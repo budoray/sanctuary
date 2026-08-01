@@ -2,6 +2,9 @@ id: d-14
 name: CAVES
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- 'Note: The lowest levels of dungeons are often composed of'
+- caves and caverns. Use this table for caves and roll for exits on
+- Table D-5.
 - D20 CAVE
 - 1–5 Cave 40ft×60ft
 - 6–7 Cave 50ft×75ft

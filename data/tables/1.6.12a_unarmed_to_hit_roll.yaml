@@ -4,6 +4,8 @@ source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
 lines:
 - ATTACKER’S ARMOUR TARGET
 - NUMBER TO HIT
+- Attacker is unarmoured (this includes
+- most monsters that aren’t human-like,
 - even if they have a better AC than 10 [10])
 - '2'
 - AC 9 [11] 4
@@ -24,3 +26,47 @@ lines:
 - armed attack to-hit roll. For monsters, the number is precalcu -
 - lated in the Game Master Guide, but it is derived from these
 - tables.
+- ATTACKER MODIFIERS
+- Dexterity Modifiers
+- '• Attacker’s Dexterity 15-18: +1'
+- • Attacker’s Dexterity 19:+ +2
+- Attacker’s Movement Rate (if free to move, including
+- 'encumbrance if encumbered):'
+- Less than 30 +0
+- 30 +2
+- 60 +4
+- 90 +6
+- 120 +8
+- 150+ +10
+- 'DEFENDER MODIFIERS:'
+- Armour Modifiers
+- Defender is unarmoured (this includes most
+- monsters that aren’t human-like, even if they
+- have a better AC than 10 [10])
+- '+0'
+- Defender AC 9 [11] +0
+- Defender AC 8 [12] +2
+- Defender AC 7 [13] +2
+- Defender AC 6 [14] +2
+- Defender AC 5 [15] +4
+- Defender AC 4 [16] +4
+- Defender AC 3 [17] +5
+- Defender AC 2 [18] +5
+- Defender AC 1 [19] +5
+- Defender AC 0 [20] or better +7
+- Defender  Movement Rate
+- '(including encumbrance if encumbered):'
+- Less than 30 +0
+- 30 -2
+- 60 -4
+- 90 -6
+- 120 -8
+- 150+ -10
+- Other Modifiers
+- Any attack modifier stemming from a condition (prone, held,
+- invisible, etc.) is applied to unarmed attack rolls, just like they
+- are applied to ordinary attack rolls.
+- 'THIRD STEP: CALCULATE RESULTS'
+- If the result is a hit, the result depends on whether the attack
+- was an attempt to grapple or to overbear. Roll on the appropri-
+- ate results table depending on the type of attack.

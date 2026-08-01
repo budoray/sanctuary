@@ -2,6 +2,9 @@ id: d-20
 name: BEHIND THE DOOR
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- This table is for use with doors that exit a room. For passag -
+- 'es, consult Table D-7: Exit Direction, Chamber Passage. Always'
+- 'check width of corridors on Table D-22: Passage Width.'
 - D20 RESULT
 - '1–3 Side  door: parallel passage. Door straight ahead:'
 - 10ft×10ft room

@@ -2,6 +2,8 @@ id: d-7
 name: EXIT DIRECTION, CHAMBER PASSAGE
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- This table is for use with passages (which exit a chamber). For
+- 'doors, consult Table D-20: Behind the Door.'
 - D20 DIRECTION
 - 1–16 Straight
 - 17–18 Left 45 degrees*

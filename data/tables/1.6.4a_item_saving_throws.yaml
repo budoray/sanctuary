@@ -54,3 +54,13 @@ lines:
 - a second turning attempt.
 - Each type of undead creature in the area of effect might be af -
 - fected, as shown on Table 1.6.5a, below.
+- • If the result is “—“, you have no chance of turning this type
+- creature.
+- •  If the result is “T”, the creature is turned automatically.
+- • If the result is “D*”, you affect 1d6+6 of that type unless the
+- type is fiend or paladin, in which case you affect 1d2 of them.
+- If you are of good or neutral alignment, the creatures are
+- automatically destroyed (good and neutral clerics can’t turn
+- paladins). If you are of evil alignment, the creatures may be
+- controlled (unless it is a paladin, in which case the paladin is
+- merely turned).

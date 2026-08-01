@@ -2,6 +2,8 @@ id: d-12
 name: TREASURE AMOUNT
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- If the treasure is guarded by a monster, roll twice and add 1 to
+- each roll. Otherwise roll once at no bonus.
 - D20 RESULT
 - 1–5 2d10×100cp
 - 6–10 2d10×100 sp

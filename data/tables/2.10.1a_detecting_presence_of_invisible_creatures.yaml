@@ -2,6 +2,7 @@ id: 2.10.1a
 name: DETECTING PRESENCE OF INVISIBLE CREATURES
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- The table result is the d100 roll on which the creature can detect the presence of an invisible being.
 - HIT DICE INT 0-1 INT 2-4 INT 5-7 INT 8-10 INT 11-12 INT 13-14 INT 15-16 INT 17+
 - 7+ - 01-05
 - 8+ - 01-05 01-10

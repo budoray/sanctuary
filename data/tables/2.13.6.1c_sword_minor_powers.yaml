@@ -2,6 +2,11 @@ id: 2.13.6.1c
 name: SWORD  MINOR POWERS
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- Minor powers only function when the weapon is drawn and the
+- owner is concentrating on the desired power. A sword can only
+- perform one special ability at a time, and the sword cannot fight
+- and perform an ability. If the same ability is rolled more than
+- once, double or triple the range of ability as appropriate.
 - D100 MINOR POWER
 - 01–11 Detect evil/good within 10ft radius
 - 12–22 Detect gold or silver within 20ft radius

@@ -2,6 +2,13 @@ id: 2.13.6.1h
 name: SWORD  EGO
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- This is the final step in the creation of an intelligent sword. Each
+- attribute the sword possesses is worth ego points, which are
+- totalled to provide an ego rating for the weapon. The ego and
+- intelligence of a weapon are a combination of factors which can
+- lead to the player and their unique weapon struggling for dom-
+- inance (detailed below). When using the chart below, round 1/2
+- points upward.
 - ATTRIBUTE EGO POINTS
 - Each + of  Sword* 1
 - Each Language Spoken 1/2
@@ -9,3 +16,56 @@ lines:
 - Each Minor Power** 1
 - Special Purpose 6
 - Telepathic Ability 2
+- '* A +1 sword has 1 ego point but if it has a second, higher bonus,'
+- 'those points are added. Example: a trollbane would have 1 ego point'
+- for its basic bonus, plus 3 more for its higher bonus vs regenerating
+- creatures for a total of 4 ego points. Swords with additional powers
+- but no higher bonuses, such as a nine lives stealer , double their
+- bonuses for determining ego. The nine lives stealer, to return to that
+- example, would have 4 ego points.
+- '** For double abilities, double ego points. If triple ability, triple the ego'
+- points.
+- 'A BATTLE OF THE WILLS: SWORDS VS CHARACTERS'
+- Each unusual sword has a personality score, determined by
+- adding its intelligence score to its ego points. These swords will
+- be very conscientious in following their alignment and if the
+- sword owner is not, a personality conflict arises. If the sword
+- has a substantial ego, 19 or higher, the weapon will consider
+- itself superior to its wielder and if they do not agree with the
+- sword’s decisions a personality conflict will arise.
+- A player character’s personality is determined by the formu -
+- 'la: Character Level+Intelligence+ Charisma = Personality Score.'
+- This score will be modified by damage they have taken, reduc -
+- ing Personality Score by 1 point for each group of hp equivalent
+- to the character average hp per level.
+- For example, Paula the Paladin is 8th level with a constitution
+- score of 15 (+1 hp bonus per die) and 54 total hp. Average hp
+- per level are 54 ÷ 8 = 6.75 and results are rounded off to 7. For
+- every 7 hp of damage Paula sustains in combat, her personality
+- level is reduced by 1.
+- Whenever personality conflict occurs, the sword will struggle
+- with the player for dominance. The more often the conflict, the
+- greater the struggle and the more unreasonable the demands
+- the sword will make before being mollified.
+- Such a sword might insist the player fight a foe they would pre-
+- fer to avoid or parley with—and perhaps seek to bring a fight
+- about, calling out to reveal the character’s hiding place, or
+- shouting insults amidst delicate negotiations.
+- In addition, some swords might insist on gemstones or filigree
+- platinum inlay being added to their blade or pommel, or de -
+- mand a scabbard made from the hide of a dragon or demon.
+- If the personality score of the sword should ever become great-
+- er than that of the wielder, the sword will be able to dominate
+- the player. The sword will be able to force any or all of the above
+- upon the unfortunate player and, in addition, may refuse to
+- strike a particular foe, or turn a swing so it strikes a comrade or
+- even the sword’s own wielder.
+- The above should be carefully adjudicated by the GM. A holy
+- sword with a powerful personality in the hands of a dedicat -
+- ed paladin would be a dynamic force for good. A neutral good
+- sword with a powerful personality in the hands of the same
+- character might argue with the paladin constantly about how
+- best to approach a situation. An especially dominant or evil
+- sword might even seek to pass into the possession of a weak -
+- er character, in order to more completely dominate him or her
+- and be better able to seek its own ends.

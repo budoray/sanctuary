@@ -2,6 +2,8 @@ id: d-5
 name: NUMBER OF EXITS
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- 'Each die roll on this table shows the number of exits based on room/chamber size. Example: A die roll of 3 indicates that if the room'
+- is smaller than 500 square feet, there is one exit. If the room is larger than 500 square feet, then there are 2 exits.
 - 'D20 ROOM AREA (SQUARE FT) # EXITS ROOM AREA (SQUARE–FT) # EXITS'
 - 1–4 < 500 1 > 500 2
 - 5–7 < 500 2 > 500 3

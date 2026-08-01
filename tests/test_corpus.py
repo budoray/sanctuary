@@ -59,13 +59,15 @@ def test_every_table_has_an_id_name_and_lines():
 
 
 def test_abandoned_tables_are_the_reviewed_set():
-    """find_tables() drops a block if it never finds a real data row (e.g. a
-    "TABLE X: NAME CONTINUED" caption artifact with no data of its own -
-    see tools/extract.py). Most of those ids still have a real committed
-    file from a sibling block that *did* find data; this pins the ids that
-    end up with NO committed file at all, so a future regex tweak that
-    silently drops a real table fails loudly instead of just shrinking the
-    corpus under a passing `len(files) > 150` check.
+    """find_tables() abandons a whole block only when it has no recognisable
+    data row (`_has_data_row`) AND its id duplicates a block already kept
+    from the same book - the "TABLE X: NAME CONTINUED" caption artifact
+    case (see tools/extract.py). Every one of these ids still has a real
+    committed file from the sibling block that *did* have data, so nothing
+    should ever vanish from the corpus entirely; this pins both facts so a
+    future regex tweak that silently drops or newly abandons a table fails
+    loudly instead of just shrinking the corpus under a passing
+    `len(files) > 150` check.
     """
     from tools.extract import find_tables, pdf_text
 
@@ -83,10 +85,55 @@ def test_abandoned_tables_are_the_reviewed_set():
         find_tables(pdf_text(p))
         abandoned |= set(find_tables.last_abandoned)
 
+    assert abandoned == {"1.3.7.4b", "1.6.12c", "2.12.5a", "2.2.2b", "2.8.1b", "2.9.1a"}, (
+        f"abandoned set changed: {sorted(abandoned)}")
+
     committed_ids = {p.name.split("_", 1)[0] for p in TABLES.glob("*.yaml")}
     fully_missing = abandoned - committed_ids
-    assert fully_missing == {"2.2.2j"}, (
+    assert fully_missing == set(), (
         f"a table id vanished from the corpus entirely: {fully_missing}")
+
+
+def test_kept_rows_that_read_like_prose_are_not_dropped():
+    """Round 1 tightened row recognition so hard that genuine data rows with
+    no digit - "Lieutenant Special as type as type as type as type as
+    type" - were indistinguishable from an intro sentence and got silently
+    skipped. Round 2 stopped classifying rows line by line entirely (see
+    tools/extract.py); these pin that the two known casualties are back.
+    """
+    ship_crews = load("2.2.2c")
+    assert any(ln.startswith("Lieutenant") for ln in ship_crews["lines"])
+
+    witch_priest = load("2.2.7.1b")
+    assert any(ln.startswith("Ettin") for ln in witch_priest["lines"])
+
+
+def test_no_prose_leaked_into_a_table():
+    """Round 1's other bug: an ALL-CAPS line (a chapter title, a hireling's
+    name) could open a table block, after which every line was kept
+    unconditionally until the next terminator - so "SOLDIERS CONTINUED"
+    (no data of its own) swallowed the Alchemist's description, and
+    "NIGHTTIME ENCOUNTERS CONTINUED" swallowed Chapter Nine's intro. Both
+    caption blocks are now abandoned as duplicates (see
+    test_abandoned_tables_are_the_reviewed_set) rather than kept with leaked
+    prose."""
+    soldiers = load("2.2.2b")
+    assert "Alchemist" not in " ".join(soldiers["lines"])
+
+    for p in TABLES.glob("*.yaml"):
+        doc = yaml.safe_load(p.read_text(encoding="utf-8"))
+        assert "CHAPTER NINE: WILDERNESS ENCOUNTER TABLES" not in " ".join(doc["lines"]), p.name
+
+
+def test_unarmed_to_hit_keeps_its_first_row_flavour_text():
+    """Regression guard for the row round 1 lost from the *other* direction:
+    the first row's target number ("2") is preceded by a 3-line description
+    ("Attacker is unarmoured (this includes...") that a naive digit/prose
+    split discarded. The dumb, whole-block collection in round 2 keeps it."""
+    t = load("1.6.12a")
+    joined = " ".join(t["lines"])
+    assert "Attacker is unarmoured" in joined
+    assert "even if they have a better AC than 10 [10])" in joined
 
 
 def test_extraction_round_trips():

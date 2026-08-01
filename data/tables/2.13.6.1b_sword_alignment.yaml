@@ -2,6 +2,9 @@ id: 2.13.6.1b
 name: SWORD  ALIGNMENT
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- Intelligent swords will always have an alignment. Use the table
+- below to generate this randomly, if needed. Holy swords are
+- always lawful good.
 - D100 ALIGNMENT D100 ALIGNMENT
 - 01–05 Chaotic Good 31–55 Lawful Good
 - 06–15 Chaotic Neutral 56–60 Lawful Neutral

@@ -2,6 +2,11 @@ id: 2.13.6.1d
 name: SWORD  MAJOR POWERS
 source: OSRIC_3.0_Gamemaster_Guide.pdf
 lines:
+- To use a sword’s major power, the weapon must be drawn and
+- the owner concentrating on the desired effect. Saving throws
+- for major powers are permitted as applicable. If the same pow-
+- er is rolled more than once, double or triple the range of ability
+- as appropriate.
 - D100 POWER
 - 01–07 Charm person on contact, thrice per day
 - 08–15 Clairaudience 30ft range for 1 round, thrice per day
