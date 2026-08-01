@@ -1,0 +1,50 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sanctuary™</title>
+<link rel="stylesheet" href="/static/app.css">
+<header class="chrome">
+  <h1>Sanctuary™</h1>
+  <nav>
+    <span id="build">{{VERSION}}</span>
+    <button id="report" type="button">report</button>
+    <a id="back" href="https://tenshinarts.com/">← Tenshin Arts</a>
+    <a id="signout" href="https://tenshinarts.com/signout">sign out</a>
+  </nav>
+</header>
+
+<main>
+  <section id="forge">
+    <h2>Roll a character</h2>
+    <label>Mode
+      <select id="mode">
+        <option value="hardest">Hardest — 3d6 in order</option>
+        <option value="difficult">Difficult — 3d6, arrange</option>
+        <option value="normal" selected>Normal — 4d6 drop lowest</option>
+        <option value="flexible">Flexible — 4d6 drop lowest, arrange</option>
+      </select>
+    </label>
+    <label>Ancestry <select id="ancestry"></select></label>
+    <label>Class <select id="klass"></select></label>
+    <label>Name <input id="name" type="text" placeholder="Ilse"></label>
+    <button id="roll" type="button">Roll</button>
+  </section>
+
+  <section id="sheet" hidden>
+    <h2 id="who"></h2>
+    <dl id="scores"></dl>
+    <p id="vitals"></p>
+    <h3>Saving throws</h3>
+    <dl id="saves"></dl>
+  </section>
+
+  <section id="tray">
+    <h2>Dice</h2>
+    <ol id="log"></ol>
+  </section>
+</main>
+
+<footer>
+  <p id="licence">Sanctuary is an independent product published under the OSRIC 3.0 Third-Party License and is not affiliated with Mythmere Games LLC.</p>
+  <p><a href="/licence">Full licence</a></p>
+</footer>
+<script src="/static/app.js"></script>

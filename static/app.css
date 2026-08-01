@@ -1,0 +1,18 @@
+:root { color-scheme: light dark; --ink: #1a1c22; --paper: #f7f5ef; --rule: #c9c3b4; }
+@media (prefers-color-scheme: dark) { :root { --ink: #e7e3d8; --paper: #16171b; --rule: #3a3d46; } }
+body { margin: 0; font: 16px/1.5 Georgia, "Times New Roman", serif; color: var(--ink); background: var(--paper); }
+.chrome { display: flex; justify-content: space-between; align-items: baseline;
+          gap: 1rem; padding: .75rem 1.25rem; border-bottom: 2px solid var(--rule); }
+.chrome h1 { font-size: 1.25rem; margin: 0; letter-spacing: .04em; }
+.chrome nav { display: flex; gap: 1rem; align-items: baseline; font-size: .85rem; }
+main { display: grid; gap: 2rem; padding: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
+section { border: 1px solid var(--rule); padding: 1rem; }
+h2 { margin-top: 0; font-size: 1rem; text-transform: uppercase; letter-spacing: .08em; }
+label { display: block; margin: .5rem 0; }
+select, input, button { font: inherit; padding: .3rem; }
+dl { display: grid; grid-template-columns: auto 1fr; gap: .1rem .75rem; margin: 0; }
+dt { text-transform: capitalize; opacity: .75; }
+dd { margin: 0; font-variant-numeric: tabular-nums; }
+#log { font-size: .9rem; padding-left: 1.25rem; }
+#log b { font-variant-numeric: tabular-nums; }
+footer { padding: 1.25rem; border-top: 1px solid var(--rule); font-size: .78rem; opacity: .8; }
