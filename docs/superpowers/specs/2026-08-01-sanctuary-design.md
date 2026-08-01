@@ -485,8 +485,13 @@ apart and the format ends up serving only one.
 ## 11. Art
 
 Not a slice — a thread landing per-slice. Platform standing order: **top-down, in the
-artwork style of Factorio. Prefer top-down over isometric.** Generated with PixelLab.
-Licence reinforces this: the books' art is explicitly off-limits.
+artwork style of Factorio.** ★ **Dr. Ray, 2026-08-01, for Sanctuary specifically: use
+PixelLab artwork, and NO ISOMETRIC TILES.** That is stronger than the platform's "prefer
+top-down" — here isometric is not a fallback, it is excluded. Licence reinforces the whole
+thread: the books' art is explicitly off-limits, so every image is made for Sanctuary.
+
+Portraits are framed as portraits — a face is not a floor — but no *tile, map or scene* in
+Sanctuary is ever drawn isometric.
 
 | Lands with | Work |
 |---|---|
