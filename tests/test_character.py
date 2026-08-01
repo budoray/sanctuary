@@ -199,3 +199,90 @@ def test_humans_accept_any_scores():
 def test_unknown_ancestry_raises():
     with pytest.raises(KeyError):
         ancestry("orc")
+
+
+from sanctuary import tables
+from sanctuary.character import CLASSES, eligible_classes, game_class, roll_hit_points
+
+
+def test_ten_classes():
+    assert set(CLASSES) == {
+        "assassin", "cleric", "druid", "fighter", "illusionist", "magic-user",
+        "monk", "paladin", "ranger", "thief"}
+
+
+def test_every_class_names_its_three_tables():
+    for name in CLASSES:
+        c = game_class(name)
+        for key in ("advancement_table", "saving_throw_table", "to_hit_table"):
+            tables.load(c[key])  # raises if the table is not in the corpus
+
+
+def test_eligibility_respects_class_minimums():
+    weak = {k: 6 for k in ABILITIES}
+    assert "fighter" not in eligible_classes(weak, "human")
+    strong = {k: 16 for k in ABILITIES}
+    assert "fighter" in eligible_classes(strong, "human")
+
+
+def test_eligibility_respects_ancestry_class_access():
+    strong = {k: 18 for k in ABILITIES}  # paladin needs CHA 17
+    assert "paladin" not in eligible_classes(strong, "dwarf")
+    assert "paladin" in eligible_classes(strong, "human")
+
+
+def test_hit_points_use_the_class_hit_die():
+    d = Dice(seed=1)
+    roll_hit_points(d, "fighter", level=1, con_bonus=0)
+    assert d.log[0].expr == "1d10"
+    d2 = Dice(seed=1)
+    roll_hit_points(d2, "magic-user", level=1, con_bonus=0)
+    assert d2.log[0].expr == "1d4"
+
+
+def test_constitution_bonus_applies_per_level():
+    d = Dice(seed=3)
+    hp = roll_hit_points(d, "fighter", level=3, con_bonus=2)
+    rolled = sum(r.total for r in d.log)
+    assert hp == rolled + 6
+
+
+def test_hit_points_never_drop_below_one_per_level():
+    d = Dice(seed=4)
+    assert roll_hit_points(d, "magic-user", level=2, con_bonus=-3) >= 2
+
+
+def test_hit_dice_stop_levels_match_the_book():
+    # OSRIC 3.0 SS1.3.N.4a: the last level whose HIT DICE column is a bare
+    # integer, and the flat hp/level once it switches to "X+Y*". Assassin,
+    # druid and monk never reach an "X+Y*" row at all - their tables end at
+    # a hard level cap (assassin's is an explicit XP ceiling; druid's and
+    # monk's are singular-titleholder caps), so their "fixed" figure is 0
+    # and unreachable in play.
+    expected = {
+        "assassin": (15, 0), "cleric": (9, 2), "druid": (14, 0),
+        "fighter": (9, 3), "illusionist": (10, 1), "magic-user": (11, 1),
+        "monk": (17, 0), "paladin": (9, 3), "ranger": (10, 2), "thief": (10, 2),
+    }
+    for name, (stop, fixed) in expected.items():
+        c = game_class(name)
+        assert c["hit_dice_stop_level"] == stop, name
+        assert c["fixed_hp_per_level_after"] == fixed, name
+
+
+def test_constitution_bonus_stops_when_hit_dice_stop():
+    # A magic-user stops rolling at 11th level (osric.txt:797's general
+    # summary and the table's own HD column both say 11; one footnote in
+    # the class's own section misprints "10th" - the table and the general
+    # rule agree, so 11 wins). Levels past that gain a flat +1/level with
+    # NO Constitution adjustment.
+    d = Dice(seed=7)
+    hp = roll_hit_points(d, "magic-user", level=13, con_bonus=5)
+    assert len(d.log) == 11, "only levels 1-11 roll a die"
+    rolled = sum(r.total for r in d.log)
+    assert hp == rolled + 5 * 11 + 2 * 1
+
+
+def test_unknown_class_raises():
+    with pytest.raises(KeyError):
+        game_class("barbarian")

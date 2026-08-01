@@ -1,0 +1,127 @@
+# OSRIC 3.0 Player Guide, Chapter Three: Character Class (§1.3.1-1.3.10).
+#
+# `minimums` is transcribed verbatim from each class's "Minimum Scores" line
+# (§1.3.N.1); an ability not listed there has no restriction beyond the
+# universal 3-18 range. `prime_requisites` lists the abilities whose "Prime
+# Requisite Bonus" line grants a 10% XP bonus at 16+; three classes (assassin,
+# illusionist, monk) say "Prime Requisite Bonus: None" and get an empty list.
+#
+# hit_dice_stop_level / fixed_hp_per_level_after: read from each class's own
+# advancement table (`_4a`), taking the last LEVEL row whose HIT DICE column
+# is a bare integer before an "X+Y*" row appears. Once hit dice stop,
+# Constitution hp adjustments stop too (every "*" footnote says so explicitly,
+# and the general Constitution table's notes confirm it - "if you get a fixed
+# hp bonus instead of rolling the dice, then you don't apply your Constitution
+# adjustment to it", osric.txt:798).
+#
+# assassin, druid and monk have NO "X+Y*" row anywhere in their tables - their
+# advancement tables simply end at their hit-die cap (assassin 15th - a hard
+# XP ceiling, "1,500,000 experience points are the ceiling for assassins",
+# osric.txt:1910; druid 14th - Supreme Druid, only one exists at a time,
+# osric.txt:2231; monk 17th - Grand Master, osric.txt:3114). No further level
+# is reachable, so fixed_hp_per_level_after is moot and recorded as 0.
+#
+# ranger and magic-user each have ONE footnote that disagrees with their own
+# table's numeric HIT DICE column (an off-by-one in the book). Both are
+# resolved in favour of the table - see task-11-report.md for the full
+# three-way comparison against the general hp-rules summary at osric.txt:797.
+assassin:
+  hit_die: d6
+  prime_requisites: []
+  minimums: {strength: 12, dexterity: 12, constitution: 6, intelligence: 11, wisdom: 6}
+  advancement_table: "1.3.1.4a"
+  saving_throw_table: "1.3.1.4c"
+  to_hit_table: "1.3.1.4d"
+  hit_dice_stop_level: 15
+  fixed_hp_per_level_after: 0
+  spell_list: null
+cleric:
+  hit_die: d8
+  prime_requisites: [wisdom]
+  minimums: {strength: 6, constitution: 6, intelligence: 6, wisdom: 9, charisma: 6}
+  advancement_table: "1.3.2.4a"
+  saving_throw_table: "1.3.2.4b"
+  to_hit_table: "1.3.2.4c"
+  hit_dice_stop_level: 9
+  fixed_hp_per_level_after: 2
+  spell_list: clerical
+druid:
+  hit_die: d8
+  prime_requisites: [wisdom, charisma]
+  minimums: {strength: 6, constitution: 6, intelligence: 6, wisdom: 12, charisma: 15}
+  advancement_table: "1.3.3.4a"
+  saving_throw_table: "1.3.3.4b"
+  to_hit_table: "1.3.3.4c"
+  hit_dice_stop_level: 14
+  fixed_hp_per_level_after: 0
+  spell_list: druidic
+fighter:
+  hit_die: d10
+  prime_requisites: [strength]
+  minimums: {strength: 9, dexterity: 6, constitution: 7, intelligence: 3, wisdom: 6, charisma: 6}
+  advancement_table: "1.3.4.4a"
+  saving_throw_table: "1.3.4.4b"
+  to_hit_table: "1.3.4.4c"
+  hit_dice_stop_level: 9
+  fixed_hp_per_level_after: 3
+  spell_list: null
+illusionist:
+  hit_die: d4
+  prime_requisites: []
+  minimums: {strength: 6, dexterity: 16, intelligence: 15, wisdom: 6, charisma: 6}
+  advancement_table: "1.3.5.4a"
+  saving_throw_table: "1.3.5.4b"
+  to_hit_table: "1.3.5.4c"
+  hit_dice_stop_level: 10
+  fixed_hp_per_level_after: 1
+  spell_list: phantasmal
+magic-user:
+  hit_die: d4
+  prime_requisites: [intelligence]
+  minimums: {dexterity: 6, constitution: 6, intelligence: 9, wisdom: 6, charisma: 6}
+  advancement_table: "1.3.6.4a"
+  saving_throw_table: "1.3.6.4b"
+  to_hit_table: "1.3.6.4c"
+  hit_dice_stop_level: 11
+  fixed_hp_per_level_after: 1
+  spell_list: arcane
+monk:
+  hit_die: d4
+  prime_requisites: []
+  minimums: {strength: 10, dexterity: 15, wisdom: 10}
+  advancement_table: "1.3.7.4a"
+  saving_throw_table: "1.3.7.4c"
+  to_hit_table: "1.3.7.4d"
+  hit_dice_stop_level: 17
+  fixed_hp_per_level_after: 0
+  spell_list: null
+paladin:
+  hit_die: d10
+  prime_requisites: [strength, wisdom]
+  minimums: {strength: 12, dexterity: 6, constitution: 9, intelligence: 9, wisdom: 13, charisma: 17}
+  advancement_table: "1.3.8.4a"
+  saving_throw_table: "1.3.8.4b"
+  to_hit_table: "1.3.8.4c"
+  hit_dice_stop_level: 9
+  fixed_hp_per_level_after: 3
+  spell_list: clerical
+ranger:
+  hit_die: d8
+  prime_requisites: [strength, intelligence, wisdom]
+  minimums: {strength: 13, dexterity: 6, constitution: 14, intelligence: 13, wisdom: 14, charisma: 6}
+  advancement_table: "1.3.9.4a"
+  saving_throw_table: "1.3.9.4b"
+  to_hit_table: "1.3.9.4c"
+  hit_dice_stop_level: 10
+  fixed_hp_per_level_after: 2
+  spell_list: null
+thief:
+  hit_die: d6
+  prime_requisites: [dexterity]
+  minimums: {strength: 6, dexterity: 9, constitution: 6, intelligence: 6, charisma: 6}
+  advancement_table: "1.3.10.4a"
+  saving_throw_table: "1.3.10.4e"
+  to_hit_table: "1.3.10.4f"
+  hit_dice_stop_level: 10
+  fixed_hp_per_level_after: 2
+  spell_list: null

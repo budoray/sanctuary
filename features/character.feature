@@ -130,3 +130,50 @@ Feature: Rolling ability scores for a new character
     And the assassin level limit is 15
     And the druid level limit is 14
     And the monk level limit is 17
+
+  Scenario: A character with a feeble body cannot become a fighter
+    Given a character with every ability score at 6
+    Then the character cannot take up fighter among a human's classes
+
+  Scenario: A character with an able body can become a fighter
+    Given a character with every ability score at 16
+    Then the character can take up fighter among a human's classes
+
+  Scenario: A dwarf's devotion never opens the door to the paladin's calling
+    Given a character with every ability score at 18
+    Then the character cannot take up paladin among a dwarf's classes
+    But the character can take up paladin among a human's classes
+
+  Scenario: A magic-user rolls a smaller hit die than a fighter
+    Given a first-level fighter and a first-level magic-user, rolled with the same seed
+    Then the fighter's hit points come from a bigger die than the magic-user's
+
+  Scenario: A hardy character's toughness helps every level it still rolls for hit points
+    Given a fighter of level 3 with a Constitution bonus of 2
+    Then the bonus is added once for every level rolled
+
+  Scenario: Hit points never fall below one for a level, however unlucky the roll
+    Given a magic-user of level 2 with a Constitution penalty of 3
+    Then the character still has at least 1 hit point per level
+
+  Scenario Outline: Hit dice stop climbing at a class's own veteran level, not a shared number
+    Given a <class> character
+    Then hit dice stop climbing at level <stop_level>
+    And every level after that grants a flat <flat_hp> hit points instead
+
+    Examples:
+      | class       | stop_level | flat_hp |
+      | fighter     | 9          | 3       |
+      | paladin     | 9          | 3       |
+      | cleric      | 9          | 2       |
+      | illusionist | 10         | 1       |
+      | thief       | 10         | 2       |
+      | ranger      | 10         | 2       |
+      | magic-user  | 11         | 1       |
+      | assassin    | 15         | 0       |
+      | druid       | 14         | 0       |
+      | monk        | 17         | 0       |
+
+  Scenario: A veteran character's Constitution no longer sweetens hit points once hit dice stop
+    Given a magic-user of level 13 with a Constitution bonus of 5
+    Then the Constitution bonus applies only to the levels that still rolled a hit die

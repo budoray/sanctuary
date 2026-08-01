@@ -93,3 +93,55 @@ def meets_ancestry_minimums(scores: dict, name: str) -> bool:
     if any(scores.get(k, 0) < v for k, v in a["minimums"].items()):
         return False
     return not any(scores.get(k, 0) > v for k, v in a["maximums"].items())
+
+
+@lru_cache(maxsize=1)
+def _classes() -> dict:
+    return yaml.safe_load((_DATA / "classes.yaml").read_text(encoding="utf-8"))
+
+
+CLASSES = ("assassin", "cleric", "druid", "fighter", "illusionist",
+           "magic-user", "monk", "paladin", "ranger", "thief")
+
+
+def game_class(name: str) -> dict:
+    """OSRIC 3.0 §1.3.1-1.3.10: one class's requirements, hit die and tables."""
+    c = _classes().get(name)
+    if c is None:
+        raise KeyError(f"unknown class: {name!r}")
+    return c
+
+
+def eligible_classes(scores: dict, ancestry_name: str) -> list[str]:
+    """Classes this character may take: allowed by ancestry AND meeting the
+    class's own ability minimums."""
+    allowed = set(ancestry(ancestry_name)["allowed_classes"])
+    out = []
+    for name in CLASSES:
+        if name not in allowed:
+            continue
+        if any(scores.get(k, 0) < v for k, v in game_class(name)["minimums"].items()):
+            continue
+        out.append(name)
+    return out
+
+
+def roll_hit_points(d: Dice, cls: str, level: int, con_bonus: int) -> int:
+    """Hit points for `level` levels of `cls`.
+
+    Past the level where hit dice stop (per class - see data/classes.yaml),
+    the class gains flat hit points instead of rolling, and Constitution
+    adjustments no longer apply - every class's own table footnote says so
+    explicitly.
+    """
+    c = game_class(cls)
+    die = c["hit_die"]
+    stop = c["hit_dice_stop_level"]
+    total = 0
+    for lvl in range(1, int(level) + 1):
+        if lvl <= stop:
+            rolled = d.roll(f"1{die}", reason=f"{cls} hp level {lvl}", kind="chargen").total
+            total += max(1, rolled + con_bonus)
+        else:
+            total += c["fixed_hp_per_level_after"]
+    return total
