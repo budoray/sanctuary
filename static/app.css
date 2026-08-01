@@ -13,6 +13,7 @@ select, input, button { font: inherit; padding: .3rem; }
 dl { display: grid; grid-template-columns: auto 1fr; gap: .1rem .75rem; margin: 0; }
 dt { text-transform: capitalize; opacity: .75; }
 dd { margin: 0; font-variant-numeric: tabular-nums; }
+#portrait { display: block; image-rendering: pixelated; border: 1px solid var(--rule); margin-bottom: .75rem; }
 #log { font-size: .9rem; padding-left: 1.25rem; }
 #log b { font-variant-numeric: tabular-nums; }
 footer { padding: 1.25rem; border-top: 1px solid var(--rule); font-size: .78rem; opacity: .8; }

@@ -19,6 +19,11 @@ Feature: Opening Sanctuary in the browser
     Then the character sheet shows the character's name and ancestry
     And the dice tray shows every die that made the character
 
+  Scenario: A rolled character is shown with a portrait of their calling
+    Given a player opens Sanctuary
+    When the player rolls a human fighter
+    Then the character sheet shows a portrait of their calling
+
   Scenario: A player rolls the same character twice
     Given a player opens Sanctuary
     When the player rolls the same character twice with the same seed

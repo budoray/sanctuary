@@ -29,6 +29,10 @@ function renderSheet(c) {
   document.getElementById("who").textContent =
     `${c.name || "Unnamed"} — ${c.ancestry} ${c.classes.join("/")}`;
 
+  const portrait = document.getElementById("portrait");
+  portrait.src = c.portrait;
+  portrait.alt = `${c.ancestry} ${c.classes.join("/")}`;
+
   const scores = document.getElementById("scores");
   scores.innerHTML = "";
   for (const [k, v] of Object.entries(c.scores)) {

@@ -67,6 +67,14 @@ def tray_shows_dice(rolled):
         assert "faces" in entry and entry["faces"]
 
 
+@then("the character sheet shows a portrait of their calling")
+def sheet_shows_portrait(page, rolled):
+    assert rolled["portrait"], "no portrait on the character payload"
+    r = page["client"].get(rolled["portrait"])
+    assert r.status_code == 200
+    assert r.content[:8] == bytes.fromhex("89504e470d0a1a0a")
+
+
 @when("the player rolls the same character twice with the same seed",
       target_fixture="two_rolls")
 def roll_twice(page):

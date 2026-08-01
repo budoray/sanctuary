@@ -1,9 +1,16 @@
+from pathlib import Path
+
+import yaml
 from fastapi.testclient import TestClient
 
 import app as sanctuary_app
+from sanctuary import character
 
 NOTICE = ("Sanctuary is an independent product published under the OSRIC 3.0 "
           "Third-Party License and is not affiliated with Mythmere Games LLC.")
+
+PNG_MAGIC = bytes.fromhex("89504e470d0a1a0a")
+ROOT = Path(__file__).resolve().parent.parent
 
 client = TestClient(sanctuary_app.app)
 
@@ -70,3 +77,35 @@ def test_selfcheck_reports_real_numbers():
     assert line.startswith("sanctuary self-check OK")
     import re
     assert re.search(r"\d+ tables", line)
+
+
+def _art():
+    return yaml.safe_load((ROOT / "data" / "art.yaml").read_text(encoding="utf-8"))
+
+
+def test_every_class_has_a_portrait_entry_and_file():
+    portraits = _art()["portraits"]
+    for k in character.CLASSES:
+        path = portraits.get(k)
+        assert path, f"no portrait entry for {k!r}"
+        assert (ROOT / path.lstrip("/")).exists(), f"portrait file missing: {path}"
+
+
+def test_every_portrait_is_actually_served():
+    portraits = _art()["portraits"]
+    for k, path in portraits.items():
+        r = client.get(path)
+        assert r.status_code == 200, f"{path} did not serve (class {k!r})"
+        assert r.content[:8] == PNG_MAGIC, f"{path} is not a PNG"
+
+
+def test_the_client_carries_a_portrait_element():
+    assert 'id="portrait"' in client.get("/").text
+
+
+def test_selfcheck_sentence_reports_unique_ids_and_files():
+    from sanctuary import tables
+    n_files = len(list((ROOT / "data" / "tables").glob("*.yaml")))
+    n_ids = len(tables._index())
+    line = sanctuary_app.selfcheck()
+    assert f"{n_ids} tables in {n_files} files" in line
