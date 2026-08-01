@@ -49,3 +49,39 @@ class Roll:
     total: int
     reason: str = ""
     tags: dict = field(default_factory=dict)
+
+
+class Dice:
+    """A seeded roller with an append-only log.
+
+    One instance per session. `log` is exposed as a tuple so a caller cannot
+    append to it behind the engine's back.
+    """
+
+    def __init__(self, seed: int):
+        self.seed = int(seed)
+        self._rng = random.Random(self.seed)
+        self._log: list[Roll] = []
+
+    @property
+    def log(self) -> tuple[Roll, ...]:
+        return tuple(self._log)
+
+    def roll(self, expr: str, reason: str = "", mods: int = 0, **tags) -> Roll:
+        """Roll `expr`, record it, return the record."""
+        count, faces_n, drop, expr_mods = parse_expr(expr)
+        faces = tuple(self._rng.randint(1, faces_n) for _ in range(count))
+        kept = tuple(sorted(faces)[drop:]) if drop else faces
+        total_mods = expr_mods + int(mods)
+        roll = Roll(
+            index=len(self._log),
+            expr=expr,
+            faces=faces,
+            kept=kept,
+            mods=total_mods,
+            total=sum(kept) + total_mods,
+            reason=reason,
+            tags=dict(tags),
+        )
+        self._log.append(roll)
+        return roll
