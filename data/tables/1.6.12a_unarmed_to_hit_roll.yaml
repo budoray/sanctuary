@@ -4,8 +4,6 @@ source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
 lines:
 - ATTACKER’S ARMOUR TARGET
 - NUMBER TO HIT
-- Attacker is unarmoured (this includes
-- most monsters that aren’t human-like,
 - even if they have a better AC than 10 [10])
 - '2'
 - AC 9 [11] 4
@@ -26,5 +24,3 @@ lines:
 - armed attack to-hit roll. For monsters, the number is precalcu -
 - lated in the Game Master Guide, but it is derived from these
 - tables.
-- ATTACKER MODIFIERS
-- Dexterity Modifiers

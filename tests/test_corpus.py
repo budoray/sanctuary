@@ -58,6 +58,37 @@ def test_every_table_has_an_id_name_and_lines():
         assert doc["lines"], p.name
 
 
+def test_abandoned_tables_are_the_reviewed_set():
+    """find_tables() drops a block if it never finds a real data row (e.g. a
+    "TABLE X: NAME CONTINUED" caption artifact with no data of its own -
+    see tools/extract.py). Most of those ids still have a real committed
+    file from a sibling block that *did* find data; this pins the ids that
+    end up with NO committed file at all, so a future regex tweak that
+    silently drops a real table fails loudly instead of just shrinking the
+    corpus under a passing `len(files) > 150` check.
+    """
+    from tools.extract import find_tables, pdf_text
+
+    pdfs = [
+        Path("C:/Users/budor/Downloads/OSRIC-3.0-Player-Guide-FINAL.v.7.pdf"),
+        Path("C:/Users/budor/Downloads/OSRIC_3.0_Gamemaster_Guide.pdf"),
+    ]
+    for p in pdfs:
+        if not p.exists():
+            import pytest
+            pytest.skip(f"source PDF not present: {p}")
+
+    abandoned = set()
+    for p in pdfs:
+        find_tables(pdf_text(p))
+        abandoned |= set(find_tables.last_abandoned)
+
+    committed_ids = {p.name.split("_", 1)[0] for p in TABLES.glob("*.yaml")}
+    fully_missing = abandoned - committed_ids
+    assert fully_missing == {"2.2.2j"}, (
+        f"a table id vanished from the corpus entirely: {fully_missing}")
+
+
 def test_extraction_round_trips():
     """Re-running the extractor reproduces the committed corpus exactly."""
     import tempfile
