@@ -548,6 +548,35 @@ platform:
 
 ---
 
+## 12a. Versioning — minor tracks chapters
+
+★ **Dr. Ray, 2026-08-01:** the minor version tracks the OSRIC chapter being ingested, and
+**`v0.8.0` is the first playable build.** This is an explicit authorisation — the platform
+rule is that Dr. Ray alone moves major and minor, and this is that instruction given in
+advance for this repo.
+
+| Version | Chapter | Ships |
+|---|---|---|
+| `v0.0.x` | — | Foundation: dice engine, table extraction, house chrome |
+| `v0.1.0` | Ch.1 Creating a Character | 7 ancestries, 11 classes, 4 generation modes, derived stats |
+| `v0.2.0` | Ch.2 Spells | 414 spells, slots, memorisation |
+| `v0.3.0` | Ch.3 How to Play | Combat, time, movement, saves, morale, turning undead |
+| `v0.4.0` | Ch.4 Dungeons, Towns and Wildernesses | D-1…D-24 procgen, encounters, traps |
+| `v0.5.0` | Ch.5 Monsters | 291 bestiary, custom and edited beasts, effect tiers |
+| `v0.6.0` | Ch.6 Treasure | Loot classes, coin, gems, jewellery, magic items |
+| `v0.7.0` | — | Campaign format and authoring surfaces |
+| **`v0.8.0`** | — | **First playable — solo runtime over all of the above** |
+
+⚠ **The build restarts at `0` when the minor moves** (`v0.1.7-beta` → `v0.2.0-beta`), per
+the platform rule. Every commit still bumps the build; the minor moves only when a chapter
+lands complete.
+
+⚠ This cuts across the S1–S5 slicing rather than replacing it. The slices are the
+*architecture*; the chapters are the *delivery order*. Where they disagree the chapter
+order wins for sequencing, because it is what Dr. Ray will see land — but the dependency
+direction in §5 still holds, which is why the dice engine and table corpus must precede
+`v0.1.0` rather than being a chapter of their own.
+
 ## 13. Platform changes
 
 Shipping a game means the platform changes too. None optional, each missed at least once
