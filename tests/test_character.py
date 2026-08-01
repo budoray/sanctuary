@@ -419,3 +419,44 @@ def test_to_hit_targets_never_worsen_with_level(cls):
     rows = tables.rows(table_id)
     first_level, last_level = _row_level(rows[0][0]), _row_level(rows[-1][0])
     assert to_hit_target(cls, last_level, 4) <= to_hit_target(cls, first_level, 4)
+
+
+# Only the fighter's saving-throw table carries an explicit "0" row (0-level
+# fighting-men); every other class's saving-throw table starts at level 1.
+@pytest.mark.parametrize("cls", [c for c in CLASSES if c != "fighter"])
+def test_level_zero_raises_saving_throws_for_every_class_but_the_fighter(cls):
+    with pytest.raises(LookupError, match=f"{cls} level 0"):
+        saving_throws(cls, 0)
+
+
+# The to-hit table has the same "0" row for BOTH the fighter and the ranger -
+# the book reprints the fighter's exact progression for the ranger, 0-level
+# row included (verified: tables.rows() gives both tables the same first row
+# "0", every other class's first row is "1" or a "1-N" range).
+@pytest.mark.parametrize("cls", [c for c in CLASSES if c not in ("fighter", "ranger")])
+def test_level_zero_raises_to_hit_for_every_class_but_the_fighter_and_ranger(cls):
+    with pytest.raises(LookupError, match=f"{cls} level 0"):
+        to_hit_target(cls, 0, 10)
+
+
+@pytest.mark.parametrize("cls", ["fighter", "ranger"])
+def test_fighter_and_ranger_level_zero_to_hit_resolves(cls):
+    # Table 1.3.4.4C / 1.3.9.4C row "0": these are the two classes whose
+    # to-hit table covers 0-level fighting-men.
+    assert to_hit_target(cls, 0, 10) == 11
+
+
+def test_fighter_level_zero_saving_throws_resolves():
+    # Table 1.3.4.4B row "0": the fighter is the one class whose
+    # saving-throw table covers 0-level fighting-men.
+    assert saving_throws("fighter", 0)["spells"] == 19
+
+
+# Assassin, druid and monk have closed top rows with no "N+" - a hard XP/title
+# ceiling, not an extraction gap (see data/classes.yaml's header comment).
+@pytest.mark.parametrize("cls, ceiling", [("assassin", 15), ("druid", 14), ("monk", 17)])
+def test_level_above_a_hard_capped_class_ceiling_raises(cls, ceiling):
+    with pytest.raises(LookupError, match=f"{cls} level {ceiling + 1}"):
+        saving_throws(cls, ceiling + 1)
+    with pytest.raises(LookupError, match=f"{cls} level {ceiling + 1}"):
+        to_hit_target(cls, ceiling + 1, 10)

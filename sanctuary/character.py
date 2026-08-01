@@ -174,7 +174,11 @@ def _int(cell: str) -> int:
 
 
 def ability_modifiers(scores: dict) -> dict:
-    """Combat-relevant modifiers derived from Table 1.1.2A (Strength)."""
+    """Combat-relevant modifiers derived from Table 1.1.2A (Strength).
+
+    Strength-only for now - Dexterity (AC/missile) and Constitution (hp)
+    modifiers arrive in a later chapter.
+    """
     strength_row = tables.ability_row("1.1.2a", scores["strength"])
     return {
         "hit": _int(strength_row[1]),
