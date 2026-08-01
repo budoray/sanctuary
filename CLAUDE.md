@@ -27,8 +27,8 @@ vhost and no unit. The row exists so the platform can SEE it: a game in no regis
 cannot fail a parity check, which is how two games once sat pushed-and-undeployed with
 every board green.
 
-⚠ **Its gate is GREEN** — `python -m pytest tests/ -q` → 427 passed, 2 skipped, `tests/test_corpus.py`
-→ 9 passed, 2 skipped, and `python app.py test` prints the self-check sentence. The two skips are
+⚠ **Its gate is GREEN** — `python -m pytest tests/ -q` → 457 passed, 2 skipped, `tests/test_corpus.py`
+→ 10 passed, 2 skipped, and `python app.py test` prints the self-check sentence. The two skips are
 the PDF-dependent corpus round-trip tests - the source PDFs are not present in this environment, so
 the round-trip guarantee is unverified here (see `test_corpus_is_internally_consistent_without_the_pdfs`
 for what still runs without them). Recorded rather than assumed; a gate someone just ran is worth
