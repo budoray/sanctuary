@@ -2,11 +2,12 @@
 import pytest
 from pytest_bdd import scenarios, given, when, then, parsers
 
-from sanctuary.character import (ABILITIES, SAVE_CATEGORIES, ability_modifiers, ancestry,
-                                 apply_ancestry, arrangeable, eligible_classes, game_class,
-                                 generate, is_legal_multiclass, meets_ancestry_minimums,
-                                 roll_abilities, roll_exceptional_strength, roll_hit_points,
-                                 saving_throws, to_hit_target)
+from sanctuary.character import (ABILITIES, SAVE_CATEGORIES, _multiclass_hit_points,
+                                 ability_modifiers, ancestry, apply_ancestry, arrangeable,
+                                 eligible_classes, game_class, generate, is_legal_multiclass,
+                                 meets_ancestry_minimums, roll_abilities,
+                                 roll_exceptional_strength, roll_hit_points, saving_throws,
+                                 to_hit_target)
 from sanctuary.dice import Dice, Roll
 
 scenarios("../features/character.feature")
@@ -430,3 +431,43 @@ def multiclass_hp_from_both_callings(multiclass_character):
     assert any("fighter" in r.reason for r in hp_rolls)
     assert any("magic-user" in r.reason for r in hp_rolls)
     assert multiclass_character.hit_points >= 1
+
+
+class _QueueRoller:
+    """Returns fixed totals in call order - lets a scenario pin an exact
+    starting-toughness roll instead of hunting for a seed."""
+
+    def __init__(self, totals):
+        self._totals = list(totals)
+        self.log = ()
+
+    def roll(self, expr, reason="", mods=0, **tags):
+        total = self._totals.pop(0)
+        r = Roll(index=len(self.log), expr=expr, faces=(total,), kept=(total,),
+                  mods=0, total=total, reason=reason, tags=tags)
+        self.log = self.log + (r,)
+        return r
+
+
+@given(parsers.parse("a fighter and magic-user who roll {first:d} and {second:d} for their "
+                      "starting toughness"), target_fixture="toughness_hp")
+def fighter_and_magic_user_roll_toughness(first, second):
+    return _multiclass_hit_points(_QueueRoller([first, second]), ("fighter", "magic-user"), 0)
+
+
+@then(parsers.parse("the multi-classed adventurer's starting hit points are {expected:d}, "
+                     "not {wrong:d}"))
+def multiclass_hp_is_exactly(toughness_hp, expected, wrong):
+    assert toughness_hp == expected
+    assert toughness_hp != wrong
+
+
+@given("a fighter, magic-user and thief who each roll a bare 1 for their starting toughness",
+       target_fixture="triple_class_hp")
+def triple_class_bare_ones():
+    return _multiclass_hit_points(_QueueRoller([1, 1, 1]), ("fighter", "magic-user", "thief"), 0)
+
+
+@then("the triple-classed adventurer starts with at least 3 hit points, one for each calling")
+def triple_class_minimum(triple_class_hp):
+    assert triple_class_hp == 3

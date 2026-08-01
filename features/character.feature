@@ -299,3 +299,11 @@ Feature: Rolling ability scores for a new character
   Scenario: A multi-classed adventurer's hit points are shared across callings
     Given a player creates an elf fighter and magic-user with seed 5
     Then the elf's hit points come from dice rolled for both callings
+
+  Scenario: A character who trains in two callings advances more slowly in body than in one alone
+    Given a fighter and magic-user who roll 7 and 3 for their starting toughness
+    Then the multi-classed adventurer's starting hit points are 4, not 5
+
+  Scenario: Every calling a multi-classed character trains in grants at least one hit point
+    Given a fighter, magic-user and thief who each roll a bare 1 for their starting toughness
+    Then the triple-classed adventurer starts with at least 3 hit points, one for each calling

@@ -603,31 +603,89 @@ def test_ranger_generates_at_first_level_with_its_extra_hit_die():
     assert c.hit_points == sum(r.total for r in hp_rolls)
 
 
-def test_multiclass_hit_points_divide_the_summed_rolls_by_class_count():
-    # OSRIC 3.0 SS1.3.11 "Gaining Hit Points": roll the right dice for each
-    # class, apply Constitution, then divide by the number of classes and
-    # drop the fraction. con_bonus is 0 here (deferred to Chapter 3), so
-    # this directly checks the divide-and-floor arithmetic against the raw
-    # per-class rolls recorded in the log.
-    c = generate(seed=5, mode="normal", ancestry_name="elf", class_names=("fighter", "magic-user"))
-    hp_rolls = [r.total for r in c.log if "hp level" in r.reason]
-    assert len(hp_rolls) == 2  # one 1st-level die per class
-    assert c.hit_points == max(1, sum(hp_rolls) // 2)
+from sanctuary.character import _multiclass_hit_points
+from sanctuary.dice import Roll
+
+
+class _QueueRoller:
+    """Duck-typed stand-in that returns fixed totals in call order, one per
+    die - so a multiclass hp test can pin exact arithmetic instead of
+    searching for a seed that happens to produce the numbers we want."""
+
+    def __init__(self, totals):
+        self._totals = list(totals)
+        self.log = ()
+
+    def roll(self, expr, reason="", mods=0, **tags):
+        total = self._totals.pop(0)
+        r = Roll(index=len(self.log), expr=expr, faces=(total,), kept=(total,),
+                  mods=0, total=total, reason=reason, tags=tags)
+        self.log = self.log + (r,)
+        return r
+
+
+def test_multiclass_hit_points_divide_each_class_roll_before_summing():
+    # OSRIC 3.0 SS1.3.11 "Gaining Hit Points": the Erix Uncle example rolls
+    # ONE class's die, adds Constitution, and divides THAT roll by the
+    # number of classes - it never sums multiple classes' rolls first. This
+    # pins fighter=7, magic-user=3 (both odd, n=2), chosen because the two
+    # readings disagree: sum-then-divide gives (7+3)//2 = 5, but the book's
+    # divide-per-class-then-sum gives floor(7/2) + floor(3/2) = 3 + 1 = 4.
+    # This test fails under the old (wrong) sum-then-divide behaviour.
+    roller = _QueueRoller([7, 3])
+    hp = _multiclass_hit_points(roller, ("fighter", "magic-user"), con_bonus=0)
+    assert hp == 4
+
+
+def test_multiclass_hit_points_divide_each_of_three_classes_before_summing():
+    # Same disagreement, three classes (elf fighter/magic-user/thief, all
+    # odd rolls): sum-then-divide gives (7+3+5)//3 = 5, but the book's
+    # divide-per-class-then-sum gives floor(7/3) + floor(3/3) + floor(5/3)
+    # = 2 + 1 + 1 = 4.
+    roller = _QueueRoller([7, 3, 5])
+    hp = _multiclass_hit_points(roller, ("fighter", "magic-user", "thief"), con_bonus=0)
+    assert hp == 4
+
+
+def test_multiclass_hit_points_floor_applies_per_class_not_once_overall():
+    # osric.txt:793's "always gain at least 1hp" is applied per class
+    # contribution, consistent with each class's level-1 being its own
+    # gaining-a-level event (and with how roll_hit_points already floors
+    # the ranger's two 1st-level dice individually - Task 11's precedent).
+    # Consequence, stated explicitly: a three-class character's minimum
+    # starting hp is 3 (1 per class), not 1. Rolls of 1 on every die, with
+    # 3 classes, would give floor(1/3) = 0 per class without the floor;
+    # with it, each class contributes at least 1.
+    roller = _QueueRoller([1, 1, 1])
+    hp = _multiclass_hit_points(roller, ("fighter", "magic-user", "thief"), con_bonus=0)
+    assert hp == 3
+
+
+def test_multiclass_hit_points_ranger_dice_stay_one_classs_contribution():
+    # A ranger's extra 1st-level die (2d8, SS1.3.9) is rolled by
+    # roll_hit_points as a single class total - it must be divided by the
+    # class count once, as ONE class's contribution, not treated as if the
+    # ranger were two classes. cleric rolls 7, ranger rolls 5+5=10:
+    # cleric contributes floor(7/2)=3, ranger contributes floor(10/2)=5,
+    # total 8 - not floor(7/2) + floor(5/2) + floor(5/2) = 3+2+2 = 7, which
+    # is what you'd get by mistakenly treating the ranger's two dice as two
+    # separate classes.
+    roller = _QueueRoller([7, 5, 5])
+    hp = _multiclass_hit_points(roller, ("cleric", "ranger"), con_bonus=0)
+    assert hp == 8
 
 
 def test_multiclass_hit_points_include_a_rangers_extra_first_level_die():
-    # A ranger contributes 2d8 (its own extra first-level die, SS1.3.9) to
-    # the pool that gets summed and divided across the multi-classed
-    # character's classes - not just 1 die like every other class.
+    # End-to-end: a ranger contributes 2d8 (its own extra first-level die)
+    # through generate(), and both dice go into the ranger's single
+    # class-contribution before it's divided by the class count.
     c = generate(seed=6, mode="normal", ancestry_name="half-elf",
                  class_names=("cleric", "ranger"))
-    hp_rolls = [r.total for r in c.log if "hp level" in r.reason]
+    hp_rolls = [r for r in c.log if "hp level" in r.reason]
     assert len(hp_rolls) == 3  # 1 cleric die + 2 ranger dice
-    assert c.hit_points == max(1, sum(hp_rolls) // 2)  # divided by 2 classes, not 3 dice
-
-
-def test_multiclass_hit_points_never_drop_below_one():
-    assert True  # covered by the max(1, ...) floor exercised in the tests above
+    cleric_roll = hp_rolls[0].total
+    ranger_roll = hp_rolls[1].total + hp_rolls[2].total
+    assert c.hit_points == max(1, cleric_roll // 2) + max(1, ranger_roll // 2)
 
 
 def test_exceptional_strength_applies_when_any_class_in_the_combo_qualifies():

@@ -257,6 +257,38 @@ def _multiclass_saves(class_names, level: int = 1) -> dict:
     return {cat: min(s[cat] for s in all_saves) for cat in SAVE_CATEGORIES}
 
 
+def _multiclass_hit_points(d: Dice, class_names, con_bonus: int) -> int:
+    """SS1.3.11 "Gaining Hit Points": "you calculate your new hp by rolling
+    the right dice for your class, applying your constitution modifier if
+    any, and THEN DIVIDING BY THE NUMBER OF CLASSES YOU HAVE. Drop any
+    fractions." The worked example (Erix Uncle, fighter/cleric/thief) rolls
+    ONE class's die, adds Constitution, and divides THAT single roll by the
+    class count - it never sums multiple classes' rolls before dividing.
+
+    A first-level multi-classed character gains level 1 in every class at
+    once, so this applies the book's arithmetic once per class and sums the
+    (already-divided) contributions: contribution = floor((class's roll +
+    con_bonus) / class_count), summed across classes.
+
+    The general "always gain at least 1hp" rule (osric.txt:793) is applied
+    per class contribution, not once to the total - each class's level-1 is
+    its own gaining-a-level event, consistent with how roll_hit_points
+    already floors the ranger's two 1st-level dice individually (Task 11).
+    Consequence: a three-class character's minimum starting hp is 3, not 1.
+
+    The ranger's extra 1st-level die (2d8, Constitution applied to both,
+    per SS1.3.9) is rolled by roll_hit_points as a single number - it is
+    still just ONE class's contribution to this formula, divided by the
+    class count like any other class's roll.
+    """
+    n = len(class_names)
+    total = 0
+    for cls in class_names:
+        class_roll = roll_hit_points(d, cls, 1, con_bonus)
+        total += max(1, class_roll // n)
+    return total
+
+
 def generate(seed: int, mode: str, ancestry_name: str, class_names,
              name: str = "") -> Character:
     """Roll a complete first-level character. Fully reproducible from
@@ -280,17 +312,7 @@ def generate(seed: int, mode: str, ancestry_name: str, class_names,
 
     mods = ability_modifiers(scores)
     con_bonus = 0  # Constitution hp adjustment lands with Chapter 3.
-
-    # SS1.3.11 "Gaining Hit Points": roll the right dice for each class,
-    # apply the Constitution modifier, then divide by the number of classes
-    # and drop any fraction. roll_hit_points already rolls the right dice
-    # per class (including the ranger's extra 1st-level die, each die
-    # floored at 1 per the general "always gain at least 1hp" rule) and
-    # applies con_bonus; here that per-class total is summed across classes
-    # and the combined total is divided by the class count, with an overall
-    # floor of 1 so a multi-classed character never starts at 0hp.
-    per_class = [roll_hit_points(d, c, 1, con_bonus) for c in class_names]
-    hit_points = max(1, sum(per_class) // len(per_class))
+    hit_points = _multiclass_hit_points(d, class_names, con_bonus)
 
     return Character(
         name=name,
