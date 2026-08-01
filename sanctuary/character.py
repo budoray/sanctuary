@@ -4,6 +4,7 @@ Every random step rolls through `Dice`, so a character is fully reproducible
 from (seed, choices). That is also what makes a reroll honest rather than a
 slot machine.
 """
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 
@@ -210,3 +211,97 @@ def to_hit_target(cls: str, level: int, armour_class: int) -> int:
         if tables.in_range(row[0], level):
             return _int(row[1 + col])
     raise LookupError(f"no to-hit row for {cls} level {level}")
+
+
+@dataclass(frozen=True)
+class Character:
+    """A complete first-level character, reproducible from
+    (seed, mode, ancestry, classes). `log` is excluded from equality so two
+    characters rolled with the same inputs compare equal regardless of any
+    incidental logging differences.
+    """
+    name: str
+    ancestry: str
+    classes: tuple[str, ...]
+    levels: dict
+    scores: dict
+    hit_points: int
+    armour_class: int
+    saves: dict
+    modifiers: dict
+    seed: int
+    log: tuple = field(default=(), compare=False)
+
+
+def is_legal_multiclass(ancestry_name: str, class_names) -> bool:
+    """One class is always legal if the ancestry allows it. More than one must
+    appear in that ancestry's own multiclass_combinations (OSRIC 3.0
+    SS1.3.11) - humans have none (dual-classing, SS1.3.12, is a different
+    mechanism entirely and not covered here)."""
+    names = list(class_names)
+    allowed = set(ancestry(ancestry_name)["allowed_classes"])
+    if not set(names) <= allowed:
+        return False
+    if len(names) == 1:
+        return True
+    combos = [sorted(c) for c in ancestry(ancestry_name).get("multiclass_combinations", [])]
+    return sorted(names) in combos
+
+
+def _multiclass_saves(class_names, level: int = 1) -> dict:
+    """SS1.3.11 "Attacks and Saving Throws": a multi-classed character may
+    use whichever of their classes' tables is best in each category - so the
+    saves are the best (lowest) target per category across all classes, not
+    just the first-listed one."""
+    all_saves = [saving_throws(c, level) for c in class_names]
+    return {cat: min(s[cat] for s in all_saves) for cat in SAVE_CATEGORIES}
+
+
+def generate(seed: int, mode: str, ancestry_name: str, class_names,
+             name: str = "") -> Character:
+    """Roll a complete first-level character. Fully reproducible from
+    (seed, mode, ancestry, classes)."""
+    class_names = tuple(class_names)
+    if not is_legal_multiclass(ancestry_name, class_names):
+        raise ValueError(
+            f"{ancestry_name} may not be {'/'.join(class_names)}")
+
+    d = Dice(seed=seed)
+    scores = apply_ancestry(roll_abilities(d, mode), ancestry_name)
+
+    # Exceptional Strength applies if ANY of the character's classes is
+    # fighter/paladin/ranger (osric.txt:650-655), not only the first-listed
+    # one. Rolled exactly once against the pre-resolution score - feeding
+    # roll_exceptional_strength its own output would silently re-roll an
+    # already-settled Strength.
+    exceptional_cls = next(
+        (c for c in class_names if c in EXCEPTIONAL_CLASSES), class_names[0])
+    scores["strength"] = roll_exceptional_strength(d, scores["strength"], exceptional_cls)
+
+    mods = ability_modifiers(scores)
+    con_bonus = 0  # Constitution hp adjustment lands with Chapter 3.
+
+    # SS1.3.11 "Gaining Hit Points": roll the right dice for each class,
+    # apply the Constitution modifier, then divide by the number of classes
+    # and drop any fraction. roll_hit_points already rolls the right dice
+    # per class (including the ranger's extra 1st-level die, each die
+    # floored at 1 per the general "always gain at least 1hp" rule) and
+    # applies con_bonus; here that per-class total is summed across classes
+    # and the combined total is divided by the class count, with an overall
+    # floor of 1 so a multi-classed character never starts at 0hp.
+    per_class = [roll_hit_points(d, c, 1, con_bonus) for c in class_names]
+    hit_points = max(1, sum(per_class) // len(per_class))
+
+    return Character(
+        name=name,
+        ancestry=ancestry_name,
+        classes=class_names,
+        levels={c: 1 for c in class_names},
+        scores=scores,
+        hit_points=hit_points,
+        armour_class=10,  # armour lands with Chapter 3.
+        saves=_multiclass_saves(class_names, 1),
+        modifiers=mods,
+        seed=seed,
+        log=d.log,
+    )

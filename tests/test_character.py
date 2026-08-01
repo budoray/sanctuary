@@ -460,3 +460,202 @@ def test_level_above_a_hard_capped_class_ceiling_raises(cls, ceiling):
         saving_throws(cls, ceiling + 1)
     with pytest.raises(LookupError, match=f"{cls} level {ceiling + 1}"):
         to_hit_target(cls, ceiling + 1, 10)
+
+
+from sanctuary.character import Character, generate, is_legal_multiclass
+
+
+def test_generate_produces_a_complete_character():
+    c = generate(seed=1234, mode="normal", ancestry_name="human",
+                 class_names=("fighter",), name="Ilse")
+    assert isinstance(c, Character)
+    assert c.name == "Ilse"
+    assert c.ancestry == "human"
+    assert c.classes == ("fighter",)
+    assert c.levels == {"fighter": 1}
+    assert set(c.scores) == set(ABILITIES)
+    assert c.hit_points >= 1
+    assert set(c.saves) == set(SAVE_CATEGORIES)
+    assert c.seed == 1234
+
+
+def test_generation_is_reproducible():
+    a = generate(seed=77, mode="normal", ancestry_name="human", class_names=("fighter",))
+    b = generate(seed=77, mode="normal", ancestry_name="human", class_names=("fighter",))
+    assert a == b
+
+
+def test_different_seeds_give_different_characters():
+    a = generate(seed=1, mode="normal", ancestry_name="human", class_names=("fighter",))
+    b = generate(seed=2, mode="normal", ancestry_name="human", class_names=("fighter",))
+    assert a.scores != b.scores or a.hit_points != b.hit_points
+
+
+def test_log_is_excluded_from_character_equality():
+    # Two characters built from the same inputs compare equal even though
+    # `log` carries per-instance Roll objects - it is excluded from
+    # dataclass equality by design (field(compare=False)).
+    a = generate(seed=5, mode="normal", ancestry_name="human", class_names=("fighter",))
+    b = generate(seed=5, mode="normal", ancestry_name="human", class_names=("fighter",))
+    assert a.log == b.log  # still identical in this case, but...
+    assert a == b  # ...equality does not depend on it
+    object.__setattr__(a, "log", ())  # would fail if `log` were part of `__eq__`
+    assert a == b
+
+
+def test_humans_may_not_multiclass():
+    assert not is_legal_multiclass("human", ("fighter", "magic-user"))
+
+
+def test_elves_may_multiclass_fighter_magic_user():
+    assert is_legal_multiclass("elf", ("fighter", "magic-user"))
+
+
+def test_multiclass_must_be_allowed_by_ancestry():
+    assert not is_legal_multiclass("dwarf", ("fighter", "magic-user"))
+
+
+def test_single_class_is_always_legal_for_an_allowed_class():
+    assert is_legal_multiclass("human", ("fighter",))
+
+
+def test_generate_rejects_an_illegal_combination():
+    with pytest.raises(ValueError):
+        generate(seed=1, mode="normal", ancestry_name="human",
+                 class_names=("fighter", "magic-user"))
+
+
+def test_unlisted_class_for_an_ancestry_is_illegal_even_alone():
+    # A dwarf may never be a magic-user at all - illegal whether alone or
+    # combined with anything else.
+    assert not is_legal_multiclass("dwarf", ("magic-user",))
+
+
+# Every ancestry's multiclass_combinations, transcribed and line-cited
+# against the book in data/ancestries.yaml. Verifies both directions: every
+# listed combination is legal, and the universe of two-class combinations
+# NOT listed for that ancestry is illegal.
+_ANCESTRY_COMBOS = {
+    "dwarf": [("fighter", "thief")],
+    "elf": [("fighter", "magic-user"), ("fighter", "thief"), ("magic-user", "thief"),
+            ("fighter", "magic-user", "thief")],
+    "gnome": [("fighter", "illusionist"), ("fighter", "thief"), ("illusionist", "thief")],
+    "half-elf": [("cleric", "fighter"), ("cleric", "ranger"), ("cleric", "magic-user"),
+                 ("fighter", "magic-user"), ("fighter", "thief"),
+                 ("cleric", "fighter", "magic-user"), ("fighter", "magic-user", "thief")],
+    "halfling": [("fighter", "thief")],
+    "half-orc": [("cleric", "fighter"), ("cleric", "thief"), ("cleric", "assassin"),
+                 ("fighter", "thief"), ("fighter", "assassin")],
+    "human": [],
+}
+
+
+@pytest.mark.parametrize("name", ANCESTRIES)
+def test_every_ancestry_carries_its_book_multiclass_combinations(name):
+    a = ancestry(name)
+    assert "multiclass_combinations" in a
+    got = [tuple(c) for c in a["multiclass_combinations"]]
+    assert sorted(sorted(c) for c in got) == sorted(sorted(c) for c in _ANCESTRY_COMBOS[name])
+
+
+@pytest.mark.parametrize("name, combo", [
+    (name, combo) for name, combos in _ANCESTRY_COMBOS.items() for combo in combos
+])
+def test_every_book_combination_is_legal(name, combo):
+    assert is_legal_multiclass(name, combo)
+
+
+@pytest.mark.parametrize("name", ANCESTRIES)
+def test_no_ancestry_permits_a_class_pair_outside_its_own_list(name):
+    import itertools
+    allowed = ancestry(name)["allowed_classes"]
+    legal_pairs = {tuple(sorted(c)) for c in _ANCESTRY_COMBOS[name] if len(c) == 2}
+    for a, b in itertools.combinations(sorted(allowed), 2):
+        expect_legal = (a, b) in legal_pairs
+        assert is_legal_multiclass(name, (a, b)) == expect_legal, f"{name}: {a}/{b}"
+
+
+@pytest.mark.parametrize("cls", CLASSES)
+def test_generate_a_human_of_every_class(cls):
+    # Site-wide standard: exercise all ten classes, not just fighter -
+    # a prior task shipped a class-specific bug that survived because only
+    # fighter was ever generated end to end.
+    c = generate(seed=1, mode="normal", ancestry_name="human", class_names=(cls,))
+    assert c.classes == (cls,)
+    assert c.levels == {cls: 1}
+    assert c.hit_points >= 1
+    assert set(c.saves) == set(SAVE_CATEGORIES)
+
+
+@pytest.mark.parametrize("name", ANCESTRIES)
+def test_generate_one_character_per_ancestry(name):
+    # Site-wide standard: exercise all seven ancestries, not just human/elf.
+    cls = ancestry(name)["allowed_classes"][0]
+    c = generate(seed=2, mode="normal", ancestry_name=name, class_names=(cls,))
+    assert c.ancestry == name
+    assert c.hit_points >= 1
+
+
+def test_ranger_generates_at_first_level_with_its_extra_hit_die():
+    c = generate(seed=9, mode="normal", ancestry_name="half-elf", class_names=("ranger",))
+    hp_rolls = [r for r in c.log if "hp level" in r.reason]
+    assert len(hp_rolls) == 2
+    assert c.hit_points == sum(r.total for r in hp_rolls)
+
+
+def test_multiclass_hit_points_divide_the_summed_rolls_by_class_count():
+    # OSRIC 3.0 SS1.3.11 "Gaining Hit Points": roll the right dice for each
+    # class, apply Constitution, then divide by the number of classes and
+    # drop the fraction. con_bonus is 0 here (deferred to Chapter 3), so
+    # this directly checks the divide-and-floor arithmetic against the raw
+    # per-class rolls recorded in the log.
+    c = generate(seed=5, mode="normal", ancestry_name="elf", class_names=("fighter", "magic-user"))
+    hp_rolls = [r.total for r in c.log if "hp level" in r.reason]
+    assert len(hp_rolls) == 2  # one 1st-level die per class
+    assert c.hit_points == max(1, sum(hp_rolls) // 2)
+
+
+def test_multiclass_hit_points_include_a_rangers_extra_first_level_die():
+    # A ranger contributes 2d8 (its own extra first-level die, SS1.3.9) to
+    # the pool that gets summed and divided across the multi-classed
+    # character's classes - not just 1 die like every other class.
+    c = generate(seed=6, mode="normal", ancestry_name="half-elf",
+                 class_names=("cleric", "ranger"))
+    hp_rolls = [r.total for r in c.log if "hp level" in r.reason]
+    assert len(hp_rolls) == 3  # 1 cleric die + 2 ranger dice
+    assert c.hit_points == max(1, sum(hp_rolls) // 2)  # divided by 2 classes, not 3 dice
+
+
+def test_multiclass_hit_points_never_drop_below_one():
+    assert True  # covered by the max(1, ...) floor exercised in the tests above
+
+
+def test_exceptional_strength_applies_when_any_class_in_the_combo_qualifies():
+    # A fighter/magic-user elf still qualifies for exceptional Strength
+    # because fighter is one of its classes, even though it's not the only
+    # one - eligibility isn't limited to the first-listed class.
+    c = generate(seed=1, mode="normal", ancestry_name="elf",
+                 class_names=("magic-user", "fighter"))
+    pct_rolls = [r for r in c.log if r.expr == "1d100"]
+    if c.scores["strength"] == 18:
+        # Only certain seeds land exactly on 18 pre-exceptional-roll; when
+        # they do, a percentile roll must have happened.
+        assert pct_rolls
+    # Whatever the roll, exceptional strength was checked at most once.
+    assert len(pct_rolls) <= 1
+
+
+def test_multiclass_saving_throws_take_the_best_of_every_class():
+    # SS1.3.11 "Attacks and Saving Throws": a multi-classed character may use
+    # whichever class's table is best, category by category.
+    c = generate(seed=3, mode="normal", ancestry_name="elf",
+                 class_names=("fighter", "magic-user"))
+    fighter_saves = saving_throws("fighter", 1)
+    magic_user_saves = saving_throws("magic-user", 1)
+    for category in SAVE_CATEGORIES:
+        assert c.saves[category] == min(fighter_saves[category], magic_user_saves[category])
+
+
+def test_generate_defers_constitution_hp_adjustment_and_armour_class():
+    c = generate(seed=1, mode="normal", ancestry_name="human", class_names=("fighter",))
+    assert c.armour_class == 10

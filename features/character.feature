@@ -221,3 +221,81 @@ Feature: Rolling ability scores for a new character
   Scenario: OSRIC does not auto-miss on a natural 1 or auto-hit on a natural 20
     Given a fighter of level 1
     Then the to-hit target is just a number to beat, with no special case for a roll of 1 or 20
+
+  Scenario: A new adventurer is ready to play
+    Given a player creates Ilse, a human fighter, with seed 1234
+    Then Ilse has a full set of ability scores
+    And Ilse has at least 1 hit point
+    And Ilse has all five saving throws
+    And Ilse's seed is recorded as 1234
+
+  Scenario: The same seed always builds the same adventurer
+    Given a player creates a human fighter twice with seed 77
+    Then both adventurers are identical in every way that matters
+
+  Scenario: Different seeds build different adventurers
+    Given a player creates a human fighter with seed 1
+    And a player creates another human fighter with seed 2
+    Then the two adventurers differ
+
+  Scenario: A human must choose a single calling
+    Given a player choosing the human ancestry
+    Then a human may not train as both a fighter and a magic-user
+
+  Scenario: An elf may train as both a fighter and a magic-user
+    Given a player choosing the elf ancestry
+    Then an elf may train as both a fighter and a magic-user
+
+  Scenario: Any single calling is always open to those who may take it
+    Given a player choosing the human ancestry
+    Then a human may train as a lone fighter
+
+  Scenario Outline: An ancestry's blessed dual callings are honoured
+    Given a player choosing the <ancestry> ancestry
+    Then the <ancestry> ancestry allows both <first_calling> and <second_calling>
+
+    Examples:
+      | ancestry | first_calling | second_calling |
+      | dwarf    | fighter       | thief           |
+      | elf      | fighter       | magic-user       |
+      | elf      | fighter       | thief            |
+      | elf      | magic-user    | thief            |
+      | gnome    | fighter       | illusionist      |
+      | gnome    | fighter       | thief            |
+      | gnome    | illusionist   | thief            |
+      | half-elf | cleric        | fighter          |
+      | half-elf | cleric        | ranger           |
+      | half-elf | cleric        | magic-user       |
+      | half-elf | fighter       | magic-user       |
+      | half-elf | fighter       | thief            |
+      | halfling | fighter       | thief            |
+      | half-orc | cleric        | fighter          |
+      | half-orc | cleric        | thief            |
+      | half-orc | cleric        | assassin         |
+      | half-orc | fighter       | thief            |
+      | half-orc | fighter       | assassin         |
+
+  Scenario Outline: A calling combination outside an ancestry's blessing is refused
+    Given a player choosing the <ancestry> ancestry
+    Then the <ancestry> ancestry does not allow both <first_calling> and <second_calling>
+
+    Examples:
+      | ancestry | first_calling | second_calling |
+      | dwarf    | fighter       | magic-user       |
+      | elf      | cleric        | fighter          |
+      | gnome    | cleric        | fighter          |
+      | halfling | druid         | fighter          |
+      | half-orc | fighter       | magic-user       |
+      | human    | fighter       | magic-user       |
+
+  Scenario: An elf may train as fighter, magic-user and thief all at once
+    Given a player choosing the elf ancestry
+    Then an elf may train as fighter, magic-user and thief all at once
+
+  Scenario: Creating a character with a forbidden combination of callings is refused
+    Given a player attempts to create a human fighter and magic-user with seed 1
+    Then the attempt is refused
+
+  Scenario: A multi-classed adventurer's hit points are shared across callings
+    Given a player creates an elf fighter and magic-user with seed 5
+    Then the elf's hit points come from dice rolled for both callings

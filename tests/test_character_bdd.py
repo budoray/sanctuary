@@ -1,10 +1,11 @@
 """Step definitions for features/character.feature."""
+import pytest
 from pytest_bdd import scenarios, given, when, then, parsers
 
-from sanctuary.character import (ABILITIES, ability_modifiers, ancestry, apply_ancestry,
-                                 arrangeable, eligible_classes, game_class,
-                                 meets_ancestry_minimums, roll_abilities,
-                                 roll_exceptional_strength, roll_hit_points,
+from sanctuary.character import (ABILITIES, SAVE_CATEGORIES, ability_modifiers, ancestry,
+                                 apply_ancestry, arrangeable, eligible_classes, game_class,
+                                 generate, is_legal_multiclass, meets_ancestry_minimums,
+                                 roll_abilities, roll_exceptional_strength, roll_hit_points,
                                  saving_throws, to_hit_target)
 from sanctuary.dice import Dice, Roll
 
@@ -305,3 +306,127 @@ def to_hit_target_is_plain_number(solo_fighter_level):
     # never special-cases the die roll itself.
     target = to_hit_target("fighter", solo_fighter_level, 10)
     assert isinstance(target, int)
+
+
+@given(parsers.parse('a player creates {name}, a human fighter, with seed {seed:d}'),
+       target_fixture="new_character")
+def create_named_human_fighter(name, seed):
+    return generate(seed=seed, mode="normal", ancestry_name="human",
+                     class_names=("fighter",), name=name)
+
+
+@then("Ilse has a full set of ability scores")
+def has_full_ability_scores(new_character):
+    assert set(new_character.scores) == set(ABILITIES)
+
+
+@then("Ilse has at least 1 hit point")
+def has_at_least_one_hp(new_character):
+    assert new_character.hit_points >= 1
+
+
+@then("Ilse has all five saving throws")
+def has_all_saving_throws(new_character):
+    assert set(new_character.saves) == set(SAVE_CATEGORIES)
+
+
+@then(parsers.parse("Ilse's seed is recorded as {seed:d}"))
+def seed_is_recorded(new_character, seed):
+    assert new_character.seed == seed
+
+
+@given(parsers.parse("a player creates a human fighter twice with seed {seed:d}"),
+       target_fixture="two_characters")
+def create_human_fighter_twice(seed):
+    a = generate(seed=seed, mode="normal", ancestry_name="human", class_names=("fighter",))
+    b = generate(seed=seed, mode="normal", ancestry_name="human", class_names=("fighter",))
+    return a, b
+
+
+@then("both adventurers are identical in every way that matters")
+def characters_are_identical(two_characters):
+    a, b = two_characters
+    assert a == b
+
+
+@pytest.fixture
+def two_seeded_characters():
+    return []
+
+
+@given(parsers.parse("a player creates a human fighter with seed {seed:d}"))
+def create_a_human_fighter(two_seeded_characters, seed):
+    two_seeded_characters.append(
+        generate(seed=seed, mode="normal", ancestry_name="human", class_names=("fighter",)))
+
+
+@given(parsers.parse("a player creates another human fighter with seed {seed:d}"))
+def create_another_human_fighter(two_seeded_characters, seed):
+    two_seeded_characters.append(
+        generate(seed=seed, mode="normal", ancestry_name="human", class_names=("fighter",)))
+
+
+@then("the two adventurers differ")
+def adventurers_differ(two_seeded_characters):
+    a, b = two_seeded_characters
+    assert a.scores != b.scores or a.hit_points != b.hit_points
+
+
+@then("a human may not train as both a fighter and a magic-user")
+def human_may_not_multiclass():
+    assert not is_legal_multiclass("human", ("fighter", "magic-user"))
+
+
+@then("an elf may train as both a fighter and a magic-user")
+def elf_may_multiclass():
+    assert is_legal_multiclass("elf", ("fighter", "magic-user"))
+
+
+@then("a human may train as a lone fighter")
+def human_may_solo_class():
+    assert is_legal_multiclass("human", ("fighter",))
+
+
+@then(parsers.parse("the {ancestry} ancestry allows both {first_calling} and {second_calling}"))
+def ancestry_may_dual_class(ancestry, first_calling, second_calling):
+    assert is_legal_multiclass(ancestry, (first_calling, second_calling))
+
+
+@then(parsers.parse("the {ancestry} ancestry does not allow both {first_calling} and {second_calling}"))
+def ancestry_may_not_dual_class(ancestry, first_calling, second_calling):
+    assert not is_legal_multiclass(ancestry, (first_calling, second_calling))
+
+
+@then("an elf may train as fighter, magic-user and thief all at once")
+def elf_may_triple_class():
+    assert is_legal_multiclass("elf", ("fighter", "magic-user", "thief"))
+
+
+@given(parsers.parse("a player attempts to create a human fighter and magic-user with seed {seed:d}"),
+       target_fixture="refused_attempt")
+def attempt_illegal_combination(seed):
+    def attempt():
+        generate(seed=seed, mode="normal", ancestry_name="human",
+                 class_names=("fighter", "magic-user"))
+    return attempt
+
+
+@then("the attempt is refused")
+def attempt_is_refused(refused_attempt):
+    with pytest.raises(ValueError):
+        refused_attempt()
+
+
+@given(parsers.parse("a player creates an elf fighter and magic-user with seed {seed:d}"),
+       target_fixture="multiclass_character")
+def create_elf_multiclass(seed):
+    return generate(seed=seed, mode="normal", ancestry_name="elf",
+                     class_names=("fighter", "magic-user"))
+
+
+@then("the elf's hit points come from dice rolled for both callings")
+def multiclass_hp_from_both_callings(multiclass_character):
+    hp_rolls = [r for r in multiclass_character.log if "hp level" in r.reason]
+    assert any("fighter" in r.reason for r in hp_rolls)
+    assert any("magic-user" in r.reason for r in hp_rolls)
+    assert multiclass_character.hit_points >= 1
