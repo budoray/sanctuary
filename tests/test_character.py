@@ -146,11 +146,35 @@ def test_every_ancestry_has_the_full_shape():
         assert a["allowed_classes"], f"{name} allows no classes"
 
 
-def test_humans_have_no_adjustments_and_no_limits():
+def test_humans_have_no_adjustments_but_three_universal_class_ceilings():
     a = ancestry("human")
     assert a["ability_adjustments"] == {}
-    assert a["level_limits"] == {}
+    assert a["level_limits"] == {"assassin": 15, "druid": 14, "monk": 17}
     assert len(a["allowed_classes"]) == 10
+
+
+def test_no_ancestry_carries_the_universal_ceilings_unless_the_book_says_so():
+    # Assassin 15 / Druid 14 / Monk 17 are ceilings no one of any ancestry
+    # exceeds (OSRIC 3.0 SS1.2.7.3) - they land on the human row because
+    # humans have no ancestral limit of their own to be lower. Another
+    # ancestry may only carry one of these numbers if the book gives that
+    # ancestry that exact cap for that class.
+    book_matches = {
+        "dwarf": {},
+        "elf": {},
+        "gnome": {},
+        "half-elf": {"druid": 14},
+        "halfling": {},
+        "half-orc": {"assassin": 15},
+    }
+    for name, expected in book_matches.items():
+        limits = ancestry(name)["level_limits"]
+        for cls, ceiling in (("assassin", 15), ("druid", 14), ("monk", 17)):
+            if cls in expected:
+                assert limits.get(cls) == expected[cls], f"{name}/{cls} should be {expected[cls]}"
+            else:
+                assert limits.get(cls) != ceiling, (
+                    f"{name} carries the universal {cls} ceiling without book support")
 
 
 def test_apply_ancestry_adjusts_scores():

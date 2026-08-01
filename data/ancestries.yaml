@@ -6,6 +6,13 @@
 # `level_limits` collapses a Strength/Intelligence/Dexterity-conditioned cap
 # to the best-case (highest qualifying score) ceiling, since the schema
 # holds one integer per class; 0 means unlimited.
+#
+# WARNING: every non-zero level_limits value is an UPPER bound only. Several
+# are conditioned in the book on an ability score (e.g. dwarf fighter: 9 if
+# Strength 18+, 8 if 17, 7 if 16 or less) and this schema cannot express that
+# condition - it stores only the best-case ceiling. Code that enforces these
+# limits (Chapter 3 levelling) must also check the relevant ability score
+# against the book; do not treat these numbers as unconditional caps.
 dwarf:
   ability_adjustments: {constitution: 1, charisma: -1}
   minimums: {strength: 8, constitution: 12}
@@ -54,4 +61,8 @@ human:
   maximums: {}
   infravision_ft: 0
   allowed_classes: [assassin, cleric, druid, fighter, illusionist, magic-user, monk, paladin, ranger, thief]
-  level_limits: {}
+  # Unlike the other ancestries, these three are not ancestral penalties -
+  # they're the universal class ceilings for Assassin/Druid/Monk that no one
+  # of ANY ancestry exceeds (OSRIC 3.0 SS1.2.7.3). Humans just have no
+  # ancestral adjustments to offset them.
+  level_limits: {assassin: 15, druid: 14, monk: 17}

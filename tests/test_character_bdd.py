@@ -134,11 +134,11 @@ def can_become_class(chosen_ancestry, can_or_cannot, cls):
     assert allowed == (can_or_cannot == "can")
 
 
-@then(parsers.parse("the thief level limit is unlimited"))
-def thief_unlimited(chosen_ancestry):
-    assert ancestry(chosen_ancestry)["level_limits"]["thief"] == 0
+@then(parsers.parse("the {cls} level limit is unlimited"))
+def class_level_limit_unlimited(chosen_ancestry, cls):
+    assert ancestry(chosen_ancestry)["level_limits"].get(cls, 0) == 0
 
 
-@then(parsers.parse("the assassin level limit is {level:d}"))
-def assassin_level_limit(chosen_ancestry, level):
-    assert ancestry(chosen_ancestry)["level_limits"]["assassin"] == level
+@then(parsers.parse("the {cls} level limit is {level:d}"))
+def class_level_limit(chosen_ancestry, cls, level):
+    assert ancestry(chosen_ancestry)["level_limits"][cls] == level

@@ -122,3 +122,11 @@ Feature: Rolling ability scores for a new character
   Scenario: A half-orc's ambition as an assassin has a ceiling
     Given a player choosing the half-orc ancestry
     Then the assassin level limit is 15
+
+  Scenario: A human may rise without limit in most classes, but never past the ceiling of an assassin, druid or monk
+    Given a player choosing the human ancestry
+    Then the player can become a fighter
+    And the fighter level limit is unlimited
+    And the assassin level limit is 15
+    And the druid level limit is 14
+    And the monk level limit is 17
