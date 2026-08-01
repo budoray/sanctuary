@@ -1508,7 +1508,8 @@ fighter:
   advancement_table: "1.3.4.4a"
   saving_throw_table: "1.3.4.4b"
   to_hit_table: "1.3.4.4c"
-  fixed_hp_after_level_9: 3
+  hit_dice_stop_level: 9        # last level that rolls a hit die
+  fixed_hp_per_level_after: 3   # flat hp per level beyond that
   spell_list: null
 cleric:
   hit_die: d8
@@ -1517,13 +1518,28 @@ cleric:
   advancement_table: "1.3.2.4a"
   saving_throw_table: "1.3.2.4b"
   to_hit_table: "1.3.2.4c"
-  fixed_hp_after_level_9: 2
+  hit_dice_stop_level: 9
+  fixed_hp_per_level_after: 2
   spell_list: clerical
 ```
 
 All eleven: assassin, cleric, druid, fighter, illusionist, magic-user, monk, paladin, ranger, thief. Multi- and dual-classing are Task 13, not entries here.
 
-⚠ `fixed_hp_after_level_9` is the flat per-level hit points once hit dice stop. The fighter's own table says `+3` and notes Constitution adjustments also stop. Do not apply a Constitution bonus past that point.
+⚠⚠ **The level at which hit dice stop is NOT 9 for every class.** An earlier draft of this plan assumed it was, which is the fighter's number. Read each class's own advancement table (`1.3.N.4a`) and take the level where the `HIT DICE` column stops incrementing and starts carrying a `X+Y*` form. Measured from the committed corpus:
+
+| class | last level rolling a hit die | flat hp per level after |
+|---|---|---|
+| fighter, paladin | 9 | 3 |
+| cleric | 9 | 2 |
+| illusionist | 10 | 1 |
+| thief | 10 | 2 |
+| magic-user | 11 | 1 |
+| ranger | see its table — level 11 reads `11+2`, which needs care | |
+| assassin, druid, monk | their tables show no `+` form in the extracted rows — determine from the book what happens at their top levels | |
+
+Verify every one of these against the class's own table rather than trusting this list; it was derived mechanically and the three unresolved rows are genuinely unresolved.
+
+⚠ Once hit dice stop, Constitution adjustments stop too — the fighter's table says so explicitly. Do not apply a Constitution bonus past that level.
 
 - [ ] **Step 2: Write the failing test**
 
@@ -1631,14 +1647,15 @@ def roll_hit_points(d: Dice, cls: str, level: int, con_bonus: int) -> int:
     """
     c = game_class(cls)
     die = c["hit_die"]
-    cap = 9
+    stop = c["hit_dice_stop_level"]   # per class - NOT 9 for everyone
     total = 0
     for lvl in range(1, int(level) + 1):
-        if lvl <= cap:
+        if lvl <= stop:
             rolled = d.roll(f"1{die}", reason=f"{cls} hp level {lvl}", kind="chargen").total
             total += max(1, rolled + con_bonus)
         else:
-            total += c["fixed_hp_after_level_9"]
+            # Constitution adjustments stop when hit dice do.
+            total += c["fixed_hp_per_level_after"]
     return total
 ```
 
