@@ -73,9 +73,15 @@ True, so `if submit(...)` tells the player "sent" while the report goes nowhere.
 <!-- tenshin:platform:end -->
 ## The gate
 ```bash
-python -m pytest -q
+python app.py test          # → "sanctuary self-check OK - ..."
+python -m pytest tests/ -q
 ```
 ⚠ Use the **system** python. Any `.venv` in this tree is a decoy.
+
+## Run
+```bash
+TENSHIN_DEV=1 python app.py    # http://127.0.0.1:9300/
+```
 
 ★ **Testing standard, site-wide (Dr. Ray, 2026-08-01).** **BDD features AND TDD tests, both** —
 every behaviour gets a Gherkin `.feature` under `features/` bound with `pytest-bdd` (runs inside
@@ -109,3 +115,14 @@ a 4-tuple"*. If it cannot be phrased without naming a Python symbol, it is a uni
   not affiliated with Mythmere Games LLC.** That notice ships in the client AND at `/licence`. The
   licence permits verbatim reuse of **monster, spell and magic-item text only** — never the art,
   never rules prose.
+- **A natural 1 to-hit is NOT an automatic miss; a natural 20 is NOT an automatic hit.** That is
+  OSRIC's stated rule. A natural 1 on a *saving throw* always fails.
+- ⚠ **Round-trip and spot-check are both required** on the corpus. Round-trip alone passes on a
+  uniformly mis-parsed corpus.
+- **`read_text(encoding="utf-8")` everywhere.** The sources carry en-dashes, curly quotes and
+  ligatures; Windows defaults to cp1252.
+- **Ligatures (U+FB00–FB06) are normalised at extraction.** Unnormalised, the corpus ships words no
+  search will match.
+- ⚠ **Assets must be SERVED, not merely present.** `/static` has gone unmounted on this platform
+  while client tests read files off disk and passed. Guarded by
+  `test_every_portrait_is_actually_served`.
