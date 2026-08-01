@@ -52,3 +52,50 @@ def test_unknown_mode_raises():
 
 def test_generation_is_reproducible_from_the_seed():
     assert roll_abilities(Dice(seed=99), "normal") == roll_abilities(Dice(seed=99), "normal")
+
+
+from sanctuary.character import EXCEPTIONAL_CLASSES, roll_exceptional_strength
+
+
+def test_only_fighters_paladins_and_rangers_roll():
+    assert set(EXCEPTIONAL_CLASSES) == {"fighter", "paladin", "ranger"}
+
+
+def test_non_eligible_class_keeps_a_plain_18():
+    d = Dice(seed=1)
+    assert roll_exceptional_strength(d, 18, "thief") == 18
+    assert d.log == ()
+
+
+def test_score_below_18_never_rolls():
+    d = Dice(seed=1)
+    assert roll_exceptional_strength(d, 17, "fighter") == 17
+    assert d.log == ()
+
+
+def test_eligible_18_rolls_d100_and_returns_a_decimal():
+    d = Dice(seed=1)
+    result = roll_exceptional_strength(d, 18, "fighter")
+    assert d.log[0].expr == "1d100"
+    assert 18.01 <= result <= 19.0
+
+
+def test_percentile_100_means_nineteen():
+    from sanctuary.dice import Roll
+
+    class FixedRoller:
+        """Duck-typed stand-in - a percentile of 00 (100) must give 19."""
+        log = ()
+
+        def roll(self, expr, reason="", mods=0, **tags):
+            return Roll(index=0, expr=expr, faces=(100,), kept=(100,),
+                        mods=0, total=100, reason=reason, tags=tags)
+
+    assert roll_exceptional_strength(FixedRoller(), 18, "fighter") == 19.0
+
+
+def test_exceptional_strength_reads_the_right_table_row():
+    from sanctuary import tables
+    # 18.51-18.75 gives +2 to hit, +3 damage per Table 1.1.2A.
+    row = tables.ability_row("1.1.2a", 18.60)
+    assert row[1] == "+2" and row[2] == "+3"

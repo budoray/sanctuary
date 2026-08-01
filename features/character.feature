@@ -32,3 +32,26 @@ Feature: Rolling ability scores for a new character
     Given a player generating a character in the normal mode
     When the six ability scores are rolled twice with the same seed
     Then both rolls produce identical ability scores
+
+  Scenario Outline: Only fighters, paladins and rangers roll for exceptional strength
+    Given a character with 18 Strength and class "<class>"
+    When exceptional strength is checked
+    Then a die is <rolled_or_not> for exceptional strength
+
+    Examples:
+      | class    | rolled_or_not |
+      | fighter  | rolled        |
+      | paladin  | rolled        |
+      | ranger   | rolled        |
+      | thief    | not rolled    |
+      | cleric   | not rolled    |
+
+  Scenario: A Strength below 18 never rolls for exceptional strength, whatever the class
+    Given a character with 17 Strength and class "fighter"
+    When exceptional strength is checked
+    Then a die is not rolled for exceptional strength
+
+  Scenario: A percentile roll of 00 gives a Strength of 19
+    Given a fighter whose exceptional strength percentile roll comes up 00
+    When exceptional strength is checked
+    Then the character's Strength is 19

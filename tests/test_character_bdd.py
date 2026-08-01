@@ -1,8 +1,8 @@
 """Step definitions for features/character.feature."""
 from pytest_bdd import scenarios, given, when, then, parsers
 
-from sanctuary.character import arrangeable, roll_abilities
-from sanctuary.dice import Dice
+from sanctuary.character import arrangeable, roll_abilities, roll_exceptional_strength
+from sanctuary.dice import Dice, Roll
 
 scenarios("../features/character.feature")
 
@@ -41,3 +41,40 @@ def scores_in_range(scores):
 def rolls_match(two_rolls):
     first, second = two_rolls
     assert first == second
+
+
+class _FixedPercentileRoller:
+    """Duck-typed stand-in - a percentile of 00 (100) must give 19."""
+    log = ()
+
+    def roll(self, expr, reason="", mods=0, **tags):
+        return Roll(index=0, expr=expr, faces=(100,), kept=(100,),
+                    mods=0, total=100, reason=reason, tags=tags)
+
+
+@given(parsers.parse('a character with {score:d} Strength and class "{cls}"'), target_fixture="exceptional_ctx")
+def a_character_with_strength(score, cls):
+    return {"dice": Dice(seed=1), "score": score, "cls": cls}
+
+
+@given("a fighter whose exceptional strength percentile roll comes up 00", target_fixture="exceptional_ctx")
+def a_fighter_rolling_00():
+    return {"dice": _FixedPercentileRoller(), "score": 18, "cls": "fighter"}
+
+
+@when("exceptional strength is checked", target_fixture="exceptional_result")
+def check_exceptional_strength(exceptional_ctx):
+    dice = exceptional_ctx["dice"]
+    result = roll_exceptional_strength(dice, exceptional_ctx["score"], exceptional_ctx["cls"])
+    return {"dice": dice, "result": result}
+
+
+@then(parsers.parse("a die is {rolled_or_not} for exceptional strength"))
+def die_rolled_or_not(exceptional_result, rolled_or_not):
+    rolled = bool(exceptional_result["dice"].log)
+    assert rolled == (rolled_or_not == "rolled")
+
+
+@then("the character's Strength is 19")
+def strength_is_19(exceptional_result):
+    assert exceptional_result["result"] == 19

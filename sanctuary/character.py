@@ -34,3 +34,22 @@ def roll_abilities(d: Dice, mode: str) -> dict[str, int]:
         raise ValueError(f"unknown generation mode: {mode!r}")
     expr = _MODE_EXPR[mode]
     return {name: d.roll(expr, reason=name).total for name in ABILITIES}
+
+
+# Only these classes roll percentile strength. For everyone else an 18 is an 18.
+EXCEPTIONAL_CLASSES = ("fighter", "paladin", "ranger")
+
+
+def roll_exceptional_strength(d: Dice, score: int, cls: str) -> float:
+    """Percentile strength for an eligible 18.
+
+    Returns 18.01-18.99 as a decimal, or 19.0 on a percentile roll of 00 (100).
+    Returns `score` unchanged when the character is not eligible - and rolls no
+    dice at all in that case, so the log stays honest.
+    """
+    if int(score) != 18 or cls not in EXCEPTIONAL_CLASSES:
+        return score
+    pct = d.roll("1d100", reason="exceptional strength", kind="chargen").total
+    if pct >= 100:
+        return 19.0
+    return round(18 + pct / 100, 2)
