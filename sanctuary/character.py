@@ -4,6 +4,11 @@ Every random step rolls through `Dice`, so a character is fully reproducible
 from (seed, choices). That is also what makes a reroll honest rather than a
 slot machine.
 """
+from functools import lru_cache
+from pathlib import Path
+
+import yaml
+
 from sanctuary.dice import Dice
 
 ABILITIES = ("strength", "dexterity", "constitution",
@@ -53,3 +58,38 @@ def roll_exceptional_strength(d: Dice, score: int, cls: str) -> float:
     if pct >= 100:
         return 19.0
     return round(18 + pct / 100, 2)
+
+
+_DATA = Path(__file__).resolve().parent.parent / "data"
+
+
+@lru_cache(maxsize=1)
+def _ancestries() -> dict:
+    return yaml.safe_load((_DATA / "ancestries.yaml").read_text(encoding="utf-8"))
+
+
+ANCESTRIES = ("dwarf", "elf", "gnome", "half-elf", "halfling", "half-orc", "human")
+
+
+def ancestry(name: str) -> dict:
+    """OSRIC 3.0 §1.2.1-1.2.7: one ancestry's adjustments, limits and class access."""
+    a = _ancestries().get(name)
+    if a is None:
+        raise KeyError(f"unknown ancestry: {name!r}")
+    return a
+
+
+def apply_ancestry(scores: dict, name: str) -> dict:
+    """Ancestral adjustments applied to a copy of `scores`."""
+    out = dict(scores)
+    for k, delta in ancestry(name)["ability_adjustments"].items():
+        out[k] = out.get(k, 0) + delta
+    return out
+
+
+def meets_ancestry_minimums(scores: dict, name: str) -> bool:
+    """Table 1.2.0A minimums, checked AFTER ancestral adjustments."""
+    a = ancestry(name)
+    if any(scores.get(k, 0) < v for k, v in a["minimums"].items()):
+        return False
+    return not any(scores.get(k, 0) > v for k, v in a["maximums"].items())

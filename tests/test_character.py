@@ -126,3 +126,52 @@ def test_plain_18_point_0_still_rolls_exactly_one_die_for_an_eligible_class():
     roll_exceptional_strength(d, 18.0, "fighter")
     assert len(d.log) == 1
     assert d.log[0].expr == "1d100"
+
+
+from sanctuary.character import (ANCESTRIES, ancestry, apply_ancestry,
+                                 meets_ancestry_minimums)
+
+
+def test_seven_ancestries():
+    assert set(ANCESTRIES) == {
+        "dwarf", "elf", "gnome", "half-elf", "halfling", "half-orc", "human"}
+
+
+def test_every_ancestry_has_the_full_shape():
+    for name in ANCESTRIES:
+        a = ancestry(name)
+        for key in ("ability_adjustments", "minimums", "maximums",
+                    "allowed_classes", "level_limits"):
+            assert key in a, f"{name} missing {key}"
+        assert a["allowed_classes"], f"{name} allows no classes"
+
+
+def test_humans_have_no_adjustments_and_no_limits():
+    a = ancestry("human")
+    assert a["ability_adjustments"] == {}
+    assert a["level_limits"] == {}
+    assert len(a["allowed_classes"]) == 10
+
+
+def test_apply_ancestry_adjusts_scores():
+    scores = {k: 10 for k in ABILITIES}
+    adjusted = apply_ancestry(scores, "dwarf")
+    assert adjusted["constitution"] == 11
+    assert adjusted["charisma"] == 9
+    assert scores["constitution"] == 10, "apply_ancestry must not mutate its input"
+
+
+def test_minimums_are_checked_after_adjustment():
+    low = {k: 6 for k in ABILITIES}
+    assert not meets_ancestry_minimums(low, "dwarf")
+    ok = {k: 14 for k in ABILITIES}
+    assert meets_ancestry_minimums(ok, "dwarf")
+
+
+def test_humans_accept_any_scores():
+    assert meets_ancestry_minimums({k: 3 for k in ABILITIES}, "human")
+
+
+def test_unknown_ancestry_raises():
+    with pytest.raises(KeyError):
+        ancestry("orc")

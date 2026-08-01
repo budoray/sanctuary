@@ -1,7 +1,9 @@
 """Step definitions for features/character.feature."""
 from pytest_bdd import scenarios, given, when, then, parsers
 
-from sanctuary.character import arrangeable, roll_abilities, roll_exceptional_strength
+from sanctuary.character import (ABILITIES, ancestry, apply_ancestry, arrangeable,
+                                 meets_ancestry_minimums, roll_abilities,
+                                 roll_exceptional_strength)
 from sanctuary.dice import Dice, Roll
 
 scenarios("../features/character.feature")
@@ -97,3 +99,46 @@ def strength_is_19(exceptional_result):
 @then(parsers.parse("the character's Strength is still {score:g}"))
 def strength_is_still(exceptional_result, score):
     assert exceptional_result["result"] == score
+
+
+@given(parsers.parse("a player choosing the {ancestry} ancestry"), target_fixture="chosen_ancestry")
+def choosing_an_ancestry(ancestry):
+    return ancestry
+
+
+@when("the ancestral adjustments are applied to ability scores of 10 across the board",
+      target_fixture="adjusted_scores")
+def apply_adjustments(chosen_ancestry):
+    return apply_ancestry({k: 10 for k in ABILITIES}, chosen_ancestry)
+
+
+@then(parsers.parse("the {ability} score becomes {score:d}"))
+def ability_becomes(adjusted_scores, ability, score):
+    assert adjusted_scores[ability] == score
+
+
+@when(parsers.parse("the player's ability scores are all {score:d}"), target_fixture="flat_scores")
+def flat_ability_scores(score):
+    return {k: score for k in ABILITIES}
+
+
+@then(parsers.parse("the character {does_or_not} meet the {ancestry_label}'s ancestral requirements"))
+def check_requirements(flat_scores, chosen_ancestry, does_or_not, ancestry_label):
+    meets = meets_ancestry_minimums(flat_scores, chosen_ancestry)
+    assert meets == (does_or_not == "does")
+
+
+@then(parsers.parse("the player {can_or_cannot} become a {cls}"))
+def can_become_class(chosen_ancestry, can_or_cannot, cls):
+    allowed = cls in ancestry(chosen_ancestry)["allowed_classes"]
+    assert allowed == (can_or_cannot == "can")
+
+
+@then(parsers.parse("the thief level limit is unlimited"))
+def thief_unlimited(chosen_ancestry):
+    assert ancestry(chosen_ancestry)["level_limits"]["thief"] == 0
+
+
+@then(parsers.parse("the assassin level limit is {level:d}"))
+def assassin_level_limit(chosen_ancestry, level):
+    assert ancestry(chosen_ancestry)["level_limits"]["assassin"] == level
