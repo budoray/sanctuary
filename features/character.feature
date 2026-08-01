@@ -181,3 +181,43 @@ Feature: Rolling ability scores for a new character
   Scenario: A ranger begins hardier than other warriors, rolling twice for starting hit points
     Given a first-level ranger and a first-level fighter, rolled with the same seed
     Then the ranger rolls twice as many starting hit dice as the fighter
+
+  Scenario: Strength sharpens a character's fists and blade
+    Given a character with 18 Strength
+    Then the Strength hit bonus is 1
+    And the Strength damage bonus is 2
+
+  Scenario: Exceptional Strength sharpens the bonus further
+    Given a character with 18.6 Strength
+    Then the Strength hit bonus is 2
+    And the Strength damage bonus is 3
+
+  Scenario: An average Strength gives no bonus at all
+    Given a character with 10 Strength
+    Then the Strength hit bonus is 0
+    And the Strength damage bonus is 0
+
+  Scenario: A seasoned fighter hits more easily than a novice
+    Given a fighter of level 1 and a fighter of level 9
+    Then the level 9 fighter needs a lower roll to hit the same armour class than the level 1 fighter
+
+  Scenario Outline: A rising adventurer of every calling resists spells better than a novice
+    Given a <class> of level 1 and a <class> of level <veteran_level>
+    Then the level <veteran_level> <class> resists spells at least as well as the level 1 <class>
+
+    Examples:
+      | class       | veteran_level |
+      | assassin    | 13            |
+      | cleric      | 13            |
+      | druid       | 13            |
+      | fighter     | 13            |
+      | illusionist | 16             |
+      | magic-user  | 16             |
+      | monk        | 17             |
+      | paladin     | 13             |
+      | ranger      | 13             |
+      | thief       | 13             |
+
+  Scenario: OSRIC does not auto-miss on a natural 1 or auto-hit on a natural 20
+    Given a fighter of level 1
+    Then the to-hit target is just a number to beat, with no special case for a roll of 1 or 20

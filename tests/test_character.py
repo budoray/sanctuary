@@ -319,3 +319,103 @@ def test_only_the_ranger_rolls_extra_dice_at_first_level(cls):
     d = Dice(seed=6)
     roll_hit_points(d, cls, level=1, con_bonus=0)
     assert len(d.log) == 1, f"{cls} should roll exactly one hit die at 1st level"
+
+
+import re
+
+from sanctuary.character import SAVE_CATEGORIES, ability_modifiers, saving_throws, to_hit_target
+
+# Same axis the to-hit tables print: armour classes descending from 10 to -10.
+_AC_COLUMNS = list(range(10, -11, -1))
+
+
+def _row_level(label: str) -> float:
+    """A level guaranteed to fall inside a table row's label, for test setup."""
+    return float(re.split(r"[–—-]", label.rstrip("+"))[0])
+
+
+def test_strength_modifiers_come_from_the_table():
+    mods = ability_modifiers({**{k: 10 for k in ABILITIES}, "strength": 18})
+    assert mods["hit"] == 1
+    assert mods["damage"] == 2
+
+
+def test_exceptional_strength_modifiers():
+    mods = ability_modifiers({**{k: 10 for k in ABILITIES}, "strength": 18.60})
+    assert mods["hit"] == 2
+    assert mods["damage"] == 3
+
+
+def test_average_scores_give_no_modifiers():
+    mods = ability_modifiers({k: 10 for k in ABILITIES})
+    assert mods["hit"] == 0
+    assert mods["damage"] == 0
+
+
+def test_fighter_saving_throws_at_level_one():
+    # Table 1.3.4.4B, row 1-2: 16 / 17 / 14 / 15 / 17. The brief quotes this
+    # exact row and it matches the corpus.
+    saves = saving_throws("fighter", 1)
+    assert saves["aimed_magic_items"] == 16
+    assert saves["breath_weapons"] == 17
+    assert saves["death_paralysis_poison"] == 14
+    assert saves["petrifaction_polymorph"] == 15
+    assert saves["spells"] == 17
+
+
+def test_fighter_saving_throws_improve_with_level():
+    assert saving_throws("fighter", 13)["spells"] < saving_throws("fighter", 1)["spells"]
+
+
+def test_fighter_to_hit_targets():
+    # Table 1.3.4.4C: level 1 needs 10 vs AC 10, and 19 vs AC 1. The brief's
+    # own inline comment says "20 vs AC 1", which is wrong - but the
+    # assertion it actually wrote checks 19, which matches the book.
+    assert to_hit_target("fighter", 1, 10) == 10
+    assert to_hit_target("fighter", 1, 1) == 19
+
+
+def test_higher_level_hits_more_easily():
+    assert to_hit_target("fighter", 9, 4) < to_hit_target("fighter", 1, 4)
+
+
+@pytest.mark.parametrize("cls", CLASSES)
+def test_saving_throws_match_the_corpus_at_every_row(cls):
+    # Cross-checks every row of every class's own saving-throw table (not
+    # just level 1 and not just fighter) against what saving_throws() returns,
+    # so a wrong table id or a swapped column is caught for all ten classes.
+    table_id = game_class(cls)["saving_throw_table"]
+    for row in tables.rows(table_id):
+        level = _row_level(row[0])
+        expected = dict(zip(SAVE_CATEGORIES, (int(c) for c in row[1:6])))
+        assert saving_throws(cls, level) == expected, f"{cls} level {level}"
+
+
+@pytest.mark.parametrize("cls", CLASSES)
+def test_to_hit_targets_match_the_corpus_at_every_row(cls):
+    # Same idea for to-hit: every level row, every armour class column, for
+    # every class - a prior task shipped a bug that hid behind fighter-only
+    # coverage.
+    table_id = game_class(cls)["to_hit_table"]
+    for row in tables.rows(table_id):
+        level = _row_level(row[0])
+        for ac, cell in zip(_AC_COLUMNS, row[1:]):
+            assert to_hit_target(cls, level, ac) == int(cell), f"{cls} level {level} AC {ac}"
+
+
+@pytest.mark.parametrize("cls", CLASSES)
+def test_saving_throws_never_worsen_with_level(cls):
+    table_id = game_class(cls)["saving_throw_table"]
+    rows = tables.rows(table_id)
+    first = saving_throws(cls, _row_level(rows[0][0]))
+    last = saving_throws(cls, _row_level(rows[-1][0]))
+    for category in SAVE_CATEGORIES:
+        assert last[category] <= first[category], f"{cls} {category} got worse with level"
+
+
+@pytest.mark.parametrize("cls", CLASSES)
+def test_to_hit_targets_never_worsen_with_level(cls):
+    table_id = game_class(cls)["to_hit_table"]
+    rows = tables.rows(table_id)
+    first_level, last_level = _row_level(rows[0][0]), _row_level(rows[-1][0])
+    assert to_hit_target(cls, last_level, 4) <= to_hit_target(cls, first_level, 4)

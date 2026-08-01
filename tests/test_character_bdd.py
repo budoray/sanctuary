@@ -1,9 +1,11 @@
 """Step definitions for features/character.feature."""
 from pytest_bdd import scenarios, given, when, then, parsers
 
-from sanctuary.character import (ABILITIES, ancestry, apply_ancestry, arrangeable,
-                                 eligible_classes, game_class, meets_ancestry_minimums,
-                                 roll_abilities, roll_exceptional_strength, roll_hit_points)
+from sanctuary.character import (ABILITIES, ability_modifiers, ancestry, apply_ancestry,
+                                 arrangeable, eligible_classes, game_class,
+                                 meets_ancestry_minimums, roll_abilities,
+                                 roll_exceptional_strength, roll_hit_points,
+                                 saving_throws, to_hit_target)
 from sanctuary.dice import Dice, Roll
 
 scenarios("../features/character.feature")
@@ -254,3 +256,52 @@ def a_ranger_and_a_fighter():
 def ranger_rolls_twice_the_dice(ranger_and_fighter_rolls):
     ranger_dice, fighter_dice = ranger_and_fighter_rolls
     assert len(ranger_dice.log) == 2 * len(fighter_dice.log)
+
+
+@given(parsers.parse("a character with {score:g} Strength"), target_fixture="strength_mods")
+def a_character_with_strength_score(score):
+    return ability_modifiers({**{k: 10 for k in ABILITIES}, "strength": score})
+
+
+@then(parsers.parse("the Strength hit bonus is {bonus:d}"))
+def strength_hit_bonus_is(strength_mods, bonus):
+    assert strength_mods["hit"] == bonus
+
+
+@then(parsers.parse("the Strength damage bonus is {bonus:d}"))
+def strength_damage_bonus_is(strength_mods, bonus):
+    assert strength_mods["damage"] == bonus
+
+
+@given(parsers.parse("a {cls} of level {novice_level:d} and a {cls} of level {veteran_level:d}"),
+       target_fixture="novice_and_veteran")
+def a_novice_and_a_veteran(cls, novice_level, veteran_level):
+    return {"cls": cls, "novice_level": novice_level, "veteran_level": veteran_level}
+
+
+@then(parsers.parse("the level {veteran_level:d} {cls} resists spells at least as well as "
+                     "the level {novice_level:d} {cls}"))
+def veteran_resists_spells_better(novice_and_veteran):
+    novice = saving_throws(novice_and_veteran["cls"], novice_and_veteran["novice_level"])
+    veteran = saving_throws(novice_and_veteran["cls"], novice_and_veteran["veteran_level"])
+    assert veteran["spells"] <= novice["spells"]
+
+
+@then("the level 9 fighter needs a lower roll to hit the same armour class than the level 1 fighter")
+def level_nine_hits_more_easily(novice_and_veteran):
+    assert to_hit_target("fighter", novice_and_veteran["veteran_level"], 4) < to_hit_target(
+        "fighter", novice_and_veteran["novice_level"], 4)
+
+
+@given(parsers.parse("a fighter of level {level:d}"), target_fixture="solo_fighter_level")
+def a_solo_fighter(level):
+    return level
+
+
+@then("the to-hit target is just a number to beat, with no special case for a roll of 1 or 20")
+def to_hit_target_is_plain_number(solo_fighter_level):
+    # OSRIC: a natural 1 is not an automatic miss, a natural 20 is not an
+    # automatic hit. to_hit_target() only computes the number to beat - it
+    # never special-cases the die roll itself.
+    target = to_hit_target("fighter", solo_fighter_level, 10)
+    assert isinstance(target, int)

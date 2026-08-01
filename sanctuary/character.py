@@ -9,6 +9,7 @@ from pathlib import Path
 
 import yaml
 
+from sanctuary import tables
 from sanctuary.dice import Dice
 
 ABILITIES = ("strength", "dexterity", "constitution",
@@ -155,3 +156,53 @@ def roll_hit_points(d: Dice, cls: str, level: int, con_bonus: int) -> int:
         else:
             total += c["fixed_hp_per_level_after"]
     return total
+
+
+# Column order of every class saving-throw table (verified against
+# 1.3.4.4b FIGHTER SAVING THROWS and cross-checked against 1.3.6.4b
+# MAGIC-USER, 1.3.7.4c MONK and 1.3.10.4e THIEF): aimed magic items, breath
+# weapons, death/paralysis/poison, petrifaction/polymorph, spells.
+SAVE_CATEGORIES = ("aimed_magic_items", "breath_weapons",
+                   "death_paralysis_poison", "petrifaction_polymorph", "spells")
+
+# A to-hit table's columns are armour classes descending from 10 to -10.
+_AC_COLUMNS = list(range(10, -11, -1))
+
+
+def _int(cell: str) -> int:
+    return int(str(cell).replace("+", "").replace("−", "-"))
+
+
+def ability_modifiers(scores: dict) -> dict:
+    """Combat-relevant modifiers derived from Table 1.1.2A (Strength)."""
+    strength_row = tables.ability_row("1.1.2a", scores["strength"])
+    return {
+        "hit": _int(strength_row[1]),
+        "damage": _int(strength_row[2]),
+        "encumbrance_lbs": _int(strength_row[3]),
+    }
+
+
+def saving_throws(cls: str, level: int) -> dict:
+    """The five saving-throw targets for a class at a level."""
+    table_id = game_class(cls)["saving_throw_table"]
+    for row in tables.rows(table_id):
+        if tables.in_range(row[0], level) and len(row) >= 6:
+            return dict(zip(SAVE_CATEGORIES, (_int(c) for c in row[1:6])))
+    raise LookupError(f"no saving-throw row for {cls} level {level}")
+
+
+def to_hit_target(cls: str, level: int, armour_class: int) -> int:
+    """The d20 result needed to hit `armour_class`.
+
+    A natural 1 is NOT an automatic miss and a natural 20 is NOT an automatic
+    hit - that is OSRIC's stated rule, not a bug. This computes the target
+    only; rolling and comparing against it belongs to whoever resolves an
+    attack.
+    """
+    table_id = game_class(cls)["to_hit_table"]
+    col = _AC_COLUMNS.index(int(armour_class))
+    for row in tables.rows(table_id):
+        if tables.in_range(row[0], level):
+            return _int(row[1 + col])
+    raise LookupError(f"no to-hit row for {cls} level {level}")
