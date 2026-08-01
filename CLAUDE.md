@@ -21,14 +21,15 @@ deploy is fine and necessary; **nothing about this game may be published or lit 
 strength of it**, and `registered` is what keeps it out of the Caddyfile, cc-op,
 deploy-all and the units until there is something to serve.
 
-⚠ **REGISTERED, NOT SHIPPED.** There is no `app.py`, no server, no vhost and no unit —
-this repo is a corpus extractor and a dice engine, not yet a Tenshin app. The row exists
-so the platform can SEE it: a game in no registry cannot fail a parity check, which is
-how two games once sat pushed-and-undeployed with every board green.
+⚠ **REGISTERED, NOT SHIPPED.** `app.py` exists, serves on port 9300, has a self-check
+gate, and the client renders a character sheet with portraits — but there is still no
+vhost and no unit. The row exists so the platform can SEE it: a game in no registry
+cannot fail a parity check, which is how two games once sat pushed-and-undeployed with
+every board green.
 
-⚠ **Its gate is currently RED** — `tests/test_corpus.py` has two failures in the
-extraction round-trip, from work in progress. Recorded rather than hidden; a gate that is
-red for a known reason is worth more than one nobody has run.
+⚠ **Its gate is GREEN** — `python -m pytest tests/ -q` → 429 passed, `tests/test_corpus.py`
+→ 11 passed, and `python app.py test` prints the self-check sentence. Recorded rather than
+assumed; a gate someone just ran is worth more than one nobody has checked.
 
 <!-- tenshin:platform:start -->
 **Two documents.** Global standards + future work: the SSoT
