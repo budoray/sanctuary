@@ -82,3 +82,79 @@ def test_ability_row_finds_an_exceptional_strength_row():
     row = tables.ability_row("1.1.2a", 18.60)
     assert row[0].replace("–", "-") == "18.51-18.75"
     assert row[1] == "+2"
+
+
+TO_HIT_TABLES = [
+    "2.1.2a", "1.3.1.4d", "1.3.2.4c", "1.3.3.4c", "1.3.4.4c", "1.3.5.4c",
+    "1.3.6.4c", "1.3.7.4d", "1.3.8.4c", "1.3.9.4c", "1.3.10.4f",
+]
+
+
+@pytest.mark.parametrize("table_id", TO_HIT_TABLES)
+def test_rows_drops_the_armour_class_header(table_id):
+    """The header `10 9 8 7 ... -10` starts with a digit like any data row,
+    but it is armour classes, not a level or hit-dice row, and must not be
+    mistaken for one."""
+    for row in tables.rows(table_id):
+        assert row != ["10", "9", "8", "7", "6", "5", "4", "3", "2", "1",
+                        "0", "-1", "-2", "-3", "-4", "-5", "-6", "-7", "-8",
+                        "-9", "-10"]
+
+
+def test_ability_row_level_10_fighter_is_not_the_header():
+    """A level-10 fighter's row label is `10`, identical to the header row's
+    first field - the exact collision the header-drop bug hid."""
+    row = tables.ability_row("1.3.4.4c", 10)
+    assert row[0] == "10"
+    assert row[1] == "1"  # roll to hit AC 10
+
+
+@pytest.mark.parametrize("level,expected", [(1, "10"), (9, "2"), (10, "1"), (20, "-9")])
+def test_ability_row_to_hit_ac10_by_level(level, expected):
+    """Roll needed to hit AC 10, for a fighter (1.3.4.4c) at several levels -
+    including 10, the one the header bug corrupted."""
+    row = tables.ability_row("1.3.4.4c", level)
+    assert row[1] == expected
+
+
+def test_in_range_refuses_ambiguous_equal_endpoint_range():
+    """`1-1` is OSRIC's "one hit die minus one" idiom, not a genuine range -
+    a real range is never written with identical endpoints. Reading it as the
+    numeric range [1, 1] would make it collapse to `value == 1` and shadow
+    the bare `1` row."""
+    with pytest.raises(ValueError):
+        tables.in_range("1-1", 1)
+
+
+def test_parts_of_unknown_table_raises():
+    with pytest.raises(KeyError):
+        tables.parts("9.9.9z")
+
+
+def test_in_range_empty_spec_is_false():
+    assert not tables.in_range("", 3)
+
+
+def test_in_range_malformed_less_than_is_false():
+    assert not tables.in_range("<abc", 1)
+
+
+def test_in_range_non_numeric_spec_is_false():
+    assert not tables.in_range("N/A", 1)
+
+
+def test_in_range_dash_only_spec_is_false():
+    assert not tables.in_range("-", 1)
+
+
+def test_ability_row_raises_when_no_row_covers_score():
+    with pytest.raises(LookupError):
+        tables.ability_row("1.1.2a", 999)
+
+
+def test_ability_row_hit_dice_one_is_not_the_minus_one_row():
+    """A full 1 Hit Die monster must not silently land on the sub-1-HD row.
+    Monster hit-dice notation gets its own accessor in Chapter 5; here the
+    contract is just that `in_range`'s ambiguity is not swallowed."""
+    with pytest.raises(ValueError):
+        tables.ability_row("2.1.2a", 1)
