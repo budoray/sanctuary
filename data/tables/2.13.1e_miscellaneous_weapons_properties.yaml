@@ -1,0 +1,13 @@
+id: 2.13.1e
+name: MISCELLANEOUS WEAPONS PROPERTIES
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT VALUE (GP)
+- 01–10 +1 2,000
+- 11–15 +2 8,000
+- 16 +3 18,000
+- '17 Roll 1d100: (01–65): +4;'
+- '(66–00): +5 32,000 (+4); 50,000 (+5)'
+- 18 Cursed (see 2.13.10) —
+- 19–20 Special (see Table
+- 2.13.1o) Variable

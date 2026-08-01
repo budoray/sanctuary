@@ -1,0 +1,10 @@
+id: d-16
+name: LAKES
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT
+- 1–12 No lake
+- 13–15 Lake
+- 16–17 Lake, monster
+- 18–19 Lake, monster and treasure
+- 20 Enchanted Lake*

@@ -1,0 +1,38 @@
+id: 1.6.2.8a
+name: NPC AND MONSTER REACTION
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- D100 REACTION
+- 01-05 Very hostile. Monsters will attack. (In social situations, this indicates absolute refusal, throwing a person out of
+- the banquet, or taking immediate steps to damage the disliked person).
+- 06-25 Hostile. Monsters probably attack unless obviously outmatched. (In social situations, the hostile response might
+- be delayed until the right social tools to damage a person are put in place).
+- 26-45 Unfavorable. Monsters probably attack. Next actions have a 55% chance to be biased against the person, for both
+- NPCs and monsters.
+- 46-55 Neutral response. Monsters don’t attack unless they are obviously going to win a fight, and NPCs wait to hear
+- more details of an offer.
+- 56-75 Favorable. Monsters wait to hear an offer. Next actions actions have a 55% chance to be biased in favour of the
+- person negotiating, for both NPCs and monsters.
+- 76-95 Friendly. Probably offers assistance if it is profitable to do so.
+- 96-00 Very friendly. May offer assistance even if it is not profitable to do so.
+- 1.6.2.9. PARRYING
+- A character who parries cannot attack in the same round, but
+- may subtract any strength-based and all specialisation-based
+- “to hit” bonuses from melee attack rolls made by opponents.
+- Parrying may be used when fleeing from combat. Parrying only
+- has value to a character with a strength or specialisation-relat -
+- ed bonus “to hit”. You must have a weapon in hand to parry.
+- 1.6.2.10. SET WEAPON AGAINST  CHARGE
+- Certain weapons can be “set” against a charge, which is a simple
+- matter of bracing the weapon against the floor or some other
+- stationary object. A character choosing to set a weapon against
+- a charge cannot attack unless an opponent charges, but the
+- weapon gets to attack before the charging opponent can attack,
+- and if it hits, it inflicts double damage against the charging op -
+- ponent. A charge is any attack that allows the attacker to move
+- and attack, and thus includes leaping attacks that may be made
+- by some monsters.
+- Weapons that may be set against a charge include spears, jav -
+- elins, lances (when used dismounted), pole arms, and tridents.
+- If a character declares this action, the weapon is “set” immedi -
+- ately, in segment 1 of the round.

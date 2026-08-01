@@ -1,0 +1,36 @@
+id: 2.13.1g
+name: RING PROPERTIES
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT VALUE (GP)
+- 01  Charisma 10,000
+- 02–03 Feather Falling 5,000
+- 04 Fire Resistance 5,000
+- 05 Free Action 5,000
+- 06 Genie Summoning 20,000
+- 07  Invisibility 7,500
+- '08–12 Roll 1d100: (01-90): Protection;'
+- '(91-00): Cursed'
+- see entry (nil if
+- cursed)
+- '13'
+- 'Roll 1d100: (01–25):'
+- 'Regeneration; (25–00):  Spell'
+- Storing
+- 40,000
+- 25,000
+- 14  Spell Turning 17,500
+- 15 Swimming 5,000
+- '16'
+- 'Roll 1d100: (01–50):'
+- 'Telekinesis; (51–00): Three'
+- Wishes
+- 10,000
+- 15,000
+- 17 Warmth 5,000
+- 18–19 Water Walking 5,000
+- 20 Wizardry 50,000
+- Determine the ring’s appearance, apparent gold piece value,
+- and gemstone (if any) using the jewellery table. For descriptions
+- 'of ring types, turn to Section 2.13.9: Rings. Cursed rings are ad-'
+- 'dressed in Section 2.13.10: Cursed Items.'

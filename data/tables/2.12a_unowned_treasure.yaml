@@ -1,0 +1,33 @@
+id: 2.12a
+name: UNOWNED TREASURE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 TREASURE
+- 01–35 1,500 cp per dungeon level
+- 36–65 750 sp per dungeon level
+- 66–80 250 gp per dungeon level
+- 81–90 100 pp per dungeon level
+- 91–95 1d3  gems per dungeon level
+- 96–97 1 piece of jewellery per dungeon level
+- 98–00 1 magic item (1d2 items below dungeon level 6)
+- '(For fully randomly–generated dungeons using Section 2.7.1:'
+- Random Dungeon Generation, Table D-12 in that section should
+- be used instead.)
+- 2.12.1.  LOOT CLASSES
+- For any Loot Class, roll for the chance of each type of treasure.
+- You may get several different types, and it’s possible that a
+- monster has no treasure at all, if all the die rolls fail.
+- The chance to have each type of treasure is rolled on a d100. If
+- the die roll is equal to or less than the percentage chance, the
+- treasure is present in the hoard.
+- 'Example: For a Hoard 1 treasure, you roll 1d100 to check for'
+- copper pieces. If the result is 01-25, then there are 1d6 x1000
+- copper pieces, and if the result is 26-00, there are no copper
+- pieces in the treasure. Whether or not there are copper piec -
+- es, you still continue to the next line, silver pieces. Roll 1d100
+- to check for silver pieces. If the result is 01-30, then there are
+- 1d6 x1000 silver pieces in addition to any copper pieces you
+- rolled earlier. Then you proceed to check for electrum pieces
+- (worth half a gold piece each). You continue all the way through,
+- checking each type. Gems may be generated in Section 2.12.4,
+- jewellery in Section 2.12.5, and magic items in Chapter Thirteen.

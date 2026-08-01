@@ -1,0 +1,9 @@
+id: d-6
+name: EXIT LOCATION*
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 LOCATION
+- 1–4 Left wall
+- 5–12 Opposite wall
+- 13–16 Right wall
+- 17–20 Same wall

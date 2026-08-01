@@ -1,0 +1,8 @@
+id: d-19
+name: DOOR LOCATION
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT
+- 1–6 Left
+- 7–12 Right
+- 13–20 Ahead

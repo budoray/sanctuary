@@ -1,0 +1,31 @@
+id: 2.7.3.2j
+name: MONSTER LEVEL TEN
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 01–07 Demon, Class E 1d3 1
+- 08–11 Giant, Storm 1 1
+- 12–15 Otyugh, Greater 1 1
+- 16–20  NPC Party—see Sub-
+- table varies varies
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 21–30 Demon, Class C 1d3 1
+- 31–40 Elemental, Earth 1 1
+- 41–50 Elemental, Air 1 1
+- 51–60 Elemental, Fire 1 1
+- 61–70 Elemental, Water 1 1
+- 71–80 Demon, Class D 1d3 1
+- 81–89 Dragon—see Sub-table 2 1
+- 90–95 Demon, Class F 1d3 1
+- 96–00 Lich 1 1
+- MONSTER LEVEL TEN—DRAGON SUB–TABLE
+- D100 TYPE  AGE HIT POINTS PER HD
+- 01–20 Blue Ancient+Very Old 8+7
+- 21–25 Bronze Ancient+Very Old 8+7
+- 26–35 Copper Ancient+Very Old 8+7
+- 36–40 Gold Ancient+Old 8+6
+- 41–60 Green Ancient+Very Old 8+7
+- 61–95 Red Ancient+Old 8+6
+- 96–00 Silver Ancient+Old 8+6

@@ -1,0 +1,33 @@
+id: 2.13.1u
+name: IOUN STONES SUBTABLE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 RESULT VALUE (GP)
+- 01–06 Clear Spindle 4,000
+- 07–12 Dusty Rose Prism 5,000
+- 13–18 Deep Red Sphere 8,000
+- 19–24 Incandescent Blue Sphere 8,000
+- 25–30 Pale Blue Rhomboid 8,000
+- 31–36 Pink Rhomboid 8,000
+- 37–42 Pink & Green Sphere 8,000
+- 43–48 Scarlet & Blue Sphere 8,000
+- 49–54 Dark Blue Rhomboid 10,000
+- 55–60 Vibrant Purple Prism 36,000
+- 61–66 Iridescent Spindle 18,000
+- 67–72 Pale Lavender Ellipsoid 20,000
+- 73–77 Pearly White Spindle 20,000
+- 78–83 Pale Green Prism 30,000
+- 84–89 Orange Prism 30,000
+- 90–96 Lavender & Green Ellipsoid 40,000
+- 97–99 Re-roll twice, ignoring results over 96 n/a
+- 00 Re-roll thrice, ignoring result over 96 n/a
+- Many magic items are restricted as to which
+- character classes can use them. Where this
+- applies, the  character classes are listed in
+- abbreviated form within the item description. The
+- 'following notation is used:'
+- Item (Classes) where, under “classes”, “A” means
+- “assassin”, “C” means “cleric”, “D” means “druid”,
+- “F” means “fighter”, “I” means “illusionist”, “M”
+- means “magic user”, “P” means “paladin”, “R”
+- means “ranger” and “T” means “thief”.

@@ -1,0 +1,73 @@
+id: 2.10.1a
+name: DETECTING PRESENCE OF INVISIBLE CREATURES
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- HIT DICE INT 0-1 INT 2-4 INT 5-7 INT 8-10 INT 11-12 INT 13-14 INT 15-16 INT 17+
+- 7+ - 01-05
+- 8+ - 01-05 01-10
+- 9+ - 01-05 01-10 01-15
+- 10+ - 01-05 01-15 01-20 01-25
+- 11+ - 01-05 01-15 01-25 01-30 01-35
+- 12+ - 01-05 01-15 01-25 01-35 01-40 01-45
+- 13+ - 01-05 01-10 01-25 01-35 01-45 01-50 01-55
+- 14+ 01-05 01-10 01-15 01-35 01-45 01-55 01-65 01-75
+- 15+ 01-10 01-15 01-20 01-45 01-55 01-65 01-80 01-95
+- Lair Chance
+- This number is used when rolling random wilderness encoun-
+- ters. It represents the chance that the adventurers have stum -
+- bled upon the creature’s lair rather than meeting it while it is
+- away from the lair (in which case it is “wandering”). This is im -
+- portant, because most of a monster’s treasure is likely to be
+- kept in the lair. Defeating a “wandering” monster means the
+- characters still have to find that lair in order to get the treasure.
+- Creatures that don’t have lairs will usually have “nil” for this en-
+- try, and various publishers might also use 0% or 100% to desig-
+- nate a “no lair” type of creature.
+- Dungeon encounter tables usually specify the number of crea -
+- tures encountered on a particular dungeon level (and lairs are
+- at keyed locations), so this entry isn’t used in dungeons.
+- Intelligence
+- The creature’s intelligence relative to a median human, and the
+- range of an intelligence score. Possible values include “Non-”,
+- “Animal”, “Semi-”, “Low”, “Average”, “Very”, “High”, “Exceptional”,
+- “Genius” or occasionally even higher.
+- Morale
+- 'The creature’s base morale. See Section 1.6.8: Morale in the Play-'
+- er Guide for a detailed explanation of morale. An entry of “N/A”
+- means that the creature doesn’t need to make morale checks.
+- These creatures usually fight to the death. If the creature has
+- intelligence higher than 0 and morale of N/A, then it means that
+- the creature can still decide to retreat but is brave enough that
+- it isn’t forced to make morale checks (Berserkers, for example).
+- Loot
+- The creature’s likely treasure hoard, measured in “loot classes”.
+- See Chapter Twelve for a detailed explanation of loot classes.
+- Experience
+- This is a pre-calculation of the creature’s Experience Point (XP)
+- 'value, which can be used on Table 2.11a: Calculating a Monster’s'
+- '“Level” to find the “Monster Level” for purposes of Table 2.7.3.1a:'
+- Monster Sub-Table Matrix. Since the monsters are already in the
+- encounter tables, the “Monster Level” isn’t needed here.
+- 2.10.2. MONSTER DESCRIPTION
+- All monsters have a general description, followed by headings
+- for their special abilities. If a monster doesn’t have a special abil-
+- ity in one of the four categories, the heading doesn’t appear.
+- Surprise and Initiative
+- Not all monsters have this subheading, but if the monster has a
+- special ability affecting surprise or initiative, this is listed.
+- Immunities and Resistance
+- 'Magic Resistance: A few creatures have magic resistance. This is'
+- shown under the heading “Immunities and Resistance”. When
+- a spell or other magic would affect that creature, the GM rolls
+- d100 for it. If the creature passes its magic resistance roll, it is
+- unaffected by that magic. Even if the creature fails its magic re -
+- sistance roll, it can still attempt a saving throw if the spell or
+- other magic would normally allow one.
+- More powerful spellcasters find it easier to overcome magic re-
+- sistance, and less powerful spellcasters find it harder. Increase
+- the creature’s magic resistance by +5% for each caster level be-
+- low 11th, and decrease it by -5% for each caster level above
+- 11th. The “caster level” is the number of levels the caster has
+- in the spell’s casting class—so for example, a character who’s
+- a 7th/11th level fighter/magic-user is an 11th level caster, even
+- though they have 18 character levels in total.

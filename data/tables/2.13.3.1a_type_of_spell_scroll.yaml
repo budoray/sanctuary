@@ -1,0 +1,49 @@
+id: 2.13.3.1a
+name: TYPE OF  SPELL SCROLL
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D10 CLASS
+- 1–6 Magic user
+- 7 Illusionist
+- 8–9 Cleric
+- 10 Druid
+- For the purposes of spell casting, all spells function as if cast by
+- a spell user with one more level of experience than is necessary
+- to cast the spell. However, all spells cast from a scroll are cast as
+- the minimum equivalent of a 6th level spell caster. Thus, even a
+- 1st level spell will be cast as if by a 6th level spell caster.
+- Note that if a spell caster uses a scroll spell for a spell which they
+- would normally be unable to cast due to being of insufficient
+- level, there is a cumulative 5% probability that the spell fails for
+- each level the caster is lower than the level required. For in -
+- stance, if a 2nd level cleric attempts to use a spell that normally
+- must be cast by a cleric of 4th level, there is a 10% chance of
+- spell failure. In addition, if a roll indicates that a spell fails, there
+- is an equal probability that the spell affects the caster, produces
+- some other unfortunate effect, or creates some other effect at
+- the GM’s discretion.
+- Once a scroll spell is cast, the magical writings for that spell van-
+- ish. This also applies even when a scroll spell is read for the
+- purpose of memorisation or to be added to a spell book.
+- 2.13.3.2.  SCROLLS OF WARDING
+- Unless otherwise noted, all scrolls of warding produce an area
+- of protection within a 10ft radius of the reader, and the area
+- moves with the affected character. No creature of the type in-
+- dicated by the warding may enter the area of protection by any
+- means, but if the affected character forces a creature of the af-
+- fected type into this radius, the effects of the scroll are cancelled.
+- Scroll effects may be “stacked” in that several different scrolls of
+- warding may be active on one being at once, but scrolls of the
+- same type do not stack for the purposes of increased duration
+- or potency.
+- 'Acid Warding (All):  This warding scroll takes 4 segments to'
+- read and its effects last for 5d6 rounds. The reader of the scroll
+- is immune to acid (corrosion damage) for the duration.
+- 'Demon Warding (CP): All demons are unable to enter the pro -'
+- tected area for 5d4 rounds. This scroll takes a variable amount
+- of time to read, to be determined by the power level of the de-
+- mon.
+- DEMON TYPE TIME TO READ
+- Class C or weaker 3 segments
+- Class E or weaker 7 segments
+- Greatest demons 1 round

@@ -1,0 +1,21 @@
+id: 2.8.1a
+name: DAYTIME  ENCOUNTERS
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100  ENCOUNTER
+- 01 Assassins.* 1d3 encountered, possibly in  disguise.
+- 02 Bandits. 3d4 plus a Leader
+- 03–12 Beggars. 1d2 0 level NPCs.
+- 13 Brigands. 3d4 plus a Leader
+- 14–18 Town Guards. 2d8 plus a Leader.
+- '19–21 Town Official: roll 1d10: (1–9) Minor Official (10) Major Official and 2d4 Guardsmen.'
+- '22–23 Town Watch: 5 Men–at–Arms (0–lvl) and Sergeant (lvl 1d3) and a Cleric (lvl d4+1).'
+- 24–25 Cleric.* A d6+5–lvl Cleric with 1d6–1 d4–lvl Assistant Clerics.
+- 26 Druid.* A d6+5–lvl Druid with (1–5) 1d4-1 d4–lvl Lesser  Druids or
+- (6–10) 1d4 d6–lvl Fighters.
+- 27 Drunk. See Urban Professions Sub–table for exact type.
+- 28–29  Fighter.* A 2d4+4–lvl  Fighter with 1d4–1 d4–lvl  Henchmen.
+- '30–33 Gentry (landowners). Roll 1d10: (1–4) Foppish Dandy and d4 Sycophants (5–6) Lone gentleman/woman on a secret'
+- errand or tryst (7–10) d4+6–lvl  Fighter and d4 similar friends.
+- 34 Giant Rats, 2d4.
+- 35–39 Townsperson. A 0–lvl normal Human

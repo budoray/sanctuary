@@ -1,0 +1,12 @@
+id: 2.8.1c
+name: ANCESTRY SUB–TABLE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100  ANCESTRY
+- 01–10 Dwarf
+- 11–15 Elf
+- 16–20 Gnome
+- 21–28 Half–Elf
+- 29–34 Halfling
+- 35–40 Half–Orc
+- 41–00 Human

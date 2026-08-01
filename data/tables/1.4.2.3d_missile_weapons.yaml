@@ -1,0 +1,55 @@
+id: 1.4.2.3d
+name: MISSILE WEAPONS
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- WEAPON TYPE HANDS USE  DAMAGE
+- TYPE
+- RANGE
+- INCREMENT
+- RATE OF FIRE
+- (PER ROUND)
+- DAMAGE VS
+- S OR M
+- DAMAGE
+- VS L+
+- WEIGHT (IN
+- POUNDS) COST
+- Axe, hand 1 H Slashing 10ft 1 1d6 1d4 5 1 gp
+- Bow, long  2 L Piercing 70ft 2 1d6 1d6 12 60 gp
+- Bow, short 2 L Piercing 50ft 2 1d6 1d6 8 15 gp
+- Club 1 H Blunt 10ft 1 1d6 1d3 3 2 cp
+- Composite bow,
+- long 2 L Piercing 60ft 2 1d6 1d6 8 100 gp
+- Composite bow,
+- short 2 L Piercing 50ft 2 1d6 1d6 5 75 gp
+- Crossbow,
+- heavy‡ 2 L Piercing 80ft 1/2 1d6+1 1d6+1 12 20 gp
+- Crossbow, light 2 L Piercing 60ft 1 1d4+1 1d4+1 4 12 gp
+- Dagger 1 H Piercing 10ft 2 1d4 1d3 1 2 gp
+- Dart 1 H Piercing 15ft 3 1d3 1d2 0.5 2 sp
+- Javelin 1 H Piercing 20ft 1 1d6 1d4 2 5 sp
+- Sling 1 L Blunt 35ft 1 1d4+1
+- or 1d4
+- 1d6+1
+- or 1d4 0.5 5 sp
+- Spear 1 H Piercing 15ft 1 1d6 1d8 5 1 gp
+- Warhammer,
+- light 1 H Blunt 10ft 1 1d4+1 1d4 5 1 gp
+- ‡ Heavy crossbows can’t be used from horseback. Only a footman can
+- 'brace them correctly before firing. Hands: The number of hands'
+- needed to use the weapon. If it’s 2, you can’t use a shield.
+- 'Use: Missile weapons are either Hurled (H) or Launched (L).'
+- You can add your Strength bonus to damage you deal with a
+- Hurled weapon, but not with a Launched one. In some cam -
+- paigns, specially-made bows might let you add your Strength
+- bonus to damage you deal with arrows. These bows are sold
+- at special cost if at all.
+- Range Increment.  Missile weapon accuracy decreases with
+- range. You take a -2 penalty on your to hit roll for each incre -
+- 'ment after the first. Example: if your target is 60ft away, you'
+- would get no penalty if you were using a longbow (70ft incre -
+- ment), but you would have a -2 penalty if using a shortbow
+- (50ft increment).
+- If your target is more than five full range increments away, you
+- can’t hit it at all. Longbows can’t reach beyond 350ft and short
+- bows can’t reach beyond 250ft.

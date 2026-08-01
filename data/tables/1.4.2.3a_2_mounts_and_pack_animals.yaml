@@ -1,0 +1,15 @@
+id: 1.4.2.3a
+name: '2: MOUNTS AND PACK ANIMALS'
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- TYPE ENCUMBERED WEIGHT MAXIMUM WEIGHT COST
+- Horse, cart (Draft) 400 pounds 800 pounds 15 gp
+- Horse, nag 100 pounds 300 pounds 8 gp
+- Horse, palfrey (Riding Horse) 300 pounds 350 pounds 40+ gp
+- Horse, rouncey (All-purpose) 200 pounds 400 pounds 25 gp
+- Horse, war, heavy 500 pounds 800 pounds 500+ gp
+- Horse, war, light 300 pounds 500 pounds 200+ gp
+- Horse, war, medium 400 pounds 700 pounds 350+ gp
+- Mule* 200 pounds 600 pounds 18 gp
+- Ox 400 pounds 800 pounds 15 gp
+- Pony 200 pounds 300 pounds 12 gp

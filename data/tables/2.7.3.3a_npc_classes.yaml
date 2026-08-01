@@ -1,0 +1,28 @@
+id: 2.7.3.3a
+name: NPC  CLASSES
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- 'D100 CHARACTER CLASS MAX. # PER PARTY'
+- 01–16 Cleric 3
+- 17–20 Druid 2
+- 21–50  Fighter 5
+- 51–53 Paladin 2
+- 54–57 Ranger 2
+- 58–75 Magic-user 3
+- 76–80 Illusionist 1
+- 81–98 Thief 4
+- 99–00 Assassin 2
+- 'NPC Levels : The level of each NPC will be equal to the level'
+- of the dungeon on which they are encountered through dun -
+- geon level 4. After that, they will be between 5th and 12th level
+- (1d8+4). From dungeon level 13 and downwards, they will be
+- between 11th and 16th level (1d6+10).
+- 'Demi-Humans and Multi–Class NPCs: As a guideline, assume'
+- demi-human NPCs and henchmen to be approximately 20%
+- of the total number of characters in the party. If the randomly
+- generated class is severely limited or impossible for the partic -
+- ular ancestry, use that class or its closest equivalent as one of
+- the 2 or 3 classes for that individual NPC. Approximately 50%
+- of demi-humans will have 2 professions, and another 25% will
+- have three. To randomly determine ancestry and chance of
+- 'multi–class professions, refer to the following table:'

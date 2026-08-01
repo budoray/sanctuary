@@ -1,0 +1,40 @@
+id: 2.7.3.2d
+name: MONSTER LEVEL FOUR
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 01–02 Yellowmusk Vine 1 N/A
+- 03–04 Spider, Giant (biggest) 1d4 1
+- 05–07 Blink Dog 1d4 1d2
+- 08–11 Ghast 1d3 1
+- 12–15 Yellowmusk Vine
+- Zombie 1d2 1
+- 16–20 Piercer 3d6 N/A
+- 21–25 Cockatrice 1d3 1
+- 26–30 Snake, Giant Boa 1 1
+- 31–35 Demon, Dretch 2d4 1d2
+- 36–40  NPC Party varies varies
+- 41–50 Beetle, Giant Stag 1d6 1d2
+- 51–60 Lycanthrope, Werewolf 1d6 1d2
+- 61–70 Devil, Spiked 2d4 1d2
+- 71–75 Snake, Giant Cobra 1 1
+- 76–80 Gargoyle 1d8 1d2
+- 81–85 Dragon—see Sub-table 1d4 1
+- 86–89 Shadow 1d8 1d2
+- 90–93 Lycanthrope, Wereboar 1d4 1
+- 94–96 Grey Ooze 1d3 1
+- 97–98 Hell Hound 1d3 1d2
+- 99–00 Crypt Thing 1 1
+- MONSTER LEVEL FOUR—DRAGON SUB–TABLE
+- D100 TYPE  AGE HIT POINTS PER HD
+- 01–10 Black Young/Sub–adult 2/3
+- 11–20 Blue Very Young/Young 1/2
+- 21–30 Brass Young/Sub–adult 2/3
+- 31–35 Bronze Very Young/Young 1/2
+- 36–50 Copper Very Young/Young 1/2
+- 51–55 Gold Very Young/Young 1/2
+- 56–70 Green Very Young/Young 1/2
+- 71–80 Red Very Young/Young 1/2
+- 81–85 Silver Very Young/Young 1/2
+- 86–00 White Young/Sub–adult 2/3

@@ -1,0 +1,19 @@
+id: 1.4.2.g
+name: ARMOUR
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- ARMOUR TYPE± WEIGHT (IN POUNDS)  MOVEMENT CAP  ARMOUR CLASS COST
+- Banded 35 90ft 4 [16] 90 gp
+- Chain mail 30 90ft 5 [15] 75 gp
+- Elfin mail 15 120ft 5 [15] Not sold*
+- Leather 15 120ft 8 [12] 5 gp
+- Helmet n/a n/a n/a Free
+- Padded 10 90ft 8 [12] 4 gp
+- Plate mail 45 60ft 3 [17] 400 gp
+- Ring mail 35 90ft 7 [13] 30 gp
+- Scale or lamellar 40 60ft 6 [14] 45 gp
+- Shield, large 10 — -1 [+1]** 15 gp
+- Shield, medium 8 — -1 [+1]** 12 gp
+- Shield, small 5 — -1 [+1]** 10 gp
+- Splint 40 60ft 4 [16] 80 gp
+- Studded leather 20 90ft 7 [13] 15 gp

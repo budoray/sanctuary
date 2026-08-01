@@ -1,0 +1,78 @@
+id: 2.13.2a
+name: POTION ADMIXTURE RESULTS
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 RESULT
+- '01'
+- Eldritch blast! A catastrophic release of magical energies. This massive energy discharge does 6d10 points of
+- internal damage and 1d10 points of damage to anyone with 10ft of the imbiber. If mixed externally, all persons
+- within 10ft of the epicentre of the blast take 4d6 points of damage, no saving throw allowed.
+- 02–03  Poison, causing instant death if mixed internally, no save. External admixtures create a poisonous cloud 10ft in
+- diameter. Anyone within the cloud must save versus poison or die.
+- 04–07 A strange brew results and imbiber sickens, losing 1d4 each strength and  dexterity for 4d6 rounds, no saving throw.
+- One potion is completely nullified and the other works at 50% strength and duration, determined randomly.
+- 08–12 The potions cancel each other out.
+- 13–20 One potion is cancelled and the other works at 50% strength and duration, determined randomly.
+- 21–30 Both potions work but only at 50% strength and duration.
+- '31–90 Successful admixture: both potions work normally.'
+- '91–99 Extraordinary success: one potion, determined randomly, works at 150% strength and duration while the other is'
+- cancelled.
+- 00 Spectacular success! One of the imbibed potions, determined randomly, has bestowed its effect permanently. Of
+- course, this may not always be a good thing! Consider, for instance, a permanent potion of gaseous form effect.
+- 2.13.2. POTIONS
+- Although potions can be found in a variety of containers, includ-
+- ing glass, ceramic, or metal flasks, most contain only one dose
+- that imbues their potion’s particular effects for one individual.
+- Most potions bear no label and require a small amount to be
+- sampled in order to attempt to identify the potion type. This is
+- not without error, and potions of the same type may differ in
+- their aroma or taste depending on how they were made.
+- As a standard rule, potions take effect 1d4+1 segments after
+- consumption, and last for 1d4 turns. This principle is supersed-
+- ed where the specific potion description indicates otherwise.
+- Potions can normally be consumed in half doses, so that half
+- the potion is consumed and operates for half the duration.
+- The creation of potions requires the joint efforts of magic users
+- and alchemists unless the magic user is over 11th level. A sam -
+- ple of the potion to be created must be obtained at some point
+- in order to learn the formula for the particular potion.
+- ADMIXTURE OF POTIONS
+- Magic potions store a great deal of eldritch energy and, as any
+- alchemist or mage can attest, require a lot of careful prepara -
+- tion. The random admixture of potions can have unpredictable
+- results and only the foolish or desperate will undertake such an
+- action. Admixture of two or more potions has occurred when the
+- liquid of one potion is mixed with that of another, or a potion is
+- consumed while a previously consumed potion remains in effect.
+- The former is considered an external admixture and the latter an
+- internal one.
+- Presented here for the GM’s consideration are a set of guide -
+- lines for handling these situations. A particularly industrious
+- referee might wish to map out a complete matrix of effects to
+- be used any time a potion is mixed with another. While this
+- would be of use, the matrices would have to be updated with
+- each introduction of a new potion. Additionally, the different
+- formulations of a potion are not accounted for in such a matrix.
+- OSRIC uses a set of guidelines combined with a random table to
+- 'achieve a similar result with far less effort, as follows:'
+- Mixing a potion of clairaudience or clairvoyance with any other
+- potion will stun anyone drinking the potion for 1d4 days, due
+- to massive sensory overload from uncontrolled telepathic in -
+- put. The individual must be closely observed during this peri -
+- od to prevent harm to themselves or to others. An admixture
+- containing a potion of longevity  as an ingredient will act as a
+- slow spell upon the imbiber for 1 hour.
+- A potion of polymorph admixture
+- always yields a poison of stron -
+- gest toxicity and the person
+- drinking it must save at -4 or
+- die. A potion of delusion  ad-
+- mixed with any other potion
+- will always produce a potion
+- of delusion . Thus, a potion
+- of delusion mixed with a po -
+- tion of invisibility will cause
+- the drinker to believe they
+- are truly invisible, even in the
+- face of overwhelming evidence
+- to the contrary.

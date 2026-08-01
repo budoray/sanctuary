@@ -1,0 +1,10 @@
+id: 2.13.1p
+name: MISCELLANEOUS  MAGIC ITEMS—RARITY
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 RESULT
+- '01–50 Table 2.13.1q: Common'
+- '51–70 Table Table 2.13.1r: Less Common'
+- '71–90 Table Table 2.13.1s: Uncommon'
+- '91–99 Table Table 2.13.1t: Rare'
+- 00 Roll Twice, Ignoring This Result

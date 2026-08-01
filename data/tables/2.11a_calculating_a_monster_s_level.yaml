@@ -1,0 +1,15 @@
+id: 2.11a
+name: CALCULATING A MONSTER’S “LEVEL”
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- MONSTER LEVEL BASE  EXPERIENCE VALUE
+- 1 20 xp or below
+- 2 21–60
+- 3 61–150
+- 4 151–275
+- 5 276–500
+- 6 501–1,100
+- 7 1,101–3,000
+- 8 3,001–5,250
+- 9 5,251–10,000
+- 10 10,001 or higher

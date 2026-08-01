@@ -1,0 +1,30 @@
+id: 1.6.12a
+name: UNARMED  TO-HIT ROLL
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- ATTACKER’S ARMOUR TARGET
+- NUMBER TO HIT
+- Attacker is unarmoured (this includes
+- most monsters that aren’t human-like,
+- even if they have a better AC than 10 [10])
+- '2'
+- AC 9 [11] 4
+- AC 8 [12] 6
+- AC 7 [13] 8
+- AC 6 [14] 10
+- AC 5 [15] 12
+- AC 4 [16] 14
+- AC 3 [17] 16
+- AC 2 [18] 18
+- AC 1 [19] 20
+- AC 0 [20] or better 22
+- Optionally, the GM may choose to reduce the Target Number to
+- Hit by two points per “plus” of magical armour, but in no case
+- may the target number be reduced below 2.
+- Modifiers to the Unarmed Attack Die Roll
+- Both the attacker and the defender have a modifier to the un -
+- armed attack to-hit roll. For monsters, the number is precalcu -
+- lated in the Game Master Guide, but it is derived from these
+- tables.
+- ATTACKER MODIFIERS
+- Dexterity Modifiers
