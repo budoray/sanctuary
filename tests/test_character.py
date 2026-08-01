@@ -99,3 +99,30 @@ def test_exceptional_strength_reads_the_right_table_row():
     # 18.51-18.75 gives +2 to hit, +3 damage per Table 1.1.2A.
     row = tables.ability_row("1.1.2a", 18.60)
     assert row[1] == "+2" and row[2] == "+3"
+
+
+class _RaisingRoller:
+    """Duck-typed stand-in that fails the test if a die is ever rolled."""
+    log = ()
+
+    def roll(self, expr, reason="", mods=0, **tags):
+        raise AssertionError("should not roll - Strength was already settled")
+
+
+@pytest.mark.parametrize("resolved_score", [18.5, 18.99, 19.0])
+def test_an_already_settled_exceptional_strength_is_not_rerolled(resolved_score):
+    assert roll_exceptional_strength(_RaisingRoller(), resolved_score, "fighter") == resolved_score
+
+
+def test_plain_18_still_rolls_exactly_one_die_for_an_eligible_class():
+    d = Dice(seed=1)
+    roll_exceptional_strength(d, 18, "fighter")
+    assert len(d.log) == 1
+    assert d.log[0].expr == "1d100"
+
+
+def test_plain_18_point_0_still_rolls_exactly_one_die_for_an_eligible_class():
+    d = Dice(seed=1)
+    roll_exceptional_strength(d, 18.0, "fighter")
+    assert len(d.log) == 1
+    assert d.log[0].expr == "1d100"

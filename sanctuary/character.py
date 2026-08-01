@@ -47,7 +47,7 @@ def roll_exceptional_strength(d: Dice, score: int, cls: str) -> float:
     Returns `score` unchanged when the character is not eligible - and rolls no
     dice at all in that case, so the log stays honest.
     """
-    if int(score) != 18 or cls not in EXCEPTIONAL_CLASSES:
+    if score != 18 or cls not in EXCEPTIONAL_CLASSES:
         return score
     pct = d.roll("1d100", reason="exceptional strength", kind="chargen").total
     if pct >= 100:

@@ -55,3 +55,9 @@ Feature: Rolling ability scores for a new character
     Given a fighter whose exceptional strength percentile roll comes up 00
     When exceptional strength is checked
     Then the character's Strength is 19
+
+  Scenario: A Strength already settled by an exceptional roll is not rolled again
+    Given a fighter whose Strength was already settled at 18.50 by an earlier exceptional roll
+    When exceptional strength is checked
+    Then a die is not rolled for exceptional strength
+    And the character's Strength is still 18.50

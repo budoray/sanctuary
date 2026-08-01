@@ -62,6 +62,20 @@ def a_fighter_rolling_00():
     return {"dice": _FixedPercentileRoller(), "score": 18, "cls": "fighter"}
 
 
+class _RaisingRoller:
+    """Fails the scenario outright if a die is ever rolled."""
+    log = ()
+
+    def roll(self, expr, reason="", mods=0, **tags):
+        raise AssertionError("should not roll - Strength was already settled")
+
+
+@given(parsers.parse('a fighter whose Strength was already settled at {score:g} by an earlier exceptional roll'),
+       target_fixture="exceptional_ctx")
+def a_fighter_already_settled(score):
+    return {"dice": _RaisingRoller(), "score": score, "cls": "fighter"}
+
+
 @when("exceptional strength is checked", target_fixture="exceptional_result")
 def check_exceptional_strength(exceptional_ctx):
     dice = exceptional_ctx["dice"]
@@ -78,3 +92,8 @@ def die_rolled_or_not(exceptional_result, rolled_or_not):
 @then("the character's Strength is 19")
 def strength_is_19(exceptional_result):
     assert exceptional_result["result"] == 19
+
+
+@then(parsers.parse("the character's Strength is still {score:g}"))
+def strength_is_still(exceptional_result, score):
+    assert exceptional_result["result"] == score
