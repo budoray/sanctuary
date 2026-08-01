@@ -51,3 +51,30 @@ def test_find_tables_keeps_data_rows_verbatim():
 def test_find_tables_stops_a_block_at_prose():
     first = find_tables(SAMPLE)[0]
     assert not any("To-hit modifiers apply" in ln for ln in first["lines"])
+
+
+def test_find_tables_stops_a_block_at_page_marker():
+    text = """
+ TABLE 1.1.2A: STRENGTH
+3 -3 -1 0 1 0
+=== PAGE 2 ===
+4-5 -2 -1 10 1 0
+"""
+    first = find_tables(text)[0]
+    assert first["lines"] == ["3 -3 -1 0 1 0"]
+
+
+def test_find_tables_drops_page_furniture_but_keeps_surrounding_rows():
+    text = """
+ TABLE 1.1.2A: STRENGTH
+3 -3 -1 0 1 0
+44 | OSRIC 3.0 - PART ONE: CREATING A CHARACTER
+ CHAPTER THREE: CHARACTER CLASS  | 43
+4-5 -2 -1 10 1 0
+"""
+    first = find_tables(text)[0]
+    assert first["lines"] == ["3 -3 -1 0 1 0", "4-5 -2 -1 10 1 0"]
+
+
+def test_normalise_folds_nbsp_to_plain_space():
+    assert normalise("4 5") == "4 5"

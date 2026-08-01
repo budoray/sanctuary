@@ -18,13 +18,19 @@ from pathlib import Path
 _HEADER = re.compile(r"^\s*TABLE\s+([0-9][0-9.]*[A-Za-z]?|D-\d+[A-Za-z]?)\s*[:.]\s*(.+?)\s*$")
 # A data row starts with a number, a range, a die code, or a short label.
 _PROSE = re.compile(r"^\s*(Notes?:|[-\u2022*]\s|\*|After |Use this table|This table)")
+# Running headers/footers, e.g. "44 | OSRIC 3.0 - PART ONE: ..." or
+# " CHAPTER THREE: CHARACTER CLASS  | 43". Skip, don't terminate the block.
+_FURNITURE = re.compile(r"^\s*(\d+\s*\|.*OSRIC 3\.0|.*OSRIC 3\.0.*\|.*|\d+\s*\|.+|.+\|\s*\d+)\s*$")
 
 
 def normalise(text: str) -> str:
-    """Expand typographic ligatures; leave en-dashes and everything else alone.
+    """Apply Unicode NFKC normalisation.
 
-    The wiki PDFs are set with U+FB00-FB06. Unnormalised, the corpus ships
-    words no search will match.
+    NFKC expands the ligatures the wiki PDFs are set with (U+FB00-FB06,
+    e.g. "\ufb03" -> "ffi") and folds compatibility characters like non-breaking
+    space (U+00A0) and superscript digits to their plain form. It leaves
+    en-dashes (U+2013) and curly quotes untouched, which is what matters
+    here: en-dashes are meaningful in OSRIC ranges like "4-5".
     """
     return unicodedata.normalize("NFKC", text)
 
@@ -62,6 +68,8 @@ def find_tables(text: str) -> list[dict]:
             out.append(current)
             current = None
             continue
+        if _FURNITURE.match(line):
+            continue
         blanks = 0
         current["lines"].append(line.strip())
     if current:
@@ -74,7 +82,8 @@ def pdf_text(path: Path) -> str:
 
     reader = pypdf.PdfReader(str(path))
     parts = []
-    for page in reader.pages:
+    for i, page in enumerate(reader.pages, start=1):
+        parts.append(f"=== PAGE {i} ===")
         parts.append(page.extract_text() or "")
     return "\n".join(parts)
 
