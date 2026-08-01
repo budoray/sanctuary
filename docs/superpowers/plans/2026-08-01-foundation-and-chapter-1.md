@@ -25,6 +25,15 @@
 - **A self-check prints what it proved, in a sentence, with numbers interpolated from what it computed** — never typed in.
 - Source PDFs live in `C:\Users\budor\Downloads\`. Extracted plain text is in the session scratchpad; the extractor reads the **PDFs**, not the scratchpad.
 
+★ **TESTING STANDARD, site-wide (Dr. Ray, 2026-08-01).** Applies to every task from here and to every Tenshin repo:
+
+- **BDD features AND TDD tests, both.** Every behaviour gets a Gherkin `.feature` file under `features/` describing it in the language of the game, bound with `pytest-bdd` (installed, 8.1.0, runs inside pytest — no second runner, the gate stays two commands). The TDD unit tests stay as they are; BDD is added alongside, not instead.
+- **Maximum coverage.** `pytest-cov` is installed. Every module carries tests; a new branch without a test is unfinished work.
+- ⚠ **Every change of the MINOR version triggers a full test suite run** — `python -m pytest tests/ -q` plus `python app.py test` once it exists, both green, before the minor moves. A patch bump runs the tests covering what it touched; a minor bump runs everything. The minor is the chapter boundary, and a chapter that lands red is a chapter nobody can build on.
+- `pytest-bdd` and `pytest-cov` are declared in `requirements.txt` even though `app.py` never imports them — an undeclared test dependency is how a future session's suite fails for no visible reason.
+
+⚠ **A BDD scenario that restates the unit test in Gherkin is waste.** Features describe behaviour a player or GM would recognise — *"a fighter with exceptional Strength hits harder"* — not *"parse_expr returns a 4-tuple"*. If a scenario cannot be phrased without naming a Python symbol, it belongs in the unit tests, not in a feature file.
+
 ---
 
 ### Task 1: Repo skeleton, drop-ins and dependencies

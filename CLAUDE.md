@@ -75,7 +75,37 @@ True, so `if submit(...)` tells the player "sent" while the report goes nowhere.
 ```bash
 python -m pytest -q
 ```
+⚠ Use the **system** python. Any `.venv` in this tree is a decoy.
+
+★ **Testing standard, site-wide (Dr. Ray, 2026-08-01).** **BDD features AND TDD tests, both** —
+every behaviour gets a Gherkin `.feature` under `features/` bound with `pytest-bdd` (runs inside
+pytest, so the gate keeps its shape), alongside the unit tests. **Maximum coverage** via
+`pytest-cov`. ⚠ **Every change of the MINOR version triggers a FULL suite run**, green before the
+minor moves — a patch bump tests what it touched, a minor bump tests everything. The minor is the
+chapter boundary, and a chapter that lands red is one nobody can build on.
+⚠ A scenario that restates a unit test in Gherkin is waste. Features describe what a player or GM
+would recognise — *"a fighter with exceptional Strength hits harder"* — never *"parse_expr returns
+a 4-tuple"*. If it cannot be phrased without naming a Python symbol, it is a unit test.
 
 ## Conventions
-- **All dice through `sanctuary/dice.py`.** No other module imports `random`.
+- **All dice through `sanctuary/dice.py`.** No other module imports `random`, and no `Math.random`
+  in `static/`. The animated die renders the number the engine already rolled; it never generates
+  one. Guarded by `tests/test_invariants.py`.
 - Extracted tables live in `data/`; the extractor is `tools/extract.py`.
+- ⚠ **Never hand-edit `data/tables/`.** Fix the extractor and re-extract — the round-trip test
+  re-runs extraction and compares, so a hand-edit passes a spot-check and then fails the gate.
+- ⚠ **The extractor is dumb on purpose.** It stores each table's lines as printed; typed
+  interpretation lives in `sanctuary/tables.py`. Per-line prose-vs-data classification was tried
+  and failed in both directions — it leaked 70 lines of narrative into two tables, and the fix
+  then discarded genuine rows like `Lieutenant Special as type as type`. Blocks are judged whole.
+- ⚠ **19 table ids map to more than one file** — a table the book split across pages keeps its id
+  and gains a `CONTINUED`/`PART 2` name. `tables.load()` raises and names the parts; `parts()`
+  returns them all. Indexing id → one path silently drops 26 tables with every test still green.
+- **The minor version tracks the OSRIC chapter.** `v0.8.0` is the first playable build, and the
+  build restarts at `0` when the minor moves. See `docs/superpowers/specs/` §12a.
+- ★ **All artwork is PixelLab-generated, top-down, Factorio-styled. NEVER isometric** (Dr. Ray,
+  2026-08-01). The OSRIC licence forbids the books' art outright, so there is no fallback.
+- ⚠ **Sanctuary is an independent product published under the OSRIC 3.0 Third-Party License and is
+  not affiliated with Mythmere Games LLC.** That notice ships in the client AND at `/licence`. The
+  licence permits verbatim reuse of **monster, spell and magic-item text only** — never the art,
+  never rules prose.
