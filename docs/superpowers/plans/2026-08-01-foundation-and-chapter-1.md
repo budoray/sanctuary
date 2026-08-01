@@ -846,6 +846,35 @@ def test_load_unknown_table_raises():
         tables.load("9.9.9z")
 
 
+def test_a_split_table_refuses_to_load_as_one_and_names_its_parts():
+    """1.4.2.3a is three files. Silently returning one of them is how 26
+    tables would vanish from a corpus that still round-trips."""
+    with pytest.raises(LookupError) as e:
+        tables.load("1.4.2.3a")
+    assert "1.4.2.3a_general_equipment.yaml" in str(e.value)
+
+
+def test_parts_returns_every_file_for_a_split_table():
+    docs = tables.parts("1.4.2.3a")
+    assert len(docs) == 3
+    assert all(d["id"] == "1.4.2.3a" for d in docs)
+    assert {d["name"] for d in docs} == {
+        "GENERAL  EQUIPMENT", "CONTAINERS", "MOUNTS AND PACK ANIMALS"}
+
+
+def test_parts_of_a_single_file_table_is_a_one_item_list():
+    assert len(tables.parts("1.3.4.4a")) == 1
+
+
+def test_no_committed_table_is_unreachable():
+    """Every file in data/tables must be reachable through the index - the
+    guard against an id-keying scheme that drops files on the floor."""
+    from pathlib import Path as _P
+    reachable = {p for group in tables._index().values() for p in group}
+    on_disk = set(_P(tables._DIR).glob("*.yaml"))
+    assert reachable == on_disk, f"unreachable: {sorted(on_disk - reachable)}"
+
+
 def test_in_range_handles_single_values():
     assert tables.in_range("3", 3)
     assert not tables.in_range("3", 4)
@@ -913,17 +942,48 @@ _DASH = re.compile(r"[\u2013\u2014-]")
 
 
 @lru_cache(maxsize=None)
-def _index() -> dict[str, Path]:
-    return {p.name.split("_", 1)[0]: p for p in _DIR.glob("*.yaml")}
+def _index() -> dict[str, tuple[Path, ...]]:
+    """id -> every file carrying it, in filename order.
+
+    ⚠ 20 ids have MORE THAN ONE file - a table split across pages keeps its id
+    and gains a "... CONTINUED" or "... PART 2" name (2.9.1c has two, 2.9.1h
+    has four, 1.4.2.3a has three). Mapping id -> a single Path silently keeps
+    whichever file globbed last and discards 26 tables.
+    """
+    out: dict[str, list[Path]] = {}
+    for p in sorted(_DIR.glob("*.yaml")):
+        out.setdefault(p.name.split("_", 1)[0], []).append(p)
+    return {k: tuple(v) for k, v in out.items()}
+
+
+def _read(path: Path) -> dict:
+    return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+
+def parts(table_id: str) -> list[dict]:
+    """Every document carrying `table_id`, in order. Use this for a table the
+    book split across pages."""
+    paths = _index().get(table_id.lower())
+    if not paths:
+        raise KeyError(f"no table {table_id!r} in {_DIR}")
+    return [_read(p) for p in paths]
 
 
 @lru_cache(maxsize=None)
 def load(table_id: str) -> dict:
-    """The raw document for a table, keyed by its OSRIC number."""
-    path = _index().get(table_id.lower())
-    if path is None:
+    """The single document for a table, keyed by its OSRIC number.
+
+    Raises when the id covers several files rather than picking one - a caller
+    that wants a split table must say so by calling `parts()`.
+    """
+    paths = _index().get(table_id.lower())
+    if not paths:
         raise KeyError(f"no table {table_id!r} in {_DIR}")
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+    if len(paths) > 1:
+        names = ", ".join(p.name for p in paths)
+        raise LookupError(
+            f"table {table_id!r} spans {len(paths)} files ({names}); call parts()")
+    return _read(paths[0])
 
 
 def rows(table_id: str) -> list[list[str]]:
