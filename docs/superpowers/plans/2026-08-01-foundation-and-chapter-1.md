@@ -2507,16 +2507,23 @@ git commit -m "Art: PixelLab class portraits on the character sheet"
 ### Task 16: Repo documentation and the v0.1.0 release
 
 **Files:**
-- Create: `CLAUDE.md`, `IMPROVEMENTS.md`
+- Modify: `CLAUDE.md` (⚠ **already exists** — Dr. Ray created it in `794fb3c`, 2026-08-01)
+- Create: `IMPROVEMENTS.md`
 - Modify: `VERSION`
 
 **Interfaces:**
 - Consumes: nothing.
 - Produces: the two documents every Tenshin repo carries.
 
-- [ ] **Step 1: Write `CLAUDE.md`**
+⚠⚠ **`CLAUDE.md` EXISTS. Do not create or overwrite it.** Dr. Ray wrote it while this plan was being executed, along with vendoring `tenshin_client.py` — a drop-in this plan's Task 1 missed entirely, caught by `dropins.sh check`. All four drop-ins are now present and byte-identical to the Website copies.
 
-The block between the markers is **vendored** — copy it byte-identically from `D:\Tenshin Arts\Website\deploy\claude-platform.md`. Per-game content goes below it.
+Its current shape: a `# Sanctuary — for Claude` heading, the canonical block between `<!-- tenshin:platform:start -->` (line 33) and `<!-- tenshin:platform:end -->` (line 73), then `## The gate` and `## Conventions`.
+
+- [ ] **Step 1: ADD the load-bearing rules to the existing `CLAUDE.md`**
+
+⚠ **Never touch the lines between `<!-- tenshin:platform:start -->` and `<!-- tenshin:platform:end -->`.** That block is vendored, guarded by `deploy/dropins.sh check`, and editing it here makes this repo diverge from every other game.
+
+Read the file first. Add the game-specific rules below the end marker, merging with the existing `## The gate` and `## Conventions` sections rather than duplicating them. Only add rules not already stated. The list to merge in:
 
 ```markdown
 # Sanctuary — for Claude
