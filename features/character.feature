@@ -177,3 +177,7 @@ Feature: Rolling ability scores for a new character
   Scenario: A veteran character's Constitution no longer sweetens hit points once hit dice stop
     Given a magic-user of level 13 with a Constitution bonus of 5
     Then the Constitution bonus applies only to the levels that still rolled a hit die
+
+  Scenario: A ranger begins hardier than other warriors, rolling twice for starting hit points
+    Given a first-level ranger and a first-level fighter, rolled with the same seed
+    Then the ranger rolls twice as many starting hit dice as the fighter

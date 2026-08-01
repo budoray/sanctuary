@@ -238,3 +238,19 @@ def con_bonus_applies_only_to_rolled_levels(hp_ctx):
     fixed_levels = hp_ctx["level"] - stop
     expected = rolled + hp_ctx["bonus"] * rolled_levels + fixed * fixed_levels
     assert hp_ctx["hp"] == expected
+
+
+@given("a first-level ranger and a first-level fighter, rolled with the same seed",
+       target_fixture="ranger_and_fighter_rolls")
+def a_ranger_and_a_fighter():
+    ranger_dice = Dice(seed=11)
+    fighter_dice = Dice(seed=11)
+    roll_hit_points(ranger_dice, "ranger", level=1, con_bonus=0)
+    roll_hit_points(fighter_dice, "fighter", level=1, con_bonus=0)
+    return ranger_dice, fighter_dice
+
+
+@then("the ranger rolls twice as many starting hit dice as the fighter")
+def ranger_rolls_twice_the_dice(ranger_and_fighter_rolls):
+    ranger_dice, fighter_dice = ranger_and_fighter_rolls
+    assert len(ranger_dice.log) == 2 * len(fighter_dice.log)

@@ -133,6 +133,14 @@ def roll_hit_points(d: Dice, cls: str, level: int, con_bonus: int) -> int:
     the class gains flat hit points instead of rolling, and Constitution
     adjustments no longer apply - every class's own table footnote says so
     explicitly.
+
+    A ranger rolls TWO hit dice at 1st level, per `hit_dice_at_first_level`
+    (osric.txt:3654-3657: "Your starting hit points are 2d8, and if you have
+    a constitution bonus to your hit points, then this applies to both of
+    your hit dice"). The floor of "always gain at least 1hp" (osric.txt:793)
+    is applied per hit die, not per level - each die is its own roll-plus-
+    Constitution event in the book's own wording, so a ranger's 1st level
+    floors at 2hp (one per die), not 1.
     """
     c = game_class(cls)
     die = c["hit_die"]
@@ -140,8 +148,10 @@ def roll_hit_points(d: Dice, cls: str, level: int, con_bonus: int) -> int:
     total = 0
     for lvl in range(1, int(level) + 1):
         if lvl <= stop:
-            rolled = d.roll(f"1{die}", reason=f"{cls} hp level {lvl}", kind="chargen").total
-            total += max(1, rolled + con_bonus)
+            dice_this_level = c["hit_dice_at_first_level"] if lvl == 1 else 1
+            for _ in range(dice_this_level):
+                rolled = d.roll(f"1{die}", reason=f"{cls} hp level {lvl}", kind="chargen").total
+                total += max(1, rolled + con_bonus)
         else:
             total += c["fixed_hp_per_level_after"]
     return total

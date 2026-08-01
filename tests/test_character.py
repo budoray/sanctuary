@@ -286,3 +286,36 @@ def test_constitution_bonus_stops_when_hit_dice_stop():
 def test_unknown_class_raises():
     with pytest.raises(KeyError):
         game_class("barbarian")
+
+
+def test_ranger_rolls_two_hit_dice_at_first_level():
+    # osric.txt:3654-3657: "Unlike other classes rangers get an extra hit
+    # die at first level. Your starting hit points are 2d8..."
+    d = Dice(seed=5)
+    hp = roll_hit_points(d, "ranger", level=1, con_bonus=0)
+    assert [r.expr for r in d.log] == ["1d8", "1d8"]
+    assert hp == sum(r.total for r in d.log)
+
+
+def test_constitution_bonus_applies_to_both_of_a_rangers_first_level_dice():
+    # "...if you have a constitution bonus to your hit points, then this
+    # applies to both of your hit dice" (osric.txt:3656-3657).
+    d = Dice(seed=5)
+    hp = roll_hit_points(d, "ranger", level=1, con_bonus=2)
+    rolled = sum(r.total for r in d.log)
+    assert hp == rolled + 2 * 2  # +2 applied once per die, twice at level 1
+
+
+def test_constitution_bonus_applies_once_per_level_after_first():
+    d = Dice(seed=5)
+    hp = roll_hit_points(d, "ranger", level=2, con_bonus=2)
+    assert len(d.log) == 3  # 2 dice at level 1, 1 at level 2
+    rolled = sum(r.total for r in d.log)
+    assert hp == rolled + 2 * 3  # bonus applied once per die rolled overall
+
+
+@pytest.mark.parametrize("cls", [c for c in CLASSES if c != "ranger"])
+def test_only_the_ranger_rolls_extra_dice_at_first_level(cls):
+    d = Dice(seed=6)
+    roll_hit_points(d, cls, level=1, con_bonus=0)
+    assert len(d.log) == 1, f"{cls} should roll exactly one hit die at 1st level"
