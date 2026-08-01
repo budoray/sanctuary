@@ -1886,15 +1886,17 @@ Expected: 42 passed
 
 ---
 
-### Task 14: The server, the licence and the house chrome
+### Task 14: The server and the client — licence, house chrome, character sheet, dice tray
 
 **Files:**
-- Create: `app.py`
+- Create: `app.py`, `static/index.html`, `static/app.css`, `static/app.js`
 - Test: `tests/test_app.py`
 
 **Interfaces:**
 - Consumes: `sanctuary.character.generate`, `tenshin_version`, `tenshin_gate`, `tenshin_feedback`.
-- Produces: routes `GET /`, `GET /version`, `GET /licence`, `POST /api/character`, `POST /api/report`, `GET /live/embed`; and `selfcheck() -> str`.
+- Produces: routes `GET /`, `GET /version`, `GET /licence`, `POST /api/character`, `POST /api/report`, `GET /live/embed`; and `selfcheck() -> str`; plus the client the gate reads.
+
+⚠ Server and client are **one task** because neither is independently testable without the other — `GET /` and `selfcheck()` both read `static/index.html`. Write both, then run the suite once at the end.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2112,33 +2114,11 @@ if __name__ == "__main__":
         uvicorn.run(app, host="127.0.0.1", port=9300)
 ```
 
-- [ ] **Step 4: Run — it still fails until the client exists (Task 15)**
+- [ ] **Step 4: Do not run the tests yet — the client does not exist**
 
-Run: `python -m pytest tests/test_app.py -q`
-Expected: FAIL on the routes that read `static/index.html`. Proceed to Task 15 and return here.
+`GET /` and `selfcheck()` both read `static/index.html`. The server is only half of this task; write the client in the next steps, then run the suite once at the end. ⚠ The animated die renders the number the engine already rolled. `Math.random` must not appear in `static/` — Task 4's test enforces it.
 
-- [ ] **Step 5: Commit the server**
-
-```bash
-printf 'v0.0.16-beta\n' > VERSION
-git add app.py tests/test_app.py VERSION
-git commit -m "Server: routes, licence notices, reporter and self-check"
-```
-
----
-
-### Task 15: The client — character sheet and dice tray
-
-**Files:**
-- Create: `static/index.html`, `static/app.css`, `static/app.js`
-
-**Interfaces:**
-- Consumes: `GET /version`, `POST /api/character`, `POST /api/report`.
-- Produces: the client the gate reads.
-
-⚠ The animated die renders the number the engine already rolled. `Math.random` must not appear in `static/` — Task 4's test enforces it.
-
-- [ ] **Step 1: Write `static/index.html`**
+- [ ] **Step 5: Write `static/index.html`**
 
 House chrome in order: build · report · back · sign out. `back` goes to the site ROOT.
 
@@ -2195,7 +2175,7 @@ House chrome in order: build · report · back · sign out. `back` goes to the s
 <script src="/static/app.js"></script>
 ```
 
-- [ ] **Step 2: Write `static/app.js`**
+- [ ] **Step 6: Write `static/app.js`**
 
 ```js
 "use strict";
@@ -2316,7 +2296,7 @@ document.getElementById("report").addEventListener("click", async () => {
 });
 ```
 
-- [ ] **Step 3: Write `static/app.css`**
+- [ ] **Step 7: Write `static/app.css`**
 
 Keep it small and readable; no CDN, no remote fonts.
 
@@ -2341,7 +2321,7 @@ dd { margin: 0; font-variant-numeric: tabular-nums; }
 footer { padding: 1.25rem; border-top: 1px solid var(--rule); font-size: .78rem; opacity: .8; }
 ```
 
-- [ ] **Step 4: Run the full suite**
+- [ ] **Step 8: Run the full suite**
 
 ```bash
 python -m pytest tests/ -q
@@ -2349,24 +2329,24 @@ python app.py test
 ```
 Expected: all tests pass; the self-check prints a sentence with real numbers, e.g. `sanctuary self-check OK - 239 tables, 7 ancestries, 10 classes, seed 1 reproduces a fighter with 6 hp and 7 logged rolls`
 
-- [ ] **Step 5: Verify it runs and looks right**
+- [ ] **Step 9: Verify it runs and looks right**
 
 ```bash
 TENSHIN_DEV=1 python app.py
 ```
 Then open the preview at `http://127.0.0.1:9300/`, roll a character, and confirm the sheet, the dice log and the licence footer all render. Use the browser tools rather than asking anyone to check by hand.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
-printf 'v0.0.17-beta\n' > VERSION
-git add static/ VERSION
-git commit -m "Client: character sheet, dice tray, house chrome and licence"
+printf 'v0.0.16-beta\n' > VERSION
+git add app.py tests/test_app.py static/ VERSION
+git commit -m "Server and client: routes, licence, house chrome, character sheet, dice tray"
 ```
 
 ---
 
-### Task 16: Character portraits from PixelLab
+### Task 15: Character portraits from PixelLab
 
 **Files:**
 - Create: `static/art/portraits/<ancestry>-<class>.png`
@@ -2517,14 +2497,14 @@ Open `http://127.0.0.1:9300/`, roll a character of each class, and confirm the p
 - [ ] **Step 8: Commit**
 
 ```bash
-printf 'v0.0.18-beta\n' > VERSION
+printf 'v0.0.17-beta\n' > VERSION
 git add static/art data/art.yaml static/index.html static/app.js static/app.css app.py tests/test_app.py VERSION
 git commit -m "Art: PixelLab class portraits on the character sheet"
 ```
 
 ---
 
-### Task 17: Repo documentation and the v0.1.0 release
+### Task 16: Repo documentation and the v0.1.0 release
 
 **Files:**
 - Create: `CLAUDE.md`, `IMPROVEMENTS.md`
