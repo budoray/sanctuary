@@ -158,3 +158,82 @@ def test_ability_row_hit_dice_one_is_not_the_minus_one_row():
     contract is just that `in_range`'s ambiguity is not swallowed."""
     with pytest.raises(ValueError):
         tables.ability_row("2.1.2a", 1)
+
+
+ABILITY_TABLES = ["1.1.2a", "1.1.3a", "1.1.4a", "1.1.5a", "1.1.6a", "1.1.7a"]
+
+
+@pytest.mark.parametrize("table_id", ABILITY_TABLES)
+def test_ability_tables_keep_all_their_rows(table_id):
+    """Regression guard for the round-1 fix that widened `_is_ac_header` too
+    far: a two-field score-to-modifier row (e.g. Wisdom's `3 -3`) is also
+    all-integer and strictly decreasing, and briefly got read as a header
+    too, deleting every row in Intelligence and all of Wisdom."""
+    rows = tables.rows(table_id)
+    assert len(rows) >= 14  # every ability table covers score 3 through 19+
+    row = tables.ability_row(table_id, 10)
+    assert row[0].startswith("10") or row[0] == "9-11"
+
+
+@pytest.mark.parametrize("table_id", TO_HIT_TABLES)
+def test_ac_header_absent_and_first_row_is_a_real_label(table_id):
+    """The AC header (21 fields wide) must be gone, and the first surviving
+    row must be a level/HD label, not a header fragment."""
+    rows = tables.rows(table_id)
+    assert rows
+    assert not tables._is_ac_header(rows[0])
+    assert not any(tables._is_ac_header(row) for row in rows)
+
+
+# Tables whose real rows are keyed by a text label (an ancestry, a weapon
+# name, an item, a hireling) rather than a number - `rows()`'s `^\s*[<\d]`
+# prefilter is a numeric-row detector by design (see the brief), so these
+# always read as zero rows. Reviewed by hand against data/tables/*.yaml.
+ZERO_ROW_ALLOWLIST = {
+    "1.2.0a",     # ability score ranges keyed by ancestry name (Dwarf, Elf, ...)
+    "1.3.10.4d",  # thief skill adjustments keyed by ancestry name
+    "1.4.2.3b",   # melee weapons keyed by weapon name (Axe, battle / Club / ...)
+    "1.4.2.g",    # armour keyed by armour name (Banded / Chain mail / ...)
+    "1.6.8a",     # morale modifiers keyed by situation text, not a number
+    "2.13.4a",    # rod/staff/wand charges keyed by device type text
+    "2.13.6.1f",  # sword special-power prose, no row structure at all
+    "2.13.6.1h",  # sword ego rules prose, no row structure at all
+    "2.14.1a",    # stronghold costs keyed by structure name
+    "2.2.1a",     # hireling wages keyed by hireling name
+    "2.2.2a",     # expert hireling wages keyed by hireling name
+    "2.2.2b",     # soldier wages keyed by unit name
+    "2.2.2c",     # ship crew wages keyed by role name
+    "2.2.2d",     # armour production keyed by armour name
+    "2.2.2e",     # weapon production keyed by weapon name
+    "2.2.2j",     # sage fields of study, prose plus percentile lists
+    "2.2.2k",     # sage chance to know, keyed by question type text
+    "2.2.2m",     # information discovery cost, keyed by question type text
+    "2.2.2n",     # complex weapon production keyed by weapon name
+    "2.2.7.1b",   # witch-priest level cap keyed by ancestry name
+    "2.2.7.1c",   # witch-priest spell list keyed by spell name
+    "2.2.7.2b",   # witch-crafter level cap keyed by ancestry name
+    "2.2.7.2c",   # witch-crafter divine spells keyed by spell name
+    "2.2.7.2d",   # witch-crafter arcane spells keyed by spell name
+}
+
+
+def test_no_unreviewed_table_yields_zero_rows():
+    """Every single-file table in the corpus either has rows or is on the
+    reviewed allow-list above. `rows()` only handles multi-file (split)
+    tables' constituent files, not the ambiguous id itself, so those are
+    skipped here - use `parts()` for them."""
+    unexpected = []
+    for table_id, paths in tables._index().items():
+        if len(paths) > 1:
+            continue
+        if not tables.rows(table_id) and table_id not in ZERO_ROW_ALLOWLIST:
+            unexpected.append(table_id)
+    assert not unexpected, f"zero rows, not on the allow-list: {unexpected}"
+
+
+def test_rows_drops_a_leaked_section_heading():
+    """`1.1.5a` (Intelligence) ends with the next section's heading,
+    `1.1.6. WISDOM`, sitting right after Intelligence's own rows. It starts
+    with a digit like a real row and must not be one."""
+    for row in tables.rows("1.1.5a"):
+        assert row != ["1.1.6.", "WISDOM"]

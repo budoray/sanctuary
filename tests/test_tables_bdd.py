@@ -25,6 +25,11 @@ def split_equipment_table():
     return "1.4.2.3a"
 
 
+@given("the Wisdom table", target_fixture="table_id")
+def wisdom_table():
+    return "1.1.6a"
+
+
 @when(
     parsers.parse(
         "a level {level:d} fighter looks up the roll needed to hit armour class {ac:d}"
@@ -71,3 +76,18 @@ def not_the_sub_hit_die_row(lookup):
         assert result[0] != "1-1"
     else:
         assert isinstance(result, ValueError)
+
+
+@when(
+    parsers.parse(
+        "a character with Wisdom {score:d} looks up their mental saving throw modifier"
+    ),
+    target_fixture="row",
+)
+def look_up_wisdom_modifier(table_id, score):
+    return tables.ability_row(table_id, score)
+
+
+@then(parsers.parse("the modifier is {modifier}"))
+def modifier_is(row, modifier):
+    assert row[1] == modifier

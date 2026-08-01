@@ -24,3 +24,8 @@ Feature: Looking up the OSRIC tables at the table
     Given the monster to-hit table
     When a GM looks up the row for a monster with exactly 1 Hit Die
     Then the lookup does not silently hand back the sub-1-Hit-Die row
+
+  Scenario: A character's Wisdom score yields its bonus
+    Given the Wisdom table
+    When a character with Wisdom 16 looks up their mental saving throw modifier
+    Then the modifier is +2

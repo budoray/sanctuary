@@ -58,31 +58,47 @@ def load(table_id: str) -> dict:
     return _read(paths[0])
 
 
+# A to-hit table's armour-class header is 21 fields wide (AC 10 down to -10).
+# Every real row is 2-6 fields (an ability score/level/HD label plus its
+# targets or modifiers). 15 sits with margin between the two, so a header
+# is never mistaken for a row and a row is never mistaken for a header.
+_AC_HEADER_MIN_WIDTH = 15
+
+# A book section heading that leaked past the `[<\d]` prefilter, e.g.
+# "1.1.6. WISDOM" or "2.13.1. POTIONS" - digits and dots ending in a literal
+# "." before the heading text. No row label has a trailing dot.
+_SECTION_HEADING = re.compile(r"^\d+(\.\d+)+\.\s")
+
+
 def _is_ac_header(fields: list[str]) -> bool:
     """True for a to-hit table's armour-class header row, e.g.
     `10 9 8 7 6 5 4 3 2 1 0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -10`.
 
     That line starts with a digit like any data row, so the `[<\\d]` check in
-    `rows()` keeps it. What makes it a header and not a row is that every
-    field is a bare integer and the whole line strictly decreases - a real
-    row's label is followed by to-hit numbers that rise (or hold) as the
-    target gets easier to hit, never a single unbroken descent end to end.
+    `rows()` keeps it. All-integer-and-strictly-decreasing alone is not
+    enough: an ordinary two-field score-to-modifier row (`3 -3`) also reads
+    that way. What actually marks the header is that it spans the FULL
+    armour-class axis - see `_AC_HEADER_MIN_WIDTH` - which no real row does.
     """
+    if len(fields) < _AC_HEADER_MIN_WIDTH:
+        return False
     try:
         nums = [int(f) for f in fields]
     except ValueError:
         return False
-    return len(nums) > 1 and all(a > b for a, b in zip(nums, nums[1:]))
+    return all(a > b for a, b in zip(nums, nums[1:]))
 
 
 def rows(table_id: str) -> list[list[str]]:
     """Data rows, whitespace-split. Lines that do not begin with a number,
-    range or `<` are treated as wrapped headers and dropped, as is the
-    armour-class header row some to-hit tables repeat as data-shaped text
-    (see `_is_ac_header`)."""
+    range or `<` are treated as wrapped headers and dropped, as are a
+    leaked section heading (`_SECTION_HEADING`) and the armour-class header
+    some to-hit tables repeat as data-shaped text (`_is_ac_header`)."""
     out = []
     for line in load(table_id)["lines"]:
         if not re.match(r"^\s*[<\d]", line):
+            continue
+        if _SECTION_HEADING.match(line.strip()):
             continue
         fields = line.split()
         if _is_ac_header(fields):
