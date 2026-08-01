@@ -260,6 +260,22 @@ def ranger_rolls_twice_the_dice(ranger_and_fighter_rolls):
     assert len(ranger_dice.log) == 2 * len(fighter_dice.log)
 
 
+@given("a first-level monk and a first-level fighter, rolled with the same seed",
+       target_fixture="monk_and_fighter_rolls")
+def a_monk_and_a_fighter():
+    monk_dice = Dice(seed=11)
+    fighter_dice = Dice(seed=11)
+    roll_hit_points(monk_dice, "monk", level=1, con_bonus=0)
+    roll_hit_points(fighter_dice, "fighter", level=1, con_bonus=0)
+    return monk_dice, fighter_dice
+
+
+@then("the monk rolls twice as many starting hit dice as the fighter")
+def monk_rolls_twice_the_dice(monk_and_fighter_rolls):
+    monk_dice, fighter_dice = monk_and_fighter_rolls
+    assert len(monk_dice.log) == 2 * len(fighter_dice.log)
+
+
 @given(parsers.parse("a character with {score:g} Strength"), target_fixture="strength_mods")
 def a_character_with_strength_score(score):
     return ability_modifiers({**{k: 10 for k in ABILITIES}, "strength": score})
@@ -471,3 +487,53 @@ def triple_class_bare_ones():
 @then("the triple-classed adventurer starts with at least 3 hit points, one for each calling")
 def triple_class_minimum(triple_class_hp):
     assert triple_class_hp == 3
+
+
+@given("a half-orc whose rolled Strength is already at its peak of 18",
+       target_fixture="ancestral_scores")
+def half_orc_at_peak_strength():
+    return apply_ancestry({**{k: 10 for k in ABILITIES}, "strength": 18}, "half-orc")
+
+
+@then("the ancestral bonus does not push the half-orc's Strength past 18")
+def half_orc_strength_capped(ancestral_scores):
+    assert ancestral_scores["strength"] == 18
+
+
+@given("a halfling whose rolled Dexterity is already at its peak of 18",
+       target_fixture="ancestral_scores")
+def halfling_at_peak_dexterity():
+    return apply_ancestry({**{k: 10 for k in ABILITIES}, "dexterity": 18}, "halfling")
+
+
+@then("the ancestral bonus does not push the halfling's Dexterity past 18")
+def halfling_dexterity_capped(ancestral_scores):
+    assert ancestral_scores["dexterity"] == 18
+
+
+@given(parsers.parse("a player attempts to create a human fighter with seed {seed:d} in the "
+                      "hardest mode"), target_fixture="refused_attempt")
+def attempt_weak_human_fighter(seed):
+    def attempt():
+        generate(seed=seed, mode="hardest", ancestry_name="human", class_names=("fighter",))
+    return attempt
+
+
+@then("the attempt is refused for not meeting the fighter's own requirements")
+def attempt_refused_for_fighter_minimums(refused_attempt):
+    with pytest.raises(ValueError, match="fighter"):
+        refused_attempt()
+
+
+@given(parsers.parse("a player attempts to create a dwarf fighter with seed {seed:d} in the "
+                      "hardest mode"), target_fixture="refused_attempt")
+def attempt_frail_dwarf(seed):
+    def attempt():
+        generate(seed=seed, mode="hardest", ancestry_name="dwarf", class_names=("fighter",))
+    return attempt
+
+
+@then("the attempt is refused for not meeting the dwarf's own requirements")
+def attempt_refused_for_dwarf_minimums(refused_attempt):
+    with pytest.raises(ValueError, match="dwarf"):
+        refused_attempt()

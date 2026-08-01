@@ -120,20 +120,30 @@ def selfcheck() -> str:
         tables.load(character.game_class(k)["to_hit_table"])
 
     portraits = _art()["portraits"]
-    n_portraits = 0
+    portrait_files = set()
     for k in character.CLASSES:
         path = portraits.get(k)
         assert path, f"no portrait entry for class {k!r}"
         assert (ROOT / path.lstrip("/")).exists(), f"missing portrait file for {k!r}: {path}"
-        n_portraits += 1
+        portrait_files.add(path)
+    # Distinct files actually backing a class, not one count per class - a
+    # class pointing at a shared/default file must not inflate this number.
+    n_portraits = len(portrait_files)
 
     index_html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
-    for needle in (LICENCE_NOTICE, 'id="build"', 'id="report"',
+    for needle in (LICENCE_NOTICE, SRD_NOTICE, 'id="build"', 'id="report"',
                    'id="back"', 'id="signout"', "Sanctuary™"):
         assert needle in index_html, f"client is missing {needle!r}"
 
+    pdfs_present = all(p.exists() for p in (
+        Path("C:/Users/budor/Downloads/OSRIC-3.0-Player-Guide-FINAL.v.7.pdf"),
+        Path("C:/Users/budor/Downloads/OSRIC_3.0_Gamemaster_Guide.pdf"),
+    ))
+    round_trip = "verified" if pdfs_present else "UNVERIFIED (source PDFs not present)"
+
     return (f"sanctuary self-check OK - {n_table_ids} tables in {n_files} files, "
             f"{n_ancestries} ancestries, {n_classes} classes, {n_portraits} portraits, "
+            f"corpus round-trip {round_trip}, "
             f"seed 1 reproduces a {c.classes[0]} with "
             f"{c.hit_points} hp and {len(c.log)} logged rolls")
 

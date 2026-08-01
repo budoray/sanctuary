@@ -70,6 +70,14 @@ def test_in_range_handles_open_ended():
     assert not tables.in_range("19+", 18)
 
 
+def test_in_range_reads_a_leading_minus_as_a_negative_value_not_a_range():
+    # No Chapter 1 table has a negative first cell, but monster and treasure
+    # tables do - "-3" must be the single value -3, not the range separator
+    # producing the positive value 3 (`_DASH.split("-3")` -> ('', '3')).
+    assert tables.in_range("-3", -3)
+    assert not tables.in_range("-3", 3)
+
+
 def test_ability_row_finds_the_strength_row():
     row = tables.ability_row("1.1.2a", 18)
     assert row[0].startswith("18")

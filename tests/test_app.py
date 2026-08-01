@@ -37,6 +37,12 @@ def test_the_client_itself_carries_the_notice():
     assert NOTICE in client.get("/").text
 
 
+def test_the_client_itself_carries_the_srd_notice():
+    # Both notices ship in both places (the design record's own words) -
+    # /licence had the SRD notice, the client index did not.
+    assert "SRD 5.1" in client.get("/").text
+
+
 def test_the_client_carries_the_house_chrome_in_order():
     body = client.get("/").text
     positions = [body.find(x) for x in
@@ -77,6 +83,25 @@ def test_selfcheck_reports_real_numbers():
     assert line.startswith("sanctuary self-check OK")
     import re
     assert re.search(r"\d+ tables", line)
+
+
+def test_selfcheck_portrait_count_is_distinct_files_not_one_per_class():
+    # A portrait count computed by incrementing once per class always equals
+    # len(CLASSES) - even if two classes shared one file, or all ten did.
+    # This pins that the number in the sentence is a distinct-file count by
+    # checking it against the same set the sentence is supposed to describe.
+    import re
+    portraits = sanctuary_app._art()["portraits"]
+    distinct = len({portraits[k] for k in character.CLASSES})
+    line = sanctuary_app.selfcheck()
+    m = re.search(r"(\d+) portraits", line)
+    assert m and int(m.group(1)) == distinct
+
+
+def test_selfcheck_states_whether_the_round_trip_is_verified():
+    line = sanctuary_app.selfcheck()
+    assert "round-trip" in line
+    assert "verified" in line or "UNVERIFIED" in line
 
 
 def _art():

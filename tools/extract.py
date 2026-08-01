@@ -86,13 +86,19 @@ def find_tables(text: str) -> list[dict]:
     - a block with none is kept too, UNLESS its id duplicates a block
       already kept from this book - that's the "TABLE X: NAME CONTINUED"
       caption case: a stray duplicate heading from PDF column reordering
-      that carries no data of its own. That one is abandoned. Matched on id
-      alone, not (id, name): the caption's name usually - but not always -
-      literally repeats the original ("NIGHTTIME ENCOUNTERS CONTINUED"
-      twice for 2.8.1b), but sometimes doesn't ("THIEF SKILLS FOR MONKS"
-      vs "... CONTINUED" for 1.3.7.4b), and an exact-name match misses the
-      second shape - the whole point here is to catch a data-less header
-      under an id we've already seen real data for, whatever it's titled.
+      that carries no data of its own. That one is abandoned. Matched on
+      `_dedup_key(id, name)` - id AND a normalised name, not id alone: id
+      alone is too broad, since a header regex quirk mis-parses ids like
+      "1.4.2.3A.1" down to "1.4.2.3a", which would make genuinely different
+      sub-tables (Containers, Mounts and Pack Animals) collide with the
+      unrelated General Equipment table under the same id. An exact (id,
+      name) match is too narrow the other way - the caption's name usually
+      repeats the original ("NIGHTTIME ENCOUNTERS CONTINUED" twice for
+      2.8.1b) but sometimes doesn't ("THIEF SKILLS FOR MONKS" vs "...
+      CONTINUED" for 1.3.7.4b) - so `_dedup_key` strips a trailing
+      "CONTINUED" and collapses whitespace before keying, catching both
+      shapes without conflating unrelated tables that merely share a
+      mis-parsed id.
     """
     blocks: list[dict] = []
     current: dict | None = None

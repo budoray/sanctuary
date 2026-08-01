@@ -21,10 +21,14 @@
 # osric.txt:2231; monk 17th - Grand Master, osric.txt:3114). No further level
 # is reachable, so fixed_hp_per_level_after is moot and recorded as 0.
 #
-# hit_dice_at_first_level: ranger gets TWO hit dice at 1st level - "Your
-# starting hit points are 2d8, and if you have a constitution bonus to your
-# hit points, then this applies to both of your hit dice" (osric.txt:3654-3657).
-# Every other class rolls the usual one.
+# hit_dice_at_first_level: ranger and monk each get TWO hit dice at 1st level.
+# Ranger: "Your starting hit points are 2d8, and if you have a constitution
+# bonus to your hit points, then this applies to both of your hit dice"
+# (osric.txt:3654-3657). Monk: Table 1.3.7.4A's HIT DICE column reads 2 at
+# level 1 (and the class header says "Hit Die Type: d4 (max 18)",
+# osric.txt:3122) - read straight from the class's own advancement table,
+# the same source this value is checked against generically in
+# tests/test_character.py. Every other class rolls the usual one.
 #
 # ranger and magic-user each have ONE footnote that disagrees with their own
 # table's numeric HIT DICE column (an off-by-one in the book). Both are
@@ -98,7 +102,7 @@ magic-user:
   spell_list: arcane
 monk:
   hit_die: d4
-  hit_dice_at_first_level: 1
+  hit_dice_at_first_level: 2
   prime_requisites: []
   minimums: {strength: 10, dexterity: 15, wisdom: 10}
   advancement_table: "1.3.7.4a"

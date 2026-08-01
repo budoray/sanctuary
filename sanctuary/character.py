@@ -81,20 +81,47 @@ def ancestry(name: str) -> dict:
     return a
 
 
+# Table 1.2.0A's universal floor/ceiling for any ability an ancestry's own
+# `minimums`/`maximums` does not override (data/ancestries.yaml records only
+# the ability/ancestry pairs where the book differs from this default).
+_DEFAULT_ABILITY_MIN, _DEFAULT_ABILITY_MAX = 3, 18
+
+
 def apply_ancestry(scores: dict, name: str) -> dict:
-    """Ancestral adjustments applied to a copy of `scores`."""
+    """Ancestral adjustments applied to a copy of `scores`, then clamped to
+    Table 1.2.0A's ceiling for each ability: "After making these
+    modifications, your scores must fall within the required limitations of
+    the Ancestry... Scores too high for the maximum may be lowered to fit"
+    (osric.txt:1000-1003, repeated per-ancestry). An ability the ancestry
+    lists no maximum for keeps the universal ceiling of 18 - that default is
+    exactly what this used to skip enforcing, letting a rolled 18 plus a +1
+    ancestral bonus (half-orc Strength, halfling Dexterity) sail past Table
+    1.2.0A's own top row. The book only ever lowers a score that's too high;
+    it never raises one that ends up too low, so there is no floor clamp
+    here - a score that lands below the ancestry's minimum fails ancestry
+    eligibility instead (see meets_ancestry_minimums)."""
+    a = ancestry(name)
     out = dict(scores)
-    for k, delta in ancestry(name)["ability_adjustments"].items():
+    for k, delta in a["ability_adjustments"].items():
         out[k] = out.get(k, 0) + delta
+    for k in out:
+        out[k] = min(out[k], a["maximums"].get(k, _DEFAULT_ABILITY_MAX))
     return out
 
 
 def meets_ancestry_minimums(scores: dict, name: str) -> bool:
-    """Table 1.2.0A minimums, checked AFTER ancestral adjustments."""
+    """Table 1.2.0A minimums and maximums, checked AFTER ancestral
+    adjustments. Every ability defaults to the universal 3-18 range unless
+    the ancestry lists its own bound - the same defaults apply_ancestry
+    clamps against, so the two agree on what "too high" means."""
     a = ancestry(name)
-    if any(scores.get(k, 0) < v for k, v in a["minimums"].items()):
-        return False
-    return not any(scores.get(k, 0) > v for k, v in a["maximums"].items())
+    for k in ABILITIES:
+        v = scores.get(k, 0)
+        if v < a["minimums"].get(k, _DEFAULT_ABILITY_MIN):
+            return False
+        if v > a["maximums"].get(k, _DEFAULT_ABILITY_MAX):
+            return False
+    return True
 
 
 @lru_cache(maxsize=1)
@@ -301,6 +328,15 @@ def generate(seed: int, mode: str, ancestry_name: str, class_names,
     d = Dice(seed=seed)
     scores = apply_ancestry(roll_abilities(d, mode), ancestry_name)
 
+    # Table 1.2.0A's own title is "Required Ability Scores AFTER ANCESTRAL
+    # BONUSES" - checked here, immediately after apply_ancestry, and before
+    # exceptional Strength (which only ever raises an 18, never lowers a
+    # score below a floor).
+    if not meets_ancestry_minimums(scores, ancestry_name):
+        raise ValueError(
+            f"{ancestry_name} ability scores do not meet Table 1.2.0A after "
+            f"ancestral bonuses: {scores}")
+
     # Exceptional Strength applies if ANY of the character's classes is
     # fighter/paladin/ranger (osric.txt:650-655), not only the first-listed
     # one. Rolled exactly once against the pre-resolution score - feeding
@@ -309,6 +345,23 @@ def generate(seed: int, mode: str, ancestry_name: str, class_names,
     exceptional_cls = next(
         (c for c in class_names if c in EXCEPTIONAL_CLASSES), class_names[0])
     scores["strength"] = roll_exceptional_strength(d, scores["strength"], exceptional_cls)
+
+    # Each class's own §1.3.N.1 "Minimum Scores", checked against the final
+    # (post-exceptional-Strength) scores. is_legal_multiclass already
+    # confirmed the ancestry allows every class in class_names, so a class
+    # missing from eligible_classes here can only be a failed ability
+    # minimum - eligible_classes is the same function tests/test_character.py
+    # already exercises for this, wired onto the generation path for real.
+    eligible = eligible_classes(scores, ancestry_name)
+    for cls in class_names:
+        if cls not in eligible:
+            short = {
+                ability: threshold
+                for ability, threshold in game_class(cls)["minimums"].items()
+                if scores.get(ability, 0) < threshold
+            }
+            raise ValueError(
+                f"{ancestry_name} does not meet {cls}'s ability minimums: {short}")
 
     mods = ability_modifiers(scores)
     con_bonus = 0  # Constitution hp adjustment lands with Chapter 3.

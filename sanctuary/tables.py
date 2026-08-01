@@ -132,11 +132,19 @@ def in_range(spec: str, value: float) -> bool:
             return False
     open_ended = s.endswith("+")
     s = s.rstrip("+")
-    parts = [p for p in _DASH.split(s) if p]
-    try:
-        nums = [float(p) for p in parts]
-    except ValueError:
-        return False
+    # A single negative value (e.g. "-3", monster/treasure tables) has a
+    # leading minus that is not a range separator - `_DASH` would otherwise
+    # split it into ('', '3') and read it as the positive value 3. Recognise
+    # a lone signed number before falling back to range-splitting; no
+    # Chapter 1 table has a negative first cell, but Chapter 5/6 tables do.
+    if re.fullmatch(r"-?\d+(\.\d+)?", s):
+        nums = [float(s)]
+    else:
+        parts = [p for p in _DASH.split(s) if p]
+        try:
+            nums = [float(p) for p in parts]
+        except ValueError:
+            return False
     if not nums:
         return False
     if open_ended and len(nums) == 1:

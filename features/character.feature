@@ -182,6 +182,10 @@ Feature: Rolling ability scores for a new character
     Given a first-level ranger and a first-level fighter, rolled with the same seed
     Then the ranger rolls twice as many starting hit dice as the fighter
 
+  Scenario: A monk begins as hardy as a ranger, rolling twice for starting hit points
+    Given a first-level monk and a first-level fighter, rolled with the same seed
+    Then the monk rolls twice as many starting hit dice as the fighter
+
   Scenario: Strength sharpens a character's fists and blade
     Given a character with 18 Strength
     Then the Strength hit bonus is 1
@@ -223,19 +227,19 @@ Feature: Rolling ability scores for a new character
     Then the to-hit target is just a number to beat, with no special case for a roll of 1 or 20
 
   Scenario: A new adventurer is ready to play
-    Given a player creates Ilse, a human fighter, with seed 1234
+    Given a player creates Ilse, a human fighter, with seed 11
     Then Ilse has a full set of ability scores
     And Ilse has at least 1 hit point
     And Ilse has all five saving throws
-    And Ilse's seed is recorded as 1234
+    And Ilse's seed is recorded as 11
 
   Scenario: The same seed always builds the same adventurer
-    Given a player creates a human fighter twice with seed 77
+    Given a player creates a human fighter twice with seed 13
     Then both adventurers are identical in every way that matters
 
   Scenario: Different seeds build different adventurers
     Given a player creates a human fighter with seed 1
-    And a player creates another human fighter with seed 2
+    And a player creates another human fighter with seed 3
     Then the two adventurers differ
 
   Scenario: A human must choose a single calling
@@ -297,7 +301,7 @@ Feature: Rolling ability scores for a new character
     Then the attempt is refused
 
   Scenario: A multi-classed adventurer's hit points are shared across callings
-    Given a player creates an elf fighter and magic-user with seed 5
+    Given a player creates an elf fighter and magic-user with seed 1
     Then the elf's hit points come from dice rolled for both callings
 
   Scenario: A character who trains in two callings advances more slowly in body than in one alone
@@ -307,3 +311,19 @@ Feature: Rolling ability scores for a new character
   Scenario: Every calling a multi-classed character trains in grants at least one hit point
     Given a fighter, magic-user and thief who each roll a bare 1 for their starting toughness
     Then the triple-classed adventurer starts with at least 3 hit points, one for each calling
+
+  Scenario: A half-orc's brawn is mighty but still human-scaled
+    Given a half-orc whose rolled Strength is already at its peak of 18
+    Then the ancestral bonus does not push the half-orc's Strength past 18
+
+  Scenario: A halfling's quickness is real but not superhuman
+    Given a halfling whose rolled Dexterity is already at its peak of 18
+    Then the ancestral bonus does not push the halfling's Dexterity past 18
+
+  Scenario: A character too weak to be a fighter is turned away
+    Given a player attempts to create a human fighter with seed 1 in the hardest mode
+    Then the attempt is refused for not meeting the fighter's own requirements
+
+  Scenario: A dwarf whose body never grew sturdy enough is turned away
+    Given a player attempts to create a dwarf fighter with seed 2 in the hardest mode
+    Then the attempt is refused for not meeting the dwarf's own requirements

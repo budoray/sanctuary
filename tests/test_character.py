@@ -201,6 +201,38 @@ def test_unknown_ancestry_raises():
         ancestry("orc")
 
 
+@pytest.mark.parametrize("name", ANCESTRIES)
+def test_ancestral_bonuses_never_push_a_score_past_the_ancestrys_own_maximum(name):
+    # Table 1.2.0A's ceiling applies whether or not data/ancestries.yaml
+    # bothers to spell it out - an ability omitted from `maximums` still has
+    # the universal ceiling of 18, and apply_ancestry must clamp to it, not
+    # just to the ceilings that happen to be listed.
+    a = ancestry(name)
+    maxed = {k: 18 for k in ABILITIES}
+    adjusted = apply_ancestry(maxed, name)
+    for k, v in adjusted.items():
+        ceiling = a["maximums"].get(k, 18)
+        assert v <= ceiling, f"{name} {k}: {v} exceeds Table 1.2.0A's ceiling of {ceiling}"
+
+
+def test_half_orc_strength_clamps_to_eighteen_not_nineteen():
+    # osric.txt:983: half-orc Strength maximum is 18. A rolled 18 plus the
+    # ancestry's +1 Strength bonus must clamp back to 18 (then be eligible
+    # for exceptional Strength resolution), not sail through to 19.
+    scores = {**{k: 10 for k in ABILITIES}, "strength": 18}
+    assert apply_ancestry(scores, "half-orc")["strength"] == 18
+
+
+def test_halfling_dexterity_clamps_to_eighteen_not_nineteen():
+    # osric.txt:1610 area: halfling Dexterity maximum is 18 (never spelled
+    # out in data/ancestries.yaml because it equals the universal default -
+    # that omission is exactly what let the +1 Dexterity bonus through
+    # before this fix).
+    scores = {**{k: 10 for k in ABILITIES}, "dexterity": 18}
+    assert apply_ancestry(scores, "halfling")["dexterity"] == 18
+    assert not meets_ancestry_minimums({**{k: 10 for k in ABILITIES}, "dexterity": 19}, "halfling")
+
+
 from sanctuary import tables
 from sanctuary.character import CLASSES, eligible_classes, game_class, roll_hit_points
 
@@ -314,11 +346,31 @@ def test_constitution_bonus_applies_once_per_level_after_first():
     assert hp == rolled + 2 * 3  # bonus applied once per die rolled overall
 
 
-@pytest.mark.parametrize("cls", [c for c in CLASSES if c != "ranger"])
-def test_only_the_ranger_rolls_extra_dice_at_first_level(cls):
+@pytest.mark.parametrize("cls", [c for c in CLASSES if c not in ("ranger", "monk")])
+def test_only_the_ranger_and_monk_roll_extra_dice_at_first_level(cls):
     d = Dice(seed=6)
     roll_hit_points(d, cls, level=1, con_bonus=0)
     assert len(d.log) == 1, f"{cls} should roll exactly one hit die at 1st level"
+
+
+@pytest.mark.parametrize("cls", CLASSES)
+def test_hit_dice_at_first_level_matches_the_class_own_advancement_table(cls):
+    # A per-class hardcoded assertion (the old test only ever checked ranger)
+    # is exactly why the monk's missing second hit die survived - this reads
+    # the level-1 HIT DICE cell straight out of every class's own table
+    # instead. Every advancement table's header line reads "LEVEL XP NEEDED
+    # HIT DICE" - the first three columns, universal across all ten tables -
+    # so column index 2 of the level-1 row is always the HIT DICE cell.
+    # Selected by row[1] == "0" rather than merely row[0] == "1": a couple of
+    # these tables also leak a wrapped spell-slot sub-header ("1 2 3 4") that
+    # itself starts with a level-shaped "1" - but level 1 always costs 0 XP
+    # in every one of these tables, and the leaked header never has "0" in
+    # its second field, so this picks the real data row and skips the leak.
+    c = game_class(cls)
+    row = next(r for r in tables.rows(c["advancement_table"]) if r[0] == "1" and r[1] == "0")
+    assert int(row[2]) == c["hit_dice_at_first_level"], (
+        f"{cls}'s hit_dice_at_first_level disagrees with its own table: "
+        f"table says {row[2]!r}, data/classes.yaml says {c['hit_dice_at_first_level']}")
 
 
 import re
@@ -466,7 +518,11 @@ from sanctuary.character import Character, generate, is_legal_multiclass
 
 
 def test_generate_produces_a_complete_character():
-    c = generate(seed=1234, mode="normal", ancestry_name="human",
+    # seed=11: a human fighter meets the fighter's own Strength-9 minimum at
+    # this seed under "normal" (4d6d1) - generate() now enforces that
+    # minimum (Critical 3), so a seed picked without checking it can raise
+    # instead of building a character.
+    c = generate(seed=11, mode="normal", ancestry_name="human",
                  class_names=("fighter",), name="Ilse")
     assert isinstance(c, Character)
     assert c.name == "Ilse"
@@ -476,18 +532,18 @@ def test_generate_produces_a_complete_character():
     assert set(c.scores) == set(ABILITIES)
     assert c.hit_points >= 1
     assert set(c.saves) == set(SAVE_CATEGORIES)
-    assert c.seed == 1234
+    assert c.seed == 11
 
 
 def test_generation_is_reproducible():
-    a = generate(seed=77, mode="normal", ancestry_name="human", class_names=("fighter",))
-    b = generate(seed=77, mode="normal", ancestry_name="human", class_names=("fighter",))
+    a = generate(seed=13, mode="normal", ancestry_name="human", class_names=("fighter",))
+    b = generate(seed=13, mode="normal", ancestry_name="human", class_names=("fighter",))
     assert a == b
 
 
 def test_different_seeds_give_different_characters():
     a = generate(seed=1, mode="normal", ancestry_name="human", class_names=("fighter",))
-    b = generate(seed=2, mode="normal", ancestry_name="human", class_names=("fighter",))
+    b = generate(seed=3, mode="normal", ancestry_name="human", class_names=("fighter",))
     assert a.scores != b.scores or a.hit_points != b.hit_points
 
 
@@ -523,6 +579,23 @@ def test_generate_rejects_an_illegal_combination():
     with pytest.raises(ValueError):
         generate(seed=1, mode="normal", ancestry_name="human",
                  class_names=("fighter", "magic-user"))
+
+
+def test_generate_rejects_a_class_the_rolled_scores_do_not_qualify_for():
+    # seed=1, mode="hardest" (3d6 in order), human fighter: rolls a Strength
+    # of 8, below the fighter's own minimum of 9 (osric.txt:2447). Before
+    # this fix generate() only checked ancestry class-access, never a
+    # class's own ability minimums, so this returned a legal (illegally
+    # weak) fighter.
+    with pytest.raises(ValueError, match="fighter"):
+        generate(seed=1, mode="hardest", ancestry_name="human", class_names=("fighter",))
+
+
+def test_generate_rejects_scores_below_the_ancestrys_own_floor():
+    # seed=2, mode="hardest", dwarf: rolls a Strength of 3, below the
+    # dwarf's own Table 1.2.0A floor of 8.
+    with pytest.raises(ValueError, match="dwarf"):
+        generate(seed=2, mode="hardest", ancestry_name="dwarf", class_names=("fighter",))
 
 
 def test_unlisted_class_for_an_ancestry_is_illegal_even_alone():
@@ -575,29 +648,51 @@ def test_no_ancestry_permits_a_class_pair_outside_its_own_list(name):
         assert is_legal_multiclass(name, (a, b)) == expect_legal, f"{name}: {a}/{b}"
 
 
+# One seed per class, each hand-picked to clear that class's own §1.3.N.1
+# ability minimums under mode="normal" - a single shared seed no longer
+# works for every class now that generate() enforces those minimums
+# (Critical 3); a class that used to slip through under-strength no longer
+# generates at all.
+_HUMAN_CLASS_SEEDS = {
+    "assassin": 3, "cleric": 1, "druid": 3, "fighter": 1, "illusionist": 37,
+    "magic-user": 1, "monk": 3, "paladin": 40, "ranger": 24, "thief": 1,
+}
+
+
 @pytest.mark.parametrize("cls", CLASSES)
 def test_generate_a_human_of_every_class(cls):
     # Site-wide standard: exercise all ten classes, not just fighter -
     # a prior task shipped a class-specific bug that survived because only
     # fighter was ever generated end to end.
-    c = generate(seed=1, mode="normal", ancestry_name="human", class_names=(cls,))
+    c = generate(seed=_HUMAN_CLASS_SEEDS[cls], mode="normal",
+                 ancestry_name="human", class_names=(cls,))
     assert c.classes == (cls,)
     assert c.levels == {cls: 1}
     assert c.hit_points >= 1
     assert set(c.saves) == set(SAVE_CATEGORIES)
 
 
+# One seed per ancestry, each clearing both that ancestry's own Table 1.2.0A
+# minimums and its first allowed class's minimums under mode="normal" - see
+# _HUMAN_CLASS_SEEDS above for why a shared seed no longer works.
+_ANCESTRY_SEEDS = {
+    "dwarf": 3, "elf": 3, "gnome": 3, "half-elf": 3,
+    "halfling": 3, "half-orc": 14, "human": 3,
+}
+
+
 @pytest.mark.parametrize("name", ANCESTRIES)
 def test_generate_one_character_per_ancestry(name):
     # Site-wide standard: exercise all seven ancestries, not just human/elf.
     cls = ancestry(name)["allowed_classes"][0]
-    c = generate(seed=2, mode="normal", ancestry_name=name, class_names=(cls,))
+    c = generate(seed=_ANCESTRY_SEEDS[name], mode="normal",
+                 ancestry_name=name, class_names=(cls,))
     assert c.ancestry == name
     assert c.hit_points >= 1
 
 
 def test_ranger_generates_at_first_level_with_its_extra_hit_die():
-    c = generate(seed=9, mode="normal", ancestry_name="half-elf", class_names=("ranger",))
+    c = generate(seed=24, mode="normal", ancestry_name="half-elf", class_names=("ranger",))
     hp_rolls = [r for r in c.log if "hp level" in r.reason]
     assert len(hp_rolls) == 2
     assert c.hit_points == sum(r.total for r in hp_rolls)
@@ -679,7 +774,7 @@ def test_multiclass_hit_points_include_a_rangers_extra_first_level_die():
     # End-to-end: a ranger contributes 2d8 (its own extra first-level die)
     # through generate(), and both dice go into the ranger's single
     # class-contribution before it's divided by the class count.
-    c = generate(seed=6, mode="normal", ancestry_name="half-elf",
+    c = generate(seed=24, mode="normal", ancestry_name="half-elf",
                  class_names=("cleric", "ranger"))
     hp_rolls = [r for r in c.log if "hp level" in r.reason]
     assert len(hp_rolls) == 3  # 1 cleric die + 2 ranger dice

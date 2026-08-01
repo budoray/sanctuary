@@ -58,6 +58,43 @@ def test_every_table_has_an_id_name_and_lines():
         assert doc["lines"], p.name
 
 
+def test_corpus_is_internally_consistent_without_the_pdfs():
+    """Always runs, PDFs or not - this is what actually verifies the corpus
+    in an environment where the two round-trip tests below are skipped.
+    It cannot catch a table that was extracted wrong to begin with (only
+    re-running the extractor against the source PDFs can - see
+    test_extraction_round_trips), but it does catch a table that was
+    hand-edited AFTER extraction: a hand-edit is very unlikely to also keep
+    every file's shape, id uniqueness and reachability intact.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT))
+    from sanctuary import tables as _tables
+    _tables._index.cache_clear()
+
+    files = list(TABLES.glob("*.yaml"))
+    assert files, "no committed tables"
+
+    ids = set()
+    for p in files:
+        doc = yaml.safe_load(p.read_text(encoding="utf-8"))
+        for key in ("id", "name", "source", "lines"):
+            assert doc.get(key), f"{p.name} missing {key!r}"
+        assert not any(chr(c) in p.read_text(encoding="utf-8") for c in range(0xFB00, 0xFB07)), (
+            f"ligature survived into {p.name}")
+        ids.add(doc["id"].lower())
+
+    index = _tables._index()
+    assert set(index) == ids, (
+        "tables._index() and the committed file set disagree on which ids exist: "
+        f"index-only {set(index) - ids}, files-only {ids - set(index)}")
+    n_files_via_index = sum(len(paths) for paths in index.values())
+    assert n_files_via_index == len(files), (
+        f"{len(files)} files on disk but tables._index() only reaches "
+        f"{n_files_via_index} of them")
+    assert len(ids) == len(index), "unique-id count disagrees with the self-check's own count"
+
+
 def test_abandoned_tables_are_the_reviewed_set():
     """find_tables() abandons a whole block only when it has no recognisable
     data row (`_has_data_row`) AND its id duplicates a block already kept
@@ -78,7 +115,12 @@ def test_abandoned_tables_are_the_reviewed_set():
     for p in pdfs:
         if not p.exists():
             import pytest
-            pytest.skip(f"source PDF not present: {p}")
+            pytest.skip(
+                f"source PDF missing: {p} does not exist in this environment - "
+                "the corpus round-trip guarantee (data/tables/ matches a fresh "
+                "extraction of the book) is UNVERIFIED here. See "
+                "test_corpus_is_internally_consistent_without_the_pdfs for what "
+                "still runs without the PDFs.")
 
     abandoned = set()
     for p in pdfs:
@@ -151,7 +193,12 @@ def test_extraction_round_trips():
     for p in pdfs.values():
         if not p.exists():
             import pytest
-            pytest.skip(f"source PDF not present: {p}")
+            pytest.skip(
+                f"source PDF missing: {p} does not exist in this environment - "
+                "the corpus round-trip guarantee (data/tables/ matches a fresh "
+                "extraction of the book) is UNVERIFIED here. See "
+                "test_corpus_is_internally_consistent_without_the_pdfs for what "
+                "still runs without the PDFs.")
 
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp)
