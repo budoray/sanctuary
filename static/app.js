@@ -468,18 +468,27 @@ function renderMap() {
       }
       // A corridor touching the current room is a move control: every cell
       // of it (and of the stub into the dark) walks that way on click.
+      // But only if the way is LEGAL from here: the engine's one-way
+      // passages (a chute you dropped down, stairs that only descend) are
+      // drawn as memory of how you got in, never as a door back - a click
+      // the engine must refuse would be a lie under the pointer.
       const curIsA = String(mapCurrentId) === aId;
       const curIsB = String(mapCurrentId) === bId;
       if (curIsA || curIsB) {
-        const seen = exploredAreas[curIsA ? bId : aId];
-        const label = seen && seen.visited && seen.name
-          ? `${kind || "way"} to ${seen.name}`
-          : `${kind || "way"} into the dark`;
-        const target = { to: Number(curIsA ? bId : aId), label };
-        for (let x = x0; x <= xEnd; x++) mapClickTargets.set(key(x, a.midY), target);
-        if (bSeen && a.midY !== b.midY) {
-          const step = b.midY > a.midY ? 1 : -1;
-          for (let y = a.midY; y !== b.midY + step; y += step) mapClickTargets.set(key(x1, y), target);
+        const otherId = curIsA ? bId : aId;
+        const legal = (exploredAreas[String(mapCurrentId)].exits || [])
+          .some((x) => String(x.to) === otherId);
+        if (legal) {
+          const seen = exploredAreas[otherId];
+          const label = seen && seen.visited && seen.name
+            ? `${kind || "way"} to ${seen.name}`
+            : `${kind || "way"} into the dark`;
+          const target = { to: Number(otherId), label };
+          for (let x = x0; x <= xEnd; x++) mapClickTargets.set(key(x, a.midY), target);
+          if (bSeen && a.midY !== b.midY) {
+            const step = b.midY > a.midY ? 1 : -1;
+            for (let y = a.midY; y !== b.midY + step; y += step) mapClickTargets.set(key(x1, y), target);
+          }
         }
       }
       if (kind.includes("door")) {
@@ -1036,7 +1045,12 @@ function renderDelve(view) {
 
   if (!view.in_combat) emptyNote(areaMonsters, "Nothing stirring.");
   emptyNote(areaTreasure, "No treasure in sight.");
-  emptyNote(exitsList, "No way on from here.");
+  // A sealed room must not read as a broken list: when the delve is live
+  // and no exit is known, name the ways that remain - Search may reveal a
+  // hidden door; Leave ends the run on the party's own terms.
+  emptyNote(exitsList, view.finished
+    ? "No way on from here."
+    : "No way on from here - the dark gives nothing back. Search for a hidden way, or leave the delve.");
 
   const inventory = document.getElementById("inventory");
   inventory.innerHTML = "";
