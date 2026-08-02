@@ -327,3 +327,75 @@ def test_leaderboard_gains_a_row_after_a_delve_and_ranks_it_by_xp():
     assert isinstance(row["stat"], str) and row["stat"].strip()
     assert board == sorted(board, key=lambda r: -r["score"]), \
         "the board is not ranked on score"
+
+
+# ── [hidden] must actually hide ───────────────────────────────────────────────
+def test_hiding_an_element_actually_hides_it():
+    """⚠ `[hidden]` is only `display: none` in the UA stylesheet, so any author
+    rule setting `display` on the same element WINS. `#forge { display: flex }`
+    did exactly that: app.js set `forge.hidden = true` when a delve began and
+    the whole character-creation form stayed on screen, 976px tall, pushing the
+    map below the fold for the entire game. Every existing test passed - they
+    checked the `.hidden` property and the HTML source, neither of which knows
+    what the cascade did.
+
+    Guard on the OUTPUT: whatever app.js hides must be un-displayable."""
+    css = (ROOT / "static" / "app.css").read_text(encoding="utf-8")
+    js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+
+    assert re.search(r"\[hidden\]\s*\{[^}]*display:\s*none\s*!important", css), \
+        "app.css must force [hidden] { display: none !important } - without it, " \
+        "any `display:` rule on a hidden element silently un-hides it"
+
+    # And the guard must actually cover every element the client hides.
+    hidden_ids = set(re.findall(r'getElementById\("([a-z-]+)"\)\.hidden\s*=', js))
+    assert "forge" in hidden_ids, \
+        "expected #forge among the elements app.js hides - if this moved, " \
+        "re-point the test rather than deleting it"
+
+    # Name the elements that carry BOTH a `display:` rule and a hide from
+    # app.js. They are the ones the guard exists for; the list is worth
+    # reading in the failure output when someone adds a sixth.
+    at_risk = sorted(
+        el_id for el_id in hidden_ids
+        if (m := re.search(rf"#{el_id}\s*\{{([^}}]*)\}}", css)) and "display:" in m.group(1)
+    )
+    assert "forge" in at_risk, \
+        f"#forge no longer sets display (at-risk ids: {at_risk}) - if that rule " \
+        "was removed the guard is still correct, but this test no longer proves it"
+
+
+# ── the display + mono faces must be SERVED, and REACHED from the client ─────
+WOFF2_MAGIC = b"wOF2"
+
+
+def test_every_font_the_stylesheet_names_is_actually_served():
+    """⚠ Same lesson as the portraits: a font file present on disk that no
+    route serves falls back to system-ui in silence, and the page still looks
+    'fine' - just not designed. Guard on the response, not on the directory."""
+    css = client.get("/static/fonts/fonts.css")
+    assert css.status_code == 200, "fonts.css is not served"
+    urls = re.findall(r"url\((/static/fonts/[^)]+\.woff2)\)", css.text)
+    assert urls, "fonts.css names no woff2 files"
+    for url in set(urls):
+        r = client.get(url)
+        assert r.status_code == 200, f"{url} did not serve"
+        assert r.content[:4] == WOFF2_MAGIC, f"{url} is not a woff2"
+
+
+def test_the_client_actually_links_the_font_stylesheet():
+    """A served stylesheet nothing links to is a served stylesheet nobody sees."""
+    assert "/static/fonts/fonts.css" in client.get("/").text
+
+
+def test_the_display_and_body_faces_are_not_the_same_stack():
+    """The one-font tell: --font-display and --font-body were byte-identical
+    system-ui stacks, so the 'display face' was a naming convention, not a
+    typeface. Break it by making them equal again and this fails."""
+    tokens = client.get("/static/tokens.css")
+    assert tokens.status_code == 200
+    display = re.search(r"--font-display:\s*([^;]+);", tokens.text)
+    body = re.search(r"--font-body:\s*([^;]+);", tokens.text)
+    assert display and body, "tokens.css must define --font-display and --font-body"
+    assert display.group(1).strip() != body.group(1).strip(), \
+        "--font-display and --font-body are the same stack - that is a one-font page"

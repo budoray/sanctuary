@@ -16,9 +16,15 @@
   --color-shadow:      oklch(8% 0.01 60);
 
   /* type */
-  --font-display: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Two real faces, not one stack wearing two names. Display carries area
+     names, the wordmark and the character's name; mono carries every number
+     the engine rolled - the dice ledger IS the game's audit trail, so its
+     figures are tabular and its face is deliberate. Body stays system-ui:
+     it is the one role a system stack genuinely does well, and shipping a
+     third webfont to prove a point is bytes for nothing. */
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
   --font-body:    system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono:    ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
+  --font-mono:    "IBM Plex Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
 
   --text-xs:   0.75rem;
   --text-sm:   0.85rem;

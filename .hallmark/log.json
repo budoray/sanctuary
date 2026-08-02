@@ -1,9 +1,16 @@
 [
   {
+    "date": "2026-08-02",
+    "macrostructure": "Workbench",
+    "theme": "Midnight",
+    "enrichment": "none",
+    "brief": "Sanctuary - redesign: delve actions to the wide column, real display+mono faces"
+  },
+  {
     "date": "2026-08-01",
     "macrostructure": "Map / Diagram",
     "theme": "Midnight",
     "enrichment": "none",
-    "brief": "Sanctuary — OSRIC dungeon client"
+    "brief": "Sanctuary \u2014 OSRIC dungeon client"
   }
 ]

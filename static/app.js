@@ -449,6 +449,16 @@ function renderDelve(view) {
     exitsList.appendChild(li);
   });
 
+  // A heading over an empty <ul> reads as broken, not as "nothing here" -
+  // "Here" and "Inventory" both rendered as a label above void.
+  const emptyNote = (list, text) => {
+    if (list.children.length) return;
+    const li = document.createElement("li");
+    li.className = "empty";
+    li.textContent = text;
+    list.appendChild(li);
+  };
+
   const areaMonsters = document.getElementById("area-monsters");
   areaMonsters.innerHTML = "";
   (view.in_combat ? [] : view.monsters).forEach((m) => {
@@ -465,6 +475,10 @@ function renderDelve(view) {
     areaTreasure.appendChild(li);
   });
 
+  if (!view.in_combat) emptyNote(areaMonsters, "Nothing stirring.");
+  emptyNote(areaTreasure, "No treasure in sight.");
+  emptyNote(exitsList, "No way on from here.");
+
   const inventory = document.getElementById("inventory");
   inventory.innerHTML = "";
   view.inventory.forEach((t) => {
@@ -472,6 +486,7 @@ function renderDelve(view) {
     li.textContent = t;
     inventory.appendChild(li);
   });
+  emptyNote(inventory, "Nothing carried yet.");
 
   const log = document.getElementById("delve-log");
   log.innerHTML = "";

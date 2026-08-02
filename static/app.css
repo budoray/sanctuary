@@ -1,4 +1,13 @@
-/* Hallmark · genre: atmospheric · macrostructure: Map / Diagram · theme: Midnight · enrichment: elevation + display type · nav: N9 · footer: Ft2 */
+/* Hallmark · genre: atmospheric · macrostructure: Workbench · theme: Midnight
+ * enrichment: none (typography + the engine's own map) · nav: N9 · footer: Ft2
+ * pre-emit critique: P4 H5 E4 S5 R4 V4
+ *
+ * ⚠ This said "Map / Diagram" while the map sat at y=880 on a 720px viewport -
+ * below the fold, in a column that also held nothing else, while every control
+ * a player touches each turn was stacked in a 398px gutter. It is a Workbench:
+ * a tool whose surfaces are ordered by how often a hand reaches for them.
+ * Stamp what shipped, or delete the stamp.
+ */
 
 @keyframes fade-in {
   from { opacity: 0; }
@@ -8,6 +17,16 @@
 html, body { overflow-x: clip; }
 
 * { box-sizing: border-box; }
+
+/* ⚠ `[hidden]` is only `display: none` in the UA stylesheet, so ANY author
+   rule that sets `display` on the same element beats it. `#forge`'s own
+   `display: flex` did exactly that: app.js set `forge.hidden = true` at the
+   start of every delve and the character-creation form stayed on screen,
+   976px tall, shoving the map below the fold for the whole game.
+   Guard once, here, rather than per-element - the next `display:` rule
+   someone adds would otherwise re-open the same hole silently.
+   Guarded by tests/test_app.py::test_hiding_an_element_actually_hides_it. */
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -89,21 +108,19 @@ section, #forge, #arrange, #map-stage {
   padding: var(--space-6);
 }
 
-/* The map is the macrostructure of a delve: it earns the deepest elevation
-   on the page, sitting forward of everything else. */
-#map-stage { box-shadow: var(--shadow-2); }
+/* Rhythm, not uniformity. One rule used to give six different sections the
+   identical paper, border, radius and padding, so "Attack" and "Inventory"
+   read at exactly the same weight. Elevation on dark comes from LIGHTNESS -
+   a brighter surface is a nearer one - never from a coloured halo. */
+#party-status { padding: var(--space-5) var(--space-6) var(--space-6); }
+#tray { padding: var(--space-4) var(--space-5); background: var(--color-paper); }
+#sheet { background: var(--color-paper-2); box-shadow: var(--shadow-1); }
+#map-stage { background: var(--color-paper-3); box-shadow: var(--shadow-1); }
 
-/* The sheet and the ledger are the instruments a player actually reads from
-   turn to turn - real cards, lifting toward the viewer on hover. Nowhere
-   else on the page gets this; restraint is the point. */
-#sheet, #tray {
-  box-shadow: var(--shadow-1);
-  transition: transform var(--dur-short) var(--ease-out);
-}
-#sheet:hover, #tray:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-glow);
-}
+/* The map orients; it does not need half the page. Capped so the actions
+   beneath it stay above the fold on a laptop. */
+#map { max-height: min(38vh, 22rem); }
+.delve-map { max-height: min(38vh, 22rem); }
 
 /* Before a delve, the forge gets the whole stage - it is not a bordered
    box crowded into a grid cell. The portrait picker is the centrepiece, so
@@ -180,11 +197,14 @@ label { display: block; margin: var(--space-3) 0; font-size: var(--text-sm); col
   max-width: 100%;
 }
 
+/* Selection reads as a brighter, nearer surface plus an accent edge - not a
+   coloured halo bleeding into the paper around it. */
 .portrait-tile input:checked + label {
   border-color: var(--color-accent);
-  box-shadow: var(--shadow-glow);
+  background: var(--color-paper-3);
   transform: translateY(-2px);
 }
+.portrait-tile input:checked + label .portrait-name { color: var(--color-accent); }
 
 .portrait-tile input:disabled + label {
   opacity: 0.45;
@@ -256,6 +276,36 @@ main:has(#map-stage:not([hidden])) #who { font-size: var(--text-lg); margin: 0 0
 #area-description { color: var(--color-ink-2); margin-bottom: 0; }
 #map { width: 100%; overflow-x: auto; margin: var(--space-4) 0; }
 .delve-map { width: 100%; height: auto; min-width: 20rem; }
+
+/* ── combat changes the page ──────────────────────────────────────────────
+   app.js sets `#combat.hidden = !view.in_combat`, so `:has()` reads the
+   fight straight off the existing state - no new markup, no new JS. Without
+   this, a party mid-ambush saw a page pixel-identical to walking an empty
+   corridor: same card, same colour, same button voice. */
+main:has(#combat:not([hidden])) #party-status {
+  border-color: var(--color-danger);
+  background: color-mix(in oklch, var(--color-danger) 7%, var(--color-paper-2));
+}
+main:has(#combat:not([hidden])) #combat h3 { color: var(--color-danger); }
+
+/* Exploration is still reachable mid-fight (the buttons only disable), but
+   it stops competing for the eye. */
+main:has(#combat:not([hidden])) #exploration { opacity: 0.55; }
+main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
+
+#combat { border-top: 1px solid var(--color-rule); padding-top: var(--space-3); }
+#combat button { width: auto; min-width: 8rem; }
+
+/* Leaving is not the same kind of act as resting. */
+#flee, #leave-delve { border-color: color-mix(in oklch, var(--color-danger) 55%, var(--color-rule)); }
+#flee:hover:not(:disabled), #leave-delve:hover:not(:disabled) {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* An empty list under a heading reads as broken, not empty. app.js writes
+   the reason in; this only styles it. */
+.empty { color: var(--color-ink-2); font-size: var(--text-sm); font-style: italic; padding: var(--space-1) 0; }
 
 .map-node-rect { fill: var(--color-paper-3); stroke: var(--color-rule); stroke-width: 1; }
 .map-node-label {

@@ -1,6 +1,7 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>Sanctuary™</title>
+<link rel="stylesheet" href="/static/fonts/fonts.css">
 <link rel="stylesheet" href="/static/tokens.css">
 <link rel="stylesheet" href="/static/app.css">
 <header class="chrome">
@@ -131,19 +132,11 @@
       <div id="map"></div>
       <p id="area-description"></p>
     </section>
-  </div>
 
-  <aside id="instruments">
-    <section id="sheet" hidden>
-      <img id="portrait" alt="" width="96" height="96">
-      <h2 id="who"></h2>
-      <dl id="scores"></dl>
-      <p id="vitals"></p>
-      <h3>Saving throws</h3>
-      <dl id="saves"></dl>
-      <button id="begin-delve" type="button" disabled>Begin a delve</button>
-    </section>
-
+    <!-- The delve's actions live in the WIDE column, beside the map they act
+         on. They were in the narrow rail beneath the character sheet, which
+         put every decision a player makes each turn into a 398px gutter while
+         795px of the page showed a static drawing. -->
     <section id="party-status" hidden>
       <h3>Party</h3>
       <p><span id="party-vitals"></span> — XP <span id="xp">0</span></p>
@@ -174,6 +167,18 @@
       <ul id="inventory"></ul>
       <h3>What's happened</h3>
       <ul id="delve-log"></ul>
+    </section>
+  </div>
+
+  <aside id="instruments">
+    <section id="sheet" hidden>
+      <img id="portrait" alt="" width="96" height="96">
+      <h2 id="who"></h2>
+      <dl id="scores"></dl>
+      <p id="vitals"></p>
+      <h3>Saving throws</h3>
+      <dl id="saves"></dl>
+      <button id="begin-delve" type="button" disabled>Begin a delve</button>
     </section>
 
     <section id="tray">

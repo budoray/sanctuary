@@ -143,6 +143,37 @@ rather than assuming it's in a backlog; fetch results within 8 hours, and use
       **Swept, `v0.8.16-beta`** - see below and
       [`metrics/2026-08-02-statline-parse-impact.md`](metrics/2026-08-02-statline-parse-impact.md).
 
+## Gotchas earned in the client redesign (`v0.9.1-beta`)
+- **⚠⚠ `[hidden]` is ONLY `display: none` in the UA stylesheet, so any author
+  rule setting `display` on the same element WINS.** `#forge { display: flex }`
+  beat it, so `app.js`'s `forge.hidden = true` did nothing visible and the
+  character-creation form stayed on screen for the whole delve — 976px tall,
+  shoving the map to y=880 on a 720px viewport. **Every test passed**: they
+  checked the `.hidden` property and the HTML source, neither of which knows
+  what the cascade did. This is the platform's "check the CLIENT, not the
+  server" lesson one layer deeper — checking the client's *markup* is still not
+  checking what a player sees. Guarded now by
+  `[hidden] { display: none !important }` once, globally, plus
+  `test_hiding_an_element_actually_hides_it`.
+- **Measure the rendered page, not the stylesheet.** The audit that found this
+  read as three layout opinions until the numbers came back: map at y=880,
+  page 4.24 screens, actions in a 398px gutter beside a 795px column holding
+  one static SVG. Drive the real client and read `getBoundingClientRect`.
+- **The delve's actions now live in the WIDE column** (`#party-status` moved
+  from `#instruments` into `#stage`). `app.js` reaches every node by id and
+  never by parent, so moving nodes between containers is free — worth knowing
+  before the next layout change.
+- **Combat now changes the page** via `main:has(#combat:not([hidden]))`, read
+  off the `hidden` flag `app.js` already sets. No new markup, no new JS. Before
+  this, a party mid-ambush saw a page pixel-identical to an empty corridor.
+- **Two real faces, reused not re-sourced.** Source Serif 4 + IBM Plex Mono
+  were already licensed and shipped at `../static/fonts`; copied into this
+  game's own `/static` so the vhost never depends on another game's mount.
+  `--font-display` and `--font-body` had been byte-identical `system-ui`.
+- ⚠ **The browser pane caches `static/` hard.** Two verification passes read
+  the OLD tokens.css and reported the fonts as not loading. `fetch(url,
+  {cache:'reload'})` then re-navigate before believing a negative result.
+
 ## Gotchas earned in the corpus-wide statline sweep (`v0.8.16-beta`)
 The sweep found the landmine was not two records, it was **160 hit dice, 91
 experience awards and 6 armour classes** - 213,411 xp missing corpus-wide.
