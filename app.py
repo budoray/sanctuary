@@ -16,6 +16,7 @@ from fastapi.staticfiles import StaticFiles
 import tenshin_feedback
 import tenshin_version
 from sanctuary import character, tables
+from sanctuary.dice import Dice
 
 ROOT = Path(__file__).resolve().parent
 GAME = "sanctuary"
@@ -57,16 +58,34 @@ def licence():
             f"<p><a href=\"/\">← Sanctuary™</a></p></main>")
 
 
+@app.post("/api/roll-abilities")
+async def api_roll_abilities(request: Request):
+    """The six ability scores for (seed, mode), before ancestry, class or an
+    arrangement apply - what an arrangeable mode shows the player to arrange.
+    Uses a fresh Dice(seed), the same first thing character.generate() does
+    with it, so the values shown here are exactly what a later /api/character
+    call with the same seed will roll."""
+    body = await request.json()
+    try:
+        mode = str(body["mode"])
+        scores = character.roll_abilities(Dice(seed=int(body["seed"])), mode)
+    except (ValueError, KeyError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return {"scores": scores, "arrangeable": character.arrangeable(mode)}
+
+
 @app.post("/api/character")
 async def api_character(request: Request):
     body = await request.json()
     try:
+        arrangement = body.get("arrangement")
         c = character.generate(
             seed=int(body["seed"]),
             mode=str(body["mode"]),
             ancestry_name=str(body["ancestry"]),
             class_names=tuple(body["classes"]),
             name=str(body.get("name", "")),
+            arrangement=dict(arrangement) if arrangement is not None else None,
         )
     except (ValueError, KeyError, LookupError) as e:
         raise HTTPException(status_code=400, detail=str(e))

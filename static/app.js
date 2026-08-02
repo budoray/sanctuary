@@ -83,14 +83,15 @@ function renderLog(rolls) {
   }
 }
 
-document.getElementById("roll").addEventListener("click", async () => {
+async function finalizeCharacter(seed, arrangement) {
   const payload = {
-    seed: newSeed(),
+    seed,
     mode: document.getElementById("mode").value,
     ancestry: document.getElementById("ancestry").value,
     classes: [document.getElementById("klass").value],
     name: document.getElementById("name").value,
   };
+  if (arrangement) payload.arrangement = arrangement;
   const res = await fetch("/api/character", {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -105,6 +106,66 @@ document.getElementById("roll").addEventListener("click", async () => {
   const c = await res.json();
   renderSheet(c);
   renderLog(c.log);
+}
+
+// For an arrangeable mode, show the six rolled scores and let the player
+// assign each to an ability before the sheet is finalised - six <select>
+// elements (keyboard-accessible; no drag-and-drop-only path) is the whole UI.
+function renderArrangement(seed, scores) {
+  const abilities = Object.keys(scores);
+  const values = Object.values(scores);
+  const section = document.getElementById("arrange");
+  const fields = document.getElementById("arrange-fields");
+  fields.innerHTML = "";
+  for (const ability of abilities) {
+    const select = document.createElement("select");
+    select.id = `arrange-${ability}`;
+    select.dataset.ability = ability;
+    values.forEach((v, i) => {
+      const o = document.createElement("option");
+      o.value = i;
+      o.textContent = v;
+      select.appendChild(o);
+    });
+    select.value = abilities.indexOf(ability); // sensible default: roll order
+    fields.insertAdjacentHTML("beforeend", `<dt><label for="${select.id}">${ability}</label></dt>`);
+    const dd = document.createElement("dd");
+    dd.appendChild(select);
+    fields.appendChild(dd);
+  }
+  section.hidden = false;
+  section.dataset.seed = seed;
+}
+
+document.getElementById("roll").addEventListener("click", async () => {
+  const mode = document.getElementById("mode").value;
+  const seed = newSeed();
+  const rolled = await fetch("/api/roll-abilities", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ seed, mode }),
+  }).then((r) => r.json());
+
+  if (rolled.arrangeable) {
+    document.getElementById("sheet").hidden = true;
+    renderArrangement(seed, rolled.scores);
+    return;
+  }
+  document.getElementById("arrange").hidden = true;
+  await finalizeCharacter(seed, null);
+});
+
+document.getElementById("confirm-arrangement").addEventListener("click", async () => {
+  const section = document.getElementById("arrange");
+  const seed = Number(section.dataset.seed);
+  const selects = section.querySelectorAll("select[data-ability]");
+  const arrangement = {};
+  const rolledValues = Array.from(selects[0].options).map((o) => o.textContent);
+  for (const select of selects) {
+    arrangement[select.dataset.ability] = Number(rolledValues[select.value]);
+  }
+  section.hidden = true;
+  await finalizeCharacter(seed, arrangement);
 });
 
 document.getElementById("report").addEventListener("click", async () => {

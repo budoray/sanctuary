@@ -43,6 +43,35 @@ def roll_abilities(d: Dice, mode: str) -> dict[str, int]:
     return {name: d.roll(expr, reason=name).total for name in ABILITIES}
 
 
+def apply_arrangement(rolled: dict, arrangement: dict | None, mode: str) -> dict:
+    """The player's chosen assignment of the six already-rolled values to the
+    six abilities - `difficult` and `flexible` exist precisely so a player
+    can do this. No dice are rolled here; this only reorders what
+    `roll_abilities` already produced, which is what keeps a seeded replay
+    honest with or without an arrangement.
+
+    `arrangement` is None for "take the dice as they fall" - `rolled`
+    passes through unchanged. Otherwise it must name every ability exactly
+    once and use exactly the multiset of values `rolled` produced - not a
+    substitute value from thin air.
+    """
+    if arrangement is None:
+        return rolled
+    if not arrangeable(mode):
+        raise ValueError(
+            f"{mode} mode does not allow rearranging ability scores - only "
+            f"{'/'.join(sorted(_ARRANGEABLE))} do")
+    if set(arrangement) != set(ABILITIES):
+        raise ValueError(
+            f"arrangement must assign every ability exactly once: "
+            f"got {sorted(arrangement)}, need {sorted(ABILITIES)}")
+    if sorted(arrangement.values()) != sorted(rolled.values()):
+        raise ValueError(
+            f"arrangement must be a permutation of the rolled scores "
+            f"{sorted(rolled.values())}, not {sorted(arrangement.values())}")
+    return dict(arrangement)
+
+
 # Only these classes roll percentile strength. For everyone else an 18 is an 18.
 EXCEPTIONAL_CLASSES = ("fighter", "paladin", "ranger")
 
@@ -317,16 +346,25 @@ def _multiclass_hit_points(d: Dice, class_names, con_bonus: int) -> int:
 
 
 def generate(seed: int, mode: str, ancestry_name: str, class_names,
-             name: str = "") -> Character:
+             name: str = "", arrangement: dict | None = None) -> Character:
     """Roll a complete first-level character. Fully reproducible from
-    (seed, mode, ancestry, classes)."""
+    (seed, mode, ancestry, classes, arrangement).
+
+    `arrangement`, when given, assigns the six already-rolled scores to
+    abilities in a player-chosen order (only legal in `difficult` and
+    `flexible` mode - see `apply_arrangement`). It never re-rolls: the roll
+    log is identical with or without an arrangement, only which ability
+    each already-rolled value lands on changes.
+    """
     class_names = tuple(class_names)
     if not is_legal_multiclass(ancestry_name, class_names):
         raise ValueError(
             f"{ancestry_name} may not be {'/'.join(class_names)}")
 
     d = Dice(seed=seed)
-    scores = apply_ancestry(roll_abilities(d, mode), ancestry_name)
+    rolled = roll_abilities(d, mode)
+    arranged = apply_arrangement(rolled, arrangement, mode)
+    scores = apply_ancestry(arranged, ancestry_name)
 
     # Table 1.2.0A's own title is "Required Ability Scores AFTER ANCESTRAL
     # BONUSES" - checked here, immediately after apply_ancestry, and before

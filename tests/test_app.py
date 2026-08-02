@@ -78,6 +78,60 @@ def test_character_api_rejects_an_illegal_combination():
     assert r.status_code == 400
 
 
+def test_roll_abilities_api_returns_the_six_rolled_scores():
+    r = client.post("/api/roll-abilities", json={"seed": 13, "mode": "flexible"})
+    assert r.status_code == 200
+    body = r.json()
+    assert set(body["scores"]) == set(character.ABILITIES)
+    assert body["arrangeable"] is True
+
+
+def test_roll_abilities_api_matches_the_character_api_for_the_same_seed():
+    # The whole point: what the player arranges is exactly what generate()
+    # would have rolled anyway - roll-abilities never gets its own dice draws.
+    rolled = client.post("/api/roll-abilities", json={"seed": 13, "mode": "flexible"}).json()
+    c = client.post("/api/character", json={
+        "seed": 13, "mode": "flexible", "ancestry": "human", "classes": ["fighter"],
+    }).json()
+    assert rolled["scores"] == c["scores"]
+
+
+def test_roll_abilities_api_reports_non_arrangeable_modes():
+    r = client.post("/api/roll-abilities", json={"seed": 13, "mode": "normal"})
+    assert r.json()["arrangeable"] is False
+
+
+def test_character_api_accepts_an_arrangement_for_an_arrangeable_mode():
+    rolled = client.post("/api/roll-abilities", json={"seed": 13, "mode": "flexible"}).json()["scores"]
+    arrangement = dict(zip(character.ABILITIES, sorted(rolled.values(), reverse=True)))
+    r = client.post("/api/character", json={
+        "seed": 13, "mode": "flexible", "ancestry": "human", "classes": ["fighter"],
+        "arrangement": arrangement,
+    })
+    assert r.status_code == 200
+    assert r.json()["scores"]["strength"] == max(rolled.values())
+
+
+def test_character_api_rejects_an_arrangement_for_a_non_arrangeable_mode():
+    rolled = client.post("/api/roll-abilities", json={"seed": 13, "mode": "normal"}).json()["scores"]
+    arrangement = dict(zip(character.ABILITIES, sorted(rolled.values(), reverse=True)))
+    r = client.post("/api/character", json={
+        "seed": 13, "mode": "normal", "ancestry": "human", "classes": ["fighter"],
+        "arrangement": arrangement,
+    })
+    assert r.status_code == 400
+    assert "normal" in r.json()["detail"]
+
+
+def test_character_api_rejects_a_bad_arrangement_with_a_useful_message():
+    r = client.post("/api/character", json={
+        "seed": 13, "mode": "flexible", "ancestry": "human", "classes": ["fighter"],
+        "arrangement": {**{k: 10 for k in character.ABILITIES}, "strength": 99},
+    })
+    assert r.status_code == 400
+    assert "permutation" in r.json()["detail"]
+
+
 def test_selfcheck_reports_real_numbers():
     line = sanctuary_app.selfcheck()
     assert line.startswith("sanctuary self-check OK")

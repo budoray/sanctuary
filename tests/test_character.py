@@ -812,3 +812,112 @@ def test_multiclass_saving_throws_take_the_best_of_every_class():
 def test_generate_defers_constitution_hp_adjustment_and_armour_class():
     c = generate(seed=1, mode="normal", ancestry_name="human", class_names=("fighter",))
     assert c.armour_class == 10
+
+
+from sanctuary.character import apply_arrangement
+
+
+def test_arrangement_none_passes_rolled_scores_through_unchanged():
+    rolled = {name: v for name, v in zip(ABILITIES, range(3, 9))}
+    assert apply_arrangement(rolled, None, "hardest") is rolled
+
+
+def test_arrangement_rejected_for_a_non_arrangeable_mode():
+    rolled = {name: v for name, v in zip(ABILITIES, range(3, 9))}
+    arrangement = dict(zip(ABILITIES, reversed(range(3, 9))))
+    with pytest.raises(ValueError, match="hardest"):
+        apply_arrangement(rolled, arrangement, "hardest")
+
+
+def test_arrangement_rejected_for_normal_mode_too():
+    rolled = {name: v for name, v in zip(ABILITIES, range(3, 9))}
+    arrangement = dict(zip(ABILITIES, reversed(range(3, 9))))
+    with pytest.raises(ValueError, match="normal"):
+        apply_arrangement(rolled, arrangement, "normal")
+
+
+def test_arrangement_reassigns_values_to_abilities():
+    rolled = dict(zip(ABILITIES, (8, 9, 10, 11, 12, 13)))
+    # Put the highest roll (13) on strength instead of where it landed (charisma).
+    arrangement = dict(zip(ABILITIES, (13, 12, 11, 10, 9, 8)))
+    result = apply_arrangement(rolled, arrangement, "difficult")
+    assert result["strength"] == 13
+    assert result["charisma"] == 8
+
+
+def test_arrangement_must_cover_every_ability_exactly_once():
+    rolled = dict(zip(ABILITIES, (8, 9, 10, 11, 12, 13)))
+    incomplete = {k: v for k, v in list(rolled.items())[:5]}  # missing charisma
+    with pytest.raises(ValueError, match="every ability"):
+        apply_arrangement(rolled, incomplete, "flexible")
+
+
+def test_arrangement_must_be_a_permutation_not_a_substitution():
+    # No sneaking a 17 in for a rolled 7 - every value must come from `rolled`.
+    rolled = dict(zip(ABILITIES, (7, 9, 10, 11, 12, 13)))
+    cheating = dict(rolled)
+    cheating["strength"] = 17
+    with pytest.raises(ValueError, match="permutation"):
+        apply_arrangement(rolled, cheating, "flexible")
+
+
+def test_arrangement_rejects_duplicating_one_value_and_dropping_another():
+    rolled = dict(zip(ABILITIES, (7, 9, 10, 11, 12, 13)))
+    duplicated = dict(rolled)
+    duplicated["strength"] = duplicated["dexterity"]  # 9, dropping the rolled 7
+    with pytest.raises(ValueError, match="permutation"):
+        apply_arrangement(rolled, duplicated, "flexible")
+
+
+def test_generate_rejects_an_arrangement_in_a_non_arrangeable_mode():
+    arrangement = dict(zip(ABILITIES, range(3, 9)))
+    with pytest.raises(ValueError, match="normal"):
+        generate(seed=1, mode="normal", ancestry_name="human",
+                 class_names=("fighter",), arrangement=arrangement)
+
+
+def test_generate_rejects_a_non_permutation_arrangement():
+    rolled = roll_abilities(Dice(seed=1), "flexible")
+    cheating = dict(rolled)
+    cheating["strength"] = max(rolled.values()) + 1  # not among the rolled values
+    with pytest.raises(ValueError, match="permutation"):
+        generate(seed=1, mode="flexible", ancestry_name="human",
+                 class_names=("fighter",), arrangement=cheating)
+
+
+def test_generate_with_arrangement_is_reproducible():
+    rolled = roll_abilities(Dice(seed=13), "flexible")
+    arrangement = dict(zip(ABILITIES, sorted(rolled.values(), reverse=True)))
+    a = generate(seed=13, mode="flexible", ancestry_name="human",
+                 class_names=("fighter",), arrangement=arrangement)
+    b = generate(seed=13, mode="flexible", ancestry_name="human",
+                 class_names=("fighter",), arrangement=arrangement)
+    assert a == b
+    assert a.scores == arrangement
+
+
+def test_arrangement_does_not_change_the_roll_log():
+    # Arrangement assigns already-rolled values - it never re-rolls, so the
+    # log is identical whether or not (and however) the player arranges.
+    rolled = roll_abilities(Dice(seed=13), "flexible")
+    arrangement = dict(zip(ABILITIES, sorted(rolled.values(), reverse=True)))
+    plain = generate(seed=13, mode="flexible", ancestry_name="human", class_names=("fighter",))
+    arranged = generate(seed=13, mode="flexible", ancestry_name="human",
+                         class_names=("fighter",), arrangement=arrangement)
+    assert plain.log == arranged.log
+
+
+def test_arrangement_can_rearrange_a_character_into_legibility():
+    # The whole point of the arrangeable modes: a set of rolled scores that
+    # fails a class's minimums in roll order can pass once the player puts
+    # the right value on the right ability. mode="hardest" (3d6 in order),
+    # seed=1, human fighter is refused for a sub-9 Strength in roll order
+    # (see test_generate_rejects_a_class_the_rolled_scores_do_not_qualify_for);
+    # the same six values, arranged so the highest lands on Strength, must
+    # succeed in "difficult" mode (which rolls the same 3d6 expression).
+    rolled = roll_abilities(Dice(seed=1), "difficult")
+    best_first = sorted(rolled.values(), reverse=True)
+    arrangement = dict(zip(ABILITIES, best_first))
+    c = generate(seed=1, mode="difficult", ancestry_name="human",
+                 class_names=("fighter",), arrangement=arrangement)
+    assert c.scores["strength"] == best_first[0]

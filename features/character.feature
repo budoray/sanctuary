@@ -327,3 +327,13 @@ Feature: Rolling ability scores for a new character
   Scenario: A dwarf whose body never grew sturdy enough is turned away
     Given a player attempts to create a dwarf fighter with seed 2 in the hardest mode
     Then the attempt is refused for not meeting the dwarf's own requirements
+
+  Scenario: A player rolling in a flexible mode places their best score where they want it
+    Given a player rolling in the flexible mode with seed 13
+    When the player puts their highest roll on Strength
+    Then the adventurer's Strength is the highest of the six scores rolled
+    And the dice log shows no roll the player did not see
+
+  Scenario: A player is not offered an arrangement in the hardest mode
+    Given a player rolling in the hardest mode with seed 13
+    Then the player is not offered a way to rearrange the scores

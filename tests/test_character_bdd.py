@@ -537,3 +537,38 @@ def attempt_frail_dwarf(seed):
 def attempt_refused_for_dwarf_minimums(refused_attempt):
     with pytest.raises(ValueError, match="dwarf"):
         refused_attempt()
+
+
+@given(parsers.parse("a player rolling in the {mode} mode with seed {seed:d}"),
+       target_fixture="arrangement_ctx")
+def a_player_rolling_with_seed(mode, seed):
+    rolled = roll_abilities(Dice(seed=seed), mode)
+    return {"mode": mode, "seed": seed, "rolled": rolled}
+
+
+@when("the player puts their highest roll on Strength", target_fixture="arranged_character")
+def player_arranges_best_on_strength(arrangement_ctx):
+    rolled = arrangement_ctx["rolled"]
+    best_first = sorted(rolled.values(), reverse=True)
+    arrangement = dict(zip(ABILITIES, best_first))
+    return generate(seed=arrangement_ctx["seed"], mode=arrangement_ctx["mode"],
+                     ancestry_name="human", class_names=("fighter",),
+                     arrangement=arrangement)
+
+
+@then("the adventurer's Strength is the highest of the six scores rolled")
+def strength_is_the_highest_roll(arranged_character, arrangement_ctx):
+    assert arranged_character.scores["strength"] == max(arrangement_ctx["rolled"].values())
+
+
+@then("the dice log shows no roll the player did not see")
+def log_has_no_hidden_arrangement_roll(arranged_character, arrangement_ctx):
+    # Arrangement never rolls dice - the six ability rolls the player saw
+    # are the only ability rolls in the finished character's log.
+    ability_rolls = [r for r in arranged_character.log if r.reason in ABILITIES]
+    assert len(ability_rolls) == len(arrangement_ctx["rolled"])
+
+
+@then("the player is not offered a way to rearrange the scores")
+def player_not_offered_arrangement(arrangement_ctx):
+    assert not arrangeable(arrangement_ctx["mode"])
