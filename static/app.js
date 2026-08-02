@@ -331,6 +331,9 @@ let mapFlicker = 1;
 // Living monsters in the current room - renderMap rings the party's
 // light with them, so a fight is visible ON the map, not just in the rail.
 let mapMenace = 0;
+// Treasure piles in the current room - renderMap scatters a gold glint per
+// haul across the floor, so loot catches the eye before the rail is read.
+let mapTreasure = 0;
 // Arrow-key movement: the layout puts deeper areas to the RIGHT and the
 // way back to the LEFT, so ←/→ are the dungeon's natural verbs. Rebuilt
 // by renderMap from the same positions the corridors are drawn from.
@@ -665,6 +668,33 @@ function renderMap() {
       }
       ctx.restore();
     }
+    // Loot winks out of the dark: one gold spark per treasure haul, seeded
+    // by the room so a redraw never moves it, brightening with the torch's
+    // breath. The party cell stays clear - the spark must not read as a foe.
+    if (mapTreasure > 0) {
+      const accent = getComputedStyle(document.documentElement).getPropertyValue("--color-accent").trim() || "#e8a33d";
+      const partyX = cur.ox + Math.floor(cur.w / 2), partyY = cur.oy + Math.floor(cur.h / 2);
+      const phase = Math.max(0, Math.min(1, (mapFlicker - 0.93) / 0.07));
+      ctx.save();
+      ctx.shadowColor = accent;
+      ctx.shadowBlur = TILE_PX * 0.4;
+      ctx.fillStyle = accent;
+      for (let i = 0; i < mapTreasure; i++) {
+        const h2 = (mapCurrentId * 2654435761 + i * 974711) >>> 0;
+        let gx = cur.ox + (h2 % cur.w);
+        let gy = cur.oy + ((h2 >> 8) % cur.h);
+        if (gx === partyX && gy === partyY) gx = cur.ox + ((gx + 1 - cur.ox) % cur.w);
+        const cx = TX(gx) + TILE_PX / 2, cy = TY(gx) + TILE_PX / 2;
+        ctx.globalAlpha = 0.5 + 0.45 * phase;
+        const r = TILE_PX * 0.09, arm = TILE_PX * 0.2;
+        ctx.beginPath();   // a four-point spark: core dot plus short rays
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(cx - arm, cy - r * 0.28, arm * 2, r * 0.56);
+        ctx.fillRect(cx - r * 0.28, cy - arm, r * 0.56, arm * 2);
+      }
+      ctx.restore();
+    }
   }
 
   container.innerHTML = "";
@@ -773,6 +803,7 @@ function renderDelve(view) {
   mapMenace = view.in_combat && view.combat
     ? view.combat.monsters.filter((m) => m.alive).length
     : view.monsters.length;
+  mapTreasure = view.treasure.length;
   recordArea(view);
   renderMap();
 

@@ -3,6 +3,13 @@
     "date": "2026-08-02",
     "macrostructure": "Marquee Hero",
     "theme": "Midnight (deepened)",
+    "enrichment": "Tier-A CSS art (torch vignette + living map)",
+    "brief": "Sanctuary — the map as control surface: click/hover/arrow-key movement, hp gauges, touch embers, torch flicker, menace eyes, treasure glints, delve-over tally"
+  },
+  {
+    "date": "2026-08-02",
+    "macrostructure": "Marquee Hero",
+    "theme": "Midnight (deepened)",
     "enrichment": "Tier-A CSS art (torch vignette + lantern map)",
     "brief": "Sanctuary — one-screen delve HUD: 64px tiles, sheet rail left, map centre with ledger under, every action in a right rail; rails scroll, the page does not"
   },
