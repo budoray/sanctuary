@@ -1,0 +1,189 @@
+id: 2.12.1
+name: LOOT CLASSES
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+note: >
+  For any Loot Class, roll each line independently on d100. If the roll is
+  equal to or less than the percent chance, that line's treasure is present
+  (in addition to whatever else rolled true on the other lines) - a hoard
+  with every line failing is empty. Individual classes have no chance line;
+  they always produce their amount. qty is a Dice-module expression
+  (sanctuary.dice.Dice.roll); a x1000/x100/x10 multiplier is applied to the
+  roll's total after rolling, never folded into the dice expression itself.
+classes:
+  hoard_1:
+    label: HOARD 1
+    lines:
+      - {percent: 25, qty: "1d6", multiplier: 1000, kind: cp}
+      - {percent: 30, qty: "1d6", multiplier: 1000, kind: sp}
+      - {percent: 35, qty: "1d6", multiplier: 1000, kind: ep}
+      - {percent: 40, qty: "1d10", multiplier: 1000, kind: gp}
+      - {percent: 25, qty: "1d4", multiplier: 100, kind: pp}
+      - {percent: 60, qty: "4d10", multiplier: 1, kind: gems}
+      - {percent: 60, qty: "3d10", multiplier: 1, kind: jewellery}
+      - {percent: 30, qty: "3", multiplier: 1, kind: magic_item, spec: "any type"}
+  hoard_2:
+    label: HOARD 2
+    lines:
+      - {percent: 50, qty: "1d8", multiplier: 1000, kind: cp}
+      - {percent: 25, qty: "1d6", multiplier: 1000, kind: sp}
+      - {percent: 25, qty: "1d4", multiplier: 1000, kind: ep}
+      - {percent: 25, qty: "1d3", multiplier: 1000, kind: gp}
+      - {percent: 30, qty: "1d8", multiplier: 1, kind: gems}
+      - {percent: 20, qty: "1d4", multiplier: 1, kind: jewellery}
+      - {percent: 10, qty: "1", multiplier: 1, kind: magic_item, spec: "sword, armour, or weapon"}
+  hoard_3:
+    label: HOARD 3
+    lines:
+      - {percent: 20, qty: "1d12", multiplier: 1000, kind: cp}
+      - {percent: 30, qty: "1d6", multiplier: 1000, kind: sp}
+      - {percent: 10, qty: "1d4", multiplier: 1000, kind: ep}
+      - {percent: 25, qty: "1d6", multiplier: 1, kind: gems}
+      - {percent: 20, qty: "1d3", multiplier: 1, kind: jewellery}
+      - {percent: 10, qty: "2", multiplier: 1, kind: magic_item, spec: "any type"}
+  hoard_4:
+    label: HOARD 4
+    lines:
+      - {percent: 10, qty: "1d8", multiplier: 1000, kind: cp}
+      - {percent: 15, qty: "1d12", multiplier: 1000, kind: sp}
+      - {percent: 15, qty: "1d8", multiplier: 1000, kind: ep}
+      - {percent: 50, qty: "1d6", multiplier: 1000, kind: gp}
+      - {percent: 30, qty: "1d10", multiplier: 1, kind: gems}
+      - {percent: 25, qty: "1d6", multiplier: 1, kind: jewellery}
+      - {percent: 15, qty: "1", multiplier: 1, kind: magic_item, spec: "1 potion and 2 other magic items (any type)"}
+  hoard_5:
+    label: HOARD 5
+    lines:
+      - {percent: 5, qty: "1d10", multiplier: 1000, kind: cp}
+      - {percent: 25, qty: "1d12", multiplier: 1000, kind: sp}
+      - {percent: 25, qty: "1d6", multiplier: 1000, kind: ep}
+      - {percent: 25, qty: "1d8", multiplier: 1000, kind: gp}
+      - {percent: 15, qty: "1d12", multiplier: 1, kind: gems}
+      - {percent: 10, qty: "1d8", multiplier: 1, kind: jewellery}
+      - {percent: 25, qty: "1", multiplier: 1, kind: magic_item, spec: "1 scroll and 3 other magic items (any type)"}
+  hoard_6:
+    label: HOARD 6
+    lines:
+      - {percent: 10, qty: "1d20", multiplier: 1000, kind: sp}
+      - {percent: 15, qty: "1d12", multiplier: 1000, kind: ep}
+      - {percent: 40, qty: "1d10", multiplier: 1000, kind: gp}
+      - {percent: 35, qty: "1d8", multiplier: 100, kind: pp}
+      - {percent: 20, qty: "3d10", multiplier: 1, kind: gems}
+      - {percent: 10, qty: "1d10", multiplier: 1, kind: jewellery}
+      - {percent: 30, qty: "1", multiplier: 1, kind: magic_item, spec: "1 potion, 1 scroll, and 3 other magic items (any type other than sword or miscellaneous item)"}
+  hoard_7:
+    label: HOARD 7
+    lines:
+      - {percent: 50, qty: "10d4", multiplier: 1000, kind: gp}
+      - {percent: 50, qty: "1d20", multiplier: 100, kind: pp}
+      - {percent: 30, qty: "5d4", multiplier: 1, kind: gems}
+      - {percent: 25, qty: "1d10", multiplier: 1, kind: jewellery}
+      - {percent: 35, qty: "1", multiplier: 1, kind: magic_item, spec: "1 scroll, 4 other magic items (any type)"}
+  hoard_8:
+    label: HOARD 8
+    lines:
+      - {percent: 25, qty: "5d6", multiplier: 1000, kind: cp}
+      - {percent: 40, qty: "1d100", multiplier: 1000, kind: sp}
+      - {percent: 40, qty: "10d4", multiplier: 1000, kind: ep}
+      - {percent: 55, qty: "10d6", multiplier: 1000, kind: gp}
+      - {percent: 25, qty: "5d10", multiplier: 100, kind: pp}
+      - {percent: 50, qty: "1d100", multiplier: 1, kind: gems}
+      - {percent: 50, qty: "10d4", multiplier: 1, kind: jewellery}
+      - {percent: 15, qty: "1", multiplier: 1, kind: magic_item, spec: "1 potion, 1 scroll, and 4 other magic items"}
+  hoard_9:
+    label: HOARD 9
+    lines:
+      - {percent: 30, qty: "3d6", multiplier: 100, kind: pp}
+      - {percent: 55, qty: "2d10", multiplier: 1, kind: gems}
+      - {percent: 50, qty: "1d12", multiplier: 1, kind: jewellery}
+      - {percent: 15, qty: "1", multiplier: 1, kind: magic_item, spec: "any type"}
+  individual_1:
+    label: INDIVIDUAL 1
+    always: true
+    lines:
+      - {qty: "3d8", multiplier: 1, kind: cp, each: true}
+  individual_2:
+    label: INDIVIDUAL 2
+    always: true
+    lines:
+      - {qty: "3d6", multiplier: 1, kind: sp, each: true}
+  individual_3:
+    label: INDIVIDUAL 3
+    always: true
+    lines:
+      - {qty: "2d6", multiplier: 1, kind: ep, each: true}
+  individual_4:
+    label: INDIVIDUAL 4
+    always: true
+    lines:
+      - {qty: "2d4", multiplier: 1, kind: gp, each: true}
+  individual_5:
+    label: INDIVIDUAL 5
+    always: true
+    lines:
+      - {qty: "1d6", multiplier: 1, kind: pp, each: true}
+  cache_1:
+    label: CACHE 1
+    lines:
+      - {percent: 25, qty: "1d4", multiplier: 1000, kind: cp}
+      - {percent: 20, qty: "1d3", multiplier: 1000, kind: sp}
+  cache_2:
+    label: CACHE 2
+    lines:
+      - {percent: 30, qty: "1d6", multiplier: 1000, kind: sp}
+      - {percent: 25, qty: "1d2", multiplier: 1000, kind: ep}
+  cache_3:
+    label: CACHE 3
+    lines:
+      - {percent: 50, qty: "1d4", multiplier: 1, kind: gems}
+  cache_4:
+    label: CACHE 4
+    lines:
+      - {percent: 40, qty: "2d4", multiplier: 1000, kind: gp}
+      - {percent: 50, qty: "10d6", multiplier: 100, kind: pp}
+      - {percent: 55, qty: "4d8", multiplier: 1, kind: gems}
+      - {percent: 45, qty: "1d12", multiplier: 1, kind: jewellery}
+  cache_5:
+    label: CACHE 5
+    lines:
+      - {percent: 40, qty: "2d4", multiplier: 1, kind: magic_item, spec: "potions"}
+  cache_6:
+    label: CACHE 6
+    lines:
+      - {percent: 50, qty: "1d4", multiplier: 1, kind: magic_item, spec: "scrolls"}
+  cache_7:
+    label: CACHE 7
+    lines:
+      - {percent: 90, qty: "1d8", multiplier: 10, kind: gems}
+      - {percent: 80, qty: "5d6", multiplier: 1, kind: jewellery}
+      - {percent: 70, qty: "1", multiplier: 1, kind: magic_item, spec: "1 ring, 1 wand, 1 miscellaneous magic item, 1 magic armour, 1 magic sword, 1 miscellaneous magic weapon"}
+  cache_8:
+    label: CACHE 8
+    lines:
+      - {percent: 85, qty: "1", multiplier: 1, kind: magic_item, spec: "2 rings, 2 wands, 2 miscellaneous magic items, 2 magic armour, 2 magic swords, 2 miscellaneous magic weapons"}
+  cache_9:
+    label: CACHE 9
+    lines:
+      - {percent: 60, qty: "5d6", multiplier: 1000, kind: gp}
+      - {percent: 15, qty: "1d8", multiplier: 100, kind: pp}
+      - {percent: 60, qty: "1d8", multiplier: 10, kind: gems}
+      - {percent: 50, qty: "5d8", multiplier: 1, kind: jewellery}
+      - {percent: 55, qty: "1", multiplier: 1, kind: map}
+  cache_10:
+    label: CACHE 10
+    lines:
+      - {percent: 60, qty: "1", multiplier: 1, kind: magic_item, spec: "1 potion and 1 miscellaneous magic item"}
+  cache_11:
+    label: CACHE 11
+    lines:
+      - {percent: 70, qty: "2d6", multiplier: 1000, kind: gp}
+  cache_12:
+    label: CACHE 12
+    lines:
+      - {percent: 20, qty: "1d3", multiplier: 1000, kind: cp}
+      - {percent: 25, qty: "1d4", multiplier: 1000, kind: sp}
+      - {percent: 25, qty: "1d4", multiplier: 1000, kind: ep}
+      - {percent: 30, qty: "1d4", multiplier: 1000, kind: gp}
+      - {percent: 30, qty: "1d6", multiplier: 100, kind: pp}
+      - {percent: 55, qty: "1d6", multiplier: 10, kind: gems}
+      - {percent: 50, qty: "5d6", multiplier: 1, kind: jewellery}
+      - {percent: 50, qty: "3", multiplier: 1, kind: magic_item, spec: "any type"}
