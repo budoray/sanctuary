@@ -876,6 +876,9 @@ function renderDelve(view) {
     // A wound announces itself: the chip of anyone who lost hp since the
     // last view pulses blood-red once, then settles back to its bar.
     if (p.name in prevHpByName && p.hp < prevHpByName[p.name]) chip.classList.add("hp-hit");
+    // A mend answers in lamp-gold: rest or a kind ruling lifts the bar,
+    // and the chip glows warm for a beat to say so.
+    if (p.name in prevHpByName && p.hp > prevHpByName[p.name]) chip.classList.add("hp-mend");
     // The fallen read as a memorial, not a meter: name struck, chip dimmed.
     if (p.hp <= 0) chip.classList.add("dead");
     vitals.appendChild(chip);
@@ -1190,6 +1193,10 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
   delveSessionId = view.session_id;
   exploredAreas = {};
   mapRootId = null;
+  // A fresh delve starts the rail's memory fresh too - no mend pulse for
+  // hp the new party never gained, no gold flash for xp it never earned.
+  prevHpByName = {};
+  prevXp = 0;
   renderDelve(view);
 });
 
