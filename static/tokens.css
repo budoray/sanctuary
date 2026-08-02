@@ -1,19 +1,22 @@
-/* Hallmark tokens · Midnight — dark paper, single warm amber accent, lamplight not neon */
+/* Hallmark tokens · Midnight, deepened — torchlit dread.
+ * The paper sinks from 16% to 13% lightness and the accent slides from
+ * amber (hue 62) toward ember (hue 52): the dark gets deeper so the one
+ * warm light in it reads as carried fire, not decoration. */
 :root {
   color-scheme: dark;
 
   /* colour */
-  --color-paper:      oklch(16% 0.012 60);
-  --color-paper-2:     oklch(21% 0.014 60);
-  --color-paper-3:     oklch(26% 0.016 60);
-  --color-ink:         oklch(90% 0.008 70);
-  --color-ink-2:       oklch(68% 0.010 70);
-  --color-rule:        oklch(32% 0.014 60);
-  --color-accent:      oklch(72% 0.14 62);
-  --color-accent-ink:  oklch(18% 0.02 60);
-  --color-focus:       oklch(78% 0.13 62);
-  --color-danger:      oklch(60% 0.16 25);
-  --color-shadow:      oklch(8% 0.01 60);
+  --color-paper:      oklch(13% 0.012 55);
+  --color-paper-2:     oklch(17.5% 0.014 55);
+  --color-paper-3:     oklch(22.5% 0.016 55);
+  --color-ink:         oklch(90% 0.008 65);
+  --color-ink-2:       oklch(66% 0.010 65);
+  --color-rule:        oklch(29% 0.014 55);
+  --color-accent:      oklch(74% 0.15 52);
+  --color-accent-ink:  oklch(16% 0.02 55);
+  --color-focus:       oklch(80% 0.13 52);
+  --color-danger:      oklch(58% 0.17 28);
+  --color-shadow:      oklch(7% 0.01 55);
 
   /* type */
   /* Two real faces, not one stack wearing two names. Display carries area
@@ -54,11 +57,20 @@
   --radius-lg: 14px;
   --radius-full: 999px;
 
+  /* tap floor: WCAG 2.5.8 wants 24px; the house standard is a named token */
+  --tap: 2.25rem;
+
   /* motion */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:  cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
   --dur-short: 220ms;
 
-  /* elevation: tight dark contact shadow + wide warm lamplight glow, never a black blur */
+  /* layering */
+  --z-sticky: 200;
+
+  /* elevation: tight dark contact shadow + wide warm firelight glow, never a black blur */
   --shadow-1: 0 1px 2px color-mix(in oklch, var(--color-shadow) 45%, transparent),
               0 6px 16px color-mix(in oklch, var(--color-shadow) 35%, transparent);
   --shadow-2: 0 2px 6px color-mix(in oklch, var(--color-shadow) 50%, transparent),

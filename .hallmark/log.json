@@ -1,6 +1,13 @@
 [
   {
     "date": "2026-08-02",
+    "macrostructure": "Marquee Hero",
+    "theme": "Midnight (deepened)",
+    "enrichment": "Tier-A CSS art (torch vignette + ember blooms)",
+    "brief": "Sanctuary — torchlit dread: forge as marquee, carried-light map halo, combat shifts the canvas, N5 pill chrome, Ft5 close"
+  },
+  {
+    "date": "2026-08-02",
     "macrostructure": "Workbench",
     "theme": "Midnight",
     "enrichment": "none",
@@ -11,6 +18,6 @@
     "macrostructure": "Map / Diagram",
     "theme": "Midnight",
     "enrichment": "none",
-    "brief": "Sanctuary \u2014 OSRIC dungeon client"
+    "brief": "Sanctuary — OSRIC dungeon client"
   }
 ]

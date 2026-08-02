@@ -141,6 +141,8 @@ function renderLog(rolls) {
     log.appendChild(li);
     animate(faces, r.faces);
   }
+  // The newest roll is the one that matters - keep it in view.
+  log.scrollTop = log.scrollHeight;
 }
 
 async function finalizeCharacter(seed, arrangement) {
@@ -353,6 +355,14 @@ function renderMap() {
       class: `map-node enter ${area.visited ? "visited" : "ghost"} ${isCurrent ? "current" : ""}`,
       transform: `translate(${x - NODE_W / 2}, ${y - NODE_H / 2})`,
     });
+    // The room the party stands in carries the only warm light on the map -
+    // a halo behind the rect whose opacity breathes (CSS: torch-breathe).
+    if (isCurrent) {
+      g.appendChild(svgEl("circle", {
+        cx: NODE_W / 2, cy: NODE_H / 2, r: Math.max(NODE_W, NODE_H) * 0.72,
+        class: "map-node-halo",
+      }));
+    }
     g.appendChild(svgEl("rect", { width: NODE_W, height: NODE_H, rx: 10, class: "map-node-rect" }));
     const label = svgEl("text", { x: NODE_W / 2, y: NODE_H / 2, class: "map-node-label" });
     label.textContent = area.visited ? area.name : "unexplored";
@@ -495,6 +505,7 @@ function renderDelve(view) {
     li.textContent = line;
     log.appendChild(li);
   });
+  log.scrollTop = log.scrollHeight;
 
   const exploring = !view.in_combat && !view.finished && !decisionPending;
   document.getElementById("search").disabled = !exploring;
