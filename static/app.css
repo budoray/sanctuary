@@ -448,6 +448,11 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
 /* ── party instruments ───────────────────────────────────────────────── */
 #exploration ul, #combat ul, #inventory, #delve-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
 #exits button { width: 100%; text-align: left; display: flex; align-items: center; gap: var(--space-3); }
+/* Map-hover sync: the rail answers when a corridor is hovered on the map.
+   Same lift as a real hover so the two read as one control. */
+@media (hover: hover) and (pointer: fine) {
+  #exits button.map-hover { background: var(--color-paper-3); transform: translateY(-1px); border-color: var(--color-accent); }
+}
 .exit-icon { width: 32px; height: 32px; flex: none; image-rendering: pixelated; border-radius: var(--radius-sm); }
 #combat-monsters li.selectable { cursor: pointer; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
 #combat-monsters li.selectable:hover { background: var(--color-paper-3); }

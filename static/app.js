@@ -622,11 +622,16 @@ function renderMap() {
     const hoverTo = t ? t.to : null;
     if (hoverTo !== mapHoverTo) {
       mapHoverTo = hoverTo;
+      syncRailHover();
       renderMap();
     }
   });
   canvas.addEventListener("mouseleave", () => {
-    if (mapHoverTo !== null) { mapHoverTo = null; renderMap(); }
+    if (mapHoverTo !== null) {
+      mapHoverTo = null;
+      syncRailHover();
+      renderMap();
+    }
   });
   canvas.addEventListener("click", (ev) => {
     if (!mapMovesEnabled) return;
@@ -652,6 +657,14 @@ let mapCurrentId = null;
 // The area the map last centred itself on - so hover redraws don't fight
 // the user's own scrolling.
 let mapScrollAreaId = null;
+
+// Mirror the map's hover state onto the rail: the exit button for the
+// hovered corridor gets .map-hover, every other button loses it.
+function syncRailHover() {
+  document.querySelectorAll("#exits button").forEach((b) => {
+    b.classList.toggle("map-hover", mapHoverTo !== null && Number(b.dataset.to) === mapHoverTo);
+  });
+}
 
 function renderDelve(view) {
   document.getElementById("forge").hidden = true;
@@ -746,6 +759,22 @@ function renderDelve(view) {
       : view.finished ? "The delve is over."
       : "";
     btn.addEventListener("click", () => act("move", { to: e.to }, btn));
+    // Two-way sync: hovering the rail button lights its corridor on the
+    // map, the same glow hovering the corridor itself would paint.
+    btn.addEventListener("mouseenter", () => {
+      if (btn.disabled) return;
+      mapHoverTo = Number(e.to);
+      renderMap();
+    });
+    btn.addEventListener("mouseleave", () => {
+      if (mapHoverTo !== Number(e.to)) return;
+      // Moving straight from the button onto its corridor must not kill
+      // the glow the canvas just set - defer to whatever the pointer is
+      // actually over now.
+      if (document.querySelector("#map canvas:hover")) return;
+      mapHoverTo = null;
+      renderMap();
+    });
     li.appendChild(btn);
     exitsList.appendChild(li);
   });
