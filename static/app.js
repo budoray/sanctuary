@@ -135,12 +135,16 @@ let prevRollsLen = 0;
 
 function renderLog(rolls) {
   const log = document.getElementById("log");
-  log.innerHTML = "";
-  const freshFrom = rolls.length > prevRollsLen ? prevRollsLen : rolls.length;
-  rolls.forEach((r, i) => {
+  // The roll log is append-only by engine guarantee, so the ledger renders
+  // that way too: rebuilding every row on every act costs O(turns) each
+  // time - a 300-turn soak measured 166ms for a single render. Reset only
+  // when memory was reset (a fresh delve, a re-forged character) or the
+  // impossible happened and the log shrank.
+  if (prevRollsLen === 0 || rolls.length < prevRollsLen) log.innerHTML = "";
+  for (let i = log.children.length; i < rolls.length; i++) {
+    const r = rolls[i];
     const li = document.createElement("li");
-    const fresh = i >= freshFrom;
-    if (fresh) li.className = "enter";
+    li.className = "enter";
     const faces = document.createElement("b");
     li.appendChild(faces);
     const modText = r.mods ? ` ${r.mods > 0 ? "+" : ""}${r.mods}` : "";
@@ -148,9 +152,8 @@ function renderLog(rolls) {
       ` <code>${r.expr}</code>${modText} = <strong>${r.total}</strong>` +
       (r.reason ? ` <em>${r.reason}</em>` : ""));
     log.appendChild(li);
-    if (fresh) animate(faces, r.faces);
-    else faces.textContent = r.faces.join(" ");
-  });
+    animate(faces, r.faces);
+  }
   prevRollsLen = rolls.length;
   // The newest roll is the one that matters - keep it in view.
   log.scrollTop = log.scrollHeight;
@@ -1155,14 +1158,15 @@ function renderDelve(view) {
   emptyNote(inventory, "Nothing carried yet.");
 
   const log = document.getElementById("delve-log");
-  log.innerHTML = "";
-  view.log.forEach((line, i) => {
+  // Append-only like the ledger: build (and fade) only the lines that are
+  // new, unless memory was reset and the chronicle starts over.
+  if (prevDelveLogLen === 0 || view.log.length < prevDelveLogLen) log.innerHTML = "";
+  for (let i = log.children.length; i < view.log.length; i++) {
     const li = document.createElement("li");
-    // What's happened arrives line by line: only the new entries fade in.
-    if (i >= prevDelveLogLen) li.classList.add("enter");
-    li.textContent = line;
+    li.classList.add("enter");
+    li.textContent = view.log[i];
     log.appendChild(li);
-  });
+  }
   prevDelveLogLen = view.log.length;
   log.scrollTop = log.scrollHeight;
   // A young delve has no history: the heading stays out of the way until
