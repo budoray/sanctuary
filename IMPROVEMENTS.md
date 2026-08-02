@@ -53,8 +53,10 @@ rather than assuming it's in a backlog; fetch results within 8 hours, and use
 - [x] Ch.5 Monsters → `v0.5.0`
 - [x] Ch.6 Treasure → `v0.6.0`
 - [x] Campaign format and authoring → `v0.7.0`
-- [ ] First playable → `v0.8.0` (runtime + solo driver + client wiring shipped this
-      chapter at `v0.7.x`; Dr. Ray moves the minor at the chapter boundary)
+- [x] First playable → `v0.8.0` (runtime + solo driver + client wiring shipped this
+      chapter at `v0.7.x`; Dr. Ray moves the minor at the chapter boundary).
+      Chapter closed at `v0.9.0-beta` (Dr. Ray, 2026-08-02) — the corpus-wide
+      statline sweep below was the last item in it.
 - [ ] Party (real-time, sockets, keyed by player name) and async drivers over the
       same `runtime.State` - `session.py` was written so `runtime` stays ignorant
       of which driver is in use
@@ -134,7 +136,48 @@ rather than assuming it's in a backlog; fetch results within 8 hours, and use
   clean `experience` value) rather than in `runtime.py`, which is out of
   this fix's file scope - worth an audit of the rest of the corpus for the
   same pattern if it recurs.
-- [ ] Only `bat_mobat` was audited for the hyphen/multi-tier data landmine
+- [x] Only `bat_mobat` was audited for the hyphen/multi-tier data landmine
       above; a full corpus sweep for other `hit_dice`/`experience` fields
       that parse but mean something else wasn't done - `resolve_name`
       making more of the corpus reachable will keep surfacing these.
+      **Swept, `v0.8.16-beta`** - see below and
+      [`metrics/2026-08-02-statline-parse-impact.md`](metrics/2026-08-02-statline-parse-impact.md).
+
+## Gotchas earned in the corpus-wide statline sweep (`v0.8.16-beta`)
+The sweep found the landmine was not two records, it was **160 hit dice, 91
+experience awards and 6 armour classes** - 213,411 xp missing corpus-wide.
+- **An unreadable statline degraded to HD 1 / `1d8` IN SILENCE.** Every dragon,
+  giant, elemental, titan, treant, whale and lich in the book instantiated as a
+  first-level chump, and nothing anywhere said so. The fix that matters is not
+  the parser, it is that `_hd_and_hp_expr`'s output is now asserted against the
+  corpus's own famous monsters, per the platform's "guard on OUTPUT, not
+  inventory".
+- **Fixed in the PARSER, not in `data/`** - reversing the earlier `bat_mobat`
+  precedent deliberately. `data/monsters/` belongs to the extractor and the
+  round-trip test re-extracts it, so 250 hand-edits would be clobbered on the
+  next run. The book genuinely prints `"9 to 11"`, `"12 or more"` and
+  `"1,400 +14/hp"`; reading those leniently is the reader's job.
+- **⚠ The book's dashes are EN DASHES (U+2013), not hyphens** - `"17–22"`,
+  `"–3 [23]"`. Every `[+-]` and `-?\d+` pattern misses them, which is how a pit
+  fiend's AC −3 became AC 10, the easiest target in the book. The corpus is
+  CORRECT here and the round-trip proves it; normalise on read, never in data.
+  ⚠ Do not trust a terminal's rendering of these - a console that cannot encode
+  U+2013 prints it as `�`, which reads exactly like extractor corruption
+  and sent this fix chasing a bug that did not exist.
+- **`"N+M"` hit dice are N dice plus M HIT POINTS.** The modifier was being
+  dropped, so a troll rolled `6d8` rather than `6d8+6` - along with the whole
+  demon, devil and giant shelf.
+- **The `experience` field is not a number.** It carries thousands separators
+  (`"1,400 +14/hp"` → the old `\d+` search returned **1**), per-HD tiers
+  (`"4 HD: 75 +4/hp"` → returned **4**, the HD count) and HD/XP pairs
+  (`"9/5,900"` → returned **9**).
+- **Hit POINTS appear in the hit-dice field** (`"1 hit point"`, `"50 hp"`).
+  `Dice.roll` cannot express a constant, so `_hd_and_hp_expr` returns a third
+  `fixed_hp` value - rolling `50d8` for a clay golem is worse than not rolling.
+- **`app.py`'s self-check was asking a HARDCODED Downloads path** whether the
+  OSRIC PDFs existed - months after commit `638d9cd` replaced that lookup with
+  `sanctuary/sources.py` for exactly this reason. It fixed `tests/` and
+  `tools/` and missed `app.py`. The books were in `_reference/osric` the whole
+  time; the gate printed `round-trip UNVERIFIED` at every run, and the test
+  guarding that sentence accepted the *word* "UNVERIFIED" anywhere in it, so
+  the lie was load-bearing. **When a lookup moves, grep for the old literal.**

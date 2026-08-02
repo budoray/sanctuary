@@ -119,3 +119,41 @@ def finds_the_dire_wolf(resolved):
 @then("it finds no monster, rather than a wrong one")
 def finds_no_monster(resolved):
     assert resolved is None
+
+
+# --------------------------------------------------------------------
+# A statline the engine cannot read does not fail loudly - it quietly
+# yields a 1 HD monster worth single-digit XP wearing no armour. These
+# scenarios watch the OUTPUT of the corpus's own famous monsters.
+# --------------------------------------------------------------------
+
+@when("the party meets whatever that names", target_fixture="instance")
+def the_party_meets_it(printed_name):
+    from sanctuary import runtime
+    from sanctuary.dice import Dice
+    record = bestiary.resolve_name(printed_name)
+    assert record is not None, f"{printed_name!r} no longer resolves"
+    return runtime._instantiate_monster(Dice(1), record)
+
+
+@then(parsers.parse("it fights with at least {least:d} hit dice"))
+def fights_with_hit_dice(instance, least):
+    from sanctuary import runtime
+    assert int(runtime._LOOSE_HD.match(instance.hd_notation).group(1)) >= least
+
+
+@then("it has more hit points than a housecat")
+def more_hp_than_a_housecat(instance):
+    # 8 is the best a single d8 can roll, which is all a 1 HD statline can
+    # ever produce - so this fails the moment a dragon collapses back to one.
+    assert instance.max_hp > 8
+
+
+@then(parsers.parse("killing it is worth at least {least:d} experience"))
+def worth_at_least(instance, least):
+    assert instance.xp >= least
+
+
+@then("its armour class is better than an unarmoured commoner's")
+def armour_better_than_a_commoner(instance):
+    assert instance.armour_class < 10  # OSRIC counts DOWN: lower is better

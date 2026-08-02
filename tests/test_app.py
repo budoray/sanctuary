@@ -194,9 +194,18 @@ def test_selfcheck_portrait_count_is_distinct_files_not_one_per_class():
 
 
 def test_selfcheck_states_whether_the_round_trip_is_verified():
+    """⚠ This used to accept the WORD "verified" anywhere in the line, which
+    an `app.py` asking a hardcoded Downloads path satisfied for months while
+    the books sat in `_reference/osric` and the gate reported UNVERIFIED at
+    every run. Assert against `sources` - the one resolver that decides."""
+    from sanctuary import sources
     line = sanctuary_app.selfcheck()
     assert "round-trip" in line
-    assert "verified" in line or "UNVERIFIED" in line
+    d = sources.osric_dir()
+    if d is None:
+        assert "NOT re-extractable" in line
+    else:
+        assert str(d) in line, "the gate must name the books it actually found"
 
 
 def _art():

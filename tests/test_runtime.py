@@ -375,3 +375,95 @@ def test_a_generated_encounter_resolves_a_bestiary_monster_and_earns_xp():
 
     pytest.fail("no generated dungeon in 30 seeds produced a resolvable bestiary "
                 "encounter - resolve_name regressed")
+
+
+# --------------------------------------------------------------------
+# Statline parsing: the corpus prints the BOOK's forms, not clean numbers.
+# Each case below is a real string lifted from data/monsters/.
+# --------------------------------------------------------------------
+
+@pytest.mark.parametrize("printed,notation,hp_expr,fixed_hp", [
+    # clean forms that already worked - these must not regress
+    ("1", "1", "1d8", None),
+    ("6 [14]", "6", "6d8", None),
+    ("1d8-1  hit points", "1-1", "1d8-1", None),
+    # a plus is HIT POINTS, not decoration: a troll is 6d8+6, never 6d8
+    ("6+6", "6+6", "6d8+6", None),
+    ("7+7", "7+7", "7d8+7", None),
+    # ranges - the whole dragon shelf, previously HD 1 with 1d8 hit points
+    ("9 to 11", "9", "9d8", None),          # dragon_red
+    ("12 to 36", "12", "12d8", None),       # whale
+    ("12 or more", "12", "12d8", None),     # lich
+    ("2, 3, or 4", "2", "2d8", None),       # seahorse_giant
+    ("8, 12, or 16 8, 12, or 16", "8", "8d8", None),   # elemental_air
+    ("3 to 8 (GM decides, or roll 1d6+2)", "3", "3d8", None),   # ankheg
+    # the book sets its ranges with an EN DASH, which no [+-] pattern matches
+    ("17\u201322", "17", "17d8", None),                  # titan
+    ("7\u201312 (1d6+6 if randomly determined)", "7", "7d8", None),   # treant
+    ("1\u20134 HD", "1", "1d8", None),                   # leech_giant
+    # collapsed multi-creature records: one value per variant, take the first
+    ("8 5+1 6 4+2 7", "8", "8d8", None),    # black_blue_green_red_white
+    ("3+3 7", "3+3", "3d8+3", None),        # boar
+    # hit points printed directly, not hit dice
+    ("1 hit point", "1", "1d8", 1),         # rot_grub
+    ("50 hp 40 hp 80 hp 60 hp", "1", "1d8", 50),   # clay_golem...
+    # nothing numeric at all
+    ("N/A N/A", "1", "1d8", None),          # brown_yellow
+])
+def test_hit_dice_reads_the_forms_the_book_actually_prints(printed, notation, hp_expr, fixed_hp):
+    assert runtime._hd_and_hp_expr(printed) == (notation, hp_expr, fixed_hp)
+
+
+@pytest.mark.parametrize("printed,xp", [
+    ("10 +1 per hp", 10),            # orc - already worked
+    ("525 +8/hp", 525),              # troll - already worked
+    ("1,400 +14/hp", 1400),          # achaiyerai - was 1
+    ("17,500 +30/hp", 17500),        # kraken - was 17
+    ("at least 10,000 +16/hp", 10000),   # lich - was 10
+    ("9/5,900 +23/hp", 5900),        # dread_wraith - was 9
+    ("4 HD: 75 +4/hp  5 HD: 110 +5/hp", 75),     # hell_hound - was 4
+    ("8 HD: 900 +12/hp 12 HD: 2,000 +16/hp", 900),   # elemental - was 8
+    ("Varies by HD: 3 HD: 65 +2/hp 4 HD: 105 +3/hp", 65),   # ankheg - was 3
+    ("7HD: 1,295 +8/hp  8HD: 1,600 +10/hp", 1295),   # treant - was 7
+    ("Warrior 110 +2/hp  Leader (4HD) 145 +3/hp", 110),   # triton
+    ("", 0),
+])
+def test_experience_reads_the_forms_the_book_actually_prints(printed, xp):
+    assert runtime._xp_from({"experience": printed}) == xp
+
+
+def test_an_explicit_xp_field_still_wins_over_the_printed_text():
+    assert runtime._xp_from({"xp": 42, "experience": "1,400 +14/hp"}) == 42
+
+
+@pytest.mark.parametrize("printed,ac", [
+    ("6 [14]", 6),
+    ("\u20133 [23]", -3),                      # pit_fiend - was 10
+    ("\u20138 [28]", -8),                      # will_o_the_wisp - was 10
+    ("Usually 7 [13]", 7),                     # mystic_nomad - was 10
+    ("Body 0 [20]; head 2 [18]", 0),           # remorhaz - was 10
+    ("Naturally 8 [12], some wear   armour", 8),   # yellowmusk_vine_zombie
+    ("By  armour type", 10),                   # buccaneer_pirate - no number
+    ("Depends on HD (see below)", 10),         # titan - no number
+])
+def test_armour_class_reads_the_forms_the_book_actually_prints(printed, ac):
+    assert runtime._armour_class_from({"armour_class": printed}) == ac
+
+
+def test_no_shipped_monster_silently_becomes_a_one_hit_die_pushover():
+    """A statline that fails to parse used to degrade to HD 1 / 1d8 in
+    SILENCE - which made every dragon, giant and elemental in the corpus a
+    first-level chump. Guard on the OUTPUT: the corpus's own big monsters
+    must instantiate big."""
+    from sanctuary import bestiary
+    from sanctuary.dice import Dice
+
+    d = Dice(1)
+    for name, least_hd in [("Dragon, Red", 9), ("Titan", 17), ("Treant", 7),
+                           ("Whale", 12), ("Lich", 12), ("Troll", 6)]:
+        rec = bestiary.resolve_name(name)
+        assert rec is not None, f"{name} no longer resolves"
+        inst = runtime._instantiate_monster(d, rec)
+        hd = int(runtime._LOOSE_HD.match(inst.hd_notation).group(1))
+        assert hd >= least_hd, f"{name} instantiated at HD {hd}, expected >= {least_hd}"
+        assert inst.max_hp >= least_hd, f"{name} rolled {inst.max_hp} hp on {least_hd}+ HD"

@@ -27,12 +27,14 @@ vhost and no unit. The row exists so the platform can SEE it: a game in no regis
 cannot fail a parity check, which is how two games once sat pushed-and-undeployed with
 every board green.
 
-⚠ **Its gate is GREEN** — `python -m pytest tests/ -q` → 478 passed, 2 skipped, `tests/test_corpus.py`
-→ 10 passed, 2 skipped, and `python app.py test` prints the self-check sentence. The two skips are
-the PDF-dependent corpus round-trip tests - the source PDFs are not present in this environment, so
-the round-trip guarantee is unverified here (see `test_corpus_is_internally_consistent_without_the_pdfs`
-for what still runs without them). Recorded rather than assumed; a gate someone just ran is worth
-more than one nobody has checked.
+⚠ **Its gate is GREEN** — `python -m pytest tests/ -q` → 998 passed, 0 skipped, at the
+`v0.9.0-beta` chapter boundary (2026-08-02), and `python app.py test` prints the self-check
+sentence. Recorded rather than assumed; a gate someone just ran is worth more than one nobody
+has checked.
+⚠ **The corpus round-trip RUNS here** — the OSRIC PDFs live in `../_reference/osric`, which
+`sanctuary/sources.py` resolves. It reported "UNVERIFIED" for months only because `app.py` was
+still asking a hardcoded `~/Downloads` path (fixed `v0.8.16-beta`). If you see that claim again,
+check `sources.osric_dir()` before believing it.
 
 <!-- tenshin:platform:start -->
 **Two documents.** Global standards + future work: the SSoT

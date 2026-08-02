@@ -39,7 +39,23 @@ _CHANCE = re.compile(r"^(\d+)-in-(\d+)$")
 _EVERY = re.compile(r"^(\d+)\s*(turn|hour)s?$")
 _LEAD_DICE = re.compile(r"^(\d+)d(\d+)([+-]\d+)?")
 _HD_NOTATION = re.compile(r"^(\d+)([+-]\d+)?$")
-_LEAD_INT = re.compile(r"-?\d+")
+
+# A bestiary statline carries the BOOK's printed form, never a clean number:
+# ranges ("9 to 11", "12 or more"), per-HD tiers ("4 HD: 75 +4/hp"), thousands
+# separators ("1,400 +14/hp"), hit points where hit dice belong ("50 hp"), and
+# a collapsed record's one-value-per-variant ("8 5+1 6 4+2 7"). Read leniently
+# HERE rather than editing 250 files - the extractor owns data/monsters/, and a
+# hand-edit is clobbered the next time it runs.
+# ⚠ The book sets its ranges and its negative armour classes with an EN DASH
+# (U+2013 - "17–22", "–3 [23]"), not a hyphen, so every `[+-]` pattern below
+# misses them. That is the source's own typography faithfully extracted, not
+# corruption: normalise on read, never "fix" it in data/.
+_DASHES = re.compile(r"[‐-―−]")
+_FIXED_HP = re.compile(r"^(\d+)\s*(?:hp\b|hit points?\b)", re.IGNORECASE)
+_LOOSE_HD = re.compile(r"^(\d+)\s*(?:(?:to|or|-)\s*\d+)?\s*([+-]\d+)?")
+_XP_TIER = re.compile(r"\(?\d+\s*HD\)?\s*:?", re.IGNORECASE)
+_XP_LEAD_HD = re.compile(r"^\s*\d+\s*/")
+_THOUSANDS = re.compile(r"(?<=\d),(?=\d\d\d\b)")
 _SIMPLE_ATTACK = re.compile(r"\d+d\d+([+-]\d+)?")
 _LOOT_TOKEN = re.compile(r"\b(hoard|individual|cache)\s+(\d+)\b", re.IGNORECASE)
 
@@ -111,12 +127,19 @@ def _tier3_from_abilities(abilities) -> list[str]:
     return out
 
 
-def _hd_and_hp_expr(hit_dice_field) -> tuple[str, str]:
-    """(hd_notation, hp_expr). Bestiary records write hit dice as a
+def _hd_and_hp_expr(hit_dice_field) -> tuple[str, str, int | None]:
+    """(hd_notation, hp_expr, fixed_hp). Bestiary records write hit dice as a
     rollable expression ("1d8-1  hit points"); module-local monsters
     write OSRIC's HD notation directly ("3+1", "6"). Either way we need
-    both a table-lookup notation and something `Dice.roll` accepts."""
-    s = str(hit_dice_field).strip()
+    both a table-lookup notation and something `Dice.roll` accepts.
+
+    `fixed_hp` is set only where the book prints hit POINTS in the hit-dice
+    field ("1 hit point", "50 hp") - `Dice.roll` cannot express a constant,
+    and rolling 50d8 for a clay golem is worse than not rolling at all."""
+    s = _DASHES.sub("-", str(hit_dice_field)).strip()
+    m = _FIXED_HP.match(s)
+    if m:
+        return "1", "1d8", int(m.group(1))
     m = _LEAD_DICE.match(s)
     if m:
         n, faces, mod = m.groups()
@@ -127,13 +150,56 @@ def _hd_and_hp_expr(hit_dice_field) -> tuple[str, str]:
             notation = f"{n}+1"
         else:
             notation = n
-        return notation, hp_expr
+        return notation, hp_expr, None
     m = _HD_NOTATION.match(s)
-    n = m.group(1) if m else "1"
+    if m:
+        n, mod = m.group(1), m.group(2)
+        # "17-22" is a RANGE the book prints, not OSRIC's "-1" hit-point
+        # penalty. Only -1 is ever printed as a penalty; anything deeper is
+        # the low end of a spread, so take it and drop the modifier.
+        if mod and int(mod) < -1:
+            return n, f"{n}d8", None
+        # A "+N" is N EXTRA HIT POINTS - dropping it made a troll 6d8, not
+        # 6d8+6, for every monster on the demon/devil/giant shelf.
+        return s, f"{n}d8{mod or ''}", None
+    m = _LOOSE_HD.match(s)
+    if m:
+        # ponytail: a range ("9 to 11"), an open end ("12 or more") and a
+        # collapsed record's variant list ("8 5+1 6 4+2 7") all resolve to
+        # their FIRST value. Upgrade path for the collapsed ones is splitting
+        # the record, which is already on IMPROVEMENTS.md's queue; a range
+        # would want a seeded roll, which needs the Dice this function has
+        # no access to. Either beats the silent HD 1 this used to return.
+        n, mod = m.group(1), m.group(2)
+        return f"{n}{mod or ''}", f"{n}d8{mod or ''}", None
     # ponytail: a module-local monster without a dice-shaped hit_dice
     # field defaults to d8 per HD (OSRIC's standard HD). Upgrade path: add
     # a `hit_die` field to the schema if a monster needs a different one.
-    return (s if m else "1"), f"{n}d8"
+    return "1", "1d8", None
+
+
+def _xp_from(record: dict) -> int:
+    """The monster's experience award. The printed field carries thousands
+    separators ("1,400 +14/hp"), per-HD tiers ("4 HD: 75 +4/hp") and the
+    occasional "HD/XP" pair ("9/5,900") - each of which handed the first
+    `\\d+` match something that was not the award."""
+    xp = record.get("xp")
+    if xp is not None:
+        return int(xp)
+    raw = _XP_LEAD_HD.sub("", str(record.get("experience", "0")))
+    raw = _THOUSANDS.sub("", _XP_TIER.sub(" ", raw))
+    m = re.search(r"\d+", raw)
+    return int(m.group()) if m else 0
+
+
+def _armour_class_from(record: dict) -> int:
+    """The monster's armour class. Printed with the ascending-AC equivalent
+    in brackets ("6 [14]"), sometimes behind prose ("Usually 7 [13]"), and
+    twice with an EN DASH for the minus sign ("–3 [23]") - which no `-?\\d+`
+    matches, so a pit fiend defaulted to AC 10, the easiest target in the book."""
+    src = _DASHES.sub("-", str(record.get("armour_class", "10"))).strip()
+    m = re.search(r"-?\d+", src)
+    return int(m.group()) if m else 10
 
 
 @dataclass
@@ -151,17 +217,16 @@ class MonsterInstance:
 
 
 def _instantiate_monster(dice_: Dice, record: dict) -> MonsterInstance:
-    hd_notation, hp_expr = _hd_and_hp_expr(record.get("hit_dice", "1"))
-    ac_match = _LEAD_INT.match(str(record.get("armour_class", "10")))
-    ac = int(ac_match.group()) if ac_match else 10
-    hp = max(1, dice_.roll(hp_expr, reason=f"{record['name']} hit points").total)
+    hd_notation, hp_expr, fixed_hp = _hd_and_hp_expr(record.get("hit_dice", "1"))
+    ac = _armour_class_from(record)
+    if fixed_hp is not None:
+        hp = max(1, fixed_hp)
+    else:
+        hp = max(1, dice_.roll(hp_expr, reason=f"{record['name']} hit points").total)
     attacks_text = str(record.get("attacks") or record.get("melee_attacks") or "1d6")
     modeled, tier3 = _split_attacks(attacks_text)
     tier3 = tier3 + _tier3_from_abilities(record.get("abilities"))
-    xp = record.get("xp")
-    if xp is None:
-        xp_m = re.search(r"\d+", str(record.get("experience", "0")))
-        xp = int(xp_m.group()) if xp_m else 0
+    xp = _xp_from(record)
     return MonsterInstance(
         name=record["name"], hd_notation=hd_notation, armour_class=ac,
         hp=hp, max_hp=hp, attacks=modeled, xp=int(xp),

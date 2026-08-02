@@ -37,3 +37,19 @@ Feature: Looking up and adjusting monsters at the table
     Given the monster tables print "Barghest" for an encounter
     When the game looks up which monster that names
     Then it finds no monster, rather than a wrong one
+
+  Scenario: A dragon arrives at the table as a dragon, not a first-level chump
+    Given the monster tables print "Dragon, Red" for an encounter
+    When the party meets whatever that names
+    Then it fights with at least 9 hit dice
+    And it has more hit points than a housecat
+
+  Scenario: A kraken is worth a kraken's experience
+    Given the monster tables print "Kraken" for an encounter
+    When the party meets whatever that names
+    Then killing it is worth at least 10000 experience
+
+  Scenario: The book's most heavily armoured devil is not the easiest thing to hit
+    Given the monster tables print "Pit Fiend" for an encounter
+    When the party meets whatever that names
+    Then its armour class is better than an unarmoured commoner's

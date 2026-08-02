@@ -34,7 +34,8 @@ from fastapi.staticfiles import StaticFiles
 import tenshin_feedback
 import tenshin_gate
 import tenshin_version
-from sanctuary import character, module as module_mod, procgen, runtime, session, tables
+from sanctuary import (character, module as module_mod, procgen, runtime, session,
+                       sources, tables)
 from sanctuary.dice import Dice
 
 ROOT = Path(__file__).resolve().parent
@@ -318,11 +319,14 @@ def selfcheck() -> str:
                    'id="back"', 'id="signout"', "Sanctuary™"):
         assert needle in index_html, f"client is missing {needle!r}"
 
-    pdfs_present = all(p.exists() for p in (
-        Path("C:/Users/budor/Downloads/OSRIC-3.0-Player-Guide-FINAL.v.7.pdf"),
-        Path("C:/Users/budor/Downloads/OSRIC_3.0_Gamemaster_Guide.pdf"),
-    ))
-    round_trip = "verified" if pdfs_present else "UNVERIFIED (source PDFs not present)"
+    # ⚠ This asked a HARDCODED Downloads path whether the books were there,
+    # months after `sources.py` replaced that lookup for exactly this reason.
+    # The books sat in `_reference/osric` the whole time and the gate reported
+    # UNVERIFIED at every run - a self-check that is wrong about what it
+    # checked is worse than one that checks nothing.
+    osric_dir = sources.osric_dir()
+    round_trip = (f"re-extractable from {osric_dir}" if osric_dir
+                  else f"NOT re-extractable (books not in {sources.searched()})")
 
     n_areas, n_reachable, xp_earned, turns_elapsed = _runtime_selfcheck()
 
