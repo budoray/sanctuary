@@ -37,18 +37,29 @@ def isolated_overlay_dir(tmp_path, monkeypatch):
 
 def test_all_monsters_returns_every_book_monster_overlays_applied():
     docs = bestiary.all_monsters()
-    assert len(docs) == 291
+    assert len(docs) == 303
     bestiary.edit("goblin", morale=999)
     docs = bestiary.all_monsters()
     goblin = next(d for d in docs if d["name"] == "Goblin")
     assert goblin["morale"] == 999
 
 
-def test_the_full_corpus_is_291_monsters():
-    """The count reconciliation gate: 291 is the GM Guide's own stated count
-    (verified independently: `FREQUENCY ` opens exactly 291 stat blocks in the
-    source text, and no other section of the book uses that label)."""
-    assert len(bestiary.base_ids()) == 291
+def test_the_full_corpus_is_303_monsters():
+    """The count reconciliation gate: 291 is the GM Guide's own stated stat-block
+    count (verified independently: `FREQUENCY ` opens exactly 291 stat blocks in
+    the source text, and no other section of the book uses that label) - but 6 of
+    those 291 blocks are the extractor's own collapsed multi-variant entries
+    (`werebear_wereboar_wererat_weretiger_werewolf.yaml` and 5 others - one of
+    them, `normal_dire.yaml`, even carries the table's own column headers as its
+    NAME field instead of "Wolf"/"Wolf, Dire", the flagship example of the bug
+    this fix addresses), each printing several creatures' stats side by side in
+    one record with no way to reach an individual one by name. This encounter-
+    resolution fix (S4) splits those 6 files into 18 per-variant records where
+    the source genuinely gives per-variant combat stats
+    (hit_dice/armour_class/melee_attacks/experience) - net 291 - 6 + 18 = 303.
+    See `resolve_name`'s docstring and `tests/test_bestiary_resolve.py` for why
+    this mattered."""
+    assert len(bestiary.base_ids()) == 303
 
 
 def test_every_monster_has_all_13_required_fields_or_is_a_reviewed_exception():
@@ -65,8 +76,10 @@ def test_every_monster_has_all_13_required_fields_or_is_a_reviewed_exception():
 
 def test_no_encountered_is_the_one_genuine_optional():
     present = sum(1 for slug in bestiary.base_ids() if bestiary.load(slug).get("no_encountered"))
-    # ~253/291 per the design; a wide but real band, not "present on all of them".
-    assert 200 <= present < 291
+    # ~253/291 per the design; the split variants (S4) don't carry the field at
+    # all (see test_the_full_corpus_is_302_monsters), so the band is unchanged
+    # but the ceiling moves with the corpus size.
+    assert 200 <= present < 303
 
 
 def test_no_ligature_survives_in_the_corpus():

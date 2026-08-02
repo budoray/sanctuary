@@ -95,3 +95,46 @@ rather than assuming it's in a backlog; fetch results within 8 hours, and use
       `"1: CONTAINERS"`. Fix is to allow `(?:\.\d+)?` in the id group, then re-extract (Ch.6 work).
 - [ ] Ability-conditioned level limits — `data/ancestries.yaml` stores best-case ceilings only;
       Ch.3 levelling must also check the relevant ability score.
+
+## Gotchas earned fixing the encounter-resolution defect (S4, `v0.8.x`)
+- **The GM Guide's D100 monster tables and the bestiary's own heading slugs
+  never agreed on name order.** `bestiary.resolve_name()` now sits between
+  a printed table name (`"Wolf, Dire"`, `"Devil, Assagim"`) and the corpus,
+  trying the comma-inverted and category-dropped forms, a bare word
+  reversal, and last a UNIQUE contiguous match inside another monster's own
+  name field - never a fuzzy guess. `runtime._find_monster_record` is the
+  only caller; it used to catch `bestiary.load()`'s `KeyError` directly.
+- **`normal_dire.yaml` was the flagship bug, hiding in plain sight.** The
+  extractor had mislabeled a genuine Wolf/Dire-Wolf collapsed entry with
+  the source table's own column headers ("Normal"/"Dire") AS the monster's
+  `name` field - so even a human skimming `data/monsters/` would read past
+  it as unrelated. Split into `wolf.yaml` / `wolf_dire.yaml`.
+- **A handful of `data/monsters/` files collapse SEVERAL creatures' stat
+  blocks into one record** (`werebear_wereboar_wererat_weretiger_werewolf.yaml`
+  and 5 others) - the extractor's per-line prose/data judgement runs on the
+  whole block (see the "extractor is dumb on purpose" gotcha above), so a
+  page with several breeds side by side becomes one record with none of
+  them reachable by name. Split where the source gives genuinely separate
+  combat stats per variant (hit_dice/armour_class/melee_attacks/experience);
+  left collapsed - and matched by any of its names via `resolve_name`'s
+  substring fallback - where the book prints one stat block for several
+  breeds and splitting would mean inventing numbers. Split variants carry
+  `abilities: []` - the source text interleaves several creatures' special
+  abilities with no clean per-creature boundary; a follow-up could recover
+  them by slicing on the embedded ALL-CAPS creature-name markers the same
+  way `description` was recovered.
+- **A resolvable name can still carry unparsable stats.** Two more corpus
+  quirks surfaced only once `resolve_name` made them reachable: `bat_mobat`'s
+  `hit_dice: "4-6"` parsed as HD 4 with a **-6 hit-point modifier** (the
+  same hyphen-overload `tables.in_range` already documents, but
+  `runtime._hd_and_hp_expr`'s own regex has the identical landmine and had
+  never been exercised), and its `experience` field's "4HD: ... 5HD: ...
+  6HD: ..." text handed `_instantiate_monster` the literal number `4` as
+  the monster's XP. Fixed at the data layer (`hit_dice: '4'`, a single
+  clean `experience` value) rather than in `runtime.py`, which is out of
+  this fix's file scope - worth an audit of the rest of the corpus for the
+  same pattern if it recurs.
+- [ ] Only `bat_mobat` was audited for the hyphen/multi-tier data landmine
+      above; a full corpus sweep for other `hit_dice`/`experience` fields
+      that parse but mean something else wasn't done - `resolve_name`
+      making more of the corpus reachable will keep surfacing these.

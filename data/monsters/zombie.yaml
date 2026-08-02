@@ -1,0 +1,19 @@
+name: Zombie
+frequency: rare very rare no.  encountered 3d8 1d6
+size: medium large
+alignment: neutral neutral
+move: 60ft 90ft
+armour_class: 8 [12]
+hit_dice: '2'
+melee_attacks: 1 strike (1d8)
+senses: Infravision 60ft Infravision 60ft
+lair_chance: Nil Nil
+intelligence: non- (0) non- (0)
+morale: N/A N/A
+loot: Nil Nil
+experience: 30 +1/hp
+description: Zombies are the risen corpses of the dead. In many cases they  have been
+  animated by a powerful spell caster, though some - times zombies rise from other
+  supernatural influences. Once  they begin to attack, they never flee unless turned
+  by a cleric.
+abilities: []

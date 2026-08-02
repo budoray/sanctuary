@@ -326,3 +326,52 @@ def test_no_soft_lock_across_many_generated_dungeons():
             runtime.leave(st)
 
         assert st.finished, f"seed {seed} never reached a terminal state"
+
+
+# ---------------------------------------------------------------------
+# Acceptance: a generated encounter resolves to a REAL bestiary monster
+# and can actually be fought - the defect this fix targets (S4).
+# ---------------------------------------------------------------------
+
+def test_a_generated_encounter_resolves_a_bestiary_monster_and_earns_xp():
+    """Before `bestiary.resolve_name`, almost every generated encounter's
+    printed name (e.g. "Wolf, Dire") matched no bestiary slug, so combat
+    never ran and a solo delve always earned 0 XP - see IMPROVEMENTS.md.
+    This proves the actual repair: search generated dungeons for a combat
+    whose monster came from the bestiary (not a module-local monster, and
+    not `unresolved`), fight it with `resolve.attack` through the public
+    `attack_round` API, and confirm the party earns XP > 0 for it."""
+    from sanctuary import bestiary
+
+    bestiary_slugs = set(bestiary.base_ids())
+
+    for seed in range(30):
+        doc = procgen.generate_dungeon(seed, target_areas=8, dungeon_level=1)
+        mod = module.load(doc)
+        party = [_party(seed * 10 + 1), _party(seed * 10 + 2, "cleric", "Meva")]
+        st = runtime.new_game(mod, party, seed=seed)
+
+        if st.combat is None or st.combat.unresolved:
+            continue
+        resolved_from_bestiary = [
+            m for m in st.combat.monsters if bestiary._slug(m.name) in bestiary_slugs
+        ]
+        if not resolved_from_bestiary:
+            continue
+
+        # A real fight: attack until it's over, never touching state by hand.
+        budget = 100
+        while st.combat is not None and budget > 0:
+            budget -= 1
+            if st.pending_decisions:
+                runtime.decide(st, 0, "the DM improvises a ruling")
+                continue
+            runtime.attack_round(st)
+
+        if st.xp > 0:
+            return  # found one - the acceptance criterion is proven
+        # An unlucky party wipe earns 0 XP legitimately - that's not a
+        # resolve_name failure, just bad dice. Try the next seed.
+
+    pytest.fail("no generated dungeon in 30 seeds produced a resolvable bestiary "
+                "encounter - resolve_name regressed")

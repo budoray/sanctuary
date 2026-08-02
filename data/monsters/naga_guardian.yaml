@@ -1,0 +1,25 @@
+name: Naga, Guardian
+frequency: very rare rare uncommon
+size: large (20ft long) large (15ft long) medium (10ft long)
+alignment: lawful good chaotic evil neutral
+move: 150ft 120ft 90ft swimming
+armour_class: 3 [17]
+hit_dice: 11 to 12
+melee_attacks: 1 bite (1d6) and tail lash (2d8)
+senses: Infravision 60ft, Detect  invisible 30% Infravision 60ft, Detect  invisible
+  5 to 15% Infravision 60ft
+lair_chance: 75% 60% 45%
+intelligence: exceptional (15-16) high (13-14) very (11-12)
+morale: 100 to 105 90 to 95 80 to 85
+loot: Hoard 8 Hoard 2, Cache 6 and 10 Hoard 4
+experience: 3,500 +10/hp
+description: 'GUARDIAN NAGA A guardian naga appears as a long, snake-like creature
+  with a  human head, golden eyes, and green-gold scales. The scales  along its spine
+  are triangular and silvery. Guardian naga are mostly found in holy places. They
+  serve as  sentinels over some ancient evil or treasure belonging to the  cause of
+  good. Spells. The guardian naga casts clerical spells as a 6th level caster: • 1st
+  level: 3 • 2nd Level: 3 • 3rd level: 2 Poison Bite.  In addition to piercing damage,
+  the naga’s bite is  poisonous. Anyone hit by the naga’s bite must make a saving  throw
+  vs. poison or die. Spit Poison. The naga can spit poison up to 30ft at any single  target
+  (to-hit roll required), and the target must save vs poison  or die.'
+abilities: []

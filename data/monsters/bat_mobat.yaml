@@ -5,14 +5,14 @@ size: medium
 alignment: neutral evil
 move: 30ft; 150ft flying (AA:IV)
 armour_class: 2 [18] or 10 [10]
-hit_dice: 4-6
+hit_dice: '4'
 melee_attacks: 1 bite (2d4)
 senses: Echolocation
 lair_chance: 15%
 intelligence: low (5-7)
 morale: 65, 70 or 75
 loot: Hoard 3
-experience: '4HD: 135 +3/hp 5HD: 190 +4/hp 6HD: 300 +6/hp'
+experience: 135 +3/hp
 description: The very large mobat is found in warm regions where a plentiful  supply of warm-blooded prey is available. These evil creatures  may work with other evil species of any kind that can commu - nicate with them.
 abilities:
 - heading: Surprise and Initiative

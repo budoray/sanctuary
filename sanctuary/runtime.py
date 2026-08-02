@@ -173,10 +173,7 @@ def _find_monster_record(module_: Module, name: str) -> dict | None:
     for m in module_.doc.get("monsters") or []:
         if m.get("name", "").lower() == name.lower():
             return m
-    try:
-        return bestiary.load(name)
-    except KeyError:
-        return None
+    return bestiary.resolve_name(name)
 
 
 # --------------------------------------------------------------------

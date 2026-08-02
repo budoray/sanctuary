@@ -96,3 +96,26 @@ def look_up_abilities(monster):
 @then("its Toxic Cloud is still there in the text, not silently dropped")
 def toxic_cloud_present(abilities_text):
     assert "Toxic Cloud" in abilities_text
+
+
+@given(parsers.parse('the monster tables print "{printed_name}" for an encounter'),
+       target_fixture="printed_name")
+def the_monster_tables_print(printed_name):
+    return printed_name
+
+
+@when("the game looks up which monster that names", target_fixture="resolved")
+def the_game_looks_it_up(printed_name):
+    return bestiary.resolve_name(printed_name)
+
+
+@then("it finds the dire wolf, ready to fight")
+def finds_the_dire_wolf(resolved):
+    assert resolved is not None
+    assert bestiary._slug(resolved["name"]) == "wolf_dire"
+    assert resolved["hit_dice"]
+
+
+@then("it finds no monster, rather than a wrong one")
+def finds_no_monster(resolved):
+    assert resolved is None

@@ -27,3 +27,13 @@ Feature: Looking up and adjusting monsters at the table
     Given the achaiyerai, a monster with a special attack beyond simple combat
     When a GM looks up what it can do
     Then its Toxic Cloud is still there in the text, not silently dropped
+
+  Scenario: A generated encounter's printed name is recognised as a real monster
+    Given the monster tables print "Wolf, Dire" for an encounter
+    When the game looks up which monster that names
+    Then it finds the dire wolf, ready to fight
+
+  Scenario: An encounter name the book doesn't contain is never guessed at
+    Given the monster tables print "Barghest" for an encounter
+    When the game looks up which monster that names
+    Then it finds no monster, rather than a wrong one
