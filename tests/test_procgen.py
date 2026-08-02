@@ -85,12 +85,27 @@ def test_target_areas_below_one_is_rejected():
 
 
 def test_fudges_are_tagged_and_reasoned_in_the_roll_log():
-    _, dice_ = procgen.generate_dungeon(1, target_areas=12, return_dice=True)
-    fudge_rolls = procgen.fudges(dice_)
-    assert fudge_rolls
+    """The book tells the GM to freely fudge an impossible result; the rule here
+    is that a fudge is LOGGED, never hidden - a generator that swallows its
+    retries cannot be debugged from a seed.
+
+    ⚠ Do not pin this to one magic seed. It was pinned to seed 1, which fudged
+    only because table 2.7.3.2f was damaged in the corpus; repairing the
+    extractor removed the fudge and the test failed for a good reason. Scan for
+    a seed that genuinely fudges instead, so the assertion tracks the behaviour
+    rather than one accident of the data.
+    """
+    for seed in range(1, 60):
+        _, dice_ = procgen.generate_dungeon(seed, target_areas=12, return_dice=True)
+        fudge_rolls = procgen.fudges(dice_)
+        if fudge_rolls:
+            break
+    else:
+        raise AssertionError("no seed in 1..59 produced a fudge to inspect")
+
     for r in fudge_rolls:
         assert r.tags.get("fudge") is True
-        assert r.reason.startswith("fudge:")
+        assert r.reason.startswith("fudge:"), r.reason
 
 
 def test_every_roll_comes_from_the_shared_dice_log():
