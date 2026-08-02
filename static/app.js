@@ -314,6 +314,11 @@ function layoutMap(rootId) {
 // untouched.
 
 const TILE_PX = 64;
+// Corridor cells leading out of the current room -> {to, label}; rebuilt by
+// renderMap, consulted by the canvas click/hover handlers. mapMovesEnabled
+// mirrors the exit buttons' disabled state (combat, ruling due, delve over).
+const mapClickTargets = new Map();
+let mapMovesEnabled = false;
 const TILE_NAMES = [
   "floor_cobblestone", "floor_flagstone", "floor_packed_dirt", "floor_worn_stone",
   "wall_dressed_stone", "wall_rough_hewn_rock",
@@ -390,6 +395,10 @@ function renderMap() {
   // into the dark. Passages between visited rooms are remembered as well
   // (corrCells): the light punches through them softly, so explored
   // dungeon reads as connected space, not islands.
+  // Corridors OUT of the current room are also the move controls: their
+  // cells are recorded in mapClickTargets so a click (or tap) on the map
+  // walks that way - actions on the map, not just beside it.
+  mapClickTargets.clear();
   const corrCells = [];
   const edgesSeen = new Set();
   for (const id in exploredAreas) {
@@ -418,6 +427,22 @@ function renderMap() {
         for (let y = a.midY; y !== b.midY + step; y += step) {
           putFloor(x1, y);
           corrCells.push([x1, y]);
+        }
+      }
+      // A corridor touching the current room is a move control: every cell
+      // of it (and of the stub into the dark) walks that way on click.
+      const curIsA = String(mapCurrentId) === aId;
+      const curIsB = String(mapCurrentId) === bId;
+      if (curIsA || curIsB) {
+        const seen = exploredAreas[curIsA ? bId : aId];
+        const label = seen && seen.visited && seen.name
+          ? `${kind || "way"} to ${seen.name}`
+          : `${kind || "way"} into the dark`;
+        const target = { to: Number(curIsA ? bId : aId), label };
+        for (let x = x0; x <= xEnd; x++) mapClickTargets.set(key(x, a.midY), target);
+        if (bSeen && a.midY !== b.midY) {
+          const step = b.midY > a.midY ? 1 : -1;
+          for (let y = a.midY; y !== b.midY + step; y += step) mapClickTargets.set(key(x1, y), target);
         }
       }
       if (kind.includes("door")) {
@@ -482,6 +507,8 @@ function renderMap() {
   canvas.className = "delve-map";
   canvas.setAttribute("role", "img");
   canvas.setAttribute("aria-label", "Dungeon floor plan of areas explored so far");
+  canvas.dataset.minX = minX;   // tile-space origin, for click handlers and
+  canvas.dataset.minY = minY;   // for anything else that maps pixels to tiles
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingEnabled = false;
 
@@ -554,6 +581,26 @@ function renderMap() {
 
   container.innerHTML = "";
   container.appendChild(canvas);
+
+  // Click / hover: a corridor out of the current room is a door you can
+  // walk through. Hover names the way (and shows the pointer); click moves.
+  const tileAt = (ev) => {
+    const r = canvas.getBoundingClientRect();
+    const x = Math.floor((ev.clientX - r.left) / TILE_PX) + minX;
+    const y = Math.floor((ev.clientY - r.top) / TILE_PX) + minY;
+    return mapClickTargets.get(key(x, y));
+  };
+  canvas.addEventListener("mousemove", (ev) => {
+    const t = mapMovesEnabled ? tileAt(ev) : null;
+    canvas.style.cursor = t ? "pointer" : "";
+    canvas.title = t ? t.label : "";
+  });
+  canvas.addEventListener("click", (ev) => {
+    if (!mapMovesEnabled) return;
+    const t = tileAt(ev);
+    if (t) act("move", { to: t.to });
+  });
+
   // Keep the light in view when the dungeon outgrows the frame.
   if (cur && container.clientWidth > 0) {
     container.scrollLeft = Math.max(0, TX(cur.ox + cur.w / 2) - container.clientWidth / 2);
@@ -630,6 +677,8 @@ function renderDelve(view) {
 
   const exitsList = document.getElementById("exits");
   exitsList.innerHTML = "";
+  mapMovesEnabled = !(view.in_combat || view.finished || decisionPending);
+  document.getElementById("map-hint").hidden = !mapMovesEnabled;
   view.exits.forEach((e) => {
     const li = document.createElement("li");
     const btn = document.createElement("button");

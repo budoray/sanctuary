@@ -368,6 +368,7 @@ button.loading { opacity: 0.65; cursor: progress; transform: none; }
 button.error { border-color: var(--color-danger); color: var(--color-danger); }
 
 .hint { font-size: var(--text-sm); color: var(--color-danger); margin: 0 0 var(--space-2); }
+#map-hint { font-size: var(--text-sm); color: var(--color-ink-2); margin: 0; }
 
 #roll, #confirm-arrangement, #begin-delve {
   background: var(--color-accent);
