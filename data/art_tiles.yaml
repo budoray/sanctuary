@@ -1,0 +1,18 @@
+# Dungeon tile art manifest — Phase 1 (assets only, not wired into the client).
+# Generated with PixelLab create_tiles_pro (outline_mode: segmentation), top-down,
+# 32x32px, matching the class portraits' muted/earth-tone palette.
+floors:
+  cobblestone: static/art/tiles/floor_cobblestone.png
+  packed_dirt: static/art/tiles/floor_packed_dirt.png
+  flagstone: static/art/tiles/floor_flagstone.png
+  worn_stone: static/art/tiles/floor_worn_stone.png
+walls:
+  dressed_stone: static/art/tiles/wall_dressed_stone.png
+  rough_hewn_rock: static/art/tiles/wall_rough_hewn_rock.png
+features:
+  door_closed: static/art/tiles/door_closed.png
+  door_open: static/art/tiles/door_open.png
+  stairs_up: static/art/tiles/stairs_up.png
+  stairs_down: static/art/tiles/stairs_down.png
+  water: static/art/tiles/water.png
+  rubble: static/art/tiles/rubble.png
