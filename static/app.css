@@ -477,6 +477,11 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
 #combat-monsters li.selectable:hover { background: var(--color-paper-3); }
 #combat-monsters li.targeted { background: var(--color-paper-3); box-shadow: inset 2px 0 0 var(--color-danger); }
 
+/* The defeated read as the fallen do: struck and dimmed, the grey bar
+   already theirs via .hp-fill.hp-dead. */
+#combat-monsters li.defeated { opacity: 0.55; }
+#combat-monsters li.defeated span:first-child { text-decoration: line-through; }
+
 /* Menace has one colour everywhere: the Here list wears the same blood as
    the eyes ringing the party on the map, and treasure answers in the same
    lamp-gold as its glints. Empty notes keep their quiet italic. */

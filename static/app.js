@@ -825,6 +825,15 @@ let prevXp = 0;
 let prevInCombat = false;
 let prevAreaId = null;
 let prevExitTos = new Set();
+let prevTurns = 0;
+
+// One beat of an animation class, restartable: remove, reflow, re-add.
+// Consecutive beats on the same element must not be swallowed.
+function beat(el, cls) {
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+}
 
 function renderDelve(view) {
   document.getElementById("forge").hidden = true;
@@ -832,10 +841,17 @@ function renderDelve(view) {
   document.getElementById("map-stage").hidden = false;
   document.getElementById("party-status").hidden = false;
 
-  document.getElementById("area-name").textContent = view.name;
+  const nameEl = document.getElementById("area-name");
+  nameEl.textContent = view.name;
   document.getElementById("area-description").textContent = view.description;
-  document.getElementById("area-turns").textContent =
+  const turnsEl = document.getElementById("area-turns");
+  turnsEl.textContent =
     `Turn ${view.turns}` + (view.finished ? " — the delve is over." : "");
+  // Passage has a pulse: the room's name fades in on arrival, the turn
+  // count each time it climbs. First render beats for nothing.
+  if (prevAreaId !== null && view.area_id !== prevAreaId) beat(nameEl, "enter");
+  if (view.turns > prevTurns) beat(turnsEl, "enter");
+  prevTurns = view.turns;
 
   // One delve at a time: while the party is below ground the begin button
   // says so and stays shut; when the run ends it opens again, renamed so
@@ -893,13 +909,8 @@ function renderDelve(view) {
   const xpEl = document.getElementById("xp");
   xpEl.textContent = view.xp;
   // A boon announces itself too: the XP figure flashes lamp-gold on every
-  // gain. The reflow between remove and add restarts the animation when
-  // gains land on back-to-back renders.
-  if (view.xp > prevXp) {
-    xpEl.classList.remove("xp-flash");
-    void xpEl.offsetWidth;
-    xpEl.classList.add("xp-flash");
-  }
+  // gain, the beat restarted so back-to-back boons are not swallowed.
+  if (view.xp > prevXp) beat(xpEl, "xp-flash");
   prevXp = view.xp;
 
   const decisionPending = view.pending_decisions.length > 0;
@@ -957,6 +968,9 @@ function renderDelve(view) {
       const li = document.createElement("li");
       const label = document.createElement("span");
       label.textContent = `${m.name}: ${m.hp}/${m.max_hp} hp ${m.alive ? "" : "(defeated)"}`;
+      // The defeated read as the fallen do at the party rail: struck,
+      // dimmed, done - not a meter still standing at zero.
+      if (!m.alive) li.classList.add("defeated");
       const bar = document.createElement("span");
       bar.className = "hp-bar";
       const fill = document.createElement("span");
@@ -1217,6 +1231,7 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
   prevInCombat = false;
   prevAreaId = null;
   prevExitTos = new Set();
+  prevTurns = 0;
   renderDelve(view);
 });
 
