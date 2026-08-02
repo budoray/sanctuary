@@ -1059,7 +1059,7 @@ function renderDelve(view) {
   // The hint teaches the controls the device actually has: arrows need a
   // keyboard, taps need nothing.
   mapHint.textContent = window.matchMedia("(hover: hover) and (pointer: fine)").matches
-    ? "Click a passage to walk it — or press ← to head back, → to press deeper."
+    ? "Click a passage to walk it — ← heads back, → presses deeper, 1–9 picks a way."
     : "Tap a passage on the map to walk it.";
   view.exits.forEach((e) => {
     const li = document.createElement("li");
@@ -1257,6 +1257,21 @@ document.addEventListener("keydown", (ev) => {
   if (to === null) return;
   ev.preventDefault();
   act("move", { to });
+});
+
+// 1-9 picks among the ways out, top to bottom as the rail lists them -
+// the same enabled buttons the pointer gets, under the same locks as the
+// arrow keys. Never inside an input.
+document.addEventListener("keydown", (ev) => {
+  if (!/^[1-9]$/.test(ev.key)) return;
+  if (ev.target.matches("input, textarea, select")) return;
+  if (!mapMovesEnabled) return;
+  const exits = Array.from(document.querySelectorAll("#exits button"))
+    .filter((b) => !b.disabled);
+  const btn = exits[Number(ev.key) - 1];
+  if (!btn) return;
+  ev.preventDefault();
+  btn.click();
 });
 
 // The keyboard fights too: A attacks the marked monster, F flees - the
