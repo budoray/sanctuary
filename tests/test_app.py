@@ -211,6 +211,32 @@ def test_tenshin_dev_bypasses_the_gate():
 
 
 # ── leaderboard (JOB 2) ───────────────────────────────────────────────────────
+# ── client wiring: exits must be real, reachable controls ────────────────────
+# A test asserting "the word 'passage' appears" passes on a bare <li> just as
+# easily as on a working <button> - it has to grab the block that builds
+# #exits from view.exits and assert the control and its wiring, not the text.
+def _exits_render_block() -> str:
+    import re
+    js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+    m = re.search(r"view\.exits\.forEach\(\(e\) => \{(.*?)\}\);", js, re.S)
+    assert m, "no view.exits.forEach block found in static/app.js"
+    return m.group(1)
+
+
+def test_exits_render_as_a_focusable_button_carrying_the_target_area_id():
+    block = _exits_render_block()
+    assert 'createElement("button")' in block, \
+        "an exit must be a real <button> - a bare <li> is not focusable or keyboard-operable"
+    assert "dataset.to" in block, \
+        "the exit's target area id must live in a data-to attribute, not be parsed back out of the label"
+
+
+def test_exit_buttons_are_disabled_while_a_decision_is_pending():
+    block = _exits_render_block()
+    assert "decisionPending" in block, \
+        "movement must be visibly disabled while a decision is pending, not silently inert"
+
+
 def test_leaderboard_gains_a_row_after_a_delve_and_ranks_it_by_xp():
     r = client.post("/api/delve/start", json={
         "module": "weeping_cistern",

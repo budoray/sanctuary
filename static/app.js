@@ -327,6 +327,8 @@ function renderDelve(view) {
     .map((p) => `${p.name} ${p.hp}/${p.max_hp} hp`).join(", ");
   document.getElementById("xp").textContent = view.xp;
 
+  const decisionPending = view.pending_decisions.length > 0;
+
   const decisions = document.getElementById("pending-decisions");
   decisions.innerHTML = "";
   view.pending_decisions.forEach((d, i) => {
@@ -340,14 +342,22 @@ function renderDelve(view) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.textContent = "Rule on it";
-    btn.addEventListener("click", () => act("decide", { index: i, ruling: input.value || "no effect" }));
+    btn.addEventListener("click", () => act("decide", { index: i, ruling: input.value || "no effect" }, btn));
     p.appendChild(input);
     p.appendChild(btn);
     decisions.appendChild(p);
   });
 
+  document.getElementById("movement-hint").hidden = !decisionPending;
+
   const combatSection = document.getElementById("combat");
   combatSection.hidden = !view.in_combat;
+  // Reset every turn: the loading state a click sets on `act()`'s way out
+  // only ever gets cleared by a fresh render replacing the element (true for
+  // #exits, rebuilt below) or, for these two static buttons, by this line -
+  // without it a successful attack leaves `attack`/`flee` disabled forever.
+  document.getElementById("attack").disabled = !view.in_combat || decisionPending;
+  document.getElementById("flee").disabled = !view.in_combat;
   const combatList = document.getElementById("combat-monsters");
   combatList.innerHTML = "";
   if (view.combat) {
@@ -370,8 +380,13 @@ function renderDelve(view) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.textContent = `${e.kind} to area ${e.to}`;
-    btn.disabled = view.in_combat || view.finished;
-    btn.addEventListener("click", () => act("move", { to: e.to }));
+    btn.dataset.to = e.to;
+    btn.disabled = view.in_combat || view.finished || decisionPending;
+    btn.title = decisionPending ? "Resolve the pending decision first."
+      : view.in_combat ? "Cannot leave while monsters are still standing."
+      : view.finished ? "The delve is over."
+      : "";
+    btn.addEventListener("click", () => act("move", { to: e.to }, btn));
     li.appendChild(btn);
     exitsList.appendChild(li);
   });
@@ -408,7 +423,7 @@ function renderDelve(view) {
     log.appendChild(li);
   });
 
-  const exploring = !view.in_combat && !view.finished;
+  const exploring = !view.in_combat && !view.finished && !decisionPending;
   document.getElementById("search").disabled = !exploring;
   document.getElementById("rest").disabled = !exploring;
   document.getElementById("take-treasure").disabled = !exploring;
@@ -417,18 +432,45 @@ function renderDelve(view) {
   renderLog(view.rolls);
 }
 
-async function act(action, payload) {
-  const res = await fetch("/api/delve/act", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ session_id: delveSessionId, action, ...(payload || {}) }),
-  });
-  const view = await res.json();
+// `btn`, when given, gets the loading/error states while the request is in
+// flight - the click that started it is disabled and marked "loading",
+// flips to "error" (and re-enables) on failure, or is simply replaced by
+// `renderDelve`'s fresh markup on success.
+async function act(action, payload, btn) {
+  let restingText;
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add("loading");
+    restingText = btn.textContent;
+  }
+  let res, view;
+  try {
+    res = await fetch("/api/delve/act", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ session_id: delveSessionId, action, ...(payload || {}) }),
+    });
+    view = await res.json();
+  } catch (err) {
+    if (btn) flagError(btn, restingText);
+    alert("Cannot reach the server.");
+    return false;
+  }
   if (!res.ok) {
+    if (btn) flagError(btn, restingText);
     alert(`Cannot do that: ${view.detail}`);
-    return;
+    return false;
   }
   renderDelve(view);
+  return true;
+}
+
+function flagError(btn, restingText) {
+  btn.classList.remove("loading");
+  btn.classList.add("error");
+  btn.disabled = false;
+  btn.textContent = restingText;
+  setTimeout(() => btn.classList.remove("error"), 1200);
 }
 
 document.getElementById("begin-delve").addEventListener("click", async () => {
@@ -459,15 +501,15 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
   renderDelve(view);
 });
 
-document.getElementById("attack").addEventListener("click", () => {
+document.getElementById("attack").addEventListener("click", (ev) => {
   const target = Number(document.getElementById("combat-monsters").dataset.target || 0);
-  act("attack", { target });
+  act("attack", { target }, ev.currentTarget);
 });
-document.getElementById("flee").addEventListener("click", () => act("flee"));
-document.getElementById("search").addEventListener("click", () => act("search"));
-document.getElementById("rest").addEventListener("click", () => act("rest", { turns: 1 }));
-document.getElementById("take-treasure").addEventListener("click", () => act("take_treasure"));
-document.getElementById("leave-delve").addEventListener("click", () => act("leave"));
+document.getElementById("flee").addEventListener("click", (ev) => act("flee", null, ev.currentTarget));
+document.getElementById("search").addEventListener("click", (ev) => act("search", null, ev.currentTarget));
+document.getElementById("rest").addEventListener("click", (ev) => act("rest", { turns: 1 }, ev.currentTarget));
+document.getElementById("take-treasure").addEventListener("click", (ev) => act("take_treasure", null, ev.currentTarget));
+document.getElementById("leave-delve").addEventListener("click", (ev) => act("leave", null, ev.currentTarget));
 
 document.getElementById("report").addEventListener("click", async () => {
   const title = prompt("What went wrong?");
