@@ -322,6 +322,10 @@ let mapMovesEnabled = false;
 // The exit whose corridor the pointer is over, or null - renderMap paints
 // that corridor in lamplight so the walkable ways announce themselves.
 let mapHoverTo = null;
+// Arrow-key movement: the layout puts deeper areas to the RIGHT and the
+// way back to the LEFT, so ←/→ are the dungeon's natural verbs. Rebuilt
+// by renderMap from the same positions the corridors are drawn from.
+const mapArrowExits = { left: null, right: null };
 const TILE_NAMES = [
   "floor_cobblestone", "floor_flagstone", "floor_packed_dirt", "floor_worn_stone",
   "wall_dressed_stone", "wall_rough_hewn_rock",
@@ -402,6 +406,21 @@ function renderMap() {
   // cells are recorded in mapClickTargets so a click (or tap) on the map
   // walks that way - actions on the map, not just beside it.
   mapClickTargets.clear();
+  // Arrow keys: an exit is "right" if it leads deeper (its column is
+  // further from the entrance than ours), "left" if it leads back.
+  // Same-column exits get no arrow - they have no corridor either.
+  mapArrowExits.left = null;
+  mapArrowExits.right = null;
+  const curAreas = exploredAreas[String(mapCurrentId)];
+  if (curAreas) {
+    for (const e of curAreas.exits) {
+      const from = positions[String(mapCurrentId)];
+      const dest = positions[String(e.to)];
+      if (!from || !dest) continue;
+      if (dest.col > from.col && mapArrowExits.right === null) mapArrowExits.right = Number(e.to);
+      if (dest.col < from.col && mapArrowExits.left === null) mapArrowExits.left = Number(e.to);
+    }
+  }
   const corrCells = [];
   const edgesSeen = new Set();
   for (const id in exploredAreas) {
@@ -887,6 +906,20 @@ function flagError(btn, restingText) {
   btn.textContent = restingText;
   setTimeout(() => btn.classList.remove("error"), 1200);
 }
+
+// ← walks back toward the entrance, → walks deeper - the same moves the
+// map corridors and the rail buttons make, from the keyboard. Never while
+// a ruling input has focus, and never when movement is locked (combat,
+// a ruling due, the delve over) - the same rule the exit buttons obey.
+document.addEventListener("keydown", (ev) => {
+  if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+  if (ev.target.matches("input, textarea, select")) return;
+  if (!mapMovesEnabled) return;
+  const to = ev.key === "ArrowRight" ? mapArrowExits.right : mapArrowExits.left;
+  if (to === null) return;
+  ev.preventDefault();
+  act("move", { to });
+});
 
 document.getElementById("begin-delve").addEventListener("click", async () => {
   if (!lastCharacter) return;
