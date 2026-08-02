@@ -716,6 +716,13 @@ function renderMap() {
   }
 
   container.innerHTML = "";
+  // The map names itself: a screen reader gets the same truth the torch
+  // gives the eyes - where the party stands, and how much is known.
+  const knownRooms = Object.values(exploredAreas).filter((a) => a.visited).length;
+  const curName = exploredAreas[String(mapCurrentId)] && exploredAreas[String(mapCurrentId)].name;
+  canvas.setAttribute("role", "img");
+  canvas.setAttribute("aria-label",
+    `Map of the delve: the party stands in ${curName || "an unnamed area"}; ${knownRooms} area${knownRooms === 1 ? "" : "s"} explored.`);
   container.appendChild(canvas);
 
   // Re-centre the light only when the party changes room - hover redraws
@@ -889,6 +896,12 @@ function renderDelve(view) {
     label.textContent = `${p.name} ${p.hp}/${p.max_hp} hp`;
     const bar = document.createElement("span");
     bar.className = "hp-bar";
+    // The bar is a meter to the eyes; make it one to the ears as well.
+    bar.setAttribute("role", "progressbar");
+    bar.setAttribute("aria-valuemin", "0");
+    bar.setAttribute("aria-valuemax", String(p.max_hp));
+    bar.setAttribute("aria-valuenow", String(p.hp));
+    bar.setAttribute("aria-label", `${p.name} hit points`);
     const fill = document.createElement("span");
     fill.className = "hp-fill" + (p.hp <= 0 ? " hp-dead" : p.hp * 3 <= p.max_hp ? " hp-low" : "");
     fill.style.width = `${Math.max(0, Math.min(100, (100 * p.hp) / p.max_hp))}%`;
@@ -906,6 +919,13 @@ function renderDelve(view) {
     vitals.appendChild(chip);
   });
   prevHpByName = Object.fromEntries(view.party.map((p) => [p.name, p.hp]));
+  // One truth: the sheet's vitals line tracks the delve's hp, not the
+  // morning the character rolled out of bed. (The sheet shows the
+  // party's first - and, at this table, only - member.)
+  if (view.party.length) {
+    const vit = document.getElementById("vitals");
+    vit.textContent = vit.textContent.replace(/^\d+ hp/, `${view.party[0].hp} hp`);
+  }
   const xpEl = document.getElementById("xp");
   xpEl.textContent = view.xp;
   // A boon announces itself too: the XP figure flashes lamp-gold on every
@@ -973,6 +993,11 @@ function renderDelve(view) {
       if (!m.alive) li.classList.add("defeated");
       const bar = document.createElement("span");
       bar.className = "hp-bar";
+      bar.setAttribute("role", "progressbar");
+      bar.setAttribute("aria-valuemin", "0");
+      bar.setAttribute("aria-valuemax", String(m.max_hp));
+      bar.setAttribute("aria-valuenow", String(m.hp));
+      bar.setAttribute("aria-label", `${m.name} hit points`);
       const fill = document.createElement("span");
       fill.className = "hp-fill" + (m.hp * 3 <= m.max_hp ? " hp-low" : "") + (m.alive ? "" : " hp-dead");
       fill.style.width = `${Math.max(0, Math.min(100, (100 * m.hp) / m.max_hp))}%`;
