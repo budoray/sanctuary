@@ -1,4 +1,9 @@
 """Step definitions for features/client.feature."""
+import os
+
+# ⚠ BEFORE `import app` - see tests/test_app.py for why.
+os.environ.setdefault("TENSHIN_DEV", "1")
+
 from fastapi.testclient import TestClient
 from pytest_bdd import given, parsers, scenarios, then, when
 

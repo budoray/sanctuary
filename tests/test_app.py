@@ -1,4 +1,11 @@
+import os
 from pathlib import Path
+
+# ⚠ BEFORE `import app`, which imports `tenshin_gate` - the drop-in latches
+# TENSHIN_DEV into a module constant at import time, so setting it inside a
+# test does nothing at all. Every route this suite hits unauthenticated needs
+# dev mode to reach it without a signed session cookie.
+os.environ.setdefault("TENSHIN_DEV", "1")
 
 import yaml
 from fastapi.testclient import TestClient
@@ -188,3 +195,33 @@ def test_selfcheck_sentence_reports_unique_ids_and_files():
     n_ids = len(tables._index())
     line = sanctuary_app.selfcheck()
     assert f"{n_ids} tables in {n_files} files" in line
+
+
+# ── auth (JOB 1) ─────────────────────────────────────────────────────────────
+# The no-cookie-gets-401 / platform-routes-stay-open matrix is proved properly
+# in tests/test_auth.py, in a SUBPROCESS with TENSHIN_DEV stripped - DEV_MODE
+# is a module constant latched at import time, so it cannot be toggled mid
+# process. This suite only needs to prove the OTHER half: that dev mode, once
+# on, actually lets a guarded route through.
+def test_tenshin_dev_bypasses_the_gate():
+    assert sanctuary_app.tenshin_gate.DEV_MODE is True, \
+        "the rest of this suite depends on dev mode being on"
+    assert client.get("/").status_code == 200
+    assert client.get("/leaderboard.json").status_code == 200
+
+
+# ── leaderboard (JOB 2) ───────────────────────────────────────────────────────
+def test_leaderboard_gains_a_row_after_a_delve_and_ranks_it_by_xp():
+    r = client.post("/api/delve/start", json={
+        "module": "weeping_cistern",
+        "party": [{"seed": 777, "mode": "normal", "ancestry": "human",
+                   "classes": ["fighter"], "name": "Boardtest"}],
+    })
+    assert r.status_code == 200
+    board = client.get("/leaderboard.json").json()["board"]
+    assert board, "a completed delve start left no row on the board"
+    row = board[0]
+    assert {"name", "score", "level", "stat"} <= set(row)
+    assert isinstance(row["stat"], str) and row["stat"].strip()
+    assert board == sorted(board, key=lambda r: -r["score"]), \
+        "the board is not ranked on score"
