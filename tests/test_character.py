@@ -695,10 +695,13 @@ def test_ranger_generates_at_first_level_with_its_extra_hit_die():
     c = generate(seed=24, mode="normal", ancestry_name="half-elf", class_names=("ranger",))
     hp_rolls = [r for r in c.log if "hp level" in r.reason]
     assert len(hp_rolls) == 2
-    assert c.hit_points == sum(r.total for r in hp_rolls)
+    # Chapter 3 wires the real Constitution hp bonus in - each die floors at
+    # 1 (plus bonus) individually, per roll_hit_points' own docstring.
+    con_bonus = constitution_hp_bonus(c.scores["constitution"], "ranger")
+    assert c.hit_points == sum(max(1, r.total + con_bonus) for r in hp_rolls)
 
 
-from sanctuary.character import _multiclass_hit_points
+from sanctuary.character import _multiclass_hit_points, constitution_hp_bonus
 from sanctuary.dice import Roll
 
 
@@ -727,8 +730,10 @@ def test_multiclass_hit_points_divide_each_class_roll_before_summing():
     # readings disagree: sum-then-divide gives (7+3)//2 = 5, but the book's
     # divide-per-class-then-sum gives floor(7/2) + floor(3/2) = 3 + 1 = 4.
     # This test fails under the old (wrong) sum-then-divide behaviour.
+    # Constitution 10 sits in Table 1.1.4A's flat 0-bonus band for every
+    # class, so this still isolates the division arithmetic being tested.
     roller = _QueueRoller([7, 3])
-    hp = _multiclass_hit_points(roller, ("fighter", "magic-user"), con_bonus=0)
+    hp = _multiclass_hit_points(roller, ("fighter", "magic-user"), {"constitution": 10})
     assert hp == 4
 
 
@@ -738,7 +743,7 @@ def test_multiclass_hit_points_divide_each_of_three_classes_before_summing():
     # divide-per-class-then-sum gives floor(7/3) + floor(3/3) + floor(5/3)
     # = 2 + 1 + 1 = 4.
     roller = _QueueRoller([7, 3, 5])
-    hp = _multiclass_hit_points(roller, ("fighter", "magic-user", "thief"), con_bonus=0)
+    hp = _multiclass_hit_points(roller, ("fighter", "magic-user", "thief"), {"constitution": 10})
     assert hp == 4
 
 
@@ -752,7 +757,7 @@ def test_multiclass_hit_points_floor_applies_per_class_not_once_overall():
     # 3 classes, would give floor(1/3) = 0 per class without the floor;
     # with it, each class contributes at least 1.
     roller = _QueueRoller([1, 1, 1])
-    hp = _multiclass_hit_points(roller, ("fighter", "magic-user", "thief"), con_bonus=0)
+    hp = _multiclass_hit_points(roller, ("fighter", "magic-user", "thief"), {"constitution": 10})
     assert hp == 3
 
 
@@ -766,7 +771,7 @@ def test_multiclass_hit_points_ranger_dice_stay_one_classs_contribution():
     # is what you'd get by mistakenly treating the ranger's two dice as two
     # separate classes.
     roller = _QueueRoller([7, 5, 5])
-    hp = _multiclass_hit_points(roller, ("cleric", "ranger"), con_bonus=0)
+    hp = _multiclass_hit_points(roller, ("cleric", "ranger"), {"constitution": 10})
     assert hp == 8
 
 
@@ -778,8 +783,11 @@ def test_multiclass_hit_points_include_a_rangers_extra_first_level_die():
                  class_names=("cleric", "ranger"))
     hp_rolls = [r for r in c.log if "hp level" in r.reason]
     assert len(hp_rolls) == 3  # 1 cleric die + 2 ranger dice
-    cleric_roll = hp_rolls[0].total
-    ranger_roll = hp_rolls[1].total + hp_rolls[2].total
+    cleric_bonus = constitution_hp_bonus(c.scores["constitution"], "cleric")
+    ranger_bonus = constitution_hp_bonus(c.scores["constitution"], "ranger")
+    cleric_roll = max(1, hp_rolls[0].total + cleric_bonus)
+    ranger_roll = (max(1, hp_rolls[1].total + ranger_bonus)
+                   + max(1, hp_rolls[2].total + ranger_bonus))
     assert c.hit_points == max(1, cleric_roll // 2) + max(1, ranger_roll // 2)
 
 

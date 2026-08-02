@@ -4,6 +4,7 @@ Every random step rolls through `Dice`, so a character is fully reproducible
 from (seed, choices). That is also what makes a reroll honest rather than a
 slot machine.
 """
+import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -244,6 +245,114 @@ def ability_modifiers(scores: dict) -> dict:
     }
 
 
+_CON_ROW = re.compile(r"^(\d+)\s+([+-]?\d+)(.*)$")
+_CON_EXCEPTIONAL = re.compile(r"\(\+(\d+)\s+for\s+fighters")
+
+
+@lru_cache(maxsize=1)
+def _constitution_rows() -> list[str]:
+    """Table 1.1.4A's data rows, wrapped continuation lines re-joined.
+
+    Row 19's text wraps onto a second physical line ("and rangers) 100 99")
+    that does not start with a digit, so the generic `tables.rows()` filter
+    (built for the common case of a wrapped HEADER, not a wrapped ROW) drops
+    it - the fighters/paladins/rangers bonus for score 19 would otherwise be
+    silently lost. Re-joined by hand here rather than teaching the generic
+    parser a one-table special case.
+    """
+    lines = tables.load("1.1.4a")["lines"][1:]  # drop the header line
+    merged: list[str] = []
+    for line in lines:
+        if re.match(r"^\s*\d", line):
+            merged.append(line.strip())
+        else:
+            merged[-1] += " " + line.strip()
+    return merged
+
+
+def constitution_hp_bonus(score: float, cls: str) -> int:
+    """Table 1.1.4A's Constitution hit-point modifier for `score`.
+
+    Fighters, paladins and rangers get a BETTER bonus at 17+ - the table
+    spells it out per-row as a parenthetical ("+2 (+3 for fighters,
+    paladins, and rangers)"), not as a separate column, so it is only
+    honoured for EXCEPTIONAL_CLASSES; every other class uses the base
+    figure that appears before the parenthesis.
+    """
+    for line in _constitution_rows():
+        m = _CON_ROW.match(line)
+        if int(m.group(1)) != int(score):
+            continue
+        if cls in EXCEPTIONAL_CLASSES:
+            exc = _CON_EXCEPTIONAL.search(m.group(3))
+            if exc:
+                return int(exc.group(1))
+        return int(m.group(2))
+    raise LookupError(f"no Constitution hit-point row for score {score}")
+
+
+# Table 1.1.3A's AC ADJUSTMENT column: always the third-from-last field of a
+# row (the row itself wraps its "initiative effect" cell to a variable
+# number of words - "0" for scores 6-14, "+3 to initiative segment" at the
+# extremes - so the AC adjustment can only be found counting from the END:
+# ..., ac_adjustment, [bracketed alternate], agility_save_modifier).
+def dexterity_ac_adjustment(score: float) -> int:
+    """Table 1.1.3A's Dexterity defensive AC adjustment (descending AC:
+    negative is better)."""
+    for row in tables.rows("1.1.3a"):
+        if int(row[0]) == int(score):
+            return _int(row[-3])
+    raise LookupError(f"no Dexterity AC adjustment row for score {score}")
+
+
+_ARMOUR_ROW = re.compile(
+    r"^([A-Za-z][A-Za-z,\s]*?)\s+\S+\s+\S+\s+([+-]?\d+)\s*\[[+-]?\d+\]\*{0,2}\s")
+
+
+@lru_cache(maxsize=1)
+def _armour_ac_by_name() -> dict[str, int]:
+    """Table 1.4.2.G's ARMOUR TYPE -> descending base AC.
+
+    Every armour row's name leads with a letter, not a digit, so
+    `tables.rows()` (which keeps only digit/`<`-led lines, to drop wrapped
+    headers) drops every row of this table - it is read from the raw lines
+    instead. `Helmet` has no `[bracket]` (its AC is "n/a", free with any
+    suit) and is skipped; the footnote/example lines below the table have
+    no bracket either and are skipped the same way.
+    """
+    out = {}
+    for line in tables.load("1.4.2.g")["lines"]:
+        m = _ARMOUR_ROW.match(line.strip())
+        if m:
+            out[m.group(1).strip().lower()] = int(m.group(2))
+    return out
+
+
+ARMOUR_TYPES = tuple(sorted(_armour_ac_by_name()))
+
+# "Shields improve your armour class by 1 point" (osric.txt, Table 1.4.2.G
+# footnote **) - true of small, medium and large alike; which of the three
+# limits how many incoming attacks it defends against per round is a
+# combat-round bookkeeping concern for whoever resolves an attack, not part
+# of the character's baseline AC.
+SHIELD_AC_BONUS = 1
+
+# The to-hit tables (character and monster ladders alike) only cover AC 10
+# down to -10 - Table 2.1.2A's own header is exactly that span.
+_AC_MIN, _AC_MAX = -10, 10
+
+
+def armour_class(dex_score: float, armour: str | None = None, shield: bool = False) -> int:
+    """Descending AC (lower is better) from armour, shield and the
+    Dexterity defensive adjustment (Table 1.1.3A). `armour=None` is
+    unarmoured (base 10, per the table's own "NO ARMOUR ... AC 10" note)."""
+    base = 10 if armour is None else _armour_ac_by_name()[armour.lower()]
+    if shield:
+        base -= SHIELD_AC_BONUS
+    ac = base + dexterity_ac_adjustment(dex_score)
+    return max(_AC_MIN, min(_AC_MAX, ac))
+
+
 def saving_throws(cls: str, level: int) -> dict:
     """The five saving-throw targets for a class at a level."""
     table_id = game_class(cls)["saving_throw_table"]
@@ -313,7 +422,7 @@ def _multiclass_saves(class_names, level: int = 1) -> dict:
     return {cat: min(s[cat] for s in all_saves) for cat in SAVE_CATEGORIES}
 
 
-def _multiclass_hit_points(d: Dice, class_names, con_bonus: int) -> int:
+def _multiclass_hit_points(d: Dice, class_names, scores: dict) -> int:
     """SS1.3.11 "Gaining Hit Points": "you calculate your new hp by rolling
     the right dice for your class, applying your constitution modifier if
     any, and THEN DIVIDING BY THE NUMBER OF CLASSES YOU HAVE. Drop any
@@ -336,10 +445,17 @@ def _multiclass_hit_points(d: Dice, class_names, con_bonus: int) -> int:
     per SS1.3.9) is rolled by roll_hit_points as a single number - it is
     still just ONE class's contribution to this formula, divided by the
     class count like any other class's roll.
+
+    Constitution's hp bonus is looked up PER CLASS (`scores`, not a flat
+    `con_bonus` int) because fighters/paladins/rangers get a better bonus
+    at 17+ Constitution than every other class - a fighter/magic-user
+    multi-class rolls its fighter level with the better figure and its
+    magic-user level with the ordinary one.
     """
     n = len(class_names)
     total = 0
     for cls in class_names:
+        con_bonus = constitution_hp_bonus(scores["constitution"], cls)
         class_roll = roll_hit_points(d, cls, 1, con_bonus)
         total += max(1, class_roll // n)
     return total
@@ -402,8 +518,7 @@ def generate(seed: int, mode: str, ancestry_name: str, class_names,
                 f"{ancestry_name} does not meet {cls}'s ability minimums: {short}")
 
     mods = ability_modifiers(scores)
-    con_bonus = 0  # Constitution hp adjustment lands with Chapter 3.
-    hit_points = _multiclass_hit_points(d, class_names, con_bonus)
+    hit_points = _multiclass_hit_points(d, class_names, scores)
 
     return Character(
         name=name,
@@ -412,7 +527,11 @@ def generate(seed: int, mode: str, ancestry_name: str, class_names,
         levels={c: 1 for c in class_names},
         scores=scores,
         hit_points=hit_points,
-        armour_class=10,  # armour lands with Chapter 3.
+        # No equipment system yet (Chapter 4+), so a freshly generated
+        # character starts unarmoured, unshielded: base AC 10 adjusted only
+        # by Dexterity (Table 1.1.3A). Passing real armour/shield choices
+        # in is exactly what armour_class() is for once equipment lands.
+        armour_class=armour_class(scores["dexterity"]),
         saves=_multiclass_saves(class_names, 1),
         modifiers=mods,
         seed=seed,

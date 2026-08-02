@@ -468,7 +468,10 @@ class _QueueRoller:
 @given(parsers.parse("a fighter and magic-user who roll {first:d} and {second:d} for their "
                       "starting toughness"), target_fixture="toughness_hp")
 def fighter_and_magic_user_roll_toughness(first, second):
-    return _multiclass_hit_points(_QueueRoller([first, second]), ("fighter", "magic-user"), 0)
+    # Constitution 10 sits in Table 1.1.4A's flat 0-bonus band for every
+    # class, isolating the per-class division arithmetic this scenario tests.
+    return _multiclass_hit_points(_QueueRoller([first, second]), ("fighter", "magic-user"),
+                                   {"constitution": 10})
 
 
 @then(parsers.parse("the multi-classed adventurer's starting hit points are {expected:d}, "
@@ -481,7 +484,8 @@ def multiclass_hp_is_exactly(toughness_hp, expected, wrong):
 @given("a fighter, magic-user and thief who each roll a bare 1 for their starting toughness",
        target_fixture="triple_class_hp")
 def triple_class_bare_ones():
-    return _multiclass_hit_points(_QueueRoller([1, 1, 1]), ("fighter", "magic-user", "thief"), 0)
+    return _multiclass_hit_points(_QueueRoller([1, 1, 1]), ("fighter", "magic-user", "thief"),
+                                   {"constitution": 10})
 
 
 @then("the triple-classed adventurer starts with at least 3 hit points, one for each calling")

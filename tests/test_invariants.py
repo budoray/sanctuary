@@ -96,7 +96,8 @@ DEPENDENCY_CHAIN = (
     ("runtime",),
     ("module",),
     ("procgen", "bestiary", "treasure"),
-    ("character", "resolve"),
+    ("resolve",),
+    ("character",),
     ("tables",),
     ("dice",),
 )
