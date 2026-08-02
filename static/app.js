@@ -180,6 +180,10 @@ async function finalizeCharacter(seed, arrangement) {
   }
   const c = await res.json();
   renderSheet(c);
+  // A fresh character is a fresh throw of the dice: the ledger's memory
+  // resets so the creation rolls dance - even on a re-roll, when the new
+  // log happens to be exactly as long as the last.
+  prevRollsLen = 0;
   renderLog(c.log);
   lastCharacter = c;
 }
