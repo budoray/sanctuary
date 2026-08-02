@@ -34,6 +34,12 @@ Feature: Opening Sanctuary in the browser
     When the player rolls a human fighter and magic-user
     Then Sanctuary refuses the combination instead of crashing
 
+  Scenario: A player is not offered a calling their people cannot follow
+    Given a player opens Sanctuary
+    When the player looks at what callings a half-elf may follow
+    Then the monk calling is not among them
+    But the monk calling is open to a human
+
   Scenario: A player reads the full licence
     Given a player opens Sanctuary
     When the player follows the full licence link

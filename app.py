@@ -127,6 +127,16 @@ def licence():
             f"<p><a href=\"/\">← Sanctuary™</a></p></main>")
 
 
+@app.get("/api/ancestry-classes")
+def api_ancestry_classes(request: Request):
+    """The map Fix 1 needs: `{ancestry: [allowed classes]}` for all seven,
+    sourced straight from data/ancestries.yaml via character.ancestry() -
+    never hand-copied into JS, or it drifts from the book the moment either
+    side edits alone."""
+    _account(request)
+    return {a: list(character.ancestry(a)["allowed_classes"]) for a in character.ANCESTRIES}
+
+
 @app.post("/api/roll-abilities")
 async def api_roll_abilities(request: Request):
     """The six ability scores for (seed, mode), before ancestry, class or an

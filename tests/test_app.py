@@ -139,6 +139,39 @@ def test_character_api_rejects_a_bad_arrangement_with_a_useful_message():
     assert "permutation" in r.json()["detail"]
 
 
+# ── Fix 1: ancestry->class access is known before any dice roll ─────────────
+def test_ancestry_classes_endpoint_covers_all_seven_ancestries():
+    body = client.get("/api/ancestry-classes").json()
+    assert set(body) == set(character.ANCESTRIES)
+
+
+def test_ancestry_classes_endpoint_reflects_the_data_not_a_hardcoded_map():
+    body = client.get("/api/ancestry-classes").json()
+    assert "monk" not in body["half-elf"]
+    assert "monk" in body["human"]
+    assert body["half-elf"] == character.ancestry("half-elf")["allowed_classes"]
+
+
+# ── Fix 2: a 400 must never render as though it were a character sheet ─────
+def test_a_rejected_roll_does_not_produce_a_rendered_sheet():
+    """The client's error path must exist as markup - a distinct error
+    region, not the #who name field re-purposed to carry the message. A
+    string check here would pass on the broken version (the message DID
+    render, just in the wrong place)."""
+    html = client.get("/").text
+    assert 'id="forge-error"' in html
+    assert 'id="who"' in html
+    # The error region and the character name are not the same element.
+    assert html.index('id="forge-error"') != html.index('id="who"')
+
+
+def test_begin_a_delve_is_disabled_until_a_character_exists():
+    html = client.get("/").text
+    import re
+    m = re.search(r'<button id="begin-delve"[^>]*>', html)
+    assert m and "disabled" in m.group(0)
+
+
 def test_selfcheck_reports_real_numbers():
     line = sanctuary_app.selfcheck()
     assert line.startswith("sanctuary self-check OK")

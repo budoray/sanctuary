@@ -108,6 +108,21 @@ def refuses_gracefully(rejected):
     assert rejected.status_code == 400
 
 
+@when("the player looks at what callings a half-elf may follow", target_fixture="callings")
+def look_at_callings(page):
+    return page["client"].get("/api/ancestry-classes").json()
+
+
+@then("the monk calling is not among them")
+def monk_not_offered(callings):
+    assert "monk" not in callings["half-elf"]
+
+
+@then("the monk calling is open to a human")
+def monk_open_to_human(callings):
+    assert "monk" in callings["human"]
+
+
 @when("the player follows the full licence link", target_fixture="licence_page")
 def follow_licence_link(page):
     r = page["client"].get("/licence")

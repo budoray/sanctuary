@@ -18,14 +18,59 @@ fill("klass", CLASSES);
 document.getElementById("ancestry").value = "human";
 document.getElementById("klass").value = "fighter";
 
+// ── Fix 1: an illegal ancestry/class pairing is known before any dice roll,
+// from data/ancestries.yaml's own allowed_classes - so it is prevented, not
+// reported back after a wasted /api/character round trip. The map comes
+// from the server (never hand-copied here, or it drifts from the book).
+let ancestryClasses = null; // {ancestry: [allowed class, ...]} once fetched
+
+function applyClassAvailability() {
+  if (!ancestryClasses) return;
+  const ancestry = document.getElementById("ancestry").value;
+  const allowed = new Set(ancestryClasses[ancestry] || CLASSES);
+  const klass = document.getElementById("klass");
+  for (const opt of klass.options) {
+    const ok = allowed.has(opt.value);
+    opt.disabled = !ok;
+    opt.title = ok ? "" : `${ancestry} may not be ${opt.value}`;
+  }
+  if (!allowed.has(klass.value)) {
+    const firstLegal = Array.from(klass.options).find((o) => allowed.has(o.value));
+    if (firstLegal) klass.value = firstLegal.value;
+  }
+}
+
+fetch("/api/ancestry-classes")
+  .then((r) => r.json())
+  .then((map) => { ancestryClasses = map; applyClassAvailability(); });
+
+document.getElementById("ancestry").addEventListener("change", applyClassAvailability);
+
 // The seed is the character. A new one per roll, shown in the log so any
 // character can be reproduced exactly.
 function newSeed() {
   return Date.now() % 2147483647;
 }
 
+function clearForgeError() {
+  const err = document.getElementById("forge-error");
+  err.hidden = true;
+  err.textContent = "";
+}
+
+function showForgeError(message) {
+  document.getElementById("sheet").hidden = true;
+  document.getElementById("begin-delve").disabled = true;
+  lastCharacter = null;
+  const err = document.getElementById("forge-error");
+  err.textContent = message;
+  err.hidden = false;
+}
+
 function renderSheet(c) {
+  clearForgeError();
   document.getElementById("sheet").hidden = false;
+  document.getElementById("begin-delve").disabled = false;
   document.getElementById("who").textContent =
     `${c.name || "Unnamed"} — ${c.ancestry} ${c.classes.join("/")}`;
 
@@ -100,8 +145,7 @@ async function finalizeCharacter(seed, arrangement) {
   });
   if (!res.ok) {
     const err = await res.json();
-    document.getElementById("who").textContent = `Cannot roll that: ${err.detail}`;
-    document.getElementById("sheet").hidden = false;
+    showForgeError(`Cannot roll that: ${err.detail}`);
     return;
   }
   const c = await res.json();
