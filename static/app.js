@@ -151,7 +151,10 @@ async function finalizeCharacter(seed, arrangement) {
     mode: document.getElementById("mode").value,
     ancestry: document.getElementById("ancestry").value,
     classes: [selectedClass()],
-    name: document.getElementById("name").value,
+    // An untouched name field still SHOWS a name (the placeholder) - the
+    // character should carry it, or the sheet contradicts what the player
+    // saw when they pressed Roll.
+    name: document.getElementById("name").value || document.getElementById("name").placeholder,
   };
   if (arrangement) payload.arrangement = arrangement;
   const res = await fetch("/api/character", {
@@ -710,8 +713,25 @@ function renderDelve(view) {
   recordArea(view);
   renderMap();
 
-  document.getElementById("party-vitals").textContent = view.party
-    .map((p) => `${p.name} ${p.hp}/${p.max_hp} hp`).join(", ");
+  // Vitals as chips, not a sentence: each party member gets a thin hp bar
+  // under their name, so a beating reads at a glance, not after a parse.
+  const vitals = document.getElementById("party-vitals");
+  vitals.innerHTML = "";
+  view.party.forEach((p) => {
+    const chip = document.createElement("span");
+    chip.className = "hp-chip";
+    const label = document.createElement("span");
+    label.textContent = `${p.name} ${p.hp}/${p.max_hp} hp`;
+    const bar = document.createElement("span");
+    bar.className = "hp-bar";
+    const fill = document.createElement("span");
+    fill.className = "hp-fill" + (p.hp * 3 <= p.max_hp ? " hp-low" : "");
+    fill.style.width = `${Math.max(0, Math.min(100, (100 * p.hp) / p.max_hp))}%`;
+    bar.appendChild(fill);
+    chip.appendChild(label);
+    chip.appendChild(bar);
+    vitals.appendChild(chip);
+  });
   document.getElementById("xp").textContent = view.xp;
 
   const decisionPending = view.pending_decisions.length > 0;
@@ -750,11 +770,30 @@ function renderDelve(view) {
   if (view.combat) {
     view.combat.monsters.forEach((m, i) => {
       const li = document.createElement("li");
-      li.textContent = `${m.name}: ${m.hp}/${m.max_hp} hp ${m.alive ? "" : "(defeated)"}`;
+      const label = document.createElement("span");
+      label.textContent = `${m.name}: ${m.hp}/${m.max_hp} hp ${m.alive ? "" : "(defeated)"}`;
+      const bar = document.createElement("span");
+      bar.className = "hp-bar";
+      const fill = document.createElement("span");
+      fill.className = "hp-fill" + (m.hp * 3 <= m.max_hp ? " hp-low" : "") + (m.alive ? "" : " hp-dead");
+      fill.style.width = `${Math.max(0, Math.min(100, (100 * m.hp) / m.max_hp))}%`;
+      bar.appendChild(fill);
+      li.appendChild(label);
+      li.appendChild(bar);
       li.dataset.target = i;
       if (m.alive) {
         li.classList.add("selectable");
-        li.addEventListener("click", () => { combatList.dataset.target = i; });
+        // Attack falls back to target 0 - show that default honestly.
+        if (![...combatList.children].some((el) => el.classList.contains("targeted"))) {
+          li.classList.add("targeted");
+        }
+        li.addEventListener("click", () => {
+          combatList.dataset.target = i;
+          // The target is the one marked - a click with no visible answer
+          // reads as a miss.
+          combatList.querySelectorAll("li").forEach((el) => el.classList.remove("targeted"));
+          li.classList.add("targeted");
+        });
       }
       combatList.appendChild(li);
     });
