@@ -92,7 +92,7 @@ def test_random_is_confined_to_the_dice_module():
 # module landing in a later chapter (spells, resolve, bestiary, procgen, ...)
 # slots in by adding it to a rank here, with no change to the walk below.
 DEPENDENCY_CHAIN = (
-    ("dm",),
+    ("dm", "session"),
     ("runtime",),
     ("module",),
     ("procgen", "bestiary", "treasure"),

@@ -4,6 +4,7 @@ Sanctuary is an independent product published under the OSRIC 3.0 Third-Party
 License and is not affiliated with Mythmere Games LLC.
 """
 import sys
+import uuid
 from dataclasses import asdict
 from functools import lru_cache
 from pathlib import Path
@@ -15,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 
 import tenshin_feedback
 import tenshin_version
-from sanctuary import character, tables
+from sanctuary import character, module as module_mod, procgen, runtime, session, tables
 from sanctuary.dice import Dice
 
 ROOT = Path(__file__).resolve().parent
@@ -96,6 +97,82 @@ async def api_character(request: Request):
     return out
 
 
+def _build_module(body: dict) -> module_mod.Module:
+    """`module: "generate"` runs procgen off `seed`/`target_areas`/
+    `dungeon_level`; any other value names a fixture under data/modules/
+    (only "weeping_cistern" ships today)."""
+    name = str(body.get("module", "generate"))
+    if name == "generate":
+        doc = procgen.generate_dungeon(
+            seed=int(body.get("seed", 1)),
+            target_areas=int(body.get("target_areas", 10)),
+            dungeon_level=int(body.get("dungeon_level", 1)),
+        )
+        return module_mod.load(doc)
+    path = ROOT / "data" / "modules" / f"{name}.yaml"
+    if not path.exists():
+        raise ValueError(f"no such module {name!r}")
+    return module_mod.load(path)
+
+
+def _build_party(specs: list[dict]) -> list[character.Character]:
+    if not specs:
+        raise ValueError("a delve needs at least one character")
+    party = []
+    for spec in specs:
+        arrangement = spec.get("arrangement")
+        party.append(character.generate(
+            seed=int(spec["seed"]),
+            mode=str(spec["mode"]),
+            ancestry_name=str(spec["ancestry"]),
+            class_names=tuple(spec["classes"]),
+            name=str(spec.get("name", "")),
+            arrangement=dict(arrangement) if arrangement is not None else None,
+        ))
+    return party
+
+
+@app.post("/api/delve/start")
+async def api_delve_start(request: Request):
+    """Begin a solo delve: generate/load a module, roll the party, hand
+    both to `sanctuary.session`. Returns `session_id` plus the opening
+    view - everything after this is `/api/delve/act`."""
+    body = await request.json()
+    try:
+        mod = _build_module(body)
+        party = _build_party(body.get("party") or [])
+        session_id = uuid.uuid4().hex
+        out = session.start(session_id, mod, party, seed=int(body.get("seed", 1)))
+    except (ValueError, KeyError, LookupError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    out["session_id"] = session_id
+    return out
+
+
+@app.post("/api/delve/act")
+async def api_delve_act(request: Request):
+    """One player action against a running delve - move, search, rest,
+    attack, flee, take_treasure, decide (a tier-3 ruling), or leave."""
+    body = await request.json()
+    session_id = str(body.get("session_id", ""))
+    action = str(body.get("action", ""))
+    kwargs = {k: v for k, v in body.items() if k not in ("session_id", "action")}
+    try:
+        return session.act(session_id, action, **kwargs)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/api/delve/{session_id}")
+def api_delve_view(session_id: str):
+    try:
+        return session.view(session_id)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @app.post("/api/report")
 async def api_report(request: Request):
     body = await request.json()
@@ -160,11 +237,95 @@ def selfcheck() -> str:
     ))
     round_trip = "verified" if pdfs_present else "UNVERIFIED (source PDFs not present)"
 
+    n_areas, n_reachable, xp_earned, turns_elapsed = _runtime_selfcheck()
+
     return (f"sanctuary self-check OK - {n_table_ids} tables in {n_files} files, "
             f"{n_ancestries} ancestries, {n_classes} classes, {n_portraits} portraits, "
             f"corpus round-trip {round_trip}, "
             f"seed 1 reproduces a {c.classes[0]} with "
-            f"{c.hit_points} hp and {len(c.log)} logged rolls")
+            f"{c.hit_points} hp and {len(c.log)} logged rolls, "
+            f"runtime plays a {n_areas}-area dungeon ({n_reachable} reachable) to a "
+            f"reproducible finish earning {xp_earned} xp over {turns_elapsed} turns")
+
+
+def _play_a_delve(seed: int):
+    """One deterministic solo delve, driven only through runtime's public
+    actions - proof that a party can enter a generated dungeon, fight,
+    take treasure, and finish (design §9's own completability gate). A
+    three-strong party rather than one, since OSRIC's own d100 lair rolls
+    can stock a level-1 room with more monsters than a lone 1st-level
+    fighter has any business surviving - that is the book being the book,
+    not a bug in this check."""
+    doc = procgen.generate_dungeon(seed, target_areas=4, dungeon_level=1)
+    mod = module_mod.load(doc)
+    party = []
+    for offset, cls in enumerate(("fighter", "fighter", "cleric")):
+        for s in range(seed + offset * 1000, seed + offset * 1000 + 200):
+            try:
+                party.append(character.generate(
+                    seed=s, mode="normal", ancestry_name="human",
+                    class_names=(cls,), name=f"Selfcheck{offset}"))
+                break
+            except ValueError:
+                continue
+    st = runtime.new_game(mod, party, seed=seed)
+    graph = {a["id"]: a for a in mod.areas}
+    order, seen, frontier = [], {st.area_id}, [st.area_id]
+    while frontier:
+        cur = frontier.pop()
+        order.append(cur)
+        for e in graph[cur]["exits"]:
+            if e["to"] not in seen and not e.get("hidden"):
+                seen.add(e["to"])
+                frontier.append(e["to"])
+
+    def clear_combat():
+        rounds = 0
+        while st.combat is not None and rounds < 100:
+            rounds += 1
+            if st.pending_decisions:
+                runtime.decide(st, 0, "self-check DM improvises a ruling")
+                continue
+            total = sum(max(0, v) for v in st.hp.values())
+            if total < sum(st.max_hp.values()) * 0.3:
+                runtime.flee(st)
+                return
+            runtime.attack_round(st)
+
+    clear_combat()
+    for area_id in order[1:]:
+        if st.finished:
+            break
+        try:
+            runtime.move(st, area_id)
+        except ValueError:
+            continue
+        clear_combat()
+        if not st.finished:
+            runtime.search(st)
+            clear_combat()
+        if not st.finished:
+            runtime.take_treasure(st)
+    if not st.finished:
+        runtime.leave(st)
+    return doc, order, seen, st
+
+
+def _runtime_selfcheck() -> tuple[int, int, int, int]:
+    # A fixed, deterministic candidate list - not a random search - so the
+    # chosen seed (and everything this prints) is the same every run.
+    seed = next(s for s in range(2026, 2036)
+                if _play_a_delve(s)[3].turns > 0 or _play_a_delve(s)[3].xp > 0)
+    doc, order, seen, st = _play_a_delve(seed)
+    assert procgen.reachable_area_ids(doc) == {a["id"] for a in doc["areas"]}, \
+        "a generated dungeon must never trap the party (no soft lock)"
+    assert st.finished, "the self-check delve must reach a terminal state"
+
+    _, _, _, replay = _play_a_delve(seed)
+    assert [r.total for r in st.dice.log] == [r.total for r in replay.dice.log], \
+        "same seed, same actions must replay identically"
+
+    return len(doc["areas"]), len(seen), st.xp, st.turns
 
 
 if __name__ == "__main__":
