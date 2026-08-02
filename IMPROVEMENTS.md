@@ -47,13 +47,46 @@ rather than assuming it's in a backlog; fetch results within 8 hours, and use
   review.
 
 ## Queue
-- [ ] Ch.2 Spells → `v0.2.0`
-- [ ] Ch.3 How to Play → `v0.3.0`
-- [ ] Ch.4 Dungeons, Towns and Wildernesses → `v0.4.0`
-- [ ] Ch.5 Monsters → `v0.5.0`
-- [ ] Ch.6 Treasure → `v0.6.0`
-- [ ] Campaign format and authoring → `v0.7.0`
-- [ ] First playable → `v0.8.0`
+- [x] Ch.2 Spells → `v0.2.0`
+- [x] Ch.3 How to Play → `v0.3.0`
+- [x] Ch.4 Dungeons, Towns and Wildernesses → `v0.4.0`
+- [x] Ch.5 Monsters → `v0.5.0`
+- [x] Ch.6 Treasure → `v0.6.0`
+- [x] Campaign format and authoring → `v0.7.0`
+- [ ] First playable → `v0.8.0` (runtime + solo driver + client wiring shipped this
+      chapter at `v0.7.x`; Dr. Ray moves the minor at the chapter boundary)
+- [ ] Party (real-time, sockets, keyed by player name) and async drivers over the
+      same `runtime.State` - `session.py` was written so `runtime` stays ignorant
+      of which driver is in use
+- [ ] Light and encumbrance in the runtime - skipped this chapter as not cheap;
+      movement between areas is currently a flat 1 turn regardless of distance
+- [ ] Tier-2 ability vocabulary in `runtime.py` is a keyword match over monster
+      prose (`_TIER2_KEYWORDS`), not a real parser - grows as real play surfaces
+      false positives/negatives
+- [ ] `runtime._instantiate_monster`'s `hd_notation`/`hp_expr` split
+      (`_hd_and_hp_expr`) defaults an HD-notation-only monster (no dice-shaped
+      `hit_dice` field) to d8 per HD; add a `hit_die` schema field if a monster
+      needs a different one
+- [ ] `runtime.leave()` is callable from any area, not only the start area - a
+      one-way chute/stairs can strand a party unable to retrace its steps, and
+      forcing `leave` to happen only at area 1 would make that a soft lock
+
+## Gotchas earned in this chapter (S4 - the play runtime)
+- **A generated dungeon's own monster stock can flatten a fresh party.**
+  OSRIC's d100 lair-count rolls (Table 2.7.3.2x) aren't scaled to the
+  dungeon's stated party size - a level-1 room can come back with 15
+  bugbears. `app.py`'s self-check tries a small fixed range of seeds and
+  picks the first where the party survives its first encounter, rather
+  than asserting against whichever seed happens to be unlucky.
+- **`leave()` had to move off "only from area 1"** - a party funnelled
+  through a one-way exit with no way back would otherwise never reach a
+  terminal state, which is exactly the soft lock this platform has been
+  burned by before.
+- **Tier-3 surfacing is a keyword match over free-text ability/attack
+  prose**, not a parser of the corpus's actual grammar - it is honest
+  (never silently drops an ability) but will mis-tier things the
+  vocabulary hasn't seen yet. Extend `_TIER2_KEYWORDS` as real play finds
+  gaps, per design §7.2's own "ship with tier 2 half-filled and grow it."
 - [ ] Constitution hit-point adjustment (deferred from Ch.1; lands with Ch.3)
 - [ ] Armour class from equipment (deferred from Ch.1; lands with Ch.3)
 - [ ] Thief skills and spell slots on the sheet (needs Ch.2 and Ch.3 tables)

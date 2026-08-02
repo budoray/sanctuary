@@ -106,6 +106,7 @@ async function finalizeCharacter(seed, arrangement) {
   const c = await res.json();
   renderSheet(c);
   renderLog(c.log);
+  lastCharacter = c;
 }
 
 // For an arrangeable mode, show the six rolled scores and let the player
@@ -167,6 +168,165 @@ document.getElementById("confirm-arrangement").addEventListener("click", async (
   section.hidden = true;
   await finalizeCharacter(seed, arrangement);
 });
+
+// --------------------------------------------------------------------
+// Delve: solo play over sanctuary/runtime.py via sanctuary/session.py.
+// The dice tray keeps rendering every roll exactly as it does for
+// character generation - `renderLog` is reused unchanged.
+// --------------------------------------------------------------------
+
+let delveSessionId = null;
+let lastCharacter = null;
+
+function renderDelve(view) {
+  document.getElementById("delve").hidden = false;
+  document.getElementById("area-name").textContent = view.name;
+  document.getElementById("area-description").textContent = view.description;
+  document.getElementById("area-turns").textContent =
+    `Turn ${view.turns}` + (view.finished ? " — the delve is over." : "");
+
+  document.getElementById("party-vitals").textContent = view.party
+    .map((p) => `${p.name} ${p.hp}/${p.max_hp} hp`).join(", ");
+  document.getElementById("xp").textContent = view.xp;
+
+  const decisions = document.getElementById("pending-decisions");
+  decisions.innerHTML = "";
+  view.pending_decisions.forEach((d, i) => {
+    const p = document.createElement("p");
+    p.innerHTML = `<strong>Decision needed:</strong> ${d.detail} `;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Your ruling";
+    input.id = `ruling-${i}`;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "Rule on it";
+    btn.addEventListener("click", () => act("decide", { index: i, ruling: input.value || "no effect" }));
+    p.appendChild(input);
+    p.appendChild(btn);
+    decisions.appendChild(p);
+  });
+
+  const combatSection = document.getElementById("combat");
+  combatSection.hidden = !view.in_combat;
+  const combatList = document.getElementById("combat-monsters");
+  combatList.innerHTML = "";
+  if (view.combat) {
+    view.combat.monsters.forEach((m, i) => {
+      const li = document.createElement("li");
+      li.textContent = `${m.name}: ${m.hp}/${m.max_hp} hp ${m.alive ? "" : "(defeated)"}`;
+      li.dataset.target = i;
+      if (m.alive) {
+        li.style.cursor = "pointer";
+        li.addEventListener("click", () => { combatList.dataset.target = i; });
+      }
+      combatList.appendChild(li);
+    });
+  }
+
+  const exitsList = document.getElementById("exits");
+  exitsList.innerHTML = "";
+  view.exits.forEach((e) => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = `${e.kind} to area ${e.to}`;
+    btn.disabled = view.in_combat || view.finished;
+    btn.addEventListener("click", () => act("move", { to: e.to }));
+    li.appendChild(btn);
+    exitsList.appendChild(li);
+  });
+
+  const areaMonsters = document.getElementById("area-monsters");
+  areaMonsters.innerHTML = "";
+  (view.in_combat ? [] : view.monsters).forEach((m) => {
+    const li = document.createElement("li");
+    li.textContent = m;
+    areaMonsters.appendChild(li);
+  });
+
+  const areaTreasure = document.getElementById("area-treasure");
+  areaTreasure.innerHTML = "";
+  view.treasure.forEach((t) => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    areaTreasure.appendChild(li);
+  });
+
+  const inventory = document.getElementById("inventory");
+  inventory.innerHTML = "";
+  view.inventory.forEach((t) => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    inventory.appendChild(li);
+  });
+
+  const log = document.getElementById("delve-log");
+  log.innerHTML = "";
+  view.log.forEach((line) => {
+    const li = document.createElement("li");
+    li.textContent = line;
+    log.appendChild(li);
+  });
+
+  const exploring = !view.in_combat && !view.finished;
+  document.getElementById("search").disabled = !exploring;
+  document.getElementById("rest").disabled = !exploring;
+  document.getElementById("take-treasure").disabled = !exploring;
+  document.getElementById("leave-delve").disabled = !exploring;
+
+  renderLog(view.rolls);
+}
+
+async function act(action, payload) {
+  const res = await fetch("/api/delve/act", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ session_id: delveSessionId, action, ...(payload || {}) }),
+  });
+  const view = await res.json();
+  if (!res.ok) {
+    alert(`Cannot do that: ${view.detail}`);
+    return;
+  }
+  renderDelve(view);
+}
+
+document.getElementById("begin-delve").addEventListener("click", async () => {
+  if (!lastCharacter) return;
+  const res = await fetch("/api/delve/start", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      module: "generate",
+      seed: lastCharacter.seed,
+      target_areas: 6,
+      dungeon_level: 1,
+      party: [{
+        seed: lastCharacter.seed, mode: "normal",
+        ancestry: lastCharacter.ancestry, classes: lastCharacter.classes,
+        name: lastCharacter.name,
+      }],
+    }),
+  });
+  const view = await res.json();
+  if (!res.ok) {
+    alert(`Cannot begin a delve: ${view.detail}`);
+    return;
+  }
+  delveSessionId = view.session_id;
+  renderDelve(view);
+});
+
+document.getElementById("attack").addEventListener("click", () => {
+  const target = Number(document.getElementById("combat-monsters").dataset.target || 0);
+  act("attack", { target });
+});
+document.getElementById("flee").addEventListener("click", () => act("flee"));
+document.getElementById("search").addEventListener("click", () => act("search"));
+document.getElementById("rest").addEventListener("click", () => act("rest", { turns: 1 }));
+document.getElementById("take-treasure").addEventListener("click", () => act("take_treasure"));
+document.getElementById("leave-delve").addEventListener("click", () => act("leave"));
 
 document.getElementById("report").addEventListener("click", async () => {
   const title = prompt("What went wrong?");

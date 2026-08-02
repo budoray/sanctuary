@@ -43,6 +43,40 @@
     <p id="vitals"></p>
     <h3>Saving throws</h3>
     <dl id="saves"></dl>
+    <button id="begin-delve" type="button">Begin a delve</button>
+  </section>
+
+  <section id="delve" hidden>
+    <h2 id="area-name"></h2>
+    <p id="area-description"></p>
+    <p id="area-turns"></p>
+    <p>Party: <span id="party-vitals"></span> — XP <span id="xp">0</span></p>
+
+    <div id="pending-decisions"></div>
+
+    <div id="combat" hidden>
+      <h3>Combat</h3>
+      <ul id="combat-monsters"></ul>
+      <button id="attack" type="button">Attack</button>
+      <button id="flee" type="button">Flee</button>
+    </div>
+
+    <div id="exploration">
+      <h3>Exits</h3>
+      <ul id="exits"></ul>
+      <h3>Here</h3>
+      <ul id="area-monsters"></ul>
+      <ul id="area-treasure"></ul>
+      <button id="search" type="button">Search</button>
+      <button id="rest" type="button">Rest a turn</button>
+      <button id="take-treasure" type="button">Take treasure</button>
+      <button id="leave-delve" type="button">Leave the delve</button>
+    </div>
+
+    <h3>Inventory</h3>
+    <ul id="inventory"></ul>
+    <h3>What's happened</h3>
+    <ul id="delve-log"></ul>
   </section>
 
   <section id="tray">
