@@ -1161,6 +1161,10 @@ function renderDelve(view) {
   });
   prevDelveLogLen = view.log.length;
   log.scrollTop = log.scrollHeight;
+  // A young delve has no history: the heading stays out of the way until
+  // there is something to remember.
+  document.getElementById("delve-log-heading").hidden = view.log.length === 0;
+  log.hidden = view.log.length === 0;
 
   const exploring = !view.in_combat && !view.finished && !decisionPending;
   document.getElementById("search").disabled = !exploring;
