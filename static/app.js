@@ -325,6 +325,9 @@ let mapMovesEnabled = false;
 // The exit whose corridor the pointer is over, or null - renderMap paints
 // that corridor in lamplight so the walkable ways announce themselves.
 let mapHoverTo = null;
+// The torch's breath: a slow multiplier on the party's light radius,
+// nudged by an interval so the carried light feels alive, not rendered.
+let mapFlicker = 1;
 // Arrow-key movement: the layout puts deeper areas to the RIGHT and the
 // way back to the LEFT, so ←/→ are the dungeon's natural verbs. Rebuilt
 // by renderMap from the same positions the corridors are drawn from.
@@ -562,7 +565,10 @@ function renderMap() {
     const r = rooms[id];
     const isCurrent = Number(id) === Number(mapCurrentId);
     const cx = TX(r.ox + r.w / 2), cy = TY(r.oy + r.h / 2);
-    const rad = (Math.max(r.w, r.h) / 2 + (isCurrent ? 2.5 : 0.75)) * TILE_PX;
+    // The carried light breathes: mapFlicker nudges only the CURRENT room's
+    // halo - remembered rooms keep a steady memory-light.
+    const reach = isCurrent ? 2.5 * mapFlicker : 0.75;
+    const rad = (Math.max(r.w, r.h) / 2 + reach) * TILE_PX;
     const grad = dctx.createRadialGradient(cx, cy, rad * 0.55, cx, cy, rad);
     grad.addColorStop(0, `rgba(0, 0, 0, ${isCurrent ? 1 : 0.6})`);
     grad.addColorStop(1, "rgba(0, 0, 0, 0)");
@@ -697,6 +703,20 @@ let mapCurrentId = null;
 // The area the map last centred itself on - so hover redraws don't fight
 // the user's own scrolling.
 let mapScrollAreaId = null;
+
+// Torch flicker: a slow breath on the party's light radius. One interval
+// for the app's lifetime; it cheaply re-renders the map (tile images are
+// cached) only while a delve map is actually on screen, and stays still
+// for users who prefer reduced motion.
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+setInterval(() => {
+  if (mapRootId === null || document.getElementById("map-stage").hidden) return;
+  if (reduceMotion.matches) { if (mapFlicker !== 1) { mapFlicker = 1; renderMap(); } return; }
+  // Slow triangle wave 0.93..1.0 - the light leans out and settles back.
+  const t = Date.now() / 2600;
+  mapFlicker = 0.93 + 0.07 * (1 - Math.abs(1 - (t % 2)));
+  renderMap();
+}, 450);
 
 // Mirror the map's hover state onto the rail: the exit button for the
 // hovered corridor gets .map-hover, every other button loses it.
