@@ -84,7 +84,10 @@ function showForgeError(message) {
 function renderSheet(c) {
   clearForgeError();
   document.getElementById("sheet").hidden = false;
-  document.getElementById("begin-delve").disabled = false;
+  // A fresh sheet means no delve underfoot: the button invites a run.
+  const begin = document.getElementById("begin-delve");
+  begin.disabled = false;
+  begin.textContent = "Begin a delve";
   document.getElementById("who").textContent =
     `${c.name || "Unnamed"} — ${c.ancestry} ${c.classes.join("/")}`;
 
@@ -794,6 +797,13 @@ function renderDelve(view) {
   document.getElementById("area-description").textContent = view.description;
   document.getElementById("area-turns").textContent =
     `Turn ${view.turns}` + (view.finished ? " — the delve is over." : "");
+
+  // One delve at a time: while the party is below ground the begin button
+  // says so and stays shut; when the run ends it opens again, renamed so
+  // the next click plainly starts a NEW delve rather than resuming this one.
+  const begin = document.getElementById("begin-delve");
+  begin.disabled = !view.finished;
+  begin.textContent = view.finished ? "Begin a new delve" : "Delve in progress";
 
   // The end of a delve is a moment, not a shrug: a tally over the map
   // tells the table how the run went and where the next one starts.
