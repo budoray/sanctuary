@@ -482,7 +482,21 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
 #exploration { display: flex; flex-direction: column; gap: var(--space-2); }
 #exploration button { width: 100%; }
 #delve-log { font-size: var(--text-sm); color: var(--color-ink-2); max-height: 12rem; overflow-y: auto; }
-#pending-decisions p { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+/* A pending ruling holds the whole delve - it should read as a held
+   lantern, not blend into the rail: accent frame, paper lift, and a slow
+   glow that breathes until the DM types the word that frees the party. */
+#pending-decisions p {
+  display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-paper-2);
+  animation: ruling-pulse 2.6s var(--ease-in-out) infinite;
+}
+@keyframes ruling-pulse {
+  0%, 100% { box-shadow: var(--shadow-1); }
+  50% { box-shadow: var(--shadow-glow); }
+}
 
 /* One action in flight at a time (app.js's actBusy guard) - the rail dims so
    the queued click the guard swallows reads as "wait", not as a dead page. */
@@ -551,7 +565,7 @@ h1, h2, h3, .chrome .wordmark { overflow-wrap: anywhere; min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label {
+  .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label, #pending-decisions p {
     animation-duration: 150ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 150ms !important;

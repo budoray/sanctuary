@@ -849,6 +849,13 @@ function renderDelve(view) {
     decisions.appendChild(p);
   });
 
+  // The ruling is the only door forward - put the caret in it. Guarded so a
+  // re-render never yanks focus away from a DM already typing in the block.
+  if (decisionPending && !decisions.contains(document.activeElement)) {
+    const first = decisions.querySelector("input");
+    if (first) first.focus();
+  }
+
   document.getElementById("movement-hint").hidden = !decisionPending;
 
   const combatSection = document.getElementById("combat");
