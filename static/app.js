@@ -129,12 +129,18 @@ function animate(el, finalFaces) {
   tick();
 }
 
+// Only the new roll dances: lines that already told their faces stay
+// put, so a fresh render doesn't re-shimmer the whole ledger.
+let prevRollsLen = 0;
+
 function renderLog(rolls) {
   const log = document.getElementById("log");
   log.innerHTML = "";
-  for (const r of rolls) {
+  const freshFrom = rolls.length > prevRollsLen ? prevRollsLen : rolls.length;
+  rolls.forEach((r, i) => {
     const li = document.createElement("li");
-    li.className = "enter";
+    const fresh = i >= freshFrom;
+    if (fresh) li.className = "enter";
     const faces = document.createElement("b");
     li.appendChild(faces);
     const modText = r.mods ? ` ${r.mods > 0 ? "+" : ""}${r.mods}` : "";
@@ -142,8 +148,10 @@ function renderLog(rolls) {
       ` <code>${r.expr}</code>${modText} = <strong>${r.total}</strong>` +
       (r.reason ? ` <em>${r.reason}</em>` : ""));
     log.appendChild(li);
-    animate(faces, r.faces);
-  }
+    if (fresh) animate(faces, r.faces);
+    else faces.textContent = r.faces.join(" ");
+  });
+  prevRollsLen = rolls.length;
   // The newest roll is the one that matters - keep it in view.
   log.scrollTop = log.scrollHeight;
 }
@@ -841,6 +849,8 @@ let prevInCombat = false;
 let prevAreaId = null;
 let prevExitTos = new Set();
 let prevTurns = 0;
+// What's happened, line by line: only entries beyond this count are new.
+let prevDelveLogLen = 0;
 
 // One beat of an animation class, restartable: remove, reflow, re-add.
 // Consecutive beats on the same element must not be swallowed.
@@ -1138,11 +1148,14 @@ function renderDelve(view) {
 
   const log = document.getElementById("delve-log");
   log.innerHTML = "";
-  view.log.forEach((line) => {
+  view.log.forEach((line, i) => {
     const li = document.createElement("li");
+    // What's happened arrives line by line: only the new entries fade in.
+    if (i >= prevDelveLogLen) li.classList.add("enter");
     li.textContent = line;
     log.appendChild(li);
   });
+  prevDelveLogLen = view.log.length;
   log.scrollTop = log.scrollHeight;
 
   const exploring = !view.in_combat && !view.finished && !decisionPending;
@@ -1281,6 +1294,8 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
   prevAreaId = null;
   prevExitTos = new Set();
   prevTurns = 0;
+  prevRollsLen = 0;
+  prevDelveLogLen = 0;
   renderDelve(view);
 });
 
