@@ -506,6 +506,14 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
   100% { box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
 }
 .hp-mend { animation: hp-mend 700ms var(--ease-out); border-radius: var(--radius-sm); }
+
+/* Blades out: the combat card rings blood-red once, on the first round
+   only - after that the fight is joined and the rail renders quiet. */
+@keyframes combat-start {
+  0% { box-shadow: 0 0 0 2px var(--color-danger), 0 0 18px color-mix(in oklch, var(--color-danger) 45%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
+}
+#combat.combat-start { animation: combat-start 600ms var(--ease-out); border-radius: var(--radius-md); }
 @keyframes xp-flash {
   0% { color: var(--color-accent); text-shadow: 0 0 14px color-mix(in oklch, var(--color-accent) 65%, transparent); }
   100% { color: inherit; text-shadow: none; }
@@ -603,7 +611,7 @@ h1, h2, h3, .chrome .wordmark { overflow-wrap: anywhere; min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label, #pending-decisions p, .hp-hit, .hp-mend, .xp-flash {
+  .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label, #pending-decisions p, .hp-hit, .hp-mend, .xp-flash, #combat.combat-start {
     animation-duration: 150ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 150ms !important;

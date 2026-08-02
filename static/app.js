@@ -819,6 +819,12 @@ function syncRailHover() {
 // a hit, and the XP figure flashes gold when the haul grows.
 let prevHpByName = {};
 let prevXp = 0;
+// Arrivals: whether blades were out last render (combat's first round
+// jolts), and which ways were known in this room (a searched-out door
+// enters with a fade, not a pop).
+let prevInCombat = false;
+let prevAreaId = null;
+let prevExitTos = new Set();
 
 function renderDelve(view) {
   document.getElementById("forge").hidden = true;
@@ -933,6 +939,11 @@ function renderDelve(view) {
 
   const combatSection = document.getElementById("combat");
   combatSection.hidden = !view.in_combat;
+  // Combat enters with a jolt: the first render with blades out rings the
+  // card in blood for a beat. Later rounds render quiet - the fight is
+  // already joined, no need to keep shouting it.
+  combatSection.classList.toggle("combat-start", view.in_combat && !prevInCombat);
+  prevInCombat = view.in_combat;
   // Reset every turn: the loading state a click sets on `act()`'s way out
   // only ever gets cleared by a fresh render replacing the element (true for
   // #exits, rebuilt below) or, for these two static buttons, by this line -
@@ -995,6 +1006,10 @@ function renderDelve(view) {
       ? `${kind} to ${seen.name}`
       : `${kind} into the dark`;
     btn.dataset.to = e.to;
+    // A way that appears where none was - a searched-out secret door -
+    // enters with a fade so the reveal is seen. Moving rooms rebuilds the
+    // whole list; only arrivals in the SAME room count as reveals.
+    if (view.area_id === prevAreaId && !prevExitTos.has(e.to)) btn.classList.add("enter");
     const icon = document.createElement("img");
     icon.src = exitTile(e.kind);
     icon.alt = "";
@@ -1025,6 +1040,8 @@ function renderDelve(view) {
     li.appendChild(btn);
     exitsList.appendChild(li);
   });
+  prevAreaId = view.area_id;
+  prevExitTos = new Set(view.exits.map((e) => e.to));
 
   // A heading over an empty <ul> reads as broken, not as "nothing here" -
   // "Here" and "Inventory" both rendered as a label above void.
@@ -1197,6 +1214,9 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
   // hp the new party never gained, no gold flash for xp it never earned.
   prevHpByName = {};
   prevXp = 0;
+  prevInCombat = false;
+  prevAreaId = null;
+  prevExitTos = new Set();
   renderDelve(view);
 });
 
