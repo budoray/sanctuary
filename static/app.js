@@ -328,6 +328,9 @@ let mapHoverTo = null;
 // The torch's breath: a slow multiplier on the party's light radius,
 // nudged by an interval so the carried light feels alive, not rendered.
 let mapFlicker = 1;
+// Living monsters in the current room - renderMap rings the party's
+// light with them, so a fight is visible ON the map, not just in the rail.
+let mapMenace = 0;
 // Arrow-key movement: the layout puts deeper areas to the RIGHT and the
 // way back to the LEFT, so ←/→ are the dungeon's natural verbs. Rebuilt
 // by renderMap from the same positions the corridors are drawn from.
@@ -643,6 +646,25 @@ function renderMap() {
       ctx.arc(px + TILE_PX / 2, py + TILE_PX / 2, TILE_PX / 3, 0, Math.PI * 2);
       ctx.fill();
     }
+    // What shares the room shares the light: a blood-red eye per living
+    // monster, ringing the party just inside the halo's edge.
+    if (mapMenace > 0) {
+      const danger = getComputedStyle(document.documentElement).getPropertyValue("--color-danger").trim() || "#c0392b";
+      ctx.save();
+      ctx.shadowColor = danger;
+      ctx.shadowBlur = TILE_PX * 0.35;
+      ctx.fillStyle = danger;
+      const ringR = TILE_PX * 1.05;
+      for (let i = 0; i < mapMenace; i++) {
+        const a = -Math.PI / 2 + (i * 2 * Math.PI) / mapMenace;
+        const mx = px + TILE_PX / 2 + ringR * Math.cos(a);
+        const my = py + TILE_PX / 2 + ringR * Math.sin(a);
+        ctx.beginPath();
+        ctx.arc(mx, my, TILE_PX * 0.09, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
   }
 
   container.innerHTML = "";
@@ -748,6 +770,9 @@ function renderDelve(view) {
 
   mapCurrentId = view.area_id;
   mapHoverTo = null;   // a new view rebuilds every corridor - stale glow helps no one
+  mapMenace = view.in_combat && view.combat
+    ? view.combat.monsters.filter((m) => m.alive).length
+    : view.monsters.length;
   recordArea(view);
   renderMap();
 
