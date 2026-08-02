@@ -471,6 +471,14 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
 #combat-monsters li.selectable:hover { background: var(--color-paper-3); }
 #combat-monsters li.targeted { background: var(--color-paper-3); box-shadow: inset 2px 0 0 var(--color-danger); }
 
+/* Menace has one colour everywhere: the Here list wears the same blood as
+   the eyes ringing the party on the map, and treasure answers in the same
+   lamp-gold as its glints. Empty notes keep their quiet italic. */
+#area-monsters li:not(.empty) { color: var(--color-danger); }
+#area-monsters li:not(.empty)::before { content: "◆ "; font-size: 0.7em; vertical-align: 0.1em; }
+#area-treasure li:not(.empty) { color: var(--color-accent); }
+#area-treasure li:not(.empty)::before { content: "✦ "; font-size: 0.8em; }
+
 /* hp as a bar, not a fraction: the party chips and the combat list share
    the same gauge - accent while healthy, blood when a third remains. */
 .hp-chip { display: inline-flex; flex-direction: column; gap: 2px; margin-right: var(--space-3); }
