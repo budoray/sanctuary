@@ -718,7 +718,15 @@ function renderDelve(view) {
 // flight - the click that started it is disabled and marked "loading",
 // flips to "error" (and re-enables) on failure, or is simply replaced by
 // `renderDelve`'s fresh markup on success.
+// Only ONE action may be in flight: a second click mid-request used to fire
+// a concurrent POST against state the first call was already mutating, and
+// the loser came back as a confusing 400.
+let actBusy = false;
+
 async function act(action, payload, btn) {
+  if (actBusy) return false;
+  actBusy = true;
+  document.getElementById("party-status").classList.add("busy");
   let restingText;
   if (btn) {
     btn.disabled = true;
@@ -737,6 +745,9 @@ async function act(action, payload, btn) {
     if (btn) flagError(btn, restingText);
     alert("Cannot reach the server.");
     return false;
+  } finally {
+    actBusy = false;
+    document.getElementById("party-status").classList.remove("busy");
   }
   if (!res.ok) {
     if (btn) flagError(btn, restingText);
