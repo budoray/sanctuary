@@ -1,4 +1,4 @@
-/* Hallmark · genre: atmospheric · macrostructure: Map / Diagram · theme: Midnight · enrichment: none · nav: N9 · footer: Ft2 */
+/* Hallmark · genre: atmospheric · macrostructure: Map / Diagram · theme: Midnight · enrichment: elevation + display type · nav: N9 · footer: Ft2 */
 
 @keyframes fade-in {
   from { opacity: 0; }
@@ -89,6 +89,22 @@ section, #forge, #arrange, #map-stage {
   padding: var(--space-6);
 }
 
+/* The map is the macrostructure of a delve: it earns the deepest elevation
+   on the page, sitting forward of everything else. */
+#map-stage { box-shadow: var(--shadow-2); }
+
+/* The sheet and the ledger are the instruments a player actually reads from
+   turn to turn - real cards, lifting toward the viewer on hover. Nowhere
+   else on the page gets this; restraint is the point. */
+#sheet, #tray {
+  box-shadow: var(--shadow-1);
+  transition: transform var(--dur-short) var(--ease-out);
+}
+#sheet:hover, #tray:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
 /* Before a delve, the forge gets the whole stage - it is not a bordered
    box crowded into a grid cell. */
 #forge { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; gap: var(--space-2); max-width: 32rem; margin: 0 auto; }
@@ -121,11 +137,17 @@ select, input, button {
 
 button {
   cursor: pointer;
-  transition: transform var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out), opacity var(--dur-short) var(--ease-out);
+  transition: transform var(--dur-short) var(--ease-out), background var(--dur-short) var(--ease-out),
+              opacity var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out);
 }
 button:hover { background: var(--color-paper-3); transform: translateY(-1px); }
 button:active { transform: translateY(0); background: var(--color-rule); }
 button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+button.loading { opacity: 0.65; cursor: progress; transform: none; }
+button.error { border-color: var(--color-danger); color: var(--color-danger); }
+
+.hint { font-size: var(--text-sm); color: var(--color-danger); margin: 0 0 var(--space-2); }
 
 #roll, #confirm-arrangement, #begin-delve {
   background: var(--color-accent);
@@ -147,10 +169,17 @@ dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-num
 
 #portrait { display: block; image-rendering: pixelated; border: 1px solid var(--color-rule); border-radius: var(--radius-md); margin-bottom: var(--space-3); }
 
+/* One thing leads at each stage: the rolled character's name before a
+   delve, the area name once one is under way. `:has()` reads which stage
+   is live off the existing [hidden] state - no extra markup or JS. */
+#who { font-size: var(--text-display-s); line-height: 1.1; margin: 0 0 var(--space-3); }
+main:has(#map-stage:not([hidden])) #who { font-size: var(--text-lg); margin: 0 0 var(--space-2); }
+
 #vitals { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--color-ink-2); }
 
 /* ── the dungeon map ──────────────────────────────────────────────────── */
 #map-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; }
+#area-name { font-size: var(--text-display-s); line-height: 1.1; margin: 0; }
 #area-turns { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--color-ink-2); font-size: var(--text-sm); }
 #area-description { color: var(--color-ink-2); margin-bottom: 0; }
 #map { width: 100%; overflow-x: auto; margin: var(--space-4) 0; }
@@ -163,7 +192,11 @@ dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-num
   text-anchor: middle;
   dominant-baseline: middle;
 }
-.map-node.current .map-node-rect { fill: var(--color-accent); stroke: var(--color-accent); }
+.map-node.current .map-node-rect {
+  fill: var(--color-accent);
+  stroke: var(--color-accent);
+  filter: drop-shadow(0 0 8px color-mix(in oklch, var(--color-accent) 70%, transparent));
+}
 .map-node.current .map-node-label { fill: var(--color-accent-ink); font-weight: 600; }
 .map-node.ghost .map-node-rect { fill: transparent; stroke: var(--color-rule); stroke-dasharray: 4 4; }
 .map-node.ghost .map-node-label { fill: var(--color-ink-2); font-style: normal; }
@@ -201,7 +234,15 @@ dd { margin: 0; font-family: var(--font-mono); font-variant-numeric: tabular-num
 }
 #log li { padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
 #log li:nth-child(odd) { background: var(--color-paper-3); }
-#log b { color: var(--color-accent); }
+#log b {
+  display: inline-block;
+  min-width: 2ch;
+  padding: 0 var(--space-1);
+  color: var(--color-accent);
+  background: color-mix(in oklch, var(--color-accent) 12%, transparent);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
 #log em { font-style: normal; color: var(--color-ink-2); }
 
 .enter { animation: fade-in var(--dur-short) var(--ease-out) both; }
