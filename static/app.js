@@ -337,6 +337,10 @@ let mapMenace = 0;
 // Treasure piles in the current room - renderMap scatters a gold glint per
 // haul across the floor, so loot catches the eye before the rail is read.
 let mapTreasure = 0;
+// The delve's end dims the world: when the run is over the carried light
+// contracts to a guttering ember, and if the party fell their token greys.
+let mapFinished = false;
+let mapPartyDown = false;
 // Arrow-key movement: the layout puts deeper areas to the RIGHT and the
 // way back to the LEFT, so ←/→ are the dungeon's natural verbs. Rebuilt
 // by renderMap from the same positions the corridors are drawn from.
@@ -590,8 +594,9 @@ function renderMap() {
     const isCurrent = Number(id) === Number(mapCurrentId);
     const cx = TX(r.ox + r.w / 2), cy = TY(r.oy + r.h / 2);
     // The carried light breathes: mapFlicker nudges only the CURRENT room's
-    // halo - remembered rooms keep a steady memory-light.
-    const reach = isCurrent ? 2.5 * mapFlicker : 0.75;
+    // halo - remembered rooms keep a steady memory-light. When the delve is
+    // over the torch gutters: the reach shrinks to an ember of itself.
+    const reach = isCurrent ? (mapFinished ? 1.1 : 2.5) * mapFlicker : 0.75;
     const rad = (Math.max(r.w, r.h) / 2 + reach) * TILE_PX;
     const grad = dctx.createRadialGradient(cx, cy, rad * 0.55, cx, cy, rad);
     grad.addColorStop(0, `rgba(0, 0, 0, ${isCurrent ? 1 : 0.6})`);
@@ -660,7 +665,10 @@ function renderMap() {
     const py = TY(cur.oy + Math.floor(cur.h / 2));
     const portrait = lastCharacter && lastCharacter.portrait ? tileImage(lastCharacter.portrait) : null;
     if (portrait) {
+      // The fallen stand grey in the guttering light.
+      if (mapPartyDown) ctx.filter = "grayscale(1) brightness(0.7)";
       ctx.drawImage(portrait, px, py, TILE_PX, TILE_PX);
+      if (mapPartyDown) ctx.filter = "none";
     } else {
       ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--color-accent") || "#e8a33d";
       ctx.beginPath();
@@ -882,6 +890,8 @@ function renderDelve(view) {
     ? view.combat.monsters.filter((m) => m.alive).length
     : view.monsters.length;
   mapTreasure = view.treasure.length;
+  mapFinished = view.finished;
+  mapPartyDown = view.party.length > 0 && view.party[0].hp <= 0;
   recordArea(view);
   renderMap();
 
