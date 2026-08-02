@@ -15,19 +15,34 @@ def test_load_unknown_table_raises():
 
 
 def test_a_split_table_refuses_to_load_as_one_and_names_its_parts():
-    """1.4.2.3a is three files. Silently returning one of them is how 26
-    tables would vanish from a corpus that still round-trips."""
+    """2.9.1e is three files (GRAVEYARD ENCOUNTERS, printed across three
+    pages). Silently returning one of them is how 26 tables would vanish
+    from a corpus that still round-trips."""
     with pytest.raises(LookupError) as e:
-        tables.load("1.4.2.3a")
-    assert "1.4.2.3a_general_equipment.yaml" in str(e.value)
+        tables.load("2.9.1e")
+    assert "2.9.1e_graveyard_encounters_part_1.yaml" in str(e.value)
 
 
 def test_parts_returns_every_file_for_a_split_table():
-    docs = tables.parts("1.4.2.3a")
+    docs = tables.parts("2.9.1e")
     assert len(docs) == 3
-    assert all(d["id"] == "1.4.2.3a" for d in docs)
+    assert all(d["id"] == "2.9.1e" for d in docs)
     assert {d["name"] for d in docs} == {
-        "GENERAL  EQUIPMENT", "1: CONTAINERS", "2: MOUNTS AND PACK ANIMALS"}
+        "GRAVEYARD  ENCOUNTERS (PART 1)", "GRAVEYARD  ENCOUNTERS (PART 2)",
+        "GRAVEYARD  ENCOUNTERS (PART 2) CONTINUED"}
+
+
+def test_sub_numbered_table_ids_are_not_merged_into_their_parent():
+    """`TABLE 1.4.2.3A.1: CONTAINERS` and `TABLE 1.4.2.3A.2: MOUNTS AND PACK
+    ANIMALS` used to fall into the id-group regex's `[:.]` separator and
+    come out as id `1.4.2.3a` with a mangled name (`"1: CONTAINERS"`),
+    merging three unrelated tables (General Equipment, Containers, Mounts
+    and Pack Animals) under one id that then had to raise on load(). The
+    `(?:\\.\\d+)?` tail in `_HEADER` keeps the sub-number as part of the id
+    instead."""
+    assert tables.load("1.4.2.3a")["name"] == "GENERAL  EQUIPMENT"
+    assert tables.load("1.4.2.3a.1")["name"] == "CONTAINERS"
+    assert tables.load("1.4.2.3a.2")["name"] == "MOUNTS AND PACK ANIMALS"
 
 
 def test_parts_of_a_single_file_table_is_a_one_item_list():
@@ -200,6 +215,9 @@ def test_ac_header_absent_and_first_row_is_a_real_label(table_id):
 ZERO_ROW_ALLOWLIST = {
     "1.2.0a",     # ability score ranges keyed by ancestry name (Dwarf, Elf, ...)
     "1.3.10.4d",  # thief skill adjustments keyed by ancestry name
+    "1.4.2.3a",   # general equipment keyed by item name (Ale, pint / Bedroll / ...)
+    "1.4.2.3a.1", # containers keyed by item name (Barrel / Basket / ...)
+    "1.4.2.3a.2", # mounts and pack animals keyed by animal name
     "1.4.2.3b",   # melee weapons keyed by weapon name (Axe, battle / Club / ...)
     "1.4.2.g",    # armour keyed by armour name (Banded / Chain mail / ...)
     "1.6.8a",     # morale modifiers keyed by situation text, not a number

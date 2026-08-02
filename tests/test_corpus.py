@@ -212,3 +212,24 @@ def test_extraction_round_trips():
         f"only committed: {sorted(set(committed) - set(fresh))[:5]}")
     differing = [k for k in committed if committed[k] != fresh[k]]
     assert differing == [], f"committed tables diverge from the book: {differing[:5]}"
+
+
+def test_truncation_gate_detects_a_deliberately_shortened_table():
+    """The detection gate for the page-break truncation bug (2.12.5a,
+    2.13.1r/1s/1t): `continuity_gaps` flags a numbered-range table whose
+    rows stop tiling, which is exactly the shape a page break silently
+    eating rows leaves behind. Proven here by deliberately truncating a
+    real, clean committed table (dropping a row from the middle, the same
+    shape the old page-marker bug produced) and reverting - the gate must
+    fire on the broken version and stay silent on the real one, on the
+    same data, so this isn't just tuned to reject one fixture.
+    """
+    from tools.extract import continuity_gaps
+
+    real_lines = load("1.3.4.4a")["lines"]  # FIGHTER LEVEL ADVANCEMENT, levels 1-20
+    assert continuity_gaps(real_lines) == [], "the real, complete table must not be flagged"
+
+    truncated = [ln for ln in real_lines if not ln.startswith("10 ")]  # drop level 10
+    assert truncated != real_lines
+    gaps = continuity_gaps(truncated)
+    assert gaps, "removing a row from a contiguous level table must be caught"

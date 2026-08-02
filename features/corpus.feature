@@ -6,7 +6,7 @@ Feature: Trusting the OSRIC rulebook data behind the tables
 
   Scenario: Every table in the rulebooks is available to the game
     Given the full corpus of extracted tables
-    Then 194 tables can be found by id
+    Then 198 tables can be found by id
 
   Scenario Outline: A table the book split across pages is still one table, read in full
     Given the table <id>, which the book printed across <parts> pages
@@ -15,7 +15,7 @@ Feature: Trusting the OSRIC rulebook data behind the tables
 
     Examples:
       | id       | parts |
-      | 1.4.2.3a | 3     |
+      | 2.9.1e   | 3     |
       | 2.9.1c   | 2     |
       | 2.9.1h   | 4     |
 

@@ -53,12 +53,32 @@ def test_find_tables_stops_a_block_at_prose():
     assert not any("To-hit modifiers apply" in ln for ln in first["lines"])
 
 
-def test_find_tables_stops_a_block_at_page_marker():
+def test_find_tables_keeps_a_block_open_across_a_page_break_when_a_row_follows():
+    """The page-break truncation bug (2.12.5a, 2.13.1r/1s/1t): a table whose
+    rows resume soon after the page marker must not be cut off there."""
     text = """
  TABLE 1.1.2A: STRENGTH
 3 -3 -1 0 1 0
 === PAGE 2 ===
 4-5 -2 -1 10 1 0
+"""
+    first = find_tables(text)[0]
+    assert first["lines"] == ["3 -3 -1 0 1 0", "4-5 -2 -1 10 1 0"]
+
+
+def test_find_tables_closes_a_block_at_a_page_break_when_only_prose_follows():
+    """The other side of the same fix: a table that genuinely ends right at
+    a page boundary must not swallow the whole next section's narrative just
+    because ordinary prose sentences don't match `_PROSE` (the druid to-hit
+    table, 1.3.3.4c, once ran straight into the following FIGHTER class
+    write-up this way)."""
+    text = """
+ TABLE 1.1.2A: STRENGTH
+3 -3 -1 0 1 0
+=== PAGE 2 ===
+This is where the next section begins, with an ordinary paragraph of prose
+that goes on for a while and never contains a data row of its own - which is
+what a table that actually ended on the previous page looks like from here.
 """
     first = find_tables(text)[0]
     assert first["lines"] == ["3 -3 -1 0 1 0"]

@@ -16,7 +16,7 @@ Feature: Looking up the OSRIC tables at the table
       | 20    | -9   |
 
   Scenario: A table the book split across pages is still readable in full
-    Given the general equipment table, which the book split across three pages
+    Given the graveyard encounters table, which the book split across three pages
     When a GM asks for every part of that table
     Then all three parts come back, none of them mistaken for the whole
 

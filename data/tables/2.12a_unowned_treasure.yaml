@@ -31,3 +31,174 @@ lines:
 - (worth half a gold piece each). You continue all the way through,
 - checking each type. Gems may be generated in Section 2.12.4,
 - jewellery in Section 2.12.5, and magic items in Chapter Thirteen.
+- 2.12.1.A. HOARD 1
+- '25% chance: 1d6 x1000 cp'
+- '30% chance: 1d6 x1000 sp'
+- '35% chance: 1d6 x1000 ep'
+- '40% chance: 1d10 x1000 gp'
+- '25% chance: 1d4 x100 pp'
+- '60% chance: 4d10 gems'
+- '60% chance: 3d10 pieces of jewellery'
+- '30% chance: 3 magic items (any type)'
+- 2.12.1.B. HOARD 2
+- '50% chance: 1d8 x1000 cp'
+- '25% chance: 1d6 x1000 sp'
+- '25% chance: 1d4 x1000 ep'
+- '25% chance: 1d3 x1000 gp'
+- '30% chance: 1d8 gems'
+- '20% chance: 1d4 pieces of jewellery'
+- '10% chance: 1 magic item (sword, ar-'
+- mour, or weapon)
+- 2.12.1.C. HOARD 3
+- '20% chance: 1d12 x1000 cp'
+- '30% chance: 1d6 x1000 sp'
+- '10% chance: 1d4 x1000 ep'
+- '25% chance: 1d6 gems'
+- '20% chance: 1d3 pieces of jewellery'
+- '10% chance: 2 magic items (any type)'
+- 2.12.1.D. HOARD 4
+- '10% chance: 1d8 x1000 cp'
+- '15% chance: 1d12 x1000 sp'
+- '15% chance: 1d8 x1000 ep'
+- '50% chance: 1d6 x1000 gp'
+- '30% chance: 1d10 gems'
+- '25% chance: 1d6 pieces of jewellery'
+- '15% chance: 1 potion and 2 other mag-'
+- ic items (any type)
+- 2.12.1.E. HOARD 5
+- '5% chance: 1d10 x1000 cp'
+- '25% chance: 1d12 x1000 sp'
+- '25% chance: 1d6 x1000 ep'
+- '25% chance: 1d8 x1000 gp'
+- '15% chance: 1d12 gems'
+- '10% chance: 1d8 pieces of jewellery'
+- '25% chance: 1 scroll and 3 other magic'
+- items (any type)
+- 2.12.1.F. HOARD 6
+- '10% chance: 1d20 x1000 sp'
+- '15% chance: 1d12 x1000 ep'
+- '40% chance: 1d10 x1000 gp'
+- '35% chance: 1d8 x100 pp'
+- '20% chance: 3d10 gems'
+- '10% chance: 1d10 pieces of jewellery'
+- '30% chance:  1 potion, 1 scroll, and 3'
+- other magic items (any type other than
+- sword or miscellaneous item)
+- 2.12.1.G. HOARD 7
+- '50% chance: 10d4 x1000 gp'
+- '50% chance: 1d20 x100 pp'
+- '30% chance: 5d4 gems'
+- '25% chance: 1d10 pieces of jewellery'
+- '35% chance: 1 scroll, 4 other magic'
+- items (any type)
+- 2.12.1.H. HOARD 8
+- '25% chance: 5d6 x1000 cp'
+- '40% chance: 1d100 x1000 sp'
+- '40% chance: 10d4 x1000 ep'
+- '55% chance: 10d6 x1000 gp'
+- '25% chance: 5d10 x100 pp'
+- '50% chance: 1d100 gems'
+- '50% chance: 10d4 pieces of jewellery'
+- '15% chance: 1 potion, 1 scroll, and 4'
+- other magic items
+- 2.12.1.I. HOARD 9
+- '30% chance: 3d6 x100 pp'
+- '55% chance: 2d10 gems'
+- '50% chance: 1d12 pieces of jewellery'
+- '15% chance: 1 magic item (any type)'
+- 2.12.1.J. INDIVIDUAL 1
+- 3d8 cp each
+- 2.12.1.K. INDIVIDUAL 2
+- 3d6 sp each
+- 2.12.1.L. INDIVIDUAL 3
+- 2d6 ep each
+- 2.12.1.M. INDIVIDUAL 4
+- 2d4 gp each
+- 2.12.1.N. INDIVIDUAL 5
+- 1d6 pp each
+- 2.12.1.O. CACHE 1
+- '25% chance: 1d4 x1000 cp'
+- '20% chance: 1d3 x1000 sp'
+- 2.12.1.P. CACHE 2
+- '30% chance: 1d6 x1000 sp'
+- '25% chance: 1d2 x1000 ep'
+- 2.12.1.Q. CACHE 3
+- '50% chance: 1d4 gems'
+- 2.12.1.R. CACHE 4
+- '40% chance: 2d4 x1000 gp'
+- '50% chance: 10d6 x100 pp'
+- '55% chance: 4d8 gems'
+- '45% chance: 1d12 pieces of jewellery'
+- 2.12.1.S. CACHE 5
+- '40% chance: 2d4 potions'
+- 2.12.1.T. CACHE 6
+- '50% chance: 1d4 scrolls'
+- 2.12.1.U. CACHE 7
+- '90% chance: 1d8 x10 gems'
+- '80% chance: 5d6 pieces of jewellery'
+- '70% chance: 1 ring, 1 wand, 1 miscel -'
+- laneous magic item, 1 magic armour,
+- 1 magic sword, 1 miscellaneous magic
+- weapon
+- 2.12.1.V. CACHE 8
+- '85% chance: 2 rings, 2 wands, 2 miscel-'
+- laneous magic items, 2 magic armour,
+- 2 magic swords, 2 miscellaneous magic
+- weapons
+- 2.12.1.W. CACHE 9
+- '60% chance: 5d6 x1000 gp'
+- '15% chance: 1d8 x100 pp'
+- '60% chance: 1d8 x10 gems'
+- '50% chance: 5d8 pieces of jewellery'
+- '55% chance: 1 map'
+- 2.12.1.X. CACHE 10
+- '60% chance: 1 potion and 1'
+- miscellaneous magic item
+- 2.12.1.Y. CACHE 11
+- '70% chance: 2d6 x1000 gp'
+- 2.12.1.Z. CACHE 12
+- '20% chance: 1d3 x1000 cp'
+- '25% chance: 1d4 x1000 sp'
+- '25% chance: 1d4 x1000 ep'
+- '30% chance: 1d4 x1000 gp'
+- '30% chance: 1d6 x100 pp'
+- '55% chance: 1d6 x10 gems'
+- '50% chance: 5d6 pieces of jewellery'
+- '50% chance: 3 magic items (any type)'
+- 2.12.2.  MAPS
+- Maps do not feature in the random tables because you would
+- need to prepare them in advance (frustrating!); they should ap-
+- pear in hand–crafted areas rather than randomly–rolled ones.
+- They are, nevertheless, valuable treasure to a clever player char-
+- acter. A map could indicate the location of a treasure outside
+- the dungeon, thus becoming an adventure in its own right—or
+- it could not show a treasure at all, but indicate where a power -
+- ful vampire lairs, or the location of a particularly fiendish trap, in
+- which case it will still be of value to the party.
+- Maps can be literal maps or charts where “X” marks the spot,
+- but they do not need to be. A note that says “The wand is lost—I
+- dropped it somewhere in the sewers” or “The Shield of Shadows
+- must lie beyond the Green Portal” is a minor map of sorts.
+- 2.12.3.  COIN
+- Coin is the simplest type of treasure, but should still be awarded
+- intelligently. OSRIC coins are heavy, and weight is a significant
+- drawback if the players locate a substantial sum in copper or
+- silver. Making decisions about heavy but less-valuable treasure
+- becomes important at higher level.
+- In an upper dungeon level, few treasures should consist of gold
+- without silver or copper, or platinum without gold and silver,
+- so if the dice indicate 500 gp on dungeon level 2, the GM might
+- prefer to award 200 gp, 2,000 sp and 10,000 cp instead. In deep-
+- er dungeon levels, copper and silver will be relatively less fre -
+- quent, although successful players will still have enormous piles
+- of them on their hands.
+- There is no particular reason why coin should be awarded in
+- round numbers; if the dice indicate 6,000 cp, you can decide
+- there are 5,573 or 6,281 of them. Some GMs prefer the round
+- numbers, others hate them.
+- Consider adding flavour by having some alternative monetary
+- systems, such as ancient coins from a previous empire, that do
+- not convert to the standard coin types of your campaign on a
+- 1:1 basis. In such cases the player characters will need to pay
+- conversion costs, perhaps to the local money changers (a good
+- reason to go to a city!).

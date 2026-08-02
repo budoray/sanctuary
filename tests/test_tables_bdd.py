@@ -18,11 +18,11 @@ def monster_table():
 
 
 @given(
-    "the general equipment table, which the book split across three pages",
+    "the graveyard encounters table, which the book split across three pages",
     target_fixture="table_id",
 )
-def split_equipment_table():
-    return "1.4.2.3a"
+def split_encounters_table():
+    return "2.9.1e"
 
 
 @given("the Wisdom table", target_fixture="table_id")
@@ -55,7 +55,7 @@ def ask_for_every_part(table_id):
 def three_parts_come_back(parts):
     assert len(parts) == 3
     with pytest.raises(LookupError):
-        tables.load("1.4.2.3a")
+        tables.load("2.9.1e")
 
 
 @when(
