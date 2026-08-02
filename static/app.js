@@ -313,7 +313,7 @@ function layoutMap(rootId) {
 // (exploredAreas) the old node diagram used - the engine's geometry is
 // untouched.
 
-const TILE_PX = 32;
+const TILE_PX = 64;
 const TILE_NAMES = [
   "floor_cobblestone", "floor_flagstone", "floor_packed_dirt", "floor_worn_stone",
   "wall_dressed_stone", "wall_rough_hewn_rock",
@@ -557,6 +557,7 @@ function renderMap() {
   // Keep the light in view when the dungeon outgrows the frame.
   if (cur && container.clientWidth > 0) {
     container.scrollLeft = Math.max(0, TX(cur.ox + cur.w / 2) - container.clientWidth / 2);
+    container.scrollTop = Math.max(0, TY(cur.oy + cur.h / 2) - container.clientHeight / 2);
   }
 }
 

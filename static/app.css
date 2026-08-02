@@ -137,6 +137,56 @@ main {
   main { grid-template-columns: minmax(0, 1fr); }
 }
 
+/* ── delve mode: the whole delve on one screen ──────────────────────────
+   Skinny sheet rail left, the map centre with the ledger under it, every
+   action in a right rail. The #stage / #instruments wrappers dissolve
+   (display: contents) so their children become grid items - the DOM, and
+   every test that reads it, is untouched. Below 861px the page falls back
+   to its normal single-column flow. */
+@media (min-width: 861px) {
+  main:has(#map-stage:not([hidden])) {
+    grid-template-columns: minmax(12rem, 14rem) minmax(0, 1fr) minmax(16rem, 21rem);
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: calc(100dvh - 7.5rem);
+    /* The base `align-items: start` sizes items to content, which gives
+       overflow-y nothing to clamp against - the rails must STRETCH to their
+       tracks so their scrollboxes engage and the delve stays one screen. */
+    align-items: stretch;
+  }
+  main:has(#map-stage:not([hidden])) #stage,
+  main:has(#map-stage:not([hidden])) #instruments { display: contents; }
+  main:has(#map-stage:not([hidden])) #sheet {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  main:has(#map-stage:not([hidden])) #map-stage {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  main:has(#map-stage:not([hidden])) #map {
+    flex: 1;
+    min-height: 0;
+    margin: var(--space-3) 0;
+    overflow: auto;
+  }
+  main:has(#map-stage:not([hidden])) #tray {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  main:has(#map-stage:not([hidden])) #log { max-height: 9rem; }
+  main:has(#map-stage:not([hidden])) #party-status {
+    grid-column: 3;
+    grid-row: 1 / -1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
 #stage { min-width: 0; }
 #instruments { min-width: 0; display: flex; flex-direction: column; gap: var(--space-6); }
 
@@ -154,17 +204,15 @@ section, #forge, #arrange, #map-stage {
 #sheet { background: var(--color-paper-2); box-shadow: var(--shadow-1); }
 #map-stage { background: var(--color-paper-3); box-shadow: var(--shadow-1); scroll-margin-top: var(--space-16); }
 
-/* The map is a dungeon now, not a diagram: tiles at their native size,
-   scrolling sideways when the delve outgrows the frame, tall dungeons
-   scaled down whole rather than cropped. */
+/* The map is a dungeon now, not a diagram: tiles at their native 64px,
+   panning inside its frame when the delve outgrows it. */
 .delve-map {
   display: block;
-  margin: 0 auto;
+  margin: auto;
   image-rendering: pixelated;
   background: var(--color-paper);
   border: 1px solid var(--color-rule);
   border-radius: var(--radius-md);
-  max-height: min(46vh, 26rem);
 }
 
 /* ── the forge: a Marquee Hero ───────────────────────────────────────────
@@ -399,7 +447,7 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
 /* ── party instruments ───────────────────────────────────────────────── */
 #exploration ul, #combat ul, #inventory, #delve-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
 #exits button { width: 100%; text-align: left; display: flex; align-items: center; gap: var(--space-3); }
-.exit-icon { width: 24px; height: 24px; flex: none; image-rendering: pixelated; border-radius: var(--radius-sm); }
+.exit-icon { width: 32px; height: 32px; flex: none; image-rendering: pixelated; border-radius: var(--radius-sm); }
 #combat-monsters li.selectable { cursor: pointer; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
 #combat-monsters li.selectable:hover { background: var(--color-paper-3); }
 #exploration { display: flex; flex-direction: column; gap: var(--space-2); }
