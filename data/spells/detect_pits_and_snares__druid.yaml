@@ -1,0 +1,14 @@
+name: Detect Pits and Snares
+slug: detect_pits_and_snares
+reversible: false
+class: druid
+level: 1
+school: Druidic Divination
+range: Caster
+duration: 4 rounds/level
+area_of_effect: Path 10-ft wide, 40-ft long
+components: V,S,M
+casting_time: 3 segments
+saving_throw: None
+text: The druid may cast this spell upon herself, imbuing her eyes with divinatory power. The druid can instantly discern virtually any form of trap if outdoors, and even indoors or underground she will detect the presence of pits.
+source: wiki2_spells.txt

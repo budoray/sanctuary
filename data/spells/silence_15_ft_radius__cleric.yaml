@@ -1,0 +1,14 @@
+name: Silence, 15-ft Radius
+slug: silence_15_ft_radius
+reversible: false
+class: cleric
+level: 2
+school: Clerical Transmutation/Alteration
+range: 120-ft
+duration: 2 rounds/caster level
+area_of_effect: 30-ft diameter sphere
+components: V,S
+casting_time: 5 segments
+saving_throw: See below
+text: Casting this spell brings into being an area of complete and utter magical silence in which no sound can be heard. The spell may be cast upon a location in the air, upon a physical object (in which case it will move with the object), or upon a creature (in which case a saving throw is applicable). If the creature makes a saving throw, the area of silence will centre upon the space just behind the intended victim.
+source: wiki2_spells.txt

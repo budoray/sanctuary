@@ -1,0 +1,14 @@
+name: Enchanted Weapon
+slug: enchanted_weapon
+reversible: true
+class: magic-user
+level: 4
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: 5 rounds/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: With a touch of his or her hand, the magic user creates a weak and temporary enchantment upon a full-sized weapon, or upon two smaller weapons such as arrows, bolts, or daggers. The enchantment lends no bonus to hit, but may be used to strike creatures that can be hit only with a magical weapon. When the weapon hits successfully, the enchantment ends.
+source: wiki2_spells.txt

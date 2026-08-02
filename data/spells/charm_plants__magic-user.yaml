@@ -1,0 +1,14 @@
+name: Charm Plants
+slug: charm_plants
+reversible: false
+class: magic-user
+level: 7
+school: Arcane Enchantment/Charm
+range: 30-ft
+duration: Permanent
+area_of_effect: 30-ft×10-ft
+components: V,S,M
+casting_time: 1 turn
+saving_throw: Negates
+text: This spell grants the magic user the ability to communicate with (for a period of 1 turn) and command plants (the obedience is permanent) in the spell's area of effect. No unusual abilities are granted to the plants; they have no additional capabilities beyond those they had before the spell was cast. Only intelligent plants are entitled to a saving throw, but at a penalty of -4.
+source: wiki2_spells.txt

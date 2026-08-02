@@ -1,0 +1,14 @@
+name: Mass Suggestion
+slug: mass_suggestion
+reversible: false
+class: illusionist
+level: 6
+school: Phantasmal Enchantment/Charm
+range: 10-ft/level
+duration: 4 turns+4 turns/level
+area_of_effect: One creature/level
+components: V,M
+casting_time: 6 segments
+saving_throw: Negates
+text: This spell functions in the same manner as suggestion, but influences multiple creatures. If all of the spell's power is concentrated upon a single creature, the spell simply functions as a powerful suggestion spell, with the saving throw made at -2.
+source: wiki2_spells.txt

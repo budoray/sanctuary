@@ -1,0 +1,14 @@
+name: Blade Barrier
+slug: blade_barrier
+reversible: false
+class: cleric
+level: 6
+school: Clerical Evocation
+range: 30-ft
+duration: 3 rounds/caster level
+area_of_effect: Circular path 2-10-ft in radius
+components: V,S
+casting_time: 9 segments
+saving_throw: None
+text: This enchantment brings into being a whirling wall of steel blades that circle around a fixed point with blinding speed. Any creature stepping through the circle will suffer 8d8 points of damage. The cleric sets the focal point and the radius of the barrier at the time of casting, and these parameters cannot be changed thereafter (short of dismissing the spell entirely, of course).
+source: wiki2_spells.txt

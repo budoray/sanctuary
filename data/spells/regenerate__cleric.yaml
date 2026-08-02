@@ -1,0 +1,14 @@
+name: Regenerate
+slug: regenerate
+reversible: true
+class: cleric
+level: 7
+school: Clerical Necromancy
+range: Touch
+duration: Instantaneous
+area_of_effect: One creature
+components: V,S,M
+casting_time: 3 rounds
+saving_throw: None
+text: The powerful regeneration spell causes severed body parts to reattach themselves in a single round, or to regrow within 2-8 turns. The spell's reverse causes a touched appendage to wither and fall away to dust within 2-8 turns. A successful attack must be made in order to cast the spell upon an unwilling victim, but the victim does not also receive a saving throw.
+source: wiki2_spells.txt

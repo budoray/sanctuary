@@ -1,0 +1,14 @@
+name: Airy Water
+slug: airy_water
+reversible: false
+class: magic-user
+level: 5
+school: Arcane Transmutation/Alteration
+range: Caster
+duration: 1 turn/level
+area_of_effect: 10-ft radius sphere or 20-ft radius hemisphere
+components: V,S,M
+casting_time: 5 segments
+saving_throw: None
+text: This spell transforms water or other non-magical liquids into a bubble of air in the area surrounding the caster. The bubble has the same density as water and will not support the magic user in the water; he or she will sink or float as normal, surrounded by the bubble's atmosphere. The oxygen content of the air in the bubble does not run out until the spell expires.
+source: wiki2_spells.txt

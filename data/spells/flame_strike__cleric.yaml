@@ -1,0 +1,14 @@
+name: Flame Strike
+slug: flame_strike
+reversible: false
+class: cleric
+level: 5
+school: Clerical Evocation
+range: 60-ft
+duration: 1 segment
+area_of_effect: 10-ft diameter column, 30-ft high
+components: V,S,M
+casting_time: 8 segments
+saving_throw: Half
+text: Upon the casting of this spell, a blazing column of fire descends from the air. Its searing flames engulf an area 10-ft in diameter, as set by the caster. Each creature caught within the flames will suffer 6d8 points of damage, halved if the creature makes a successful saving throw.
+source: wiki2_spells.txt

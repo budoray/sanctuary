@@ -1,0 +1,14 @@
+name: Fire Trap
+slug: fire_trap
+reversible: false
+class: druid
+level: 2
+school: Druidic Evocation
+range: Touch
+duration: Permanent until tripped
+area_of_effect: One object
+components: V,S,M
+casting_time: 1 turn
+saving_throw: Half
+text: This spell enchants any item that can be opened or closed with a magical trap. When the item is opened by any person other than the caster, magical fire explodes in an area 5-ft in radius around the fire trapped object, causing 1d4 plus the caster's level hit points of damage to all creatures in this area. A successful saving throw indicates half damage. The item upon which this spell is cast suffers no damage from the explosion. Detecting a fire trap is extraordinarily difficult; attempts to find traps are reduced by one-half in efficacy if the trap is a fire trap, and the trap will detonate if an attempt to remove traps fails.
+source: wiki2_spells.txt

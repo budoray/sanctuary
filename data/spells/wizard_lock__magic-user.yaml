@@ -1,0 +1,14 @@
+name: Wizard Lock
+slug: wizard_lock
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: Permanent
+area_of_effect: 30 square-ft/level
+components: V,S
+casting_time: 2 segments
+saving_throw: None
+text: A wizard lock spell functions similarly to a powerful hold portal spell, except that extra-dimensional creatures cannot pass through a wizard lock as they can a held portal.
+source: wiki2_spells.txt

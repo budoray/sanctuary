@@ -1,0 +1,14 @@
+name: Scare
+slug: scare
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Enchantment/Charm
+range: 10-ft
+duration: 3d4 rounds
+area_of_effect: One creature
+components: V,S,M
+casting_time: 2 segments
+saving_throw: Negates
+text: This spell causes terror in creatures of less than 6th level or 6 HD. Such creatures are entitled to a saving throw, which, if successful, allows them to shake off the spell's effect entirely. If a creature fails the saving throw, however, it will become frozen with terror. If forced, it can fight, but it suffers a penalty of -1 to all attacks, damage, and saving throw rolls.
+source: wiki2_spells.txt

@@ -1,0 +1,14 @@
+name: Maze
+slug: maze
+reversible: false
+class: magic-user
+level: 8
+school: Arcane Conjuration/Summoning
+range: 5-ft/level
+duration: See below
+area_of_effect: One creature
+components: V,S
+casting_time: 3 segments
+saving_throw: None
+text: The targeted creature is trapped by this spell into an interdimensional reality similar to that created by the second level spell ropetrick. This wormhole has an entrance, which closes immediately after the target is trapped, and an exit, which is difficult to find in the branching, twisting maze of the dimensional labyrinth. A creature's intelligence determines the amount of time required to find the way out and emerge back into the material plane.
+source: wiki2_spells.txt

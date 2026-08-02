@@ -1,0 +1,14 @@
+name: Burning Hands
+slug: burning_hands
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Transmutation/Alteration
+range: Caster
+duration: 1 round
+area_of_effect: Fan of flame 3-ft long in a 120-degree arc
+components: V,S
+casting_time: 1 segment
+saving_throw: None
+text: While casting this spell, the magic user touches his or her thumbs together, and a sheet of flame explodes from his or her fingers to burn opponents within the spell's short (3-ft) range. The flames inflict 1 hp of damage per caster level (no saving throw applies). Any combustible items caught in the sheet of flame must pass a saving throw against normal fire or be destroyed.
+source: wiki2_spells.txt

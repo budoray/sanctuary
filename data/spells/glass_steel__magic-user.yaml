@@ -1,0 +1,14 @@
+name: Glass-steel
+slug: glass_steel
+reversible: false
+class: magic-user
+level: 8
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: Permanent
+area_of_effect: One object
+components: V,S,M
+casting_time: 8 segments
+saving_throw: None
+text: This spell grants a glass object the strength of steel, while retaining its transparent properties. The weight of the object can be no more than 10 lbs per caster level. In most cases, the object will make item saving throws on the more favourable of the glass or metal tables.
+source: wiki2_spells.txt

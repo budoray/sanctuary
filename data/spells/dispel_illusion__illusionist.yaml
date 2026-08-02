@@ -1,0 +1,14 @@
+name: Dispel Illusion
+slug: dispel_illusion
+reversible: false
+class: illusionist
+level: 3
+school: Phantasmal Abjuration
+range: 10-ft/level
+duration: Instantaneous
+area_of_effect: One illusion
+components: V,S
+casting_time: 3 segments
+saving_throw: None
+text: This spell automatically dispels phantasmal forces cast by non-illusionists. All other illusion spells are treated as if this spell were a dispel magic (i.e., with a 50% base chance to dispel, adjusted up or down by 2% or 5% respectively, based on relative caster levels).
+source: wiki2_spells.txt

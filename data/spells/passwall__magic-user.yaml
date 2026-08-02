@@ -1,0 +1,14 @@
+name: Passwall
+slug: passwall
+reversible: false
+class: magic-user
+level: 5
+school: Arcane Transmutation/Alteration
+range: 30-ft
+duration: 6 turns+1/level
+area_of_effect: Passage 5-ft wide, 10-ft high, and 10-ft long
+components: V,S,M
+casting_time: 5 segments
+saving_throw: None
+text: By means of a passwall spell, the magic user creates an inter-dimensional opening through any non- metallic material, allowing him or her and any others to simply walk directly into the hillside or through a wall. More than one spell may be used in succession to create longer passages. The inside of the passageway is still a part of the material plane; the inter-dimensional warping of space simply acts to “remove” the material through which the passage is created.
+source: wiki2_spells.txt

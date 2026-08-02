@@ -1,0 +1,14 @@
+name: Control Temperature, 10-ft Radius
+slug: control_temperature_10_ft_radius
+reversible: false
+class: druid
+level: 4
+school: Druidic Transmutation/Alteration
+range: Caster
+duration: 4 turns+1 turn/caster level
+area_of_effect: 10-ft radius
+components: V,S,M
+casting_time: 6 segments
+saving_throw: None
+text: By casting this spell, the druid magically controls the temperature of his or her immediate surroundings, to a radius of 10-ft. The temperature may be raised or lowered by 9° Fahrenheit (4° Celsius) per caster level.
+source: wiki2_spells.txt

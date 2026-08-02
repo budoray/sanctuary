@@ -1,0 +1,14 @@
+name: Conjure Earth Elemental
+slug: conjure_earth_elemental
+reversible: true
+class: druid
+level: 7
+school: Druidic Conjuration/Summoning
+range: 40-ft
+duration: 1 turn/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: By means of this spell, the druid summons a 16 HD elemental from the plane of earth. The spell is otherwise identical to the druidic spell conjure fire elemental, but there is no chance to summon a more powerful elemental, as exists when a druid summons fire elementals. As with conjuring fire elementals, the earth elemental will be the druid's ally by its own will; the druid requires no magical wards against it and need not concentrate upon it after the summoning is complete.
+source: wiki2_spells.txt

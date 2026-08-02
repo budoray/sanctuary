@@ -1,0 +1,14 @@
+name: Repulsion
+slug: repulsion
+reversible: false
+class: magic-user
+level: 6
+school: Arcane Abjuration
+range: 10-ft/level
+duration: 1 round/2 levels
+area_of_effect: 10-ft wide path
+components: V,S,M
+casting_time: 6 segments
+saving_throw: None
+text: All living creatures in the spell's path will move away from the caster at their normal movement rates for the spell's duration, as if by choice.
+source: wiki2_spells.txt

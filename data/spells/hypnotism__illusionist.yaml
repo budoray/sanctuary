@@ -1,0 +1,14 @@
+name: Hypnotism
+slug: hypnotism
+reversible: false
+class: illusionist
+level: 1
+school: Phantasmal Enchantment/Charm
+range: 30-ft
+duration: 1 round+1 round/level
+area_of_effect: 1d6 creatures
+components: V,S
+casting_time: 1 segment
+saving_throw: Negates
+text: The gestures of this spell weave a hypnotic power into the illusionist's words, affecting 1d6 creatures. Those not making their saving throws are subject to a suggestion made by the illusionist, identical to that made in the magic user spell suggestion (but with a much shorter duration). The only indication about whether a creature has been affected by the hypnotism is whether or not it responds to the suggestion.
+source: wiki2_spells.txt

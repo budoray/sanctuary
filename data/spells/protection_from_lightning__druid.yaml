@@ -1,0 +1,14 @@
+name: Protection From Lightning
+slug: protection_from_lightning
+reversible: false
+class: druid
+level: 4
+school: Druidic Abjuration
+range: Touch
+duration: See below
+area_of_effect: One creature
+components: V,S,M
+casting_time: 6 segments
+saving_throw: None
+text: The druid may use this spell to confer considerable protection from lightning upon another creature, but if he or she casts it upon him- or herself the effects are far greater, conferring temporary invulnerability even to lightning of magical nature, such as dragon's breath. If the spell is cast upon another creature, the recipient gains immunity to normal electrical effects and a saving throw bonus of +4 against lightning based attacks. Any damage incurred by them will also reduced by half. If the spell is cast upon the druid, he or she becomes completely invulnerable to normal electrical effects and also ignores all damage from magical lightning (dragon breath, lightning bolt, etc.) until a total of 12 hp/caster level has been absorbed by the spell, at which time the spell will be dissipated.
+source: wiki2_spells.txt

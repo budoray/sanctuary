@@ -1,0 +1,14 @@
+name: Misdirection
+slug: misdirection
+reversible: false
+class: illusionist
+level: 2
+school: Phantasmal Illusion
+range: 30-ft
+duration: 1 round/level
+area_of_effect: One object or creature
+components: V,S
+casting_time: 2 segments
+saving_throw: Negates
+text: This spell is cast upon an object or creature to mislead any form of divination spells. If the caster or user of the divination magic fails a saving throw, he or she will obtain a false result from the divination; a lie will be detected as truth, the wrong alignment perceived, the wrong location divined, etc.
+source: wiki2_spells.txt

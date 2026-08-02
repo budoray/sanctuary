@@ -1,0 +1,14 @@
+name: Detect Lie
+slug: detect_lie
+reversible: true
+class: cleric
+level: 4
+school: Clerical Divination
+range: 30-ft
+duration: 1 round/caster level
+area_of_effect: One person
+components: V,S,M
+casting_time: 7 segments
+saving_throw: None
+text: The subject of this spell (not necessarily the caster) gains the ability to discern whether the truth is being told, for the duration of the spell. The reverse of the spell allows the spell recipient's most brazen falsehoods to seem logical and believable. The spell's reverse may also be used to ward against the effects of a detect lie spell.
+source: wiki2_spells.txt

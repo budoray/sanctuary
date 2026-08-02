@@ -1,0 +1,14 @@
+name: Fly
+slug: fly
+reversible: false
+class: magic-user
+level: 3
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: 6 turns/level+1d6 turns
+area_of_effect: One creature
+components: V,S,M
+casting_time: 3 segments
+saving_throw: None
+text: This spell grants the power of flight with aerial agility level V (see Chapter 3) to any creature the magic user touches. The base movement rate for flight is 120-ft per round, with the base speed being doubled when diving, halved when climbing. The GM secretly rolls a 1d6 to determine how much time the spell will last after the base duration expires.
+source: wiki2_spells.txt

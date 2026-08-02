@@ -1,0 +1,14 @@
+name: Create Food and Water
+slug: create_food_and_water
+reversible: false
+class: cleric
+level: 3
+school: Clerical Transmutation/Alteration
+range: 10-ft
+duration: Instantaneous (permanent)
+area_of_effect: A day's ration per caster level
+components: V,S
+casting_time: 1 turn
+saving_throw: None
+text: Upon completion of the ritual words of this spell, food and/ or water will appear from thin air. A caster of fifth level can conjure up enough food and water to sustain a person or even a horse for five full days. The volume of food and water produced by the spell is approximately one cubic-ft per level of the caster.
+source: wiki2_spells.txt

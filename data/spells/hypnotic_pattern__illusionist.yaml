@@ -1,0 +1,14 @@
+name: Hypnotic Pattern
+slug: hypnotic_pattern
+reversible: false
+class: illusionist
+level: 2
+school: Phantasmal Illusion
+range: '0'
+duration: See below
+area_of_effect: 30-ft×30-ft square
+components: S,M
+casting_time: 2 segments
+saving_throw: Negates
+text: The illusionist traces magical patterns in the air with a lit stick of incense or other small light source. Any creature in the area of effect that looks at the traceries of light must make a saving throw or stay transfixed by the patterns. The spell can affect a maximum of 25 hit dice worth of creatures, and its effect persists for so long as the caster chooses to continue tracing the patterns in the air.
+source: wiki2_spells.txt

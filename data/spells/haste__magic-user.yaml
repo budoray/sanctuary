@@ -1,0 +1,14 @@
+name: Haste
+slug: haste
+reversible: false
+class: magic-user
+level: 3
+school: Arcane Transmutation/Alteration
+range: 60-ft
+duration: 3 rounds+1 round/level
+area_of_effect: 1 creature/level in a 40-ft×40-ft area
+components: V,S,M
+casting_time: 3 segments
+saving_throw: None (willing targets only)
+text: This spell imbues creatures in the targeted area with preternatural speed, allowing them to move and attack at twice the normal rate. The rate of spell casting cannot be increased. Within the area of effect, creatures closest to the caster will be affected first by the spell if the caster's level is not sufficient to affect all of the creatures in the area. The spell ages the creatures upon which it is cast by 2 years.
+source: wiki2_spells.txt

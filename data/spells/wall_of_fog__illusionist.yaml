@@ -1,0 +1,14 @@
+name: Wall of Fog
+slug: wall_of_fog
+reversible: false
+class: illusionist
+level: 1
+school: Phantasmal Transmutation/Alteration
+range: 30-ft
+duration: 2d4 rounds+1round/level
+area_of_effect: 20-ft/level cube
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: 'The illusionist creates a curtain of obscuring fog in the area of effect. Vision of all kinds is reduced to 2-ft through the swirling vapour. The fog can be affected by normal or magical wind and breezes. Last update: 2021/04/04 17:11'
+source: wiki2_spells.txt

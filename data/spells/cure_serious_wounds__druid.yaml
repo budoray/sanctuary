@@ -1,0 +1,14 @@
+name: Cure Serious Wounds
+slug: cure_serious_wounds
+reversible: true
+class: druid
+level: 4
+school: Druidic Necromancy
+range: Touch
+duration: Instantaneous (permanent)
+area_of_effect: Creature touched
+components: V,S,M
+casting_time: 6 segments
+saving_throw: None (neg.)
+text: A benison similar to cure light wounds, cure serious wounds permits the caster to lay on hands for 2d8+1 hit points of healing. The spell's limits are otherwise similar to those of cure light wounds. The reverse of the spell causes damage rather than healing, requiring that the cleric successfully touch the target.
+source: wiki2_spells.txt

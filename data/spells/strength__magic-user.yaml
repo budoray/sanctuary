@@ -1,0 +1,14 @@
+name: Strength
+slug: strength
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: 6 turns/level
+area_of_effect: One person
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: This spell increases a person's strength (affecting the same sorts of creatures as hold person). The recipient's strength increases by 1d6, and members of the various fighter-type classes gain a +1 to this roll. If the spell is cast upon a monster (such as an orc), the GM is free to rule for convenience that the effect of the spell is to grant +1 to damage, and if the d6 roll is a 5 or 6, a +1 “to hit” as well.
+source: wiki2_spells.txt

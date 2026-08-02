@@ -1,0 +1,14 @@
+name: Alter Reality
+slug: alter_reality
+reversible: false
+class: illusionist
+level: 7
+school: Phantasmal Illusion
+range: Unlimited
+duration: Varies (GM discretion
+area_of_effect: Varies (GM discretion)
+components: Varies (GM discretion)
+casting_time: Varies (GM discretion)
+saving_throw: Varies (GM discretion)
+text: This spell has the same effect as the magic user spell limited wish, but requires the creation of a phantasmal force prior to casting, which serves as a focus for the spell.
+source: wiki2_spells.txt

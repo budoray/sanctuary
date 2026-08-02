@@ -1,0 +1,14 @@
+name: Locate Animals
+slug: locate_animals
+reversible: false
+class: druid
+level: 1
+school: Druidic Divination
+range: Caster
+duration: 1 round/caster level
+area_of_effect: Path 20-ft wide, 20-ft/caster level long
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: The caster becomes able to divine the presence of a particular kind of animal in the direction he or she views. The druid must concentrate for a full round in a particular direction in order to gain the insight granted by the spell. The spell's enchantment affects the caster, so the effects move with him or her. The divination is not blocked by any intervening substance, of any thickness.
+source: wiki2_spells.txt

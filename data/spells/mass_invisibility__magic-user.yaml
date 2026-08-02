@@ -1,0 +1,14 @@
+name: Mass Invisibility
+slug: mass_invisibility
+reversible: false
+class: magic-user
+level: 7
+school: Arcane Illusion/Phantasm
+range: 10-ft/level
+duration: See below
+area_of_effect: 30-ft×30-ft radius
+components: V,S,M
+casting_time: 7 segments
+saving_throw: None
+text: This spell acts in the same manner as an invisibility spell, but has an effective radius of 30-ft×30-ft, possibly hiding as many as 300 medium-sized creatures if they are packed in close and do not jostle one another.
+source: wiki2_spells.txt

@@ -1,0 +1,14 @@
+name: Summon Shadow
+slug: summon_shadow
+reversible: false
+class: illusionist
+level: 5
+school: Phantasmal Conjuration/Summoning
+range: 10-ft
+duration: 1 round+1 round/level
+area_of_effect: Summoned shadows
+components: V,S,M
+casting_time: 5 segments
+saving_throw: None
+text: This spell summons 1 undead shadow per caster level from the shadow planes. The shadows are under the illusionist's command and will do his or her bidding. If turned, they will return to the shadow plane whence they came.
+source: wiki2_spells.txt

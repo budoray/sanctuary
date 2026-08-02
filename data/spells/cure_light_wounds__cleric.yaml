@@ -1,0 +1,14 @@
+name: Cure Light Wounds
+slug: cure_light_wounds
+reversible: true
+class: cleric
+level: 1
+school: Clerical Necromancy
+range: Touch
+duration: Instantaneous (permanent)
+area_of_effect: Creature touched
+components: V,S
+casting_time: 5 segments
+saving_throw: None (Neg.)
+text: Cure light wounds allows the cleric to lay hands upon a wounded creature, restoring 1d8 hit points to the spell's beneficiary. The reverse of the spell operates in the same manner (although requiring a “to hit” roll), but inflicts 1d8 hit points rather than healing. If the cleric fails to hit while casting cause light wounds, the spell is lost. This spell does not heal disease, reattach limbs, or bring back the dead, nor can it add hit points beyond a character's normal number. Non-corporeal creatures are not affected by this spell, nor are undead, nor are creatures that are harmed only by iron, silver, or magical weapons.
+source: wiki2_spells.txt

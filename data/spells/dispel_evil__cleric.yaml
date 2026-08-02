@@ -1,0 +1,14 @@
+name: Dispel Evil
+slug: dispel_evil
+reversible: true
+class: cleric
+level: 5
+school: Clerical Abjuration
+range: Touch
+duration: 1 round/caster level
+area_of_effect: Creature touched
+components: V,S,M
+casting_time: 8 segments
+saving_throw: See below
+text: This spell banishes summoned creatures of evil, or those summoned for evil purposes, to their home planes of existence. Although a saving throw negates the spell's banishing effect, any creature that would otherwise have been banished will suffer a penalty of -7 “to hit” the caster for the extent of the spell's duration. Creatures affected by this spell include, but are certainly not limited to, afreets, demons, devils, genies (either evil or working toward evil purposes under duress), and elementals summoned for evil purposes. The reverse of the spell has the same effects, but upon summoned creatures of good alignment or those summoned for the purposes of good.
+source: wiki2_spells.txt

@@ -1,0 +1,14 @@
+name: Crushing Hand
+slug: crushing_hand
+reversible: false
+class: magic-user
+level: 9
+school: Arcane Evocation
+range: 5-ft/level
+duration: 1 round/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 9 segments
+saving_throw: None
+text: This spell calls into existence a large, floating hand much like that summoned by the other hand spells. The crushing hand attacks any foe the caster directs, grabbing it and squeezing with great power. Damage increases as the hand continues to constrict, doing 1d10 points of damage in the first round, 2d10 points of damage in the second and third round, and 4d10 points of damage per round thereafter. As with the other hand spells, the hand has as many hit points as its caster. The caster cannot engage in any other activity while directing the hand.
+source: wiki2_spells.txt

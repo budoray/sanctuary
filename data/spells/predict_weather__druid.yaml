@@ -1,0 +1,14 @@
+name: Predict Weather
+slug: predict_weather
+reversible: false
+class: druid
+level: 1
+school: Druidic Divination
+range: '0'
+duration: Instantaneous
+area_of_effect: 9 square miles
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: 'The druid casts this spell upon virtually any substance: bones, leaves, powders, etc. He or she can read in the resulting pattern an exact divination of the weather as it will naturally occur within the surrounding nine square miles for the next two hours per caster level. For example, a second level druid would be able to predict the weather four hours into the future.'
+source: wiki2_spells.txt

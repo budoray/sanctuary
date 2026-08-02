@@ -1,0 +1,14 @@
+name: Find Traps
+slug: find_traps
+reversible: false
+class: cleric
+level: 2
+school: Clerical Divination
+range: 30-ft
+duration: 3 turns
+area_of_effect: 10-ft wide path
+components: V,S
+casting_time: 5 segments
+saving_throw: None
+text: This spell permits the cleric to discern the existence of traps, both of magical and mechanical nature. The cleric must be looking at a trap in order to perceive it.
+source: wiki2_spells.txt

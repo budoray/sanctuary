@@ -1,0 +1,14 @@
+name: Disintegrate
+slug: disintegrate
+reversible: false
+class: magic-user
+level: 6
+school: Arcane Transmutation/Alteration
+range: 5-ft/level
+duration: Instantaneous
+area_of_effect: See below
+components: V,S,M
+casting_time: 6 segments
+saving_throw: Negates
+text: 'This spell disintegrates matter of any kind: animal, vegetable, or mineral. Matter of a magical nature will also be destroyed, although evocations of magic force (such as a wall of force, globe of invulnerability, or shield) are not affected (not being matter). An entire creature, or an area of non- living matter up to 10-ft×10-ft/level, will be utterly obliterated by this powerful spell. The spell cannot be used to destroy both living and non-living matter; once it hits its first target it will take effect upon that matter and not pass beyond.'
+source: wiki2_spells.txt

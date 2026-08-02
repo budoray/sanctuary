@@ -1,0 +1,14 @@
+name: Hallucinatory Terrain
+slug: hallucinatory_terrain
+reversible: false
+class: magic-user
+level: 4
+school: Arcane Illusion/ Phantasm
+range: 20-ft/level
+duration: See below
+area_of_effect: 10-ft×10-ft square/level
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: This spell masks the true appearance of an area, making it appear as something else. A road can be made to appear as a river, a forest can be made to appear as a ravine, etc. The spell's effect remains until some intelligent being touches the area (or until it is dispelled). The spell is particularly useful for hiding pits or making cliff edges seem to extend more than they actually do, but it has many other useful applications for the creative player.
+source: wiki2_spells.txt

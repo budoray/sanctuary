@@ -1,0 +1,14 @@
+name: Protection from Evil, 10-ft Radius
+slug: protection_from_evil_10_ft_radius
+reversible: true
+class: cleric
+level: 4
+school: Clerical Abjuration
+range: Touch
+duration: 1 turn/caster level
+area_of_effect: 10-ft radius sphere around creature touched
+components: V,S
+casting_time: 7 segments
+saving_throw: None
+text: This spell has effects and limitations identical to protection from evil, but the radius of divine protection extends a full 10-ft around the spell's recipient, allowing allies to shelter within the protective ambience. The duration of the spell is also longer.
+source: wiki2_spells.txt

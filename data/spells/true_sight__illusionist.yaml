@@ -1,0 +1,14 @@
+name: True Sight
+slug: true_sight
+reversible: false
+class: illusionist
+level: 6
+school: Phantasmal Divination
+range: Touch
+duration: 1 round/level
+area_of_effect: 60-ft
+components: V,S
+casting_time: 3 segments
+saving_throw: None
+text: This spell is identical in function (other than as may be noted above) to the clerical spell true seeing, except that the illusionist cannot discern alignments, for this spell is not of a spiritual nature.
+source: wiki2_spells.txt

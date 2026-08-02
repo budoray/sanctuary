@@ -1,0 +1,14 @@
+name: Knock
+slug: knock
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Transmutation/Alteration
+range: 60-ft
+duration: See below
+area_of_effect: 10 square-ft/level
+components: V
+casting_time: 1 segment
+saving_throw: None
+text: The powerful magic words of a knock spell open doors that are stuck, barred, locked, or even wizard locked. Chains (even those that are welded) and chests will also spring open under this spell. Doors that operate by gravity, such as portcullises, will not be opened by means of the spell. If a door is secured by a number of devices, only two will be opened by the spell; a triple-locked door is proof against a single casting of the enchantment.
+source: wiki2_spells.txt

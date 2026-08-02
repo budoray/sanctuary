@@ -1,0 +1,14 @@
+name: Tongues
+slug: tongues
+reversible: true
+class: cleric
+level: 4
+school: Clerical Transmutation/Alteration
+range: '0'
+duration: 1 turn
+area_of_effect: 30-ft radius
+components: V,S
+casting_time: 7 segments
+saving_throw: None
+text: Within the radius established by this spell, the caster, and the caster alone, will be able to speak and understand any verbal language. Note that the spell's area of effect does not move with the caster. The reverse of the spell makes verbal communication impossible for any person (not just the caster) in the spell's area, or may be used to cancel out the effects of the tongues spell.
+source: wiki2_spells.txt
