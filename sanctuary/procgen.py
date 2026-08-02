@@ -472,7 +472,8 @@ def generate_dungeon(seed: int, *, target_areas: int = 12, dungeon_level: int = 
             kind, hidden, one_way = walked
             new_area, new_n_exits = _make_area(
                 dice_, next_id, dungeon_level, chamber=False,
-                label_hint=f"Reached via a {wall} exit.")
+                label_hint=f"Reached via {'an' if wall[:1] in 'aeiou' else 'a'}"
+                           f" {wall} exit.")
             areas[next_id] = new_area
             areas[area_id]["exits"].append({"to": next_id, "kind": kind, "hidden": hidden})
             if not one_way:
@@ -494,7 +495,8 @@ def generate_dungeon(seed: int, *, target_areas: int = 12, dungeon_level: int = 
         wall = _roll_exit_wall(dice_)
         new_area, new_n_exits = _make_area(
             dice_, next_id, dungeon_level, chamber=False,
-            label_hint=f"Reached via a {wall} exit.")
+            label_hint=f"Reached via {'an' if wall[:1] in 'aeiou' else 'a'}"
+                       f" {wall} exit.")
         areas[next_id] = new_area
         areas[source_id]["exits"].append({"to": next_id, "kind": "passage", "hidden": False})
         new_area["exits"].append({"to": source_id, "kind": "passage", "hidden": False})
