@@ -6,5 +6,6 @@ venv/
 *.sqlite
 *.db
 scratch/
+scratchpad_dl/
 .coverage
 htmlcov/
