@@ -1129,6 +1129,20 @@ document.addEventListener("keydown", (ev) => {
   act("move", { to });
 });
 
+// The keyboard fights too: A attacks the marked monster, F flees - the
+// same buttons, under the same locks (a ruling due disables Attack just
+// as it does for the mouse). Never inside an input, never outside combat.
+document.addEventListener("keydown", (ev) => {
+  const k = ev.key.toLowerCase();
+  if (k !== "a" && k !== "f") return;
+  if (ev.target.matches("input, textarea, select")) return;
+  if (document.getElementById("combat").hidden) return;
+  const btn = document.getElementById(k === "a" ? "attack" : "flee");
+  if (btn.disabled) return;
+  ev.preventDefault();
+  btn.click();
+});
+
 document.getElementById("begin-delve").addEventListener("click", async () => {
   if (!lastCharacter) return;
   const res = await fetch("/api/delve/start", {
