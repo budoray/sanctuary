@@ -1173,7 +1173,9 @@ function renderDelve(view) {
   const exploring = !view.in_combat && !view.finished && !decisionPending;
   document.getElementById("search").disabled = !exploring;
   document.getElementById("rest").disabled = !exploring;
-  document.getElementById("take-treasure").disabled = !exploring;
+  // No loot, no button: an empty room's Take invites a click that can
+  // only come back empty.
+  document.getElementById("take-treasure").disabled = !exploring || view.treasure.length === 0;
   document.getElementById("leave-delve").disabled = !exploring;
 
   renderLog(view.rolls);
