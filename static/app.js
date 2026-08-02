@@ -696,6 +696,15 @@ function renderDelve(view) {
   document.getElementById("area-turns").textContent =
     `Turn ${view.turns}` + (view.finished ? " — the delve is over." : "");
 
+  // The end of a delve is a moment, not a shrug: a tally over the map
+  // tells the table how the run went and where the next one starts.
+  const over = document.getElementById("delve-over");
+  over.hidden = !view.finished;
+  if (view.finished) {
+    document.getElementById("delve-over-tally").textContent =
+      `${view.turns} turn${view.turns === 1 ? "" : "s"} below ground, ${view.xp} xp earned.`;
+  }
+
   mapCurrentId = view.area_id;
   mapHoverTo = null;   // a new view rebuilds every corridor - stale glow helps no one
   recordArea(view);

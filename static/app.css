@@ -416,6 +416,19 @@ main:has(#map-stage:not([hidden])) #who { font-size: var(--text-lg); margin: 0 0
 #area-description { color: var(--color-ink-2); margin-bottom: 0; max-width: 65ch; }
 #map { width: 100%; overflow-x: auto; margin: var(--space-4) 0; display: flex; }
 
+/* The delve's epilogue: a warm banner over the run's tally, not a disabled
+   grey page. Accent edge on the left, like a ribbon cut at the surface. */
+#delve-over {
+  border-left: 3px solid var(--color-accent);
+  background: color-mix(in oklch, var(--color-accent) 8%, var(--color-paper-2));
+  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-5);
+  margin-top: var(--space-4);
+}
+#delve-over h3 { margin: 0 0 var(--space-1); color: var(--color-accent); }
+#delve-over p { margin: 0; }
+.delve-over-hint { color: var(--color-ink-2); font-size: var(--text-sm); margin-top: var(--space-2) !important; }
+
 /* ── combat changes the air ──────────────────────────────────────────────
    app.js sets `#combat.hidden = !view.in_combat`, so `:has()` reads the
    fight straight off the existing state - no new markup, no new JS. */
