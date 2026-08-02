@@ -802,7 +802,13 @@ function renderDelve(view) {
   const exitsList = document.getElementById("exits");
   exitsList.innerHTML = "";
   mapMovesEnabled = !(view.in_combat || view.finished || decisionPending);
-  document.getElementById("map-hint").hidden = !mapMovesEnabled;
+  const mapHint = document.getElementById("map-hint");
+  mapHint.hidden = !mapMovesEnabled;
+  // The hint teaches the controls the device actually has: arrows need a
+  // keyboard, taps need nothing.
+  mapHint.textContent = window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    ? "Click a passage to walk it — or press ← to head back, → to press deeper."
+    : "Tap a passage on the map to walk it.";
   view.exits.forEach((e) => {
     const li = document.createElement("li");
     const btn = document.createElement("button");
