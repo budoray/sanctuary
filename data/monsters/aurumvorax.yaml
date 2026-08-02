@@ -1,0 +1,26 @@
+name: Aurumvorax
+frequency: very rare
+no_encountered: '1'
+size: small
+alignment: neutral
+move: 90ft; 30ft burrowing
+armour_class: 0 [20]
+hit_dice: '12'
+melee_attacks: 1 bite (2d4 piercing)
+senses: Standard
+lair_chance: 25%
+intelligence: animal (1)
+morale: 105
+loot: Nil
+experience: 2,250 +16/hp
+description: Also known as the “golden gorger” for its beautiful fur coat, the  aurumvorax is a long-bodied, eight-legged carnivore. It lives in  plains or woods. Though as small as a badger, the creature is  very dense and heavy, and weighs as much as a bear.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Immune (gas and poison):  The aurumvorax is immune to gases  and poison. Resistant (blunt and fire): The creature takes only half damage  from blunt weapons and fire damage (round down).  Many-legged. This creature cannot be knocked prone, over - borne, or grappled.'
+- heading: Special Features
+  text: This small creature is very heavy (600 pounds).
+- heading: Special Attacks
+  text: 'Melee Attack: Jaw Lock and Rake.  Jaw Lock: When the aurumvorax’s bite hits, it locks its jaws in the  target’s flesh. (If you are using a grid, it is in the target’s square).  If the target moves, it has to pull the aurumvorax with it, and  since the aurumvorax weighs 600 pounds, this is unlikely. Until  the jaw lock ends, the aurumvorax can’t bite or lock onto an - other target. On its initiative, the aurumvorax can choose to  release its target (in a grid, it moves to an unoccupied space  within 5ft) and can take another action.  • A creature the aurumvorax is locked onto can try to escape  on its  initiative. It attempts a Major Test of Strength. If the  creature succeeds at the test, it takes 2d4 piercing damage  as it pulls the aurumvorax off itself. The jaw lock ends, and  the creature can then choose to move up to its speed away  from the aurumvorax, but it can’t take any other action that  round. If it fails, then the aurumvorax remains locked on and  its target can’t take
+    any other action that round. • Other creatures can help the creature locked onto to escape  by attempting a Major Test of Strength. If they pass, they  wrestle the creature away from the aurumvorax, so the au - rumvorax is no longer locked on. The creature rescuing can’t  take any other action that round. If the creature rescuing fails,  then the aurumvorax remains locked on and the creature res- cuing can’t take any other action that round. Rake: If the aurumvorax is locked onto a creature, then instead  of attacking, it can rake the creature it’s locked onto. When  it does so, the aurumvorax’s target automatically takes 2d4  piercing damage from the aurumvorax’s jaws, and the aurum- vorax rakes it, attacking with 2d4 of its claws. Each claw inflicts  1d6 slashing damage (a successful to-hit roll is required). Unarmed Combat. Aurumvoraxes cannot be overborne or grap- pled, and do not employ these tactics.'
+- heading: Languages
+  text: None.

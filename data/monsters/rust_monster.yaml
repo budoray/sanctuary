@@ -1,0 +1,19 @@
+name: Rust Monster
+frequency: uncommon
+no_encountered: 1d2
+size: medium (5ft long)
+alignment: neutral
+move: 180ft
+armour_class: 2 [18]
+hit_dice: '5'
+melee_attacks: 2 (Special)
+senses: Infravision 60ft, Smell iron
+lair_chance: 10%
+intelligence: animal (1)
+morale: N/A
+loot: Cache 3 (x10)
+experience: 185 +4 per hp
+description: Rust monsters are creatures vaguely resembling a 5ft long and  3ft tall giant, bug-like, armadillo that weighs about 200 lbs. Rust  monsters have rust-red colouration on their dorsal hides and  two prehensile antennae on their heads. Rust monsters are only found in underground type environ - ments, which they prowl constantly in search of food. Rust monsters consume metal of any kind, especially ferrous  metals and ferrous metal alloys. The antennae of a rust mon - ster can “smell” metal 90ft away, and the creature will dart to - ward such a source of food with blinding speed, attacking the  largest piece of metal it can sense.  Rust monsters are motivated by blind hunger, and can be easily  distracted from pursuit by dropping metal objects and fleeing;  some iron spikes or a heavy mace will cause the attacking rust  monster to stop for 1 round to devour the treat. Otherwise, rust  monsters will relentlessly pursue the PCs until slain or all metal  items have been consumed.
+abilities:
+- heading: Special Attacks
+  text: Rust. A successful antennae attack causes up to 10 cubicft of  metal instantly to crumble into easily-digestible rust. The crea- ture will immediately cease attacking in such a case and begin  devouring its newly-created meal. Metal with magical bonuses  gains a 10% chance per plus of not being affected by the rust  monster’s attack. For instance a +3 shield would have a 30% of  resisting the rusting effect. A successful “to hit” roll against a  rust monster with a metal weapon automatically subjects that  weapon to a rust attack. Unarmed Combat. Rust monsters cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics. SAHUAGIN

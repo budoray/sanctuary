@@ -1,0 +1,23 @@
+name: Black Brown
+frequency: common uncommon
+no_encountered: 1d3 1d6
+size: medium large (9ft)
+alignment: neutral neutral
+move: 120ft 120ft
+armour_class: 7 [13] 6 [14]
+hit_dice: 3+3 5+5
+melee_attacks: 3 (1d3/1d3/1d6) 3 (1d6/1d6/1d8)
+senses: Standard Standard
+lair_chance: 10% 10%
+intelligence: semi- (2-4) semi- (2-4)
+morale: 65 75
+loot: Nil Nil
+experience: 75 +3/hp 160 +6/hp
+description: BLACK BEAR Of all bears, the black bear is the least aggressive. If attacked,  they will defend themselves and their cubs. The black bear is  omnivorous and possesses good hearing and smell, but has  weak vision.
+abilities:
+- heading: Special Attacks
+  text: 'Melee Attack: Bear Hug. Any claw attack with a to-hit roll of 18 or  more results in the target being hugged for an additional 2d4  hit points. Unarmed Combat. Black bears cannot be overborne or grappled,  and do not employ these tactics.  BROWN BEAR The brown bear, of which the grizzly is the most famous, is an  aggressive strain of bear. Like black bears, they are omnivorous  and possess good hearing and smell, but have weak vision.'
+- heading: Immunities and Resistances
+  text: Death Stamina. If reduced to zero hit points, the brown bear will  continue to fight until either 1d4 rounds have elapsed or it is  reduced to -9 hit points.
+- heading: Special Attacks
+  text: 'Melee Attack: Bear Hug. Any claw attack with a to-hit roll of 18 or  more results in the target being hugged for an additional 2d6  hit points. Unarmed Combat. Brown bears may attempt to overbear a lone  opponent, and can (technically) grapple and be grappled. If not  fended off, they score an unarmed hit with a 2+ on 1d20. Hit  Mods: ATK/DEF +8/-8. Overbear Results Mods: ATK/DEF +5/-5.  Grappling Result Mods: ATK/DEF +2/-2. BEAR, GREATER'

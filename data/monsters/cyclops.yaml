@@ -1,0 +1,19 @@
+name: Cyclops
+frequency: very rare
+no_encountered: 1d2
+size: large (20ft)
+alignment: chaotic evil
+move: 150ft
+armour_class: 2 [18]
+hit_dice: '13'
+melee_attacks: 1 club (6d6)
+senses: Infravision 60ft, Detect invisible 10%
+lair_chance: 80%
+intelligence: low (5-7)
+morale: 110
+loot: Hoard 5, Cache 5
+experience: 3,300 +17/hp
+description: Cyclopes are extremely tall, ugly humanoids, each with a single  eye centred under its slightly drooping brow. These oafish, an - tisocial creatures prefer to inhabit lonesome environs, such as  out–of–the–way, otherwise deserted islands. In addition to their single club attack, cyclopes may attack by  hurling large boulders up to a distance of 60ft.
+abilities:
+- heading: Special Attacks
+  text: 'Ranged Attack. A cyclops can throw rocks like other giants, for  4d10 blunt damage, with a range increment of 20ft (-2 at 40ft,  -4 at 60ft). Unarmed Combat. A cyclops can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with a 2+  on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear Results Mods:  ATK/DEF +4/-4. Grappling Result Mods: ATK/DEF -2/+2. D'

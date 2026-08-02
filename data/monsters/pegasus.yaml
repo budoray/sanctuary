@@ -1,0 +1,17 @@
+name: Pegasus
+frequency: very rare
+no_encountered: 1d10
+size: large
+alignment: chaotic good
+move: 240ft; 480ft flying (AA:IV)
+armour_class: 6 [14]
+hit_dice: '4'
+melee_attacks: 2 hooves (1d8 blunt) and 1  bite (1d3 piercing)
+senses: Standard
+lair_chance: 15%
+intelligence: average (8-10)
+morale: 65
+loot: Nil
+experience: 75 +3/hp
+description: 'A pegasus is a winged horse who lives in secluded areas far  from civilisation. They are intelligent, but very wild and un - tamed. They do not trust humans and must be approached very  carefully. If they can be caught and tamed, they become very  devoted mounts. They will, however, only serve a good-aligned  master. If mounted by a creature weighing more than 100 lbs,  the pegasus’ aerial agility level decreases to III. A pegasus is equal in size and strength to a medium warhorse.  Unarmed Combat. Pegasi cannot be targeted with grappling or  overbearing attacks, but may choose to overbear a lone oppo - nent. If not fended off, they score an unarmed hit with a 2+ on  1d20. Hit Mods: ATK/DEF +10/na. Overbear Results Mods: ATK/ DEF +5/na.'
+abilities: []

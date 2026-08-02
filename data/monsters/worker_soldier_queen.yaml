@@ -1,0 +1,25 @@
+name: Worker Soldier Queen
+frequency: rare very rare very rare
+no_encountered: 1d100 1/5 the number of workers 1
+size: small medium large
+alignment: neutral neutral neutral
+move: 180ft 180ft Can’t move
+armour_class: 3 [17] 3 [17] 4 [16]
+hit_dice: 2 3 10
+melee_attacks: 1 bite (1d6 piercing) 1 bite (2d4 piercing & 3d4  poison) None
+senses: Standard Standard Standard
+lair_chance: 10% 10% 100%
+intelligence: animal (1) animal (1) low (5-7)
+morale: 55 60 N/A
+loot: Nil Nil Cache 3 (x3) and Cache 5
+experience: 30 +1/hp 50 +2/hp 700 +13/hp
+description: Giant ants are a dangerous threat to dungeon adventurers, but  they can also be encountered above ground. The population of a giant ant colony is determined by rolling for  the number of workers (1d100). There will also be one soldier  for each five workers (round fractions up). The queen can’t move or fight, and lives at the heart of the col - ony. It takes twelve workers to carry her, moving at 30ft. If the  queen’s chamber is invaded, twelve workers will try to carry her  to safety while the rest of the colony (workers and soldiers alike)  attacks the intruders. If the queen is killed, the entire colony will be confused (as the  7th level druidic spell) for 1d6 rounds. They will then leave the  colony in search of a new one.
+abilities:
+- heading: Immunities and Resistances
+  text: Many-legged. A giant ant cannot be knocked prone, overborne,  or grappled.
+- heading: Special Features
+  text: Climber. Giant ants can move on walls and ceilings as if they  were floors.
+- heading: Special Attacks
+  text: 'Melee Attack: Poison (Soldiers only).  Anyone bitten by a soldier  ant will take 3d4 hit points of damage from poison in addition  to the piercing damage unless they succeed at a saving throw  vs poison, in which case the poison damage is 1d4 hit points. Unarmed Combat. Giant ants cannot be overborne or grappled,  and do not employ these tactics.'
+- heading: Languages
+  text: None. APE

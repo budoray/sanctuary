@@ -1,0 +1,21 @@
+name: Boar
+frequency: common uncommon
+no_encountered: 1d12 2d4
+size: medium large
+alignment: neutral neutral
+move: 150ft 120ft
+armour_class: 7 [13] 6 [14]
+hit_dice: 3+3 7
+melee_attacks: 1 (3d4) 1 (3d6)
+senses: Standard Standard
+lair_chance: 20% 20%
+intelligence: animal (1) animal (1)
+morale: N/A (fights to the  death) N/A (fights to the  death)
+loot: Nil Nil
+experience: 75+3/hp 225+8/hp
+description: WILD BOAR Boars are wild pigs with tusks. They are extremely aggressive and  quite dangerous. The first two boars encountered will automati- cally be adults; each additional boar indicated has a 75% chance  of being a sounder (boar piglet). Sounders will flee from attackers,  and are non-combatants.
+abilities:
+- heading: Special Features
+  text: 'Die Hard. Adult boars will fight for 1d4+1 rounds after reaching  0 hit points, or until -7 hit points are accumulated. Unarmed Combat. Wild boar cannot be grappled or overborne,  but might overbear a lone opponent. If not fended off, they  score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF  +10/na. Overbear Results Mods: ATK/DEF +0/na. Grappling Re- sult Mods: ATK/DEF na/na. GIANT BOAR Ancient ancestor to the modern boar, the giant boar is even  more aggressive. They have a smaller proportion of sounders in  a group: additional boars after the first two (automatic adults)  have only a 25% chance of being sounders (as opposed to 75%  for normal boars). Also, giant boar sounders do not flee; they are  treated as ordinary adult wild boars (without the die hard ability).'
+- heading: Special Features
+  text: 'Die Hard (Giant Boar). Adult giant boars will fight for 1d4 rounds  after reaching 0 hit  points, or until -11 hit  points are accumu - lated. Unarmed Combat. Wild boar cannot be grappled or overborne,  but might overbear a lone opponent. If not fended off, they  score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF  +10/na. Overbear Results Mods: ATK/DEF +3/na. Grappling Re- sult Mods: ATK/DEF na/na.'

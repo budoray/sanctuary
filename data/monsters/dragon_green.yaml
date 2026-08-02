@@ -1,0 +1,23 @@
+name: Dragon, Green
+frequency: rare
+no_encountered: 1d4
+size: varies by age
+alignment: lawful evil
+move: 90ft; 240ft flying (AA:II)
+armour_class: 2 [18]
+hit_dice: 7 to 9
+melee_attacks: 2 claws (1d6) and 1 bite (2d10)
+senses: Infravision 60ft, Detect  invisibility by age category
+lair_chance: 40%
+intelligence: average (8-10) to very (11-12)
+morale: 80, 85, or 90 (by HD)
+loot: Hoard 8
+experience: Varies by hit dice and age
+description: Particularly renowned for their foul temper, which is said to be  even more venomous than their breath, green dragons prefer  to live in caverns or ruins in or near forests.
+abilities:
+- heading: Special Features
+  text: Sleeping Dragon. A green dragon encountered in its lair has a  40% chance to be sleeping when the adventurers approach. If  the dragon is asleep, there is a 1 in 6 chance that it will awaken  from the mere presence of adventurers. Dragons also some - times feign sleep. Spellcasting Dragon.  Roughly 20% of green dragons are spell - casters. If it can cast spells, it does so as a magic-user with a  level equal to the dragon’s age category.
+- heading: Special Attacks
+  text: Breath Weapon. Green dragon breath is a cloud of toxic gas, 50ft  long, 40ft wide, and 30ft high. It does poison damage equal to  the dragon’s (uninjured) hit points to everyone in the area of  effect, but a saving throw vs dragon breath reduces this amount  to half damage. The dragon may use this breath weapon up to  three times per day.
+- heading: Languages
+  text: All dragons speak the draconic tongue, and there is a 45%  chance that a green dragon will also be able to speak common.

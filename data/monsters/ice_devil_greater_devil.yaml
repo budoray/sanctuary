@@ -1,0 +1,23 @@
+name: Ice Devil (greater Devil)
+frequency: uncommon
+no_encountered: 1 or 1d4
+size: large (11ft)
+alignment: lawful evil
+move: 60ft
+armour_class: -4 [24]
+hit_dice: '11'
+melee_attacks: 2 claws (1d4) and 1 mandible (2d4)  and 1 tail (3d4) or spear (2d6+4 plus  freezing)
+senses: Infravision 60ft
+lair_chance: 60%
+intelligence: high (13-14)
+morale: 100
+loot: Cache 3 and 4
+experience: 4,400 +16/hp
+description: Ice devils resemble upright remorhaz with humanoid arms and  legs, and knotted, barbed tails. They dominate the 8th plane  of Hell, which serves as their frozen home. They are also very  strong (18.76 strength) and enjoy torturing their victims before  killing them. Ice devils also have secret personal names which  can be used to summon them, if the name is somehow known  to the conjurer.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (55%).  Any magic spell or effect has a 55%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane and +1 Weapons.  This creature is immune  to piercing, blunt, and slashing damage from weapons and un- armed attacks, unless the weapon causing that damage has a  magical bonus of +2 or more. Immunities. This creature is immune to fire damage. Damage Resistances  (all half damage): Cold, Poison (including  gases).'
+- heading: Special Features
+  text: 'Regeneration. If injured, the ice devil regenerates 1 hp per round. Fear Aura. Ice devils exude fear (as the 4th level magic-user spell)  in a 10ft radius. Spell-Like Abilities. At Will: animate dead (as the 5th level magic-user spell), charm  person (as the 1st level magic-user spell), fear (effect varies,  as the 4th level magic-user spell), know alignment (as the 2nd  level cleric spell), spectral force  (as the 3rd level illusionist  spell), suggestion (as the 3rd level magic-user spell), teleport  (no chance of error, otherwise as the 5th level magic-user  spell), detect invisibility (as the 2nd level magic-user spell), de- tect magic  (as the 1st level magic-user spell), fly (as the 3rd  level magic-user spell), polymorph self (as the 4th level mag - ic-user spell), wall of ice (as the 4th level magic-user spell), or  summon 2 bone devils (70%) or another ice devil (30%) with a  60% chance of success in either case. 1/day: ice storm (as the 4th level magic-user spell).'
+- heading: Special Attacks
+  text: 'Magic Spear. Some ice devils (25% chance) wield long, magical  spears which they can use to impale and freeze their victims.  The spear inflicts 2d6 piercing damage, and if a victim is hit  they must make a saving throw vs. paralysation or be reduced  to half their normal move (duration 3d6 rounds). The effect  can only reduce a victim to one-quarter move, after which ad - ditional attacks have no further effect. Unarmed Combat. Ice devils can be targeted with grappling or  overbearing attacks, although they usually do not engage in  grappling. If not fended off, they score an unarmed hit with a  2+ on 1d20. Hit Mods: ATK/DEF +4/-4. Overbear Results Mods:  ATK/DEF +4/-4. Grappling Result Mods: ATK/DEF +2/-2.'

@@ -1,0 +1,23 @@
+name: Skeleton Warrior
+frequency: very rare
+no_encountered: '1'
+size: medium
+alignment: neutral evil
+move: 60ft
+armour_class: 2 [18]
+hit_dice: 9+2 or higher
+melee_attacks: 1 By weapon (+3 to hit)
+senses: Infravision 60ft; Detect  invisible 10%
+lair_chance: 5%
+intelligence: exceptional (15-16)
+morale: 90
+loot: Hoard 1
+experience: 2,000 +16/hp
+description: Skeleton warriors are the unfortunate victims of powerful mag- ic; in life they were fighters of great prowess and likely lords in  their own right. In death they have become abominations, com- pelled by evil sorcery to serve any who possess the golden cir - clets that contain their souls. Skeleton warriors desire above all  else to gain possession of their own circlet and to be revenged  upon any who have possessed and used it in the past. They are generally armed and armoured with the remains of  what they wore in life, or their grave goods. A character in possession of the circlet of a skeleton warrior and  within 240ft may attempt to dominate it. The circlet must be  worn on the attempting character’s head in order to do this; it  cannot be used whilst wearing a helmet or similar headgear. On  the first attempt at domination, the character has a chance of  success equal to their wisdom score ×5, but they must be able  to see their victim and have the freedom to concentrate
+  for one  round. If the attempt fails, it may be attempted again on the fol- lowing round. If concentration is interrupted before domination  is achieved, such as by an attack, the character must concen - trate for a further three rounds. During this time, the Skeleton  Warrior will attempt to kill its would-be master and take posses- sion of the circlet if such is at all possible. In the event of successful domination, the skeleton warrior is  rendered inert for as long as the character remains in posses - sion of the circlet. Additionally, whenever they are within 240ft  of one another and the character wears the circlet without hel - met as described above, the user may take control of the Skel - eton Warrior, being able to see through its eyes and direct its  actions as they desire; whilst controlling the actions of the skel- eton warrior, the user may not take any action. Should the user lose possession of the circlet for any reason,  the skeleton warrior will seek them out and slay
+  them, moving  at double its usual movement rate. In the event that the skele - ton warrior ever regains possession of its circlet, it will place it  upon its head and as a result both will turn to dust. The lair of a skeleton warrior is normally a richly adorned tomb  filled with considerable treasure. However, because they are  usually either seeking the current possessor of their circlet or  else in the unwilling service of said possessor, they are rarely  found in their lairs.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (90%).  Any magic spell or effect has a 90%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Unusual Form of Undeath. Contrary to appearances, the skeleton  warrior is not undead in the conventional sense. It cannot be  turned, is unaffected by a scroll of protection from undead,  etc.
+- heading: Special Features
+  text: 'Fear Aura.  The appearance of a skeleton warrior is terrifying,  and creatures with less than five HD who look upon it will panic  and flee from its presence.  Unarmed Combat. Skeleton warriors do not engage in grappling  or overbearing attacks. They can be targeted this way, but do  not suffer any temporary damage inflicted. If not fended off,  they score an unarmed hit with an 18+ on 1d20. Hit Mods: ATK/ DEF +4/+1. Overbear Results Mods: ATK/DEF +2/-2. Grappling  Result Mods: ATK/DEF +0/-0.'

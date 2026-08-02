@@ -1,0 +1,20 @@
+name: Locathah
+frequency: rare
+no_encountered: 20d10
+size: medium
+alignment: neutral
+move: 120ft
+armour_class: 6 [14]
+hit_dice: '2'
+melee_attacks: 1 (By weapon)
+senses: Standard
+lair_chance: 10%
+intelligence: very (11-12)
+morale: 55
+loot: Hoard 1
+experience: 30 +1/hp
+description: Locathah are bipedal fish-people, covered in scales. They have  large, black eyes and large fan-shaped finned ears. Locathah  can leave the water for short periods (2d10 minutes) of time but  are loath to do so. For the most part, locathah make their home in the warm,  shallow, salt waters of seas and oceans. They roam the area  around their lair, hunting and gathering food. They are rather  distrustful of strangers, even strangers of their own species.  Lairs are built in undersea rock formations, very much like hu - man fortifications, and they often alter the rock face to a distinc- tive fortress-like appearance. The locathah will hollow the rock  into rooms, chambers, and passages as needed and doors are  typically quite sturdy and well-guarded either by moray eels or  trapped air bubbles containing Portuguese man-o-wars. Locathah troops are organised into companies of 40 warriors,  each led by a war-chief with 22 hit points who fights as a 5th  level fighter. The war-chief
+  is assisted by 4 sub-chiefs with 15 hp  who fight as 3rd level fighters.  Any group of 3 or more companies (120 warriors) will be led by  a full chief with 30 hp who fights as a 6th level fighter. The chief  will be protected by an honour guard of 12 warriors who fight  as sub-chiefs.  There is a 5% chance a sub-chief or war-chief will be carrying a  magic weapon of the appropriate type and a 10% a full chief will  have one. Locathah troops ride giant eels (q.v.) into battle and these  mounts will also fight.  • One-fourth of locathah troops are armed with lances (2d4+1  piercing). • One-fourth of locathah troops are armed with tridents (1d6+1  piercing). • One-fourth of locathah troops are armed with light crossbow  (1d4+1 piercing) and dagger. The light crossbows have a 20ft  range underwater. • One-fourth of locathah troops are armed with net and dag - ger.
+abilities:
+- heading: Special Attacks
+  text: 'Ranged or Melee Attack (Net).  Some locathah are armed with  nets. These have a range of 20ft (and can be thrown while in  melee combat). If the attack hits, the target is automatically  (no saving throw) entangled for 1d4 rounds, unable to attack  or move. Unarmed Combat. Locathah can be targeted with grappling or  overbearing attacks and may use these tactics. If not fended  off, they score an unarmed hit with a 2+ on 1d20. Hit Mods:  ATK/DEF +8/-8. Overbear Results Mods: ATK/DEF +0/-0. Grap - pling Result Mods: ATK/DEF +0/+0.'

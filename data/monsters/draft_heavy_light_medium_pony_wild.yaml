@@ -1,0 +1,16 @@
+name: Draft Heavy Light Medium Pony Wild
+frequency: common uncommon uncommon uncommon uncommon uncommon no.  encountered 1 1 1 1 1 5d6
+size: large large large large large large
+alignment: neutral neutral neutral neutral neutral neutral
+move: 120ft 150ft 240ft 180ft 120ft 240ft
+armour_class: 7 [13] 7 [13] 7 [13] 7 [13] 7 [13] 7 [13]
+hit_dice: 3 3+3 2 2+2 1+1 2
+melee_attacks: 1 bite (1d3) 2 hooves (1d8)  and 1 bite (1d3) 2 hooves (1d4) 2 hooves (1d6)  and 1 bite (1d3) 1 bite (1d2) 1 bite (1d3)
+senses: Standard Standard Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil Nil Nil
+intelligence: animal (1) animal (1) animal (1) animal (1) animal (1) animal (1)
+morale: 60 60 55 55 50 55
+loot: Nil Nil Nil Nil Nil Nil
+experience: 20 +2/hp 20 +2/hp 20 +2/hp 20 +2/hp 20 +2/hp 20 +2/hp
+description: One of the most common domesticated animals, horses are  almost ubiquitous in most human societies. They are insuffi - ciently sure-footed to take into most dungeon environments  (this requires a mule). “Heavy”, “Medium” and “Light” refer to  warhorses. Only about 10% of horses can be trained as war - horses, even by an expert, and warhorse training requires very  specialised knowledge on the part of the trainer. Unarmed Combat. Horses cannot be targeted with grappling or  overbearing attacks, and do not use such tactics. A warhorse  might be trained to overbear.
+abilities: []

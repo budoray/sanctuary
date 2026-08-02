@@ -1,0 +1,29 @@
+name: Big Bigger Biggest
+frequency: common common uncommon
+no_encountered: 2d12 2d6 1d8
+size: small medium large
+alignment: neutral neutral chaotic evil
+move: 60ft; 150ft in web 180ft 30ft; 120ft in web
+armour_class: 6 [14] 6 [14] 4 [16]
+hit_dice: 1+1 2+2 4+4
+melee_attacks: 1 (1d4+poison) 1 (1d6+poison) 1 (1d8+poison)
+senses: Standard Standard Standard
+lair_chance: 50% 50% 75%
+intelligence: animal (1) animal (1) low (5-7)
+morale: 50 55 70
+loot: Individual 1-5 Individual 1-5, Cache 3 Hoard 3
+experience: 75 +2/hp 150 +3/hp 325 +5/hp
+description: Unarmed Combat. Giant spiders cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics. BIG GIANT SPIDERS Big giant spiders come in various shapes and colours. These are  among the most frequently encountered denizens of dungeons  and ruins. Some are jumping spiders and some spin webs, but  unlike the larger types, neither characteristic is significant in  game terms.
+abilities:
+- heading: Special Attacks
+  text: Venomous Bite. On a successful hit, the target of a big giant spi - der’s bite must make a saving throw vs. death or die, but the  saving throw is made with a +2 bonus to the die roll because  the venom is relatively weak. BIGGER GIANT SPIDERS The bigger variety of giant spiders resemble tarantulas. They do  not spin webs because they are jumping predators.
+- heading: Surprise and Initiative
+  text: Surprise. As hunting spiders, the bigger giant spider surprises  prey on a roll of 1-5 on a d6.
+- heading: Special Attacks
+  text: Leap. The bigger type of giant spider can leap 30ft to attack and  attack in the same round. This is considered a charge. Venomous Bite. On a successful hit, the target of a bigger giant  spider’s bite must make a saving throw vs. death or die, but the  saving throw is made with a +1 bonus to the die roll because  the venom is slightly weaker than normal poison. BIGGEST GIANT SPIDERS These creatures build webs to ensnare prey. Usually, adventur- ers will encounter the webs first.
+- heading: Special Features
+  text: Webs. It takes 2 combat rounds to break free from their webs  (+1 additional round for each point of strength below 17).
+- heading: Special Attacks
+  text: Venomous Bite. On a successful hit, the target of a biggest giant  spider’s bite must make a saving throw vs. death or die.
+- heading: Languages
+  text: In some fantasy worlds, giant spiders can speak Common; in  others, they are voiceless.

@@ -1,0 +1,24 @@
+name: Vampire
+frequency: rare
+no_encountered: 1d4
+size: medium
+alignment: chaotic evil
+move: 120ft; 180ft flying (AA:V)
+armour_class: 1 [19]
+hit_dice: 8+3
+melee_attacks: 1 strike (1d6+4)
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: exceptional (15-16)
+morale: 90
+loot: Hoard 6
+experience: 3,810 +12/hp
+description: The vampire is one of the most feared of the undead. Vampires  must take refuge in a coffin or other hide-away during daylight,  and must slumber on soil from their own grave once in a while  to maintain their powers. Vampires create others of their kind by draining humans or hu- manoids of all life energy. The victim must be buried. After 1 day  they will arise as a vampire. The victim will retain class abilities  they had in life but will become a chaotic evil undead being. The  new vampire is a slave to the vampire that created them, but  becomes free willed if the master is killed. There is a variant type of vampire from the east, which can - not assume gaseous form at will (but will if reduced to zero hit  points), nor does it have a charm gaze. However, it is invisible  and foes that cannot detect invisibility suffer -4 to strike these  vampires in combat.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Vampires are turned as type 10 Undead. Effect of Regeneration.  Vampires regenerate all damage types,  and can only be killed in one of the following ways. They are  killed in 3 rounds of immersion in running water (each round  reduces 1/3 of the creature’s hit points). If caught in sunlight  a vampire becomes powerless and will die in 1 turn. Finally, a  stake through the heart, coupled with decapitation, will destroy  a vampire if holy sacraments or a blessed item is placed in the  mouth after the head is removed. If a vampire is staked, it will  appear to die, but unless also decapitated the vampire will re - vive when the stake is removed. Immune to Mundane Weapons. The vampire is immune to pierc- ing, blunt, or cutting damage, unless the weapon causing that  damage is magical. Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease. Resistances. Electricity and cold
+    inflict only half damage on vam- pires. Vulnerabilities. In addition to the effect of running water, sun - light, and turning, vampires are affected in a minor way by a  lawful good holy symbol, a mirror, or garlic if they are present- ed with confidence. Garlic causes a vampire to cringe for 1d4  rounds, and a holy symbol or mirror will cause a vampire to  take a position in which it cannot directly see the item. Holy  water will inflict 1d6+1 points of damage per full vial which  strikes.
+- heading: Special Features
+  text: Regeneration. Vampires regenerate 3 hit points per round. They  can only be killed by specific methods. Shape Change. Vampires may shape change into a large bat at  will, which grants them flying movement. Summon Creatures. Vampires can summon 1d10×10 bats or rats  when underground or 3d6 wolves when above. These crea - tures will arrive in 2d6 rounds.  Gaseous Form (At Will). Vampires may take gaseous form at will,  and will be forced into this form if their hit points reach zero.  They then attempt to reach their coffin to reform their bodies.  If they do not reach the coffin within 12 turns and rest for 8  hours, they are unable to re-form.
+- heading: Special Attacks
+  text: 'Drain Life. A successful hit by a vampire drains two levels of ex - perience from the victim, which consequently reduces all other  traits linked to a loss in levels (attack ability, hit dice, etc.). Charm Gaze. Any person meeting the gaze of a vampire must  successfully save vs petrifaction with a penalty of -2 or be  charmed (save each time the gaze is met) as per the charm  person spell. This applies to anyone who is generally in front  of the vampire and attacking it or casting spells at it. Attacking  the creature by looking at a reflection is not possible, because  it casts no reflection. Unarmed Combat. Vampires can be targeted with grappling or  overbearing attacks, but they are immune to temporary dam - age. They may overbear and might grapple under certain con- ditions. If not fended off, they score an unarmed hit with a 2+  on 1d20. Hit Mods: ATK/DEF +8/-8. Overbear Results Mods:  ATK/DEF +2/-2. Grappling Result Mods: ATK/DEF +0/-0.'

@@ -1,0 +1,18 @@
+name: Normal Giant
+frequency: common rare
+size: large large
+alignment: neutral neutral no.  encountered 3d8 1 to 2d6
+move: 60ft; 120ft swimming 60ft; 120ft swimming
+armour_class: 4 [16] 3 [17]
+hit_dice: 3 7
+melee_attacks: 1 bite (2d4 piercing)  and 1 tail (1d12  blunt) 1 bite (3d6 piercing)  and 1 tail (2d10  blunt)
+senses: Standard Standard
+lair_chance: Nil Nil
+intelligence: animal (1) animal (1)
+morale: 60 80
+loot: Nil Nil
+experience: 50 +2/hp 225 +8/hp
+description: Crocodiles may be found in shallow fresh or salt water. They lie  in ambush along river banks, leaping up from concealment to  eat just about anything that comes in reach. Cold is their ene - my, cutting their movement speed in half. Giant Crocodiles are normally restricted to prehistoric or salt water  environments.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Crocodiles of both varieties surprise opponents on a  roll of 1–3 on a d6. Unarmed Combat.  Crocodiles of either type cannot be over - borne or grappled, and do not employ these tactics.  CRUSTACEAN, GIANT

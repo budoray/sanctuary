@@ -1,0 +1,23 @@
+name: Coffer Corpse
+frequency: rare
+no_encountered: '1'
+size: medium
+alignment: chaotic evil
+move: 60ft
+armour_class: 8 [12]
+hit_dice: '2'
+melee_attacks: 1 claw (1d6 + strangle) or by weapon
+senses: Infravision 60ft
+lair_chance: 80%
+intelligence: low (5-7)
+morale: N/A (fights to the death)
+loot: Hoard 2
+experience: 30 +2/hp
+description: A coffer corpse resembles a zombie, seeming nothing more  than a rotting, fetid corpse. They are the bodies of the dead who  are left behind, never given a proper burial, their souls never  finding rest.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Coffer corpses are turned as type 7 Undead. Immune to Mundane Weapons.  The coffer corpse is immune to  piercing, blunt, and slashing damage, unless the weapon caus- ing that damage is magical. Immunities. This creature is immune to mind control (including  charm) and hold spells, sleep, gases, poison, disease, cold dam- age, temporary damage, and subdual damage.
+- heading: Special Features
+  text: If a coffer corpse is hit for 6 or more points in a single round of  combat by a normal weapon (to which they are immune) they  will fall down, only to rise up the next round. All who witness  this horror must save vs fear. Those who fail the saving throw  will panic and run away for 2 rounds, with a 60% chance (re - duced by 5% per level) to drop all items they are holding.
+- heading: Special Attacks
+  text: Strangle. A coffer corpse has a 75% chance to attack with its bare  hands to strangle rather than attacking with a weapon. If they  hit, they have grabbed their target by the throat, causing 1d6  damage. Each successive round thereafter they cause an addi- tional 1d6 damage as they are strangling their victim, with no  additional roll needed. They will continue choking until they  are destroyed or their victim is dead. Unarmed Combat. Coffer corpses cannot be overborne or grap- pled (it is theoretically possible, but they are immune to tem - porary damage), and do not employ these tactics.

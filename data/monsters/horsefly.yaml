@@ -1,0 +1,21 @@
+name: Horsefly
+frequency: rare very rare no.  encountered 1d12 1d6
+size: medium large
+alignment: neutral neutral
+move: 90ft; 300ft flying  (AA:III) 90ft; 300ft flying  (AA:III)
+armour_class: 6 [14] 5 [15]
+hit_dice: 3 6
+melee_attacks: 1d8+1 2d6
+senses: Standard Standard
+lair_chance: Nil Nil
+intelligence: non- (0) non- (0)
+morale: N/A N/A
+loot: Nil Nil
+experience: 40 +3/hp 165 +6/hp
+description: 'Giant flies are more massive than the normal variety of  flying insects and thus are Aerial Agility: Level III, though  they can hover. They do retain a normal fly’s ability to  react quickly and thus they can jump away from an at - tack in only 1 segment. This jumping defensive move  is a backward springing leap which carries the giant fly  30ft away and does not count as a retreat for purpos - es of a free attack. Giant flies cannot be overborne or  grappled, and do not employ these tactics.  GIANT BLOW FLY Giant blow flies have a shiny metallic green or blue  body covered with coarse black hair. Their large eyes  are a dark orange colour. These flies will rarely attack  living prey unless someone is covered with blood or  has open wounds. They are also attracted to sweet  food and drink; an abundance of these might garner  the attention of this monster. Giant flies are more often  encountered wherever there is an abundance of their  preferred diet: carrion, rotting food,
+  and malodorous  refuse.'
+abilities:
+- heading: Special Attacks
+  text: The bite of a giant blow fly has a 10% chance of infecting  the victim with disease.  GIANT HORSEFLY This giant insect is even larger than the giant blow fly and far  more aggressive. The giant horsefly dines on fresh blood and it  will land on any warm-blooded creature is encounters, attempt- ing to draw blood from the target with its bite. Giant horseflies  are flat tan and brown in colour, with shiny brown eyes.
+- heading: Special Attacks
+  text: Suck Blood.  After a successful bite, the horsefly continues to  automatically inflict damage as it draws blood from the bite  wound. This process can only be halted by killing the giant  horsefly.

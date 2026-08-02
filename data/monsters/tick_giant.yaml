@@ -1,0 +1,19 @@
+name: Tick, Giant
+frequency: rare
+no_encountered: 3d4
+size: small
+alignment: neutral
+move: 30ft
+armour_class: 4 [16]
+hit_dice: '3'
+melee_attacks: 1 (1d4)
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 50 +2/hp
+description: These blood-sucking creatures are giant versions of the normal  tick, but are 3-4ft in length. They typically dwell in ruins and up- per dungeon levels, though some are found in forests as well.  They usually seek to ambush their prey, jumping out from hid - ing.
+abilities:
+- heading: Special Attacks
+  text: Suck Blood. The initial attack inflicts the damage indicated, and  thereafter the giant tick drains 1d6 hp worth of blood automat- ically per round (no further to-hit rolls needed).  Disease. A character bitten by a giant tick must save vs poison or  suffer a disease that will be fatal in 1d6 weeks. Unarmed Combat. Giant ticks cannot be effectively targeted with  grappling or overbearing attacks, and do not use these tactics. TIGER

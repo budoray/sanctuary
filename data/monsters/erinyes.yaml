@@ -1,0 +1,23 @@
+name: Erinyes
+frequency: uncommon
+no_encountered: 1d3 or 4d4
+size: medium (6ft)
+alignment: lawful evil
+move: 60ft; 210ft flying (AA:IV)
+armour_class: 2 [18]
+hit_dice: 6+6
+melee_attacks: 1 dagger (2d4+poison)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: average (8-10)
+morale: 80
+loot: Cache 4
+experience: 875 +8/hp
+description: These winged humanoids usually appear female, although a  few (10%) are male. Erinyes dwell on the 2nd Plane of Hell, and  are tasked with retrieving evil souls from the Prime Material  Plane for their diabolical masters. Erinyes are unrelenting pursuers and prefer to capture their vic- tims alive and return them to Hell for punishment. On occasion,  erinyes may be willing to bargain, but they are quite crafty and  will always try to tempt the bargainer into committing a great  sin.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (30%).  Any magic spell or effect has a 30%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immunities. This creature is immune to fire damage. Damage Resistances  (all half damage): Cold, Poison (including  gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: animate dead (as the 5th level magic-user spell), c harm  person (as the 1st level magic-user spell), fear (effect varies, as  the 4th level magic-user spell), know alignment (as the 2nd level  cleric spell), spectral force (as the 3rd level illusionist spell), sug- gestion (as the 3rd level magic-user spell), teleport (no chance  of error, otherwise as the 5th level magic-user spell), fear (gaze,  otherwise as the 4th level magic-user spell), detect invisibility (as  the 2nd level magic-user spell), locate object (as the 2nd level  magic-user spell), invisibility (as the 2nd level magic-user spell),  polymorph self (as the 4th level magic-user spell), produce flame  (as the 2nd level druid spell), or summon another erinyes to their  aid (25% chance of success).'
+- heading: Special Attacks
+  text: 'Poison Dagger. In melee, erinyes use a magical dagger which is  poisonous and causes horribly painful wounds (save vs poison  or pass out for 1d6 rounds).  Ropes of Entanglement. These devils also carry ropes of entangle- ment, which they use to bind their prisoners. Unarmed Combat. Erinyes devils can be targeted with grappling  or overbearing attacks, although they don’t use these tactics. If  not fended off, they score an unarmed hit with a 2+ on 1d20.  Hit Mods: ATK/DEF +4/-4. Overbear Results Mods: ATK/DEF  +1/-1. Grappling Result Mods: ATK/DEF +0/+0.'

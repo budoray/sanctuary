@@ -1,0 +1,23 @@
+name: Treant
+frequency: rare
+no_encountered: 1d20
+size: large
+alignment: chaotic good
+move: 120ft
+armour_class: 0 [20]
+hit_dice: 7–12 (1d6+6 if randomly determined)
+melee_attacks: 2 (fists). See below
+senses: Keen
+lair_chance: 10%
+intelligence: very (11-12)
+morale: See below
+loot: Cache 3 (x5), Cache 5
+experience: '7HD: 1,295 +8/hp  8HD: 1,600 +10/hp  9HD: 2,050 +12/hp  10HD: 2,350 +13/hp  11HD: 2,750 +14/hp  12HD: 3,600 +16/hp'
+description: 'Treants are woodland creatures, reclusive to humankind but  friendly with other good-aligned creatures of the woods. They  resemble humanoid trees: their “arms” and “legs” are not eas - ily seen as such until they begin moving. Treants are vigilant  guardians of the woods, despising anyone of evil alignment and  all who make reckless use of fire, regardless of alignment. Dam- age and morale depend upon hit dice as follows: • 7–8 HD: 2d8 damage per fist; Morale 80 or 85 • 9–10 HD: 3d6 damage per fist; Morale 90 or 95 • 11–12 HD: 4d6 damage per fist; Morale 100 or 105'
+abilities:
+- heading: Surprise and Initiative
+  text: Alert. Treants cannot be surprised.
+- heading: Immunities and Resistances
+  text: 'Vulnerability to Fire. Treants are quite vulnerable to fire: fire at - tacks requiring a roll “to hit” gain a bonus of +4, a treant makes  saving throws vs fire at -4, and any hit die of damage inflicted  upon a treant gains a +1 to its result.'
+- heading: Special Features
+  text: Animate Trees. Treants can animate 1d2 trees to aid them (see  “Tree, Animated”) within a range of 180ft. Separate experience  is not awarded for killing such animated trees. Unarmed Combat.  Treants cannot be effectively targeted with  grappling or overbearing attacks, and do not use these tactics.

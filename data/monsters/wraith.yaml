@@ -1,0 +1,21 @@
+name: Wraith
+frequency: uncommon
+no_encountered: 2d6
+size: medium
+alignment: lawful evil
+move: 120ft; 240ft flying (AA:IV)
+armour_class: 4 [16]
+hit_dice: 5+3
+melee_attacks: 1 touch (1d6+level drain)
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: very (11-12)
+morale: 75
+loot: Hoard 5
+experience: 550 +6/hp
+description: Wraiths are insubstantial undead creatures that exist partially  in the negative material plane, giving them the power to drain  one level of experience when they score a hit upon an oppo - nent. In sunlight, the wraith cannot drain levels. Wraiths are  shadowy, man-like shapes, dark and indistinct.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Wraiths are turned as type 7 Undead. Immune to Mundane Non-Silver Weapons.  The wraith is immune  to piercing, blunt, or cutting damage, unless the weapon caus- ing that damage is magical or silver. Non-magical silver weap - ons inflict half damage. Immune to Cold. Wraiths are immune to cold damage. Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease.
+- heading: Special Attacks
+  text: Level Drain. With a successful hit, a wraith drains 1 level of expe- rience from the target. Unarmed Combat. Wraiths cannot be targeted with grappling or  overbearing attacks, and do not employ these tactics.

@@ -1,0 +1,24 @@
+name: Yellowmusk Vine
+frequency: rare
+no_encountered: '1'
+size: large
+alignment: neutral
+move: Nil
+armour_class: 7 [13]
+hit_dice: '3'
+melee_attacks: Entwine
+senses: Can sense living creatures  within 10ft
+lair_chance: 100%
+intelligence: non- (0)
+morale: N/A (fights to the death)
+loot: Nil
+experience: 75 +3/hp
+description: A yellowmusk vine is a climbing plant with strikingly beautiful  amber flowers like honeysuckle blooms. It doesn’t need sun - light, instead drawing nutrients from decaying animals or plants. A mature vine covers about 20 square feet, and has 2d6 blooms  and 1d4 buds. It exudes a musky, heady perfume. The plant begins its attack with a puff of pollen, causing prey  to make contact, at which point the plant’s melee attack can be  used.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Climbing Plant. The vine can only be knocked prone by destroy - ing the surface or structure it’s growing on.  Mindless. The vine is immune to psychic damage and it can’t be  charmed or dominated. No Back. The vine can’t be backstabbed. Plant Immunities. The vine doesn’t need to eat, drink, sleep, or  breathe as an animal would. Magic can’t put it to sleep. Gases  can’t harm it, and it’s immune to poison and disease. Special Senses.  Sight isn’t the vine’s primary sense. It can’t be  blinded. Melee Attack Entwine. When a creature touches the vine, the vine produces  hundreds of leafy tendrils that wrap themselves around that  creature. An entwined creature can blink and speak but can’t  move any other part of its body. Using this feature is the vine’s  action in combat. The entwined creature doesn’t get a saving  throw. Implant Seed. If the vine has entwined at least one creature, then  on its initiative score, the vine can try to implant a special seed  into the skull of each creature
+    it has entwined. Invasive ten - drils probe into the entwined creatures’ noses, eyes, mouths,  ears, or other skull orifices. Each entwined creature tempo - rarily loses 1d4 from its Intelligence score (roll separately for  each affected creature). Using this feature is the vine’s action  in combat. The entwined creature does not get a saving throw. If this damage reduces the creature to 0 Intelligence or below,  that creature dies. If it reduces the creature to 1 or 2 Intelli - gence, that creature becomes an Amber Vine Zombie (no sav - ing throw). All lost intelligence is fully restored after a week’s rest. It’s also  fully restored if the entwined creature receives magical heal - ing. Special Puff of Pollen. When a human, humanoid, or demi-human comes  within 10ft of the vine, the vine emits a puff of pollen at it.  The target creature must attempt a saving throw vs spells and  other magical effects, and must add its Wisdom saving throw  modifier, if any, to this roll. Creatures that
+    can’t be charmed,  and creatures that don’t need to breathe, always pass their  saving throw. If the creature passes, it ignores the puff of pol - len. If it fails, it’s enthralled. While enthralled, on its initiative in combat the creature must  move towards the vine as quickly and directly as it can. If it’s  grappled, it must try to escape. If a creature or object impedes  its movement, it must walk around that creature or object, and  if it can’t, then it must attack that creature or object in melee,  using all its attacks if it has several, and using a hand weapon if  it has one. It can’t take any other actions apart from these until  the enthrallment ends. When an enthralled creature reaches the vine, it must press it - self against the vine’s bark and then cease to act. The enthrallment ends on the enthralled creature’s initiative  score when one or more of the following is true: 1. The yellowmusk vine has used Entwine on the creature. 2. The yellowmusk vine is dead. 3. The creature
+    is both (a) at least 240ft away from the Yellow - musk Vine and (b) can’t see it. 4. Someone has used a cure disease, limited wish, restoration, or  wish spell to end the enthrallment.'
+- heading: Languages
+  text: None.

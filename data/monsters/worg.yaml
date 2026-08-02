@@ -1,0 +1,19 @@
+name: Worg
+frequency: rare
+no_encountered: 3d4
+size: large
+alignment: neutral evil
+move: 180ft
+armour_class: 6 [14]
+hit_dice: 4+4
+melee_attacks: 1 bite (2d4)
+senses: Keen
+lair_chance: 10%
+intelligence: low (5-7)
+morale: 70
+loot: Nil
+experience: 75 +3/hp
+description: 'Worgs are evil wolves of great size. They often cooperate with  goblin tribes. These malicious beasts stand 4ft to 5ft tall at the  shoulder and may weigh as much as 600 to 700 lbs. Unarmed Combat. Worgs cannot be targeted with grappling or  overbearing attacks. They may choose to overbear. If not fend- ed off, they score an unarmed hit with a 2+ on 1d20. Hit Mods:  ATK/DEF +10/na. Overbear Results Mods: ATK/DEF +5/na.'
+abilities:
+- heading: Languages
+  text: Worgs speak their own language, and that of goblins.

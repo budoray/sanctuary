@@ -1,0 +1,42 @@
+name: Fire Lava Smoke Steam
+frequency: very rare very rare very rare very rare
+no_encountered: 1 1 1 1
+size: medium (5ft tall) medium (5ft tall) medium (5ft tall) medium (5ft tall)
+alignment: any evil any evil any evil any evil
+move: '120ft; 240ft flying (AA:  IV) 120ft; 240ft flying (AA:  IV) 120ft; 240ft flying (AA:  IV) 120ft; 240ft flying (AA:  IV)'
+armour_class: 5 [15] 6 [14] 4 [16] 7 [13]
+hit_dice: 3+1 3 3 3+3
+melee_attacks: 2 claws (1d3 piercing +1  fire) 1 claw (1 piercing + 1d8  fire) 2 claws (1d2) 2 claws (1d4)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft Infravision 60ft
+lair_chance: Nil Nil Nil Nil
+intelligence: average (8-10) average (8-10) average (8-10) average (8-10)
+morale: 60 60 60 65
+loot: Individual 5 (x3) Individual 5 (x3) Individual 5 (x3) Individual 5 (x3)
+experience: 155 +4/hp 110 +3/hp 100 +3/hp 170 +4/hp
+description: Mephits are the varlets, lackeys, messengers, errand runners,  and fetchers of the Lower Planes. They can be found in any of  the evilly-aligned lower planes and will be serving the various  demons, devils, evil elemental gods, or any extra-planar crea - ture of dark purpose and evil intent. Their exact origins and  home plane are not known; even the mephits themselves do  not know for certain. This entry lists the known types of me - phits, but dark rumours persist of other types more dangerous  than these. Mephits share various common characteristics. They are all  about 5ft tall, bat-winged, with sharp fangs. Mephits speak their  own language shared by all the different types of mephits, their  alignment tongue, and usually speak the common tongue of  whatever lower plane they happen to call home. Mephits are  mischievous and have a malignant sense of humour, finding joy  in the pain of others.  Unarmed Combat. Mephits cannot be targeted with grappling or  overbearing attacks,
+  and do not use these tactics. FIRE MEPHITS Fire mephits are wreathed with tiny wisps of flame, and touch - ing one bare-handed will cause 1 point of damage. In combat  mephits attack with two claws and a breath weapon.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Fire. Fire mephitis are immune to fire damage.
+- heading: Special Features
+  text: 'Spell-Like Abilities. 1/Hour: attempt to gate in another mephit, type determined  randomly, (33% chance of success). 1/day: magic missile (two missiles) and heat metal.'
+- heading: Special Attacks
+  text: 'Breath Weapon.  The fire mephit’s breath weapon has two  modes: a jet of flame 15ft long and 1 inch wide, or a blanket  of flame 5ft square. The jet is directed against a single target  and always hits, causing 1d8+1 fire damage; a saving throw  vs breath weapons is allowed for half damage. The blanket of  flame causes 4 points of damage to each victim in the area of  effect, no saving throw allowed. LAVA MEPHIT These mephits are red in colour and sweat droplets of molten  lava. As a result, the lava mephit is so hot it can be sensed up  to 30ft away. Touching one without protection results in 1d8  points of damage. The touch of a lava mephit dissolves metal rather quickly, de - stroying plate mail armour in 3 melee rounds. Wood dissolves  a little more slowly, about an inch per hour of contact. The lava  mephit can shape-change into a pool of lava but doing so will  not recharge the mephit’s breath weapon or allow it to regen - erate.'
+- heading: Immunities and Resistances
+  text: Immune to Fire. Lava mephitis are immune to fire damage.
+- heading: Special Features
+  text: 'Limited Regeneration. When in contact with molten lava, the lava  mephit can regenerate 2 hp per round, but if killed it cannot  regenerate back to life as a troll does.  Spell-Like Abilities. 1/Hour: gate in 1d2 mephits (25% chance of success). The type  is random, but if two appear, they will be the same type. Burning Touch. Although it has no effect in combat, a lava me - phit can melt metal and burn wood by prolonged contact, de - stroying doors or other impediments.'
+- heading: Special Attacks
+  text: Spit Lava. In addition to its attack, every 3 rounds a lava mephit  can spit a blob of molten lava, up to 8 times before recharging  (see below). The projectile has a 10ft range, always hits the me- phit’s target, and inflicts 1d6 fire damage with no saving throw.  Contact with lava also allows the mephit to recharge its breath  weapon. SMOKE MEPHIT This type of mephit is charcoal black, and constantly emits  smoke. When encountered on the Prime Material Plane, smoke  mephits rarely stray from dark or smoky areas except in great  need. Smoke mephits attack with two claws, and may employ  their breath weapon while in combat.
+- heading: Immunities and Resistances
+  text: Immune to Fire. Smoke mephits are immune to fire damage.
+- heading: Special Features
+  text: 'Death Flash. If slain, the smoke mephit emits a burst of flash- fire which inflicts 1 point of damage to everyone with 10ft, no  saving throw allowed. Spell-Like Abilities. 1/Hour: gate in 1d2 mephits (25% chance of success). The type  is random, but if two appear, they are the same type. 1/day: invisibility and dancing lights.'
+- heading: Special Attacks
+  text: Smokeball (every other round). The smoke mephit’s breath weap- on is a ball of oily smoke that automatically strikes its target,  with a range of 20ft, dealing 1d4 hp, no save allowed. In ad - dition to the hit point damage, the victim is blinded for 1d2  rounds. There is no limit to the number of times a smoke me - phit may use its breath weapon. STEAM MEPHIT These mephits constantly sweat hot water in profuse amounts,  leaving puddles of hot water behind them as they travel. Touch- ing a steam mephit causes 1 point of damage to unprotected  skin and has a 50% chance to stun the victim for 1 melee round.
+- heading: Immunities and Resistances
+  text: Immune to Fire. Steam mephits are immune to fire damage.
+- heading: Special Features
+  text: 'Spell-Like Abilities. 1/Hour: gate in 1d2 mephits (30% chance of success). The type  is random, but if two appear, they are the same type. Also,  the steam mephit can contaminate water (as the reverse of  the purify water spell). 1/day: rain boiling water in a 40×40ft square area of effect for  2d6 hp to all in the affected area (no saving throw).'
+- heading: Special Attacks
+  text: Spit Scalding Water (every other round).  The steam mephit can  spit a stream of scalding water that will automatically hit any  single target within 20ft. The stream inflicts 1d3 points of dam- age and has a 50% chance to stun the target (no saving throw  allowed).

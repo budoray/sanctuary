@@ -1,0 +1,25 @@
+name: Azer
+frequency: very rare
+no_encountered: 1d4
+size: medium
+alignment: lawful neutral
+move: 90ft
+armour_class: 2 [18]
+hit_dice: 2+1
+melee_attacks: 1 spear (1d6+2 piercing and 1d3 fire)
+senses: Standard
+lair_chance: Nil
+intelligence: very (11-12)
+morale: 60
+loot: Nil
+experience: 40 +3/hp
+description: Azer are elementals from the elemental plane of fire. They look  like dwarfs with flames for hair and brass-coloured skin. In that  plane of existence, azers may be encountered in much larger  numbers than shown here.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Fire. The azer ignores fire damage. Resistant to Poison. When the azer takes poison damage, this  damage is halved. Round fractions down. Vulnerable to Cold. When the azer takes cold damage, this dam- age is doubled.
+- heading: Special Features
+  text: Burning. When you hit the azer with a melee attack while stand- ing within 5ft of it, you take 1d3 fire damage.  Glowing. The azer sheds light in a 40ft radius.
+- heading: Special Attacks
+  text: 'Melee Attack: Burning.  When the azer hits you with a melee at - tack, you take an extra 1d3 fire damage. Ranged Attack. 1 spear (1d6+2 piercing); 30ft range increment (-2  beyond 30ft, -4 beyond 60ft). Unarmed Combat. Azers can choose to overbear or grapple in - stead of making a regular melee attack. If not fended off, they  score an unarmed hit with an 18+ on 1d20. Hit Mods: ATK/DEF  +6/-14. Overbear Results Mods: ATK/DEF +0/-0. Grappling Re - sult Mods: ATK/DEF +0/-0.'
+- heading: Languages
+  text: Azer have their own language, and also speak Ignan, the lingua  franca of the Elemental Plane of Fire.

@@ -1,0 +1,26 @@
+name: Behir
+frequency: rare
+no_encountered: 'Encountered: 1d2'
+size: huge
+alignment: neutral evil
+move: 150ft
+armour_class: 4 [16]
+hit_dice: '12'
+melee_attacks: 1 bite (2d4) or bite plus 6 claws (1d6)
+senses: Infravision 60ft, Detect invisible 5%
+lair_chance: Nil
+intelligence: low (5-7)
+morale: 105
+loot: See below
+experience: 2,750 +16/hp
+description: A behir is a particularly nasty subterranean beast with a croc - odile-like head on a 40ft long, snake-like body with twelve sets  of legs. Since behirs swallow prey whole, the beast’s stomach will con - tain 10d4 gems (60% chance), 1d8 jewellery (30% chance), and  a misc. magic item that can survive its digestive juices (10%  chance).
+abilities:
+- heading: Immunities and Resistances
+  text: Immunities. The behir is immune to electricity damage and poi - son. Many-legged. This creature cannot be knocked prone, over - borne, or grappled, and does not employ unarmed combat tac- tics.
+- heading: Special Features
+  text: Climber. This creature can move on walls and ceilings as if they  were floors, but moves at half speed when doing so.
+- heading: Special Attacks
+  text: Lightning Breath.  Every 10 rounds a behir can also breathe a  20ft lightning bolt that does 4d6+24 damage unless a save vs  breath is made for half damage.  Swallow Whole. On a bite attack that rolls a natural 20, the behir  swallows the victim. If the victim is not rescued, they will die  at the end of 6 rounds spent in the creature’s stomach. It  is possible for the victim to cut their way out (the inside of  the behir is armour class 10 [10]). For each round the victim  is inside, subtract 1 from their damage that they inflict. This  penalty is cumulative for each round, so after four rounds the  damage inflicted is at -4. Bite and Claw. The behir’s first attack is a bite, but if it hits with  this attack it can coil around the victim and bring its claws into  play. On the second round after a successful bite, the behir  can make an additional 6 claw attacks against the victim. The  victim is held in place, but can continue to act (other than mov- ing); the behir’s attacks do
+    not shift to automatic damage; it  must still make to-hit rolls to inflict damage, although it can  now make a lot more attacks.
+- heading: Languages
+  text: Behirs only speak the alignment tongue of neutral evil. BIRD OF PREY

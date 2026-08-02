@@ -1,0 +1,21 @@
+name: Class E Demon (marilith And Others)
+frequency: rare
+no_encountered: 1d3 or 1d6 (in the Abyss)
+size: large
+alignment: chaotic evil
+move: 120ft
+armour_class: -7 [27]
+hit_dice: 7+7
+melee_attacks: 6 arms (2d4) and 1 constriction (1d6)
+senses: Infravision 120ft
+lair_chance: 10%
+intelligence: high (13-14)
+morale: 90
+loot: Hoard 7
+experience: 3,000 +12/hp
+description: Infamous even among demonkind for their cruel and ill-tem - pered nature, the marilith are invariably female. From the waist  up they appear to be a human female with six arms and skin  tones ranging from deep violet to a putrescent green. Below  the waist however, they have the coiling body of a large serpent.  In melee they prefer to wield a variety of barbed and hooked  swords and battle axes or simply constrict their prey with their  powerful serpentine tail. All class E demons have personal and secret names which may  be used to summon and bargain with them, much like class D  demons.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (80%).  Any magic spell or effect has an 80%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: Darkness, 5ft radius, charm person (as the 1st level mag- ic-user spell), levitate (as the 2nd level magic-user spell), com- prehend languages  (as the 1st level magic-user spell), detect  invisibility (objects only, otherwise as the 2nd level magic-user  spell), pyrotechnics (as the 2nd level magic-user spell ), poly- morph self  (as the 4th level magic-user spell), project image   (as the 6th level magic-user spell), or gate (as the 9th level  magic-user spell) another demon (50% chance of success).  Use the following table to determine which class of demon  is summoned: D100 DEMON CLASS 1–30 Class A 31–55 Class B 56–70 Class C 71–85 Class D 86–00 Class F Unarmed Combat. Marilith demons can make grappling or over- bearing attacks, but cannot be overborne. If not fended off,  they score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/ DEF +8/-8. Overbear Results Mods: ATK/DEF +3/na. Grappling  Result Mods: ATK/DEF +6/-6.'

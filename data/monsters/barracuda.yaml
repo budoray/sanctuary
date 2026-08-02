@@ -1,0 +1,17 @@
+name: Barracuda
+frequency: uncommon
+no_encountered: 2d6
+size: small
+alignment: neutral
+move: 300ft swimming
+armour_class: 6 [14]
+hit_dice: 1 to 3
+melee_attacks: 1 bite (2d4 piercing)
+senses: Standard
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: '1HD: 10 +1/hp 2HD: 30 +1/hp 3HD: 50 +2/hp'
+description: The barracuda is a fearsome, very fast aquatic predator. The  natural habitat of this fish is warm salt water. It prefers vulnera- ble or wounded prey, especially those smaller than itself.
+abilities: []

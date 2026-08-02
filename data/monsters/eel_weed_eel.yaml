@@ -1,0 +1,21 @@
+name: Eel Weed Eel
+frequency: uncommon rare very rare no.  encountered 1d3 1d4 1d6 x10
+size: large medium small
+alignment: neutral neutral neutral
+move: 90ft swimming 120ft  swimming 150ft  swimming
+armour_class: 6 [14] 9 [11] 8 [12]
+hit_dice: 5 2 1d6 hp
+melee_attacks: 3d6 1d4 1 + poison
+senses: Standard Standard Standard
+lair_chance: Nil Nil 100%
+intelligence: non- (0) non- (0) non- (0)
+morale: N/A N/A N/A
+loot: Nil Nil Cache 1, 2, 4
+experience: 110 +4/hp 40 +2/hp 30 +1/hp
+description: GIANT MORAY EELS Giant morays are saltwater dwellers with a nasty temper and  a mouth full of teeth. Though they will generally keep to them - selves if not molested, giant moray eels are often found in the  service of locathah (q.v.) as both battle mounts and guards. Gi - ant morays encountered in those circumstances are extremely  aggressive. On rare occasions, a giant moray eel will be found  in fresh water. GIANT ELECTRIC EELS Electric eels are non-aggressive freshwater dwellers, preferring  warm water. Rumours persist of a saltwater electric eel which is  double the size and delivers a jolt twice as powerful.
+abilities:
+- heading: Special Attacks
+  text: 'Electric Jolt. If an electric eel feels threatened or is attacked it  will discharge a jolt of electricity. This electrical charge causes  any creature within 5ft of the eel to take 3d8 points of damage,  all creatures within a 5ft to 10ft range will take 2d8 points of  damage, and all creatures within 10ft to 15ft take 1d8 hp dam- age. No saving throw is allowed, though certain magic items  and spells may grant immunity or reduced damage from the  electrical attack. WEED EELS Weed eels are found in both salt and fresh water, preferring  depths of around 30ft. Weed eels are so-called because of their  brownish green colouration, and because they tend to anchor  themselves in the rocks and dirt of the sea or lake bed, looking  for all the world like a bed of seaweed. A weed eel lair consists  of many small tunnels of about 6 inches diameter which even - tually join into a series of 6ft tunnels, which in turn lead to a  large cave which is the actual lair. The cave is usually about
+    600  square ft and the eels pave the bottom of it with any suitable  material they find: small stones, gems, coins, and similar-sized  shiny objects. Any attempt by anyone or anything other than  a weed eel to enter any hole leading to the lair will provoke an  immediate attack by every eel in the colony.'
+- heading: Special Attacks
+  text: 'Poison Bite. Weed eels have a single biting attack which injects a  powerful poison into the wound: the victim must save or die.'

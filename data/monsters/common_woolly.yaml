@@ -1,0 +1,18 @@
+name: Common Woolly
+frequency: common common no.  encountered 1d6 1d4
+size: large large
+alignment: neutral neutral
+move: 120ft 120ft
+armour_class: 6 [14] 5 [15]
+hit_dice: 8 or 9 10
+melee_attacks: 1 (2d4 or 2d6) 1 (2d6)
+senses: Standard Standard
+lair_chance: Nil Nil
+intelligence: animal (1) animal (1)
+morale: N/A 95
+loot: Nil Nil
+experience: 550 +10/hp 900 +12/hp
+description: Rhinoceroses are aggressive herbivores that will charge any  creature they can detect. Rhinos have poor eyesight but have  a very good sense of smell and excellent hearing. There are 2  common types of rhinos, single horn and double horned. Dou - ble horned rhinos are larger, having 9 HD and doing 2d6 dam - age. The single horn variety has 8 HD and does 2d4 damage. A woolly rhinoceros is a larger version of the rhino that roams  Arctic areas of “lost world” settings, though they can also be en- countered in the wild.
+abilities:
+- heading: Special Attacks
+  text: Charge. In combat a rhino will charge, doing double damage on  a successful attack.  Trample. Any opponent on the ground (prone) may be tram - pled. Roll to hit for 2 foreleg attacks (2d4 blunt damage). Unarmed Combat. Rhinoceroses cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics.

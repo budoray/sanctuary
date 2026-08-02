@@ -1,0 +1,27 @@
+name: Satyr (faun)
+frequency: uncommon
+no_encountered: 2d4
+size: medium
+alignment: neutral
+move: 180ft
+armour_class: 5 [15]
+hit_dice: '5'
+melee_attacks: 1 gore (2d4 piercing)
+senses: Keen
+lair_chance: 40%
+intelligence: very (11-12)
+morale: 70
+loot: Hoard 9, Cache 5 and 10
+experience: 110 +4/hp
+description: A satyr looks like a man with goat legs, and their heads have  small goat-horns as well. These creatures are invariably male.  As they are fey creatures, they are probably capable of breeding  with humans and with other types of fey. Satyrs live in remote forests or meadows far away from civili - sation. They are a frisky sort of fey creature, occupying most of  their time with playing, flirting, and drinking. They value their  privacy and will try to drive away any intruders from their do - main. Satyrs have been known to ignore intruders from time to  time, if given enough premium food and or wine. Satyrs will not attack physically unless they themselves are  threatened. Sometimes (20%) a satyr will carry a magic weapon.
+abilities:
+- heading: Surprise and Initiative
+  text: Hard to Surprise. Being nature spirits, fauns are very tuned into  their surroundings and are surprised only on a roll of 1 on a  d6. (See also “Invisibility in Foliage,” below).
+- heading: Immunities and Resistances
+  text: Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: 'Magic Pipes. A faun’s primary defence is its magic pipes that only  it can play. With it the faun can cast charm, sleep, or fear. All  spells have a 60ft radius and those within range must save vs  magic or suffer the effects. Invisibility in Foliage.  Satyrs magically blend in with their sur - roundings, and each one has a 90% chance to be treated as  invisible when hiding in foliage. This can be used for an am - bush, but once the satyr is moving, it becomes visible unless  it hides again. Unarmed Combat. Satyrs can engage in grappling or overbearing  attacks. If not fended off, they score an unarmed hit with a 2+  on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear Results Mods:  ATK/DEF +1/-1. Grappling Result Mods: ATK/DEF +0/-0.'
+- heading: Languages
+  text: Satyrs can speak their own language and that of the fey, as well  as elven and common.  Giant scorpions are vicious, fearless predators found almost  anywhere. Their usual tactic is to attack anything smaller than  themselves. The scorpion can use its attacks independently on  3 different targets. Anything that the scorpion kills is taken back  to its lair and consumed.
+- heading: Special Attacks
+  text: Poison Sting. Anyone hit by the stinger of a giant scorpion must  make a saving throw vs. poison or die. Giant scorpions are not  immune to poison, so if one stings another it can be lethal. Unarmed Combat. Giant scorpions cannot effectively be target - ed with grappling or overbearing attacks, and do not use these  tactics.

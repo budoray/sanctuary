@@ -1,0 +1,21 @@
+name: Sprite
+frequency: rare
+no_encountered: 10d10
+size: tiny (1ft)
+alignment: neutral good
+move: 90ft; 180ft flying (AA:III)
+armour_class: 6 [14]
+hit_dice: '1'
+melee_attacks: 1 (by weapon)
+senses: Keen
+lair_chance: 20%
+intelligence: very (11-12)
+morale: 50
+loot: Hoard 3
+experience: 50 +1/hp
+description: Sprites are fey creatures resembling tiny humans with insect  wings. They use daggers in melee, but prefer small bows (treat  as a short bow, but half range and 1d3 damage per arrow).  They will typically only attack evil creatures or those that blun - der through their homes. Evil things will be slain, others re - moved in their sleep to somewhere far away.
+abilities:
+- heading: Special Features
+  text: Fey Magic. Sprites can (at will) become invisible, detect evil as per  the spell, and move in complete silence.
+- heading: Special Attacks
+  text: Arrows. Sprite arrows are coated with sleep poison. A successful  hit requires a saving throw vs poison or the victim falls into  magical sleep for 1d6 hours. Unarmed Combat. Sprites are too small to be effectively targeted  with grappling or overbearing attacks, and do not use these  tactics.

@@ -1,0 +1,18 @@
+name: Buccaneer (pirate)
+frequency: uncommon
+no_encountered: 50d6
+size: medium
+alignment: neutral (chaotic evil)
+move: 120ft
+armour_class: By  armour type
+hit_dice: 1d6 hp
+melee_attacks: Axe or sword (1d8)
+senses: Standard
+lair_chance: 80% (100% by sea)
+intelligence: mean (average to very) (8-12)
+morale: 50
+loot: Individual 2 each; in lair,  Cache 9
+experience: Varies
+description: 'One out of every 3 buccaneers (or pirates) is armed with a light  crossbow as well as an axe or sword. Buccaneers are found on all large bodies of water, their lair is  most always the ship they use for raiding. They are always led  by high level fighters as follows: • For every 50 buccaneers: 1 additional 3rd level fighter • For every 100 buccaneers: 1 additional 5th level fighter The overall captain will be a fighter of 8th to 10th level as fol - lows: • If there are less than 200 buccaneers: 8th level fighter with a  lieutenant of 6th level • If there are 200 buccaneers or more: 10th level fighter with a  lieutenant of 7th level. The captain will also have 4 mates (4th level fighters) in addition  to a lieutenant. There is a 15% chance of a cleric being present per every 50 buc- caneers. The cleric will be between 12th and 15th level (1d4+11). There is a 10% chance of a magic-user being present for every  50 buccaneers; the magic-user will be between 6th and 8th level  (1d3+5).
+  Pirate: Pirates are chaotic evil, but otherwise conform to buc - caneers above.'
+abilities: []

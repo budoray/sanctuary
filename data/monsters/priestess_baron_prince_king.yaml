@@ -1,0 +1,20 @@
+name: Priestess Baron Prince King
+frequency: very rare very rare very rare very rare
+no_encountered: 1d4+1 1 1 1
+size: medium medium medium medium
+alignment: lawful evil lawful evil lawful evil lawful evil
+move: 120ft; 240ft swimming 120ft; 240ft swimming 20ft; 240ft swimming 120ft; 240ft swimming
+armour_class: 5 [15] 3 [17] 2 [18] 1 [19]
+hit_dice: 2 to 6 6+6 8+8 10+10
+melee_attacks: 1 (By weapon) 1 (By weapon) 2 (By weapon) 4 (By weapon)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft Infravision 60ft
+lair_chance: 100% 100% 100% 100%
+intelligence: exceptional (15-16) high (13-14) high (13-14) exceptional (15-16)
+morale: By HD 80 95 120
+loot: Individual 5 each Individual 5 each Individual 5 each Individual 5 each
+experience: Variable 300 +8/hp 500 +12/hp 1,250 +14/hp
+description: 'Sahuagin are humanoid fish-people of evil alignment, much  more shark-like in their appearance than the locathah. They  dwell in shallow, warmer salt waters and raid villages and com- munities on land for loot and sport. Sahuagin have been known  to tame sharks and keep them as pets. Each sahuagin realm has a King and is divided into nine prov - inces, each ruled by a Prince. Each Prince will have a number  of Barons under his command, and each Baron controls a war- band. The “Number Encountered” listing for this creature is for  the lair of a typical war-band; the lair of a Prince would be much  larger. If encountered outside their lair, there will be only normal sa - huagin and guards. The band will be led by a warchief. Sahuagin are typically armed as follows: • Dagger and spear: 25% of the band • Dagger, trident and net: 50% of the band • Dagger and heavy crossbow: 25% of the band All these weapons are fully usable both above and below the  water, which makes them quite
+  highly prized. Priestesses The sahuagin clergy will always be led by a priestess with 6 HD  and the spell casting powers of an 8th level cleric. The remain - ing priestesses will be trainees of 2nd to 7th level (1d6+1). Their  HD are equal to their spell casting level minus 2 (minimum 2).  Sahuagin priestesses will typically be attended by zombie or  skeleton servants, as they are fond of the animate dead spell.'
+abilities:
+- heading: Special Attacks
+  text: 'Ranged or Melee Attack (Net). Some sahuagin are armed with  nets. These have a range of 20ft (and can be thrown while in  melee combat). If the attack hits, the target is automatically  (no saving throw) entangled for 1d4 rounds, unable to attack  or move. Unarmed Combat.  Sahuagin can engage in grappling or over - bearing attacks when out of water. For a normal sahuagin, if  not fended off, they score an unarmed hit with a 2+ on 1d20.  Hit Mods: ATK/DEF +8/-8. Overbear Results Mods: ATK/DEF  +0/-0. Grappling Result Mods: ATK/DEF +0/-0.'

@@ -1,0 +1,23 @@
+name: Nereid
+frequency: very rare
+no_encountered: 1d4
+size: medium
+alignment: chaotic neutral
+move: 120ft
+armour_class: 10 [10]
+hit_dice: '4'
+melee_attacks: None
+senses: Standard
+lair_chance: 100%
+intelligence: very (11-12)
+morale: 65
+loot: Cache 10
+experience: 150 +4/hp
+description: Nereids are transparent and invisible in water. On land these  fey creatures appear as young, slim humans. They are playful  and capricious, but a few (10%) are actually evil. An equally  small number are good. A nereid will always have a diaphanous shawl containing the  creature’s spirit essence. Anyone holding the shawl can control  the nereid by threatening the shawl, but the nereid will use any  means possible to recover it.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: Control Water. As fey creatures, neireids can control the water  of their homes, speeding or slowing swimming movement  through it (up to double normal speed, or down to 25% of it),  causing crashing waves that deafen, prevent conversation and  interrupt spell-casting, or forming miniature waterspouts that  attack as 4 HD monsters (inflicting 1d4hp damage—no more  than one such waterspout per nereid per round).
+- heading: Special Attacks
+  text: 'Kiss. The kiss of a nereid can cause the recipient to drown in  air and also in water. This requires a to-hit roll unless the kiss  is voluntarily received. If it hits, a saving throw vs spells is re - quired, and if the saving throw fails, the victim will drown in  1d4 rounds unless the magic is dispelled. Spit. In extremis, a nereid can attack with their spittle (range  20ft) that blinds its target for 1d12 rounds. This requires a to- hit roll but no saving throw is allowed. Unarmed Combat.  Nereids can be targeted with grappling or  overbearing attacks if out of the water (this is a terrible idea  since the kiss can be used while grappling). If not fended off,  they score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/ DEF +8/-8. Overbear Results Mods: ATK/DEF +1/-1. Grappling  Result Mods: ATK/DEF +0/-0.'

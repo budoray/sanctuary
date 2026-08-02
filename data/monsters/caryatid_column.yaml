@@ -1,0 +1,21 @@
+name: Caryatid Column
+frequency: very rare
+no_encountered: 1d12
+size: medium
+alignment: neutral
+move: 60ft
+armour_class: 5 [15]
+hit_dice: '5'
+melee_attacks: 1 (2d4)
+senses: Special
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A (fights to the death)
+loot: Nil
+experience: 110 +3/hp
+description: Caryatid columns share many similarities to stone golems, being  created in much the same way. These constructs resemble intri- cately-carved columns in the shape of a person, usually in pairs.  The most common type is maidens, however they can resemble  practically anyone. In their dormant state they are almost indis- tinguishable from a normal statue. The only indication of their  true nature is a faint outline of sword held in one hand. They  are created as guardians and will animate only when triggered  by a certain event. Their trigger must be something simple like  someone entering a room, lifting a chest, or opening a door.  Once animated they will do their utmost to prevent the trigger  from continuing. When their task is complete they will return to  their previous place and form. The caryatid column’s main purpose is not combat, but if  pressed they will use their swords and attack.
+abilities:
+- heading: Immunities and Resistances
+  text: Saving Throw Bonus.  Caryatid columns make all saving throws  with a +4 bonus. Immunities. Caryatid columns are immune to blindness (and  invisibility), psychic damage, charm, domination, sleep, gases,  poison, and disease. Resistances. Normal weapons do half damage and magical  weapons score full damage, but without their additional mag - ical effects.
+- heading: Special Features
+  text: Any weapon, including magic weapons, that hits a caryatid  column has a 25% chance of breaking. For each plus that the  weapon has reduces the chance of breaking by 5%; consider  any magical weapons without any pluses as a +1. Unarmed Combat.  Caryatid Columns cannot be overborne or  grappled, and do not employ these tactics.  CAT

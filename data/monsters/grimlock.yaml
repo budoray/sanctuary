@@ -1,0 +1,22 @@
+name: Grimlock
+frequency: uncommon
+no_encountered: 20d10
+size: medium
+alignment: neutral evil
+move: 120ft
+armour_class: 5 [15]
+hit_dice: '2'
+melee_attacks: 1d6 or by weapon
+senses: Special
+lair_chance: 75%
+intelligence: average (8-10)
+morale: 55
+loot: Individual 2, 3, 4 each; in lair  Horde 2
+experience: 28 +2/hp
+description: Grimlocks are a fierce species of humanoid that dwells in the  dark and hidden places of the earth, periodically issuing forth to  the surface in search of prey, preferably human. Whilst some - what resembling men in shape, they have a thick, almost scaly,  hide that is a dusky grey in colour, a head of wild and matted  black hair, a mouthful of vicious pointed teeth and two white  featureless orbs for eyes. (The original inspiration for this mon- ster was probably the morlocks). Though it is unknown whether grimlocks speak a language, it  is certain that they are entirely blind. They instead rely on their  other senses, which are highly developed and allow them to  perceive the environment around them within a 20ft radius  with astounding accuracy.  Grimlocks show very little grasp of tactics or strategy, prefer - ring to attack directly and all at once. However, they do seem  to prefer to fight under cover of darkness, which often yields to  them a distinct advantage. Although
+  they are capable of inflict - ing 1d6 damage with their filthy claws, most prefer to use axes  or swords.  For every 30 grimlocks encountered there will be one with 3 HD  and AC 4 [16]; for every 40 grimlocks encountered there will be  one with 4 HD and AC 3 [17]. These act as leaders, being generally  more ferocious than their fellows and even capable of developing  and employing elementary stratagems. For every one of these  leaders present, their morale is increased by 5%. It is rare for  them to be found in conjunction with any other monsters.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Grimlocks surprise on a die roll of 1-3 on a d6 if the  encounter is underground.
+- heading: Immunities and Resistances
+  text: 'Native Blindness. Grimlocks are immune to the effects of bright  light or other visual stimuli that might otherwise adversely af - fect them, including magical effects, such as invisibility, dark - ness and any visual illusions. However, grimlocks are also  known to be particularly vulnerable to effects that obscure  their other senses, such as overpowering scents or overloud  noises that have a significant duration. When exposed to such  hindrances, their perception is reduced to a 10ft radius and  they suffer a -2 penalty to hit. Improved Saving Throw. Regardless of hit dice, grimlocks always  make saving throws as 6th level fighters. Unarmed Combat. Grimlocks can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with a  2+ on 1d20. Hit Mods: ATK/DEF +8/-8. Overbear Results Mods:  ATK/DEF +0/+0. Grappling Result Mods: ATK/DEF +0/+0.'

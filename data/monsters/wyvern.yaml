@@ -1,0 +1,19 @@
+name: Wyvern
+frequency: uncommon
+no_encountered: 1d6
+size: huge (30ft to 40ft long)
+alignment: neutral evil
+move: 60ft; 240ft flying (AA:III)
+armour_class: 3 [17]
+hit_dice: 7+7
+melee_attacks: 1 bite (1d6) and 1 sting (2d8 +poison)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: low (5-7)
+morale: 85
+loot: Hoard 5
+experience: 850 +10/hp
+description: Wyverns are distant cousins of dragons, extremely voracious  but dull of intellect. They do not have front legs, and cannot  attack effectively with their hind legs. In combat, wyverns rely  on their bite and deadly poison stinger.
+abilities:
+- heading: Special Attacks
+  text: Poison Sting.  If the wyvern hits with its sting, the target must  save vs poison or die.

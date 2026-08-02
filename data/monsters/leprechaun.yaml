@@ -1,0 +1,23 @@
+name: Leprechaun
+frequency: uncommon
+no_encountered: 1d20
+size: tiny (2ft)
+alignment: neutral
+move: 150ft
+armour_class: 8 [12]
+hit_dice: 1d4+1hp
+melee_attacks: Nil
+senses: Infravision 60ft
+lair_chance: 10%
+intelligence: exceptional (15-16)
+morale: 50
+loot: Hoard 6
+experience: 50 +3/hp
+description: 'Leprechauns are a type of fey that love to torment those they  encounter with practical jokes, general mischief, and swindles.  They normally live in green fields or rolling hills on the outskirts  of civilisation. Because of their sharp senses they are never sur- prised. One of the leprechaun’s favourite tricks is to grab some valu - able object, turn invisible and flee with it. If they are chased too  closely, they will drop the item rather than be tracked back to  their lair. If they are caught or tracked back to their lair, the lep- rechaun will do or say just about anything to win their freedom  back. Be warned: leprechauns are magical, and they take great  pride in their confidence games. Nothing they say should be  considered the truth. A leprechaun will always be playing some  kind of scam.'
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Leprechauns cannot be surprised.
+- heading: Immunities and Resistances
+  text: Magic Resistance (80%).  Any magic spell or effect has an 80%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: A leprechaun can turn invisible, polymorph inanimate  objects, make illusions, and perform ventriloquism at will. Unarmed Combat.  Leprechauns can be targeted with grap - pling or overbearing attacks. If not fended off, they score an  unarmed hit with an 2+ on 1d20. Hit Mods: ATK/DEF +10/- 10. Overbear Results Mods: ATK/DEF -4/+4. Grappling Result  Mods: ATK/DEF -4/+4.'

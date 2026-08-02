@@ -1,0 +1,19 @@
+name: Rot Grub
+frequency: rare
+no_encountered: 5d4
+size: small
+alignment: neutral
+move: 10ft
+armour_class: 9 [11]
+hit_dice: 1 hit point
+melee_attacks: 0 (See below)
+senses: N/A
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 5 +1/hp
+description: Although rot grubs can be found in animal waste and other foul  refuse, they prefer to consume tissue that is still alive.
+abilities:
+- heading: Special Attacks
+  text: Burrow. Upon contact with a living being, rot grubs attempt a to- hit roll, and if successful will begin to vigorously burrow deep  into the body. Fire must be applied to the site of contact at  once (within 3 rounds) in order to prevent the rot grub from  burrowing further. This application of flame inflicts 1d6 hit  points of damage per rot grub burrow. If not stopped imme - diately, within 1 to 3 turns the rot grub will find the heart and  kill the victim.

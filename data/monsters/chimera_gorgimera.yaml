@@ -1,0 +1,23 @@
+name: Chimera Gorgimera
+frequency: rare very rare
+no_encountered: 1d4 1
+size: large large
+alignment: chaotic evil chaotic evil
+move: 90ft; 180ft flying (AA:II) 120ft; 150ft flying (AA:II)
+armour_class: 4 [16] 3 [17]
+hit_dice: 9 10+1
+melee_attacks: 2 lion claws (1d4), 2 goat horns (1d3), 1 lion bite  (2d6), 1 dragon bite (3d4) 2 lion claws (1d4), 1 gorgon-gore (2d4), 1 lion bite  (2d6), 1 dragon bite (3d4)
+senses: Infravision 60ft Infravision 60ft
+lair_chance: 40% 30%
+intelligence: semi- (2-4) semi- (2-4)
+morale: 90 95
+loot: Hoard 6 Hoard 6
+experience: 1,300 +12/hp 2,250 +14/hp
+description: CHIMERA A chimera has the hind quarters of a goat, the forequarters of a  lion, the wings of a dragon and 3 heads, one each of the afore - mentioned creatures. The creature may make up to 6 natural  attacks per round, two with clawed lion paws, one with each of  the goat head’s 2 horns, the mighty bite of the lion’s maw and  another powerful bite by the dragon.
+abilities:
+- heading: Special Attacks
+  text: Breath Weapon. The chimera’s dragon head is capable of breath- ing fire to a 60ft distance, inflicting 3d8 points of damage. Nor- mal saving throws vs breath weapon apply (save for half dam- age). GORGIMERA The gorgimera looks much like a chimera, but it has gorgon’s  head rather than a goat’s head beside the lion and dragon  heads.
+- heading: Special Attacks
+  text: Breath Weapons. The gorgon head breathes a cloud of petrifying  gas in a cone 30ft long and 10ft radius at the base (save or be  turned to stone). The dragon head is capable of breathing fire  to a 60ft distance, inflicting 3d8 points of damage (save for half  damage). Unarmed Combat.  Chimeras and gorgimeras cannot be over - borne or grappled, and do not employ these tactics.
+- heading: Languages
+  text: Chimeric is an imperfect form of the red dragon tongue, and is  spoken by both chimeras and gorgimeras. It is also often used  as a code by those familiar with the language.

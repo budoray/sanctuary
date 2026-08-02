@@ -1,0 +1,21 @@
+name: Lurker Above
+frequency: rare
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 10ft; 90ft flying (AA:I)
+armour_class: 6 [14]
+hit_dice: '10'
+melee_attacks: 1 (Smother)
+senses: Infravision 60ft
+lair_chance: 95%
+intelligence: non- (0)
+morale: N/A
+loot: Hoard 3, Cache 11
+experience: 1,500 +10/hp
+description: Lurkers are dangerous creatures that wait in high places for  prey to pass beneath them. In shape they resemble manta rays,  but have such colouration and form that they can become al - most indistinguishable from the stone of the caverns in which  they dwell.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Lurkers surprise on a 1-5 in 1d6, even if they wait to  drop (this is a measure of how difficult they are to see).
+- heading: Special Attacks
+  text: Drop and Smother.  Lurkers attack by dropping onto a creature  and enfolding it. Lurkers that successfully engulf their victim  (on a successful to-hit roll) automatically cause 1d6 points  of damage from constriction every round thereafter and will  cause suffocation within 1d4+1 rounds. Those engulfed may  only use short weapons (short sword or smaller) against their  attacker and are not in a position to change weapons. Lurk - ers continue to attack until slain. Fortunately for adventurers,  lurkers have such a tough body that attacking a lurker that has  enfolded someone does not damage the enfolded victim. Unarmed Combat. Lurkers above cannot be targeted with grap - pling or overbearing attacks, and do not use these tactics.

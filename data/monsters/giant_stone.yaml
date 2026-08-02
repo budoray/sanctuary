@@ -1,0 +1,19 @@
+name: Giant, Stone
+frequency: uncommon
+no_encountered: 1d8
+size: large (12ft)
+alignment: neutral
+move: 120ft
+armour_class: 0 [20]
+hit_dice: 9+1d4
+melee_attacks: 1 (3d6)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: average (8-10)
+morale: 90
+loot: Hoard 4
+experience: 1,500 +14/hp
+description: Stone giants are partially named for their stone-like complex - ions and iron coloured eyes. Their hair is also dark-stone co - loured, sometimes with hints of blue. Whereas hill giants often  use wooden clubs, stone giants prefer stone and wear skins the  colour of stone. These giants live in mountainous locations exclusively, in cav - erns or otherwise in the earth. They are most active at night.  Three-quarters of the time stone giants have 1d4 cave bears  guarding their homes. When encountering more than 4 stone  giants, the first six adults. Additional giants are young (treat as  hill giants or ogres).  Stone giants sometimes share their lairs with cave bears (50%  chance of 1d4).
+abilities:
+- heading: Special Attacks
+  text: Ranged Attack (Thrown Rocks).  Stone giants can cause 3d10 hit  points in damage by throwing large rocks from between 10 to  300ft. Likewise, they can catch rocks tossed at them with a 90%  probability. Unarmed Combat.  Stone giants cannot be targeted with grap - pling or overbearing attacks, and do not use such tactics.

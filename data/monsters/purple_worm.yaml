@@ -1,0 +1,21 @@
+name: Purple Worm
+frequency: rare
+no_encountered: 1d2
+size: huge
+alignment: neutral
+move: 90ft
+armour_class: 6
+hit_dice: '15'
+melee_attacks: 1 bite (2d12 piercing) and 1 tail sting  (2d4 piercing+poison)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: non- (0)
+morale: N/A
+loot: Hoard 2, Cache 3 (x5) and 10
+experience: 5,000 +20/hp
+description: Purple worms are huge, almost 10ft around and 40ft to 50ft  long. They live deep underground where they are constantly on  the search for food. They are attracted to vibrations up to 60ft  away. These creatures always return to their lair to rest. During  this time, they will pass their waste consisting of metals and  gems they could not digest.
+abilities:
+- heading: Immunities and Resistances
+  text: Prone. This creature cannot be knocked prone.
+- heading: Special Attacks
+  text: Swallow Whole. On a bite attack that rolls a natural 20, the pur - ple worm swallows the victim. If the victim is not rescued,  they will die at the end of 6 rounds spent in the creature’s  stomach. It is possible for the victim to cut their way out (the  inside of the worm is armour class 10 [10]). For each round  the victim is inside, subtract 1 from their damage that they  inflict. This penalty is cumulative for each round, so after four  rounds the damage inflicted is at -4. Poison Stinger.  Any creature hit by the worm’s tail takes 2d4  damage and must save vs poison or die.

@@ -1,0 +1,23 @@
+name: Mummy
+frequency: rare
+no_encountered: 2d4
+size: medium
+alignment: lawful evil
+move: 60ft
+armour_class: 3 [17]
+hit_dice: 6+3
+melee_attacks: 1 (1d12)
+senses: Standard
+lair_chance: 80%
+intelligence: low (5-7)
+morale: N/A
+loot: Hoard 4
+experience: 985 +8/hp
+description: The mummy is an undead creature. Normally found in tombs  or other burial places, they hate life and attempt to destroy any  living creature they encounter. A raise dead spell will transform  the monster into a 7th-level fighter unless the mummy makes a  successful save vs spells.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Mummies are turned as type 8 Undead. Immune to Mundane Weapons and Resistant to All Weapons.  This  creature is immune to piercing, blunt, and slashing damage  from weapons and unarmed attacks, unless the weapon caus- ing that damage has a magical bonus of +1 or more. Even a  magic weapon inflicts only half damage on a mummy (drop  fractions). Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease. Vulnerable to Fire. A mummy is susceptible to fire. A hit from a  torch will deal 1d3 hp damage, a flask of burning oil causes 1d8  hp on the first round and 2d8 hp on the second round, and  magical fires deal +1 for each die of damage.
+- heading: Special Features
+  text: 'Fear. All creatures within 60ft of a mummy, upon sight, will suf - fer the effects of fear and revulsion unless a successful saving  throw vs spells is made. If the save fails, the victim will be par - alysed for 1d4 rounds. Groups of creatures gain a bonus of +1  for their save at a ratio of six creatures for each mummy (for  example: 12 creatures in sight of 1 mummy gain a +2 to save;  12 creatures in sight of 2 mummies gain a +1, and 12 creatures  within sight of 3 or more mummies gain no bonus). If humans  confront a mummy, then each human will gain a +2 to their  saves.'
+- heading: Special Attacks
+  text: Mummy Rot. A successful hit by a mummy causes a wasting and  rotting disease which will cause death within 1d6 months. For  each month of affliction, the victim permanently loses 2 points  of charisma, and while diseased no cure wound spells will have  any effect and any wounds will naturally heal at a 10% rate. The  mummy rot can only be cured by a cure disease spell. A charac- ter killed by a mummy cannot be raised (due to the amount of  damage caused by the rotting waste) unless a cure disease and  raise dead are both cast on the victim within one hour of death. Unarmed Combat. Mummies cannot effectively be targeted with  grappling or overbearing attacks, and do not use these tactics. NAGA

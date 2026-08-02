@@ -1,0 +1,21 @@
+name: Giant, Storm
+frequency: rare
+no_encountered: 1d4
+size: huge (21ft)
+alignment: chaotic good
+move: 150ft
+armour_class: 1 [19]
+hit_dice: 15 (+1d6  hit points)
+melee_attacks: 1 (7d6)
+senses: Infravision 60ft, Detect invisible 80%
+lair_chance: 30%
+intelligence: exceptional (15-16)
+morale: 125
+loot: Hoard 5, Cache 3 (x10), Cache 5
+experience: 6,000 +20/hp
+description: There are two typical appearances of storm giants, related to  their preference for environment. Those who choose to live un- derwater are often of green hair, eyes and skin, while those who  reside on land have purple skin, eyes either purple or cloudy  grey, and blue–tinted black hair. Storm giants are the most formidable of giants in many cam - paigns. They live in remote locations; about 60% of the time  they live on clouds like their cloud giant cousins, and 30% of  the time in the mountains like their stone giant relatives. Some- what more rarely (10% of the time) storm giants choose to live  underwater. In all cases, they live in immense, luxurious castles.  Like other giants, storm giants have a fondness for pets and if  living above water will have 1d4 griffons 30% of the time and 1  or 2 rocs 70% of the time. However, storm giants who have their  castle abodes under water will instead have 2d4 sea lions.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Electricity. Storm giants are immune to all damage by  electricity, including the fearsome electrical bolt breathed by  the dreaded blue dragon.
+- heading: Special Features
+  text: 'Spell-Like Abilities. 1/day: lightning bolt  (8d8 damage), call lightning  (10 to 15d6  damage, 3 bolts), control winds, predict weather, and weather  summoning. 2/day: levitate their own weight plus an additional weight equal  to 30,000 gold pieces two times per day. Underwater Abilities.  Storm giants can breathe and otherwise  function underwater unimpeded. Unarmed Combat. Storm giants cannot be targeted with grap - pling or overbearing attacks, and do not use such tactics. GNOLL-KIN'

@@ -1,0 +1,18 @@
+name: Bumblebee Queen
+frequency: rare rare no.  encountered 1 (1d6+6 in lair) 1
+size: medium medium
+alignment: neutral neutral
+move: 60ft; 240ft flying 60ft; 240ft flying
+armour_class: 5 [15] 5 [15]
+hit_dice: 6+4 9
+melee_attacks: 1 sting (1d6 +  poison) 1 sting (1d6 +  poison)
+senses: Standard Standard
+lair_chance: 10% 10%
+intelligence: semi- (2-4) semi- (2-4)
+morale: 80 80
+loot: Nil Nil
+experience: 300 +8/hp 900 +12/hp
+description: Giant bumblebees live in nests rather than hives. These lairs  will contain combatant queens and 2d3 non-combatant drones  (2 HD and no effective attack). Giant bumblebees will flee from  smoke or fire unless their lair is threatened. Giant bumblebee nests will always contain honey worth 10d10  gold pieces. There is a 15% chance that a hive will contain royal  jelly. If it does, the royal jelly can be fashioned into 2d3 potions  of extra healing by a magic-user of 7th or higher level—or a  magic-user of 12th level or higher may make it into an unguent  which preserves the appearance of youth. Regular application  of this unguent for 1 year makes the user appear 2d3 years  younger. Such an unguent is typically worth 3d6x1,000 gp to  wealthy nobles.
+abilities:
+- heading: Special Attacks
+  text: Bumblebee Sting. A giant bumblebee can only sting once per en- counter; it has a 25% chance of dying after stinging, otherwise  the stinger will slowly regrow. Queens do not die from stinging,  but still lose the stinger. The sting is poisonous; if it hits, the  target must make a saving throw vs. poison with a -1 penalty  or take 5d4 additional points of poison damage.  BEETLES, GIANT SMALL TO MEDIUM

@@ -1,0 +1,17 @@
+name: Seahorse, Giant
+frequency: common
+no_encountered: 1d20
+size: large
+alignment: neutral
+move: 210ft swimming
+armour_class: 7 [13]
+hit_dice: 2, 3, or 4
+melee_attacks: 1 head-butt (1d4, 1d4+1, or 2d4)
+senses: Standard
+lair_chance: Nil
+intelligence: semi (2-4)
+morale: 55, 60, or 65
+loot: Nil
+experience: 20 +4/hp
+description: Giant Seahorses are giant versions of the regular seahorse, not  mer-horses (that’s the hippocampus). They are often trained as  steeds by underwater species such as tritons.
+abilities: []

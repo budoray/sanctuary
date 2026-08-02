@@ -1,0 +1,21 @@
+name: Ettin
+frequency: very rare
+no_encountered: 1d4
+size: large (13ft)
+alignment: chaotic evil
+move: 120ft
+armour_class: 3 [17]
+hit_dice: '10'
+melee_attacks: 1 club (2d8) and 1 other club (3d6)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: low (5-7)
+morale: 95
+loot: Cache 1 each; Hoard 3 and Cache 11  in lair
+experience: 1,370 +14/hp
+description: Ettins are two-headed giants, nocturnal creatures that live be - low ground. Each of an ettin’s heads controls one arm. The right  side is slightly dominant, and can cause 3d6 damage whereas  the left can inflict 2d8. Ettins are seldom surprised because one  head or the other is usually keeping watch.
+abilities:
+- heading: Surprise and Initiative
+  text: 'Surprise. Ettins are only surprised on a 1 in 6. Unarmed Combat. Ettins can attack and be targeted with grap - pling or overbearing attacks. If not fended off, they score an  unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +8/-8. Over- bear Results Mods: ATK/DEF +4/-4. Grappling Result Mods:  ATK/DEF +2/-2.'
+- heading: Languages
+  text: Ettins speak giantish, and each head has a 20% chance to speak  common.

@@ -1,0 +1,21 @@
+name: Giant, Fire
+frequency: uncommon
+no_encountered: 1d8
+size: large (12ft)
+alignment: lawful evil
+move: 120ft
+armour_class: 3 [17]
+hit_dice: 11 (+1d4 hp)
+melee_attacks: 1 weapon (5d6)
+senses: Infravision 60ft, Detect invisible 5%
+lair_chance: 35%
+intelligence: low up to average (5-10)
+morale: 105
+loot: Hoard 5
+experience: 2,720 +16/hp
+description: Fire giants’ hair is the red and orange colour of flames, and their  skin is soot black. Their teeth are flame orange, and their eyes  red. The commonly wear armour on their broad, 6ft wide shoul- ders. This armour is sometimes made from the skin of dragons. Like cloud giants, fire giants often live in castles (50%), but are  just as likely to frequent caves. It is not uncommon for many  adult fire giants to live together. When more than six fire giants  are encountered, the additional individuals will be immature  and will only have a percentage of adult capabilities (as hill gi - ants or ogres).  Fire giants sometimes share their lairs with 1d4 hell hounds  (25% chance).
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Fire.  As their name suggests, all fire giants are un - harmed by fire. This extends to the flame breath produced by  red dragons.
+- heading: Special Attacks
+  text: 'Like most giants, fire giants delight in throwing rocks at en - emies. They can hit a target from a distance of 10ft to 200ft  (2d10 hit points of blunt damage), and can similarly catch (50%  chance) thrown rocks. Unarmed Combat. Fire giants cannot be targeted with grappling  or overbearing attacks. They will occasionally make an over - bearing attack. If not fended off, they score an unarmed hit  with a 16+ on 1d20. Hit Mods: ATK/DEF +8/na. Overbear Re - sults Mods: ATK/DEF +4/na. Grappling Result Mods: ATK/DEF  na/na.'

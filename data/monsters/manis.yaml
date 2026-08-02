@@ -1,0 +1,19 @@
+name: Manis
+frequency: rare
+no_encountered: 4d4
+size: small
+alignment: chaotic evil
+move: 30ft
+armour_class: 7 [13]
+hit_dice: '1'
+melee_attacks: 2 claws (1d2 slashing) and 1 bite (1d4  piercing)
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: semi- (2-4)
+morale: 50%
+loot: Nil
+experience: 18 +1/hp
+description: 'A manis (plural: manes) is the form of a soul condemned to the  abyss. They are considered demons, but do not have all the  powers associated with demonkind. They are rare in the ma - terial planes. Manes will attack anything that is not a demon.  The form of a manis is bipedal and humanoid, but manes have  vacant eyes, sharp teeth and claws, and tails.'
+abilities:
+- heading: Immunities and Resistances
+  text: 'Immune to Mundane Weapons.  A manis is immune to piercing,  blunt, and slashing damage, unless the weapon causing that  damage is magical. Immunities. This creature is immune to mind control (including  charm) and hold spells, sleep, gases, poison, disease, cold dam- age, temporary damage, and subdual damage. Cannot Be Killed. A manis that is killed re-forms after one day.  They are only truly destroyed when a demon lord chooses to  feed on them. Unarmed Combat.  Manes can make grappling or overbearing  attacks, but ordinarily don’t. If not fended off, they score an  unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +2/-2. Over- bear Results Mods: ATK/DEF -2/+2. Grappling Result Mods:  ATK/DEF -2/+2.'

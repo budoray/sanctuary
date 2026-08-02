@@ -1,0 +1,18 @@
+name: Anklyosaurus Ceratosaurus Iguanodon Plateosaurus Stegosaurus Velociraptor
+frequency: uncommon uncommon common common common common no.  encountered 1d4+1 1d4 3d6 5d4 2d4 4d4
+size: huge large large large huge large
+alignment: neutral neutral neutral neutral neutral neutral
+move: 60ft 150ft 150ft 120ft 60ft 150ft
+armour_class: 0 [20] 5 [15] 4 [16] 5 [15] 3 [17] 6 [14]
+hit_dice: 9 8 6 8 10 6
+melee_attacks: 1 bite (1d4) and  1 tail (3d6) 2 claws (1d6) and  1 bite (4d4) 2 claws (1d3) and  1 bite (2d4) 1 bite (1d4) 1 tail (2d8) 1 bite (1d4) and  2 claws (1d4)
+senses: Standard Standard Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0) non- (0) non- (0) non- (0)
+morale: N/A N/A N/A N/A N/A N/A
+loot: Nil Nil Nil Nil Nil Nil
+experience: 750 +12/hp 200 +6/hp 500 +10/hp 475 +10/hp 150 +6/hp 1,000 +12/hp
+description: 'A miscellany of other kinds of dinosaur, including some (ank - lyosaurus and stegosaurus) with bony, armoured backs. Both  these creatures have an effective attack by clubbing with their  tails. GMs who are fans of Jurassic Park may wish to increase the  velociraptor’s intelligence score to “semi-” or even “low”. Anklyosaurus: Huge Cretaceous herbivore. Ceratosaurus: Large  Jurassic carnivore. Plateosaurus: Large Triassic herbivore. Igua- nodon: Large Cretaceous herbivore. Stegosaurus: Huge Jurassic  herbivore. Velociraptor: Large Cretaceous carnivore.'
+abilities:
+- heading: Special Attacks
+  text: Velociraptor Rake. If a velociraptor hits with its bite, it can bring  its rear claws into action as well as its foreclaws. It gains an  immediate follow-up attack with the 2 rear claws (2d4), and  can continue to attack with the rear claws for as long as it con- tinues to attack the target it bit (as well as normal biting and  foreclaws). OTHER DINOSAURS II

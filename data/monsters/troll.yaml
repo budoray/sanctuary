@@ -1,0 +1,21 @@
+name: Troll
+frequency: uncommon
+no_encountered: 1d12
+size: large (9ft+ tall)
+alignment: chaotic evil
+move: 120ft
+armour_class: 4 [16]
+hit_dice: 6+6
+melee_attacks: 2 claws (1d4+4) and 1 bite (2d6)
+senses: Infravision 60ft
+lair_chance: 40%
+intelligence: low (5-7)
+morale: 80
+loot: Hoard 4
+experience: 525 +8/hp
+description: 'Trolls are large creatures, shaped like humans but with long  arms and legs, rubbery flesh, and a feral, misshapen face. Their  crouching gait is unmistakable to those who are familiar with  the species, which is known for its ravenous hunger and its  most notable attribute: regeneration.'
+abilities:
+- heading: Immunities and Resistances
+  text: Effect of Regeneration.  Trolls regenerate all damage except fire  damage and corrosive damage (acid). Thus, a troll can only be  permanently killed by fire or acid.
+- heading: Special Features
+  text: 'Regeneration. After three rounds of combat (even if the troll is  dead), a troll’s innate regeneration ability will start working,  recovering 3 hit points per round. Their ability to regenerate  even allows detached limbs to reattach to their body. Severed  limbs will even continue to attack foes independently.  Unarmed Combat. Trolls do not engage in grappling or overbear- ing attacks, but can be targeted this way. If not fended off, they  score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF  +8/-8. Overbear Results Mods: ATK/DEF +3/-3. Grappling Result  Mods: ATK/DEF +2/-2.'

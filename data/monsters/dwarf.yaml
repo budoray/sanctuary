@@ -1,0 +1,24 @@
+name: Dwarf
+frequency: common
+no_encountered: 4d100
+size: small (4ft)
+alignment: lawful good
+move: 60ft
+armour_class: 4 [16]
+hit_dice: '1'
+melee_attacks: By weapon
+senses: Infravision 60ft
+lair_chance: 50%
+intelligence: very (11-12)
+morale: 50
+loot: Individual 4 (x5); in lair Hoard 7, Cache  3 (x20) and 4
+experience: 30 +1/hp
+description: 'Dwarfs are sturdy demi-humans who live in extended clans.  They typically make their homes in rocky hills. Dwarfs are led  by higher level leader types (additional to the number encoun - tered die roll) as follows: • For every 40 dwarfs: 2nd to 6th level fighter (1d6, 1 = 2nd lev- el, 2–6 = level indicated by die roll). • If over 160 dwarfs: 1 6th level fighter (chief) & 1 4th level fight- er (lieutenant). • If over 200 dwarfs: 1 fighter/cleric (of 3rd to 6th level as fighter  and 4th to 7th level as cleric). • If over 320 dwarfs: 1 8th level fighter, 1 7th level fighter, 1 6th  level fighter/ 7th level cleric. • If encountered in their lair: 2d6 fighters (2nd to 5th level), 2d4  fighter/ clerics (2nd to 4th level), plus 1d100 noncombatant  dwarfs. Higher level fighters and fighter/clerics have a 10% chance (per  level) of having magic armour or weapons. Dwarfs are typically armoured in chain mail and carry shields.  Axes and hammers are their weapons of choice. Dwarfs receive  a
+  +1 on “to hit” rolls vs goblins, orcs, and hobgoblins due to their  intense hatred of these ancestries. When in melee with giants,  trolls, and ogres, these opponents must fight at -4 due to their  size and the skill of dwarfs in fighting such opponents. Description: Dwarfs grow long beards, and usually favour dark,  sombre colours for their clothing, with flashes of bright colours.  They are short but have stocky builds and are known for their  great strength. In some campaign worlds, they may wear kilts. Mountain Dwarfs: These dwarfs are similar to their cousins, the  hill dwarfs (described above), except they have 1d8+1 hit dice  and they are slightly taller (4.5ft tall).'
+abilities:
+- heading: Immunities and Resistances
+  text: Saving Throw Bonus (Poison and Magic). Dwarfs are a hardy peo- ple, and save vs poison and magic as if they were 4 levels (or  hit dice) higher than their actual level.
+- heading: Special Features
+  text: 'Ancestral Features. Dwarfs have the same ancestral features as  dwarven player characters.  Unarmed Combat. For a dwarf wearing chainmail: If not fended  off, they score an unarmed hit with a 14+ on 1d20. Hit Mods:  ATK/DEF +4/-0. Overbear Results Mods: ATK/DEF -2/+2. Grap - pling Result Mods: ATK/DEF -2/+2.'
+- heading: Languages
+  text: Dwarfs speak common, goblin, gnome, kobold, and orc in addi- tion to their own tongue. E EEL, GIANT MORAY EEL ELECTRIC

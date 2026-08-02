@@ -1,0 +1,22 @@
+name: Fire Beetle Bombardier Water
+frequency: common common common no.  encountered 3d4 3d4 1d12
+size: small medium medium
+alignment: neutral neutral neutral
+move: 120ft 90ft 30ft; 120ft  swimming
+armour_class: 4 [16] 4 [16] 3 [17]
+hit_dice: 1+2 2+2 4
+melee_attacks: 1 bite (2d4) 1 bite (2d6) 1 bite (3d6)
+senses: Standard Standard See below
+lair_chance: Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0)
+morale: N/A N/A N/A
+loot: Nil Nil Nil
+experience: 30 +1/hp 65 +2/hp 75 +3/hp
+description: Unarmed Combat. Giant beetles cannot be overborne or grap - pled, and do not employ these tactics.  GIANT FIRE BEETLE With their glowing red glands, one above each eye and one on  the back of the abdomen, these nocturnal beetles are much  sought after by adventurers. Fire beetles can be found both  above and below ground, feeding on decaying matter like all  beetles.
+abilities:
+- heading: Special Features
+  text: The glands will continue to glow for 1d6 days after removal, illu- minating a 10ft radius without fail. GIANT BOMBARDIER BEETLE Frequently found in forested regions, this beetle primarily scav- enges for food above ground. It will collect decaying matter into  a large heap and there lay its eggs.
+- heading: Special Attacks
+  text: Noxious Gas. When attacked it has a 50% chance to release an  8ft cube of noxious gas. The gas will cause 3d4 hp of damage  and the sound of its release will stun (20% chance) and deafen  (20%) all within a cloud (5ft radius beginning directly in front of  the beetle). The stun effect will prevent action for 2d4 rounds  and the deafness will persist for 2d6 rounds. The beetle must  “recharge” for 1 round before releasing gas again, and cannot  release gas more than twice in 8 hours.  GIANT WATER BEETLE Hunting by scent and vibration, and dwelling in fresh water at  least 30ft deep, the water beetle is a powerful threat to the un - wary adventurer. Omnivorous and insatiable, the water beetle  will consume whatever it can get its powerful mandibles around.
+- heading: Special Features
+  text: Hold Breath.  This creature can go for up to an hour between  breaths. Unusual Senses. Giant water beetles automatically detect invis - ible opponents because their primary senses are scent and  vibration. LARGE

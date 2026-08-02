@@ -1,0 +1,23 @@
+name: Lammasu
+frequency: rare
+no_encountered: 1d8
+size: large
+alignment: lawful good
+move: 120ft; 240ft flying (AA:III)
+armour_class: 6 [14]
+hit_dice: 7+7
+melee_attacks: 2 claws (1d6+1)
+senses: Infravision 60ft, Detect  invisible 5%
+lair_chance: 25%
+intelligence: genius (17-18)
+morale: 85
+loot: Cache 4, 5, 6
+experience: 875 +10/hp
+description: Champions of all that is good and just, lammasu have qua - drupedal bodies the size and shape of the largest of lions, ful - ly-functional feathered wings, and a human head bearing the  kindly visage of a bearded wise man. Lammasu are the guardians and protectors of all lawful good  persons and have a friendly disposition to all good-aligned crea- tures they encounter. Lammasu tend to lair in warm climates  but travel widely and can thus be encountered anywhere. Lammasu prefer to advise and support the forces of good if at  all possible, but are formidable opponents in battle. In fact, it  is almost impossible to press a lammasu into combat against  its will due to its ability to dimension door and become invisible  at will.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (30%).  Any magic spell or effect has a 30%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Protection from Evil. Lammasu are constantly surrounded by an  extra strength protection from evil, 10ft radius (-2 to attack, +2  on saving throws from attacking evil creatures).
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: dimension door and become invisible. 20% of these  creatures can also speak a holy word at will. Spells. Lammasu can cast cleric spells of up to 4th level as an 8th  level cleric does. Spell list: 4—1st level, 3—2nd level, 2—3rd  level, 1—4th level. They cast cure light wounds and cure serious  wounds at double normal efficacy (2d8 hp and 4d8+2 hp re - spectively).  Unarmed Combat. Lammasu cannot be targeted with grappling  or overbearing attacks, and do not use these tactics.'
+- heading: Languages
+  text: Lammasu can communicate in their own tongue, the alignment  language of lawful good creatures, and also through telepathy.

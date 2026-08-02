@@ -1,0 +1,21 @@
+name: Class A Demon (vrock)
+frequency: common
+no_encountered: 1d3 or 1d6 (in the Abyss)
+size: large (9ft)
+alignment: chaotic evil
+move: 120ft; 180ft flying (AA:IV)
+armour_class: 0 [20]
+hit_dice: '8'
+melee_attacks: 2 talons (1d4), 2 claws (1d8)  and 1 bite (1d6)
+senses: Infravision 120ft
+lair_chance: 5%
+intelligence: low (5-7)
+morale: 85
+loot: Hoard 2
+experience: 1,275 +10/hp
+description: Vrock, considered one of the weakest of demonkind, look like a  hideous cross between a vulture and a humanoid. Unlike stron- ger demons, they are vulnerable to non-magical weapons. Vrock are particularly stupid, and cannot normally be bargained  with. They love the sight of precious gems and jewellery, howev- er, and also enjoy feasting on the flesh of humans.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: Darkness, 5ft radius, detect invisibility (objects only, oth- erwise as per the 2nd level magic-user spell), gate in another  vrock (10% chance of success), or telekinesis (as the 5th level  magic-user spell, up to 200 lbs). Unarmed Combat. Vrock demons can make grappling or over - bearing attacks. If not fended off, they score an unarmed hit  with a 2+ on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear Re - sults Mods: ATK/DEF +3/-3. Grappling Result Mods: ATK/DEF  +3/-3.'

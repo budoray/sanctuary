@@ -1,0 +1,21 @@
+name: Centrosaurus Diceratus Monoclonius Pentaceratops Styracosaurus Triceratops
+frequency: rare very rare uncommon uncommon uncommon common no.  encountered 1d6 1d3 1d6 10d100 1d20 1d20
+size: huge huge huge huge huge huge
+alignment: neutral neutral neutral neutral neutral neutral
+move: 120ft 120ft 120ft 120ft 120ft 120ft
+armour_class: 3 [17] or 7 [13] 3 [17] or 7 [13] 4 [16] or 7 [13] 3 [17] or 7 [13] 2 [18] or 7 [13] 3 [17] or 7 [13]
+hit_dice: 7 8 8 12 9 16
+melee_attacks: 1 gore (1d8) 1 gore (1d10) 1 gore (1d8) 1 gore (2d6) 1 gore (1d10) 1 gore (3d6)
+senses: Standard Standard Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0) non- (0) non- (0) non- (0)
+morale: N/A N/A N/A N/A N/A N/A
+loot: Nil Nil Nil Nil Nil Nil
+experience: 200 +4/hp 500 +8/hp 400 +8/hp 1,000 +18/hp 550 +8/hp 2,000 +20/hp
+description: 'Ceratopsians are quadrupedal beasts with horns and bony head  armour. They fill the rhinoceros’ ecological niche. Ceratopsians  are bad-tempered and prone to charge, making them among  the most dangerous of the dinosaur herbivorous species. They  were extremely common during the late cretaceous period. The  best known and most common of these creatures, triceratops,  was probably about twice as heavy as an elephant.  Pentaceratops: Cretaceous herbivore, resembling a triceratops  with a longer neck-frill and two extra horns protruding from  under its eyes. Triceratops: Cretaceous herbivore. Unlike most  other ceratopsians it does not seem to have lived in herds. Dic- eratops: Cretaceous herbivore; extremely rare compared to tric- eratops. Styracosaurus: Cretaceous herbivore with a distinctive  spiky neck-frill; about half the size of triceratops. Monoclonius:  Cretaceous herbivore with only one horn. Centrosaurus: Creta- ceous herbivore that seems to have lived in very large
+  herds.'
+abilities:
+- heading: Special Features
+  text: 'Segmented Armour Class. Ceratopsians have two AC scores: one  for their armoured heads, the other for their bodies.'
+- heading: Special Attacks
+  text: Stomp. If a ceratopsian attacks (other than with a charge) and  exceeds its required “to hit” roll by 4 or more, it has knocked  down its target and will stomp on it for an additional 1d10  points of damage. Charge. If a ceratopsian charges and hits, it inflicts triple dam - age. OTHER DINOSAURS I

@@ -1,0 +1,22 @@
+name: Frog, Giant
+frequency: uncommon
+no_encountered: 5d8
+size: small to medium
+alignment: neutral
+move: 30ft; 90ft swimming
+armour_class: 7 [13]
+hit_dice: 1 to 3
+melee_attacks: 1 (1d3, 1d6 or 2d4)
+senses: Standard
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: '1 HD: 10 +5/hp  2 HD: 30 +10/hp  3 HD: 50 +15/hp'
+description: Giant frogs can be 2, 4, or 6ft in length. They are found anywhere  their normal-size cousins are. A 2ft frog weighs 50 lbs and can  jump 180ft, a 4ft frog weighs 150 lbs and can jump 140ft, and a  6ft frog weighs 250 lbs and can jump 100ft.
+abilities:
+- heading: Surprise and Initiative
+  text: Giant frogs have natural camouflage and surprise on a roll of  1–4 on 1d6.
+- heading: Special Attacks
+  text: 'Tongue Pull. The frog can shoot its tongue up to three times its  body length, and has +4 to hit with this attack. The tongue does  no damage: it only sticks to the victim. Any creature hit with the  tongue can attempt to free itself by striking the tongue. If the  victim manages to strike the tongue, the frog will retract it and  attack a different target next round. If the victim is not freed and weighs less than the frog, the frog  will pull the victim into its mouth, inflicting maximum damage  automatically each round thereafter. If the victim weighs more  than the giant frog it will take 2 rounds to drag the victim into its  mouth. If the victim is more than double the frog’s weight, the  frog will not be able to move the victim (on the 3rd round the  frog will release its tongue). Swallow Whole. If the frog scores a natural 20 on an attack, it  has swallowed its prey (unless the target is a larger size than  the frog). A giant frog can swallow whole anything elf-sized or  smaller.
+    If swallowed, there is a chance for the victim to cut  their way out. They must have in hand a sharp edged weapon  and score an 18 or better. Prey get three attempts to escape.  Any hit to the giant frog, that has swallowed its victim, has a  33% chance of doing damage to the victim as well. Unarmed Combat. Giant frogs cannot be overborne or grappled,  and do not employ these tactics.'

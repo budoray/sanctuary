@@ -1,0 +1,20 @@
+name: Gnoll
+frequency: uncommon
+no_encountered: 20d10
+size: large (7ft)
+alignment: chaotic evil
+move: 90ft
+armour_class: 5 [15]
+hit_dice: '2'
+melee_attacks: 2d4 or by weapon
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: low to average (5-10)
+morale: 55
+loot: Individual 3, 4 each; in lair Hoard 4,  Cache 3 (x5), and Cache 5
+experience: 30 +2/hp
+description: 'Gnolls resemble tall humans, but they have the head of a hye - na and are covered in yellowish-grey hair. They live and travel  in small, roving bands. There are rumours of a gnoll overlord,  though if one exists its power and reach are limited. In general,  these creatures are scavengers, raiders, and thieves, their be - haviour analogous to hyena packs. Raiding parties of gnolls are led by a leader with 16 hp, fighting  as a 3 HD monster. Gnoll bands (when encountered in a lair) are led by a chieftain  (AC 3 [17], 22 hp, attacking as a 4 HD monster, and inflicting  2d4+2 damage), and 2d6 guards (AC 4 [16], 20 hp, attacking as a  3 HD monster, inflicting 2d4+1 damage). Gnolls have been known to ally with orcs, hobgoblins, bugbears,  and even trolls. Unarmed Combat. Gnolls can attack and be targeted with grap - pling or overbearing attacks although they seldom use this tac- tic. If not fended off, they score an unarmed hit with a 12+ on  1d20. Hit Mods: ATK/DEF +6/-2. Overbear
+  Results Mods: ATK/ DEF +2/-2. Grappling Result Mods: ATK/DEF +2/-2.'
+abilities:
+- heading: Languages
+  text: Gnolls speak troll, their own barked tongue which they share  with flinds, the chaotic evil alignment tongue, and occasionally  orcish and hobgoblin.

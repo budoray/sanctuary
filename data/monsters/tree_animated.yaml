@@ -1,0 +1,19 @@
+name: Tree, Animated
+frequency: rare
+no_encountered: 1d2
+size: large
+alignment: neutral
+move: 30ft
+armour_class: 0 [20]
+hit_dice: '12'
+melee_attacks: 2 (fists) (4d6)
+senses: Special
+lair_chance: 100%
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 1,300 +16/hp
+description: (nil if animated by a treant) Animated trees are generally encountered when treants ani - mate a normal tree (see “Treant”).
+abilities:
+- heading: Immunities and Resistances
+  text: Plant Immunities. The animated tree doesn’t need to eat, drink,  sleep, or breathe as an animal would. Magic can’t put it to  sleep. Gases can’t harm it, and it is immune to poison and dis- ease. Unarmed Combat. Animated trees cannot be effectively targeted  with grappling or overbearing attacks, and do not use these  tactics.

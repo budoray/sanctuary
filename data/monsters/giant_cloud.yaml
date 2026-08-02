@@ -1,0 +1,23 @@
+name: Giant, Cloud
+frequency: rare
+no_encountered: 1d6
+size: large (18ft tall)
+alignment: neutral good (50%) or neutral evil  (50%)
+move: 150ft
+armour_class: 2 [18]
+hit_dice: 12 (+1d6 hp)
+melee_attacks: 1 weapon (6d6)
+senses: Infravision 60ft, Detect invisible 15%
+lair_chance: 40%
+intelligence: average (8-10) up to very (11-12)
+morale: 110
+loot: Hoard 5, Cache 3 (x5)
+experience: 3,520 +16/hp
+description: Cloud giants usually live in giant castles at high elevations. When  not high up in the mountains, their castles are on clouds given  substance by magic. The majority (90%) of these giants have av- erage intelligence; the remainder are very intelligent and most  often live in castles in the sky. Cloud giants often dress in flow - ing clothing and fancy jewellery. They have bronze to white hair,  with skin in tones of blue ranging from nearly white to cold, light  blue. When multiple giants are found in a castle, there is a 75% chance  that it is a family consisting of two adults, with any remaining gi- ants being children (treat as ogres). The other 25% of the time,  all of the giants are adults. Evil cloud giants have a 50% chance  to be keeping 1d3 human slaves, and also have a 50% chance to  own 1d4 prehistoric lions.
+abilities:
+- heading: Surprise and Initiative
+  text: Sense of Smell. Cloud giants are rarely (1 on 1d6) surprised due  to their impressive olfactory abilities.
+- heading: Special Features
+  text: Levitation. The “very intelligent” class of cloud giants have the  ability to levitate the equivalent of 20,000 gp, plus their body  weight, twice a day.
+- heading: Special Attacks
+  text: Ranged Attack (Thrown Rock).  All cloud giants can throw rocks  to inflict 2d12 blunt damage from 10 to 240ft distance from a  target, and can catch thrown rocks 60% of the time. Unarmed Combat.  Cloud giants cannot be targeted with grap - pling or overbearing attacks, and do not use this tactic.

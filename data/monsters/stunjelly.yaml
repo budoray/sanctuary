@@ -1,0 +1,23 @@
+name: Stunjelly
+frequency: uncommon
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 30ft
+armour_class: 8 [12]
+hit_dice: '4'
+melee_attacks: 1 tendril (2d4 + paralysis)
+senses: Special
+lair_chance: 95%
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 150 +4/hp
+description: Stunjellies appear, at a distance, to be no more than a normal  section of wall, but should any individual stray too close, they  will turn translucent and attack. Most known examples occupy  an area 10ft wide by 10ft high and are 2ft to 5ft thick, but larger  versions have occasionally been reported.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Stunjellies surprise on a 1-5 on 1d6 if they have not  been detected before the target moves into range.
+- heading: Immunities and Resistances
+  text: Immunities. Stunjellies are immune to paralysis, as well as poly - morph, electrical attacks and mind-influencing spells. They  cannot be knocked prone.
+- heading: Special Attacks
+  text: Paralysis. If the stunjelly makes a successful hit, the target must  make a saving throw vs paralysis or be paralysed for 5d4  rounds, which the Stunjelly uses to engulf its victim and begin  the process of digestion.

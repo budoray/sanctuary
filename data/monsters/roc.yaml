@@ -1,0 +1,19 @@
+name: Roc
+frequency: rare
+no_encountered: 1d2
+size: huge (60ft+ wingspan)
+alignment: neutral
+move: 30ft; 300ft flying (AA:II)
+armour_class: 4 [16]
+hit_dice: '18'
+melee_attacks: 1 bite (4d6) or 2 talons (3d6)
+senses: Detect invisible 10%
+lair_chance: 10%
+intelligence: animal (1)
+morale: 135
+loot: Hoard 3
+experience: 3,010 +25/hp
+description: 'Rocs are enormous birds of prey living in high elevations, usual- ly in warmer environments. They will sometimes be found with  giants, who keep them as pets. The immense size of a roc is ac- companied by an equally immense appetite: rocs hunt for large  mammals including horses, cattle, and even elephants.  Any treasure found in the gigantic nest of a roc is there purely  by coincidence, since rocs have no concept of wealth. The be - longings of past victims will be found woven into the intricate  nest.'
+abilities:
+- heading: Special Attacks
+  text: Grab. If a roc hits with either of its talons, it can pick up any prey  smaller than huge size, and fly off toward its nest to feed its  young or devour the victim at leisure. ROPER

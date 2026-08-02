@@ -1,0 +1,17 @@
+name: Axe Beak (phorusrhacid)
+frequency: uncommon
+no_encountered: 1d6
+size: large
+alignment: neutral
+move: 180ft
+armour_class: 6 [14]
+hit_dice: '3'
+melee_attacks: 2 claws (1d3) 1 beak (2d4)
+senses: Standard
+lair_chance: Nil
+intelligence: animal (1)
+morale: 60
+loot: Nil
+experience: 50 +2/hp
+description: 'These ostrich-like birds run fast, and attack prey with their im - mensely strong beaks. They are usually found in Lost World  types of settings, but some cultures or monsters may have  learned how to domesticate them as mounts for battle. Unarmed Combat.  Axe beaks do not initiate unarmed combat  unless they are trained mounts, and cannot be grappled. If not  fended off, they score an unarmed hit with a 2+ on 1d20. Hit  Mods: ATK/DEF +10/-10. Overbear Results Mods: ATK/DEF +2/- 2. Grappling Result Mods: ATK/DEF -/-.'
+abilities: []

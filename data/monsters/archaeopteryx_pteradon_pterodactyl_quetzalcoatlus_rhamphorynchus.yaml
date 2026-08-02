@@ -1,0 +1,16 @@
+name: Archaeopteryx Pteradon Pterodactyl Quetzalcoatlus Rhamphorynchus
+frequency: common uncommon common rare uncommon no.  encountered 4d12 2d10 3d12 1d2 2d12
+size: small large small huge large
+alignment: neutral neutral neutral neutral neutral
+move: 300ft flying (AA:IV) 240ft flying (AA:IV) 240ft flying (AA:IV) 180ft flying (AA:IV) 210ft flying (AA:IV)
+armour_class: 10 [10] 7 [13] 8 [12] 6 [14] 7 [13]
+hit_dice: 1d2 hp 4 1+2 7 2+4
+melee_attacks: 1 bite (1d2 1 bite (1d8) 1 bite (1d6) 1 bite (2d8) 1 bite (1d8)
+senses: Standard Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0) non- (0) non- (0)
+morale: N/A N/A N/A N/A N/A
+loot: Nil Nil Nil Nil Nil
+experience: 5 +1/hp 75 +4/hp 15 +1/hp 400 +6/hp 50 +2/hp
+description: 'Pterodactyl was really several different kinds of creature, here  lumped together. Quetzalcoatlus is assumed to have filled the  raptor niche, while the other flying dinosaurs are assumed to  have been found in flocks. Pteranodon: Large Cretaceous carnivore. Pterodactyl: Small Ju- rassic carnivore. Archaeopteryx: Small Jurassic carnivore; no big- ger than an ordinary bird. Quetzalcoatlus: Huge Cretaceous car- nivore. Rhamphorhynchus: Large Jurassic carnivore.'
+abilities: []

@@ -1,0 +1,23 @@
+name: Poltergeist
+frequency: rare
+no_encountered: 1d8
+size: medium
+alignment: lawful evil
+move: 60ft
+armour_class: 10 [10]
+hit_dice: 1d4  hit points
+melee_attacks: Nil
+senses: Standard
+lair_chance: 97%
+intelligence: low (5-7)
+morale: N/A
+loot: Nil
+experience: 35 +1/hp
+description: 'Poltergeists are undead creatures: non-corporeal, invisible spir- its of humans who died a tragic death or were murdered in cold  blood. So far as is known, all poltergeists were formerly human  or at least half-human. They are only rarely encountered as a  wandering monster but in such a case can be treated as a type 1  undead for purposes of turning or disrupting. More often, how- ever, the poltergeist is in the area where it met its untimely end.  The poltergeist’s bond to this area is strong and turning is much  more difficult, treat the poltergeist as a turning a type 3 undead  in this case.'
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Poltergeists are turned as type 1 or 3 Un - dead. Immune to Non-Silver Mundane Weapons.  This creature is im - mune to piercing, blunt, and slashing damage from weapons  and unarmed attacks, unless the weapon causing that damage  has a magical bonus of +1 or more or is silver. Unusual Undeath. A poltergeist will not cross over sprinkled holy  water, but holy water does not cause actual harm to them.  Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease.
+- heading: Special Features
+  text: Invisibility. Poltergeists are naturally invisible and can stay invisi- ble even when they attack. Unless affected by a detection spell,  opponents make to-hit rolls at -4.
+- heading: Special Attacks
+  text: Telekinesis and Fear.  Poltergeists cannot physically attack. In - stead, they hurl objects with a telekinetic power at their oppo- nents (lamps, books, etc.), attacking as a 5 HD monster. Any - one struck takes no damage, but must make a saving throw vs  spells or flee at top movement speed for 2d12 rounds. A flee - ing victim has a 50% chance to drop whatever they were hold- ing in their hands. Once an opponent has made a successful  saving throw, they are immune to further fear from that indi - vidual poltergeist, and only for the duration of the encounter. Unarmed Combat.  Poltergeists cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics.

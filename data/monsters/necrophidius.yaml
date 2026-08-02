@@ -1,0 +1,24 @@
+name: Necrophidius
+frequency: very rare
+no_encountered: '1'
+size: large (15ft long)
+alignment: neutral
+move: 90ft
+armour_class: 2 [18]
+hit_dice: '2'
+melee_attacks: 1 bite (1d8 + paralysis)
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: average (8-10)
+morale: N/A
+loot: Nil
+experience: 125 +2/hp
+description: 'Referred to in forbidden books of necromancy as the “death  worm”, the necrophidius is a skeletal giant snake with the  fanged skull of an adult human for a head. The necrophidius  is a necromantic construct but is not an undead creature and  cannot be turned by a cleric.  There are several ways to go about creating a necrophidius.  First, the basic materials must be assembled: the skull of a  cold-blooded murderer who has been killed within 72 hours of  the ritual, and the complete skeleton of a giant snake. The pro - cess will also require 10 days plus the services and laboratory  of an alchemist, who will charge the full monthly fee plus 500  gp per hp of the completed necrophidius. At the end of 10 days,  the potential owner has 24 hours to complete the ritual by one  of the methods detailed hereafter. First, a magical book can be used. These work the same way  as a manual of the golems  (q.v.) can be used to create a golem.  Second, a high-level magic-user can cast the
+  following spells in  this order upon the pre-necrophidius alchemical mixture: limit- ed wish, geas, and charm person. Upon completion of the charm  person spell the death worm magically assembles from the var- ious parts, absorbing the fluids of the mixture. Lastly, a cleric  can cast the following divine spells upon the pre-necrophidius  alchemical mixture in this precise order: quest, neutralise poison,  prayer, silence 15ft radius , and snake charm . As with the mag - ic-user, when the last spell is completed the necrophidius mag- ically assembles from the various parts, absorbing the fluids of  the mixture. Because of the artificial nature of the necrophidius, they are  never encountered in a lair or as a wandering monster. Instead,  they are created for a specific purpose, usually as an assassin or  guard. They are perfect for this role because they never sleep,  they never check morale, and they never give up.'
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Death worms move completely silently, and surprise  prey on a 1-3 on 1d6.
+- heading: Immunities and Resistances
+  text: Necromantic Construct. This creature is necromantic but not “un- dead,” so cannot be turned by a cleric. Creature of Necromancy. This creature is immune to all illusions,  mind control (including charm) and hold spells. It cannot be af- fected by sleep, gases, poison, or disease.
+- heading: Special Attacks
+  text: Dance of Death . This attack is a swaying, hypnotic dance that  dominates the attention of anyone who fails a saving throw vs  petrifaction. An individual so dominated will stand completely  motionless and unresisting as the necrophidius advances and  attacks. The victim does not defend (no shield or dex bonus)  but is not considered fully paralysed for purposes of immedi - ate killing. Paralytic Bite. A successful bite attack inflicts a magical paralysis  upon the victim for 1d4 turns, unless the target makes a saving  throw vs. paralysis. Unarmed Combat. Necrophidius cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics.

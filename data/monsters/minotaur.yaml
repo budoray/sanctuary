@@ -1,0 +1,21 @@
+name: Minotaur
+frequency: rare
+no_encountered: 1d8
+size: large
+alignment: chaotic evil
+move: 120ft
+armour_class: 6 [14]
+hit_dice: 6+3
+melee_attacks: 1 gore (2d4) or 1 bite (1d4), or  by weapon
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: low (5-7)
+morale: 80
+loot: Hoard 3
+experience: 225 +6/hp
+description: Minotaurs usually like to inhabit vast mazes whether they be  underground or outdoors. They are excellent trackers (50%  chance to track) and will always give chase if they can see their  prey. These beasts are man–eaters and will attack savagely any- thing they think they can kill and eat. They are stupid and can  be tricked. Minotaurs can attack with their horns only if their opponent is  medium-sized or larger. They have to bite smaller foes or attack  with a weapon.
+abilities:
+- heading: Surprise and Initiative
+  text: 'Surprise. Minotaurs are surprised only on a 1 in 1d6. Unarmed Combat. Minotaurs can be targeted with grappling or  overbearing attacks. If not fended off, they score an unarmed  hit with a 2+ on 1d20. Hit Mods: ATK/DEF +8/-8. Overbear Re - sults Mods: ATK/DEF +3/-3. Grappling Result Mods: ATK/DEF  +2/-2.'
+- heading: Languages
+  text: Minotaurs can speak their own language and sometimes (25%)  can speak common. MOULD
