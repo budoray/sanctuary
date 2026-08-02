@@ -26,7 +26,91 @@
         </select>
       </label>
       <label>Ancestry <select id="ancestry"></select></label>
-      <label>Class <select id="klass"></select></label>
+      <div class="field">
+        <span id="klass-label" class="field-label">Class</span>
+        <div id="klass-group" class="portrait-grid" role="radiogroup" aria-labelledby="klass-label">
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-assassin" value="assassin" class="sr-only" aria-describedby="klass-assassin-reason">
+            <label for="klass-assassin" id="klass-assassin-label">
+              <img src="/static/art/portraits/assassin.png" alt="" width="96" height="96">
+              <span class="portrait-name">Assassin</span>
+            </label>
+            <span id="klass-assassin-reason" class="sr-only"></span>
+          </span>
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-cleric" value="cleric" class="sr-only" aria-describedby="klass-cleric-reason">
+            <label for="klass-cleric" id="klass-cleric-label">
+              <img src="/static/art/portraits/cleric.png" alt="" width="96" height="96">
+              <span class="portrait-name">Cleric</span>
+            </label>
+            <span id="klass-cleric-reason" class="sr-only"></span>
+          </span>
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-druid" value="druid" class="sr-only" aria-describedby="klass-druid-reason">
+            <label for="klass-druid" id="klass-druid-label">
+              <img src="/static/art/portraits/druid.png" alt="" width="96" height="96">
+              <span class="portrait-name">Druid</span>
+            </label>
+            <span id="klass-druid-reason" class="sr-only"></span>
+          </span>
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-fighter" value="fighter" class="sr-only" checked aria-describedby="klass-fighter-reason">
+            <label for="klass-fighter" id="klass-fighter-label">
+              <img src="/static/art/portraits/fighter.png" alt="" width="96" height="96">
+              <span class="portrait-name">Fighter</span>
+            </label>
+            <span id="klass-fighter-reason" class="sr-only"></span>
+          </span>
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-illusionist" value="illusionist" class="sr-only" aria-describedby="klass-illusionist-reason">
+            <label for="klass-illusionist" id="klass-illusionist-label">
+              <img src="/static/art/portraits/illusionist.png" alt="" width="96" height="96">
+              <span class="portrait-name">Illusionist</span>
+            </label>
+            <span id="klass-illusionist-reason" class="sr-only"></span>
+          </span>
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-magic-user" value="magic-user" class="sr-only" aria-describedby="klass-magic-user-reason">
+            <label for="klass-magic-user" id="klass-magic-user-label">
+              <img src="/static/art/portraits/magic-user.png" alt="" width="96" height="96">
+              <span class="portrait-name">Magic-User</span>
+            </label>
+            <span id="klass-magic-user-reason" class="sr-only"></span>
+          </span>
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-monk" value="monk" class="sr-only" aria-describedby="klass-monk-reason">
+            <label for="klass-monk" id="klass-monk-label">
+              <img src="/static/art/portraits/monk.png" alt="" width="96" height="96">
+              <span class="portrait-name">Monk</span>
+            </label>
+            <span id="klass-monk-reason" class="sr-only"></span>
+          </span>
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-paladin" value="paladin" class="sr-only" aria-describedby="klass-paladin-reason">
+            <label for="klass-paladin" id="klass-paladin-label">
+              <img src="/static/art/portraits/paladin.png" alt="" width="96" height="96">
+              <span class="portrait-name">Paladin</span>
+            </label>
+            <span id="klass-paladin-reason" class="sr-only"></span>
+          </span>
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-ranger" value="ranger" class="sr-only" aria-describedby="klass-ranger-reason">
+            <label for="klass-ranger" id="klass-ranger-label">
+              <img src="/static/art/portraits/ranger.png" alt="" width="96" height="96">
+              <span class="portrait-name">Ranger</span>
+            </label>
+            <span id="klass-ranger-reason" class="sr-only"></span>
+          </span>
+          <span class="portrait-tile">
+            <input type="radio" name="klass" id="klass-thief" value="thief" class="sr-only" aria-describedby="klass-thief-reason">
+            <label for="klass-thief" id="klass-thief-label">
+              <img src="/static/art/portraits/thief.png" alt="" width="96" height="96">
+              <span class="portrait-name">Thief</span>
+            </label>
+            <span id="klass-thief-reason" class="sr-only"></span>
+          </span>
+        </div>
+      </div>
       <label>Name <input id="name" type="text" placeholder="Ilse"></label>
       <button id="roll" type="button">Roll</button>
       <p id="forge-error" class="hint" role="alert" hidden></p>

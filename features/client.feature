@@ -24,6 +24,11 @@ Feature: Opening Sanctuary in the browser
     When the player rolls a human fighter
     Then the character sheet shows a portrait of their calling
 
+  Scenario: A player chooses their calling by its portrait
+    Given a player opens Sanctuary
+    Then every calling in the forge is offered as its own portrait tile
+    And each portrait tile is a real, keyboard-selectable choice
+
   Scenario: A player rolls the same character twice
     Given a player opens Sanctuary
     When the player rolls the same character twice with the same seed

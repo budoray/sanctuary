@@ -80,6 +80,21 @@ def sheet_shows_portrait(page, rolled):
     assert r.content[:8] == bytes.fromhex("89504e470d0a1a0a")
 
 
+@then("every calling in the forge is offered as its own portrait tile")
+def every_calling_has_a_tile(page):
+    import re
+    from sanctuary import character
+    radios = re.findall(r'<input type="radio" name="klass"[^>]*>', page["body"])
+    values = {re.search(r'value="([^"]+)"', r).group(1) for r in radios}
+    assert values == set(character.CLASSES)
+
+
+@then("each portrait tile is a real, keyboard-selectable choice")
+def tiles_are_real_radios(page):
+    assert 'role="radiogroup"' in page["body"]
+    assert page["body"].count('<input type="radio" name="klass"') == 10
+
+
 @when("the player rolls the same character twice with the same seed",
       target_fixture="two_rolls")
 def roll_twice(page):

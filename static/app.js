@@ -14,9 +14,18 @@ function fill(id, values) {
   }
 }
 fill("ancestry", ANCESTRIES);
-fill("klass", CLASSES);
 document.getElementById("ancestry").value = "human";
-document.getElementById("klass").value = "fighter";
+
+// The class picker is a real radio group, server-rendered in index.html
+// (one portrait tile per class, in CLASSES order) so it is focusable and
+// keyboard-navigable with no JS at all - this just reads/writes it.
+function classRadios() {
+  return Array.from(document.querySelectorAll('input[name="klass"]'));
+}
+function selectedClass() {
+  const checked = classRadios().find((r) => r.checked);
+  return checked ? checked.value : CLASSES[0];
+}
 
 // ── Fix 1: an illegal ancestry/class pairing is known before any dice roll,
 // from data/ancestries.yaml's own allowed_classes - so it is prevented, not
@@ -28,15 +37,20 @@ function applyClassAvailability() {
   if (!ancestryClasses) return;
   const ancestry = document.getElementById("ancestry").value;
   const allowed = new Set(ancestryClasses[ancestry] || CLASSES);
-  const klass = document.getElementById("klass");
-  for (const opt of klass.options) {
-    const ok = allowed.has(opt.value);
-    opt.disabled = !ok;
-    opt.title = ok ? "" : `${ancestry} may not be ${opt.value}`;
+  const radios = classRadios();
+  for (const input of radios) {
+    const ok = allowed.has(input.value);
+    input.disabled = !ok;
+    const reason = ok ? "" : `${ancestry} may not be ${input.value}`;
+    const label = document.getElementById(`klass-${input.value}-label`);
+    if (label) label.title = reason;
+    const reasonEl = document.getElementById(`klass-${input.value}-reason`);
+    if (reasonEl) reasonEl.textContent = reason;
   }
-  if (!allowed.has(klass.value)) {
-    const firstLegal = Array.from(klass.options).find((o) => allowed.has(o.value));
-    if (firstLegal) klass.value = firstLegal.value;
+  const current = radios.find((r) => r.checked);
+  if (!current || current.disabled) {
+    const firstLegal = radios.find((r) => allowed.has(r.value));
+    if (firstLegal) firstLegal.checked = true;
   }
 }
 
@@ -134,7 +148,7 @@ async function finalizeCharacter(seed, arrangement) {
     seed,
     mode: document.getElementById("mode").value,
     ancestry: document.getElementById("ancestry").value,
-    classes: [document.getElementById("klass").value],
+    classes: [selectedClass()],
     name: document.getElementById("name").value,
   };
   if (arrangement) payload.arrangement = arrangement;

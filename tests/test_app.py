@@ -1,4 +1,5 @@
 import os
+import re
 from pathlib import Path
 
 # ⚠ BEFORE `import app`, which imports `tenshin_gate` - the drop-in latches
@@ -220,6 +221,39 @@ def test_every_portrait_is_actually_served():
 
 def test_the_client_carries_a_portrait_element():
     assert 'id="portrait"' in client.get("/").text
+
+
+# ── class picker: a real radio group, not divs with click handlers ─────────
+def test_the_class_picker_is_a_real_radio_group():
+    import re
+    html = client.get("/").text
+    assert 'role="radiogroup"' in html
+    radios = re.findall(r'<input type="radio" name="klass"[^>]*>', html)
+    assert len(radios) == 10, f"expected 10 class radios, found {len(radios)}"
+    values = {re.search(r'value="([^"]+)"', r).group(1) for r in radios}
+    assert values == set(character.CLASSES)
+
+
+def test_the_class_picker_defaults_to_a_legal_selection():
+    html = client.get("/").text
+    radios = re.findall(r'<input type="radio" name="klass"[^>]*>', html)
+    checked = [r for r in radios if "checked" in r]
+    assert len(checked) == 1
+
+
+def test_applying_class_availability_disables_forbidden_radios_by_class():
+    """The client-side logic that dims a forbidden tile must disable its
+    radio input (skipping it in keyboard navigation for free), not merely
+    style it - checked against source, since this only runs after a fetch
+    no TestClient triggers."""
+    js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+    m = re.search(r"function applyClassAvailability\(\) \{(.*?)\n\}", js, re.S)
+    assert m, "no applyClassAvailability function found in static/app.js"
+    body = m.group(1)
+    assert "input.disabled" in body, \
+        "a forbidden class must be disabled on its <input>, not just styled"
+    assert "firstLegal" in body, \
+        "the current selection must move to the first legal class when it becomes illegal"
 
 
 def test_selfcheck_sentence_reports_unique_ids_and_files():
