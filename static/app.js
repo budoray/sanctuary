@@ -1128,6 +1128,20 @@ function renderDelve(view) {
 // the loser came back as a confusing 400.
 let actBusy = false;
 
+// Failure (and the occasional success) speaks in the house's voice: a
+// toast, never a native dialog. Blood-edged by default, lamp-gold when
+// the news is good, dismissed by time rather than by demand.
+let toastTimer = null;
+function toast(message, ok = false) {
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.classList.toggle("ok", ok);
+  el.hidden = false;
+  beat(el, "enter");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 4200);
+}
+
 async function act(action, payload, btn) {
   if (actBusy) return false;
   actBusy = true;
@@ -1148,7 +1162,7 @@ async function act(action, payload, btn) {
     view = await res.json();
   } catch (err) {
     if (btn) flagError(btn, restingText);
-    alert("Cannot reach the server.");
+    toast("Cannot reach the server.");
     return false;
   } finally {
     actBusy = false;
@@ -1156,7 +1170,7 @@ async function act(action, payload, btn) {
   }
   if (!res.ok) {
     if (btn) flagError(btn, restingText);
-    alert(`Cannot do that: ${view.detail}`);
+    toast(`Cannot do that: ${view.detail}`);
     return false;
   }
   renderDelve(view);
@@ -1218,7 +1232,7 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
   });
   const view = await res.json();
   if (!res.ok) {
-    alert(`Cannot begin a delve: ${view.detail}`);
+    toast(`Cannot begin a delve: ${view.detail}`);
     return;
   }
   delveSessionId = view.session_id;
@@ -1254,5 +1268,5 @@ document.getElementById("report").addEventListener("click", async () => {
     body: JSON.stringify({ kind: "bug", title, body: location.href }),
   });
   const out = await res.json();
-  alert(out.ok ? "Report sent." : "Could not send the report.");
+  toast(out.ok ? "Report sent." : "Could not send the report.", out.ok);
 });

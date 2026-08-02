@@ -615,6 +615,26 @@ h1, h2, h3, .chrome .wordmark { overflow-wrap: anywhere; min-width: 0; }
   #forge { min-height: 0; padding: var(--space-8) var(--space-2); }
 }
 
+/* Bad news and good both speak in the house's voice: a toast at the
+   foot of the stage, blood-edged for failure, lamp-gold for success,
+   gone on its own after a breath. Native alert() never crosses the
+   threshold. */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-6);
+  transform: translateX(-50%);
+  z-index: var(--z-sticky);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  box-shadow: var(--shadow-2);
+  max-width: min(32rem, 90vw);
+  text-align: center;
+}
+#toast.ok { border-color: var(--color-accent); }
+
 @media (prefers-reduced-motion: reduce) {
   .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label, #pending-decisions p, .hp-hit, .hp-mend, .xp-flash, #combat.combat-start {
     animation-duration: 150ms !important;
