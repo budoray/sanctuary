@@ -11,7 +11,10 @@ One-way dependency chain, asserted by `tests/test_invariants.py`:
 Ten class portraits ship with Chapter 1 (top-down/Factorio-styled, per the platform standing
 order — never isometric; the OSRIC licence forbids the books' art outright, so there is no
 fallback for any of these). Still needed: monster portraits (291, Ch.5 — phase by encounter
-frequency, `common` first), dungeon tilesets (Ch.4), map chrome.
+frequency, `common` first), map chrome. Dungeon tilesets SHIPPED: twelve
+top-down tiles in `static/art/tiles/` (manifest `data/art_tiles.yaml`), wired
+into the delve's canvas map — `water.png` was later replaced with a procedural
+pool (`v0.9.37-beta`); the PixelLab original was a flat fill.
 ⚠ For dungeon floors use `create_tiles_pro` with `outline_mode: "segmentation"` and a numbered
 list of floors — **not** `create_topdown_tileset`, which composes a scene when what's wanted is
 a transition.
@@ -142,6 +145,30 @@ rather than assuming it's in a backlog; fetch results within 8 hours, and use
       making more of the corpus reachable will keep surfacing these.
       **Swept, `v0.8.16-beta`** - see below and
       [`metrics/2026-08-02-statline-parse-impact.md`](metrics/2026-08-02-statline-parse-impact.md).
+
+## Gotchas earned in the living-map redesign (`v0.9.x`, 2026-08-02)
+- **A generated dungeon can strand the party BY DESIGN.** One-way doors are
+  real table output: a room whose own exit record is empty is a pocket, not
+  a bug. Build the map's move controls from the CURRENT room's own exits —
+  deriving them from other rooms' reverse exits renders doors the party
+  cannot walk back through. The sealed room's copy owns the situation:
+  "Search for a hidden way, or leave the delve."
+- **Full re-render + CSS entrance animations = everything dances on every
+  beat.** The dice ledger and the chronicle rebuild their lists each
+  render; without the `prevRollsLen`/`prevDelveLogLen` sentinels marking
+  only the new lines, every hit-point tick replays every entrance. Derive
+  NOVELTY, not just content — and reset the sentinels at every fresh
+  start, or a same-length new ledger dances nothing at all.
+- **Verification is a driven browser, not a grep.** Each cycle shipped
+  against Playwright-driven Chromium (probes in `scratchpad_dl/`,
+  gitignored): click/tap-to-move, arrow- and number-key walking, decision
+  locks, the guttering-torch epilogue were verified on pixels and console
+  errors, never on markup. `#roll` 400s on ability minimums about half the
+  time — re-roll loops are normal, not a failure.
+- **The map is canvas, drawn from explored rooms only** (`renderMap` in
+  `static/app.js`): 64px tiles, corridor memory light, rubble seals where
+  one-way doors collapse. Hover, click, arrows and 1-9 all route through
+  the same `act("move")` as the rail buttons — one door, four hands.
 
 ## Gotchas earned in the client redesign (`v0.9.1-beta`)
 - **⚠⚠ `[hidden]` is ONLY `display: none` in the UA stylesheet, so any author

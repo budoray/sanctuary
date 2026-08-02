@@ -28,7 +28,8 @@ cannot fail a parity check, which is how two games once sat pushed-and-undeploye
 every board green.
 
 ⚠ **Its gate is GREEN** — `python -m pytest tests/ -q` → 998 passed, 0 skipped, at the
-`v0.9.0-beta` chapter boundary (2026-08-02), and `python app.py test` prints the self-check
+`v0.9.0-beta` chapter boundary (2026-08-02), re-confirmed at **1002 passed** through
+`v0.9.40-beta` later the same day, and `python app.py test` prints the self-check
 sentence. Recorded rather than assumed; a gate someone just ran is worth more than one nobody
 has checked.
 ⚠ **The corpus round-trip RUNS here** — the OSRIC PDFs live in `../_reference/osric`, which

@@ -1,6 +1,9 @@
-# Dungeon tile art manifest — Phase 1 (assets only, not wired into the client).
+# Dungeon tile art manifest — rendered by the delve's canvas map (renderMap
+# in static/app.js draws these at 64px).
 # Generated with PixelLab create_tiles_pro (outline_mode: segmentation), top-down,
 # 32x32px, matching the class portraits' muted/earth-tone palette.
+# water.png replaced with a procedural pool (PIL) at v0.9.37-beta - the
+# PixelLab original was a flat fill that read as a missing texture.
 floors:
   cobblestone: static/art/tiles/floor_cobblestone.png
   packed_dirt: static/art/tiles/floor_packed_dirt.png
