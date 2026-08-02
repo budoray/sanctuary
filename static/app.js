@@ -589,17 +589,35 @@ function renderMap() {
 
   // Hover glow: the corridor under the pointer catches the lamplight. Only
   // its own cells - the glow says "THIS way", not "somewhere over there".
-  if (mapHoverTo !== null) {
+  // Touch has no hover: on coarse pointers every walkable corridor keeps a
+  // faint ember instead, so the tap targets are never invisible.
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  if (mapHoverTo !== null || (coarse && mapMovesEnabled && mapClickTargets.size)) {
     const accent = getComputedStyle(document.documentElement).getPropertyValue("--color-accent").trim() || "#e8a33d";
     ctx.save();
     ctx.shadowColor = accent;
     ctx.shadowBlur = TILE_PX * 0.6;
     ctx.fillStyle = accent;
-    ctx.globalAlpha = 0.32;
-    for (const [k, t] of mapClickTargets) {
-      if (t.to !== mapHoverTo) continue;
-      const [x, y] = k.split(",").map(Number);
-      ctx.fillRect(TX(x) + TILE_PX * 0.1, TY(y) + TILE_PX * 0.1, TILE_PX * 0.8, TILE_PX * 0.8);
+    const ember = mapHoverTo === null;
+    if (ember) {
+      // A coal at the heart of each walkable cell: small, warm, unmissable
+      // against the dark, but nothing like the full hover glow.
+      for (const [k] of mapClickTargets) {
+        const [x, y] = k.split(",").map(Number);
+        const cx = TX(x) + TILE_PX / 2, cy = TY(y) + TILE_PX / 2;
+        ctx.globalAlpha = 0.55;
+        ctx.beginPath();
+        ctx.arc(cx, cy, TILE_PX * 0.07, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else {
+      ctx.globalAlpha = 0.32;
+      for (const [k, t] of mapClickTargets) {
+        if (t.to !== mapHoverTo) continue;
+        const [x, y] = k.split(",").map(Number);
+        const inset = TILE_PX * 0.1;
+        ctx.fillRect(TX(x) + inset, TY(y) + inset, TILE_PX - inset * 2, TILE_PX - inset * 2);
+      }
     }
     ctx.restore();
   }
