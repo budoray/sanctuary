@@ -489,6 +489,12 @@ function renderMap() {
             const step = b.midY > a.midY ? 1 : -1;
             for (let y = a.midY; y !== b.midY + step; y += step) mapClickTargets.set(key(x1, y), target);
           }
+        } else if (exploredAreas[otherId].visited) {
+          // ...and the way is sealed from this side: a fall of rubble at
+          // the mouth on the current room's edge, so the memory reads as
+          // collapsed behind the party, not as an open door that ignores
+          // the pointer.
+          featCells.set(key(curIsA ? x0 : x1, a.midY), "rubble");
         }
       }
       if (kind.includes("door")) {
