@@ -247,6 +247,13 @@ let lastCharacter = null;
 let exploredAreas = {};
 let mapRootId = null;
 
+// The way out looks like what it is: stairs, a door, a corridor mouth.
+const EXIT_TILES = [["stairs", "stairs_down"], ["door", "door_open"], ["corridor", "floor_worn_stone"]];
+function exitTile(kind) {
+  const hit = EXIT_TILES.find(([k]) => (kind || "").includes(k));
+  return `/static/art/tiles/${hit ? hit[1] : "floor_worn_stone"}.png`;
+}
+
 function recordArea(view) {
   if (mapRootId === null) mapRootId = view.area_id;
   exploredAreas[view.area_id] = { name: view.name, exits: view.exits, visited: true };
@@ -299,79 +306,258 @@ function layoutMap(rootId) {
   return positions;
 }
 
-const NS = "http://www.w3.org/2000/svg";
-function svgEl(tag, attrs) {
-  const el = document.createElementNS(NS, tag);
-  for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v);
-  return el;
+// ── The lantern map ────────────────────────────────────────────────────
+// The dungeon as the party sees it: top-down tiles, a torch's worth of
+// light around the character, visited rooms kept as dim memory, darkness
+// everywhere else. Drawn on a canvas from the same fog-of-war graph
+// (exploredAreas) the old node diagram used - the engine's geometry is
+// untouched.
+
+const TILE_PX = 32;
+const TILE_NAMES = [
+  "floor_cobblestone", "floor_flagstone", "floor_packed_dirt", "floor_worn_stone",
+  "wall_dressed_stone", "wall_rough_hewn_rock",
+  "door_closed", "door_open", "stairs_down", "stairs_up", "rubble", "water",
+];
+const FLOOR_TILES = TILE_NAMES.slice(0, 4);
+const tileImages = {};      // url -> HTMLImageElement, once loaded
+let tileLoadsPending = 0;
+
+// Every tile draw goes through here: the first call starts the load and
+// returns null; when the last pending image settles the map redraws once.
+function tileImage(url) {
+  if (tileImages[url]) return tileImages[url];
+  tileLoadsPending++;
+  const img = new Image();
+  const done = () => { if (--tileLoadsPending === 0 && mapRootId !== null) renderMap(); };
+  img.onload = () => { tileImages[url] = img; done(); };
+  img.onerror = done;
+  img.src = url;
+  return null;
+}
+for (const n of TILE_NAMES) tileImage(`/static/art/tiles/${n}.png`);
+
+function hashOf(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
 }
 
 function renderMap() {
   const container = document.getElementById("map");
   if (mapRootId === null) { container.innerHTML = ""; return; }
 
-  const NODE_W = 128, NODE_H = 72, GAP_X = 96, GAP_Y = 32;
+  const ROOM_W = 6, ROOM_H = 5, CORR = 4;
+  const COL_PITCH = ROOM_W + CORR;   // tiles per depth column
+  const ROW_PITCH = ROOM_H + 3;      // tiles per row band
   const positions = layoutMap(mapRootId);
-  const maxCol = Math.max(...Object.values(positions).map((p) => p.col));
   const maxRows = Math.max(...Object.values(positions).map((p) => p.rowCount));
-  const width = (maxCol + 1) * (NODE_W + GAP_X) - GAP_X + GAP_X;
-  const height = maxRows * (NODE_H + GAP_Y) + GAP_Y;
 
-  const centerOf = (id) => {
+  // Every explored area gets a room rect in tile space - unexplored ones
+  // too, so their corridors have somewhere to point; only visited rooms
+  // are drawn. Size and floor come from a hash of the area id, so a room
+  // keeps its shape for the whole delve.
+  const rooms = {};
+  for (const id in positions) {
     const p = positions[id];
-    const colX = GAP_X / 2 + p.col * (NODE_W + GAP_X) + NODE_W / 2;
-    const bandH = p.rowCount * (NODE_H + GAP_Y);
-    const rowY = (height - bandH) / 2 + p.row * (NODE_H + GAP_Y) + GAP_Y / 2 + NODE_H / 2;
-    return { x: colX, y: rowY };
-  };
+    const h = hashOf(id);
+    const w = 4 + h % 3;             // 4..6 tiles
+    const hh = 3 + (h >> 3) % 3;     // 3..5 tiles
+    const bandH = p.rowCount * ROW_PITCH;
+    const ox = 1 + p.col * COL_PITCH + Math.floor((ROOM_W - w) / 2);
+    const oy = 2 + Math.floor((maxRows * ROW_PITCH - bandH) / 2)
+             + p.row * ROW_PITCH + Math.floor((ROOM_H - hh) / 2);
+    rooms[id] = { ox, oy, w, h: hh, midY: oy + Math.floor(hh / 2), hash: h,
+                  floor: FLOOR_TILES[h % FLOOR_TILES.length] };
+  }
 
-  const svg = svgEl("svg", { viewBox: `0 0 ${width} ${height}`, class: "delve-map", role: "img",
-                              "aria-label": "Dungeon floor plan of areas explored so far" });
+  const key = (x, y) => `${x},${y}`;
+  const floorCells = new Map();      // "x,y" -> floor tile name
+  const featCells = new Map();       // "x,y" -> door / stairs / rubble / water
+  const putFloor = (x, y) => { if (!floorCells.has(key(x, y))) floorCells.set(key(x, y), "floor_worn_stone"); };
 
+  for (const id in rooms) {
+    if (!exploredAreas[id].visited) continue;
+    const r = rooms[id];
+    for (let dx = 0; dx < r.w; dx++)
+      for (let dy = 0; dy < r.h; dy++)
+        floorCells.set(key(r.ox + dx, r.oy + dy), r.floor);
+  }
+
+  // Corridors: one per explored edge, drawn from the shallower column,
+  // L-shaped when the two rooms sit at different depths of row. Corridors
+  // to unexplored areas are drawn too - they are the ways on, vanishing
+  // into the dark. Passages between visited rooms are remembered as well
+  // (corrCells): the light punches through them softly, so explored
+  // dungeon reads as connected space, not islands.
+  const corrCells = [];
   const edgesSeen = new Set();
   for (const id in exploredAreas) {
     for (const e of exploredAreas[id].exits) {
       const to = String(e.to);
-      const key = [id, to].sort().join("-");
-      if (edgesSeen.has(key)) continue;
-      edgesSeen.add(key);
-      const a = centerOf(id), b = centerOf(to);
-      const line = svgEl("line", {
-        x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: "map-edge",
-      });
-      svg.appendChild(line);
-      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
-      const label = svgEl("text", { x: mx, y: my, class: "map-edge-label" });
-      label.textContent = e.kind || "";
-      svg.appendChild(label);
+      if (!(to in rooms)) continue;
+      const ekey = [id, to].sort().join("-");
+      if (edgesSeen.has(ekey)) continue;
+      edgesSeen.add(ekey);
+      if (positions[id].col === positions[to].col) continue;
+      const [aId, bId] = positions[id].col < positions[to].col ? [id, to] : [to, id];
+      const a = rooms[aId], b = rooms[bId];
+      const kind = e.kind || "";
+      const bSeen = exploredAreas[bId].visited;
+      const x0 = a.ox + a.w;         // first cell right of room A
+      const x1 = b.ox - 1;           // last cell left of room B
+      // A way into the unknown is a mouth, not a tunnel: cap the stub so
+      // it vanishes into the dark a few tiles on.
+      const xEnd = bSeen ? x1 : Math.min(x1, x0 + 2);
+      for (let x = x0; x <= xEnd; x++) {
+        putFloor(x, a.midY);
+        if (bSeen) corrCells.push([x, a.midY]);
+      }
+      if (bSeen && a.midY !== b.midY) {
+        const step = b.midY > a.midY ? 1 : -1;
+        for (let y = a.midY; y !== b.midY + step; y += step) {
+          putFloor(x1, y);
+          corrCells.push([x1, y]);
+        }
+      }
+      if (kind.includes("door")) {
+        featCells.set(key(x0, a.midY), bSeen ? "door_open" : "door_closed");
+      }
+      if (kind.includes("stairs")) {
+        featCells.set(key(a.ox + a.w - 1, a.midY), "stairs_down");
+      }
     }
   }
 
-  for (const id in exploredAreas) {
-    const area = exploredAreas[id];
-    const { x, y } = centerOf(id);
-    const isCurrent = Number(id) === Number(mapCurrentId);
-    const g = svgEl("g", {
-      class: `map-node enter ${area.visited ? "visited" : "ghost"} ${isCurrent ? "current" : ""}`,
-      transform: `translate(${x - NODE_W / 2}, ${y - NODE_H / 2})`,
-    });
-    // The room the party stands in carries the only warm light on the map -
-    // a halo behind the rect whose opacity breathes (CSS: torch-breathe).
-    if (isCurrent) {
-      g.appendChild(svgEl("circle", {
-        cx: NODE_W / 2, cy: NODE_H / 2, r: Math.max(NODE_W, NODE_H) * 0.72,
-        class: "map-node-halo",
-      }));
+  // The way in: the entrance room carries the stairs back to the surface.
+  const root = rooms[String(mapRootId)];
+  if (root) featCells.set(key(root.ox, root.midY), "stairs_up");
+
+  // Debris: a deterministic scatter of rubble and standing water, never
+  // under a feature, never under the party's footing.
+  for (const id in rooms) {
+    if (!exploredAreas[id].visited) continue;
+    const r = rooms[id];
+    for (let dx = 0; dx < r.w; dx++) for (let dy = 0; dy < r.h; dy++) {
+      const x = r.ox + dx, y = r.oy + dy, k = key(x, y);
+      if (featCells.has(k)) continue;
+      if (dx === Math.floor(r.w / 2) && dy === Math.floor(r.h / 2)) continue;
+      const m = (x * 7 + y * 13 + r.hash) % 23;
+      if (m === 0) featCells.set(k, "rubble");
+      else if (m === 7) featCells.set(k, "water");
     }
-    g.appendChild(svgEl("rect", { width: NODE_W, height: NODE_H, rx: 10, class: "map-node-rect" }));
-    const label = svgEl("text", { x: NODE_W / 2, y: NODE_H / 2, class: "map-node-label" });
-    label.textContent = area.visited ? area.name : "unexplored";
-    g.appendChild(label);
-    svg.appendChild(g);
+  }
+
+  // Walls ring every floor cell - rooms and corridors read as carved space.
+  const wallCells = new Map();
+  for (const k of floorCells.keys()) {
+    const [x, y] = k.split(",").map(Number);
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+      const nx = x + dx, ny = y + dy, nk = key(nx, ny);
+      if (!floorCells.has(nk) && !featCells.has(nk)) {
+        wallCells.set(nk, (nx * 5 + ny * 11) % 2 ? "wall_dressed_stone" : "wall_rough_hewn_rock");
+      }
+    }
+  }
+
+  // The canvas wraps what has actually been explored, plus a tile of
+  // margin - the unknown is not rendered space, it is simply elsewhere.
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  const grow = (k) => {
+    const [x, y] = k.split(",").map(Number);
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  };
+  floorCells.forEach((_, k) => grow(k));
+  wallCells.forEach((_, k) => grow(k));
+  minX -= 1; minY -= 1; maxX += 1; maxY += 1;
+  const TX = (v) => (v - minX) * TILE_PX;
+  const TY = (v) => (v - minY) * TILE_PX;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = (maxX - minX + 1) * TILE_PX;
+  canvas.height = (maxY - minY + 1) * TILE_PX;
+  canvas.className = "delve-map";
+  canvas.setAttribute("role", "img");
+  canvas.setAttribute("aria-label", "Dungeon floor plan of areas explored so far");
+  const ctx = canvas.getContext("2d");
+  ctx.imageSmoothingEnabled = false;
+
+  const drawCells = (cells) => {
+    for (const [k, name] of cells) {
+      const [x, y] = k.split(",").map(Number);
+      const img = tileImage(`/static/art/tiles/${name}.png`);
+      if (img) ctx.drawImage(img, TX(x), TY(y), TILE_PX, TILE_PX);
+    }
+  };
+  drawCells(wallCells);
+  drawCells(floorCells);
+  drawCells(featCells);
+
+  // The dark. One near-black overlay, punched through where the party has
+  // been - softly for rooms they remember, wide and warm where they stand.
+  const dark = document.createElement("canvas");
+  dark.width = canvas.width;
+  dark.height = canvas.height;
+  const dctx = dark.getContext("2d");
+  dctx.fillStyle = "rgba(4, 3, 2, 0.93)";
+  dctx.fillRect(0, 0, dark.width, dark.height);
+  dctx.globalCompositeOperation = "destination-out";
+  for (const id in rooms) {
+    if (!exploredAreas[id].visited) continue;
+    const r = rooms[id];
+    const isCurrent = Number(id) === Number(mapCurrentId);
+    const cx = TX(r.ox + r.w / 2), cy = TY(r.oy + r.h / 2);
+    const rad = (Math.max(r.w, r.h) / 2 + (isCurrent ? 2.5 : 0.75)) * TILE_PX;
+    const grad = dctx.createRadialGradient(cx, cy, rad * 0.55, cx, cy, rad);
+    grad.addColorStop(0, `rgba(0, 0, 0, ${isCurrent ? 1 : 0.6})`);
+    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+    dctx.fillStyle = grad;
+    dctx.beginPath();
+    dctx.arc(cx, cy, rad, 0, Math.PI * 2);
+    dctx.fill();
+  }
+  // Remembered passages: a soft pulse of light every couple of tiles along
+  // corridors the party has actually walked.
+  for (let i = 0; i < corrCells.length; i += 2) {
+    const [x, y] = corrCells[i];
+    const cx = TX(x + 0.5), cy = TY(y + 0.5);
+    const rad = 2.2 * TILE_PX;
+    const grad = dctx.createRadialGradient(cx, cy, rad * 0.3, cx, cy, rad);
+    grad.addColorStop(0, "rgba(0, 0, 0, 0.5)");
+    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+    dctx.fillStyle = grad;
+    dctx.beginPath();
+    dctx.arc(cx, cy, rad, 0, Math.PI * 2);
+    dctx.fill();
+  }
+  ctx.drawImage(dark, 0, 0);
+
+  // The party stands at the centre of the light: their portrait is the
+  // token. The fallback marker uses the theme's accent, read live.
+  const cur = rooms[String(mapCurrentId)];
+  if (cur) {
+    const px = TX(cur.ox + Math.floor(cur.w / 2));
+    const py = TY(cur.oy + Math.floor(cur.h / 2));
+    const portrait = lastCharacter && lastCharacter.portrait ? tileImage(lastCharacter.portrait) : null;
+    if (portrait) {
+      ctx.drawImage(portrait, px, py, TILE_PX, TILE_PX);
+    } else {
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--color-accent") || "#e8a33d";
+      ctx.beginPath();
+      ctx.arc(px + TILE_PX / 2, py + TILE_PX / 2, TILE_PX / 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   container.innerHTML = "";
-  container.appendChild(svg);
+  container.appendChild(canvas);
+  // Keep the light in view when the dungeon outgrows the frame.
+  if (cur && container.clientWidth > 0) {
+    container.scrollLeft = Math.max(0, TX(cur.ox + cur.w / 2) - container.clientWidth / 2);
+  }
 }
 
 let mapCurrentId = null;
@@ -447,8 +633,19 @@ function renderDelve(view) {
     const li = document.createElement("li");
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.textContent = `${e.kind} to area ${e.to}`;
+    // Where the way leads decides how it is named: a visited room by its
+    // name, the unknown as the unknown.
+    const seen = exploredAreas[String(e.to)];
+    const kind = e.kind || "way";
+    btn.textContent = seen && seen.visited && seen.name
+      ? `${kind} to ${seen.name}`
+      : `${kind} into the dark`;
     btn.dataset.to = e.to;
+    const icon = document.createElement("img");
+    icon.src = exitTile(e.kind);
+    icon.alt = "";
+    icon.className = "exit-icon";
+    btn.prepend(icon);
     btn.disabled = view.in_combat || view.finished || decisionPending;
     btn.title = decisionPending ? "Resolve the pending decision first."
       : view.in_combat ? "Cannot leave while monsters are still standing."

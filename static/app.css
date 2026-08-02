@@ -1,25 +1,20 @@
 /* Hallmark · genre: atmospheric · macrostructure: Marquee Hero · theme: Midnight (deepened)
- * enrichment: Tier-A CSS art (torch vignette + ember blooms) · nav: N5 · footer: Ft5
+ * enrichment: Tier-A CSS art (torch vignette + ember blooms + the lantern map) · nav: N5 · footer: Ft5
  * pre-emit critique: P4 H5 E5 S5 R4 V4
  *
  * Torchlit dread. The previous build was a Workbench - every surface a card
  * of equal weight. This one is a descent: the dark is deeper, the only warm
- * light is the one the party carries (the forge's fire, the current room's
- * halo), and combat pulls the whole canvas toward ember-red. The forge is a
- * Marquee Hero - the one moment the player is making a someone - and the
- * delve beneath it is the instrument deck.
+ * light is the one the party carries, and combat pulls the whole canvas
+ * toward ember-red. The forge is a Marquee Hero - the one moment the player
+ * is making a someone. The delve's map is a lantern-lit tile dungeon drawn
+ * on canvas (app.js): rooms and corridors, not boxes and lines - visited
+ * rooms persist as dim memory, the unknown stays dark, and the party's
+ * portrait stands in the light.
  */
 
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
-}
-
-/* The party's light breathes. Opacity only, 6s, one ambient loop - the
- * functional kind: it marks the room you are standing in. */
-@keyframes torch-breathe {
-  0%, 100% { opacity: 0.10; }
-  50%      { opacity: 0.22; }
 }
 
 html, body { overflow-x: clip; }
@@ -157,12 +152,20 @@ section, #forge, #arrange, #map-stage {
 #party-status { padding: var(--space-5) var(--space-6) var(--space-6); }
 #tray { padding: var(--space-4) var(--space-5); background: var(--color-paper); }
 #sheet { background: var(--color-paper-2); box-shadow: var(--shadow-1); }
-#map-stage { background: var(--color-paper-3); box-shadow: var(--shadow-1); }
+#map-stage { background: var(--color-paper-3); box-shadow: var(--shadow-1); scroll-margin-top: var(--space-16); }
 
-/* The map orients; it does not need half the page. Capped so the actions
-   beneath it stay above the fold on a laptop. */
-#map { max-height: min(38vh, 22rem); }
-.delve-map { max-height: min(38vh, 22rem); }
+/* The map is a dungeon now, not a diagram: tiles at their native size,
+   scrolling sideways when the delve outgrows the frame, tall dungeons
+   scaled down whole rather than cropped. */
+.delve-map {
+  display: block;
+  margin: 0 auto;
+  image-rendering: pixelated;
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  max-height: min(46vh, 26rem);
+}
 
 /* ── the forge: a Marquee Hero ───────────────────────────────────────────
    Before a delve, the forge IS the page - not a bordered box crowded into
@@ -362,8 +365,7 @@ main:has(#map-stage:not([hidden])) #who { font-size: var(--text-lg); margin: 0 0
 #area-name { font-size: var(--text-display-s); line-height: 1.1; margin: 0; }
 #area-turns { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--color-ink-2); font-size: var(--text-sm); }
 #area-description { color: var(--color-ink-2); margin-bottom: 0; max-width: 65ch; }
-#map { width: 100%; overflow-x: auto; margin: var(--space-4) 0; }
-.delve-map { width: 100%; height: auto; min-width: 20rem; }
+#map { width: 100%; overflow-x: auto; margin: var(--space-4) 0; display: flex; }
 
 /* ── combat changes the air ──────────────────────────────────────────────
    app.js sets `#combat.hidden = !view.in_combat`, so `:has()` reads the
@@ -394,38 +396,10 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
    the reason in; this only styles it. */
 .empty { color: var(--color-ink-2); font-size: var(--text-sm); font-style: italic; padding: var(--space-1) 0; }
 
-.map-node-rect { fill: var(--color-paper-2); stroke: var(--color-rule); stroke-width: 1; }
-.map-node-label {
-  fill: var(--color-ink);
-  font: var(--text-sm) / 1 var(--font-body);
-  text-anchor: middle;
-  dominant-baseline: middle;
-}
-/* The room you stand in is the only warm thing on the map. The halo is a
-   real circle in the SVG (app.js draws it for the current node) whose
-   opacity breathes - the carried torch. */
-.map-node-halo {
-  fill: var(--color-accent);
-  opacity: 0.16;
-  animation: torch-breathe 6s var(--ease-in-out) infinite;
-}
-.map-node.current .map-node-rect {
-  fill: var(--color-accent);
-  stroke: var(--color-accent);
-}
-.map-node.current .map-node-label { fill: var(--color-accent-ink); font-weight: 600; }
-.map-node.ghost .map-node-rect { fill: transparent; stroke: var(--color-rule); stroke-dasharray: 4 4; }
-.map-node.ghost .map-node-label { fill: var(--color-ink-2); font-style: normal; }
-.map-edge { stroke: var(--color-rule); stroke-width: 2; }
-.map-edge-label {
-  fill: var(--color-ink-2);
-  font: var(--text-xs) / 1 var(--font-mono);
-  text-anchor: middle;
-}
-
 /* ── party instruments ───────────────────────────────────────────────── */
 #exploration ul, #combat ul, #inventory, #delve-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
-#exits button { width: 100%; text-align: left; }
+#exits button { width: 100%; text-align: left; display: flex; align-items: center; gap: var(--space-3); }
+.exit-icon { width: 24px; height: 24px; flex: none; image-rendering: pixelated; border-radius: var(--radius-sm); }
 #combat-monsters li.selectable { cursor: pointer; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
 #combat-monsters li.selectable:hover { background: var(--color-paper-3); }
 #exploration { display: flex; flex-direction: column; gap: var(--space-2); }
@@ -487,12 +461,14 @@ h1, h2, h3, .chrome .wordmark { overflow-wrap: anywhere; min-width: 0; }
 
 @media (max-width: 560px) {
   .chrome { padding: var(--space-2) var(--space-4); gap: var(--space-3); }
-  .chrome nav { gap: var(--space-3); }
+  .chrome nav { gap: var(--space-3); flex-wrap: nowrap; }
+  /* One row or nothing: the build hash yields its seat on small screens
+     (still in the DOM, still at /version - the house set is intact). */
+  .chrome nav #build { display: none; }
   #forge { min-height: 0; padding: var(--space-8) var(--space-2); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .map-node-halo { animation: none; opacity: 0.16; }
   .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label {
     animation-duration: 150ms !important;
     animation-iteration-count: 1 !important;
