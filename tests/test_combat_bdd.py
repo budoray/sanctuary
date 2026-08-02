@@ -201,8 +201,11 @@ def battered_warband():
     return {"hit_dice": 4}
 
 
+# ⚠ A pytest-bdd step must NOT be named test_* — pytest collects it as a test
+# function and tries to inject its step arguments as fixtures, which fails at
+# collection because `warband` is a @given target_fixture, not a pytest fixture.
 @when("the warband's morale is tested under those losses", target_fixture="morale_pair")
-def test_battered_morale(warband):
+def battered_morale_is_tested(warband):
     # Same die result for both checks - only the situation differs -
     # isolates what the modifiers do to the outcome.
     fresh = R.morale(_FixedDice({"morale": 65}), warband["hit_dice"], modifiers=0)
