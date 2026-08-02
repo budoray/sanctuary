@@ -50,8 +50,15 @@ def exits_reciprocate(dungeon):
 
 @given("a GM rolls up a dungeon that hits an impossible table result", target_fixture="fudged")
 def dungeon_that_fudges():
-    _, dice_ = procgen.generate_dungeon(1, target_areas=12, return_dice=True)
-    return dice_
+    # ⚠ Do not pin a magic seed here. This was seed 1, which fudged only because
+    # table 2.7.3.2f was damaged in the corpus; repairing the extractor removed
+    # the fudge and this step started returning an empty log. Scan for a seed
+    # that genuinely hits an impossible result instead.
+    for seed in range(1, 60):
+        _, dice_ = procgen.generate_dungeon(seed, target_areas=12, return_dice=True)
+        if procgen.fudges(dice_):
+            return dice_
+    raise AssertionError("no seed in 1..59 produced a fudge to inspect")
 
 
 @then("the roll log shows what was fudged and why")
