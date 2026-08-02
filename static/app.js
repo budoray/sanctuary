@@ -319,6 +319,9 @@ const TILE_PX = 64;
 // mirrors the exit buttons' disabled state (combat, ruling due, delve over).
 const mapClickTargets = new Map();
 let mapMovesEnabled = false;
+// The exit whose corridor the pointer is over, or null - renderMap paints
+// that corridor in lamplight so the walkable ways announce themselves.
+let mapHoverTo = null;
 const TILE_NAMES = [
   "floor_cobblestone", "floor_flagstone", "floor_packed_dirt", "floor_worn_stone",
   "wall_dressed_stone", "wall_rough_hewn_rock",
@@ -562,6 +565,23 @@ function renderMap() {
   }
   ctx.drawImage(dark, 0, 0);
 
+  // Hover glow: the corridor under the pointer catches the lamplight. Only
+  // its own cells - the glow says "THIS way", not "somewhere over there".
+  if (mapHoverTo !== null) {
+    const accent = getComputedStyle(document.documentElement).getPropertyValue("--color-accent").trim() || "#e8a33d";
+    ctx.save();
+    ctx.shadowColor = accent;
+    ctx.shadowBlur = TILE_PX * 0.6;
+    ctx.fillStyle = accent;
+    ctx.globalAlpha = 0.32;
+    for (const [k, t] of mapClickTargets) {
+      if (t.to !== mapHoverTo) continue;
+      const [x, y] = k.split(",").map(Number);
+      ctx.fillRect(TX(x) + TILE_PX * 0.1, TY(y) + TILE_PX * 0.1, TILE_PX * 0.8, TILE_PX * 0.8);
+    }
+    ctx.restore();
+  }
+
   // The party stands at the centre of the light: their portrait is the
   // token. The fallback marker uses the theme's accent, read live.
   const cur = rooms[String(mapCurrentId)];
@@ -582,6 +602,11 @@ function renderMap() {
   container.innerHTML = "";
   container.appendChild(canvas);
 
+  // Re-centre the light only when the party changes room - hover redraws
+  // must not yank the view away from wherever the user has scrolled to.
+  const scrollState = { left: container.scrollLeft, top: container.scrollTop };
+  const areaChanged = mapScrollAreaId !== mapCurrentId;
+
   // Click / hover: a corridor out of the current room is a door you can
   // walk through. Hover names the way (and shows the pointer); click moves.
   const tileAt = (ev) => {
@@ -594,6 +619,14 @@ function renderMap() {
     const t = mapMovesEnabled ? tileAt(ev) : null;
     canvas.style.cursor = t ? "pointer" : "";
     canvas.title = t ? t.label : "";
+    const hoverTo = t ? t.to : null;
+    if (hoverTo !== mapHoverTo) {
+      mapHoverTo = hoverTo;
+      renderMap();
+    }
+  });
+  canvas.addEventListener("mouseleave", () => {
+    if (mapHoverTo !== null) { mapHoverTo = null; renderMap(); }
   });
   canvas.addEventListener("click", (ev) => {
     if (!mapMovesEnabled) return;
@@ -601,14 +634,24 @@ function renderMap() {
     if (t) act("move", { to: t.to });
   });
 
-  // Keep the light in view when the dungeon outgrows the frame.
+  // Keep the light in view when the dungeon outgrows the frame - but only
+  // on a real move; hover redraws restore the user's own scroll position.
   if (cur && container.clientWidth > 0) {
-    container.scrollLeft = Math.max(0, TX(cur.ox + cur.w / 2) - container.clientWidth / 2);
-    container.scrollTop = Math.max(0, TY(cur.oy + cur.h / 2) - container.clientHeight / 2);
+    if (areaChanged) {
+      container.scrollLeft = Math.max(0, TX(cur.ox + cur.w / 2) - container.clientWidth / 2);
+      container.scrollTop = Math.max(0, TY(cur.oy + cur.h / 2) - container.clientHeight / 2);
+      mapScrollAreaId = mapCurrentId;
+    } else {
+      container.scrollLeft = scrollState.left;
+      container.scrollTop = scrollState.top;
+    }
   }
 }
 
 let mapCurrentId = null;
+// The area the map last centred itself on - so hover redraws don't fight
+// the user's own scrolling.
+let mapScrollAreaId = null;
 
 function renderDelve(view) {
   document.getElementById("forge").hidden = true;
@@ -622,6 +665,7 @@ function renderDelve(view) {
     `Turn ${view.turns}` + (view.finished ? " — the delve is over." : "");
 
   mapCurrentId = view.area_id;
+  mapHoverTo = null;   // a new view rebuilds every corridor - stale glow helps no one
   recordArea(view);
   renderMap();
 
