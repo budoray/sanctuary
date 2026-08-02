@@ -2,19 +2,37 @@
 
 Sanctuary is an independent product published under the OSRIC 3.0 Third-Party
 License and is not affiliated with Mythmere Games LLC.
+
+    python app.py test            # the gate
+    TENSHIN_DEV=1 python app.py   # play locally, no login
+
+⚠ TENSHIN_DEV must be set BEFORE tenshin_gate is imported; the drop-in latches
+it into a module constant at import time.
 """
+import os
 import sys
 import uuid
 from dataclasses import asdict
 from functools import lru_cache
 from pathlib import Path
 
+# ⚠ BEFORE `import tenshin_gate`, AND THIS IS THE WHOLE REASON IT IS UP HERE.
+# The drop-in latches TENSHIN_DEV and TENSHIN_SECRET into module constants at
+# import time, so setting them later does nothing at all. The gate needs both:
+# dev mode to reach the gated player routes without a signed cookie, and a
+# secret that is not the public dev fallback - `secret_ok()` fails CLOSED on the
+# fallback, deliberately, so a box that never configured one rejects everything.
+if "test" in sys.argv:
+    os.environ.setdefault("TENSHIN_DEV", "1")
+    os.environ.setdefault("TENSHIN_SECRET", "gate-only-secret-not-a-real-one")
+
 import yaml
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 
 import tenshin_feedback
+import tenshin_gate
 import tenshin_version
 from sanctuary import character, module as module_mod, procgen, runtime, session, tables
 from sanctuary.dice import Dice
@@ -41,8 +59,58 @@ def _art() -> dict:
     return yaml.safe_load((ROOT / "data" / "art.yaml").read_text(encoding="utf-8"))
 
 
+# ── auth ──────────────────────────────────────────────────────────────────────
+# One Tenshin Arts account opens every game, so Sanctuary hosts no login of its
+# own: an unauthenticated visitor is sent to the SITE, not to a per-game form.
+# `require_account` raises 401 when the signed session cookie is missing or bad.
+#
+# ⚠ /version, /licence, /live/embed and /api/report stay OPEN on purpose. The
+# platform contract requires the unauthenticated embed to carry build · report ·
+# back, and the hub reads /version cross-origin to show a live build on the card.
+def _account(request: Request) -> int:
+    return tenshin_gate.require_account(request)
+
+
+# ── public leaderboard (Across-the-realms) ─────────────────────────────────
+# Sanctuary's natural score is XP earned: it is the one number every delve
+# produces regardless of module, party size, or whether the party survived —
+# a wipe still earns XP, and a fixture module (no procgen) has no depth stat
+# to report but wins XP the same as a generated one. Depth (the requested
+# dungeon_level) rides along as `stat` so the row means something at a glance.
+# One row per Tenshin account: their best delve, ever.
+# ponytail: process-local dicts, same shape as sanctuary/session.py's own
+# in-memory `_SESSIONS` - a durable store is a later, unrelated concern.
+CORS = {"Access-Control-Allow-Origin": "*"}
+_BEST: dict[int, dict] = {}
+_SESSION_LEVEL: dict[str, int] = {}
+
+
+def _record_best(request: Request, acct: int, session_id: str, view: dict) -> None:
+    xp = int(view.get("xp", 0))
+    prior = _BEST.get(acct)
+    if prior is not None and xp <= prior["score"]:
+        return
+    level = _SESSION_LEVEL.get(session_id, 1)
+    name = (tenshin_gate.name_from_cookie_header(request.headers.get("cookie", ""))
+            or f"P{acct}")
+    _BEST[acct] = {"name": name, "score": xp, "level": level,
+                   "stat": f"level {level} · {xp} xp"}
+
+
+@app.get("/leaderboard.json")
+def leaderboard():
+    """Public board, unauthenticated (the accepted carve-out - Tenshin
+    accounts are zero-PII, a self-chosen name and nothing else). Ranked on
+    XP, each account's best delve. ⚠ Every row carries a `stat` STRING - the
+    hub prints that column verbatim, and a board serving {name, score, level}
+    with no `stat` renders a blank column."""
+    board = sorted(_BEST.values(), key=lambda r: -r["score"])[:20]
+    return JSONResponse({"board": board}, headers=CORS)
+
+
 @app.get("/", response_class=HTMLResponse)
-def index():
+def index(request: Request):
+    _account(request)
     html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
     return html.replace("{{VERSION}}", tenshin_version.get_version())
 
@@ -66,6 +134,7 @@ async def api_roll_abilities(request: Request):
     Uses a fresh Dice(seed), the same first thing character.generate() does
     with it, so the values shown here are exactly what a later /api/character
     call with the same seed will roll."""
+    _account(request)
     body = await request.json()
     try:
         mode = str(body["mode"])
@@ -77,6 +146,7 @@ async def api_roll_abilities(request: Request):
 
 @app.post("/api/character")
 async def api_character(request: Request):
+    _account(request)
     body = await request.json()
     try:
         arrangement = body.get("arrangement")
@@ -137,6 +207,7 @@ async def api_delve_start(request: Request):
     """Begin a solo delve: generate/load a module, roll the party, hand
     both to `sanctuary.session`. Returns `session_id` plus the opening
     view - everything after this is `/api/delve/act`."""
+    acct = _account(request)
     body = await request.json()
     try:
         mod = _build_module(body)
@@ -146,6 +217,8 @@ async def api_delve_start(request: Request):
     except (ValueError, KeyError, LookupError) as e:
         raise HTTPException(status_code=400, detail=str(e))
     out["session_id"] = session_id
+    _SESSION_LEVEL[session_id] = int(body.get("dungeon_level", 1))
+    _record_best(request, acct, session_id, out)
     return out
 
 
@@ -153,20 +226,24 @@ async def api_delve_start(request: Request):
 async def api_delve_act(request: Request):
     """One player action against a running delve - move, search, rest,
     attack, flee, take_treasure, decide (a tier-3 ruling), or leave."""
+    acct = _account(request)
     body = await request.json()
     session_id = str(body.get("session_id", ""))
     action = str(body.get("action", ""))
     kwargs = {k: v for k, v in body.items() if k not in ("session_id", "action")}
     try:
-        return session.act(session_id, action, **kwargs)
+        out = session.act(session_id, action, **kwargs)
     except KeyError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    _record_best(request, acct, session_id, out)
+    return out
 
 
 @app.get("/api/delve/{session_id}")
-def api_delve_view(session_id: str):
+def api_delve_view(session_id: str, request: Request):
+    _account(request)
     try:
         return session.view(session_id)
     except KeyError as e:
