@@ -486,6 +486,20 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
 .hp-fill { display: block; height: 100%; background: var(--color-accent); transition: width var(--dur-med) var(--ease-out); }
 .hp-fill.hp-low { background: var(--color-danger); }
 .hp-fill.hp-dead { background: var(--color-rule); }
+
+/* The rail feels the blow and the boon: a chip whose bearer just lost hp
+   pulses a blood-red ring once; the XP figure flashes lamp-gold on a gain.
+   Both fire a single beat and settle - nothing loops, nothing nags. */
+@keyframes hp-hit {
+  0% { box-shadow: 0 0 0 2px var(--color-danger), 0 0 14px color-mix(in oklch, var(--color-danger) 55%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
+}
+.hp-hit { animation: hp-hit 700ms var(--ease-out); border-radius: var(--radius-sm); }
+@keyframes xp-flash {
+  0% { color: var(--color-accent); text-shadow: 0 0 14px color-mix(in oklch, var(--color-accent) 65%, transparent); }
+  100% { color: inherit; text-shadow: none; }
+}
+.xp-flash { animation: xp-flash 900ms var(--ease-out); }
 #combat-monsters li { display: flex; flex-direction: column; gap: 2px; }
 #exploration { display: flex; flex-direction: column; gap: var(--space-2); }
 #exploration button { width: 100%; }
@@ -573,7 +587,7 @@ h1, h2, h3, .chrome .wordmark { overflow-wrap: anywhere; min-width: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label, #pending-decisions p {
+  .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label, #pending-decisions p, .hp-hit, .xp-flash {
     animation-duration: 150ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 150ms !important;

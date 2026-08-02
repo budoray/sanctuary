@@ -778,6 +778,12 @@ function syncRailHover() {
   });
 }
 
+// The rail remembers the last view's wounds and winnings, so a fresh
+// render can feel the difference: a chip pulses red when its bearer took
+// a hit, and the XP figure flashes gold when the haul grows.
+let prevHpByName = {};
+let prevXp = 0;
+
 function renderDelve(view) {
   document.getElementById("forge").hidden = true;
   document.getElementById("arrange").hidden = true;
@@ -824,9 +830,23 @@ function renderDelve(view) {
     bar.appendChild(fill);
     chip.appendChild(label);
     chip.appendChild(bar);
+    // A wound announces itself: the chip of anyone who lost hp since the
+    // last view pulses blood-red once, then settles back to its bar.
+    if (p.name in prevHpByName && p.hp < prevHpByName[p.name]) chip.classList.add("hp-hit");
     vitals.appendChild(chip);
   });
-  document.getElementById("xp").textContent = view.xp;
+  prevHpByName = Object.fromEntries(view.party.map((p) => [p.name, p.hp]));
+  const xpEl = document.getElementById("xp");
+  xpEl.textContent = view.xp;
+  // A boon announces itself too: the XP figure flashes lamp-gold on every
+  // gain. The reflow between remove and add restarts the animation when
+  // gains land on back-to-back renders.
+  if (view.xp > prevXp) {
+    xpEl.classList.remove("xp-flash");
+    void xpEl.offsetWidth;
+    xpEl.classList.add("xp-flash");
+  }
+  prevXp = view.xp;
 
   const decisionPending = view.pending_decisions.length > 0;
 
