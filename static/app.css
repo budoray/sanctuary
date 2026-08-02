@@ -506,6 +506,11 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
   100% { color: inherit; text-shadow: none; }
 }
 .xp-flash { animation: xp-flash 900ms var(--ease-out); }
+
+/* The fallen: the chip quiets to a memorial - name struck, whole chip
+   dimmed, the bar already grey via .hp-fill.hp-dead. */
+.hp-chip.dead { opacity: 0.55; }
+.hp-chip.dead span:first-child { text-decoration: line-through; }
 #combat-monsters li { display: flex; flex-direction: column; gap: 2px; }
 #exploration { display: flex; flex-direction: column; gap: var(--space-2); }
 #exploration button { width: 100%; }

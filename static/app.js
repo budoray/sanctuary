@@ -853,7 +853,7 @@ function renderDelve(view) {
     const bar = document.createElement("span");
     bar.className = "hp-bar";
     const fill = document.createElement("span");
-    fill.className = "hp-fill" + (p.hp * 3 <= p.max_hp ? " hp-low" : "");
+    fill.className = "hp-fill" + (p.hp <= 0 ? " hp-dead" : p.hp * 3 <= p.max_hp ? " hp-low" : "");
     fill.style.width = `${Math.max(0, Math.min(100, (100 * p.hp) / p.max_hp))}%`;
     bar.appendChild(fill);
     chip.appendChild(label);
@@ -861,6 +861,8 @@ function renderDelve(view) {
     // A wound announces itself: the chip of anyone who lost hp since the
     // last view pulses blood-red once, then settles back to its bar.
     if (p.name in prevHpByName && p.hp < prevHpByName[p.name]) chip.classList.add("hp-hit");
+    // The fallen read as a memorial, not a meter: name struck, chip dimmed.
+    if (p.hp <= 0) chip.classList.add("dead");
     vitals.appendChild(chip);
   });
   prevHpByName = Object.fromEntries(view.party.map((p) => [p.name, p.hp]));
