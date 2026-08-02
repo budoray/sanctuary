@@ -98,6 +98,7 @@ DEPENDENCY_CHAIN = (
     ("procgen", "bestiary", "treasure"),
     ("resolve",),
     ("character",),
+    ("spells",),
     ("tables",),
     ("dice",),
 )
