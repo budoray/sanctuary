@@ -3,7 +3,12 @@
 Run manually; never imported by app.py. The committed YAML is the runtime
 truth and the PDFs are never read at runtime.
 
-    python tools/extract.py "C:/Users/budor/Downloads/OSRIC-3.0-Player-Guide-FINAL.v.7.pdf" data/tables
+    python tools/extract.py "<osric-dir>/OSRIC-3.0-Player-Guide-FINAL.v.7.pdf" data/tables
+
+⚠ The books are NOT in this repo and must never be - it is public, and the OSRIC
+licence permits reusing monster/spell/item TEXT, not redistributing the books.
+`sanctuary/sources.py` resolves where they live (SANCTUARY_OSRIC_DIR env var, then
+../_reference/osric, then ~/Downloads).
 
 The output is deliberately raw: each table keeps its lines as printed. Typed
 interpretation belongs in sanctuary/tables.py, where one table's quirks cannot

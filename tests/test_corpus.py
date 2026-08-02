@@ -108,19 +108,17 @@ def test_abandoned_tables_are_the_reviewed_set():
     """
     from tools.extract import find_tables, pdf_text
 
-    pdfs = [
-        Path("C:/Users/budor/Downloads/OSRIC-3.0-Player-Guide-FINAL.v.7.pdf"),
-        Path("C:/Users/budor/Downloads/OSRIC_3.0_Gamemaster_Guide.pdf"),
-    ]
-    for p in pdfs:
-        if not p.exists():
-            import pytest
-            pytest.skip(
-                f"source PDF missing: {p} does not exist in this environment - "
-                "the corpus round-trip guarantee (data/tables/ matches a fresh "
-                "extraction of the book) is UNVERIFIED here. See "
-                "test_corpus_is_internally_consistent_without_the_pdfs for what "
-                "still runs without the PDFs.")
+    from sanctuary import sources
+
+    pdfs = sources.source_pdfs()
+    if pdfs is None:
+        import pytest
+        pytest.skip(
+            f"OSRIC source PDFs not found. Searched: {sources.searched()}. The "
+            "corpus round-trip guarantee (data/tables/ matches a fresh "
+            "extraction of the book) is UNVERIFIED here. See "
+            "test_corpus_is_internally_consistent_without_the_pdfs for what "
+            "still runs without them.")
 
     abandoned = set()
     for p in pdfs:
@@ -184,21 +182,18 @@ def test_extraction_round_trips():
 
     from tools.extract import find_tables, pdf_text, write_tables
 
-    pdfs = {
-        "OSRIC-3.0-Player-Guide-FINAL.v.7.pdf": Path(
-            "C:/Users/budor/Downloads/OSRIC-3.0-Player-Guide-FINAL.v.7.pdf"),
-        "OSRIC_3.0_Gamemaster_Guide.pdf": Path(
-            "C:/Users/budor/Downloads/OSRIC_3.0_Gamemaster_Guide.pdf"),
-    }
-    for p in pdfs.values():
-        if not p.exists():
-            import pytest
-            pytest.skip(
-                f"source PDF missing: {p} does not exist in this environment - "
-                "the corpus round-trip guarantee (data/tables/ matches a fresh "
-                "extraction of the book) is UNVERIFIED here. See "
-                "test_corpus_is_internally_consistent_without_the_pdfs for what "
-                "still runs without the PDFs.")
+    from sanctuary import sources
+
+    found = sources.source_pdfs()
+    if found is None:
+        import pytest
+        pytest.skip(
+            f"OSRIC source PDFs not found. Searched: {sources.searched()}. The "
+            "corpus round-trip guarantee (data/tables/ matches a fresh "
+            "extraction of the book) is UNVERIFIED here. See "
+            "test_corpus_is_internally_consistent_without_the_pdfs for what "
+            "still runs without them.")
+    pdfs = {p.name: p for p in found}
 
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp)
