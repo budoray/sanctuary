@@ -874,6 +874,11 @@ function renderDelve(view) {
     btn.type = "button";
     btn.textContent = "Rule on it";
     btn.addEventListener("click", () => act("decide", { index: i, ruling: input.value || "no effect" }, btn));
+    // The DM's hands are already on the keyboard - Enter rules, same as
+    // reaching for the mouse. The input is no form, so the key must call it.
+    input.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") { ev.preventDefault(); btn.click(); }
+    });
     p.appendChild(input);
     p.appendChild(btn);
     decisions.appendChild(p);
