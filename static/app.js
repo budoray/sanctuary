@@ -964,7 +964,11 @@ function renderDelve(view) {
   view.pending_decisions.forEach((d, i) => {
     const p = document.createElement("p");
     p.className = "enter";
-    p.innerHTML = `<strong>Decision needed:</strong> ${d.detail} `;
+    // A stacked docket reads as one repeated card; number it so the DM can
+    // tell the second giant frog from the first.
+    const label = view.pending_decisions.length > 1
+      ? `Decision ${i + 1} of ${view.pending_decisions.length}:` : "Decision needed:";
+    p.innerHTML = `<strong>${label}</strong> ${d.detail} `;
     const input = document.createElement("input");
     input.type = "text";
     input.placeholder = "Your ruling";
