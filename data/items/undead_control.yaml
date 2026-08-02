@@ -1,0 +1,4 @@
+name: Undead Control
+classes: any
+description: Normally undead are immune to charm. However, this potion grants the drinker the ability to charm undead (intelligent or otherwise) as the charm person spell (including the limitations). Only intelligent undead are allowed a saving throw vs magic, with a penalty of 2. A total of 16 hit dice of undead can be influenced. All hit dice bonuses are rounded down (5+2 hit dice is considered as 5). The effects of this potion last 5d4 rounds. Each potion of undead control affects one type of undead, determined from the following table. D10 UNDEAD AFFECTED 1 Ghasts 2 Ghosts 3 Ghouls 4 Shadows 5 Skeletons 6
+source: OSRIC_3.0_Gamemaster_Guide.pdf

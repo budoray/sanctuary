@@ -1,0 +1,4 @@
+name: All Lycanthrope Warding
+classes: any
+description: This warding scroll takes 4 segments to read and its effects last for 5d6 rounds. A total of 49 HD of creatures are warded off, and for this calculation any “+” is rounded up if 3 or more, or down if 2 or fewer. Any creatures above these HD may enter the protected area and attack characters within. Roll on the table below to determine which specific creature type a scroll of warding is effective against. Note that if all shape-changers is indicated, this includes any creature that is capable of taking a human form, as well as creatures under the effects of a polymorph spell or creatures with an innate ability to shape-change or polymorph (including druids of high level). D20 CREATURE TYPE 1 Werebears 2 Wereboars 3–4 Wererats 5 Weretigers D20 CREATURE TYPE 6–8 Werewolves 9–19
+source: OSRIC_3.0_Gamemaster_Guide.pdf

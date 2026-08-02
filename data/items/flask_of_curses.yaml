@@ -1,0 +1,4 @@
+name: Flask of Curses
+classes: any
+description: This container appears as anyone of a number of containers encountered during the course of an adventure. Sometimes it looks like a potion flask, sometimes as a bottle or beaker, still others as a jug. Shaking the flask of curses may yield a sound as if it were filled with liquid, still other times the flask may emit a thin stream of smoke. When unstoppered, the flask releases a gaseous cloud which causes all within 30ft to roll their constitution score or lower on 3d6 to avoid being cursed. The curse causes a -2 penalty on all attack rolls and saving throws until such times as a remove curse spell can be cast on the suffering individuals.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

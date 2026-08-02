@@ -1,0 +1,4 @@
+name: Invisibility
+classes: any
+description: When this potion is quaffed, the drinker is bestowed with the spell-like ability of invisibility. This potion can be consumed in 1/8 increments, in which case the invisibility granted lasts 1d4+2 turns per dose. Any combat action removes the invisibility granted, such that a new dose must be consumed.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

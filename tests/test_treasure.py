@@ -1,11 +1,21 @@
-"""Unit tests for sanctuary.treasure: loot classes, gems, jewellery."""
+"""Unit tests for sanctuary.treasure: loot classes, gems, jewellery, and the
+magic-item determination chain."""
+import re
 from pathlib import Path
+
+import yaml
 
 from sanctuary.dice import Dice
 from sanctuary import treasure
 
 ROOT = Path(__file__).resolve().parent.parent
 TREASURE_DIR = ROOT / "data" / "treasure"
+ITEMS_DIR = ROOT / "data" / "items"
+
+
+def _slug(name: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "_", name.lower())
+    return s.strip("_")
 
 
 def _session(seed, class_name):
@@ -106,3 +116,107 @@ def test_no_ligature_survives_in_treasure_data():
         if any(chr(c) in text for c in range(0xFB00, 0xFB07)):
             bad.append(p.name)
     assert bad == [], f"ligatures survived into: {bad}"
+
+
+# --- magic-item determination chain (2.13.1a onward) -----------------------
+
+def test_magic_item_type_covers_every_d20_result():
+    seen = set()
+    for seed in range(200):
+        seen.add(treasure.roll_magic_item_type(Dice(seed)))
+    assert seen == {
+        "armour_or_shield", "miscellaneous_magic", "miscellaneous_weapon",
+        "potion", "ring", "rod_staff_wand", "scroll", "sword",
+    }
+
+
+def test_magic_item_type_same_seed_same_category():
+    assert treasure.roll_magic_item_type(Dice(3)) == treasure.roll_magic_item_type(Dice(3))
+
+
+def test_special_sword_and_weapon_and_ioun_stone_never_error_across_many_seeds():
+    # 2.13.1n, 1o and 1u are flat d100 tables spanning the whole range
+    # (including the book's own "96-00" wraparound row) - every seed must
+    # resolve to a row, never raise.
+    for seed in range(300):
+        d = Dice(seed)
+        treasure.roll_special_sword(d)
+        treasure.roll_special_weapon(d)
+        treasure.roll_ioun_stone(d)
+
+
+def test_ioun_stone_never_returns_the_re_roll_instruction_itself():
+    for seed in range(300):
+        name = treasure.roll_ioun_stone(Dice(seed)).name
+        assert not name.lower().startswith("re-roll")
+
+
+def test_miscellaneous_magic_item_never_errors_across_many_seeds():
+    # 2.13.1p (rarity) -> 1q/1r/1s/1t (specific item). Several of these
+    # tables were only partially committed to data/tables/ by the shared
+    # extractor (a table crossing a page break loses its remainder - see
+    # data/treasure/misc_magic_items_overflow.yaml's note); this is the
+    # regression test for that gap actually being closed.
+    for seed in range(1000):
+        item = treasure.roll_miscellaneous_magic_item(Dice(seed))
+        assert item.name
+
+
+def test_miscellaneous_magic_item_same_seed_same_item():
+    a = treasure.roll_miscellaneous_magic_item(Dice(123))
+    b = treasure.roll_miscellaneous_magic_item(Dice(123))
+    assert a == b
+
+
+def test_special_sword_percentages_match_the_book():
+    """Table 2.13.1n: Vorpal Blade is a single-result 1-in-100 (row "90"),
+    Luck Blade is the widest band, 54-69 (16/100)."""
+    row = next(r for r in treasure._rows("2.13.1n") if "Vorpal" in r)
+    assert row[0] == "90"
+    row = next(r for r in treasure._rows("2.13.1n") if "Luck" in r)
+    assert re.sub(r"[–—]", "-", row[0]) == "54-69"
+
+
+# --- data/items corpus -------------------------------------------------
+
+def test_item_corpus_is_substantial():
+    files = list(ITEMS_DIR.glob("*.yaml"))
+    assert len(files) > 250, f"only {len(files)} magic items extracted"
+
+
+def test_every_item_file_parses_and_has_a_name():
+    for p in ITEMS_DIR.glob("*.yaml"):
+        doc = yaml.safe_load(p.read_text(encoding="utf-8"))
+        assert doc["name"], f"{p.name} has no name"
+        assert doc["source"]
+
+
+def test_no_ligature_survives_in_item_corpus():
+    bad = []
+    for p in ITEMS_DIR.glob("*.yaml"):
+        text = p.read_text(encoding="utf-8")
+        if any(chr(c) in text for c in range(0xFB00, 0xFB07)):
+            bad.append(p.name)
+    assert bad == [], f"ligatures survived into: {bad}"
+
+
+def test_miscellaneous_magic_item_names_mostly_reconcile_with_the_corpus():
+    """Every named (non-meta) result across the four miscellaneous-magic
+    rarity tiers (2.13.1q-1t) should have a matching data/items file. A
+    fuzzy prefix match absorbs the source's own footnote markers (e.g.
+    "Strand of Prayer Beads1") and the odd table row a page-break wrapped
+    mid-name - tracked with a threshold rather than exact equality so a
+    handful of known, reported gaps don't make this test brittle."""
+    item_slugs = [p.stem for p in ITEMS_DIR.glob("*.yaml")]
+    total = hit = 0
+    for table_id in ("2.13.1q", "2.13.1r", "2.13.1s", "2.13.1t"):
+        for row in treasure._rows(table_id):
+            name, _value = treasure._name_and_value(row[1:])
+            if name.lower().startswith(("roll", "re-roll")):
+                continue  # a re-roll instruction, not a named item
+            total += 1
+            slug = _slug(name)
+            if any(slug.startswith(s) or s.startswith(slug) for s in item_slugs):
+                hit += 1
+    assert total > 150
+    assert hit / total > 0.85, f"only {hit}/{total} miscellaneous magic items reconciled"

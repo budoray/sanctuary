@@ -1,0 +1,4 @@
+name: Incense of Meditation
+classes: C
+description: If a cleric meditates for spells while burning the incense of meditation, any spells gained will have their maximum stated effects (so a cure light wounds spell would heal 8hp regardless of the roll). The incense does not alter target saving throws.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

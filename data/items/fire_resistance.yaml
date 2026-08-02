@@ -1,0 +1,4 @@
+name: Fire Resistance
+classes: any
+description: The drinker of this potion is impervious to all forms of ordinary flame, whether as small as a torch or as large as a raging bonfire, for 1 turn. Further, this potion reduces damage from other kinds of fire by -2 per die of damage. These kinds of fire include fireball, wall of fire, and the intense heat of molten rock. If exposure to these flames requires a saving throw, it is made at +4 to the die roll. Half of the potion can be quaffed for resistance lasting 5 rounds, and other bonuses provided are halved (-1 damage and +2 to saving throws).
+source: OSRIC_3.0_Gamemaster_Guide.pdf
