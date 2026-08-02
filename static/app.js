@@ -710,16 +710,34 @@ function renderMap() {
 
   // Click / hover: a corridor out of the current room is a door you can
   // walk through. Hover names the way (and shows the pointer); click moves.
-  const tileAt = (ev) => {
+  const tileXY = (ev) => {
     const r = canvas.getBoundingClientRect();
-    const x = Math.floor((ev.clientX - r.left) / TILE_PX) + minX;
-    const y = Math.floor((ev.clientY - r.top) / TILE_PX) + minY;
+    return [
+      Math.floor((ev.clientX - r.left) / TILE_PX) + minX,
+      Math.floor((ev.clientY - r.top) / TILE_PX) + minY,
+    ];
+  };
+  const tileAt = (ev) => {
+    const [x, y] = tileXY(ev);
     return mapClickTargets.get(key(x, y));
+  };
+  // Memory has names: hovering a room the party has actually stood in
+  // answers with what the delve called it. Unvisited shells stay mute.
+  const roomNameAt = (ev) => {
+    const [x, y] = tileXY(ev);
+    for (const id in rooms) {
+      const rm = rooms[id];
+      if (!exploredAreas[id].visited) continue;
+      if (x >= rm.ox && x < rm.ox + rm.w && y >= rm.oy && y < rm.oy + rm.h) {
+        return exploredAreas[id].name;
+      }
+    }
+    return null;
   };
   canvas.addEventListener("mousemove", (ev) => {
     const t = mapMovesEnabled ? tileAt(ev) : null;
     canvas.style.cursor = t ? "pointer" : "";
-    canvas.title = t ? t.label : "";
+    canvas.title = t ? t.label : (roomNameAt(ev) || "");
     const hoverTo = t ? t.to : null;
     if (hoverTo !== mapHoverTo) {
       mapHoverTo = hoverTo;
