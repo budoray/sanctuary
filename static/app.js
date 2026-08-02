@@ -72,6 +72,7 @@ function renderLog(rolls) {
   log.innerHTML = "";
   for (const r of rolls) {
     const li = document.createElement("li");
+    li.className = "enter";
     const faces = document.createElement("b");
     li.appendChild(faces);
     const modText = r.mods ? ` ${r.mods > 0 ? "+" : ""}${r.mods}` : "";
@@ -173,17 +174,154 @@ document.getElementById("confirm-arrangement").addEventListener("click", async (
 // Delve: solo play over sanctuary/runtime.py via sanctuary/session.py.
 // The dice tray keeps rendering every roll exactly as it does for
 // character generation - `renderLog` is reused unchanged.
+//
+// The map is built entirely from what `/api/delve/*` already returns:
+// each `view` names the current area (`area_id`, `name`, `exits`). There
+// is no "give me the whole dungeon" endpoint, so the client accumulates
+// what it has actually seen into `exploredAreas` as the party moves -
+// a fog-of-war map is the honest shape for a map built this way.
 // --------------------------------------------------------------------
 
 let delveSessionId = null;
 let lastCharacter = null;
+let exploredAreas = {};
+let mapRootId = null;
+
+function recordArea(view) {
+  if (mapRootId === null) mapRootId = view.area_id;
+  exploredAreas[view.area_id] = { name: view.name, exits: view.exits, visited: true };
+  for (const e of view.exits) {
+    if (!(e.to in exploredAreas)) {
+      exploredAreas[e.to] = { name: null, exits: [], visited: false };
+    }
+  }
+}
+
+// BFS layering from the root area: column = steps from the start, row =
+// position within that column. Good enough for the mostly-linear graphs
+// procgen produces; not a general graph-layout engine.
+function layoutMap(rootId) {
+  const adjacency = {};
+  for (const id in exploredAreas) adjacency[id] = new Set();
+  for (const id in exploredAreas) {
+    for (const e of exploredAreas[id].exits) {
+      const to = String(e.to);
+      adjacency[id].add(to);
+      if (!adjacency[to]) adjacency[to] = new Set();
+      adjacency[to].add(id);
+    }
+  }
+  const depth = {};
+  const queue = [String(rootId)];
+  depth[String(rootId)] = 0;
+  const order = [];
+  while (queue.length) {
+    const cur = queue.shift();
+    order.push(cur);
+    for (const n of adjacency[cur] || []) {
+      if (!(n in depth)) {
+        depth[n] = depth[cur] + 1;
+        queue.push(n);
+      }
+    }
+  }
+  const columns = {};
+  for (const id of order) {
+    const d = depth[id];
+    (columns[d] = columns[d] || []).push(id);
+  }
+  const positions = {};
+  for (const d in columns) {
+    columns[d].forEach((id, i) => {
+      positions[id] = { col: Number(d), row: i, rowCount: columns[d].length };
+    });
+  }
+  return positions;
+}
+
+const NS = "http://www.w3.org/2000/svg";
+function svgEl(tag, attrs) {
+  const el = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v);
+  return el;
+}
+
+function renderMap() {
+  const container = document.getElementById("map");
+  if (mapRootId === null) { container.innerHTML = ""; return; }
+
+  const NODE_W = 128, NODE_H = 72, GAP_X = 96, GAP_Y = 32;
+  const positions = layoutMap(mapRootId);
+  const maxCol = Math.max(...Object.values(positions).map((p) => p.col));
+  const maxRows = Math.max(...Object.values(positions).map((p) => p.rowCount));
+  const width = (maxCol + 1) * (NODE_W + GAP_X) - GAP_X + GAP_X;
+  const height = maxRows * (NODE_H + GAP_Y) + GAP_Y;
+
+  const centerOf = (id) => {
+    const p = positions[id];
+    const colX = GAP_X / 2 + p.col * (NODE_W + GAP_X) + NODE_W / 2;
+    const bandH = p.rowCount * (NODE_H + GAP_Y);
+    const rowY = (height - bandH) / 2 + p.row * (NODE_H + GAP_Y) + GAP_Y / 2 + NODE_H / 2;
+    return { x: colX, y: rowY };
+  };
+
+  const svg = svgEl("svg", { viewBox: `0 0 ${width} ${height}`, class: "delve-map", role: "img",
+                              "aria-label": "Dungeon floor plan of areas explored so far" });
+
+  const edgesSeen = new Set();
+  for (const id in exploredAreas) {
+    for (const e of exploredAreas[id].exits) {
+      const to = String(e.to);
+      const key = [id, to].sort().join("-");
+      if (edgesSeen.has(key)) continue;
+      edgesSeen.add(key);
+      const a = centerOf(id), b = centerOf(to);
+      const line = svgEl("line", {
+        x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: "map-edge",
+      });
+      svg.appendChild(line);
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const label = svgEl("text", { x: mx, y: my, class: "map-edge-label" });
+      label.textContent = e.kind || "";
+      svg.appendChild(label);
+    }
+  }
+
+  for (const id in exploredAreas) {
+    const area = exploredAreas[id];
+    const { x, y } = centerOf(id);
+    const isCurrent = Number(id) === Number(mapCurrentId);
+    const g = svgEl("g", {
+      class: `map-node enter ${area.visited ? "visited" : "ghost"} ${isCurrent ? "current" : ""}`,
+      transform: `translate(${x - NODE_W / 2}, ${y - NODE_H / 2})`,
+    });
+    g.appendChild(svgEl("rect", { width: NODE_W, height: NODE_H, rx: 10, class: "map-node-rect" }));
+    const label = svgEl("text", { x: NODE_W / 2, y: NODE_H / 2, class: "map-node-label" });
+    label.textContent = area.visited ? area.name : "unexplored";
+    g.appendChild(label);
+    svg.appendChild(g);
+  }
+
+  container.innerHTML = "";
+  container.appendChild(svg);
+}
+
+let mapCurrentId = null;
 
 function renderDelve(view) {
-  document.getElementById("delve").hidden = false;
+  document.getElementById("forge").hidden = true;
+  document.getElementById("arrange").hidden = true;
+  document.getElementById("map-stage").hidden = false;
+  document.getElementById("party-status").hidden = false;
+
   document.getElementById("area-name").textContent = view.name;
   document.getElementById("area-description").textContent = view.description;
   document.getElementById("area-turns").textContent =
     `Turn ${view.turns}` + (view.finished ? " — the delve is over." : "");
+
+  mapCurrentId = view.area_id;
+  recordArea(view);
+  renderMap();
 
   document.getElementById("party-vitals").textContent = view.party
     .map((p) => `${p.name} ${p.hp}/${p.max_hp} hp`).join(", ");
@@ -193,6 +331,7 @@ function renderDelve(view) {
   decisions.innerHTML = "";
   view.pending_decisions.forEach((d, i) => {
     const p = document.createElement("p");
+    p.className = "enter";
     p.innerHTML = `<strong>Decision needed:</strong> ${d.detail} `;
     const input = document.createElement("input");
     input.type = "text";
@@ -217,7 +356,7 @@ function renderDelve(view) {
       li.textContent = `${m.name}: ${m.hp}/${m.max_hp} hp ${m.alive ? "" : "(defeated)"}`;
       li.dataset.target = i;
       if (m.alive) {
-        li.style.cursor = "pointer";
+        li.classList.add("selectable");
         li.addEventListener("click", () => { combatList.dataset.target = i; });
       }
       combatList.appendChild(li);
@@ -315,6 +454,8 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
     return;
   }
   delveSessionId = view.session_id;
+  exploredAreas = {};
+  mapRootId = null;
   renderDelve(view);
 });
 

@@ -1,93 +1,107 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>Sanctuary™</title>
+<link rel="stylesheet" href="/static/tokens.css">
 <link rel="stylesheet" href="/static/app.css">
 <header class="chrome">
-  <h1>Sanctuary™</h1>
+  <span class="wordmark">Sanctuary™</span>
   <nav>
     <span id="build">{{VERSION}}</span>
-    <button id="report" type="button">report</button>
-    <a id="back" href="https://tenshinarts.com/">← Tenshin Arts</a>
-    <a id="signout" href="https://tenshinarts.com/signout">sign out</a>
+    <button id="report" type="button">Report</button>
+    <a id="back" href="https://tenshinarts.com/">Tenshin Arts</a>
+    <a id="signout" href="https://tenshinarts.com/signout">Sign out</a>
   </nav>
 </header>
 
 <main>
-  <section id="forge">
-    <h2>Roll a character</h2>
-    <label>Mode
-      <select id="mode">
-        <option value="hardest">Hardest — 3d6 in order</option>
-        <option value="difficult">Difficult — 3d6, arrange</option>
-        <option value="normal" selected>Normal — 4d6 drop lowest</option>
-        <option value="flexible">Flexible — 4d6 drop lowest, arrange</option>
-      </select>
-    </label>
-    <label>Ancestry <select id="ancestry"></select></label>
-    <label>Class <select id="klass"></select></label>
-    <label>Name <input id="name" type="text" placeholder="Ilse"></label>
-    <button id="roll" type="button">Roll</button>
-  </section>
+  <div id="stage">
+    <section id="forge">
+      <h2>Roll a character</h2>
+      <label>Mode
+        <select id="mode">
+          <option value="hardest">Hardest — 3d6 in order</option>
+          <option value="difficult">Difficult — 3d6, arrange</option>
+          <option value="normal" selected>Normal — 4d6 drop lowest</option>
+          <option value="flexible">Flexible — 4d6 drop lowest, arrange</option>
+        </select>
+      </label>
+      <label>Ancestry <select id="ancestry"></select></label>
+      <label>Class <select id="klass"></select></label>
+      <label>Name <input id="name" type="text" placeholder="Ilse"></label>
+      <button id="roll" type="button">Roll</button>
+    </section>
 
-  <section id="arrange" hidden>
-    <h2>Arrange your rolls</h2>
-    <p>Assign each rolled score to an ability.</p>
-    <dl id="arrange-fields"></dl>
-    <button id="confirm-arrangement" type="button">Confirm arrangement</button>
-  </section>
+    <section id="arrange" hidden>
+      <h2>Arrange your rolls</h2>
+      <p>Assign each rolled score to an ability.</p>
+      <dl id="arrange-fields"></dl>
+      <button id="confirm-arrangement" type="button">Confirm arrangement</button>
+    </section>
 
-  <section id="sheet" hidden>
-    <img id="portrait" alt="" width="192" height="192">
-    <h2 id="who"></h2>
-    <dl id="scores"></dl>
-    <p id="vitals"></p>
-    <h3>Saving throws</h3>
-    <dl id="saves"></dl>
-    <button id="begin-delve" type="button">Begin a delve</button>
-  </section>
+    <section id="map-stage" hidden>
+      <div id="map-head">
+        <h2 id="area-name"></h2>
+        <p id="area-turns"></p>
+      </div>
+      <div id="map"></div>
+      <p id="area-description"></p>
+    </section>
+  </div>
 
-  <section id="delve" hidden>
-    <h2 id="area-name"></h2>
-    <p id="area-description"></p>
-    <p id="area-turns"></p>
-    <p>Party: <span id="party-vitals"></span> — XP <span id="xp">0</span></p>
+  <aside id="instruments">
+    <section id="sheet" hidden>
+      <img id="portrait" alt="" width="96" height="96">
+      <h2 id="who"></h2>
+      <dl id="scores"></dl>
+      <p id="vitals"></p>
+      <h3>Saving throws</h3>
+      <dl id="saves"></dl>
+      <button id="begin-delve" type="button">Begin a delve</button>
+    </section>
 
-    <div id="pending-decisions"></div>
+    <section id="party-status" hidden>
+      <h3>Party</h3>
+      <p><span id="party-vitals"></span> — XP <span id="xp">0</span></p>
 
-    <div id="combat" hidden>
-      <h3>Combat</h3>
-      <ul id="combat-monsters"></ul>
-      <button id="attack" type="button">Attack</button>
-      <button id="flee" type="button">Flee</button>
-    </div>
+      <div id="pending-decisions"></div>
 
-    <div id="exploration">
-      <h3>Exits</h3>
-      <ul id="exits"></ul>
-      <h3>Here</h3>
-      <ul id="area-monsters"></ul>
-      <ul id="area-treasure"></ul>
-      <button id="search" type="button">Search</button>
-      <button id="rest" type="button">Rest a turn</button>
-      <button id="take-treasure" type="button">Take treasure</button>
-      <button id="leave-delve" type="button">Leave the delve</button>
-    </div>
+      <div id="combat" hidden>
+        <h3>Combat</h3>
+        <ul id="combat-monsters"></ul>
+        <button id="attack" type="button">Attack</button>
+        <button id="flee" type="button">Flee</button>
+      </div>
 
-    <h3>Inventory</h3>
-    <ul id="inventory"></ul>
-    <h3>What's happened</h3>
-    <ul id="delve-log"></ul>
-  </section>
+      <div id="exploration">
+        <h3>Exits</h3>
+        <ul id="exits"></ul>
+        <h3>Here</h3>
+        <ul id="area-monsters"></ul>
+        <ul id="area-treasure"></ul>
+        <button id="search" type="button">Search</button>
+        <button id="rest" type="button">Rest a turn</button>
+        <button id="take-treasure" type="button">Take treasure</button>
+        <button id="leave-delve" type="button">Leave the delve</button>
+      </div>
 
-  <section id="tray">
-    <h2>Dice</h2>
-    <ol id="log"></ol>
-  </section>
+      <h3>Inventory</h3>
+      <ul id="inventory"></ul>
+      <h3>What's happened</h3>
+      <ul id="delve-log"></ul>
+    </section>
+
+    <section id="tray">
+      <h2>Dice ledger</h2>
+      <ol id="log"></ol>
+    </section>
+  </aside>
 </main>
 
 <footer>
   <p id="licence">Sanctuary is an independent product published under the OSRIC 3.0 Third-Party License and is not affiliated with Mythmere Games LLC.</p>
+  <span class="rule">·</span>
   <p id="srd-notice">This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at: https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at: https://creativecommons.org/licenses/by/4.0/legalcode.</p>
-  <p><a href="/licence">Full licence</a></p>
+  <span class="rule">·</span>
+  <a href="/licence">Full licence</a>
 </footer>
 <script src="/static/app.js"></script>
