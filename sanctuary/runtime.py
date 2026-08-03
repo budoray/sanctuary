@@ -15,17 +15,28 @@ sequence of calls against this module's public functions produces an
 identical `State.dice.log` and an identical resulting state, end to end.
 
 May import `sanctuary.module`, `sanctuary.procgen`, `sanctuary.bestiary`,
-`sanctuary.treasure`, `sanctuary.resolve`, `sanctuary.character`,
-`sanctuary.spells`, `sanctuary.dice` - nothing left of itself in the §5
-chain (tests/test_invariants.py::test_dependency_chain_is_one_way).
+`sanctuary.treasure`, `sanctuary.character`, `sanctuary.spells`,
+`sanctuary.dice` - nothing left of itself in the §5 chain
+(tests/test_invariants.py::test_dependency_chain_is_one_way). Combat
+mechanics (attack rolls, morale, the stock damage die) go through
+`State.ruleset` - the loaded pack, never `sanctuary.resolve` directly -
+so the engine runs whatever ruleset it was handed.
 """
 import re
 from dataclasses import dataclass, field
 
-from sanctuary import bestiary, resolve, treasure
+from sanctuary import bestiary, treasure
 from sanctuary.character import Character
 from sanctuary.dice import Dice
 from sanctuary.module import Module
+
+
+def _default_ruleset():
+    """The pack a delve plays by when its driver names none. Imported
+    lazily so this module's top-level import list stays exactly the §5
+    chain's - and so tests can register a double before first use."""
+    from sanctuary import rulesets
+    return rulesets.load("osric")
 
 # --------------------------------------------------------------------
 # Small parsers for the module format's free-text fields. None of these
@@ -275,20 +286,26 @@ class State:
     pending_decisions: list = field(default_factory=list)
     log: list = field(default_factory=list)
     finished: bool = False
+    # The pack this delve plays by (sanctuary.ruleset.Ruleset). Set by
+    # new_game; attack/morale/damage go through it, never around it.
+    ruleset: object = None
 
 
 def party_key(c: Character, i: int) -> str:
     return c.name or f"pc{i}"
 
 
-def new_game(module_: Module, party: list, seed: int) -> State:
-    """Start a delve. `party` is a list of `character.Character`."""
+def new_game(module_: Module, party: list, seed: int, ruleset=None) -> State:
+    """Start a delve. `party` is a list of `character.Character`;
+    `ruleset` is the pack the delve plays by (the OSRIC pack when the
+    driver names none)."""
     if not party:
         raise ValueError("a delve needs at least one character")
     start_id = module_.areas[0]["id"]
     hp = {party_key(c, i): c.hit_points for i, c in enumerate(party)}
     st = State(seed=seed, dice=Dice(seed), module=module_, party=list(party),
-               hp=dict(hp), max_hp=dict(hp), area_id=start_id)
+               hp=dict(hp), max_hp=dict(hp), area_id=start_id,
+               ruleset=ruleset if ruleset is not None else _default_ruleset())
     st.visited.add(start_id)
     st.log.append(f"The party begins: {module_.doc['module']['start'].strip()}")
     _maybe_start_area_combat(st)
@@ -482,7 +499,8 @@ def attack_round(st: State, target_index: int = 0) -> dict:
         key = party_key(c, i)
         if st.hp[key] <= 0 or not target.alive:
             continue
-        result = resolve.attack(st.dice, c, target.armour_class, damage_expr="1d6")
+        result = st.ruleset.attack(st.dice, c, target.armour_class,
+                                   damage_expr=st.ruleset.default_damage_expr)
         events.append({"attacker": key, "target": target.name, "hit": result.hit,
                         "damage": result.damage})
         if result.hit:
@@ -503,7 +521,8 @@ def attack_round(st: State, target_index: int = 0) -> dict:
         # actually fights, and made a single unlucky round unrecoverable.
         i, c = living_pcs[m_idx % len(living_pcs)]
         key = party_key(c, i)
-        result = resolve.attack(st.dice, m.hd_notation, c.armour_class, damage_expr="1d6")
+        result = st.ruleset.attack(st.dice, m.hd_notation, c.armour_class,
+                                   damage_expr=st.ruleset.default_damage_expr)
         events.append({"attacker": m.name, "target": key, "hit": result.hit,
                         "damage": result.damage})
         if result.hit:
@@ -520,7 +539,7 @@ def attack_round(st: State, target_index: int = 0) -> dict:
         _resolve_victory(st)
     elif alive_monsters:
         hd_num = re.match(r"[\d.]+", alive_monsters[0].hd_notation)
-        morale_result = resolve.morale(st.dice, hit_dice=float(hd_num.group()) if hd_num else 1.0)
+        morale_result = st.ruleset.morale(st.dice, hit_dice=float(hd_num.group()) if hd_num else 1.0)
         if not morale_result.passed:
             for m in alive_monsters:
                 m.alive = False

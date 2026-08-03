@@ -1,0 +1,41 @@
+# The OSRIC 3.0 pack manifest. Every ruleset pack declares these fields:
+#
+#   id                  registry name (directory name must match)
+#   name                human-facing ruleset name
+#   title               product title the chrome shows
+#   version             pack version, independent of the game's VERSION
+#   licence_notice      the pack's own licence line (served at /licence)
+#   abilities           ability keys, in sheet order
+#   save_heading        the sheet's heading over the saves list
+#   default_damage_expr the party's stock damage die (until equipment lands)
+#   gen_modes           chargen modes: value, player-facing label, and at most
+#                       one `selected: true` (the select's initial choice)
+#   selected_class      the class tile checked on first paint
+#   content             where the pack's extracted corpus lives (tables,
+#                       ancestries, classes, monsters) - informational for
+#                       now; the adapter owns actually reading them
+#
+# Mechanics are NOT here on purpose: real systems need real code (see
+# sanctuary/rulesets/osric.py - exceptional strength, ranger 2d8 at 1st
+# level and multiclass division are why the adapter is Python, not YAML).
+id: osric
+name: OSRIC 3.0
+title: "Sanctuary™"
+version: 1.0.0
+licence_notice: >-
+  Sanctuary is an independent product published under the OSRIC 3.0
+  Third-Party License and is not affiliated with Mythmere Games LLC.
+abilities: [strength, dexterity, constitution, intelligence, wisdom, charisma]
+save_heading: Saving throws
+default_damage_expr: 1d6
+gen_modes:
+  - {value: hardest, label: "Hardest — 3d6 in order"}
+  - {value: difficult, label: "Difficult — 3d6, arrange"}
+  - {value: normal, label: "Normal — 4d6 drop lowest", selected: true}
+  - {value: flexible, label: "Flexible — 4d6 drop lowest, arrange"}
+selected_class: fighter
+content:
+  tables: data/tables
+  ancestries: data/ancestries.yaml
+  classes: data/classes.yaml
+  monsters: data/monsters

@@ -34,16 +34,19 @@ from fastapi.staticfiles import StaticFiles
 import tenshin_feedback
 import tenshin_gate
 import tenshin_version
-from sanctuary import (character, module as module_mod, procgen, runtime, session,
-                       sources, tables)
+from sanctuary import (character, module as module_mod, procgen, rulesets, runtime,
+                       session, sources, tables)
 from sanctuary.dice import Dice
 
 ROOT = Path(__file__).resolve().parent
 GAME = "sanctuary"
 
-LICENCE_NOTICE = (
-    "Sanctuary is an independent product published under the OSRIC 3.0 "
-    "Third-Party License and is not affiliated with Mythmere Games LLC.")
+# The pack this table plays by. Everything rules-facing - chargen, combat,
+# the forge's own option lists - asks the pack, never the OSRIC modules
+# directly, so another system can be plugged in by name alone.
+RULESET = rulesets.load(os.environ.get("SANCTUARY_RULESET", "osric"))
+
+LICENCE_NOTICE = RULESET.licence_notice
 SRD_NOTICE = (
     "This work includes material taken from the System Reference Document 5.1 "
     "(\"SRD 5.1\") by Wizards of the Coast LLC and available at: "
@@ -128,14 +131,24 @@ def licence():
             f"<p><a href=\"/\">← Sanctuary™</a></p></main>")
 
 
+@app.get("/api/ruleset")
+def api_ruleset(request: Request):
+    """The loaded pack's client manifest: everything the forge needs to
+    build itself - gen modes, ancestries, class tiles with portraits,
+    headings, title, licence. The client hardcodes none of it, so a new
+    pack is a server-side choice, not a client edit."""
+    _account(request)
+    return RULESET.client_manifest()
+
+
 @app.get("/api/ancestry-classes")
 def api_ancestry_classes(request: Request):
-    """The map Fix 1 needs: `{ancestry: [allowed classes]}` for all seven,
-    sourced straight from data/ancestries.yaml via character.ancestry() -
-    never hand-copied into JS, or it drifts from the book the moment either
-    side edits alone."""
+    """`{ancestry: [allowed classes]}` from the loaded pack, which sources
+    it straight from its own data (OSRIC: data/ancestries.yaml via
+    character.ancestry()) - never hand-copied into JS, or it drifts from
+    the book the moment either side edits alone."""
     _account(request)
-    return {a: list(character.ancestry(a)["allowed_classes"]) for a in character.ANCESTRIES}
+    return {a: RULESET.ancestry_allowed_classes(a) for a in RULESET.ancestry_names()}
 
 
 @app.post("/api/roll-abilities")
@@ -149,10 +162,10 @@ async def api_roll_abilities(request: Request):
     body = await request.json()
     try:
         mode = str(body["mode"])
-        scores = character.roll_abilities(Dice(seed=int(body["seed"])), mode)
+        scores = RULESET.roll_abilities(Dice(seed=int(body["seed"])), mode)
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return {"scores": scores, "arrangeable": character.arrangeable(mode)}
+    return {"scores": scores, "arrangeable": RULESET.arrangeable(mode)}
 
 
 @app.post("/api/character")
@@ -161,7 +174,7 @@ async def api_character(request: Request):
     body = await request.json()
     try:
         arrangement = body.get("arrangement")
-        c = character.generate(
+        c = RULESET.generate(
             seed=int(body["seed"]),
             mode=str(body["mode"]),
             ancestry_name=str(body["ancestry"]),
@@ -173,8 +186,11 @@ async def api_character(request: Request):
         raise HTTPException(status_code=400, detail=str(e))
     out = asdict(c)
     out["log"] = [asdict(r) for r in c.log]
-    portraits = _art()["portraits"]
-    out["portrait"] = portraits.get(c.classes[0], portraits["default"])
+    out["portrait"] = RULESET.portrait_for(c.classes[0])
+    # The pack formats its own vitals sentence (OSRIC: descending AC and
+    # to-hit/damage modifiers); the client renders it verbatim rather than
+    # knowing which numbers a ruleset considers vital.
+    out["vitals_text"] = RULESET.vitals_line(c)
     return out
 
 
@@ -202,7 +218,7 @@ def _build_party(specs: list[dict]) -> list[character.Character]:
     party = []
     for spec in specs:
         arrangement = spec.get("arrangement")
-        party.append(character.generate(
+        party.append(RULESET.generate(
             seed=int(spec["seed"]),
             mode=str(spec["mode"]),
             ancestry_name=str(spec["ancestry"]),
@@ -224,7 +240,8 @@ async def api_delve_start(request: Request):
         mod = _build_module(body)
         party = _build_party(body.get("party") or [])
         session_id = uuid.uuid4().hex
-        out = session.start(session_id, mod, party, seed=int(body.get("seed", 1)))
+        out = session.start(session_id, mod, party, seed=int(body.get("seed", 1)),
+                            ruleset=RULESET)
     except (ValueError, KeyError, LookupError) as e:
         raise HTTPException(status_code=400, detail=str(e))
     out["session_id"] = session_id
@@ -330,13 +347,23 @@ def selfcheck() -> str:
 
     n_areas, n_reachable, xp_earned, turns_elapsed = _runtime_selfcheck()
 
+    # The seam itself: the pack the app plays by must be the registry's
+    # OSRIC pack, and its seed-1 character must be the module's seed-1
+    # character - a delegation that changes a number is not a delegation.
+    pack = rulesets.load("osric")
+    assert pack.generate(seed=1, mode="normal", ancestry_name="human",
+                         class_names=("fighter",)) == c, \
+        "the OSRIC pack does not delegate chargen honestly"
+    assert RULESET.id == "osric" or "SANCTUARY_RULESET" in os.environ
+
     return (f"sanctuary self-check OK - {n_table_ids} tables in {n_files} files, "
             f"{n_ancestries} ancestries, {n_classes} classes, {n_portraits} portraits, "
             f"corpus round-trip {round_trip}, "
             f"seed 1 reproduces a {c.classes[0]} with "
             f"{c.hit_points} hp and {len(c.log)} logged rolls, "
             f"runtime plays a {n_areas}-area dungeon ({n_reachable} reachable) to a "
-            f"reproducible finish earning {xp_earned} xp over {turns_elapsed} turns")
+            f"reproducible finish earning {xp_earned} xp over {turns_elapsed} turns, "
+            f"ruleset '{RULESET.id}' v{RULESET.version} loaded from data/rulesets/{RULESET.id}")
 
 
 def _play_a_delve(seed: int):

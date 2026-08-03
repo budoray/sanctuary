@@ -19,11 +19,13 @@ from sanctuary.module import Module
 _SESSIONS: dict[str, runtime.State] = {}
 
 
-def start(session_id: str, module_: Module, party: list[Character], seed: int) -> dict:
+def start(session_id: str, module_: Module, party: list[Character], seed: int,
+          ruleset=None) -> dict:
     """Begin a solo delve, keyed by `session_id` (the client mints this -
     a session id, not a player identity, so nothing here decides who a
-    player is)."""
-    st = runtime.new_game(module_, party, seed)
+    player is). `ruleset` is the pack the delve plays by; the runtime
+    defaults to the OSRIC pack when none is named."""
+    st = runtime.new_game(module_, party, seed, ruleset=ruleset)
     _SESSIONS[session_id] = st
     return view(session_id)
 
@@ -40,6 +42,7 @@ def view(session_id: str) -> dict:
     party vitals, the dice log so far, and anything awaiting a decision."""
     st = _get(session_id)
     out = runtime.describe(st)
+    out["ruleset"] = getattr(st.ruleset, "id", "osric")
     out["party"] = [
         {"name": runtime.party_key(c, i), "hp": st.hp[runtime.party_key(c, i)],
          "max_hp": st.max_hp[runtime.party_key(c, i)]}
