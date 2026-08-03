@@ -200,7 +200,14 @@ section, #forge, #arrange, #map-stage {
 /* Rhythm, not uniformity. Elevation on dark comes from LIGHTNESS - a
    brighter surface is a nearer one - never from a coloured halo. */
 #party-status { padding: var(--space-5) var(--space-6) var(--space-6); }
-#tray { padding: var(--space-4) var(--space-5); background: var(--color-paper); }
+#tray { padding: var(--space-3) var(--space-4); background: var(--color-paper); }
+#tray h2 {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-2);
+  margin: var(--space-1) 0 var(--space-1);
+}
 #sheet { background: var(--color-paper-2); box-shadow: var(--shadow-1); }
 #map-stage { background: var(--color-paper-3); box-shadow: var(--shadow-1); scroll-margin-top: var(--space-16); }
 
@@ -242,6 +249,61 @@ section, #forge, #arrange, #map-stage {
   letter-spacing: -0.02em;
   margin: 0 0 var(--space-2);
 }
+
+/* ── forge mode: the whole ceremony on one screen ───────────────────────
+   Before a delve the dice ARE the point, so the table sits directly under
+   the forge where the player's eyes already are; the sheet keeps the rail,
+   shrunk to a working card. The forge gives up its 78svh stage and packs
+   tight - form, table and sheet all fit the viewport, nothing to scroll
+   for. #instruments dissolves exactly as in delve mode; DOM untouched.
+   ⚠ This block must come AFTER the base `#forge { display: flex }` rule in
+   the file: tests/test_app.py::test_hiding_an_element_actually_hides_it
+   reads the FIRST `#forge {` rule textually and requires a `display:` in
+   it. */
+@media (min-width: 861px) {
+  main:has(#map-stage[hidden]) {
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 19rem);
+    align-items: stretch;
+  }
+  main:has(#map-stage[hidden]) #instruments { display: contents; }
+  main:has(#map-stage[hidden]) #sheet {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-3) var(--space-4);
+  }
+  main:has(#map-stage[hidden]) #tray { grid-column: 1; grid-row: 2; align-self: start; }
+  main:has(#map-stage[hidden]) #forge {
+    min-height: 0;
+    justify-content: flex-start;
+    max-width: none;
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-2);
+  }
+  main:has(#map-stage[hidden]) #forge h2 { font-size: var(--text-2xl); }
+  main:has(#map-stage[hidden]) #forge label { margin: var(--space-1) 0; }
+  /* Ten portraits, one row: the class choice reads as a tavern's worth of
+     strangers shoulder to shoulder, and the forge keeps a single screen. */
+  main:has(#map-stage[hidden]) .portrait-grid { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+  main:has(#map-stage[hidden]) .portrait-name { font-size: var(--text-xs); }
+  main:has(#map-stage[hidden]) #who { font-size: var(--text-lg); }
+  main:has(#map-stage[hidden]) #portrait { width: 64px; height: 64px; }
+  main:has(#map-stage[hidden]) #scores { grid-template-columns: auto 1fr auto 1fr; column-gap: var(--space-3); }
+  /* Save names are long ("Death Paralysis Poison") - give them a full row
+     each rather than letting a 4-up grid wrap them into towers. */
+  main:has(#map-stage[hidden]) #saves { grid-template-columns: auto 1fr; }
+  main:has(#map-stage[hidden]) #sheet h3 { margin-top: var(--space-3); }
+  main:has(#map-stage[hidden]) #log { max-height: 3.75rem; }
+}
+
+/* Name and the throw of the dice share one line: the commitment row. */
+.forge-commit { display: flex; gap: var(--space-3); align-items: flex-end; }
+.forge-commit label { flex: 1; margin: 0; }
+.forge-commit input { width: 100%; }
+.forge-commit #roll { flex: none; padding-inline: var(--space-10); }
+@media (max-width: 560px) { .forge-commit { flex-direction: column; align-items: stretch; } }
+
 #arrange h2 { margin-top: 0; }
 
 h2 {
@@ -582,23 +644,105 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
 #log strong { color: var(--color-accent); }
 #log em { font-style: normal; color: var(--color-ink-2); }
 
+/* ── the dice table: felt, bone dice, the ceremony ─────────────────────── */
+/* The ledger is the audit trail; the table is the theatre. Dice tumble in
+   from above with a deterministic scatter (hashed in app.js - the client
+   never invents randomness), settle, and the total stamps down in accent. */
+#dice-table {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: flex-start;
+  gap: 6px;
+  min-height: 44px;
+  max-height: 6.5rem;
+  overflow: hidden;
+  padding: 6px 8px;
+  margin-bottom: var(--space-2);
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in oklch, var(--color-felt) 70%, var(--color-paper)) 0%, var(--color-felt) 100%);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 2px 8px color-mix(in oklch, var(--color-shadow) 60%, transparent);
+}
+.table-wait {
+  margin: auto;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-sm);
+  color: color-mix(in oklch, var(--color-ink) 40%, transparent);
+}
+.die {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  filter: drop-shadow(0 2px 2px color-mix(in oklch, var(--color-shadow) 55%, transparent));
+  animation: die-tumble 640ms var(--ease-out) both;
+  animation-delay: var(--tumble-delay, 0ms);
+}
+.die polygon, .die rect {
+  fill: var(--color-die-bone);
+  stroke: var(--color-die-edge);
+  stroke-width: 1.5;
+}
+.die text {
+  fill: var(--color-die-ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.die.sweep {
+  transition: transform 240ms var(--ease-in), opacity 240ms var(--ease-in);
+  transform: translateX(-30px);
+  opacity: 0;
+}
+.table-stamp {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-accent);
+  padding: 0 var(--space-1);
+  animation: stamp-in 300ms var(--ease-out) both;
+  animation-delay: var(--tumble-delay, 0ms);
+}
+@keyframes die-tumble {
+  from { transform: translate(var(--tumble-dx, 0), -56px) rotate(var(--tumble-rot, 0deg)); opacity: 0; }
+  60%  { opacity: 1; }
+  75%  { transform: translate(0, 4px) rotate(0deg); }
+  90%  { transform: translate(0, -2px); }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes stamp-in {
+  from { transform: translateY(6px) scale(1.25); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .die, .table-stamp { animation: none; }
+  .die.sweep { transition: none; }
+}
+
 .enter { animation: fade-in var(--dur-short) var(--ease-out) both; }
 
 /* ── Ft5: statement close ─────────────────────────────────────────────── */
 /* The page closes with a sentence, not a sitemap: the licence is the
    colophon, centred and quiet, and the one link in it carries the accent. */
 footer {
-  padding: var(--space-8) var(--space-5) var(--space-6);
+  padding: var(--space-3) var(--space-5);
   border-top: 1px solid var(--color-rule);
   font-size: var(--text-xs);
   color: var(--color-ink-2);
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
   text-align: center;
-  gap: var(--space-2);
+  gap: var(--space-1) var(--space-4);
 }
-footer p { margin: 0; max-width: 68ch; }
+footer p { margin: 0; }
+footer #srd-notice { max-width: 90ch; }
 footer .rule { color: var(--color-rule); display: none; }
 footer a { color: var(--color-accent); text-decoration: none; border-bottom: 1px solid var(--color-rule); }
 footer a:hover { border-color: var(--color-accent); }

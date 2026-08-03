@@ -129,6 +129,83 @@ function animate(el, finalFaces) {
   tick();
 }
 
+// --- The dice table -------------------------------------------------------
+// Every roll the server reports lands on the felt as physical dice: one SVG
+// per face, tumbling in from above, then a stamped total. Pure spectacle -
+// the ledger below stays the audit trail and the aria-live voice; the table
+// is aria-hidden so the numbers are announced exactly once.
+
+const DIE_SHAPES = {
+  4:   '<polygon points="20,4 36,33 4,33"/>',
+  6:   '<rect x="5" y="5" width="30" height="30" rx="7"/>',
+  8:   '<polygon points="20,3 36,20 20,37 4,20"/>',
+  10:  '<polygon points="20,3 34,16 27,37 13,37 6,16"/>',
+  12:  '<polygon points="20,3 34,12 30,31 10,31 6,12"/>',
+  20:  '<polygon points="20,3 33,10 33,28 20,37 7,28 7,10"/>',
+  100: '<polygon points="20,3 34,16 27,37 13,37 6,16"/>',
+};
+
+function dieSides(expr) {
+  const m = /d(\d+)/.exec(expr);
+  return m ? parseInt(m[1], 10) : 6;
+}
+
+// Deterministic scatter: the client must never invent randomness (the
+// invariants suite scans static/ for a second RNG), so each die's tumble
+// path is hashed from its position in the cast - same roll, same dance.
+function tumbleSeed(i, j, face) {
+  let h = (i + 1) * 2654435761 ^ (j + 1) * 40503 ^ (face + 7) * 97;
+  h = (h ^ (h >>> 13)) * 2246822519;
+  return ((h ^ (h >>> 15)) >>> 0) / 4294967295;
+}
+
+function castDice(newRolls) {
+  const table = document.getElementById("dice-table");
+  if (!table) return;
+  // Old dice are swept off the edge before the new cast lands.
+  for (const die of table.querySelectorAll(".die")) {
+    die.classList.add("sweep");
+    setTimeout(() => die.remove(), 260);
+  }
+  table.querySelectorAll(".table-stamp, .table-wait").forEach((el) => el.remove());
+
+  // A resumed delve can arrive with a hundred rolls in tow - only the most
+  // recent few get the ceremony, or the table drowns in dice. And even a
+  // fresh cast caps the physical dice: a wall of 26 reads as noise, eighteen
+  // tumbling bones reads as a throw.
+  const shown = newRolls.length > 10 ? newRolls.slice(-3) : newRolls;
+  let n = 0;
+  for (let i = 0; i < shown.length && n < 18; i++) {
+    const r = shown[i];
+    const sides = dieSides(r.expr);
+    const shape = DIE_SHAPES[sides] || DIE_SHAPES[6];
+    for (let j = 0; j < r.faces.length && n < 18; j++) {
+      const s1 = tumbleSeed(i, j, r.faces[j]);
+      const s2 = tumbleSeed(j, i, r.faces[j] + 1);
+      const die = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      die.setAttribute("viewBox", "0 0 40 40");
+      die.setAttribute("class", "die");
+      die.style.setProperty("--tumble-dx", `${Math.round((s1 - 0.5) * 72)}px`);
+      die.style.setProperty("--tumble-rot", `${Math.round((s2 - 0.5) * 720)}deg`);
+      die.style.setProperty("--tumble-delay", `${n * 90}ms`);
+      die.innerHTML = `${shape}<text x="20" y="21">${r.faces[j]}</text>`;
+      table.appendChild(die);
+      n++;
+    }
+  }
+  // The last roll's total stamps down once its dice have settled.
+  const last = shown[shown.length - 1];
+  if (last) {
+    const stamp = document.createElement("span");
+    stamp.className = "table-stamp";
+    stamp.style.setProperty("--tumble-delay", `${n * 90 + 350}ms`);
+    const modText = last.mods ? ` ${last.mods > 0 ? "+" : ""}${last.mods}` : "";
+    stamp.textContent = `${last.expr}${modText} = ${last.total}` +
+      (last.reason ? ` · ${last.reason}` : "");
+    table.appendChild(stamp);
+  }
+}
+
 // Only the new roll dances: lines that already told their faces stay
 // put, so a fresh render doesn't re-shimmer the whole ledger.
 let prevRollsLen = 0;
@@ -141,7 +218,8 @@ function renderLog(rolls) {
   // when memory was reset (a fresh delve, a re-forged character) or the
   // impossible happened and the log shrank.
   if (prevRollsLen === 0 || rolls.length < prevRollsLen) log.innerHTML = "";
-  for (let i = log.children.length; i < rolls.length; i++) {
+  const start = log.children.length;
+  for (let i = start; i < rolls.length; i++) {
     const r = rolls[i];
     const li = document.createElement("li");
     li.className = "enter";
@@ -155,8 +233,23 @@ function renderLog(rolls) {
     animate(faces, r.faces);
   }
   prevRollsLen = rolls.length;
+  if (rolls.length > start) castDice(rolls.slice(start));
   // The newest roll is the one that matters - keep it in view.
   log.scrollTop = log.scrollHeight;
+}
+
+// Engine refusals arrive as Python-speak ("human does not meet monk's
+// ability minimums: {'dexterity': 15}"). The forge speaks to the player
+// instead: what the class needs, what to do about it.
+function humanRollError(detail) {
+  const m = /^(\w+) does not meet (\w+)'s ability minimums: \{(.+)\}$/.exec(detail || "");
+  if (!m) return `Cannot roll that: ${detail}`;
+  const [, ancestry, klass, needsRaw] = m;
+  const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+  const needs = [...needsRaw.matchAll(/'(\w+)': (\d+)/g)]
+    .map((g) => `${cap(g[1])} ${g[2]}`)
+    .join(" and ");
+  return `A ${klass} needs ${needs} - this ${ancestry} rolled lower. Re-roll, or choose another class.`;
 }
 
 async function finalizeCharacter(seed, arrangement) {
@@ -178,7 +271,7 @@ async function finalizeCharacter(seed, arrangement) {
   });
   if (!res.ok) {
     const err = await res.json();
-    showForgeError(`Cannot roll that: ${err.detail}`);
+    showForgeError(humanRollError(err.detail));
     return;
   }
   const c = await res.json();

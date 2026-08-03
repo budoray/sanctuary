@@ -113,8 +113,10 @@
           </span>
         </div>
       </div>
-      <label>Name <input id="name" type="text" placeholder="Ilse"></label>
-      <button id="roll" type="button">Roll</button>
+      <div class="forge-commit">
+        <label>Name <input id="name" type="text" placeholder="Ilse"></label>
+        <button id="roll" type="button">Roll</button>
+      </div>
       <p id="forge-error" class="hint" role="alert" hidden></p>
     </section>
 
@@ -190,6 +192,7 @@
     </section>
 
     <section id="tray">
+      <div id="dice-table" aria-hidden="true"><span class="table-wait">The dice wait.</span></div>
       <h2>Dice ledger</h2>
       <ol id="log" aria-live="polite"></ol>
     </section>
