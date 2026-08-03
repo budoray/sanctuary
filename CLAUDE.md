@@ -63,6 +63,15 @@ reporter wired server-side with nothing calling it, a version in the state paylo
 renders, and a tutorial with no replay have all shipped here while `app.py` grepped clean. If the
 client is a static file or a bundle, the gate must read it.
 
+⚠⚠ **A LINK IS NOT A FEATURE — ITS TARGET IS.** The house chrome rendered
+`<a href="/api/report">report</a>` for this game's whole life, and `/api/report` is **POST
+only**: the link answered **405**, in production, on both surfaces, on the one control a
+player uses to say something is broken. Everything the gate asked was true — the POST route
+existed, the word "report" was in the page, the contract checker POSTed and passed. Nothing
+asked where the link pointed. The house pattern is `<a id="report" href="#">` plus a handler
+that POSTs; three sibling games already did it and this one was the lone deviation, which is
+why no shared check caught it. **When you add a control, follow it to what it hits.**
+
 ⚠ **`tenshin_feedback.submit()` returns `(ok, info)` — a tuple.** `bool()` on a 2-tuple is always
 True, so `if submit(...)` tells the player "sent" while the report goes nowhere. Unpack it.
 

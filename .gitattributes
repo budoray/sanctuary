@@ -1,0 +1,6 @@
+# Normalize line endings — the deploy box is Linux; a CRLF shebang is a broken
+# interpreter there, and consistent LF stops the "CRLF will be replaced" churn.
+* text=auto eol=lf
+*.sh text eol=lf
+*.woff2 binary
+*.png binary
