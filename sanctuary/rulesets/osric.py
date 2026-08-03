@@ -33,6 +33,7 @@ class OsricPack:
         self.default_damage_expr = m["default_damage_expr"]
         self._gen_modes = list(m["gen_modes"])
         self._selected_class = m["selected_class"]
+        self._selected_ancestry = m["selected_ancestry"]
         self._portraits = yaml.safe_load(
             (_ROOT / "data" / "art.yaml").read_text(encoding="utf-8"))["portraits"]
 
@@ -92,6 +93,7 @@ class OsricPack:
             "save_heading": self.save_heading,
             "gen_modes": self.gen_modes(),
             "ancestries": self.ancestry_names(),
+            "selected_ancestry": self._selected_ancestry,
             "classes": [
                 {"value": c, "label": self._label(c), "portrait": self.portrait_for(c),
                  "selected": c == self._selected_class}

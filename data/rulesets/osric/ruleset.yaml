@@ -11,6 +11,7 @@
 #   gen_modes           chargen modes: value, player-facing label, and at most
 #                       one `selected: true` (the select's initial choice)
 #   selected_class      the class tile checked on first paint
+#   selected_ancestry   the ancestry option selected on first paint
 #   content             where the pack's extracted corpus lives (tables,
 #                       ancestries, classes, monsters) - informational for
 #                       now; the adapter owns actually reading them
@@ -34,6 +35,7 @@ gen_modes:
   - {value: normal, label: "Normal — 4d6 drop lowest", selected: true}
   - {value: flexible, label: "Flexible — 4d6 drop lowest, arrange"}
 selected_class: fighter
+selected_ancestry: human
 content:
   tables: data/tables
   ancestries: data/ancestries.yaml

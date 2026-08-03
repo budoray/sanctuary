@@ -1,8 +1,14 @@
 "use strict";
 
-const ANCESTRIES = ["dwarf", "elf", "gnome", "half-elf", "halfling", "half-orc", "human"];
-const CLASSES = ["assassin", "cleric", "druid", "fighter", "illusionist",
-                 "magic-user", "monk", "paladin", "ranger", "thief"];
+// The ruleset pack's manifest is the forge's parts list: which ancestries
+// and classes exist, what the generation modes are called, which tile is
+// checked first. index.html carries the OSRIC pack's markup as the no-JS
+// first paint; bootPack() rebuilds the same DOM from /api/ruleset so the
+// client serves any pack the server loads, sight unseen.
+let PACK = null;
+let ANCESTRIES = ["dwarf", "elf", "gnome", "half-elf", "halfling", "half-orc", "human"];
+let CLASSES = ["assassin", "cleric", "druid", "fighter", "illusionist",
+               "magic-user", "monk", "paladin", "ranger", "thief"];
 
 function fill(id, values) {
   const el = document.getElementById(id);
@@ -16,9 +22,10 @@ function fill(id, values) {
 fill("ancestry", ANCESTRIES);
 document.getElementById("ancestry").value = "human";
 
-// The class picker is a real radio group, server-rendered in index.html
-// (one portrait tile per class, in CLASSES order) so it is focusable and
-// keyboard-navigable with no JS at all - this just reads/writes it.
+// The class picker is a real radio group - server-rendered in index.html
+// for the no-JS first paint, rebuilt by bootPack() from the manifest in
+// the exact same shape (one portrait tile per class) so it stays
+// focusable and keyboard-navigable either way - this just reads/writes it.
 function classRadios() {
   return Array.from(document.querySelectorAll('input[name="klass"]'));
 }
@@ -26,6 +33,64 @@ function selectedClass() {
   const checked = classRadios().find((r) => r.checked);
   return checked ? checked.value : CLASSES[0];
 }
+
+function buildClassTiles(classes) {
+  const group = document.getElementById("klass-group");
+  group.innerHTML = "";
+  for (const c of classes) {
+    const tile = document.createElement("span");
+    tile.className = "portrait-tile";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "klass";
+    input.id = `klass-${c.value}`;
+    input.value = c.value;
+    input.className = "sr-only";
+    input.checked = !!c.selected;
+    input.setAttribute("aria-describedby", `klass-${c.value}-reason`);
+    const label = document.createElement("label");
+    label.htmlFor = input.id;
+    label.id = `klass-${c.value}-label`;
+    const img = document.createElement("img");
+    img.src = c.portrait;
+    img.alt = "";
+    img.width = 96;
+    img.height = 96;
+    const name = document.createElement("span");
+    name.className = "portrait-name";
+    name.textContent = c.label;
+    label.append(img, name);
+    const reason = document.createElement("span");
+    reason.id = `klass-${c.value}-reason`;
+    reason.className = "sr-only";
+    tile.append(input, label, reason);
+    group.appendChild(tile);
+  }
+}
+
+async function bootPack() {
+  const res = await fetch("/api/ruleset");
+  if (!res.ok) return;   // the static first paint stands
+  PACK = await res.json();
+  ANCESTRIES = PACK.ancestries;
+  CLASSES = PACK.classes.map((c) => c.value);
+  fill("ancestry", ANCESTRIES);
+  document.getElementById("ancestry").value = PACK.selected_ancestry || ANCESTRIES[0];
+  const mode = document.getElementById("mode");
+  mode.innerHTML = "";
+  for (const m of PACK.gen_modes) {
+    const o = document.createElement("option");
+    o.value = m.value;
+    o.textContent = m.label;
+    o.selected = !!m.selected;
+    mode.appendChild(o);
+  }
+  buildClassTiles(PACK.classes);
+  const saveHeading = document.querySelector("#sheet h3");
+  if (saveHeading) saveHeading.textContent = PACK.save_heading;
+  applyClassAvailability();
+}
+bootPack();
 
 // ── Fix 1: an illegal ancestry/class pairing is known before any dice roll,
 // from data/ancestries.yaml's own allowed_classes - so it is prevented, not
@@ -101,9 +166,9 @@ function renderSheet(c) {
     scores.insertAdjacentHTML("beforeend", `<dt>${k}</dt><dd>${v}</dd>`);
   }
 
-  document.getElementById("vitals").textContent =
-    `${c.hit_points} hp · AC ${c.armour_class} · to hit ${c.modifiers.hit >= 0 ? "+" : ""}${c.modifiers.hit}` +
-    ` · damage ${c.modifiers.damage >= 0 ? "+" : ""}${c.modifiers.damage} · seed ${c.seed}`;
+  document.getElementById("vitals").textContent = c.vitals_text ||
+    (`${c.hit_points} hp · AC ${c.armour_class} · to hit ${c.modifiers.hit >= 0 ? "+" : ""}${c.modifiers.hit}` +
+     ` · damage ${c.modifiers.damage >= 0 ? "+" : ""}${c.modifiers.damage} · seed ${c.seed}`);
 
   const saves = document.getElementById("saves");
   saves.innerHTML = "";
@@ -202,10 +267,11 @@ function castDice(newRolls) {
       n++;
     }
   }
-  // The stamp belongs to the player, not the DM's screen: morale and
-  // wandering-monster checks tumble with the rest (the table is honest),
-  // but the ember total names the roll someone at the table actually made.
-  const DM_NOISE = /wandering check|morale/i;
+  // The stamp belongs to the player, not the DM's screen: morale,
+  // wandering-monster and hoard-generation checks tumble with the rest
+  // (the table is honest), but the ember total names the roll someone at
+  // the table actually made.
+  const DM_NOISE = /wandering check|morale|hoard/i;
   const last = [...shown].reverse().find((r) => !DM_NOISE.test(r.reason || ""))
     || shown[shown.length - 1];
   if (last) {
