@@ -544,6 +544,40 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
 #combat-monsters li.defeated { opacity: 0.55; }
 #combat-monsters li.defeated span:first-child { text-decoration: line-through; }
 
+/* A hit has a number and a flinch: the damage the view reported flies off
+   the wounded row and the row shakes once. A fresh kill flashes ember and
+   settles into its memorial - one beat, then stillness. */
+#combat-monsters li { position: relative; }
+.dmg-fly {
+  position: absolute;
+  top: -2px;
+  right: var(--space-2);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--text-md);
+  color: var(--color-danger);
+  text-shadow: 0 0 10px color-mix(in oklch, var(--color-danger) 60%, transparent);
+  pointer-events: none;
+  animation: dmg-fly 950ms var(--ease-out) both;
+}
+@keyframes dmg-fly {
+  0%   { transform: translateY(6px) scale(0.8); opacity: 0; }
+  18%  { transform: translateY(0) scale(1.15); opacity: 1; }
+  100% { transform: translateY(-30px) scale(1); opacity: 0; }
+}
+@keyframes row-flinch {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  55% { transform: translateX(3px); }
+  80% { transform: translateX(-1px); }
+}
+#combat-monsters li.hit { animation: row-flinch 260ms var(--ease-out); }
+@keyframes slain-beat {
+  0% { box-shadow: 0 0 0 2px var(--color-danger), 0 0 22px color-mix(in oklch, var(--color-danger) 60%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent, 0 0 0 transparent; }
+}
+#combat-monsters li.slain { animation: row-flinch 260ms var(--ease-out), slain-beat 800ms var(--ease-out); border-radius: var(--radius-sm); }
+
 /* Menace has one colour everywhere: the Here list wears the same blood as
    the eyes ringing the party on the map, and treasure answers in the same
    lamp-gold as its glints. Empty notes keep their quiet italic. */
@@ -780,7 +814,7 @@ h1, h2, h3, .chrome .wordmark { overflow-wrap: anywhere; min-width: 0; }
 #toast.ok { border-color: var(--color-accent); }
 
 @media (prefers-reduced-motion: reduce) {
-  .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label, #pending-decisions p, .hp-hit, .hp-mend, .xp-flash, #combat.combat-start {
+  .enter, button, .chrome nav a, .chrome nav button, .portrait-tile label, #pending-decisions p, .hp-hit, .hp-mend, .xp-flash, #combat.combat-start, #combat-monsters li.hit, #combat-monsters li.slain, .dmg-fly {
     animation-duration: 150ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 150ms !important;

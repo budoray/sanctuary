@@ -961,6 +961,9 @@ let prevXp = 0;
 let prevInCombat = false;
 let prevAreaId = null;
 let prevExitTos = new Set();
+// Monsters bleed too: the last view's combat hp, so a fresh render can
+// fly the damage number off the row that took it and mark a fresh kill.
+let prevMonsterHp = [];
 let prevTurns = 0;
 // What's happened, line by line: only entries beyond this count are new.
 let prevDelveLogLen = 0;
@@ -1107,6 +1110,10 @@ function renderDelve(view) {
 
   const combatSection = document.getElementById("combat");
   combatSection.hidden = !view.in_combat;
+  // A NEW combat is not a wound: only a fight already joined in the last
+  // render can fly damage. Without this gate the first render of a fresh
+  // combat reads the old fight's hp as injuries the new monsters never took.
+  const combatContinues = view.in_combat && prevInCombat;
   // Combat enters with a jolt: the first render with blades out rings the
   // card in blood for a beat. Later rounds render quiet - the fight is
   // already joined, no need to keep shouting it.
@@ -1142,6 +1149,19 @@ function renderDelve(view) {
       li.appendChild(label);
       li.appendChild(bar);
       li.dataset.target = i;
+      // The wound shows its number: hp the view says this monster lost
+      // since the last render flies off its row, and the row flinches.
+      // A fresh kill gets the heavier beat - once, at the moment it falls.
+      if (combatContinues && i in prevMonsterHp && m.hp < prevMonsterHp[i]) {
+        const fly = document.createElement("span");
+        fly.className = "dmg-fly";
+        fly.setAttribute("aria-hidden", "true");
+        fly.textContent = `−${prevMonsterHp[i] - m.hp}`;
+        li.appendChild(fly);
+        setTimeout(() => fly.remove(), 1000);
+        li.classList.add("hit");
+        if (!m.alive && prevMonsterHp[i] > 0) li.classList.add("slain");
+      }
       if (m.alive) {
         li.classList.add("selectable");
         // Attack falls back to target 0 - show that default honestly.
@@ -1158,6 +1178,9 @@ function renderDelve(view) {
       }
       combatList.appendChild(li);
     });
+    prevMonsterHp = view.combat.monsters.map((m) => m.hp);
+  } else {
+    prevMonsterHp = [];
   }
 
   const exitsList = document.getElementById("exits");
@@ -1428,6 +1451,7 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
   // A fresh delve starts the rail's memory fresh too - no mend pulse for
   // hp the new party never gained, no gold flash for xp it never earned.
   prevHpByName = {};
+  prevMonsterHp = [];
   prevXp = 0;
   prevInCombat = false;
   prevAreaId = null;
