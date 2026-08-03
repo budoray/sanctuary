@@ -72,6 +72,17 @@ asked where the link pointed. The house pattern is `<a id="report" href="#">` pl
 that POSTs; three sibling games already did it and this one was the lone deviation, which is
 why no shared check caught it. **When you add a control, follow it to what it hits.**
 
+★ **A game that teaches a subject is designed in the PRAXAGOGICAL mode** — the fourth rung after
+pedagogy, andragogy and heutagogy. Locus of control is the learner *inside a complex system*; the
+goal is **process resilience and adaptive confidence**, not subject mastery; failure is **tolerated
+as cognitive friction**, never penalised. The instructor is a **validating mentor / co-conspirator**:
+it tells a learner their process was sound *separately from whether it worked*, and it is inside the
+problem rather than holding the answer key — an oracle that is never wrong is an authority figure,
+which is the pedagogy column. ⚠ Never in player-facing copy: a game that announces its mode has
+become an exercise. ⚠ **This framework was called PCRT until 2026-08-03** — same content, retired
+name; do not write PCRT in new work. Full section, the three scales and what each demands of a game:
+[`SSOT.md`](../Website/SSOT.md) → *Praxagogy — why these games exist*.
+
 ⚠ **`tenshin_feedback.submit()` returns `(ok, info)` — a tuple.** `bool()` on a 2-tuple is always
 True, so `if submit(...)` tells the player "sent" while the report goes nowhere. Unpack it.
 
