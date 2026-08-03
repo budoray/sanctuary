@@ -168,6 +168,15 @@ function castDice(newRolls) {
     setTimeout(() => die.remove(), 260);
   }
   table.querySelectorAll(".table-stamp, .table-wait").forEach((el) => el.remove());
+  // An empty cast is the DM gathering the bones between scenes: the felt
+  // goes back to waiting.
+  if (!newRolls.length) {
+    const wait = document.createElement("span");
+    wait.className = "table-wait";
+    wait.textContent = "The dice wait.";
+    table.appendChild(wait);
+    return;
+  }
 
   // A resumed delve can arrive with a hundred rolls in tow - only the most
   // recent few get the ceremony, or the table drowns in dice. And even a
@@ -193,8 +202,12 @@ function castDice(newRolls) {
       n++;
     }
   }
-  // The last roll's total stamps down once its dice have settled.
-  const last = shown[shown.length - 1];
+  // The stamp belongs to the player, not the DM's screen: morale and
+  // wandering-monster checks tumble with the rest (the table is honest),
+  // but the ember total names the roll someone at the table actually made.
+  const DM_NOISE = /wandering check|morale/i;
+  const last = [...shown].reverse().find((r) => !DM_NOISE.test(r.reason || ""))
+    || shown[shown.length - 1];
   if (last) {
     const stamp = document.createElement("span");
     stamp.className = "table-stamp";
@@ -1423,6 +1436,9 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
   prevRollsLen = 0;
   prevDelveLogLen = 0;
   renderDelve(view);
+  // A new scene: the DM gathers the creation dice and the felt waits for
+  // the delve's own first cast.
+  castDice([]);
 });
 
 document.getElementById("attack").addEventListener("click", (ev) => {
