@@ -19,6 +19,8 @@
   --color-die-edge:    oklch(70% 0.03 70);
   --color-die-ink:     oklch(22% 0.03 55);
   --color-felt:        oklch(24% 0.04 150);
+  --color-wood:        oklch(31% 0.05 62);
+  --color-wood-edge:   oklch(19% 0.03 55);
   --color-danger:      oklch(58% 0.17 28);
   --color-shadow:      oklch(7% 0.01 55);
 

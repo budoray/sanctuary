@@ -1077,13 +1077,14 @@ function renderDelve(view) {
     const p = document.createElement("p");
     p.className = "enter";
     // A stacked docket reads as one repeated card; number it so the DM can
-    // tell the second giant frog from the first.
+    // tell the second giant frog from the first. The voice is the table's:
+    // the engine cannot rule, so it calls on the one who can.
     const label = view.pending_decisions.length > 1
-      ? `Decision ${i + 1} of ${view.pending_decisions.length}:` : "Decision needed:";
+      ? `The DM rules (${i + 1} of ${view.pending_decisions.length}):` : "The DM rules:";
     p.innerHTML = `<strong>${label}</strong> ${d.detail} `;
     const input = document.createElement("input");
     input.type = "text";
-    input.placeholder = "Your ruling";
+    input.placeholder = "Speak your ruling";
     input.id = `ruling-${i}`;
     const btn = document.createElement("button");
     btn.type = "button";

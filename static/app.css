@@ -209,7 +209,14 @@ section, #forge, #arrange, #map-stage {
   margin: var(--space-1) 0 var(--space-1);
 }
 #sheet { background: var(--color-paper-2); box-shadow: var(--shadow-1); }
-#map-stage { background: var(--color-paper-3); box-shadow: var(--shadow-1); scroll-margin-top: var(--space-16); }
+#map-stage {
+  background:
+    var(--color-paper-3) padding-box,
+    linear-gradient(180deg, var(--color-wood), var(--color-wood-edge)) border-box;
+  border: 3px solid transparent;
+  box-shadow: var(--shadow-1);
+  scroll-margin-top: var(--space-16);
+}
 
 /* The map is a dungeon now, not a diagram: tiles at their native 64px,
    panning inside its frame when the delve outgrows it. */
@@ -693,9 +700,12 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
   overflow: hidden;
   padding: 6px 8px;
   margin-bottom: var(--space-2);
+  /* Felt inside, wood without: the rim is a real material, not a line -
+     the same timber frames the map, so the delve reads as one table. */
   background:
-    radial-gradient(ellipse at 50% 0%, color-mix(in oklch, var(--color-felt) 70%, var(--color-paper)) 0%, var(--color-felt) 100%);
-  border: 1px solid var(--color-rule);
+    radial-gradient(ellipse at 50% 0%, color-mix(in oklch, var(--color-felt) 70%, var(--color-paper)) 0%, var(--color-felt) 100%) padding-box,
+    linear-gradient(180deg, var(--color-wood), var(--color-wood-edge)) border-box;
+  border: 3px solid transparent;
   border-radius: var(--radius-md);
   box-shadow: inset 0 2px 8px color-mix(in oklch, var(--color-shadow) 60%, transparent);
 }
