@@ -7,6 +7,16 @@ Build plan: [`docs/superpowers/plans/`](docs/superpowers/plans/)
 One-way dependency chain, asserted by `tests/test_invariants.py`:
 `character → tables → dice`. `dice.py` imports nothing of ours.
 
+## Ruleset packs
+At play time the engine never calls `sanctuary.character`/`sanctuary.resolve` directly — it
+calls the loaded ruleset pack (`sanctuary/ruleset.py`: protocol + registry; `runtime.State.ruleset`,
+`app.RULESET`). OSRIC 3.0 is the first pack: manifest `data/rulesets/osric/ruleset.yaml`, adapter
+`sanctuary/rulesets/osric.py` (delegates to `character`/`resolve`, so OSRIC play is unchanged).
+The client builds the forge from `GET /api/ruleset` (modes, ancestries, class tiles, licence), not
+from hardcoded lists. To plug in another system: manifest in `data/rulesets/<id>/ruleset.yaml`,
+adapter registered in `sanctuary/rulesets/__init__.py`, run with `SANCTUARY_RULESET=<id>`.
+`tests/test_ruleset.py` proves the seam with a scripted test-double pack that drives a real delve.
+
 ## PixelLab
 Ten class portraits ship with Chapter 1 (top-down/Factorio-styled, per the platform standing
 order — never isometric; the OSRIC licence forbids the books' art outright, so there is no
