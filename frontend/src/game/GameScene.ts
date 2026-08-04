@@ -85,11 +85,11 @@ export class GameScene {
     this.sessionId = id;
     this.hud.setSession(id);
     this.hud.setStatus('Click a tile to move the Hero.');
-    this.renderState(state);
+    await this.renderState(state);
     this.socket.emit('join_session', { session_id: id });
   }
 
-  private renderState(state: SessionState) {
+  private async renderState(state: SessionState) {
     if (this.app) {
       this.app.destroy(true);
       this.tokens.clear();
@@ -99,7 +99,8 @@ export class GameScene {
     const canvasWidth = state.map.width * tileSize;
     const canvasHeight = state.map.height * tileSize;
 
-    this.app = new PIXI.Application({
+    this.app = new PIXI.Application();
+    await this.app.init({
       width: canvasWidth,
       height: canvasHeight,
       background: 0x0d0e10,
