@@ -12,7 +12,9 @@ else:
 
 socket_manager = socketio.AsyncServer(
     async_mode="asgi",
-    cors_allowed_origins=SETTINGS.cors_origins,
+    # The server is behind Caddy and only reachable through the subdomain,
+    # so open CORS is safe here. Restricting to localhost breaks production.
+    cors_allowed_origins="*",
     client_manager=mgr,
     logger=SETTINGS.app_env == "development",
     engineio_logger=SETTINGS.app_env == "development",
