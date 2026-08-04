@@ -29,6 +29,13 @@ class AttackRequest(BaseModel):
     target_id: str
 
 
+def _check_game_over(session: GameSession, dm_payload: dict) -> None:
+    player = session.player_token()
+    if player and player.hp <= 0:
+        dm_payload["game_over"] = True
+        dm_payload["entry"]["text"] += f" {player.name} has fallen."
+
+
 async def _load_session(db: AsyncSession, session_id: str) -> GameSession:
     store = EventStore(db)
     snapshot = await store.snapshot(session_id)
@@ -242,6 +249,7 @@ async def move_token(
 
     entry = {"turn": session.turn, "text": dm_result.get("narration", "The DM acts.")}
     dm_payload["entry"] = entry
+    _check_game_over(session, dm_payload)
     session.apply("dm_turn", dm_payload)
     await store.append(session_id, "dm_turn", dm_payload)
     await store.save_snapshot(session_id, session.version, session.to_dict())
@@ -352,6 +360,7 @@ async def attack_token(
         entry_text += f" {damage} damage."
     entry = {"turn": session.turn, "text": entry_text}
     dm_payload["entry"] = entry
+    _check_game_over(session, dm_payload)
     session.apply("dm_turn", dm_payload)
     await store.append(session_id, "dm_turn", dm_payload)
     await store.save_snapshot(session_id, session.version, session.to_dict())

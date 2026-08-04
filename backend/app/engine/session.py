@@ -69,6 +69,8 @@ class GameSession:
             self.phase = "player"
             if "entry" in payload:
                 self.log.append(payload["entry"])
+            if payload.get("game_over"):
+                self.phase = "game_over"
         self.version += 1
 
     def end_player_turn(self) -> None:

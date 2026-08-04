@@ -4,6 +4,7 @@ import { Token } from './Token';
 import { createSession, getSession, moveToken, attackToken, whoami } from '../net/api';
 import { connectSocket } from '../net/socket';
 import { HUD, CharacterInfo } from '../ui/HUD';
+import { GameOver } from '../ui/GameOver';
 import { Socket } from 'socket.io-client';
 
 interface SessionState {
@@ -63,6 +64,14 @@ export class GameScene {
       }
       if (msg.type === 'dm_turn' && msg.entry) {
         this.hud.addLog(msg.entry.text);
+        if (msg.game_over) {
+          this.phase = 'game_over';
+          this.hud.setTurn(msg.entry.turn, 'game over');
+          this.hud.setStatus('Game over.');
+          this.updateActions();
+          this.showGameOver(msg.entry.text);
+          return;
+        }
         this.hud.setStatus("DM's turn complete. Your move.");
         this.phase = 'player';
         this.actionMode = 'move';
@@ -100,7 +109,13 @@ export class GameScene {
     this.actionMode = this.phase === 'player' ? 'move' : null;
     this.hud.setSession(id);
     this.hud.setTurn(state.turn, this.phase);
-    this.hud.setStatus(this.phase === 'player' ? 'Select a token, then click a tile to move.' : "DM is thinking...");
+    this.hud.setStatus(
+      this.phase === 'player'
+        ? 'Select a token, then click a tile to move.'
+        : this.phase === 'game_over'
+        ? 'Game over.'
+        : "DM is thinking..."
+    );
     this.hud.clearLog();
     for (const entry of state.log || []) {
       this.hud.addLog(entry.text);
@@ -108,6 +123,10 @@ export class GameScene {
     await this.renderState(state);
     this.socket.emit('join_session', { session_id: id });
     this.updateActions();
+    if (this.phase === 'game_over') {
+      const lastEntry = state.log?.length ? state.log[state.log.length - 1].text : 'Your hero has fallen.';
+      this.showGameOver(lastEntry);
+    }
   }
 
   private async renderState(state: SessionState) {
@@ -381,5 +400,13 @@ export class GameScene {
     if (player && this.map) {
       this.map.updateFog(player.gridX, player.gridY, 7);
     }
+  }
+
+  private showGameOver(message: string) {
+    const overlay = new GameOver(message, this.container);
+    overlay.onRestart = () => {
+      overlay.destroy();
+      this.newSession(this.character || undefined);
+    };
   }
 }
