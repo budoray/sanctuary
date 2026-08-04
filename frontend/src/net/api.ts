@@ -41,6 +41,10 @@ export async function createSession(characterId?: string) {
   });
 }
 
+export async function listSessions() {
+  return api('/api/sessions');
+}
+
 export async function getSession(sessionId: string) {
   return api(`/api/sessions/${sessionId}`);
 }

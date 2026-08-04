@@ -56,6 +56,20 @@ class EventStore:
         )
         return result.scalars().all()
 
+    async def sessions_for_account(self, account_id: int) -> list[str]:
+        """Return session_ids created by the account by scanning creation events."""
+        result = await self.db.execute(
+            select(EventRecord)
+            .where(EventRecord.event_type == "session_created")
+            .order_by(EventRecord.id.desc())
+        )
+        session_ids = []
+        for ev in result.scalars().all():
+            payload = json.loads(ev.payload)
+            if payload.get("account_id") == account_id:
+                session_ids.append(ev.session_id)
+        return session_ids
+
     async def snapshot(self, session_id: str) -> SnapshotRecord | None:
         result = await self.db.execute(
             select(SnapshotRecord).where(SnapshotRecord.session_id == session_id)

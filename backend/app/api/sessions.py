@@ -142,6 +142,29 @@ async def create_session(
     return {"session_id": session.id, "state": session.to_dict(), "character": _character_dict(char)}
 
 
+@router.get("/sessions")
+async def list_sessions(
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    store = EventStore(db)
+    session_ids = await store.sessions_for_account(account_id)
+    sessions = []
+    for sid in session_ids[:20]:
+        try:
+            session = await _load_session(db, sid)
+            sessions.append({
+                "session_id": session.id,
+                "turn": session.turn,
+                "phase": session.phase,
+                "module_id": session.module_id,
+                "hero_name": next((t.name for t in session.map.tokens if t.owner == "player"), "Unknown"),
+            })
+        except Exception:
+            continue
+    return {"sessions": sessions}
+
+
 @router.get("/sessions/{session_id}")
 async def get_session(
     session_id: str,
