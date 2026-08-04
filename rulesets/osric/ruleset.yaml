@@ -1,0 +1,22 @@
+id: osric
+name: OSRIC
+version: "3.0"
+description: >-
+  Old School Reference and Index Compilation — a 1st/2nd edition
+  Advanced Fantasy ruleset adapted for Sanctuary.
+attributes:
+  - str
+  - dex
+  - con
+  - int
+  - wis
+  - cha
+rolls:
+  ability: 3d6
+  hp: 1d8
+currency:
+  - pp
+  - gp
+  - ep
+  - sp
+  - cp

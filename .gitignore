@@ -1,3 +1,4 @@
+# Python
 __pycache__/
 *.py[cod]
 .venv/
@@ -5,7 +6,27 @@ venv/
 .pytest_cache/
 *.sqlite
 *.db
-scratch/
-scratchpad_dl/
 .coverage
 htmlcov/
+.mypy_cache/
+
+# Node / frontend
+node_modules/
+dist/
+*.log
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Project
+scratch/
+scratchpad_dl/

@@ -1,0 +1,19 @@
+# /etc/systemd/system/tenshin-sanctuary.service
+# Sanctuary — binds 127.0.0.1:9300 (only Caddy reaches it).
+[Unit]
+Description=Sanctuary
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/tenshin/sanctuary
+Environment=TENSHIN_SECRET=SAME_SECRET_AS_THE_WEBSITE
+Environment=TENSHIN_SITE_URL=https://tenshinarts.com
+Environment=DATABASE_URL=postgresql+asyncpg://sanctuary:REPLACE_ME@127.0.0.1:5432/sanctuary
+Environment=OLLAMA_HOST=http://127.0.0.1:11434
+Environment=OLLAMA_MODEL=llama3.2
+ExecStart=/opt/tenshin/sanctuary/.venv/bin/python app.py
+Restart=always
+User=tenshin
+
+[Install]
+WantedBy=multi-user.target

@@ -817,7 +817,7 @@ def test_multiclass_saving_throws_take_the_best_of_every_class():
         assert c.saves[category] == min(fighter_saves[category], magic_user_saves[category])
 
 
-def test_generate_defers_constitution_hp_adjustment_and_armour_class():
+def test_generate_defers_armour_class_from_equipment():
     c = generate(seed=1, mode="normal", ancestry_name="human", class_names=("fighter",))
     assert c.armour_class == 10
 

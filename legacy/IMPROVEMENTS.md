@@ -102,7 +102,11 @@ rather than assuming it's in a backlog; fetch results within 8 hours, and use
   (never silently drops an ability) but will mis-tier things the
   vocabulary hasn't seen yet. Extend `_TIER2_KEYWORDS` as real play finds
   gaps, per design §7.2's own "ship with tier 2 half-filled and grow it."
-- [ ] Constitution hit-point adjustment (deferred from Ch.1; lands with Ch.3)
+- [x] Constitution hit-point adjustment (deferred from Ch.1; lands with Ch.3) -
+      landed with Ch.3 combat resolution (`v0.1.9-beta`): `character.constitution_hp_bonus`
+      reads Table 1.1.4A per class (fighters/paladins/rangers get the better 17+
+      figure), applied per hit die in `roll_hit_points` and per class contribution
+      in `_multiclass_hit_points`. Checkbox was stale; verified `v0.9.53-beta`.
 - [ ] Armour class from equipment (deferred from Ch.1; lands with Ch.3)
 - [ ] Thief skills and spell slots on the sheet (needs Ch.2 and Ch.3 tables)
 - [ ] Dual-classing (human-only, sequential — a different mechanism from multi-classing)
