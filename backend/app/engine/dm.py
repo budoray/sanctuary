@@ -10,6 +10,32 @@ from backend.app.config import SETTINGS
 class DMController:
     """Pluggable DM. Defaults to Ollama locally; falls back to a simple rule DM."""
 
+    async def take_turn(self, session) -> dict[str, Any]:
+        """Return a DM turn result: {token_id, x, y, narration}."""
+        player = session.player_token()
+        enemies = session.dm_tokens()
+        if not player or not enemies:
+            return {"narration": "The chamber is still."}
+
+        # Simple AI: move the closest enemy one tile toward the player.
+        target = min(enemies, key=lambda e: abs(e.x - player.x) + abs(e.y - player.y))
+        dx = 0 if target.x == player.x else (1 if player.x > target.x else -1)
+        dy = 0 if target.y == player.y else (1 if player.y > target.y else -1)
+        new_x = max(0, min(session.map.width - 1, target.x + dx))
+        new_y = max(0, min(session.map.height - 1, target.y + dy))
+
+        context = {
+            "event": f"{target.name} moves toward {player.name}.",
+            "session": session.to_dict(),
+        }
+        narration = await self.narrate(context)
+        return {
+            "token_id": target.id,
+            "x": new_x,
+            "y": new_y,
+            "narration": narration,
+        }
+
     async def narrate(self, context: dict[str, Any]) -> str:
         if SETTINGS.app_env == "test":
             return self._fallback(context)

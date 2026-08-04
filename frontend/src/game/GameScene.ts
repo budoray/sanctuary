@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { GameMap } from './Map';
 import { Token } from './Token';
-import { createSession, getSession, moveToken } from '../net/api';
+import { createSession, getSession, moveToken, whoami } from '../net/api';
 import { connectSocket } from '../net/socket';
 import { HUD } from '../ui/HUD';
 import { Socket } from 'socket.io-client';
@@ -17,6 +17,9 @@ interface TokenData {
 
 interface SessionState {
   id: string;
+  turn: number;
+  phase: string;
+  log: Array<{ turn: number; text: string }>;
   map: {
     width: number;
     height: number;
@@ -33,12 +36,23 @@ export class GameScene {
   private sessionId: string | null = null;
   private socket: Socket;
   private hud: HUD;
+  private phase: string = 'player';
 
   constructor(private container: HTMLElement = document.body) {
     this.hud = new HUD(container);
     this.socket = connectSocket();
     this.setupSocket();
     this.createControls();
+    this.loadUser();
+  }
+
+  private async loadUser() {
+    try {
+      const data = await whoami();
+      this.hud.setUser(data.user.name, data.user.id);
+    } catch (e) {
+      // 401 will redirect; other errors are silent for now.
+    }
   }
 
   private setupSocket() {
@@ -48,6 +62,12 @@ export class GameScene {
       }
       if (msg.type === 'system') {
         this.hud.setStatus(msg.text);
+      }
+      if (msg.type === 'dm_turn' && msg.entry) {
+        this.hud.addLog(msg.entry.text);
+        this.hud.setStatus("DM's turn complete. Your move.");
+        this.phase = 'player';
+        this.hud.setTurn(msg.entry.turn, 'player');
       }
     });
   }
@@ -83,8 +103,14 @@ export class GameScene {
       throw new Error('Session state not found');
     }
     this.sessionId = id;
+    this.phase = state.phase || 'player';
     this.hud.setSession(id);
-    this.hud.setStatus('Click a tile to move the Hero.');
+    this.hud.setTurn(state.turn, this.phase);
+    this.hud.setStatus(this.phase === 'player' ? 'Click a tile to move the Hero.' : "DM is thinking...");
+    this.hud.clearLog();
+    for (const entry of state.log || []) {
+      this.hud.addLog(entry.text);
+    }
     await this.renderState(state);
     this.socket.emit('join_session', { session_id: id });
   }
@@ -147,6 +173,10 @@ export class GameScene {
     this.app.stage.hitArea = this.app.screen;
     this.app.stage.on('pointerdown', async (e: any) => {
       if (!this.selectedTokenId || !this.sessionId || !this.map) return;
+      if (this.phase !== 'player') {
+        this.hud.setStatus("Wait for the DM's turn to finish.");
+        return;
+      }
       const pos = e.global;
       const tx = Math.floor(pos.x / this.map.tileSize);
       const ty = Math.floor(pos.y / this.map.tileSize);
@@ -154,9 +184,12 @@ export class GameScene {
       if (tx < 0 || tx >= this.map.width || ty < 0 || ty >= this.map.height) return;
 
       this.map.highlightTile(tx, ty);
+      this.phase = 'dm';
+      this.hud.setStatus("DM is thinking...");
       try {
         await moveToken(this.sessionId, this.selectedTokenId, tx, ty);
       } catch (err) {
+        this.phase = 'player';
         this.hud.setStatus(`Move failed: ${err instanceof Error ? err.message : String(err)}`);
       }
     });

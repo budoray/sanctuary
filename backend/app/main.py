@@ -2,16 +2,20 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from backend.app.api.characters import router as characters_router
 from backend.app.api.modules import router as modules_router
 from backend.app.api.rulesets import router as rulesets_router
 from backend.app.api.sessions import router as sessions_router
 from backend.app.config import SETTINGS, ROOT
 from backend.app.db import Base, engine
+from backend.app.engine.store import EventRecord, SnapshotRecord  # noqa: F401  registers models
+from backend.app.auth import require_account
 from backend.app.socket_manager import socket_app
+from backend.app.tenshin_gate import name_from_cookie_header
 
 FRONTEND_DIST = ROOT / "frontend" / "dist"
 
@@ -35,6 +39,7 @@ fastapi_app.add_middleware(
 )
 
 fastapi_app.include_router(sessions_router, prefix="/api")
+fastapi_app.include_router(characters_router, prefix="/api")
 fastapi_app.include_router(rulesets_router, prefix="/api")
 fastapi_app.include_router(modules_router, prefix="/api")
 
@@ -55,9 +60,9 @@ async def health_db():
 
 
 @fastapi_app.get("/api/whoami")
-async def whoami(user: dict = None):
-    # Placeholder until Tenshin auth is wired.
-    return {"user": user or {"name": "guest", "id": None}}
+async def whoami(request: Request, account_id: int = Depends(require_account)):
+    name = name_from_cookie_header(request.headers.get("cookie", ""))
+    return {"user": {"id": account_id, "name": name or "player"}}
 
 
 if FRONTEND_DIST.exists():

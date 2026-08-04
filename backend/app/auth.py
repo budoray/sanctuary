@@ -1,16 +1,15 @@
-"""Tenshin shared-cookie authentication stub.
+"""Tenshin shared-cookie authentication wrapper for FastAPI."""
+from fastapi import HTTPException, Request
 
-The real implementation will validate the Tenshin Arts session cookie against
-TENSHIN_SECRET. For the first vertical slice we accept any caller as 'guest'.
-"""
-from fastapi import Request
-
-from backend.app.config import SETTINGS
+from backend.app.tenshin_gate import resolve_account
 
 
-def get_current_user(request: Request) -> dict:
-    """Return the logged-in user or a guest placeholder."""
-    if not SETTINGS.tenshin_secret:
-        return {"id": None, "name": "guest", "admin": False}
-    # TODO: validate Tenshin session cookie using TENSHIN_SECRET.
-    return {"id": None, "name": "guest", "admin": False}
+def require_account(request: Request) -> int:
+    """Return the Tenshin account_id from the session cookie, or 401."""
+    acct = resolve_account(
+        request.headers.get("cookie", ""),
+        request.query_params.get("_acct") or request.headers.get("x-tenshin-dev-account"),
+    )
+    if acct is None:
+        raise HTTPException(status_code=401, detail="No Tenshin Arts session.")
+    return acct

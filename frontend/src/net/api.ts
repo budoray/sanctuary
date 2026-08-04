@@ -1,14 +1,25 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const SITE_URL = 'https://tenshinarts.com';
 
 async function api(path: string, options: RequestInit = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
+  if (res.status === 401) {
+    // Send the player to the Tenshin Arts hub to log in, then come back.
+    const next = encodeURIComponent(window.location.href);
+    window.location.href = `${SITE_URL}/?next=${next}`;
+    throw new Error('Not authenticated');
+  }
   if (!res.ok) {
     throw new Error(`API ${path} failed: ${res.status}`);
   }
   return res.json();
+}
+
+export async function whoami() {
+  return api('/api/whoami');
 }
 
 export async function createSession() {

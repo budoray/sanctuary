@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     module_root: Path = ROOT / "modules"
     tenshin_secret: str | None = None
     tenshin_site_url: str = "https://tenshinarts.com"
+    tenshin_dev: bool = False
+    tenshin_dev_account: int = 1
     ollama_host: str = "http://127.0.0.1:11434"
     ollama_model: str = "llama3.2"
 
