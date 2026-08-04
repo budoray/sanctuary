@@ -24,9 +24,9 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 
-app = FastAPI(title="Sanctuary", lifespan=lifespan)
+fastapi_app = FastAPI(title="Sanctuary", lifespan=lifespan)
 
-app.add_middleware(
+fastapi_app.add_middleware(
     CORSMiddleware,
     allow_origins=SETTINGS.cors_origins,
     allow_credentials=True,
@@ -34,17 +34,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(sessions_router, prefix="/api")
-app.include_router(rulesets_router, prefix="/api")
-app.include_router(modules_router, prefix="/api")
+fastapi_app.include_router(sessions_router, prefix="/api")
+fastapi_app.include_router(rulesets_router, prefix="/api")
+fastapi_app.include_router(modules_router, prefix="/api")
 
 
-@app.get("/health")
+@fastapi_app.get("/health")
 async def health():
     return {"status": "ok", "env": SETTINGS.app_env}
 
 
-@app.get("/health/db")
+@fastapi_app.get("/health/db")
 async def health_db():
     from sqlalchemy import text
 
@@ -54,19 +54,16 @@ async def health_db():
     return {"status": "ok", "db": row == 1}
 
 
-@app.get("/api/whoami")
+@fastapi_app.get("/api/whoami")
 async def whoami(user: dict = None):
     # Placeholder until Tenshin auth is wired.
     return {"user": user or {"name": "guest", "id": None}}
 
 
-# Socket.IO is mounted under /ws; the static catch-all must come last.
-app.mount("/ws", socket_app)
-
 if FRONTEND_DIST.exists():
-    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+    fastapi_app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
 
-    @app.get("/{full_path:path}")
+    @fastapi_app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
         index = FRONTEND_DIST / "index.html"
         if index.exists():
@@ -74,3 +71,27 @@ if FRONTEND_DIST.exists():
 
             return FileResponse(index)
         return {"status": "backend only", "path": full_path}
+
+
+class SocketIOMiddleware:
+    """Forward /ws/* to the Socket.IO ASGI app without path stripping.
+
+    Starlette's Mount strips prefixes before calling sub-apps, which breaks
+    python-socketio's ASGI path matching when mounted under /ws. This tiny
+    middleware routes on the raw scope path instead.
+    """
+
+    def __init__(self, app, socket_app):
+        self.app = app
+        self.socket_app = socket_app
+
+    async def __call__(self, scope, receive, send):
+        if scope.get("type") in ("http", "websocket") and scope.get("path", "").startswith("/ws"):
+            await self.socket_app(scope, receive, send)
+        else:
+            await self.app(scope, receive, send)
+
+
+# uvicorn imports `app` from this module. The middleware wraps FastAPI so
+# /ws/socket.io traffic goes to Socket.IO and everything else goes to FastAPI.
+app = SocketIOMiddleware(fastapi_app, socket_app)

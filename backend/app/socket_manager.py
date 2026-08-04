@@ -20,7 +20,9 @@ socket_manager = socketio.AsyncServer(
     engineio_logger=SETTINGS.app_env == "development",
 )
 
-socket_app = socketio.ASGIApp(socket_manager)
+# Serve Socket.IO at the full /ws/socket.io path so Caddy proxies it cleanly
+# without depending on Starlette's mount path stripping.
+socket_app = socketio.ASGIApp(socket_manager, socketio_path="ws/socket.io")
 
 
 @socket_manager.event
