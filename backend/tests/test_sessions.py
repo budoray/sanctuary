@@ -47,3 +47,20 @@ async def test_create_and_move_token(client):
     loaded_hero = next(t for t in loaded["map"]["tokens"] if t["name"] == "Hero")
     assert loaded_hero["x"] == 4
     assert loaded_hero["y"] == 4
+
+
+@pytest.mark.asyncio
+async def test_create_character(client):
+    r = await client.post(
+        "/api/characters",
+        json={"name": "Elara", "race": "Elf", "class": "Magic-User"},
+    )
+    assert r.status_code == 200
+    char = r.json()["character"]
+    assert char["name"] == "Elara"
+    assert char["race"] == "Elf"
+    assert char["class"] == "Magic-User"
+    assert char["level"] == 1
+    assert set(char["abilities"].keys()) == {"str", "dex", "con", "int", "wis", "cha"}
+
+

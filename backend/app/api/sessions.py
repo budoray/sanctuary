@@ -73,11 +73,29 @@ def _character_dict(record: CharacterRecord) -> dict:
     }
 
 
-async def _get_or_create_character(db: AsyncSession, account_id: int) -> CharacterRecord:
+async def _get_or_create_character(
+    db: AsyncSession,
+    account_id: int,
+    character_id: str | None = None,
+) -> CharacterRecord:
     from sqlalchemy.future import select
 
+    if character_id:
+        result = await db.execute(
+            select(CharacterRecord).where(
+                CharacterRecord.id == character_id,
+                CharacterRecord.account_id == account_id,
+            )
+        )
+        record = result.scalar_one_or_none()
+        if record:
+            return record
+
     result = await db.execute(
-        select(CharacterRecord).where(CharacterRecord.account_id == account_id).limit(1)
+        select(CharacterRecord)
+        .where(CharacterRecord.account_id == account_id)
+        .order_by(CharacterRecord.id.desc())
+        .limit(1)
     )
     record = result.scalar_one_or_none()
     if record:
@@ -105,10 +123,11 @@ async def _get_or_create_character(db: AsyncSession, account_id: int) -> Charact
 
 @router.post("/sessions")
 async def create_session(
+    data: dict = {},
     db: AsyncSession = Depends(get_db),
     account_id: int = Depends(require_account),
 ):
-    char = await _get_or_create_character(db, account_id)
+    char = await _get_or_create_character(db, account_id, data.get("character_id"))
     session = new_session(account_id=account_id)
     # Name the player token after the character and sync stats.
     hero = next((t for t in session.map.tokens if t.owner == "player"), None)

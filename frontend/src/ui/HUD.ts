@@ -1,4 +1,5 @@
 export interface CharacterInfo {
+  id?: string;
   name: string;
   race: string;
   class: string;

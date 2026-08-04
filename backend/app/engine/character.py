@@ -5,6 +5,24 @@ from typing import Any
 
 
 ABILITIES = ["str", "dex", "con", "int", "wis", "cha"]
+RACES = ["Human", "Elf", "Dwarf", "Halfling"]
+CLASSES = ["Fighter", "Cleric", "Magic-User", "Thief"]
+
+# OSRIC-ish hit dice by class.
+HIT_DICE = {
+    "Fighter": 8,
+    "Cleric": 6,
+    "Magic-User": 4,
+    "Thief": 6,
+}
+
+# Simple racial ability modifiers (OSRIC-ish).
+RACE_MODS: dict[str, dict[str, int]] = {
+    "Elf": {"dex": 1, "con": -1},
+    "Dwarf": {"con": 1, "cha": -1},
+    "Halfling": {"dex": 1, "str": -1},
+    "Human": {},
+}
 
 
 def roll_3d6() -> int:
@@ -14,11 +32,21 @@ def roll_3d6() -> int:
 def ability_mod(score: int) -> int:
     if score >= 16:
         return 2
-    if score <= 7:
+    if score >= 13:
+        return 1
+    if score <= 8:
         return -1
     if score <= 5:
         return -2
     return 0
+
+
+def valid_character_choice(race: str, class_: str) -> tuple[bool, str]:
+    if race not in RACES:
+        return False, f"Unknown race: {race}"
+    if class_ not in CLASSES:
+        return False, f"Unknown class: {class_}"
+    return True, ""
 
 
 @dataclass
@@ -37,8 +65,13 @@ class Character:
     def __post_init__(self):
         if not self.abilities:
             self.abilities = {a: roll_3d6() for a in ABILITIES}
+            # Apply racial modifiers.
+            for ability, delta in RACE_MODS.get(self.race, {}).items():
+                self.abilities[ability] = max(3, min(18, self.abilities[ability] + delta))
         if self.max_hp == 0:
-            self.max_hp = max(1, random.randint(1, 8) + ability_mod(self.abilities.get("con", 10)))
+            hd = HIT_DICE.get(self.class_, 6)
+            con_mod = ability_mod(self.abilities.get("con", 10))
+            self.max_hp = max(1, random.randint(1, hd) + con_mod)
         if self.hp == 0:
             self.hp = self.max_hp
         self.ac = 10 + ability_mod(self.abilities.get("dex", 10))
@@ -74,10 +107,13 @@ class Character:
 
 
 def make_character(account_id: int, name: str, race: str = "Human", class_: str = "Fighter") -> Character:
+    ok, reason = valid_character_choice(race, class_)
+    if not ok:
+        raise ValueError(reason)
     return Character(
         id="",
         account_id=account_id,
-        name=name,
+        name=name or "Hero",
         race=race,
         class_=class_,
     )

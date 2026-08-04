@@ -204,6 +204,141 @@ button:disabled {
   cursor: not-allowed;
 }
 
+#char-creator {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #121418 0%, #050607 100%);
+  z-index: 100;
+}
+
+.creator-panel {
+  width: 420px;
+  max-width: calc(100% - 32px);
+  padding: 28px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.6);
+}
+
+.creator-panel h1 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 12px var(--accent-glow);
+  text-align: center;
+}
+
+.creator-panel .subtitle {
+  margin: 0 0 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 5px;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ability-preview {
+  margin: 18px 0;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+}
+
+.abilities-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.abilities-grid div {
+  text-align: center;
+}
+
+.abilities-grid span {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.abilities-grid strong {
+  display: block;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.abilities-grid small {
+  font-size: 11px;
+  color: var(--gold);
+}
+
+.derived {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.derived span {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+button.reroll {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+button.enter {
+  width: 100%;
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: bold;
+}
+
+button.enter:hover:not(:disabled) {
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
 @media (max-width: 600px) {
   #hud {
     width: calc(100% - 24px);

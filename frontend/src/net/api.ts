@@ -23,8 +23,22 @@ export async function whoami() {
   return api('/api/whoami');
 }
 
-export async function createSession() {
-  return api('/api/sessions', { method: 'POST' });
+export async function createCharacter(character: { name: string; race: string; class: string }) {
+  return api('/api/characters', {
+    method: 'POST',
+    body: JSON.stringify(character),
+  });
+}
+
+export async function listCharacters() {
+  return api('/api/characters');
+}
+
+export async function createSession(characterId?: string) {
+  return api('/api/sessions', {
+    method: 'POST',
+    body: JSON.stringify(characterId ? { character_id: characterId } : {}),
+  });
 }
 
 export async function getSession(sessionId: string) {

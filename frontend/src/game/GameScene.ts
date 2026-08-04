@@ -27,8 +27,15 @@ export class GameScene {
   private actionMode: 'move' | 'attack' | null = 'move';
   private character: CharacterInfo | null = null;
 
-  constructor(private container: HTMLElement = document.body) {
+  constructor(
+    private container: HTMLElement = document.body,
+    character: CharacterInfo | null = null
+  ) {
     this.hud = new HUD(container);
+    this.character = character;
+    if (character) {
+      this.hud.setCharacter(character);
+    }
     this.socket = connectSocket();
     this.setupSocket();
     this.loadUser();
@@ -66,10 +73,10 @@ export class GameScene {
     });
   }
 
-  async newSession() {
+  async newSession(character?: CharacterInfo) {
     this.hud.setStatus('Creating session...');
     try {
-      const data = await createSession();
+      const data = await createSession(character?.id);
       if (data.character) {
         this.character = data.character as CharacterInfo;
         this.hud.setCharacter(this.character);
