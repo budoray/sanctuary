@@ -440,6 +440,14 @@ let lastCharacter = null;
 let exploredAreas = {};
 let mapRootId = null;
 
+// The table the hub sent us to: module and depth ride in the URL
+// (/play?module=generate&level=2, or ?session=<id> to rejoin a delve
+// already under way). Defaults match the pre-hub behaviour exactly.
+const TABLE_PARAMS = new URLSearchParams(window.location.search);
+const TABLE_MODULE = TABLE_PARAMS.get("module") || "generate";
+const TABLE_LEVEL = Math.max(1, parseInt(TABLE_PARAMS.get("level") || "1", 10) || 1);
+const TABLE_SESSION = TABLE_PARAMS.get("session") || null;
+
 // The way out looks like what it is: stairs, a door, a corridor mouth.
 const EXIT_TILES = [["stairs", "stairs_down"], ["door", "door_open"], ["corridor", "floor_worn_stone"]];
 function exitTile(kind) {
@@ -1490,16 +1498,34 @@ document.addEventListener("keydown", (ev) => {
   btn.click();
 });
 
+// A delve (fresh or rejoined) starts the rail's memory fresh too - no mend
+// pulse for hp the party never gained on this screen, no gold flash for xp
+// it never earned here.
+function resetDelveMemory(sessionId) {
+  delveSessionId = sessionId;
+  exploredAreas = {};
+  mapRootId = null;
+  prevHpByName = {};
+  prevMonsterHp = [];
+  prevXp = 0;
+  prevInCombat = false;
+  prevAreaId = null;
+  prevExitTos = new Set();
+  prevTurns = 0;
+  prevRollsLen = 0;
+  prevDelveLogLen = 0;
+}
+
 document.getElementById("begin-delve").addEventListener("click", async () => {
   if (!lastCharacter) return;
   const res = await fetch("/api/delve/start", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      module: "generate",
+      module: TABLE_MODULE,
       seed: lastCharacter.seed,
       target_areas: 6,
-      dungeon_level: 1,
+      dungeon_level: TABLE_LEVEL,
       party: [{
         seed: lastCharacter.seed, mode: "normal",
         ancestry: lastCharacter.ancestry, classes: lastCharacter.classes,
@@ -1512,25 +1538,29 @@ document.getElementById("begin-delve").addEventListener("click", async () => {
     toast(`Cannot begin a delve: ${view.detail}`);
     return;
   }
-  delveSessionId = view.session_id;
-  exploredAreas = {};
-  mapRootId = null;
-  // A fresh delve starts the rail's memory fresh too - no mend pulse for
-  // hp the new party never gained, no gold flash for xp it never earned.
-  prevHpByName = {};
-  prevMonsterHp = [];
-  prevXp = 0;
-  prevInCombat = false;
-  prevAreaId = null;
-  prevExitTos = new Set();
-  prevTurns = 0;
-  prevRollsLen = 0;
-  prevDelveLogLen = 0;
+  resetDelveMemory(view.session_id);
   renderDelve(view);
   // A new scene: the DM gathers the creation dice and the felt waits for
   // the delve's own first cast.
   castDice([]);
 });
+
+// Rejoining a delve from the hub (/play?session=<id>): the session id rides
+// in the URL, the live view comes from the server, and the forge is skipped
+// - the party is already below ground.
+async function bootRejoin() {
+  if (!TABLE_SESSION) return;
+  const res = await fetch(`/api/delve/${TABLE_SESSION}`);
+  if (!res.ok) {
+    toast("That delve is no longer at this table.");
+    return;
+  }
+  const view = await res.json();
+  resetDelveMemory(TABLE_SESSION);
+  renderDelve(view);
+  castDice([]);
+}
+bootRejoin();
 
 document.getElementById("attack").addEventListener("click", (ev) => {
   const target = Number(document.getElementById("combat-monsters").dataset.target || 0);

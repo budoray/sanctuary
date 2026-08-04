@@ -41,32 +41,38 @@ def test_licence_route_carries_the_srd_notice():
 
 
 def test_the_client_itself_carries_the_notice():
-    """A route that exists is not a feature a player can reach."""
-    assert NOTICE in client.get("/").text
+    """A route that exists is not a feature a player can reach. The hub and
+    the game screen alike carry it."""
+    for page in ("/", "/play"):
+        assert NOTICE in client.get(page).text
 
 
 def test_the_client_itself_carries_the_srd_notice():
     # Both notices ship in both places (the design record's own words) -
     # /licence had the SRD notice, the client index did not.
-    assert "SRD 5.1" in client.get("/").text
+    for page in ("/", "/play"):
+        assert "SRD 5.1" in client.get(page).text
 
 
 def test_the_client_carries_the_house_chrome_in_order():
-    body = client.get("/").text
-    positions = [body.find(x) for x in
-                 ('id="build"', 'id="report"', 'id="back"', 'id="signout"')]
-    assert all(p >= 0 for p in positions), f"missing chrome: {positions}"
-    assert positions == sorted(positions), "house chrome out of order"
+    for page in ("/", "/play"):
+        body = client.get(page).text
+        positions = [body.find(x) for x in
+                     ('id="build"', 'id="report"', 'id="back"', 'id="signout"')]
+        assert all(p >= 0 for p in positions), f"{page} missing chrome: {positions}"
+        assert positions == sorted(positions), f"{page} house chrome out of order"
 
 
 def test_back_goes_to_the_site_root_not_games():
-    body = client.get("/").text
-    assert "tenshinarts.com/\"" in body or "tenshinarts.com'" in body
-    assert "/games" not in body
+    for page in ("/", "/play"):
+        body = client.get(page).text
+        assert "tenshinarts.com/\"" in body or "tenshinarts.com'" in body
+        assert "/games" not in body
 
 
 def test_the_client_carries_the_trademark():
-    assert "Sanctuary™" in client.get("/").text
+    for page in ("/", "/play"):
+        assert "Sanctuary™" in client.get(page).text
 
 
 def test_character_api_returns_a_reproducible_character():
@@ -159,7 +165,7 @@ def test_a_rejected_roll_does_not_produce_a_rendered_sheet():
     region, not the #who name field re-purposed to carry the message. A
     string check here would pass on the broken version (the message DID
     render, just in the wrong place)."""
-    html = client.get("/").text
+    html = client.get("/play").text
     assert 'id="forge-error"' in html
     assert 'id="who"' in html
     # The error region and the character name are not the same element.
@@ -167,7 +173,7 @@ def test_a_rejected_roll_does_not_produce_a_rendered_sheet():
 
 
 def test_begin_a_delve_is_disabled_until_a_character_exists():
-    html = client.get("/").text
+    html = client.get("/play").text
     import re
     m = re.search(r'<button id="begin-delve"[^>]*>', html)
     assert m and "disabled" in m.group(0)
@@ -229,13 +235,13 @@ def test_every_portrait_is_actually_served():
 
 
 def test_the_client_carries_a_portrait_element():
-    assert 'id="portrait"' in client.get("/").text
+    assert 'id="portrait"' in client.get("/play").text
 
 
 # ── class picker: a real radio group, not divs with click handlers ─────────
 def test_the_class_picker_is_a_real_radio_group():
     import re
-    html = client.get("/").text
+    html = client.get("/play").text
     assert 'role="radiogroup"' in html
     radios = re.findall(r'<input type="radio" name="klass"[^>]*>', html)
     assert len(radios) == 10, f"expected 10 class radios, found {len(radios)}"
@@ -244,7 +250,7 @@ def test_the_class_picker_is_a_real_radio_group():
 
 
 def test_the_class_picker_defaults_to_a_legal_selection():
-    html = client.get("/").text
+    html = client.get("/play").text
     radios = re.findall(r'<input type="radio" name="klass"[^>]*>', html)
     checked = [r for r in radios if "checked" in r]
     assert len(checked) == 1
@@ -329,6 +335,36 @@ def test_leaderboard_gains_a_row_after_a_delve_and_ranks_it_by_xp():
         "the board is not ranked on score"
 
 
+# ── the hub: ruleset picker and delves-in-progress ────────────────────────────
+def test_the_rulesets_endpoint_lists_the_registered_packs():
+    body = client.get("/api/rulesets").json()
+    assert body, "the hub's ruleset picker would be empty"
+    osric = next(p for p in body if p["id"] == "osric")
+    assert {"id", "name", "title", "version"} <= set(osric)
+
+
+def test_a_started_delve_is_listed_and_rejoinable():
+    r = client.post("/api/delve/start", json={
+        "module": "weeping_cistern",
+        "party": [{"seed": 777, "mode": "normal", "ancestry": "human",
+                   "classes": ["fighter"], "name": "Rejoin"}],
+    })
+    assert r.status_code == 200
+    session_id = r.json()["session_id"]
+
+    games = client.get("/api/games").json()
+    row = next((g for g in games if g["session_id"] == session_id), None)
+    assert row, "a delve under way is missing from the hub's list"
+    assert row["module"] == "weeping_cistern"
+    assert row["ruleset"] == "osric"
+    assert row["finished"] is False
+
+    # The rejoin link (/play?session=<id>) resolves to the live view.
+    view = client.get(f"/api/delve/{session_id}")
+    assert view.status_code == 200
+    assert view.json()["party"][0]["name"] == "Rejoin"
+
+
 # ── [hidden] must actually hide ───────────────────────────────────────────────
 def test_hiding_an_element_actually_hides_it():
     """⚠ `[hidden]` is only `display: none` in the UA stylesheet, so any author
@@ -385,7 +421,8 @@ def test_every_font_the_stylesheet_names_is_actually_served():
 
 def test_the_client_actually_links_the_font_stylesheet():
     """A served stylesheet nothing links to is a served stylesheet nobody sees."""
-    assert "/static/fonts/fonts.css" in client.get("/").text
+    for page in ("/", "/play"):
+        assert "/static/fonts/fonts.css" in client.get(page).text
 
 
 def test_the_display_and_body_faces_are_not_the_same_stack():

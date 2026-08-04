@@ -769,6 +769,55 @@ main:has(#combat:not([hidden])) #exploration:focus-within { opacity: 1; }
 
 .enter { animation: fade-in var(--dur-short) var(--ease-out) both; }
 
+/* ── the hub: pick the table ──────────────────────────────────────────────
+   One centred column, not the game's two-rail grid: the hero speaks, then
+   two cards side by side - begin a delve, rejoin one already under way. */
+main#hub {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 64rem;
+  margin: 0 auto;
+  gap: var(--space-10);
+}
+#hub-hero { text-align: center; }
+#hub-hero h1 { font-size: var(--text-display-s); margin: var(--space-6) 0 var(--space-3); }
+#hub-hero .tagline { color: var(--color-ink-2); max-width: 46ch; margin: 0 auto; }
+#hub-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+@media (max-width: 860px) { #hub-columns { grid-template-columns: minmax(0, 1fr); } }
+#new-delve, #active-delves {
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+#new-delve select { width: 100%; }
+#hub-mode {
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+}
+#hub-mode legend { font-size: var(--text-sm); color: var(--color-ink-2); padding: 0 var(--space-2); }
+#hub-mode .soon { opacity: 0.55; }
+#hub-mode .soon-tag {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+}
+#hub-begin { width: 100%; margin-top: var(--space-2); }
+/* In the hub a .hint is a whisper, not a wound - the play screen's danger
+   red belongs to forge errors. */
+#hub .hint { color: var(--color-ink-2); }
+#games { list-style: none; margin: 0; padding: 0; }
+#games li + li { margin-top: var(--space-2); }
+#games a { color: var(--color-accent); text-decoration: none; border-bottom: 1px solid var(--color-rule); }
+#games a:hover { border-color: var(--color-accent); }
+
 /* ── Ft5: statement close ─────────────────────────────────────────────── */
 /* The page closes with a sentence, not a sitemap: the licence is the
    colophon, centred and quiet, and the one link in it carries the accent. */

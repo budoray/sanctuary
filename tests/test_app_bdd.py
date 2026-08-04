@@ -18,7 +18,7 @@ NOTICE = ("Sanctuary is an independent product published under the OSRIC 3.0 "
 @given("a player opens Sanctuary", target_fixture="page")
 def open_sanctuary():
     client = TestClient(sanctuary_app.app)
-    r = client.get("/")
+    r = client.get("/play")
     assert r.status_code == 200
     return {"client": client, "body": r.text}
 

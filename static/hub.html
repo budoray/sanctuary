@@ -1,0 +1,70 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sanctuary™</title>
+<link rel="stylesheet" href="/static/fonts/fonts.css">
+<link rel="stylesheet" href="/static/tokens.css">
+<link rel="stylesheet" href="/static/app.css">
+<header class="chrome">
+  <span class="wordmark">Sanctuary™</span>
+  <nav>
+    <span id="build">{{VERSION}}</span>
+    <button id="report" type="button">Report</button>
+    <a id="back" href="https://tenshinarts.com/">Tenshin Arts</a>
+    <a id="signout" href="https://tenshinarts.com/signout">Sign out</a>
+  </nav>
+</header>
+
+<main id="hub">
+  <section id="hub-hero">
+    <h1>Sanctuary™</h1>
+    <p class="tagline">A table in the browser. Roll a someone, take them below,
+    and see every die that decides what happens next.</p>
+  </section>
+
+  <div id="hub-columns">
+    <section id="new-delve">
+      <h2>Begin a delve</h2>
+      <label>Ruleset
+        <select id="hub-ruleset"></select>
+      </label>
+      <label>Module
+        <select id="hub-module">
+          <option value="generate" selected>A generated dungeon</option>
+          <option value="weeping_cistern">The Weeping Cistern</option>
+        </select>
+      </label>
+      <label id="hub-level-row">Depth
+        <select id="hub-level">
+          <option value="1" selected>Level 1 — the shallow dark</option>
+          <option value="2">Level 2</option>
+          <option value="3">Level 3</option>
+        </select>
+      </label>
+      <fieldset id="hub-mode">
+        <legend>Table</legend>
+        <label><input type="radio" name="hub-mode" value="solo" checked> Solo — you against the engine</label>
+        <label class="soon"><input type="radio" name="hub-mode" value="coop" disabled>
+          Co-op — a shared delve with your party <span class="soon-tag">soon</span></label>
+      </fieldset>
+      <button id="hub-begin" type="button">Enter the forge</button>
+      <p class="hint">The forge is where your character is rolled. The delve begins from their sheet.</p>
+    </section>
+
+    <section id="active-delves">
+      <h2>Delves in progress</h2>
+      <ul id="games"></ul>
+      <p id="games-empty" class="hint" hidden>No delve is under way. The dark is patient.</p>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <p id="licence">Sanctuary is an independent product published under the OSRIC 3.0 Third-Party License and is not affiliated with Mythmere Games LLC.</p>
+  <span class="rule">·</span>
+  <p id="srd-notice">This work includes material taken from the System Reference Document 5.1 ("SRD 5.1") by Wizards of the Coast LLC and available at: https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License available at: https://creativecommons.org/licenses/by/4.0/legalcode.</p>
+  <span class="rule">·</span>
+  <a href="/licence">Full licence</a>
+</footer>
+<div id="toast" role="status" hidden></div>
+<script src="/static/hub.js"></script>

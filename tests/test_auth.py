@@ -19,9 +19,10 @@ _PROBE = textwrap.dedent('''
     import app as A
     c = TestClient(A.app, raise_server_exceptions=False)
     out = {}
-    for m, u in [("GET","/"),("POST","/api/character"),("POST","/api/roll-abilities"),
+    for m, u in [("GET","/"),("GET","/play"),("POST","/api/character"),("POST","/api/roll-abilities"),
                  ("POST","/api/delve/start"),("POST","/api/delve/act"),
-                 ("GET","/api/delve/x"),("GET","/version"),("GET","/licence"),
+                 ("GET","/api/delve/x"),("GET","/api/rulesets"),("GET","/api/games"),
+                 ("GET","/version"),("GET","/licence"),
                  ("GET","/live/embed")]:
         out[u] = c.request(m, u, json={}).status_code
     print(json.dumps(out))
@@ -40,8 +41,9 @@ def _status_without_dev() -> dict:
 def test_every_player_route_refuses_a_request_with_no_session():
     got = _status_without_dev()
     leaks = {u: s for u, s in got.items()
-             if u in ("/", "/api/character", "/api/roll-abilities",
-                      "/api/delve/start", "/api/delve/act", "/api/delve/x")
+             if u in ("/", "/play", "/api/character", "/api/roll-abilities",
+                      "/api/delve/start", "/api/delve/act", "/api/delve/x",
+                      "/api/rulesets", "/api/games")
              and s != 401}
     assert leaks == {}, f"routes served without a session: {leaks}"
 

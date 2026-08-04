@@ -114,8 +114,17 @@ def leaderboard():
 
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
+    """The hub: pick the table, begin or rejoin a delve. The game itself
+    (forge, sheet, map) lives at /play."""
     _account(request)
-    html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+    html = (ROOT / "static" / "hub.html").read_text(encoding="utf-8")
+    return html.replace("{{VERSION}}", tenshin_version.get_version())
+
+
+@app.get("/play", response_class=HTMLResponse)
+def play(request: Request):
+    _account(request)
+    html = (ROOT / "static" / "play.html").read_text(encoding="utf-8")
     return html.replace("{{VERSION}}", tenshin_version.get_version())
 
 
@@ -129,6 +138,41 @@ def licence():
     return (f"<!doctype html><meta charset=utf-8><title>Sanctuary™ licence</title>"
             f"<main><h1>Licence</h1><p>{LICENCE_NOTICE}</p><p>{SRD_NOTICE}</p>"
             f"<p><a href=\"/\">← Sanctuary™</a></p></main>")
+
+
+@app.get("/api/rulesets")
+def api_rulesets(request: Request):
+    """Every pack registered with the engine - the hub's ruleset picker.
+    Today that is OSRIC alone; a new pack registered server-side appears
+    here (and so in the hub) with no client edit."""
+    _account(request)
+    out = []
+    for name in rulesets.registered():
+        pack = rulesets.load(name)
+        out.append({"id": pack.id, "name": pack.name,
+                    "title": pack.title, "version": pack.version})
+    return out
+
+
+# Delves this process is running, for the hub's "delves in progress" list.
+# Session state itself lives in sanctuary.session; this is the metadata the
+# hub lists by (module/ruleset), enriched from the live view at read time.
+_GAMES: dict[str, dict] = {}
+
+
+@app.get("/api/games")
+def api_games(request: Request):
+    _account(request)
+    out = []
+    for session_id, meta in _GAMES.items():
+        try:
+            v = session.view(session_id)
+        except KeyError:
+            continue
+        out.append({"session_id": session_id, **meta,
+                    "area": v.get("area_id"), "turns": v.get("turns", 0),
+                    "xp": v.get("xp", 0), "finished": bool(v.get("finished"))})
+    return out
 
 
 @app.get("/api/ruleset")
@@ -246,6 +290,8 @@ async def api_delve_start(request: Request):
         raise HTTPException(status_code=400, detail=str(e))
     out["session_id"] = session_id
     _SESSION_LEVEL[session_id] = int(body.get("dungeon_level", 1))
+    _GAMES[session_id] = {"module": str(body.get("module", "generate")),
+                          "ruleset": RULESET.id}
     _record_best(request, acct, session_id, out)
     return out
 
@@ -331,10 +377,13 @@ def selfcheck() -> str:
     # class pointing at a shared/default file must not inflate this number.
     n_portraits = len(portrait_files)
 
-    index_html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
-    for needle in (LICENCE_NOTICE, SRD_NOTICE, 'id="build"', 'id="report"',
-                   'id="back"', 'id="signout"', "Sanctuary™"):
-        assert needle in index_html, f"client is missing {needle!r}"
+    # The house chrome and both licence notices ride on EVERY page the
+    # player can land on - the hub and the game screen alike.
+    for page in ("hub.html", "play.html"):
+        page_html = (ROOT / "static" / page).read_text(encoding="utf-8")
+        for needle in (LICENCE_NOTICE, SRD_NOTICE, 'id="build"', 'id="report"',
+                       'id="back"', 'id="signout"', "Sanctuary™"):
+            assert needle in page_html, f"{page} is missing {needle!r}"
 
     # ⚠ This asked a HARDCODED Downloads path whether the books were there,
     # months after `sources.py` replaced that lookup for exactly this reason.
