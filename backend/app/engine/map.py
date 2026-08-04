@@ -110,3 +110,55 @@ class GameMap:
             if dx * dx + dy * dy <= radius * radius:
                 result.append(token)
         return result
+
+    def neighbors(self, x: int, y: int) -> list[tuple[int, int]]:
+        """Return walkable neighbor coordinates."""
+        result = []
+        for dx, dy in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+            nx, ny = x + dx, y + dy
+            if self.is_walkable(nx, ny):
+                result.append((nx, ny))
+        return result
+
+    def pathfind(self, start_x: int, start_y: int, goal_x: int, goal_y: int) -> list[tuple[int, int]]:
+        """A* pathfinding. Returns a list of coordinates from start to goal, excluding start."""
+        import heapq
+
+        if not self.is_walkable(goal_x, goal_y):
+            return []
+
+        start = (start_x, start_y)
+        goal = (goal_x, goal_y)
+        if start == goal:
+            return []
+
+        open_set = [(0, start)]
+        came_from: dict[tuple[int, int], tuple[int, int]] = {}
+        g_score: dict[tuple[int, int], int] = {start: 0}
+        f_score: dict[tuple[int, int], int] = {start: abs(start_x - goal_x) + abs(start_y - goal_y)}
+        visited = set()
+
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            if current == goal:
+                path = []
+                while current in came_from:
+                    path.append(current)
+                    current = came_from[current]
+                path.reverse()
+                return path
+
+            if current in visited:
+                continue
+            visited.add(current)
+
+            for nx, ny in self.neighbors(*current):
+                neighbor = (nx, ny)
+                tentative = g_score[current] + 1
+                if tentative < g_score.get(neighbor, float("inf")):
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative
+                    f_score[neighbor] = tentative + abs(nx - goal_x) + abs(ny - goal_y)
+                    heapq.heappush(open_set, (f_score[neighbor], neighbor))
+
+        return []

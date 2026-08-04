@@ -35,29 +35,27 @@ class DMController:
             })
             return result
 
-        dx = 0 if target.x == player.x else (1 if player.x > target.x else -1)
-        dy = 0 if target.y == player.y else (1 if player.y > target.y else -1)
+        # Use A* pathfinding to chase the player around walls and doors.
+        path = session.map.pathfind(target.x, target.y, player.x, player.y)
+        if path:
+            new_x, new_y = path[0]
+            # Do not step onto another token unless it's the player.
+            occupant = session.map.token_at(new_x, new_y)
+            if occupant and occupant.id != player.id:
+                new_x, new_y = target.x, target.y
+            result["x"] = new_x
+            result["y"] = new_y
+            context = {
+                "event": f"{target.name} moves toward {player.name}.",
+                "session": session.to_dict(),
+            }
+            result["narration"] = await self.narrate(context)
+            return result
 
-        # Try horizontal first, then vertical, preferring walkable tiles.
-        candidates = [
-            (target.x + dx, target.y),
-            (target.x, target.y + dy),
-            (target.x + dx, target.y + dy),
-        ]
-        new_x, new_y = target.x, target.y
-        for cx, cy in candidates:
-            if session.map.is_walkable(cx, cy) and not session.map.token_at(cx, cy):
-                new_x, new_y = cx, cy
-                break
-
-        result["x"] = new_x
-        result["y"] = new_y
-
-        context = {
-            "event": f"{target.name} moves toward {player.name}.",
+        result["narration"] = await self.narrate({
+            "event": f"{target.name} snarls but cannot reach {player.name}.",
             "session": session.to_dict(),
-        }
-        result["narration"] = await self.narrate(context)
+        })
         return result
 
     async def narrate(self, context: dict[str, Any]) -> str:
