@@ -4,7 +4,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any
 
-from backend.app.engine.map import GameMap, Token
+from backend.app.engine.map import GameMap, Token, TILE_FLOOR, TILE_WALL, TILE_DOOR
 
 
 @dataclass
@@ -15,7 +15,7 @@ class GameSession:
     account_id: int | None = None
     map: GameMap = field(default_factory=GameMap)
     version: int = 0
-    turn: int = 0
+    turn: int = 1
     phase: str = "player"  # "player" or "dm"
     log: list[dict[str, Any]] = field(default_factory=list)
 
@@ -41,7 +41,7 @@ class GameSession:
             account_id=data.get("account_id"),
             map=GameMap.from_dict(data.get("map", {})),
             version=data.get("version", 0),
-            turn=data.get("turn", 0),
+            turn=data.get("turn", 1),
             phase=data.get("phase", "player"),
             log=data.get("log", []),
         )
@@ -53,6 +53,12 @@ class GameSession:
                 if token.id == token_id:
                     token.x = payload.get("x", token.x)
                     token.y = payload.get("y", token.y)
+                    break
+        elif event_type == "token_damaged":
+            token_id = payload.get("token_id")
+            for token in self.map.tokens:
+                if token.id == token_id:
+                    token.hp = max(0, token.hp - payload.get("damage", 0))
                     break
         elif event_type == "token_added":
             self.map.tokens.append(Token.from_dict(payload))
@@ -69,10 +75,10 @@ class GameSession:
         self.phase = "dm"
 
     def player_token(self) -> Token | None:
-        return next((t for t in self.map.tokens if t.owner == "player"), None)
+        return next((t for t in self.map.tokens if t.owner == "player" and t.is_alive()), None)
 
     def dm_tokens(self) -> list[Token]:
-        return [t for t in self.map.tokens if t.owner != "player"]
+        return [t for t in self.map.tokens if t.owner != "player" and t.is_alive()]
 
     def add_token(
         self,
@@ -81,6 +87,9 @@ class GameSession:
         y: int,
         color: str = "#e74c3c",
         owner: str | None = None,
+        hp: int = 0,
+        max_hp: int = 0,
+        ac: int = 10,
     ) -> Token:
         token = Token(
             id=str(uuid.uuid4())[:8],
@@ -89,9 +98,36 @@ class GameSession:
             y=y,
             color=color,
             owner=owner,
+            hp=hp,
+            max_hp=max_hp,
+            ac=ac,
         )
         self.map.tokens.append(token)
         return token
+
+
+def _build_lair() -> GameMap:
+    """Create a small sample dungeon: a room with a corridor and a side chamber."""
+    width, height = 24, 16
+    tiles = [[TILE_WALL for _ in range(width)] for _ in range(height)]
+
+    def carve_rect(x1: int, y1: int, x2: int, y2: int):
+        for y in range(y1, y2):
+            for x in range(x1, x2):
+                tiles[y][x] = TILE_FLOOR
+
+    # Main hall
+    carve_rect(2, 2, 12, 10)
+    # Corridor east
+    carve_rect(12, 5, 20, 7)
+    # Goblin chamber
+    carve_rect(20, 3, 23, 9)
+    # Door between hall and corridor
+    tiles[5][11] = TILE_DOOR
+    tiles[6][11] = TILE_DOOR
+
+    gm = GameMap(width=width, height=height, tile_size=32, tiles=tiles)
+    return gm
 
 
 def new_session(account_id: int | None = None, module_id: str = "sample_lair", ruleset_id: str = "osric") -> GameSession:
@@ -100,7 +136,8 @@ def new_session(account_id: int | None = None, module_id: str = "sample_lair", r
         module_id=module_id,
         ruleset_id=ruleset_id,
         account_id=account_id,
+        map=_build_lair(),
     )
-    session.add_token("Hero", 2, 2, owner="player")
-    session.add_token("Goblin", 10, 8, color="#2ecc71")
+    session.add_token("Hero", 3, 4, owner="player", hp=8, max_hp=8, ac=10)
+    session.add_token("Goblin", 21, 5, color="#2ecc71", hp=4, max_hp=4, ac=6)
     return session

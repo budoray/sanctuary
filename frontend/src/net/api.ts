@@ -13,7 +13,8 @@ async function api(path: string, options: RequestInit = {}) {
     throw new Error('Not authenticated');
   }
   if (!res.ok) {
-    throw new Error(`API ${path} failed: ${res.status}`);
+    const body = await res.text().catch(() => '');
+    throw new Error(`API ${path} failed: ${res.status} ${body}`);
   }
   return res.json();
 }
@@ -34,5 +35,12 @@ export async function moveToken(sessionId: string, tokenId: string, x: number, y
   return api(`/api/sessions/${sessionId}/move`, {
     method: 'POST',
     body: JSON.stringify({ token_id: tokenId, x, y }),
+  });
+}
+
+export async function attackToken(sessionId: string, tokenId: string, targetId: string) {
+  return api(`/api/sessions/${sessionId}/attack`, {
+    method: 'POST',
+    body: JSON.stringify({ token_id: tokenId, target_id: targetId }),
   });
 }

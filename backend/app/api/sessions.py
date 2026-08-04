@@ -24,6 +24,11 @@ class MoveRequest(BaseModel):
     y: int
 
 
+class AttackRequest(BaseModel):
+    token_id: str
+    target_id: str
+
+
 async def _load_session(db: AsyncSession, session_id: str) -> GameSession:
     store = EventStore(db)
     snapshot = await store.snapshot(session_id)
@@ -52,6 +57,20 @@ async def _load_session(db: AsyncSession, session_id: str) -> GameSession:
     # Version is the count of events that have been applied.
     session.version = len(events)
     return session
+
+
+def _character_dict(record: CharacterRecord) -> dict:
+    return {
+        "id": record.id,
+        "name": record.name,
+        "race": record.race,
+        "class": record.class_,
+        "level": record.level,
+        "hp": record.hp,
+        "max_hp": record.max_hp,
+        "ac": record.ac,
+        "abilities": json.loads(record.abilities or "{}"),
+    }
 
 
 async def _get_or_create_character(db: AsyncSession, account_id: int) -> CharacterRecord:
@@ -91,14 +110,17 @@ async def create_session(
 ):
     char = await _get_or_create_character(db, account_id)
     session = new_session(account_id=account_id)
-    # Name the player token after the character.
+    # Name the player token after the character and sync stats.
     hero = next((t for t in session.map.tokens if t.owner == "player"), None)
     if hero:
         hero.name = char.name
+        hero.hp = char.hp
+        hero.max_hp = char.max_hp
+        hero.ac = char.ac
     store = EventStore(db)
     await store.append(session.id, "session_created", session.to_dict())
     session = await _load_session(db, session.id)
-    return {"session_id": session.id, "state": session.to_dict()}
+    return {"session_id": session.id, "state": session.to_dict(), "character": _character_dict(char)}
 
 
 @router.get("/sessions/{session_id}")
@@ -128,6 +150,13 @@ async def move_token(
     if not token:
         raise HTTPException(status_code=404, detail="Token not found")
 
+    if not session.map.is_walkable(req.x, req.y):
+        raise HTTPException(status_code=400, detail="Cannot move there")
+
+    # Only allow one tile of movement per turn for now.
+    if abs(req.x - token.x) + abs(req.y - token.y) != 1:
+        raise HTTPException(status_code=400, detail="Must move to an adjacent tile")
+
     payload = {"token_id": req.token_id, "x": req.x, "y": req.y}
     session.apply("token_moved", payload)
     session.end_player_turn()
@@ -139,7 +168,8 @@ async def move_token(
     dm = DMController()
     dm_result = await dm.take_turn(session)
     dm_payload = {"turn": session.turn + 1}
-    if "token_id" in dm_result:
+
+    if "x" in dm_result and "y" in dm_result:
         session.apply("token_moved", {
             "token_id": dm_result["token_id"],
             "x": dm_result["x"],
@@ -155,6 +185,19 @@ async def move_token(
             "x": dm_result["x"],
             "y": dm_result["y"],
         }
+
+    if "attack" in dm_result:
+        attack = dm_result["attack"]
+        session.apply("token_damaged", {
+            "token_id": attack["target_id"],
+            "damage": attack["damage"],
+        })
+        await store.append(session_id, "token_damaged", {
+            "token_id": attack["target_id"],
+            "damage": attack["damage"],
+        })
+        dm_payload["attack"] = attack
+
     entry = {"turn": session.turn, "text": dm_result.get("narration", "The DM acts.")}
     dm_payload["entry"] = entry
     session.apply("dm_turn", dm_payload)
@@ -170,6 +213,122 @@ async def move_token(
         await socket_manager.emit(
             "message",
             {"type": "move", **dm_payload["move"]},
+            room=session_id,
+        )
+    if "attack" in dm_payload:
+        await socket_manager.emit(
+            "message",
+            {"type": "attack", **dm_payload["attack"]},
+            room=session_id,
+        )
+    await socket_manager.emit(
+        "message",
+        {"type": "dm_turn", "entry": entry},
+        room=session_id,
+    )
+
+    return {"session_id": session_id, "state": session.to_dict()}
+
+
+@router.post("/sessions/{session_id}/attack")
+async def attack_token(
+    session_id: str,
+    req: AttackRequest,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    import random
+
+    session = await _load_session(db, session_id)
+    if session.account_id != account_id:
+        raise HTTPException(status_code=403, detail="Not your session")
+
+    attacker = next((t for t in session.map.tokens if t.id == req.token_id), None)
+    target = next((t for t in session.map.tokens if t.id == req.target_id), None)
+    if not attacker or not target:
+        raise HTTPException(status_code=404, detail="Token not found")
+
+    distance = abs(attacker.x - target.x) + abs(attacker.y - target.y)
+    if distance != 1:
+        raise HTTPException(status_code=400, detail="Target must be adjacent")
+
+    roll = random.randint(1, 20)
+    hit = roll >= target.ac
+    damage = random.randint(1, 8) if hit else 0
+
+    result = {
+        "attacker_id": attacker.id,
+        "target_id": target.id,
+        "roll": roll,
+        "hit": hit,
+        "damage": damage,
+    }
+
+    store = EventStore(db)
+    if hit:
+        session.apply("token_damaged", {"token_id": target.id, "damage": damage})
+        await store.append(session_id, "token_damaged", {"token_id": target.id, "damage": damage})
+
+    session.end_player_turn()
+
+    # AI DM turn
+    dm = DMController()
+    dm_result = await dm.take_turn(session)
+    dm_payload = {"turn": session.turn + 1}
+
+    if "x" in dm_result and "y" in dm_result:
+        session.apply("token_moved", {
+            "token_id": dm_result["token_id"],
+            "x": dm_result["x"],
+            "y": dm_result["y"],
+        })
+        await store.append(session_id, "token_moved", {
+            "token_id": dm_result["token_id"],
+            "x": dm_result["x"],
+            "y": dm_result["y"],
+        })
+        dm_payload["move"] = {
+            "token_id": dm_result["token_id"],
+            "x": dm_result["x"],
+            "y": dm_result["y"],
+        }
+
+    if "attack" in dm_result:
+        attack = dm_result["attack"]
+        session.apply("token_damaged", {
+            "token_id": attack["target_id"],
+            "damage": attack["damage"],
+        })
+        await store.append(session_id, "token_damaged", {
+            "token_id": attack["target_id"],
+            "damage": attack["damage"],
+        })
+        dm_payload["attack"] = attack
+
+    entry_text = f"{attacker.name} attacks {target.name} and {'hits' if hit else 'misses'}!"
+    if hit:
+        entry_text += f" {damage} damage."
+    entry = {"turn": session.turn, "text": entry_text}
+    dm_payload["entry"] = entry
+    session.apply("dm_turn", dm_payload)
+    await store.append(session_id, "dm_turn", dm_payload)
+    await store.save_snapshot(session_id, session.version, session.to_dict())
+
+    await socket_manager.emit(
+        "message",
+        {"type": "attack", **result},
+        room=session_id,
+    )
+    if "move" in dm_payload:
+        await socket_manager.emit(
+            "message",
+            {"type": "move", **dm_payload["move"]},
+            room=session_id,
+        )
+    if "attack" in dm_payload:
+        await socket_manager.emit(
+            "message",
+            {"type": "attack", **dm_payload["attack"]},
             room=session_id,
         )
     await socket_manager.emit(
