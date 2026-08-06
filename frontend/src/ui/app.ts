@@ -1,16 +1,16 @@
 import { CampaignLobby } from './campaign-lobby';
-import { Campaign, CharacterState, createSession, getActiveSession, getModule, whoami } from '../net/api';
+import { Campaign, CharacterState, createSession, getModule, listSessions, whoami } from '../net/api';
 import { CharacterCreator } from './character-creator';
 import { CharacterSelect } from './character-select';
 import { Game } from './game';
-import { ResumeScreen } from './resume-screen';
+import { SessionSelect } from './session-select';
 import { clear } from './utils';
 
-type Screen = 'loading' | 'select' | 'create' | 'campaigns' | 'resume' | 'game';
+type Screen = 'loading' | 'select' | 'create' | 'campaigns' | 'sessions' | 'game';
 
 export class SanctuaryApp {
   private app: HTMLElement;
-  private current: CharacterCreator | CharacterSelect | CampaignLobby | ResumeScreen | Game | null = null;
+  private current: CharacterCreator | CharacterSelect | CampaignLobby | SessionSelect | Game | null = null;
 
   constructor(app: HTMLElement) {
     this.app = app;
@@ -25,8 +25,13 @@ export class SanctuaryApp {
     }
 
     try {
-      const { session } = await getActiveSession();
-      this.showResume(session);
+      const { sessions } = await listSessions();
+      const active = sessions.filter((s) => s.status === 'active');
+      if (active.length > 0) {
+        this.showSessions();
+      } else {
+        this.showSelect();
+      }
     } catch {
       this.showSelect();
     }
@@ -44,7 +49,8 @@ export class SanctuaryApp {
       this.app,
       (character, timerSeconds) => this.enterGame(character, undefined, timerSeconds),
       () => this.showCreate(),
-      () => this.showCampaigns()
+      () => this.showCampaigns(),
+      () => this.showSessions()
     );
   }
 
@@ -78,18 +84,18 @@ export class SanctuaryApp {
       this.app,
       (character, timerSeconds) => this.enterGame(character, campaign.id, timerSeconds),
       () => this.showCreate(),
-      () => this.showCampaigns()
+      () => this.showCampaigns(),
+      () => this.showSessions()
     );
   }
 
-  private showResume(session: import('../net/api').GameSession) {
-    this.setScreen('resume');
+  private showSessions() {
+    this.setScreen('sessions');
     clear(this.app);
     this.current?.destroy();
-    this.current = new ResumeScreen(
+    this.current = new SessionSelect(
       this.app,
-      session,
-      () => this.resumeGame(session),
+      (session) => this.resumeGame(session),
       () => this.showSelect()
     );
   }

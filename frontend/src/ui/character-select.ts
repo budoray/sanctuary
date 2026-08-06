@@ -5,6 +5,7 @@ export class CharacterSelect {
   private root: HTMLElement;
   private onPlay: (character: CharacterState, turnTimerSeconds: number) => void;
   private onCreate: () => void;
+  private onSessions?: () => void;
   private listEl: HTMLElement;
   private timerInput: HTMLSelectElement;
 
@@ -12,11 +13,13 @@ export class CharacterSelect {
     container: HTMLElement,
     onPlay: (character: CharacterState, turnTimerSeconds: number) => void,
     onCreate: () => void,
-    onCampaigns: () => void
+    onCampaigns: () => void,
+    onSessions?: () => void
   ) {
     this.root = el('div', { className: 'session-select' });
     this.onPlay = onPlay;
     this.onCreate = onCreate;
+    this.onSessions = onSessions;
 
     const panel = el('div', { className: 'session-panel' });
     panel.appendChild(el('h1', {}, 'Sanctuary'));
@@ -47,6 +50,10 @@ export class CharacterSelect {
     const campaignBtn = el('button', { onclick: () => onCampaigns() }, 'Campaigns');
     actions.appendChild(newBtn);
     actions.appendChild(campaignBtn);
+    if (this.onSessions) {
+      const sessionsBtn = el('button', { onclick: () => this.onSessions!() }, 'Saved Adventures');
+      actions.appendChild(sessionsBtn);
+    }
     panel.appendChild(actions);
 
     this.root.appendChild(panel);
