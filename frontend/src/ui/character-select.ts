@@ -10,7 +10,8 @@ export class CharacterSelect {
   constructor(
     container: HTMLElement,
     onPlay: (character: CharacterState) => void,
-    onCreate: () => void
+    onCreate: () => void,
+    onCampaigns: () => void
   ) {
     this.root = el('div', { className: 'session-select' });
     this.onPlay = onPlay;
@@ -23,8 +24,12 @@ export class CharacterSelect {
     this.listEl = el('ul', { className: 'session-list' });
     panel.appendChild(this.listEl);
 
-    const newBtn = el('button', { className: 'enter', onclick: () => this.onCreate() }, 'New Adventurer');
-    panel.appendChild(newBtn);
+    const actions = el('div', { className: 'session-actions' });
+    const newBtn = el('button', { onclick: () => this.onCreate() }, 'New Adventurer');
+    const campaignBtn = el('button', { onclick: () => onCampaigns() }, 'Campaigns');
+    actions.appendChild(newBtn);
+    actions.appendChild(campaignBtn);
+    panel.appendChild(actions);
 
     this.root.appendChild(panel);
     container.appendChild(this.root);

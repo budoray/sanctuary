@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from backend.app.api.campaigns import router as campaigns_router
 from backend.app.api.characters import router as characters_router
 from backend.app.api.modules import router as modules_router
 from backend.app.api.sessions import router as sessions_router
@@ -49,6 +50,7 @@ fastapi_app.add_middleware(
 )
 
 fastapi_app.include_router(characters_router, prefix="/api")
+fastapi_app.include_router(campaigns_router, prefix="/api")
 fastapi_app.include_router(modules_router, prefix="/api")
 fastapi_app.include_router(sessions_router, prefix="/api")
 
