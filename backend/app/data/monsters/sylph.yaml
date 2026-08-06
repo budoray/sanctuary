@@ -1,0 +1,23 @@
+name: Sylph
+frequency: very rare
+no_encountered: '1'
+size: medium
+alignment: neutral
+move: 120ft; 360ft flying (AA:V)
+armour_class: 10 [10]
+hit_dice: '3'
+melee_attacks: Nil
+senses: Standard
+lair_chance: 10%
+intelligence: exceptional (15-16)
+morale: 60
+loot: Cache 3 (x10), Cache 10
+experience: 100 +3/hp
+description: Sylphs are aerial fey creatures thought to be closely related to  nymphs. Because a sylph’s territory is so vast it is unlikely they  will be encountered anywhere near their lair.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature; but  if it does, the magic takes full effect.
+- heading: Special Features
+  text: 'Spells. Sylphs are able to cast spells as if they are a 7th level  magic-user (4—1st level, 3—2nd level, 2—3rd level, 1—4th lev- el).  Spell-Like Abilities. At Will: invisibility. 1/Week: conjure air elemental. Unarmed Combat.  Sylphs do not engage in grappling or over - bearing attacks. They can be targeted this way. If not fended  off, they score an unarmed hit with a 2+ on 1d20. Hit Mods:  ATK/DEF +10/-10. Overbear Results Mods: ATK/DEF +0/-0.  Grappling Result Mods: ATK/DEF +0/-0.'
+- heading: Languages
+  text: Sylphs have their own language, speak the language of the fey,  and can also understand common.

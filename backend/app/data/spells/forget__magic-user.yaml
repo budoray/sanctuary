@@ -1,0 +1,14 @@
+name: Forget
+slug: forget
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Enchantment/Charm
+range: 30-ft
+duration: Instantaneous (permanent)
+area_of_effect: 1-4 creatures in a 20-ft square area
+components: V,S,M
+casting_time: 2 segments
+saving_throw: Negates
+text: This extremely potent spell causes the victims to forget events of the immediate past. The spell obliterates memory of the last round plus one additional round per three caster levels. The caster decides which creatures in the spell's area to affect, and these must make saving throws or suffer the loss of memory. The caster may designate 1-4 creatures as the targets of the spell. If one is targeted, the saving throw is made with a -2 penalty; if two are targeted, the penalty is -1; and if 3 or 4 creatures are targeted they suffer no penalty to the saving throw. Lost memories can only be restored by heal, restoration, or wish; the spell's effect is not subject to being merely dispelled.
+source: wiki2_spells.txt

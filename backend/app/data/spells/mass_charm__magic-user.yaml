@@ -1,0 +1,14 @@
+name: Mass Charm
+slug: mass_charm
+reversible: false
+class: magic-user
+level: 8
+school: Arcane Enchantment/Charm
+range: 5-ft/level
+duration: See below
+area_of_effect: See below
+components: V
+casting_time: 8 segments
+saving_throw: Negates
+text: This spell functions as does charm monster, but affects more than one creature. Total hit dice limits the number of creatures affected; the caster cannot affect a total number of hit dice more than twice his or her caster level. All of the target creatures must be within a 30-ft×30-ft area.
+source: wiki2_spells.txt

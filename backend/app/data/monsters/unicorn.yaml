@@ -1,0 +1,25 @@
+name: Unicorn
+frequency: rare
+no_encountered: 1d4+1
+size: large
+alignment: chaotic good
+move: 240ft
+armour_class: 2 [18]
+hit_dice: 4+4
+melee_attacks: 2 hooves (1d6) and 1 horn (1d12)
+senses: Standard
+lair_chance: 5%
+intelligence: average (8-10)
+morale: 70
+loot: Cache 10
+experience: 440 +4/hp
+description: Unicorns avoid contact with all but woodland creatures, al - though they may render assistance to maidens who are pure of  heart, allowing themselves to be tamed as steeds.
+abilities:
+- heading: Surprise and Initiative
+  text: Alert. Unicorns are never surprised within 240ft. Surprise. Unicorns surprise on a 1–5 on 1d6.
+- heading: Immunities and Resistances
+  text: Saving Throws. Unicorns make saving throws as a level 11 mag - ic-user. Immunities. Unicorns are immune to charm, hold, death magic,  and poison.
+- heading: Special Features
+  text: Neutralise Poison. A unicorn’s horn negates the effect of poison,  with normally the merest touch being required. Dimension Door (1/day). Unicorns can cast dimension door once  per day at a range of 360ft.
+- heading: Special Attacks
+  text: 'Charge. Unicorns normally charge into battle, attacking only  with their horns but for double damage on the initial attack. Unarmed Combat. Unicorns cannot be targeted with grappling  or overbearing attacks, but they may overbear. If not fended  off, they score an unarmed hit with a 2+ on 1d20. Hit Mods:  ATK/DEF +8/na. Overbear Results Mods: ATK/DEF +5/na.'

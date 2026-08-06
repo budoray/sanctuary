@@ -1,0 +1,17 @@
+name: Hippocampus
+frequency: rare
+no_encountered: 2d4
+size: large
+alignment: chaotic good
+move: 240ft swimming
+armour_class: 5 [15]
+hit_dice: '4'
+melee_attacks: 1 bite (1d4 piercing)
+senses: Standard
+lair_chance: Nil
+intelligence: average (8-10)
+morale: 65
+loot: Nil
+experience: 60 +4/hp
+description: The hippocampus (plural “hippocampi”) is a mer-horse with the  forequarters of a horse and a fish-like tail instead of rear legs.  They are used as steeds by some underwater species, most no- tably the tritons. Hippocampi are entirely aquatic, and cannot  venture out of the water.
+abilities: []

@@ -1,0 +1,23 @@
+name: Dragon, Silver
+frequency: very rare
+no_encountered: 1d4
+size: varies by age
+alignment: lawful good
+move: 90ft; 240ft flying (AA:II)
+armour_class: -1 [21]
+hit_dice: 9 to 11
+melee_attacks: 3 (1d6/1d6/5d6)
+senses: Infravision 60ft, Detect  invisibility by age category
+lair_chance: 55%
+intelligence: exceptional (15-16)
+morale: 90, 95, or 100 (by HD)
+loot: Hoard 8, Cache 6
+experience: Varies by hit dice and age
+description: Dwelling in high places such as mountaintops or among the  clouds, like gold dragons, silver dragons epitomise law and  goodness. They are interested in the ways of humankind and  often use shape-changing powers to watch, observe and help  people. They prefer to have their lairs in places isolated from  prying eyes, however, and thus often place their entrances in  lakes or ponds. They have found that their treasure hordes are  tempting targets for evil or even neutral adventurers.
+abilities:
+- heading: Special Features
+  text: Polymorph. A silver dragon can cast polymorph self as an innate  ability three times per day. Sleeping Dragon.  A silver dragon encountered in its lair has a  15% chance to be sleeping when the adventurers approach. If  the dragon is asleep, there is a 1 in 6 chance that it will awaken  from the mere presence of adventurers. Dragons also some - times feign sleep. Spellcasting Dragon.  Roughly 75% of silver dragons who can  speak are spellcasters. If it can cast spells, it does so as a mag- ic-user with a level equal to the dragon’s age category.
+- heading: Special Attacks
+  text: Breath Weapon. Silver dragon breath is a blast of frost (like that  of a white dragon) or a cloud of paralysing gas (like a green  dragon except those who fail their saves are paralysed for  3d4 turns), at the dragon’s option. The dragon may use breath  weapons up to three times per day.
+- heading: Languages
+  text: All dragons speak the draconic tongue, and there is a 75%  chance that a silver dragon will also be able to speak common.

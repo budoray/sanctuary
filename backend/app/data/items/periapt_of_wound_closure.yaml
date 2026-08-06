@@ -1,0 +1,4 @@
+name: Periapt of Wound Closure
+classes: any
+description: A magical necklace which will automatically stabilise the wearer’s condition if their hit points drop below zero (-1 to -9). The periapt also doubles the wearer’s normal healing rate and allows a normal rate of healing to wounds which do not normally permit this (e.g. damage from a bleeding sword).
+source: OSRIC_3.0_Gamemaster_Guide.pdf

@@ -1,0 +1,33 @@
+id: 2.7.3.2c
+name: MONSTER LEVEL THREE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 01–02 Ape, Carnivorous 1d3 1
+- 03–04 Centipede, Giant
+- (biggest) 1d2 1
+- 05–07 Rust Monster 1d2 1
+- 08–11 Wolf, Dire 1d4 1d2
+- 12–15 Harpy 1d6 1d2
+- 16–20 Ghoul 1d6 1d2
+- 21–25 Lycanthrope, Wererat 1d8 1d2
+- 26–30 Frog, Giant 1d8 1d2
+- 31–35 Devil, Lemure 2d6 1d3
+- 36–40  NPC Party varies varies
+- 41–50 Lizard, Giant 1d6 1d2
+- 51–60 Ogre 1d6 1d2
+- 61–70 Carcass Creeper 1d6 1
+- 71–75 Beetle, Giant Boring 1d6 1d2
+- 76–80 Bugbear 2d8 1d4
+- 81–85 Wight 1d4 1
+- 86–89 Fungi, Violet 1d4 N/A
+- 90–93 Dark Creeper 1 1
+- 94–96 Dragon—see Sub-table 1 1
+- 97–98 Zombie, Monster 1d3 1
+- 99–00 Spider, Giant (bigger) 1d6 1d2
+- MONSTER LEVEL THREE—DRAGON SUB–TABLE
+- D100 TYPE  AGE HIT POINTS PER HD
+- 01–30 Black Very Young 1
+- 31–60 Brass Very Young 1
+- 61–00 White Very Young 1

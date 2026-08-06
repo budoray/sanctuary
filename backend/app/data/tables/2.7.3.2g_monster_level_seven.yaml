@@ -1,0 +1,47 @@
+id: 2.7.3.2g
+name: MONSTER LEVEL SEVEN
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 01–02 Golem; (1–3) Clay, (4–6)
+- Flesh 1 1
+- 03–04 Giant, Ettin 1d2 1
+- 05–07 Chimera 1d4 1d2
+- 08–11 Spectre 1d4 1d2
+- 12–15 Basilisk 1d2 1
+- 16–20 Giant; (1–3) Fire, (4–6)
+- Stone 1d8 1d2
+- 21–25 Demon, Babau 1d3 1
+- 26–30 Sphinx; (1–3) Andro-,
+- (4–6) Crio- 1 1
+- 31–35 Lamia 1 1
+- 36–40  NPC Party—see Sub-
+- table varies varies
+- 41–50 Lizard, Giant; (1–3) Fire,
+- (4–6) Cave 1d2 1
+- 51–55 Skeleton Warrior 1 1
+- 56–60 Shedu 1d2 1
+- 61–70 Will-o-the-wisp 1 1
+- 71–75 Naga, Spirit 1d3 1
+- 76–80 Devil; (1–3) Bearded,
+- (4–6) Bone 1d2 1
+- 81–85 Hydra, 9 or 10 heads 1 1
+- 86–89 Dragon—see Sub-table 1 1
+- 90–93 Cyclops 1 1
+- 94–96 Barghest 1 1
+- 97–98 Troll, Giant Two-headed 1d3 1
+- 99–00 Efreet 1 1
+- MONSTER LEVEL SEVEN—DRAGON SUB–TABLE
+- D100 TYPE  AGE HIT POINTS PER HD
+- 01–10 Black Very Old 7
+- 11–20 Blue Old 6
+- 21–30 Brass Very Old 7
+- 31–35 Bronze Old 6
+- 36–50 Copper Old 6
+- 51–55 Gold Old 6
+- 56–70 Green Old 6
+- D100 TYPE  AGE HIT POINTS PER HD
+- 71–80 Red Old 6
+- 81–85 Silver Old 6
+- 86–00 White Very Old 7

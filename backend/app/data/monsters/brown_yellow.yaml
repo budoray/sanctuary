@@ -1,0 +1,26 @@
+name: Brown Yellow
+frequency: very rare uncommon no.  encountered 1 patch 1 patch
+size: small to large small to large
+alignment: neutral neutral
+move: 0 0
+armour_class: 10 [10] 10 [10]
+hit_dice: N/A N/A
+melee_attacks: Nil Nil
+senses: N/A N/A
+lair_chance: Nil Nil
+intelligence: non- (0) non- (0)
+morale: N/A N/A
+loot: Nil Nil
+experience: None None
+description: BROWN MOULD Brown mould can be found in places where it escapes the ef - fects of ultraviolet light. It feeds on most other sources of en - ergy, and absorbs the body heat of any creature that comes  within 5ft.
+abilities:
+- heading: Immunities and Resistances
+  text: Almost Unkillable. Brown Mould cannot be killed without the use  of a wish spell. The only thing that really affects it is magical  cold. An ice storm or wall of ice will make the brown mould go  into a dormant state for 5d6 turns.
+- heading: Special Features
+  text: Growth by Fire. Brown mould grows in the presence of heat, so  that the presence of high (fiery) temperatures can cause the  mould to increase its size by a factor of 2d4 times in the course  of a melee round.
+- heading: Special Attacks
+  text: Heat Absorption.  Heat absorption from a brown mould deals  damage to all creatures within 5ft, at a rate of 4d8 cold damage  per combat round (this is approximately 1d8 per 10 degrees  Fahrenheit of body heat over 50 degrees). Creatures that are  colder (undead, in particular) will take less damage or poten - tially none at all.  YELLOW MOULD Yellow mould is a growth found only in dark places, more of a  hazard than a monster.
+- heading: Immunities and Resistances
+  text: Immune to All but Fire. Yellow mould is extremely susceptible to  fire and fire attacks, but cannot be killed by any other means. A  continual light spell will force the mould to go dormant for 2d6  turns until it covers the light source. If it is set alight, the mould  will die in 1d3+3 rounds.
+- heading: Special Attacks
+  text: Spores. When touched, yellow mould releases spores in a 10ft  (cube) cloud. Any creature within this area will die unless it suc- cessfully saves vs poison. A dead character will require a cure  disease in addition to raise dead or resurrection, or they will re- main infected and die again. If any surface covered in yellow  mould is handled roughly, there is a 50% chance spores will be  released in such a cloud.

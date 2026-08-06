@@ -1,0 +1,23 @@
+name: Hell Hound
+frequency: very rare
+no_encountered: 2d4
+size: medium
+alignment: lawful evil
+move: 120ft
+armour_class: 4 [16]
+hit_dice: 4 to 7
+melee_attacks: 1 bite (1d10)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: low (5-7)
+morale: 70
+loot: Hoard 3
+experience: '4 HD: 75 +4/hp  5 HD: 110 +5/hp  6 HD: 160 +6/hp  7 HD: 225 +8/hp'
+description: Hell hounds are not native to the material plane; they are  brought here by others to serve as guard dogs. These fiendish  dogs are dark reddish in colour with glowing red eyes and black  mouths.
+abilities:
+- heading: Surprise and Initiative
+  text: Stealthy Surprise. Because hell hounds can move so quietly, they  surprise on a roll of 1–4 on 1d6. Keen Senses. Hell hounds can only be surprised on a roll of 1 due  to their own sharp senses.
+- heading: Immunities and Resistances
+  text: 'Eyes of the Underworld. The vision of Hell Hounds is unnaturally  sharp: 50% of the time they can spot hidden or invisible crea - tures.'
+- heading: Special Attacks
+  text: 'Breathe Fire.  Hell hounds breath fire up to a 10ft range. Any - one caught in the area (roughly a line 10ft long and 5-6ft wide)  must make a saving throw vs. breath weapons or take fire  damage equal to the hound’s hit dice. If the saving throw suc - ceeds, the victim takes only half damage. Example: a 6 hit dice  hell hound breathes fire for 6hp damage, unless the opponent  saves vs breath weapons and thus takes only 3 hit points. The  hell hound can attack and breathe fire in the same round. Unarmed Combat.  Hell hounds cannot be targeted with grap - pling or overbearing attacks, but they may overbear. If not  fended off, they score an unarmed hit with a 2+ on 1d20. Hit  Mods: ATK/DEF +8/na. Overbear Results Mods: ATK/DEF +3/na.  Grappling Result Mods: ATK/DEF na/na.'

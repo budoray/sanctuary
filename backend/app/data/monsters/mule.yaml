@@ -1,0 +1,17 @@
+name: Mule
+frequency: common
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 120ft
+armour_class: 7 [13]
+hit_dice: '3'
+melee_attacks: 1 bite (1d2) or 2 kicks (1d6)
+senses: Standard
+lair_chance: Nil
+intelligence: semi- (2-4)
+morale: 60
+loot: Nil
+experience: 20 +2/hp
+description: Mules are a sterile cross-breed of horses and donkeys, and are  sure-footed enough to be taken into dungeons. Their stubborn- ness is legendary. The stats given for mules can also be used for  asses and donkeys, although these should have their hit points  rolled on d6s rather than d8s to reflect their smaller size.
+abilities: []

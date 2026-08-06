@@ -1,0 +1,19 @@
+name: Wolf
+frequency: common rare no.  encountered 3d10 3d4
+size: small medium
+alignment: neutral neutral
+move: 180ft 180ft
+armour_class: 7 [13]
+hit_dice: 2+2
+melee_attacks: 1 bite (1d4+1)
+senses: Keen Keen
+lair_chance: 10% 10%
+intelligence: semi- (2-4) semi- (2-4)
+morale: 60 65
+loot: Nil Nil
+experience: 50 +2/hp
+description: Wolves are predators that hunt in packs of up to 30. They are  normally
+  26 to 30 inches tall at the shoulder, and males weigh  80 to 100 lbs. A wolf pack
+  will encircle prey, seeking to attack  from behind. Once a pack has identified possible
+  prey, they  usually (75%) follow the group, waiting for the chance to attack.
+abilities: []

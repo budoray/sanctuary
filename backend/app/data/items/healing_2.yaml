@@ -1,0 +1,4 @@
+name: Healing
+classes: CD
+description: 'This staff can cure the following conditions, two times each per day: blindness, disease, injury (3d8+3 hp), and insanity. This staff may only be employed on an individual human or human-like creature one time per function, per day. For example, the wielder could cure a victim of all conditions the staff can address, but only once for each condition in one day. This staff may be recharged.'
+source: OSRIC_3.0_Gamemaster_Guide.pdf

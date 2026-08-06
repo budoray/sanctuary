@@ -1,0 +1,48 @@
+id: 2.7.3.2f
+name: MONSTER LEVEL SIX
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 01–02 Wraith 1d6 1
+- 03–04 Demon, Quasit 1 1
+- 05–07 Phase Cat 1d4 1d2
+- 08–11 Mummy 1d4 1d2
+- 12–15 Dragon—see Sub–table 1d2 1
+- 16–20 Devil, Erinyes 1d3 1
+- 21–25 Troll 1d3 1
+- 26–30 Otyugh, Lesser 1d2 1
+- 31–35
+- Devil, Manalishi; (1–2)
+- Black;
+- (3–4) Blue; (5–6) Green,
+- (7–8) White
+- 1d3 1
+- 36–40  NPC Party—see Sub-
+- table varies varies
+- 41–50 Giant, Hill 1d2 1
+- 51–60 Wight 1d8 1d2
+- 61–70 Sphinx; (1–3) Gyno-,
+- (4–6) Hieraco- 1 1
+- 71–75 Wyvern 1d3 1
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 76–80 Hydra, 7 or 8 heads 1d2 1
+- 81–85 Manticore 1d4 1
+- 86–89 Troll, Giant 1d3 1
+- 90–93 Lizard, Giant Monitor 1d4 1
+- 94–96 Hell Hound 2d6 1d3
+- 97–98 Banshee 1 1
+- 99–00 Spectral Troll 1d2 1
+- MONSTER LEVEL SIX—DRAGON SUB-TABLE
+- D100 TYPE  AGE HIT POINTS PER HD
+- 01–10 Black Old 6
+- 11–20 Blue Adult 5
+- 21–30 Brass Old 6
+- 31–35 Bronze Adult 5
+- 36–50 Copper Adult 5
+- 51–55 Gold Adult 5
+- 56–70 Green Adult 5
+- 71–80 Red Adult 5
+- 81–85 Silver Adult 5
+- 86–00 White Old 6

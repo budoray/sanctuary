@@ -1,0 +1,25 @@
+name: Djinni Noble Djinni
+frequency: very rare very rare no.  encountered 1 1
+size: large (8ft) large (8ft)
+alignment: chaotic good chaotic good
+move: 90ft; 240ft flying  (AA:VI) 90ft; 240ft flying  (AA:VI)
+armour_class: 4 [16] 4 [16]
+hit_dice: 7+3 10
+melee_attacks: 1 slap (2d8) 1 slap (3d8)
+senses: Infravision 60ft Infravision 60ft
+lair_chance: Nil Nil
+intelligence: average (8-10) to  high (13-14) average (8-10) to  high (13-14)
+morale: 85 95
+loot: Nil Nil
+experience: 650 +10/hp 1200 +13/hp
+description: Djinn (singular “djinni”) come from the Elemental Plane of Air  and are quite magical. They can travel the elemental planes and  the Astral Plane, as well as the Prime Material. If subdued, they  can be enslaved for 1,001 days. Once their service has expired,  they are free and may not become enslaved again by the same  creature. A djinni can carry up to 600  lbs without tiring, either flying or  walking. A djinni is able to carry double the weight on foot but  only for about thirty minutes. A djinni will require an hour’s rest  for every 30 minutes of carrying.
+abilities:
+- heading: Immunities and Resistances
+  text: If any attack is made on the djinni by an airborne attacker, the  attack will be at -1 “to hit” and -1 to damage.
+- heading: Special Features
+  text: 'Spell-like Abilities.  At Will: Djinns can become invisible or enter gaseous form at  will. In gaseous form, the creature takes on a translucent, gaseous  consistency and floats at 30ft per round. This speed can be dif - ferent depending on natural wind speed in the environment  or due to the effects of wind–altering spells. While in gaseous  form, the creature can flow below doors and other small spac - es not sealed airtight. Although magical lightning and fire do  the gaseous form full damage, the creature is impervious to all  other attacks. 1/day: Djinn can perform any of the following abilities once per  day: create food for up to 12 people; create water or wine for  up to 12 people; create up to 16 cubicft of cloth, 9 cubicft of  wood, or 100 pounds of metal (the metal is not permanent  and will disappear within a day); create an illusion with both  sight and sound that will act on its own without being con - trolled. The illusion will last until it is dispelled or touched.  Three
+    Wishes (Noble Djinn only).  If subdued, a noble djinni need  only grant three wishes to be released from service. The djinni  can effectively cast three wish spells per day, but if the djinni  is angry at the person asking for the wishes the wording of the  request should be very specific, because the djinni will comply  with the least beneficial interpretation possible.'
+- heading: Special Attacks
+  text: 'Once per day, djinn can assume the form of a whirlwind 7ft tall,  3ft across at the top, and 1ft across at the bottom. This lasts  for an entire round and does 2d6 hit points of damage to all  creatures caught in its path (3d6 for a noble djinn). Any creature  with less than 2 hit dice are killed instantly. The djinni can move  30ft in one round while in whirlwind form, but can turn while  moving, to hit a large number of opponents. Unarmed Combat. Djinn can be targeted with grappling or over- bearing attacks, and under some circumstances they may use  these tactics. If not fended off, they score an unarmed hit with  a 2+ on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear Results  Mods: ATK/DEF +4/-4. Grappling Result Mods: ATK/DEF +2/-2.'
+- heading: Languages
+  text: Djinn speak the language of the elemental plane of air, but they  also have a limited form of telepathy that enables them to com- municate with any intelligent creature. DOG WAR DOG  (MASTIFF) ORDINARY OR WILD

@@ -1,0 +1,14 @@
+name: Arcane Spells, Level 1
+slug: arcane_spells_level_1
+reversible: false
+class: illusionist
+level: 7
+school: Various
+range: See below
+duration: See below
+area_of_effect: See below
+components: See below
+casting_time: See below
+saving_throw: See below
+text: This spell enables the illusionist to memorise several first level magic user spells in place of one seventh level illusionist spell. The illusionist may substitute a number of magic user spells equal to his or her level minus ten (4 at 14th level, 5 at 15th level, etc.). The mage spells must be chosen at the same time as the Arcane Spells, Level 1 spell is memorised.
+source: wiki2_spells.txt

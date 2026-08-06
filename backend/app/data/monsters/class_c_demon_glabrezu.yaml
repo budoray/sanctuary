@@ -1,0 +1,21 @@
+name: Class C Demon (glabrezu)
+frequency: uncommon
+no_encountered: 1d3 or 1d6 (in the Abyss)
+size: large (10ft)
+alignment: chaotic evil
+move: 90ft
+armour_class: -4 [24]
+hit_dice: '10'
+melee_attacks: 2 pincers (2d6 piercing), 2 claws (1d3  slashing), and 1 bite (1d4+1 piercing)
+senses: Infravision 120ft, Detect invisible 5%
+lair_chance: 15%
+intelligence: average (8-10)
+morale: 95
+loot: Hoard 4
+experience: 2,400 +14/hp
+description: 'These muscular demons have a head like a horned dog, and four  smaller arms that sprout from the creature’s chest: two of these  end in sharp pincers, and two end in clawed hands. Glabrezu are  vulnerable to normal melee weapons and missiles.'
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (60%).  Any magic spell or effect has a 60%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: Darkness, 10ft radius, cause fear (as the 4th level mag- ic-user spell), cause fear (as the 4th level magic-user spell), levi- tate (as the 2nd level magic-user spell), pyrotechnics (as the 2nd  level magic-user spell ), polymorph self (as the 4th level mag - ic-user spell), telekinesis (as the 5th level magic-user spell, up to  400 lbs), gate (as the 9th level magic-user spell) another Class A  to C demon (30% chance of success). Unarmed Combat.  Glabrezu demons can make grappling or  overbearing attacks. If not fended off, they score an unarmed  hit with a 2+ on 1d20. Hit Mods: ATK/DEF +6/-6. Overbear Re - sults Mods: ATK/DEF +4/-4. Grappling Result Mods: ATK/DEF  +3/-3.'

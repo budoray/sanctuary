@@ -1,0 +1,25 @@
+name: Bison (buffalo) Bull Cattle
+frequency: uncommon common common
+no_encountered: 4d6 1, plus 50% chance of 3d6 cattle 20d10
+size: large large large
+alignment: neutral neutral neutral
+move: 150ft 150ft 150ft
+armour_class: 3 [17] or 7 [13] 7 [13] 7 [13]
+hit_dice: 5 4 3
+melee_attacks: 2 horns (1d8 piercing) 2 horns (1d6 piercing) 1 head butt (1d6 blunt)
+senses: Standard Standard Standard
+lair_chance: Nil Nil Nil
+intelligence: animal (1) animal (1) animal (1)
+morale: 70 65 60
+loot: Nil Nil Nil
+experience: 110 +4/hp 75 +3/hp 50 +2/hp
+description: Unarmed Combat. Cattle cannot be overborne or grappled, and  do not employ these tactics (they are folded into their trample  or charge attacks).  BUFFALO Native to tropical and subtropical plains, the buffalo will usually  attack if approached within 60ft. Any attack by one may result  in the whole herd charging.  50% of all buffalo species are non-aggressive and will flee from  threats unless cornered.
+abilities:
+- heading: Special Features
+  text: Sectioned Armour Class. A bison’s head is AC 3 [17]. Only those to  the side or rear can attack the body’s AC 7 [13].
+- heading: Special Attacks
+  text: When charging, the buffalo will do 3d6 impact damage plus 1d4  trampling damage. The charge must cover a minimum of 40ft. BULL This is an encounter with a wild bull, massive in size and very  aggressive. If someone moves to within 80ft, it is likely to charge  (75%), even without apparent provocation.
+- heading: Special Attacks
+  text: The charge, if either horn hits, inflicts 4d4 points of blunt dam - age upon impact, in addition to any damage from the horns.  Any creature smaller than huge is knocked prone. The charge  must traverse a minimum of 30ft in order to be effective. CATTLE These are smaller bulls and cows, either encountered without  a lead bull or as part of a lead bull’s herd. If there is any inter - action with the herd, it has a 25% chance of stampeding, and  a stampede has a 25% chance to head toward the characters,  becoming a special attack.
+- heading: Special Attacks
+  text: Stampedes will cause characters to be trampled by 2d4 ani - mals, and take 1d4 damage per animal.

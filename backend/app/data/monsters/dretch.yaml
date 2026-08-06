@@ -1,0 +1,21 @@
+name: Dretch
+frequency: common
+no_encountered: 2d4 or 5d4 (in the Abyss)
+size: small
+alignment: chaotic evil
+move: 90ft
+armour_class: 2 [18]
+hit_dice: '4'
+melee_attacks: 2 claws (1d4) and 1 bite(1d4+1)
+senses: Infravision 60ft
+lair_chance: 15%
+intelligence: low (5-7)
+morale: 65
+loot: Individual 1, 2, 3, 4
+experience: 175 +4/hp
+description: 'Dretch are the weakest of native demonkind (manes, as con - demned souls, are weaker). Their appearance is almost comical:  a plump body with thin, gangly arms and legs. Their squat heads  are bald and they have a slobbering, stupid visage. Dretch usu - ally attack in hordes, using tooth and claw in blind abandon,  although if they consider themselves threatened they will first  try to open a gate for reinforcements.'
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (30%).  Any magic spell or effect has a 30%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: Darkness, 5ft radius, scare (as the 2nd level magic-user  spell), telekinesis (as the 5th level magic-user spell, up to 50  lbs) or attempt to gate (as the 9th level magic-user spell) a  class A demon (15% chance of success). 1/day: stinking cloud  (as the 2nd level magic-user spell), and  teleport without fail (as the 5th level magic-user spell, but with  no chance of error).  Unarmed Combat. Dretch demons can make grappling or over - bearing attacks, but ordinarily don’t. If not fended off, they  score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF  +6/-6. Overbear Results Mods: ATK/DEF -1/+1. Grappling Result  Mods: ATK/DEF -2/+2.'

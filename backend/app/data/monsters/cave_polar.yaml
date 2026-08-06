@@ -1,0 +1,23 @@
+name: Cave Polar
+frequency: uncommon rare
+no_encountered: 1d2 1d6
+size: large (12ft) large (14ft)
+alignment: neutral neutral
+move: 120ft 120ft; 90ft  swimming
+armour_class: 6 [14] 6 [14]
+hit_dice: 6+6 8+8
+melee_attacks: 1d8/1d8/1d12 1d10/1d10/2d6
+senses: Standard Standard
+lair_chance: 10% Nil
+intelligence: semi- (2-4) semi- (2-4)
+morale: 80 95
+loot: Nil Nil
+experience: 225 +8/hp 600 +12/hp
+description: 'Unarmed Combat. Greater bears may attempt to overbear a lone  opponent, and can (technically) grapple and be grappled. If not  fended off, they score an unarmed hit with a 2+ on 1d20. Hit  Mods: ATK/DEF +8/-8. Overbear Results Mods: ATK/DEF +5/-5.  Grappling Result Mods: ATK/DEF +2/-2. CAVE BEAR The cave bear, a giant relic of past ages, is particularly carnivo - rous, in contrast to its more omnivorous relatives.'
+abilities:
+- heading: Immunities and Resistances
+  text: Death Stamina. If reduced to zero hit  points, the cave bear will  continue to fight until either 1d4 rounds have elapsed or it is  reduced to -9 hit points.
+- heading: Special Attacks
+  text: 'Melee Attack: Bear Hug. Any claw attack with a to-hit roll of 18 or  more results in the target being hugged for an additional 2d8  hit points. POLAR BEAR Polar bears have white fur and are excellent swimmers. They do  not have a bear hug attack.'
+- heading: Immunities and Resistances
+  text: Death Stamina. If reduced to zero hit  points, the polar bear will  continue to fight until either 1d4+1 rounds have elapsed or it  is reduced to -13 hit points. BEE, GIANT (HONEYBEE)

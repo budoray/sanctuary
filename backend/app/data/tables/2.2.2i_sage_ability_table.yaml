@@ -1,0 +1,12 @@
+id: 2.2.2i
+name: SAGE ABILITY TABLE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 MINOR FIELDS SPECIAL CATEGORIES IN
+- MAJOR FIELD
+- 01–10 1 2
+- 11–30 1 3
+- 31–50 1 4
+- 51–70 2 2
+- 71–90 2 3
+- 91–00 2 4

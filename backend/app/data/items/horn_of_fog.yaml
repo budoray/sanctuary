@@ -1,0 +1,4 @@
+name: Horn of Fog
+classes: any
+description: Creates a thick, vision-obscuring fog covering a 10ft cube starting next to the user and increasing 10ft in a straight line each round the horn is blown. The fog can be blocked by any substantial structure such as a wall. The fog begins dissipating after 3 rounds and a moderate wind will disperse the fog in 4 rounds, a strong wind in 1 round.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

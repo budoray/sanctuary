@@ -1,0 +1,23 @@
+name: Shedu
+frequency: rare
+no_encountered: 2d4
+size: large
+alignment: lawful good
+move: 120ft; 240ft flying (AA:IV)
+armour_class: 4 [16]
+hit_dice: 9+9
+melee_attacks: 2 hooves (1d6 blunt)
+senses: Detect invisible 10%
+lair_chance: 25%
+intelligence: exceptional (15-16)
+morale: 100
+loot: Hoard 7
+experience: 1,950 +14/hp
+description: Shedu are winged bulls with human heads. They wander end - lessly, battling evil and chaos. They will aid anyone of good  alignment who is in need. Shedu not only travel the material  plane but the ethereal and astral planes as well.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (25%).  Any magic spell or effect has a 25%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: Spells. All shedu cast spells as a 9th level magic-user. Ethereality (at will). Shedu can become ethereal at will. Unarmed Combat.  Shedus cannot effectively be targeted with  grappling or overbearing attacks, and do not use these tactics.
+- heading: Languages
+  text: Shedu speak their own language, using their telepathy to com- municate with others.

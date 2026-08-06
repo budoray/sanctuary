@@ -1,0 +1,14 @@
+name: Extension II
+slug: extension_ii
+reversible: false
+class: magic-user
+level: 5
+school: Arcane Transmutation/Alteration
+range: Caster
+duration: See below
+area_of_effect: See below
+components: V
+casting_time: 4 segments
+saving_throw: None
+text: Except as noted, this spell is identical to the spell extension I, but may be used to extend by 50% the duration of any spell up to and including fourth-level spells.
+source: wiki2_spells.txt

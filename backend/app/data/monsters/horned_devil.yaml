@@ -1,0 +1,23 @@
+name: Horned Devil
+frequency: uncommon
+no_encountered: 1d2 or 1d4+1
+size: large (9ft)
+alignment: lawful evil
+move: 90ft; 180ft flying (AA:III)
+armour_class: -5 [25]
+hit_dice: 5+5
+melee_attacks: 2 claws (1d4) and 1 bite (1d4+1) and 1  tail (1d3) or 1 weapon and 1 tail (1d3)
+senses: Infravision 60ft
+lair_chance: 55%
+intelligence: high (13-14)
+morale: 75
+loot: Hoard 9
+experience: 1,320 +6/hp
+description: Horned devils are inhabitants of the 6th and 7th planes of Hell.  Although considered to be greater devils, they are weaker than  either ice devils or pit fiends, whom they despise. Horned devils  have their own personal names which can be used to summon  and control them.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Immunities. This creature is immune to fire damage. Damage Resistances  (all half damage): Cold, Poison (including  gases).'
+- heading: Special Features
+  text: 'Fear Aura. Horned devils constantly emanate fear (as the 4th lev- el magic-user spell) in a 5ft radius.  Spell-Like Abilities. At Will: animate dead (as the 5th level magic-user spell), charm  person (as the 1st level magic-user spell), fear (effect varies, as  the 4th level magic-user spell), know alignment (as the 2nd lev- el cleric spell), spectral force (as the 3rd level illusionist spell),  suggestion (as the 3rd level magic-user spell), teleport (no  chance of error, otherwise as the 5th level magic-user spell),  ESP (as the 2nd level magic-user spell), detect magic  (as the  1st level magic-user spell), phantasmal force  (as the 1st lev - el illusionist spell), pyrotechnics (as the 2nd level magic-user  spell), produce flame (as the 2nd level druid spell) or summon  another horned devil (50% chance of success). 1/day: wall of fire that inflicts 3d8 hit points of fire damage.'
+- heading: Special Attacks
+  text: 'Melee Weapons. In combat, horned devils typically use either a  barbed fork (75%) for 2d6 damage or a jagged whip (25%) that  inflicts 1d4 damage plus the victim is stunned 1d4 rounds— save vs spells for unlisted categories to avoid). Wounding Tail. As part of their normal attack, these devils can  attack with their sharply-tipped tails, which cause weeping  wounds (1d3 damage plus 1 hp of damage per turn until the  wound is bound or cured). Unarmed Combat. Horned devils can be targeted with grappling  or overbearing attacks, although they usually do not engage in  grappling. If not fended off, they score an unarmed hit with a  2+ on 1d20. Hit Mods: ATK/DEF +6/-6. Overbear Results Mods:  ATK/DEF +3/-3. Grappling Result Mods: ATK/DEF +3/-3.'

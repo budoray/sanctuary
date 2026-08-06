@@ -1,0 +1,21 @@
+name: Titan
+frequency: very rare
+no_encountered: '1'
+size: huge (18ft or more)
+alignment: chaotic good
+move: Depends on HD (see below)
+armour_class: Depends on HD (see below)
+hit_dice: 17–22
+melee_attacks: 1 (See below)
+senses: Infravision 60ft
+lair_chance: 10%
+intelligence: genius (17-18) or supra– genius
+morale: Depends on HD (see below)
+loot: Hoard 5, Cache 3 (x10), Cache  4
+experience: Variable
+description: 'Titans are powerful creatures not native to the material plane,  and are therefore affected by a protection from evil  spell (if it  overcomes their innate magic resistance). They normally ap - pear as massive humans, figured and possessed of an unearth- ly beauty. By hit die, movement rate, armour class, damage,  and morale is as follows: • 17 HD: MV 210ft, AC 2 [18], DAM 7d6, Morale 130 • 18 HD: MV 210ft, AC 1 [19], DAM 7d6, Morale 135 • 19 HD: MV 150ft, AC 0 [20], DAM 7d6, Morale 140 • 20 HD: MV 150ft, AC -1 [21], DAM 7d6, Morale 145 • 21 HD MV 150ft, AC -2 [22], DAM 8d6, Morale 150 • 22 HD: MV 150ft, AC -3 [23], DAM 8d6, Morale 155 It is possible (20% chance) that a titan will be accompanied by  a storm giant, for the two species are friendly with each other.'
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (60%).  Any magic spell or effect has a 60%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mental Attacks.  Titans are immune to all mental at - tacks (all spells and abilities affecting the mind), and may have  mental powers if the GM makes use of psionics in the cam - paign.
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: levitate (per the level 2 magic-user spell). 2/day: become invisible or shift into the ethereal plane. Spells. All titans have the ability to cast both clerical and mag - ic spells. For each type of spell, roll 1d4+3. This number rep - resents the maximum spell level the titan can cast for that type  of spell. The titan can cast 2 spells of each level. Example: The die rolls result in a 4 for magic spells and a 6  for clerical spells. The titan would be able to cast 2 first level  magic spells, 2 second level, 2 third level and 2 fourth level  (because the die roll for maximum level of magic spells was  4). It would also be able to cast 2 first level clerical spells, 2  second level, 2 third level, 2 fourth level, 2 fifth level, and 2  sixth level (because the die roll showed 6 as the maximum  level for clerical spells). Unarmed Combat.  Titans cannot be effectively targeted with  grappling or overbearing attacks, and do not use these tactics.'

@@ -1,0 +1,14 @@
+name: Plant Growth
+slug: plant_growth
+reversible: false
+class: magic-user
+level: 4
+school: Arcane Transmutation/Alteration
+range: 10-ft/level
+duration: Permanent
+area_of_effect: 10-ft×10-ft square/level
+components: V,S
+casting_time: 4 segments
+saving_throw: None
+text: By means of this spell, the caster causes plants and vines to grow with unbelievable speed, forming a tangled barrier of thick vegetation. The enchantment may be dispelled, or the plants cleared by normal means. Chopping a way through the barrier is possible, but movement is restricted to 10- ft/turn (20-ft for size L creatures).
+source: wiki2_spells.txt

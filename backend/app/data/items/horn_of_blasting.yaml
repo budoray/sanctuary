@@ -1,0 +1,4 @@
+name: Horn of Blasting
+classes: FPR
+description: When the command word is spoken and the horn sounded, a 40ft cone of sonic energy deals 5d6 damage and deafens targets for 2d6 rounds. Saving throw vs wand negates deafening effect and halves damage. Any crystalline object within the area of effect takes 7d6 damage with no save allowed. The horn can be used as a musical instrument but if the blasting effect is used more than once within a 24 hour period there is a cumulative 20% chance the horn will explode, dealing 10d6 points of damage to the user (no save).
+source: OSRIC_3.0_Gamemaster_Guide.pdf

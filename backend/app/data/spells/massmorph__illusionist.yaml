@@ -1,0 +1,14 @@
+name: Massmorph
+slug: massmorph
+reversible: false
+class: illusionist
+level: 4
+school: Phantasmal Illusion
+range: 10-ft/level
+duration: See below
+area_of_effect: Up to 10-ft×10-ft/level
+components: V,S
+casting_time: 4 segments
+saving_throw: None
+text: This spell causes creatures of man size or smaller to appear like an innocent grove of trees to any observers. Up to 10 creatures may be enchanted in this manner. The illusion is so powerful that it is maintained even if the massmorphed creatures are touched. The “tree's” reaction to being stabbed or hacked at is fairly likely to indicate that it is no normal tree, of course, although the illusion is not actually dispelled by a successful attack. The illusion persists until the caster dies or dismisses it (or it is dispelled).
+source: wiki2_spells.txt

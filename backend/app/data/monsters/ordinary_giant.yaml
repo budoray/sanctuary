@@ -1,0 +1,18 @@
+name: Ordinary Giant
+frequency: uncommon very rare no.  encountered 1d4+1 1d4+1
+size: small medium
+alignment: neutral neutral
+move: 60ft; 30ft burrowing 60ft; 30ft burrowing
+armour_class: 4 [16] 4 [16]
+hit_dice: 1+2 3
+melee_attacks: 2 claws (1d2), 1 bite  (1d3) 2 claws (1d3), 1 bite  (1d6)
+senses: Keen (detect  invisible 5%) Keen (detect  invisible 5%)
+lair_chance: 10% 10%
+intelligence: semi- (2-4) semi- (2-4)
+morale: 55 60
+loot: Nil Nil
+experience: 30 +1/hp 50 +2/hp
+description: Swift-moving burrowers, badgers will defend their territory to  the death. They mate for life, and when more than one is indi - cated, the encounter will be with a family. Adult badger pelts  will usually bring 1d3×10 gold each, and juvenile pelts are worth  one-half normal. The giant badger is simply a larger version of the regular bad - ger. They are very rare, even in badger-rich areas, but may be  encountered in prehistoric “lost world” environments. Their  pelts are worth 1d3 x20 gold each.  Unarmed Combat.  Badgers cannot be overborne or grappled,  and do not employ these tactics.
+abilities:
+- heading: Languages
+  text: Depending on the world setting, some unusual badgers (both  ordinary and giant) may be related to the fey, in which case they  can speak common and/or fey.

@@ -1,0 +1,17 @@
+name: Hippogriff
+frequency: rare
+no_encountered: 2d8
+size: large
+alignment: neutral
+move: 180ft; 360ft flying (AA:IV)
+armour_class: 5 [15]
+hit_dice: 3+3
+melee_attacks: 1d6/1d6/1d10
+senses: Standard
+lair_chance: 10%
+intelligence: semi- (2-4)
+morale: 65
+loot: Cache 3 (x5)
+experience: 150 +3/hp
+description: 'Hippogriffs have the body of a horse, but the head, wings, and  foreclaws of an eagle. They are only found in remote locations,  far from civilisation, nesting on rocky outcrops. Hippogriffs do  not mix well other winged beasts, and will try to eat pegasi. If  encountered near its nest, a hippogriff will fight ferociously to  defend itself and its young. Eggs and hatchlings bring a high  price from those wishing to train them as mounts. When ridden by a creature weighing more than 100 lbs, a hip - pogriff’s aerial agility rating decreases to III. Unarmed Combat. Hippogriffs cannot be targeted with grappling  or overbearing attacks, but they may overbear. If not fended  off, they score an unarmed hit with a 2+ on 1d20. Hit Mods:  ATK/DEF +10/na. Overbear Results Mods: ATK/DEF +4/na.  Grappling Result Mods: ATK/DEF na/na.'
+abilities: []

@@ -1,0 +1,14 @@
+name: Transmute Metal to Wood
+slug: transmute_metal_to_wood
+reversible: false
+class: druid
+level: 7
+school: Druidic Transmutation/Alteration
+range: 80-ft
+duration: Instantaneous (permanent)
+area_of_effect: One metal object
+components: V,S,M
+casting_time: 9 segments
+saving_throw: See below
+text: Using this spell, the druid may select a single object of metal and change its substance to wood. The spell affects up to 8 lbs of metal per caster level. The item is not entitled to a saving throw, but magic items have a flat 90% chance of being unaffected by the spell.
+source: wiki2_spells.txt

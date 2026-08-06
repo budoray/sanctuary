@@ -1,0 +1,24 @@
+name: Nymph
+frequency: very rare
+no_encountered: 1d4
+size: medium
+alignment: neutral
+move: 120ft
+armour_class: 9 [11]
+hit_dice: '3'
+melee_attacks: 1 (1d2 or by weapon)
+senses: Keen
+lair_chance: 95%
+intelligence: exceptional (15-16)
+morale: 60
+loot: Cache 3 (x10), Cache 10
+experience: 350 +3/hp
+description: Nymphs are nature spirits of almost indescribable beauty,  and are always female; it is said that even the mere glimpse of  one is enough to rob a mortal of their sight, or perhaps even  cause death. They typically inhabit natural places of particular  loveliness, such as high mountain lakes or deep forest glades.  The key thing about being damaged by seeing a nymph isn’t  about gender (as described in the original rules), it is about the  Ancient Greek concept of disrespect to the gods. Thus, an elf  (being fey) might be immune to the effect of laying eyes on a  nymph. Any human—not just males—are affected by the sight,  because nymphs are creatures not meant by the gods to be  looked upon. Nymphs abhor evil and will occasionally aid someone in dis - tress.  A lock of nymph’s hair woven into a cloak or other item of cloth- ing will magically increase the charisma of those who wear it by  one point. Alternatively, the lock of hair may be used to create  a powerful potion of
+  sleep. Nymph tears are sometimes used in  the creation of a philtre of love and any person who bathes in a  nymph’s pool will have their charisma increased by two points  until sundown.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: 'Dimension Door (1/day). Nymphs can cast dimension door once  per day. Spells. A nymph casts spells as a 7th level druid. Not to be Looked Upon. Any character that chances to look upon  a clothed nymph must make a saving throw vs spells or be per- manently blinded. Should a nymph be seen unclothed, then  the consequence of a failed saving throw is death. The nymph  can “turn off” this effect if she wishes to communicate or be  seen safely. As with medusas, a mirror can provide protection  from the sight of a nymph. Unarmed Combat.  Nymphs can be targeted with grappling or  overbearing attacks. If not fended off, they score an unarmed  hit with a 2+ on 1d20. Hit Mods: ATK/DEF +8/-8. Overbear Re - sults Mods: ATK/DEF +0/+0. Grappling Result Mods: ATK/DEF  +0/+0.'
+- heading: Languages
+  text: Nymphs typically speak common in addition to the language of  the fey (dryads, etc.).

@@ -1,0 +1,23 @@
+name: Assagim (nipheribu, Nuperibbo)
+frequency: common
+no_encountered: 10d10
+size: medium
+alignment: lawful evil
+move: 60ft
+armour_class: 9 [11]
+hit_dice: '1'
+melee_attacks: 2 claws (1d2) or 1 weapon
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: semi- (2-4)
+morale: 50
+loot: Nil
+experience: 18 +1/hp
+description: These are the lowest of all the devils, and they are found in the  millions throughout every plane of Hell. Assagim are the un - fortunate souls of those not evil enough to be incarnated as  lemures. They are totally senseless—having neither eyes, ears,  or mouth.  Assagim resemble bony, featureless humanoids with two crude  arms ending in claws. In combat, they attack with their two  sharp claws. If organised by an archdevil into an army, they are  sometimes armed with crude clubs or maces which they use to  blindly batter their opponents en masse. If slain in the service of  evil, assagim will usually (99%) reincarnate within one day as an- other assagim. A small percentage (1%) become lemures; and  within another 10 millennia, they might again be reincarnated  as one of the lesser devils.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Immunities. This creature is immune to fire damage and im - mune to any condition that assumes the presence of senses  such as hearing or sight. Damage Resistances  (all half damage): Cold, Poison (including  gases).'
+- heading: Special Features
+  text: 'Regeneration (Native Plane Only).  These creatures regenerate at  a rate of 1hp/round if they are in Hell or one of the other lower  planes of existence. This ability is lost in the material planes. Unarmed Combat. Assagim can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with a  2+ on 1d20. Hit Mods: ATK/DEF +4/-4. Overbear Results Mods:  ATK/DEF +0/-0. Grappling Result Mods: ATK/DEF +0/+0.'
+- heading: Languages
+  text: Assagim (Nipheribu) are telepathically sensitive to other devils,  and can receive commands from most other types of devil ex - cept lemures.

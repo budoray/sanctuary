@@ -1,0 +1,14 @@
+name: Continual Light
+slug: continual_light
+reversible: true
+class: cleric
+level: 3
+school: Clerical Transmutation/Alteration
+range: 120-ft
+duration: Permanent
+area_of_effect: 60-ft radius globe
+components: V,S
+casting_time: 6 segments
+saving_throw: See below
+text: This spell brings into being a bright, magical illumination almost sufficient to rival the light of day. In some respects the spell is identical to the first level cleric spell light, but its effects are permanent until dispelled. The light cast is greater than that produced by a light spell, extending 60-ft into the darkness. The reverse of the spell, continual darkness, produces an ink-like darkness in the same 60- ft area and negates the illumination of a continual light spell if one is present. By casting the spell upon an enemy's eyes or other organs of sight, the caster may blind the spell's subject, causing the same penalties as if the creature were blinded by a light spell. In this instance, a saving throw is permitted, and if it is successful the spell's effect will centre upon the area immediately behind the targeted creature.
+source: wiki2_spells.txt

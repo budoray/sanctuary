@@ -1,0 +1,36 @@
+name: Elemental, Water
+frequency: very rare very rare very rare very rare
+size: large large large large
+alignment: neutral neutral neutral neutral
+move: 60ft; 180ft swimming
+armour_class: 2 [18] 2 [18] 2 [18] 2 [18]
+hit_dice: 8, 12, or 16 8, 12, or 16 8, 12, or 16 8, 12, or 16
+melee_attacks: 1 strike (5d6)
+senses: Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil
+intelligence: low (5-7) low (5-7) low (5-7) low (5-7)
+morale: N/A N/A N/A N/A
+loot: Nil Nil Nil Nil
+experience: '8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp 8 HD: 900 +12/hp
+  12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp 8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16
+  HD: 3,650 +20/hp 8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp'
+description: WATER ELEMENTALS Water Elementals are creatures from the Elemental Plane
+  of  Water, though they may sometimes be found elsewhere. When  encountered on the
+  Prime Material Plane, usually as a result of  summoning magic, they take the form
+  of a great wave of water  or other liquid, constantly in motion, but retaining an
+  almost  humanoid shape. Some claim that they have sea green eyes, of  a sort, and
+  others that they were able to discern a mouth. Immune to Mundane and +1 Weapons.  This
+  creature is immune  to piercing, blunt, and slashing damage from weapons and un-
+  armed attacks, unless the weapon causing that damage has a  magical bonus of +2
+  or more. Melee Combat.  Water Elementals forced to fight on land can - not do so
+  more than sixty yards from the place at which they  entered the plane they are currently
+  on, which on the Prime  Material Plane is generally the place of summoning. Addition
+  - ally, when fighting on land they strike opponents for only 5d4  points of damage.
+  If surrounded by water (including marshy  terrain), they attack for 5d6 blunt damage.
+  Sink Ships. Ships are particularly vulnerable to Water Elementals,  which are capable
+  of overturning any vessel with a tonnage  equal to or less than their HD, and of
+  stopping the movement  of those with a tonnage equal or less than the Water Elemen
+  - tal’s hit points. Ships with a greater tonnage than the Elemen - tal has hit points
+  total can travel at 1% of their speed for each  point by which tonnage exceeds the
+  elemental’s hit points.
+abilities: []

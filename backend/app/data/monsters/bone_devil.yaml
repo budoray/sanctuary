@@ -1,0 +1,23 @@
+name: Bone Devil
+frequency: uncommon
+no_encountered: 1d2 or 2d4
+size: large (9ft)
+alignment: lawful evil
+move: 150ft
+armour_class: -1 [21]
+hit_dice: '9'
+melee_attacks: 1 bone hook (3d4)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: average (8-10)
+morale: 90
+loot: Nil
+experience: 1,000 +10/hp
+description: Bone devils make their lair on the 5th plane of Hell. They are  cruel, and enjoy torturing those weaker than themselves. They  resemble large skeletons, covered in leathery white flesh, with  a segmented tail like a scorpion. Unlike most devils, bone devils  prefer the frigid climate of their home plane.  Bone devils carry no treasure. They cannot be bribed with coins  or gems, but they consider frozen humanoid flesh a delicacy.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (20%).  Any magic spell or effect has a 20%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immunities. This creature is immune to fire damage. Damage Resistances  (all half damage): Cold, Poison (including  gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: animate dead (as the 5th level magic-user spell), charm  person (as the 1st level magic-user spell), fear (effect varies,  as the 4th level magic-user spell), know alignment (as the 2nd  level cleric spell), spectral force  (as the 3rd level illusionist  spell), suggestion (as the 3rd level magic-user spell), teleport  (no chance of error, otherwise as the 5th level magic-user  spell), fear (5ft radius, otherwise as the 4th level magic-user  spell), phantasmal force  (as the 1st level illusionist spell), fly  (as the 3rd level magic-user spell), invisibility (as the 2nd level  magic-user spell), detect invisibility (as the 2nd level magic-us- er spell), or summon another bone devil (40% chance of suc - cess).  1/day: wall of ice (as the 4th level magic-user spell).'
+- heading: Special Attacks
+  text: 'Hook. Bone devils wield a large bone hook to snag their oppo - nents. If they score a hit, there is a 50% chance the victim will  be immobilised and cannot attack. A successful Minor Test of  Strength check is required to escape from the hook.  Tail Sting. If a victim is caught in the devil’s hook, the bone devil  can then sting with their scorpion-like tails (2d4 damage, save  vs poison or lose 1d4 strength for 10 rounds). Unarmed Combat. Bone devils can make grappling or overbear- ing attacks, although they usually don’t. If not fended off, they  score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF  +10/-10. Overbear Results Mods: ATK/DEF +4/-4. Grappling Re- sult Mods: ATK/DEF +3/-3.'

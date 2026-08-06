@@ -1,0 +1,23 @@
+name: Dryad
+frequency: very rare
+no_encountered: 1d6
+size: medium
+alignment: neutral
+move: 120ft
+armour_class: 10 [10]
+hit_dice: '2'
+melee_attacks: 1 (1d2)
+senses: Infravision 60ft
+lair_chance: 10%
+intelligence: high (13-14)
+morale: 55
+loot: Individual 4 (x100), Cache 3 (x10)
+experience: 100 +3/hp.
+description: Dryads are tree sprites who dwell in the most remote locations.  Dryads are female, although male “hamadryads” are encoun - tered just as often. Dryads all have a home tree that houses  their spirits (if this tree is killed, the dryad dies). They are nev - er far (400 yards, or thereabouts) from this spirit-tree. Dryads  are non-violent and will never attack unless they have no other  choice.  Dryads and hamadryads, as fey creatures, have a tendency to  kidnap humans using their charm ability. If successful, there is a  50% chance the victim will never be seen again. If they do return  to civilisation, it will be at least 1d4 years later.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: 'Spell-Like Abilities At Will: Dryads can dimension door by stepping into any nearby  tree, returning to their own spirit-tree.  3/day: A dryad can cast a charm person spell thrice per day. Unarmed Combat. Dryads and hamadryads can make grappling  or overbearing attacks, but ordinarily don’t. If not fended off,  they score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/ DEF +8/-8. Overbear Results Mods: ATK/DEF +0/+0. Grappling  Result Mods: ATK/DEF +0/+0.'
+- heading: Languages
+  text: Dryads have their own language as well as elven, pixie, sprite,  and they can also speak with animals.

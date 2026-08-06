@@ -1,0 +1,14 @@
+name: Fire Storm
+slug: fire_storm
+reversible: true
+class: druid
+level: 7
+school: Druidic Evocation
+range: 150-ft
+duration: 1 round
+area_of_effect: 20-ft×20-ft×20-ft area per caster level
+components: V, S, M
+casting_time: 9 segments
+saving_throw: Half
+text: The fire storm invocation is a modified and enlarged version of wall of fire. It lasts for only a single round, and does only half the damage of a wall of fire (i.e. 2d8 damage), but the huge area of effect makes it devastating. The spell's reverse extinguishes all normal fire in the area of effect, or will instantly kill one fire elemental (no saving throw).
+source: wiki2_spells.txt

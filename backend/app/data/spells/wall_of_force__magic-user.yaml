@@ -1,0 +1,14 @@
+name: Wall of Force
+slug: wall_of_force
+reversible: false
+class: magic-user
+level: 5
+school: Arcane Evocation
+range: 30-ft
+duration: 1 turn+1 turn/level
+area_of_effect: 20-ft square/level
+components: V,S,M
+casting_time: 5 segments
+saving_throw: None
+text: A wall of force is a barrier of magical power, invisible but virtually impervious to all attacks, blocking almost anything from passing through it. The wall is utterly unaffected by physical attacks and spells, including dispel magic, and all forms of energy, such as electricity, heat, and cold. The only way actually to destroy a wall of force is with a disintegrate spell. The wall remains in place even if the ground beneath it is destroyed or transformed, hanging magically in place where it was evoked.
+source: wiki2_spells.txt

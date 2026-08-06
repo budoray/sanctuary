@@ -1,0 +1,14 @@
+name: Spider Climb
+slug: spider_climb
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: 1 round+1 round/ evel
+area_of_effect: One creature
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: When the magic user casts this spell, the recipient's bare hands and feet become sticky enough to allow him or her to climb walls and even crawl along a ceiling. The movement rate for such climbing is 30-ft per round. The subject of this spell will find it difficult to employ tools or handle small objects with precision while the spell is in effect.
+source: wiki2_spells.txt

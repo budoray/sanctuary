@@ -6,13 +6,8 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from backend.app.api.characters import router as characters_router
-from backend.app.api.modules import router as modules_router
-from backend.app.api.rulesets import router as rulesets_router
-from backend.app.api.sessions import router as sessions_router
 from backend.app.config import SETTINGS, ROOT
 from backend.app.db import Base, engine
-from backend.app.engine.store import EventRecord, SnapshotRecord  # noqa: F401  registers models
 from backend.app.auth import require_account
 from backend.app.socket_manager import socket_app
 from backend.app.tenshin_gate import name_from_cookie_header
@@ -37,11 +32,6 @@ fastapi_app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-fastapi_app.include_router(sessions_router, prefix="/api")
-fastapi_app.include_router(characters_router, prefix="/api")
-fastapi_app.include_router(rulesets_router, prefix="/api")
-fastapi_app.include_router(modules_router, prefix="/api")
 
 
 @fastapi_app.get("/health")
@@ -72,6 +62,22 @@ async def whoami(request: Request, account_id: int = Depends(require_account)):
     return {"user": {"id": account_id, "name": name or "player"}}
 
 
+@fastapi_app.get("/licence")
+async def licence():
+    return {
+        "notice": (
+            "Sanctuary is an independent product published under the OSRIC 3.0 Third-Party License "
+            "and is not affiliated with Mythmere Games LLC."
+        ),
+        "srn": (
+            "This work includes material taken from the System Reference Document 5.1 ('SRD 5.1') by "
+            "Wizards of the Coast LLC and available at https://dnd.wizards.com/resources/systems-reference-document. "
+            "The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License "
+            "available at https://creativecommons.org/licenses/by/4.0/legalcode."
+        ),
+    }
+
+
 FRONTEND_ASSETS = FRONTEND_DIST / "assets"
 FRONTEND_INDEX = FRONTEND_DIST / "index.html"
 
@@ -91,12 +97,7 @@ else:
 
 
 class SocketIOMiddleware:
-    """Forward /ws/* to the Socket.IO ASGI app without path stripping.
-
-    Starlette's Mount strips prefixes before calling sub-apps, which breaks
-    python-socketio's ASGI path matching when mounted under /ws. This tiny
-    middleware routes on the raw scope path instead.
-    """
+    """Forward /ws/* to the Socket.IO ASGI app without path stripping."""
 
     def __init__(self, app, socket_app):
         self.app = app
@@ -109,6 +110,4 @@ class SocketIOMiddleware:
             await self.app(scope, receive, send)
 
 
-# uvicorn imports `app` from this module. The middleware wraps FastAPI so
-# /ws/socket.io traffic goes to Socket.IO and everything else goes to FastAPI.
 app = SocketIOMiddleware(fastapi_app, socket_app)

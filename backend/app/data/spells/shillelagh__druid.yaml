@@ -1,0 +1,14 @@
+name: Shillelagh
+slug: shillelagh
+reversible: false
+class: druid
+level: 1
+school: Druidic Transmutation/Alteration
+range: Touch
+duration: 1 round/caster level
+area_of_effect: 1 oak club
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: The druid imbues a club or billet of oak-wood with enchanted power, making it +1 “to hit” and capable of inflicting 2d4 points of damage against small and medium-sized opponents, 1d4+1 against large opponents. The shillelagh must be wielded by the druid in order for it to possess these magical properties; in the hands of any other person it will be no more than an ordinary wooden club.
+source: wiki2_spells.txt

@@ -1,0 +1,19 @@
+name: Sea Serpent
+frequency: uncommon
+no_encountered: 1d2
+size: huge (50ft long)
+alignment: neutral
+move: 120ft swimming
+armour_class: 5 [15]
+hit_dice: '10'
+melee_attacks: 1 bite (1d6 + poison) and 1  constrict (3d6)
+senses: Standard
+lair_chance: 5%
+intelligence: animal (1)
+morale: 95
+loot: Nil
+experience: 1,000 +12/hp
+description: Descriptions of sea serpents vary with the region in which they  are found. Sometimes they appear as giant sea snakes and oth- er times as dragon-like serpentine creatures with legs or flip - pers. What is known for certain is that a sea serpent can be en- countered in any ocean, sea, or large body of fresh water. Sea  serpents are very territorial but are not otherwise aggressive,  only attacking when hungry. Sea serpents are capable of div - ing to great depths and staying underwater for long periods of  time. They only lair in caves in very deep water, and tend to be  solitary or, at most, a mated pair.
+abilities:
+- heading: Special Attacks
+  text: Poison Bite. The sea serpent has a poisonous bite, causing death  in 1d4 rounds (save vs poison to negate). Constrict. After a successful to-hit roll, the coils of a sea serpent  do automatic damage to the captured person or vessel. Crea - tures take an automatic 3d6 blunt damage per round. Ships  are crushed in 1d6+4 rounds.

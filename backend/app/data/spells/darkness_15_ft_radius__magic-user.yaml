@@ -1,0 +1,14 @@
+name: Darkness, 15-ft Radius
+slug: darkness_15_ft_radius
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Transmutation/Alteration
+range: 10-ft/level
+duration: 1 turn+1 round/level
+area_of_effect: 15-ft radius sphere
+components: V,M
+casting_time: 2 segments
+saving_throw: See below
+text: This spell creates an area of utter lightlessness, a magical darkness that prevents all natural vision, even infravision. The spell's effect is neutralised by (and neutralises) the counteracting effect of a light or continual light spell.
+source: wiki2_spells.txt

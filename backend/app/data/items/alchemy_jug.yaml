@@ -1,0 +1,4 @@
+name: Alchemy Jug
+classes: IM
+description: 'This jug appears as an ordinary ewer or beaker, but will, on command, produce various liquids when poured. The type and quantity of liquid is as follows: Salt water 16 gallons Oil 1 pint Fresh water 8 gallons Aqua regia 8 ounces Beer 4 gallons Alcohol 4 ounces Vinegar 2 gallons Chlorine 1 ounce Wine 1 gallon Cyanide 1/2 ounce Ammonia 1 quart The amount listed for each liquid can be produced up to 7 times per day, at a maximum rate of 2 gallons per round. Only one type of liquid can be produced per day, however.'
+source: OSRIC_3.0_Gamemaster_Guide.pdf

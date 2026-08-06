@@ -1,0 +1,23 @@
+name: Normal Giant
+frequency: common very rare
+no_encountered: 1d20 1
+size: small medium
+alignment: neutral neutral
+move: 30ft; 360ft flying  (AA:IV) 30ft; 360ft flying  (AA:IV)
+armour_class: 6 [14] 7 [13]
+hit_dice: 1 4
+melee_attacks: 1 bite (1hp) and 2  claws (1d2) 1 bite (2d6) and 2  claws (1d6)
+senses: Keen Keen
+lair_chance: 20% 20%
+intelligence: animal (1) animal (1)
+morale: 50 65
+loot: Nil Nil
+experience: 15 +1/hp 105 +3/hp
+description: NORMAL BIRDS OF PREY Birds of prey are found across the known world in many shapes,  forms and colours. They are distinguished from one another by  plumage, size, beak shape, body length, wing size and talon  type, as well as by dietary habits. Most are two or three feet  long, weigh up to about three pounds and have a wingspan of  around four or five feet. Eagles, hawks and falcons are all examples of birds of prey.  Falcons are generally the smallest of the three, tending to be  around a foot in length and having a wingspan of two to three  feet. Hawks are usually somewhat larger, typically being around  two feet long and having a wingspan of four to five feet. Eagles  can be considerably larger, sometimes exceeding even three  feet in length and having a wingspan of anywhere from five to  eight feet. The largest types may weigh up to twelve pounds.
+abilities:
+- heading: Special Attacks
+  text: Diving Attack (Normal). A diving attack must be made from the air  at a distance of 120ft or more. It acts as a charge, and grants a  +2 “to-hit” bonus and double damage from their talons. GIANT BIRDS OF PREY There is a 50% chance that randomly-encountered giant birds  of prey are of a highly-intelligent variety (such as Tolkien’s giant  eagles). These are similar enough to their animal-type relatives  to share the rest of the physical statistics, but have higher intel- ligence, possibly their own culture, and may be related to the  fey. Otherwise, the giant bird of prey is just a giant version of a  normal bird of prey.
+- heading: Special Attacks
+  text: Diving Attack (Giant). A diving attack must be made from the air  at a distance of 60ft or more. It acts as a charge, and grants a  +4 “to-hit” bonus and double damage from their talons.
+- heading: Languages
+  text: Intelligent giant birds of prey are likely to understand the com - mon tongue, and may be able to speak it.

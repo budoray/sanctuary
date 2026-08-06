@@ -1,0 +1,14 @@
+name: Animal Growth
+slug: animal_growth
+reversible: true
+class: druid
+level: 5
+school: Druidic Transmutation/Alteration
+range: 80-ft
+duration: 2 rounds/caster level
+area_of_effect: Up to 8 animals in a 10-ft radius
+components: V,S,M
+casting_time: 7 segments
+saving_throw: None
+text: This spell causes up to 8 animals in the area of effect to grow to twice normal size, doubling their hit dice and the damage they inflict. The spell does not influence the animals' attitude toward the druid, so it is advisable to ensure ahead of time that they are friendly. The reverse of the spell halves their size and damage inflicted.
+source: wiki2_spells.txt

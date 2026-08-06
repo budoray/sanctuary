@@ -1,0 +1,22 @@
+name: Tiger Smilodon
+frequency: uncommon rare no.  encountered 1d4 1d2
+size: large large
+alignment: neutral neutral
+move: 120ft 120ft
+armour_class: 6 [14] 6 [14]
+hit_dice: 5+5 7+2
+melee_attacks: 2 claws (1d6) and 1  bite (1d10) 2 claws (1d8) and 1  bite (2d6)
+senses: Keen Keen
+lair_chance: 7% 15%
+intelligence: animal (1) animal (1)
+morale: 75 80
+loot: Nil Nil
+experience: 250 +6/hp 525 +10/hp
+description: Tigers are large, carnivorous and very cunning cats ranging  from tropical climes to subarctic tundra. Tigers are ruthless and  efficient predators, often hunting in pairs or family groups, sur- rounding their prey and attacking as one.  Smilodons (sabre-toothed tigers) are dangerous and aggres - sive. These giant cats are generally found in “lost world” type  areas with dinosaurs and cave men, but they are sometimes en- countered in more standard (sword & sorcery) settings as well.
+abilities:
+- heading: Surprise and Initiative
+  text: Alert. Tigers and smilodons are surprised only on a roll of 1 on  1d6.
+- heading: Special Features
+  text: Movement. Tigers can climb trees as easily as walking on the  ground. Tigers and smilodons can leap 40ft to attack from hid- ing (treat as charge), move quietly at quarter speed in natural  settings, and spring upwards a distance of 10ft.
+- heading: Special Attacks
+  text: 'Rear Claws. If both claw attacks are successful the tiger (or Smi - lodon) has grabbed its victim and gains two additional attacks  at +4 “to hit” from its powerful rear legs (claw damage with a  +2 bonus). Smilodon Bite. Smilodons have a +2 to-hit bonus for their bite. Unarmed Combat. Tigers and smilodons cannot be targeted with  grappling or overbearing attacks. They may choose to over - bear. If not fended off, they score an unarmed hit with a 2+ on  1d20. Hit Mods: ATK/DEF +8/na. Overbear Results Mods: ATK/ DEF +5/na.'

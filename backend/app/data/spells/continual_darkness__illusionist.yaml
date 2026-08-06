@@ -1,0 +1,14 @@
+name: Continual Darkness
+slug: continual_darkness
+reversible: false
+class: illusionist
+level: 3
+school: Phantasmal Transmutation/Alteration
+range: 60-ft
+duration: Permanent
+area_of_effect: 30-ft radius globe
+components: V,S
+casting_time: 3 segments
+saving_throw: None
+text: This spell creates an area of utter lightlessness, a magical darkness that prevents all natural vision, even infravision. The spell's effect is neutralised by (and neutralises) the counteracting effect of a light or continual light spell.
+source: wiki2_spells.txt

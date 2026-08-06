@@ -1,0 +1,60 @@
+id: 1.4.2.3c
+name: MELEE WEAPONS TABLE  2
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- WEAPON TYPE SPEED
+- FACTOR
+- SPACE
+- REQUIRED LENGTH  DAMAGE
+- TYPE
+- Axe, battle 7 4ft 4ft Slashing
+- Axe, hand 4 1ft 1.5ft Slashing
+- Club 4 3ft 3ft Blunt
+- Dagger 2 1ft 1ft Piercing or
+- slashing*
+- Fist or kick 1 0 0 Blunt
+- Flail, heavy 7 6ft 4ft Blunt
+- Flail, light 6 4ft 2ft Blunt
+- Halberd 9 5ft 5ft Piercing or
+- slashing*
+- Javelin† 8 1ft 5ft Piercing
+- Lance‡ 8 1ft 10ft Piercing
+- Mace, heavy 7 4ft 2.5ft Blunt
+- Mace, light 6 2ft 2ft Blunt
+- Morning star 7 5ft 4ft Blunt or
+- piercing*
+- Pick, heavy 7 4ft 4ft Blunt or
+- piercing*
+- Pick, light 5 2ft 2ft Blunt or
+- piercing*
+- Pole arm† 13 1ft 8ft
+- Blunt,
+- piercing or
+- slashing*
+- Spear 7 1ft 6ft Piercing
+- Staff 4 3ft 6ft Blunt
+- Sword,
+- bastard/
+- claymore
+- 6 4ft 4.5ft Slashing
+- Sword, broad 5 4ft 3.5ft Slashing
+- WEAPON TYPE SPEED
+- FACTOR
+- SPACE
+- REQUIRED LENGTH  DAMAGE
+- TYPE
+- Sword, long 5 3ft 3.5ft Slashing
+- Sword,
+- scimitar/
+- cutlass
+- 5 2ft 3ft Slashing
+- Sword, short 3 1ft 2ft Slashing
+- Sword, two-
+- handed 10 6ft 6ft Slashing
+- Torch§ 4 2ft 3ft Blunt or
+- fire*
+- Trident† 6 1ft 5ft Piercing
+- Warhammer,
+- heavy 7 5ft 4ft Blunt
+- Warhammer,
+- light 6 2ft 2ft Blunt

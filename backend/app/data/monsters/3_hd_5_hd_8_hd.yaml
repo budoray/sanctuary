@@ -1,0 +1,17 @@
+name: 3 Hd 5 Hd 8 Hd
+frequency: common common common
+no_encountered: 3d4 3d4 3d4
+size: medium medium large
+alignment: neutral neutral neutral
+move: 240ft swimming 240ft swimming 240ft swimming
+armour_class: 6 [14] 6 [14] 6 [14]
+hit_dice: 3 5 8
+melee_attacks: 1 bite (1d4+1) 1 bite (2d4) 1 bite (3d4)
+senses: Standard Standard Standard
+lair_chance: Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0)
+morale: N/A N/A N/A
+loot: Nil Nil Nil
+experience: 50 +2/hp 110 +4/hp 350 + 10/hp
+description: Sharks are scavengers of the seas who viciously attack anything  that seems wounded or dying. They are attracted to splashing,  kicking, or any other sound that can be mistaken for a fish in  distress. The smell of blood in  the water can attract sharks  from miles away. When  sharks have targeted their  prey, they will enter a  feeding frenzy and attack  everything in sight, some - times even each other.
+abilities: []

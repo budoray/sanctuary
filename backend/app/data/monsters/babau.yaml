@@ -1,0 +1,22 @@
+name: Babau
+frequency: uncommon
+no_encountered: 1d3 or 1d6 (in the Abyss)
+size: medium (7ft)
+alignment: chaotic evil
+move: 150ft
+armour_class: -3 [23]
+hit_dice: 7+14
+melee_attacks: 2 claws (1d4+1) and 1 bite (2d4) or 1  weapon (+7 damage)
+senses: Infravision 120ft
+lair_chance: 20%
+intelligence: very
+morale: 95
+loot: Hoard 3
+experience: 2,000 +12/hp
+description: Babau are also known by demonologists as horned demons  or bone demons. They are around 7ft tall and look like skele - tons covered in a leathery black skin. The babau’s feet, taloned  hands and head are grossly oversized, nearly the same as a hill  giant’s. From the base of its skull protrudes a hooked horn. These demons are known for their cunning intelligence and  strength (19). In combat, they prefer to use any sort of weapon- ry if it is to their advantage.  Babau are despised by class A, B and C demons. Class D de - mons especially hate bands of babau, and hunt them for food.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. The babau is immune to piercing,  blunt, and slashing damage, unless the weapon causing that  damage is magical. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases). Ichor Reduces Weapon Damage by Half.  In the heat of battle, ba - bau demons secrete a slimy rust coloured ichor that reduces  damage from melee weapons, as blows slide off their bodies.  Any damage from a melee weapon inflicts only half the dam - age indicated. Vulnerability to Iron.  Iron weapons inflict +2 additional damage  on babau demons (although the weapon must be magical to  hit).'
+- heading: Special Features
+  text: 'Thief Abilities.  Babau have the thieving abilities of a 9th level  Thief. Spell-Like Abilities At Will: Darkness, 5ft radius 1/day (as 14th level caster):  fear (touch only, otherwise as  the 4th level magic-user spell), levitate (as the 2nd level mag- ic-user spell), fly (as the 3rd level magic-user spell), dispel  magic (as the 3rd level magic-user spell), polymorph self (as  the 4th level magic-user spell), heat metal (as the 2nd level  druid spell), and gate (as the 9th level magic-user spell) in  another babau (25% chance of success). Enfeebling Gaze.  Anyone up to 20ft away gazing into the eyes  of a babau must save vs spells or suffer the effects of a ray of  enfeeblement (as the 2nd level magic-user spell). This applies to  anyone who is generally in front of the demon and looking at  it without using an indirect method of sight such as a mirror.  Attacking the creature by looking at a reflection incurs a to-hit  penalty of -2. Attacking blindly incurs a to-hit penalty
+    of -4. Unarmed Combat. Babau demons can make grappling or over - bearing attacks. If not fended off, they score an unarmed hit  with a 2+ on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear Re - sults Mods: ATK/DEF +1/-1. Grappling Result Mods: ATK/DEF  +1/-1. CAUMBION'

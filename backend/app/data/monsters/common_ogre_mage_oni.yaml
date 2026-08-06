@@ -1,0 +1,28 @@
+name: Common Ogre Mage (oni)
+frequency: common rare no.  encountered 2d10 1d6
+size: large (9ft+) large (9ft+)
+alignment: chaotic evil chaotic evil
+move: 90ft 90ft; 150ft flying  (AA:III)
+armour_class: 5 [15] 4 [16]
+hit_dice: 4+1 5+2
+melee_attacks: 1d10 or weapon 1d12 or by weapon
+senses: Infravision 60ft Infravision 60ft
+lair_chance: 20% 25%
+intelligence: low (5-7) average (8-10) to  high (13-14)
+morale: 70 75
+loot: Individual 4 each; in  lair Hoard 2, Cache  3 (x10), Cache 5 Cache 4, 5, and 35%  chance of 4 magic  items (any) plus a  scroll
+experience: 95 +5/hp 750 +6/hp
+description: Ogres are hulking creatures, nine feet tall, although they are  not true giants. Their faces are more feral and less human-like  than a giant’s. Ogres live in all environments, whether above or  below ground. They have affinity with hill giants and trolls, and  often can be found with them. Ogres love wealth, and will hire  themselves out to other creatures toward this end—although  ogre mercenaries tend to get badly out of hand unless tightly  controlled. Left to themselves, ogres are quite primitive, but if  an ogre mage or another dominant non-ogre leader (such as  a necromancer or giant) is in charge, they can be quite well- equipped. In a group of 11 or more ogres, one is a leader and is slightly  more powerful (attack capability equal to a 7 HD monster, 33 hit  points, AC 3 [17], and damage of 2d6). Groups of 16 or greater  ogres will have two of these leaders, as well as an ogre chief.  The chief also attacks as a 7 HD monster, but inflicts 1d10+4 hit  points of damage
+  and has an AC of 4 [16].  When encountering ogres in their lair, the lair will contain slaves  or prisoners 30% of the time. Anyone captured by ogres has a  75% chance to be eaten within a few days of captivity.
+abilities:
+- heading: Special Attacks
+  text: 'Weapon Damage Bonus.  When attacking with a weapon, ogres  inflict +2 to damage, leader-types add +3 and a chief adds +4. Unarmed Combat. Ogres can be targeted with grappling or over- bearing attacks. If not fended off, they score an unarmed hit  with a 12+ on 1d20. Hit Mods: ATK/DEF +6/-2. Overbear Results  Mods: ATK/DEF +4/-4. Grappling Result Mods: ATK/DEF +2/-2.'
+- heading: Languages
+  text: 'Despite their low intelligence, ogres are social creatures and  speak orc, troll, and the language of hill giants in addition to  their own language and alignment tongue. OGRE MAGE Ogre Magi are fearsome evil creatures, well versed in magic and  of unnatural size and strength. They are clearly related to ordi - nary ogres, standing around nine or ten feet tall, with the feral  face and thick muscles of a normal ogre. Unlike normal ogres,  their skin colour is usually bright yellow, blue, or red. Most have  two or more yellow horns, and short tusks.  Though ogre magi are physically powerful, it is their command  of magic that makes them truly dangerous adversaries.  Ogre magi are not numerous and tend towards small groups  living in castles or well-guarded and luxurious caves. Groups of  5 or 6 are led by particularly powerful individuals with 30–42  hp who fight and save as though they had 9 hit dice. These are  leader-type monsters who almost always have underlings: their  lairs
+    are generally defended and often guarded by lesser beings  (including normal ogres).'
+- heading: Immunities and Resistances
+  text: Regeneration. Ogre magi regenerate 1 hp per combat round un- til they are killed, at which point the regeneration stops.
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: fly (12 turn duration), invisibility, darkness, 10ft radius   and polymorph self (limited to humanoid forms 4ft to 12ft in  size).  1/day: charm person, sleep, gaseous form, and cone of cold as a  12th level spell caster. Unarmed Combat. Ogre magi can be targeted with grappling or  overbearing attacks. If not fended off, they score an unarmed  hit with a 14+ on 1d20. Hit Mods: ATK/DEF +6/-2. Overbear Re- sults Mods: ATK/DEF +4/-4. Grappling Result Mods: ATK/DEF  +2/-2.'
+- heading: Languages
+  text: Ogre magi speak common and ogrish, amongst other languag - es.

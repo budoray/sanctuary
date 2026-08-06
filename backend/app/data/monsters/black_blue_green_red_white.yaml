@@ -1,0 +1,15 @@
+name: Black Blue Green Red White
+frequency: common common common common common no.  encountered 1d3 or 2d4 1d4 or 2d4 1d3 or 3d3 1d4 or 3d4 1d3 or 3d4
+size: large (8ft) medium (5ft) medium (6ft) small (4ft) medium (7ft)
+alignment: ': lawful evil lawful evil lawful evil lawful evil lawful evil'
+move: '90ft, 120ft flying  (AA: IV) 150ft, 150ft flying  (AA: IV) 120ft, 150ft flying  (AA: IV) 180ft, 180ft flying  (AA: IV) 90ft, 150ft flying  (AA: IV)  ARMOUR CLASS 2 [18] 3 [17] 3 [17] 1 [19] 3 [17]'
+hit_dice: 8 5+1 6 4+2 7
+melee_attacks: Halberd (1d10+4)  and tail (1d2) Trident (1d6+4) and  tail (1d2) Pole arm (1d6+4)  and tail (1d2) 2 Short sword  (1d4+1) and tail  (1d2) 2 Flail (1d6+3) and  tail (1d2)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft Infravision 60ft Infravision 60ft MAGIC RESISTANCE 35% 20% 25% 40% 30%
+lair_chance: 20% 35% 30% 40% 25%
+intelligence: ': average (8-10) average (8-10) average (8-10) average (8-10) average (8-10)'
+morale: 85 75 75 70 80
+loot: 'Nil Nil Nil Nil Nil  EXPERIENCE 855+10/hp 550+6/hp 550+6/hp 320+5/hp 650+8/hp The manalishi, also known as “scaly devils” and “abyssai,” are  quite common on the upper planes of Hell. Most manalishi  serve the five-headed dragon queen of Hell. Manalishi are humanoid-shaped with horns, bat-like wings,  a long spiked tail, and vaguely draconic features. Their scaled  hide varies, as there are five distinct breeds of manalishi: black,  blue, green, red, and white. Immunities and Resistances Magic Resistance.  See summary stats for individual levels of  magic resistance. Damage Resistances  (all half damage): Cold, Poison (including  gases). Special Features Regeneration. Manalishi regenerate at a rate of 1 hit point per  round unless the damage was caused by holy water, a silver  weapon, or a blessed weapon. Spell-Like Abilities. At Will: change self (as the 1st level illusionist spell), command  (as the 1st level cleric spell), produce flame (as the 2nd level  druid spell), pyrotechnics
+  (as the 2nd level magic-user spell),  or scare (as the 2nd level magic-user spell).  1/day: Once per day, a manalishi can attempt to summon an - other manalishi (20% chance of success). Unarmed Combat. Varies by type.'
+description: ''
+abilities: []

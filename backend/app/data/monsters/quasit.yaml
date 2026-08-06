@@ -1,0 +1,24 @@
+name: Quasit
+frequency: very rare
+no_encountered: '1'
+size: tiny
+alignment: chaotic evil
+move: 150ft
+armour_class: 2 [18]
+hit_dice: '3'
+melee_attacks: 2 claws (1d2) and 1 bite (1d4)
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: low (5-7)
+morale: 60
+loot: Cache 3 (x3)
+experience: 325 +3/hp
+description: Quasits are larval fiends that have been shaped by demon lords  for service as familiars to chaotic evil magic-users and occasion- ally as servants to other powerful chaotic evil individuals.  When serving as a familiar, quasits endow the magic-user with  several abilities. If the magic-user is within a mile of their qu - asit familiar, a constant full-sensory telepathic communication  operates through the quasit. The master also gains 1 level of  ability as a magic-user within this radius. If the quasit is within  25ft of its master, it imparts its 25% magic resistance and also  its regeneration abilities. If either master or quasit moves out of  range, the special abilities are lost. In addition to these abilities,  once per week a quasit is able to contact the Abyss in order to  help gain some necessary advice or information. This operates  as the 5th level cleric spell commune, and up to 6 questions are  permitted. Despite their rather low intelligence, quasits are quite
+  crafty  and cunning creatures. They are also used as tools by demon  lords, who might communicate through them. Quasits are gen- erally tasked with helping their masters to spread evil and cha- os. In particular, they are often used to pervert lawful evil souls  to chaos, which earns them rewards on their home plane of the  Abyss. Ultimately, when its master dies, the quasit is charged  with bringing the soul back to the Abyss. If the quasit has served  well, it may be rewarded by being changed into a class A or class  B demon. If not, they will be punished through becoming a soul  worm, or even a quasit again. If the quasit dies, the master immediately loses 4 levels (dura - tion 1 month).
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (25%).  Any magic spell or effect has a 25%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Immunities. Quasits are immune to cold, fire, and electrical dam- age. Saving Throw (Spells). Quasits make saving throws against spells  with a target number of 13.
+- heading: Special Features
+  text: 'Regeneration. Quasits regenerate damage at a rate of 1 hp per  round. Spell-Like Abilities. At Will: detect good (as the 1st level cleric spell), detect magic (as  the 1st level cleric spell), invisibility (as the 2nd level magic-us- er spell), polymorph self (each quasit has 2 forms into which it  can polymorph, chosen by the GM from frog, bat, giant cen - tipede, or wolf. 1/day: cause fear (as the 4th level magic-user spell) in a 30ft  radius.'
+- heading: Special Attacks
+  text: 'In its natural form, a quasit attacks with its teeth and claws,  which inflict a burning irritation that subtracts 1 from the vic - tim’s dexterity unless a save vs poison is made. This penalty is  cumulative. The irritation remains for 2d6 melee rounds. Unarmed Combat.  Quasits can make grappling or overbear - ing attacks, but ordinarily don’t. If not fended off, they score  an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +10/- 10. Overbear Results Mods: ATK/DEF -4/+4. Grappling Result  Mods: ATK/DEF -4/+4.'

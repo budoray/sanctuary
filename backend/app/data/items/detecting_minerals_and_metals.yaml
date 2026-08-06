@@ -1,0 +1,4 @@
+name: Detecting Minerals and Metals
+classes: any
+description: Like other wands of detection, this wand will vibrate and point to the item it is enchanted to detect, in this case, the largest quantity of a mineral or metal within a 30ft range. The wand may also be used to detect all samples of a specific mineral or metal within range, such as gold or diamonds. The wielder of the wand becomes aware of the quantity of the item when detected. This wand requires 1 round per use, and may be used continuously for 1 turn per charge spent. The wand of detecting minerals and metals can be recharged.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

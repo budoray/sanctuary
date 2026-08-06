@@ -1,0 +1,14 @@
+name: Speak with Plants
+slug: speak_with_plants
+reversible: false
+class: cleric
+level: 4
+school: Clerical Transmutation/Alteration
+range: Caster
+duration: 1 round/caster level
+area_of_effect: Caster
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: The cleric becomes able to hold converse with living plant matter. He or she may pose questions and understand the answers given, although any conclusions or opinions the plant provides will be based on the plant's level of intelligence. Even a normal plant, however, will be able to convey information about events that have transpired near it. If the plants are capable of motion, it will be possible for the cleric to persuade them into a course of action, such as drawing aside to allow passage, or even attacking an enemy citadel.
+source: wiki2_spells.txt

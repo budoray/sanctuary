@@ -1,0 +1,14 @@
+name: Stone to Flesh
+slug: stone_to_flesh
+reversible: true
+class: magic-user
+level: 6
+school: Arcane Transmutation/Alteration
+range: 10-ft/level
+duration: Instantaneous
+area_of_effect: One creature
+components: V,S,M
+casting_time: 6 segments
+saving_throw: See below
+text: This spell transforms stone into flesh, or vice versa if the caster has elected to memorise the reversed version, flesh to stone. A creature that has been turned to stone will be returned to its normal state (provided that a system shock roll is successful). If the spell is used upon normal stone (as opposed to restoring a petrified creature), up to 9 cubic-ft/caster level may be transformed. A saving throw is permitted only against the spell's reverse, flesh to stone.
+source: wiki2_spells.txt

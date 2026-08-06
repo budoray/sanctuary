@@ -1,0 +1,23 @@
+name: Phase Cat (coeurl)
+frequency: very rare
+no_encountered: 1d4
+size: large
+alignment: neutral
+move: 150ft
+armour_class: 2 [18]
+hit_dice: 6+6
+melee_attacks: 2 tentacles (2d4)
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: average (8-10)
+morale: 80
+loot: Hoard 4
+experience: 400 +6/hp
+description: Inspired by the work of A. E. Van Vogt, phase cats (coeurls) are  feline predators originating from a place alien in space or time,  although probably from the prime material plane since they are  not affected by protection from evil. They resemble jaguar-sized  black cats with a pair of tentacles that can be used to rip at their  foes. The oddest thing about phase cats is that they appear to  be in a slightly different place than they actually are, making  them difficult to target.  Phase cats hate blink dogs, and will hunt them down and kill  them if possible.
+abilities:
+- heading: Immunities and Resistances
+  text: Improved Saving Throw. Phase cats make all saving throws with a  +6 bonus to the die roll.
+- heading: Special Features
+  text: Displacement. Phase cats are out of phase with reality, and their  visual appearance is slightly off from their actual location. This  is already taken into account  with the armour class and saving  throw. Unarmed Combat. Phase cats cannot effectively be targeted with  grappling or overbearing attacks, and do not use these tactics.
+- heading: Languages
+  text: Phase cats can communicate telepathically, though they use  this to coordinate with each other. They seldom bother to com- municate with beings other than phase cats.

@@ -1,0 +1,14 @@
+name: Finger of Death
+slug: finger_of_death
+reversible: false
+class: druid
+level: 7
+school: Druidic Enchantment/Charm
+range: 60-ft
+duration: Instantaneous
+area_of_effect: One creature
+components: V,S,M
+casting_time: 5 segments
+saving_throw: Negates
+text: The casting of this spell culminates when the druid points a finger at his or her chosen victim. If the target fails a saving throw, it dies.
+source: wiki2_spells.txt

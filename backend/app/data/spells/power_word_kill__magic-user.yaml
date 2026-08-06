@@ -1,0 +1,14 @@
+name: Power Word, Kill
+slug: power_word_kill
+reversible: false
+class: magic-user
+level: 9
+school: Arcane Conjuration/Summoning
+range: 21⁄2-ft/level
+duration: Instantaneous
+area_of_effect: 10-ft radius
+components: V
+casting_time: 1 segment
+saving_throw: None
+text: Upon the casting of this spell, the magic user specifies whether the spell is to kill one creature or multiple creatures. The spell will instantly deal death to a creature of up to 60 hit points, offering no saving throw (magic resistance does apply). The spell may, alternatively, be used to slaughter up to 120 hp of creatures with 10 or fewer hit points each. The total number of hit points is based upon the target's current hit points, not maximum hit points, so wounded creatures are more vulnerable to the spell. All creatures to be killed must be within the spell's area of effect.
+source: wiki2_spells.txt

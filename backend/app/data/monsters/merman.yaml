@@ -1,0 +1,24 @@
+name: Merman
+frequency: uncommon
+no_encountered: 20d10
+size: medium
+alignment: neutral
+move: 10ft; 180ft swimming
+armour_class: 7 [13]
+hit_dice: 1+1
+melee_attacks: 1 (By weapon)
+senses: Standard
+lair_chance: 25%
+intelligence: average (8-10)
+morale: 50
+loot: Hoard 3, Cache 4
+experience: 30 +1/hp
+description: 'Mermen (also called “merfolk”) appear as normal humans from  the waist up, but as human-sized fish or dolphins from the waist  down. They disdain clothing, though they will often adorn them- selves with plundered jewellery and use any enchanted weap - ons and protective magic rings or bracers they may gain in their  raids. Merfolk are the inhabitants of oceans and seas in the warmer  areas of the world, being particularly fond of tropical seas. Mer- men are much like rural humans, farming and harvesting vege- tation on the ocean floor and hunting in the area around their  settlements; they hunt for fish and other sea–going creatures.  Merfolk have been known to herd certain fish, keeping them  corralled in large, spherical netted seaweed pens in much the  same way their human counterparts will herd cattle. Merfolk tend to congregate in small communities, establish - ing their dwellings in reefs or underwater cliffs and tunnelling  many rooms and passages into these natural
+  structures. Rarely,  mermen will construct dwellings of natural materials such as  seashells, coral, rocks, and materials scavenged from sunken  sailing vessels. These communities, no matter the location, will  correspond to a human agricultural type community in many  respects: there will be workshops, residences, pens for the food  fish, and storage areas for the harvested sea vegetation. Mer - folk rarely venture from the ocean but can sometimes be spot - ted sunning themselves on coastal rocks in isolated areas. Merfolk communities are guarded by 3d6 giant gar (see Fish,  Giant), bred and trained by the mermen for this purpose. In battle, merfolk troops encountered will be armed as follows: • 50% trident • 25% crossbow (1d4+1 piercing) and dagger. The light cross - bows have a 20ft range underwater. • 25% net (see below), javelin, and dagger.  Though mermen tend to avoid humans under most circum - stances, they have been known to attack and sink surface ves - sels to plunder them.
+  Grappling hook-equipped mermen will  surface and hurl their grapples up to 30ft as the other mer - men attack exposed crewman on the ship with crossbows and  thrown javelins. The merfolk are quite proficient with grapples  and will successfully score a hit on a roll of 1–9 on a 1d10. If a  grapple hits it will be grabbed and held by 10 mermen, causing  the ship to lose 30ft per round of top speed for each successful  grapple attack. If the crew of the ship manages to cut a grapple  line it will take the 10 mermen holding the line a round to re - group and return to the fight. Any merman grappling the ship  or laying down cover fire is exposed to ranged attack from the  ship. Further, fire-based attacks will cause double damage but  only for a single round. If the grappled ship is successfully ren - dered motionless it will be pulled underwater in 4d4 rounds.  Any crewmen abandoning ship at this time will be ignored as  the ship and mermen sink beneath the waves. Mermen do not  take surface
+  dwellers prisoner, but will not normally harm any  crewmen in the water—unless the crew of the ship foolishly try  to continue the battle.'
+abilities:
+- heading: Special Attacks
+  text: Ranged or Melee Attack (Net). Some mermen are armed with  nets. These have a range of 20ft (and can be thrown while in  melee combat). If the attack hits, the target is automatically  (no saving throw) entangled for 1d4 rounds, unable to attack  or move.
+- heading: Languages
+  text: Merfolk speak their own language, 50% speak locathah, and if  the merfolk dwell near any other intelligent aquatic creatures  at least 10% of the community will be able to speak that tongue  as well.

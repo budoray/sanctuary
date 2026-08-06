@@ -1,0 +1,21 @@
+name: Minor Noble
+frequency: very rare very rare no.  encountered 1 1
+size: medium (6-7ft) medium (7-8ft)
+alignment: chaotic evil chaotic evil
+move: 150ft 150ft
+armour_class: 6 [14] (base) 2 [18] (base)
+hit_dice: 5 to 8 (1d4+4) 9 to 16 (1d8+8)
+melee_attacks: 2 (By weapon type) 2 (By weapon type)
+senses: Infravision 60ft Infravision 60ft
+lair_chance: 10% 50%
+intelligence: average to  exceptional (8-16) genius (17-18)
+morale: 70 to 85 90 to 125
+loot: Cache 5, 6, 7 Cache 3, 4, 5, 6, 7
+experience: 1,275 +10/hp 4,410 +15/hp
+description: Caumbions are the offspring of a major demon and a human  (cf. aluu-demon). As such, each is slightly different depending  upon parentage. Generally, caumbions are strong and heavily– built. They will usually have several other demonic characteris - tics as well, such as vestigial horns, barbs, or scaled skin. Caumbions may become clerics, attaining a maximum level  equal to their hit dice, magic-users (maximum of 5th level), or  thieves or assassins (up to a maximum of their hit dice in ability  level). The caumbion has the abilities of the class, none of the  armour/weapon restrictions, but does not gain extra hit points  from the class. If the caumbion has the abilities of a character  class, add an extra 15 points of XP per hit point to the monster’s  experience point value. MINOR CAUMBIONS Minor Caumbions have a natural base armour class of 6 [14].  Wearing mundane armours cannot improve this. Magical ar - mours or other protections add only their bonus, unless the  armour
+  is superior to AC 6 [14], in which case the full benefit is  accrued (the caumbion’s base AC is ignored, and the AC of the  armour is used instead). The GM may choose to add class abilities or special abilities to a  minor caumbion to generate an interesting foe if the caumbion  is the main villain and has minions; caumbions are highly indi - vidual. In higher level adventures where the caumbion is just  one of many enemies, this usually isn’t worth the extra com - plexity.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance:  Minor caumbions have 5%–20% magic re - sistance depending on their hit dice. 5HD=5%, 6HD=10%,  7HD=15%, and 8HD=20%. Unarmed Combat.  Minor Caumbions can make grappling or  overbearing attacks, but only overbearing is commonly used  against sole opponents. If not fended off, they score an un - armed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +8/-8. Over - bear Results Mods: ATK/DEF +1/-1. Grappling Result Mods:  ATK/DEF +0/-0. NOBLE CAUMBIONS Noble Caumbions are the children of very powerful demons,  such as demon princes and the like (“nobility” refers to their  power, for their behaviour is usually anything but noble). They  are likely to be the main villain in an adventure, so the GM will  probably choose to add abilities from one of the four possible  classes (see above).'
+- heading: Immunities and Resistances
+  text: 'Magic Resistance: Noble caumbions have 25%–40% magic resis - tance depending on their hit dice. 9-10HD=25%, 11-12HD=30%,  13-14HD=35%, 15-16HD=40%. Unarmed Combat.  Noble Caumbions can make grappling or  overbearing attacks, but only overbearing is commonly used  against sole opponents. If not fended off, they score an un - armed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +8/-8. Over - bear Results Mods: ATK/DEF +2/-2. Grappling Result Mods:  ATK/DEF +0/-0.'

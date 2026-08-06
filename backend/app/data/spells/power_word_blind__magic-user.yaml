@@ -1,0 +1,14 @@
+name: Power Word, Blind
+slug: power_word_blind
+reversible: false
+class: magic-user
+level: 8
+school: Arcane Conjuration/Summoning
+range: 5-ft/level
+duration: See below
+area_of_effect: 15-ft radius
+components: V
+casting_time: 1 segment
+saving_throw: None
+text: The word of power to blind removes vision from creatures within the area of effect. The duration of the blindness depends on how many total hp the affected creatures have. If the total is 50 or less, the blindness lasts 1d4+1 turns. If the total is 51 hit points to 100, the blindness lasts 1d4+1 rounds, as opposed to turns. The spell does not affect more than 100 hp of creatures in total. The caster may target specific creatures within the area of effect.
+source: wiki2_spells.txt

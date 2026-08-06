@@ -1,0 +1,17 @@
+name: Normal Huge Giant
+frequency: common rare very rare no.  encountered 1d6 1d6 1d4
+size: small small medium
+alignment: neutral neutral neutral
+move: 120ft 150ft 180ft
+armour_class: 7 [13] 6 [14] 5 [15]
+hit_dice: 1 2 4
+melee_attacks: 1 bite (1d4 1 bite (1d4+1) 1 bite (1d8)
+senses: Keen Keen Keen
+lair_chance: 25% 25% 25%
+intelligence: animal (1) animal (1) animal (1)
+morale: 50 55 65
+loot: Nil Nil Nil
+experience: 10 +1/hp 30 +1/hp 75 +3/hp
+description: 'Jackals are small mammals, 2ft to 3ft long and weighing about 25 lbs. They  are muzzle-snouted, fur-covered, four-legged and long-tailed nocturnal  scavengers and occasional predators. They generally hunt and forage  singly or in mated pairs, but occasionally gather in  small packs to bring down difficult prey. Jackals can  be found in subtropical grasslands, woodlands and  wastelands, and occasionally in more mountainous  terrain. They are most active at dawn and dusk, which  has occasionally led to them being revered by death  cults. The small size of the jackal makes it cautious and an  unlikely combatant, but they can bite if necessary,  such as when defending their cubs. Huge jackals are  larger, more aggressive and have a stronger bite, but  are otherwise similar. Giant jackals are almost cer - tainly unnatural and are known to often be associ - ated with religious groups. Though they are thought  to usually behave as other Jackals, there are rumours  that some possess
+  a greater degree of intelligence  and an evil will. Unarmed Combat (Normal and Big):  Normal and Huge  jackals cannot be targeted with grappling or over - bearing attacks, but they may overbear. If not fend - ed off, they score an unarmed hit with a 2+ on 1d20.  Hit Mods: ATK/DEF +8/na. Overbear Results Mods:  ATK/DEF +0/na. Unarmed Combat (Giant):  Giant jackals cannot be tar - geted with grappling or overbearing attacks, but they  may overbear. If not fended off, they score an un - armed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +10/ na. Overbear Results Mods: ATK/DEF +2/na.'
+abilities: []

@@ -1,0 +1,16 @@
+name: Dog
+frequency: uncommon common no.  encountered varies 4d4
+size: medium small
+alignment: neutral neutral
+move: 120ft 150ft
+armour_class: 6 [14] (or by   armour type) 7 [13]
+hit_dice: 2+2 1
+melee_attacks: 1 bite (2d4) 1 bite (1d4)
+senses: Keen smell Keen smell
+lair_chance: Nil Nil
+intelligence: semi- (2-4) semi- (2-4)
+morale: N/A 50
+loot: Nil Nil
+experience: 50 +2/hp 10 +1/hp
+description: 'War Dogs are usually large mastiffs or pit bulls, trained to fight  or guard a location. They are typically armoured in leather. They  do not check morale and are trained not to accept food from  strangers. Most dogs are in the “Ordinary or Wild” category, including most  guard dogs. All dogs have a 25% chance to detect the presence of an in - visible person by smell. How the dog reacts to it depends on  training. A war dog will usually be trained to attempt an attack  (still with a -4 to hit), a guard dog may be trained to bark at any- thing suspicious, and a relatively untrained dog may just follow  the invisible person’s scent until something causes it to react  differently. Unarmed Combat.  Dogs cannot be targeted with grappling or  overbearing attacks, but war dogs may be trained to overbear.  If not fended off, they score an unarmed hit with a 2+ on 1d20.  Hit Mods: ATK/DEF +8/na. Overbear Results Mods: ATK/DEF  +2/-0. Grappling Result Mods: ATK/DEF na/na.'
+abilities: []

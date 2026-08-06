@@ -1,0 +1,14 @@
+name: Detect Invisibility
+slug: detect_invisibility
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Divination
+range: Caster
+duration: 5 rounds/level
+area_of_effect: Path 10-ft wide, 10-ft long/level
+components: V,S,M
+casting_time: 2 segments
+saving_throw: None
+text: This spell allows the caster to see that which is invisible or hidden, and also to perceive the astral and æthereal planes. The spell's sight is limited to the stated range of 10-ft/caster level.
+source: wiki2_spells.txt

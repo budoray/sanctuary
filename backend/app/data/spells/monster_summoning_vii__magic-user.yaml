@@ -1,0 +1,14 @@
+name: Monster Summoning VII
+slug: monster_summoning_vii
+reversible: false
+class: magic-user
+level: 9
+school: Arcane Conjuration/Summoning
+range: 90-ft
+duration: 8 rounds+1 round/level
+area_of_effect: Summoned creatures
+components: V,S,M
+casting_time: 9 segments
+saving_throw: None
+text: 'This spell functions in the same manner as monster summoning I, but calls 1d2 creatures as determined on the following table, the monsters appearing in 1 round: Monster Summoning VII Results (magic user level 9) d6 Monster Summoned 1 Cockatrice 2 Doppelgänger 3 Hydra (7 heads) 4 Lycanthrope (wereboar) 5 Minotaur 6 Snake, giant poisonous'
+source: wiki2_spells.txt

@@ -1,0 +1,19 @@
+name: Stirge
+frequency: uncommon
+no_encountered: 3d10
+size: small
+alignment: neutral
+move: 30ft; 180ft flying (AA:IV)
+armour_class: 8 [12]
+hit_dice: 1+1
+melee_attacks: 1 (1d3)
+senses: Infravision 60ft
+lair_chance: 55%
+intelligence: animal (1)
+morale: 50
+loot: Hoard 4
+experience: 35 +2/hp
+description: Stirges are bat-like flying mammals with a long, bloodsucking  snout. They live in dark places and feed on blood.
+abilities:
+- heading: Special Attacks
+  text: Attacks as 4HD. A stirge attacks as a 4 hit dice creature. Suck Blood. Once it has hit, the stirge has latched on to its victim  and will continue draining the victim of 1d3 hp worth of blood  per round, without needing any further rolls “to hit”, until the  stirge has drunk 10–13 (9+1d4) hp worth of blood, at which  time its hunger is satisfied and it will attempt to depart. Only  death will prevent the stirge feeding once it has latched on.

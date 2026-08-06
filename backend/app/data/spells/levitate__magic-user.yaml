@@ -1,0 +1,14 @@
+name: Levitate
+slug: levitate
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Transmutation/Alteration
+range: 20-ft/level
+duration: 1 turn/level
+area_of_effect: Caster or one creature
+components: V,S,M
+casting_time: 2 segments
+saving_throw: Negates
+text: This spell allows the magic user to levitate him- or herself or another person, to a maximum weight of 100 lbs/level. The magic user can move vertically up or down at a rate of 20-ft per round, and can levitate another at a rate of 10-ft per round. The spell may be cast upon an unwilling enemy, but in this case the intended target is entitled to a saving throw. The spell does not allow any sort of horizontal movement (aerial agility level I–see Chapter 3), but it is possible for a levitated person to pull him- or herself along if there is something upon which to gain purchase, such as a wall.
+source: wiki2_spells.txt

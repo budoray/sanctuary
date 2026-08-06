@@ -1,0 +1,23 @@
+name: Xorn
+frequency: very rare
+no_encountered: 1d4
+size: medium
+alignment: neutral
+move: 90ft
+armour_class: -2 [22]
+hit_dice: 7+7
+melee_attacks: 3 claws (1d3) and 1 bite (6d4)
+senses: Infravision 60ft
+lair_chance: 40%
+intelligence: average (8-10)
+morale: 85
+loot: Cache 1, 2, 3 (x5), 10, 11
+experience: 1,350 +10/hp
+description: Xorn are bizarre creatures from the elemental planes of earth  that eat precious metals and other minerals. They have a rock- like consistency, granting an extremely good armour class, and  appear to be made of stone. Xorn have a barrel-shaped body,  radially symmetrical with three eyes, three arms, three stub - by legs, and a powerful mouth set in the top of the creature’s  body. The stone-like appearance grants the xorn a tremendous- ly good chance of surprising its enemies.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Xorn surprise on a 1–5 on 1d6.
+- heading: Immunities and Resistances
+  text: Immune to Fire and Cold. Xorn are immune to fire and cold dam- age.  Resistance (Electricity). Xorn take only half damage from electri - cal attacks (no damage when saving throws are successful). Vulnerability to Earth Spells. Xorn are particularly vulnerable to  spells that affect earth and stone. Move earth  spells may be  used to hurl a xorn backwards 30ft and stun them for a full  round. Stone to flesh and rock to mud spells weaken the xorn’s  elemental structure, changing the creature’s AC to 8 [12] until  the xorn concentrates for a full round to readjust its composi - tion. Passwall spells inflict 1d10+10 points of damage. In each  case described above, the xorn receives no saving throw.
+- heading: Special Features
+  text: Swim Through Stone.  A xorn can swim through stone, but re - quires a full melee round to enter solid rock, during which time  it cannot attack. A phase door spell will utterly destroy a xorn  that is travelling through rock or readjusting its composition. Unarmed Combat.  Xorn cannot be targeted with grappling or  overbearing attacks, and do not employ these tactics.

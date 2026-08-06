@@ -1,0 +1,21 @@
+name: Disenchanter
+frequency: very rare
+no_encountered: 1d2
+size: medium (5ft at shoulder)
+alignment: neutral
+move: 120ft
+armour_class: 5 [15]
+hit_dice: '5'
+melee_attacks: 1 (special)
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: average (8-10)
+morale: 70
+loot: Nil
+experience: 225 +5/hp
+description: The disenchanter resembles a rather bizarre cross between a  dromedary camel and a cow, with a muscular prehensile snout  stuck on for good measure. Colouration is a shimmery electric  blue, and the entire creature appears to be somewhat translu - cent and difficult for the eye to focus upon. The disenchanter is a thaumivore, feeding on magical power.  It sucks the dweomer from enchanted objects by attaching its  snout to them with a successful “to hit” roll.  The disenchanter can only be hit by magic weapons but doing  so will not affect the dweomer of the weapon; only the snout  has the ability to disenchant items. Even the wisest and most  learned of sages know nothing about the ecology of the disen - chanter or why it seems to be able to sustain itself only with  magic items.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more.
+- heading: Special Attacks
+  text: Disenchant Item. One touch (a normal to-hit roll) is all it takes  for the disenchanter’s snout to render any magic item (except  major artifacts) completely inert. The creature has no other at- tacks and causes no physical damage of any kind. The muscu - lar snout can be extended as much as 5ft and the disenchanter  is capable of detecting relative strengths of magic enchant - ment, knowing, for instance, that plate mail +5 will be a tastier  morsel than a mere +1 ring of protection. Unarmed Combat. Disenchanters cannot be overborne or grap - pled, and do not employ these tactics.  DJINN (GENIE)

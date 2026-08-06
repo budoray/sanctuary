@@ -1,0 +1,23 @@
+name: Banshee (groaning Spirit)
+frequency: very rare
+no_encountered: '1'
+size: medium
+alignment: chaotic evil
+move: 150ft
+armour_class: 0 [20]
+hit_dice: '7'
+melee_attacks: 1 touch (1d8 cold)
+senses: Infravision 60ft, Detect invisible 5%
+lair_chance: 10%
+intelligence: exceptional (15-16)
+morale: 80
+loot: Nil
+experience: 665 +8/hp
+description: The banshee is often said to be the ghost of an evil elven wom- an, although many have been encountered who don’t really ap- pear to fit this description. These spirits are found in remote  countryside and other lonely natural places. They are mostly in- corporeal, and float just above the ground, but they cannot fly.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Banshees are turned as type 13 Undead. Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. The banshee is immune to pierc- ing, blunt, and slashing damage, unless the weapon causing  that damage is magical. Immunities. This creature is immune to mind control (includ - ing charm) and hold spells, sleep, gases, poison, disease, cold  damage, electrical damage, temporary damage, and subdual  damage. Vulnerability to Exorcism. An exorcism spell immediately kills the  creature.
+- heading: Special Features
+  text: Fearful Appearance. The mere sight of a banshee will cause fear  (as the level 3 illusionist spell) unless the viewer saves vs spells  (one saving throw, not an ongoing series). Fighting the crea - ture without looking at it incurs a to-hit penalty of -4.
+- heading: Special Attacks
+  text: Wail (1/day). The banshee can wail only when it is dark. All crea- tures within 30ft of the banshee when it wails must save ver - sus spells or die. Unarmed Combat. Banshees cannot be overborne or grappled,  and do not employ these tactics.

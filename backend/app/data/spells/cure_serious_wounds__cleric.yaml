@@ -1,0 +1,14 @@
+name: Cure Serious Wounds
+slug: cure_serious_wounds
+reversible: true
+class: cleric
+level: 4
+school: Clerical Necromancy
+range: Touch
+duration: Instantaneous (permanent)
+area_of_effect: One creature
+components: V,S
+casting_time: 7 segments
+saving_throw: None (Neg.)
+text: A benison similar to cure light wounds, cure serious wounds permits the cleric to lay on hands for 2d8+1 hit points of healing. The spell's limits are otherwise similar to those of cure light wounds. The reverse of the spell causes damage rather than healing, requiring that the cleric successfully touch the target.
+source: wiki2_spells.txt

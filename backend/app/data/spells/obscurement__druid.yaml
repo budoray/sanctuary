@@ -1,0 +1,14 @@
+name: Obscurement
+slug: obscurement
+reversible: false
+class: druid
+level: 2
+school: Druidic Transmutation/Alteration
+range: '0'
+duration: 4 rounds/caster level
+area_of_effect: 10-ft×10-ft cube /caster level
+components: V,S
+casting_time: 4 segments
+saving_throw: None
+text: As this spell is completed, an enchanted mist billows from the area where the druid stands, rapidly filling the area of effect and reducing visibility therein to 1d4-ft×2-ft. The spell is affected by natural conditions such as strong winds, which will reduce the spell's effective duration.
+source: wiki2_spells.txt

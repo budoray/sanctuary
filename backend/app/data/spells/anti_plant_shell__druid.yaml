@@ -1,0 +1,14 @@
+name: Anti-Plant Shell
+slug: anti_plant_shell
+reversible: false
+class: druid
+level: 5
+school: Druidic Abjuration
+range: '0'
+duration: 1 turn/caster level
+area_of_effect: 80-ft radius sphere (or hemisphere)
+components: V,S,M
+casting_time: 7 segments
+saving_throw: None
+text: When the druid finishes casting this spell, an invisible barrier forms in an 80-ft radius around the caster and is immobile thereafter. No vegetable matter (including missiles formed of vegetable matter, such as wooden arrows) can penetrate the barrier.
+source: wiki2_spells.txt

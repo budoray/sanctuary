@@ -1,0 +1,18 @@
+name: Tribal Warriors
+frequency: rare
+no_encountered: 10d12
+size: medium
+alignment: neutral
+move: 120ft
+armour_class: 7 [13]
+hit_dice: '1'
+melee_attacks: 1 sword (1d8) or spear (1d6)
+senses: Standard
+lair_chance: 40%
+intelligence: average (8-10)
+morale: 50
+loot: See below
+experience: 10 +1/hp
+description: 'Tribal warriors are usually at a bronze-age level of technology,  although they may have steel weapons obtained from else - where. This entry allows for anything from Roman-era German- ic tribes to isolated island settlements, to post-catastrophic ar - eas that have lost even a feudal level of civilisation. In their lair, there will be a chief (5th level fighter) and 1d4 guards  (4th level fighters). There is always a 10% chance (per every 10  tribal warriors) that a 3rd level cleric will be present. Additional Leaders. • One 4th level fighter per 10 • One 6th level fighter per 30 • One 8th level cleric/druid. They are usually armed with spears, shields, short bows, and  short swords (longswords, if there is better access to steel, or  spears if metal is scarce in the area). Their treasure will consist of furs, gold nuggets, or uncut gems  (5% chance per 10 tribal warriors present). If one is present, it  will be the only treasure there. The value of each is 1,000 gp per  bale
+  of furs (2d6), 5 gp gold nuggets (2d4×10), and 10 gp gems  (1d100). Unarmed Combat. Tribal warriors can make grappling or over - bearing attacks. If not fended off, they score an unarmed hit  with an 8+ on 1d20. Hit Mods: ATK/DEF +8/-10. Overbear Re - sults Mods: ATK/DEF +0/+0. Grappling Result Mods: ATK/DEF  +0/+0.'
+abilities: []

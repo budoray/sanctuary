@@ -1,0 +1,21 @@
+name: Domestic Wild
+frequency: common uncommon
+no_encountered: 1 or 2d6 1 or 1d4+1
+size: small small
+alignment: neutral neutral
+move: 50ft 180ft
+armour_class: 6 [14] 5 [15]
+hit_dice: 1d2 hp 1d6 hp
+melee_attacks: 1 (1d2-1) 3 (1/1/1d2)
+senses: Keen Keen
+lair_chance: 75% 5%
+intelligence: animal (1) animal (1)
+morale: 50 50
+loot: Nil Nil
+experience: 3 +1/hp 10 +1/hp
+description: Agile and proud, cats are found everywhere. Because of their  size, domestic cats have very ineffective attacks. When a black  cat is found as a magic-user’s familiar, the cat confers excellent  hearing and night vision on its master or mistress. See also, Lynx, Giant.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Cats are only surprised on a 1 (of a d6), and they sur- prise opponents on a 1–3 (of a d6).
+- heading: Special Attacks
+  text: Rear Claws.  A cat exceeding its needed “to hit” score by 4 or  more can rake with its rear claws as well as its front, so roll the  listed damage twice. Unarmed Combat. Cats cannot be overborne or grappled, and  do not employ these tactics.

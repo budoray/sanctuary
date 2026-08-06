@@ -1,0 +1,21 @@
+name: Manticore
+frequency: uncommon
+no_encountered: 1d4
+size: large
+alignment: lawful evil
+move: 120ft; 180ft flying (AA:II)
+armour_class: 4 [16]
+hit_dice: 6+3
+melee_attacks: 3 (1d3/1d3/1d8)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: low (5-7)
+morale: 80
+loot: Hoard 5
+experience: 525 +8/hp
+description: A manticore has a lion’s body with a human head and bat-like  wings. Its tail is thick and club-like at the end, and bristles with  iron spikes. They make their lairs in dark, dank caves or des - olate underground caverns, flying out by night to hunt sheep,  cattle, and (if available) humans.
+abilities:
+- heading: Special Attacks
+  text: 'Tail Spikes. The manticore can launch 6 tail spikes (1d6 piercing)  at a range of up to 60ft (120ft at -2, 180ft at -4). A manticore  has 24 spikes total, which regrow fully after as little as 2 days. Unarmed Combat. Manticores cannot be targeted with grappling  or overbearing attacks, but may choose to overbear a lone op- ponent. If not fended off, they score an unarmed hit with a  2+ on 1d20. Hit Mods: ATK/DEF +8/na. Overbear Results Mods:  ATK/DEF +4/na.'
+- heading: Languages
+  text: Manticores are monsters, and despite the humanlike head they  only speak the alignment tongue of lawful evil.

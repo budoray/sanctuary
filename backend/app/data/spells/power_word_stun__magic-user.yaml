@@ -1,0 +1,14 @@
+name: Power Word, Stun
+slug: power_word_stun
+reversible: false
+class: magic-user
+level: 7
+school: Arcane Conjuration/Summoning
+range: 5-ft/level
+duration: See below
+area_of_effect: One creature
+components: V
+casting_time: 1 segment
+saving_throw: None
+text: The creature targeted by a stunning power word hears the word as a thundering roar, although others hear it normally. The impact of the word's magical power stuns the victim, rendering him unable to think clearly or act in any manner (including movement). The duration of the spell's effect is determined by the target's current hit points (not its normal maximum). A creature with 1-30 remaining hit points will be stunned for 4d4 rounds, a creature with 31-60 hp remaining will be stunned for 2d4 rounds, a creature with 61-90 hp remaining will be stunned for 1d4 rounds, and creatures with 90+ hit points will be able to shrug off the effect of the spell entirely.
+source: wiki2_spells.txt

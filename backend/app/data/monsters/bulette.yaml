@@ -1,0 +1,21 @@
+name: Bulette
+frequency: very rare
+no_encountered: 1d2
+size: large
+alignment: neutral
+move: 140ft; 30ft burrowing
+armour_class: -2 [22] (see below)
+hit_dice: '9'
+melee_attacks: 3 (3d6/3d6/4d12)
+senses: Standard
+lair_chance: 0%
+intelligence: animal (1)
+morale: N/A (fights to the death)
+loot: Nil
+experience: 2,000 +12/hp
+description: 'Bulettes are sometimes called “land sharks” because of their  habit of burrowing while the crests of their backs break the  surface. Like sharks, they are huge, vicious, and always hungry.  They seem to be someone’s experiment gone wrong: a turtle  crossed with an armadillo with just a touch of demon thrown  in. Their favourite food is horse but they will eat just about any- thing that moves. The only kind of meat they don’t seem to like  is dwarf or elf. They have been known to dig halflings right out  of their holes. Being fearless, a bulette will attack anything that moves on  sight. They have been known to attack an armed party to get  at the horses. When they attack, they use their vicious bite and  their two front claws.  Their plates are highly prized by armourers. They can be fash - ioned into +1 or +2 shields.'
+abilities:
+- heading: Special Features
+  text: Sectioned Armour Class. Bulettes are well armoured AC -2 [22],  but they have a vulnerable spot. When fighting, the bulette  raises one of its back plates as a warning crest (part of the rea- son it is often described as a “land shark”. The area underneath  the crest is unprotected, AC 6 [14]. However, an attacker must  be behind the bulette in order to attack the unarmoured spot.
+- heading: Special Attacks
+  text: 8ft jump. When cornered or seriously wounded, a bulette will  attempt to leap 8ft vertically and land directly on top of their  victim, clawing with all four feet. Unarmed Combat.  Bulettes cannot be overborne or grappled,  and do not employ these tactics.  C

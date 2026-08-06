@@ -1,0 +1,14 @@
+name: Magic Aura
+slug: magic_aura
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Illusion/Phantasm
+range: Touch
+duration: 1 day/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 round
+saving_throw: See below
+text: This spell creates a false magical aura around a single object of not more than five lbs per caster level. A detect magic spell will incorrectly perceive the item as magical, but if it is actually handled by the caster of the detect magic spell, he or she will be permitted a saving throw to realize that the aura is, in fact, not a true magical aura but a counterfeit.
+source: wiki2_spells.txt

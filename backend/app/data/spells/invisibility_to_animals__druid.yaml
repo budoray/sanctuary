@@ -1,0 +1,14 @@
+name: Invisibility to Animals
+slug: invisibility_to_animals
+reversible: false
+class: druid
+level: 1
+school: Druidic Transmutation/Alteration
+range: Touch
+duration: 1 turn+1 round/level
+area_of_effect: Creature touched
+components: S,M
+casting_time: 4 segments
+saving_throw: None
+text: With a gesture, the druid or other recipient of the spell fades from the sight, sound, and smell of any animal (i.e. creature listed under “Animal” in Chapter 5). Creatures with intelligence of 6+ are not affected by the spell. This powerful form of invisibility is not dispelled if the druid attacks, although a particular creature being attacked with a hand-held weapon will, of course, be aware of the druid's general location and be entitled to attack with a -4 penalty until the druid moves out of its immediate area. Druids will, by nature of their calling, not use this spell to commit wholesale slaughter upon animals except in extraordinary circumstances.
+source: wiki2_spells.txt

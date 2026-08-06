@@ -1,0 +1,14 @@
+name: Animal Summoning II
+slug: animal_summoning_ii
+reversible: false
+class: druid
+level: 5
+school: Druidic Conjuration/Summoning
+range: 180-ft/caster level
+duration: See below
+area_of_effect: See below
+components: V,S,M
+casting_time: 7 segments
+saving_throw: None
+text: This spell is similar to animal summoning I, but is more powerful. The spell will summon a maximum of six animals, each no greater than 8 HD, or up to 12 animals, each no greater than 4 HD.
+source: wiki2_spells.txt

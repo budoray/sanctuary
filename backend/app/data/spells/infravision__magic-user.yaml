@@ -1,0 +1,14 @@
+name: Infravision
+slug: infravision
+reversible: false
+class: magic-user
+level: 3
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: 12 turns+6 turns/level
+area_of_effect: One creature
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: This spell allows the magic user to confer the ability to see in the dark, perceiving variations of heat in the infrared spectrum. The range of this vision is 60-ft. Lamps and other light sources tend to spoil the effects of infravision. Infravision does not perceive invisibility any more than normal vision.
+source: wiki2_spells.txt

@@ -1,0 +1,23 @@
+name: Lesser Greater
+frequency: uncommon rare no.  encountered 1d2 1
+size: medium large
+alignment: neutral neutral
+move: 60ft 60ft
+armour_class: 3 [17] 0 [20]
+hit_dice: 6 to 8 10 to 12
+melee_attacks: 2 tentacles (1d8)  and 1 bite (1d4+1) 2 tentacles (1d12)  and 1 bite (1d4+1)
+senses: Infravision 90ft Infravision 90ft
+lair_chance: 75% 75%
+intelligence: low (5-7) average (8-10)
+morale: 75 to 85 90 to 105
+loot: Nil Nil
+experience: '6 HD: 275 +6/hp  7 HD: 400 +8/hp  8 HD: 650 +10/hp 10 HD: 1,500 +14/hp  11 HD: 2,000 +16/hp  12 HD: 2,300 +17/hp'
+description: Otyughs are repulsive beasts that feed off the refuse and waste  habitually discarded by other creatures. They are generally  found in large rubbish pits and cisterns. Not always content with  discards, they sometimes wait beneath the surface for anyone  foolish enough to stray too close. Otyughs have no discernible  head, the bulk of their form consisting of a great horn-plated  torso supported by three stocky legs, with a powerful, sharp- toothed maw. Three long tentacular appendages extend from  their bodies, two of which are hard and thorny, being used to  attack and grapple prey; the third is actually a sensory organ  with three eyes at its end.  Whilst Otyughs suffer no ill-effects from bright light, they do not  like it, preferring to dwell in dark places that help them to strike  with complete surprise, though their eyes, usually protruding  above the surface, sometimes give them away.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Otyughs cannot be surprised, and surprise others on  a roll of 1-3 on a d6.
+- heading: Special Features
+  text: Limited Telepathy. Lesser Otyughs are capable of limited telep - athy at a range of up to 30ft, and Greater Otyughs up to 60 ft.  Such communication is limited to simple thoughts and ideas.
+- heading: Special Attacks
+  text: Disease. Any character unfortunate enough to be bitten by an  Otyugh may catch a disease (saving throw vs. poison negates).  If contracted, the disease has a 20% chance to be fatal within  1d8 days; if it is not fatal, the patient recovers fully. Grab. Otyughs can use their tentacles for normal attacks, but  may also use them to grab opponents. Grabbing an opponent  only requires a successful to-hit roll, and normal damage is in- flicted in that round. In later rounds, the otyugh inflicts dam - age automatically, but less than it might inflict by making an  attack roll. Grabbed opponents suffer 1d3+1 points of blunt  damage per round, and bite attacks against them are made  with +2 to hit. A character with 18 strength can break free af - ter one round of struggling, but other characters must make  a successful Minor Test of Strength die roll to do the same.  Grabbed characters cannot attack until freed. Greater Otyughs  may also use grabbed creatures as a shield; in doing so, they  gain
+    a +1 bonus to armour class. Unarmed Combat. Otyughs cannot effectively be targeted with  grappling or overbearing attacks, and do not use these tactics.

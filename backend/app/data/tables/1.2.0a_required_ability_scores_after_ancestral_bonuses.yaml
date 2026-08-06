@@ -1,0 +1,11 @@
+id: 1.2.0a
+name: REQUIRED  ABILITY SCORES (AFTER ANCESTRAL BONUSES)
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- STR DEX CON INT WIS CHA
+- Dwarf 8-18 3-17 12-19 3-18 3-18 3-16
+- Elf 3-18 7-19 6-18 8-18 3-18 8-18
+- Gnome 6-18 3-18 8-18 7-18 3-18 3-18
+- Half-Elf 3-18 6-18 6-18 4-18 3-18 3-18
+- Half-Orc 6-18 3-17 13-19 3-17 3-14 3-12
+- Halfling 6-17 8-18 10-19 6-18 3-17 3-18

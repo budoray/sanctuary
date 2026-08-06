@@ -1,0 +1,155 @@
+id: 2.2.3a
+name: CLASSES OF AVAILABLE  HENCHMEN
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 CLASS
+- 01–40  Fighter
+- 41–60 Magic-user
+- 61–80 Cleric
+- 91–00 Thief
+- 'Level: Newly recruited henchmen are generally first level char -'
+- acters. The exceptions to this are if the player character is high-
+- er than sixth level, or higher than twelfth level. If level 7-12, the
+- character’s reputation is such that 1 in 10 henchmen are sec -
+- ond level; if level 13+, the character has achieved enough fame
+- that 1 in 4 potential henchmen are second level, and another
+- 1 in 4 are third level.
+- 'Cost: Once a potential henchmen is selected, there are still costs'
+- to be paid and negotiations to be completed. The minimum
+- offer a henchmen will consider is 100 gp per level; this yields
+- a 30% chance of the offer being accepted, which increases by
+- 1% for each additional 10 gp offered above the minimum, up
+- to a maximum of 60%.
+- 'Equipment: Prospective henchmen arrive with nothing but the'
+- clothes they are wearing and perhaps a few coppers in their
+- pockets. This apparent lack of success as an independent
+- adventurer is the main reason the henchman is seeking the
+- position, and the offer must include complete equipment in
+- accordance with the henchman’s character class. Any magic
+- items useful to the NPC will typically increase the chance of ac-
+- ceptance by 15%, magical ammunition counting only in groups
+- of six.
+- 'Room and Board: The potential henchman always expects this.'
+- Not including an offer of free room and board decreases the
+- chance of acceptance by 25%.
+- 'Treasure: The player character must explain to the prospective'
+- henchman their specific duties and what is more generally ex-
+- pected. The henchman will want to know what percentage of
+- treasure will be apportioned, and what to expect with regards
+- to magic items. In addition to living expenses, henchmen typ -
+- ically receive a half share of the treasure gained on a given
+- expedition; they will also expect healing and other restorative
+- spells as needs dictate.
+- 'The Offer:  If the player character tenders an offer the game'
+- master adds up all the percentage modifiers listed above and
+- any charisma adjustment from Table 1.1.7a. This is the offer
+- acceptance chance; if the number rolled does not exceed this
+- chance, then the non-player character accepts service as a
+- henchman.
+- 'Exceptional Henchmen: In certain circumstances, a player'
+- character may have a relatively high level non-player charac -
+- ter in their power, which may then lead to an offer of hench -
+- man status. In general, if such an NPC is more than two levels
+- higher than the player character they will accept only associate
+- status for one or two adventures. No inducement will cause a
+- higher-level NPC to willingly accept a longer period of service.
+- However, if the player character is more than two levels high -
+- er than the non-player character then an offer may be made
+- normally in accordance with the above guidelines. In any other
+- circumstances, the non-player character will agree to accept
+- associate status for only 1d4 weeks or adventures. If an offer
+- is accepted under threat, then the NPC will be of highly ques -
+- tionable loyalty.
+- 'Associates: Typically, associate non-player characters regard'
+- themselves as being the equal of any player characters, or per-
+- haps their better; these NPCs may have been coerced, hired,
+- or joined the party of their own free will and for their own
+- ends. Regardless, such NPCs expect to be treated as a true
+- member of the group, taking their fair share of the risks, and
+- receiving a full share of any treasure or magic items gained.
+- Associates rarely function in this capacity for any great length
+- of time, usually one or two adventures.
+- 2.2.4. LOYALTY OF   HIRELINGS
+- AND  HENCHMEN
+- Sooner or later the loyalty of a non-player character will be put
+- to the test.
+- Initial loyalty is 50%, adjusted according to the charisma modifi-
+- er of the player character in whose service they are.
+- The following are guidelines for adjusting hireling and hench -
+- men loyalty to correspond with prevailing circumstances, but
+- they may also be applied more widely to help determine the
+- reaction of other non-player characters and monsters (See Ta -
+- 'ble 1.6.2.8a: NPC and Monster Reaction ). An experienced game'
+- master is not expected to have to refer to these tables, as your
+- own judgement will generally suffice.
+- There is some information in here (vicious treatment, brutal dis-
+- cipline) that are relevant to troops or hirelings who are in the
+- service of a monstrous leader such as a demon or a giant. If a
+- player character is of evil alignment, the same modifiers would
+- also apply.
+- The following modifiers apply to morale checks (see Section
+- '1.6.8: Morale).'
+- ALIGNMENT OF PLAYER CHARACTER
+- ALIGNMENT MODIFIER
+- Chaotic -10%
+- Evil -5%
+- Neutral +0%
+- Good +5%
+- Lawful +10%
+- ALIGNMENT OF HIRELING OR  HENCHMEN
+- ALIGNMENT PLAYER
+- CHARACTER ALLIES EXAMPLE
+- Similar +0% +0% Lawful Neutral to
+- Neutral
+- Different -10% -5% Chaotic Neutral to
+- Neutral Good
+- Opposed -20% -10% Neutral Good to
+- Chaotic Evil
+- Irreconcilable -30% -15% Lawful Good to
+- Chaotic Evil
+- STATUS OF HIRELING OR  HENCHMEN
+- TYPE MODIFIER
+- Conscript -20%
+- Hireling -10%
+- Follower +0%
+- Henchman +10%
+- LENGTH OF SERVICE
+- LENGTH MODIFIER
+- 0–1 month -5%
+- 0–1 years +0%
+- 1–2 years +5%
+- 2–3 years +10%
+- 3–4 years +15%
+- 4–5 years +20%
+- 5+ years +25%
+- TRAINING OF HIRELING OR  HENCHMEN
+- TYPE MODIFIER
+- Untrained -30%
+- Semi-trained -20%
+- Trained, but
+- untested -10%
+- Trained +0%
+- Veteran +10%
+- Elite +20%
+- Leader +30%
+- PAYMENT OF   HIRELINGS OR  HENCHMEN
+- STATUS MODIFIER
+- Unpaid -20%
+- Late -15%
+- Very Poor -10%
+- Poor -5%
+- Standard +0%
+- Good +5%
+- Very Good +10%
+- TREATMENT*
+- TYPE MODIFIER
+- Vicious -20%
+- Cruel -10%
+- Normal +0%
+- Kind +10%
+- Beneficent +20%
+- DISCIPLINE*
+- TYPE MODIFIER
+- Brutal -10%
+- Indifferent +0%
+- Fair +10%

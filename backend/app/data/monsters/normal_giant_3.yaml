@@ -1,0 +1,19 @@
+name: Normal Giant
+frequency: uncommon rare
+no_encountered: 1 1
+size: small medium
+alignment: neutral evil neutral evil
+move: 120ft 150ft
+armour_class: 5 [15] 4 [16]
+hit_dice: 3 4+4
+melee_attacks: 2 claws (1d4) and 1 bite (1d4+1) 2 claws (1d6) and 1 bite (2d4)
+senses: Standard Standard
+lair_chance: 15% 15%
+intelligence: semi- (2-4) semi- (2-4)
+morale: 60 70
+loot: Nil Nil
+experience: 125 +2/hp 235 +4/hp
+description: Wolverines are deadly predators, resembling a cross between a  huge weasel and a small bear. The creatures are just intelligent  enough to be evil-aligned, and are intelligent enough to ambush  prey.  Giant wolverines are massive cousins to the normal wolverine,  but they do not differ in terms of special abilities.
+abilities:
+- heading: Special Attacks
+  text: Blinding Musk Spray. Wolverines can spray musk in a 60ft cone,  which necessitates a saving throw vs poison or the victim will  be blinded for 1d8 hours. Regardless of the saving throw’s re - sult, the strength and dexterity scores of anyone caught in a  musk cloud will effectively be halved. Improved Attack Roll.  The savagery and speed of a wolverine  grants them a +4 on all to-hit rolls. Unarmed Combat. Wolverines cannot be targeted with grappling  or overbearing attacks, and do not employ these tactics.

@@ -1,0 +1,24 @@
+name: Aluu-Demon (half-Demon)
+frequency: rare
+no_encountered: '1'
+size: medium
+alignment: chaotic evil (see below)
+move: 120ft; 120ft flying (AA:IV)
+armour_class: 5 [15]
+hit_dice: 6+1d6  hit points
+melee_attacks: 1 weapon (weapon + strength bonus)  or draining touch
+senses: Infravision 120ft
+lair_chance: 15%
+intelligence: very (11-12) to genius (17-18)
+morale: 75
+loot: Cache 5, 6, 7
+experience: 4,050 +14/hp
+description: Aluu-demons are one of several types of “tieflings,” a common  term for those with fiends of the lower planes in their ances - try. The two tiefling monster types represented in this book  (aluu-demons and caumbions) are too powerful to be used as a  character ancestry. Most aluu-demons are the result of union between a succubus  or incubus with a human. Their individual appearances vary,  but their vestigial horns and small leathery bat-like wings de - note their demonic heritage. Most favour their demonic parent  and revel in chaotic evil. A minority (20%) harbour less demonia- cal inclinations. Nevertheless, they may never be lawful or good. Aluu-demons have a natural base armour class of 5 [15]. Wear- ing armour gives them no additional benefit, although rings,  magic items and spells can improve their AC.  Fully 25% of all aluu-demons have genius level intelligence (17- 18). These aluu-demons are able to memorise and cast spells  as a 1st to 12th level magic-user (1d12
+  to determine level). Spell  casting abilities are in addition to their other innate abilities not- ed above, and the aluu-demon has none of the armour/weapon  restrictions of the magic-user class.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (30%).  Any magic spell or effect has a 30%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Non-Iron Mundane Weapons. This creature is immune  to piercing, blunt, and slashing damage from weapons that are  not made of iron, unless the weapon causing that damage has  a magical bonus of +1 or more. Most metal weapons are made  from iron (steel).
+- heading: Special Features
+  text: 'Spell-Like Abilities. 1/day: dimension door (as the 4th level magic-user spell) 3/day (as Level 12 Caster): charm person (as the 1st level mag- ic-user spell), ESP (as the 2nd level magic-user spell), poly- morph self (humanoid shapes only, otherwise as the 4th level  magic-user spell), and suggestion (as the 3rd level magic-user  spell).'
+- heading: Special Attacks
+  text: 'Energy Drain.  Much like succubi/incubi, aluu-demons are able  to drain a victim’s life energy with a touch (a “to hit” roll is re - quired in combat). Each touch drains 1d8 hit points from the  victim and adds 1d4 hit points to the aluu-demon. Unarmed Combat.  Aluu-demons can make grappling or over - bearing attacks, but usually don’t. If not fended off, they score  an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +8/- 8. Overbear Results Mods: ATK/DEF +1/-1. Grappling Result  Mods: ATK/DEF +0/-0.'

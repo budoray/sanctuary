@@ -1,0 +1,14 @@
+name: Time Stop
+slug: time_stop
+reversible: false
+class: magic-user
+level: 9
+school: Arcane Transmutation/Alteration
+range: 10-ft
+duration: 1 segment/ 2 levels+1d8 segments
+area_of_effect: 15-ft radius sphere
+components: V
+casting_time: 9 segments
+saving_throw: None
+text: This spell allows the caster to act between two moments of time, in a bubble where the outside is frozen in place, not moving in the flow of time's passage. The spell's common name is a misnomer, for time does not actually stop; rather the caster simply gains a few “extra” moments, captured in between the points of time's normal passage. Effectively, the caster simply gains the duration of the spell as extra time in which he or she may perform whatever actions he or she wishes, while the rest of the universe is effectively frozen relative to the caster.
+source: wiki2_spells.txt

@@ -1,0 +1,22 @@
+name: Kraken
+frequency: very rare
+no_encountered: '1'
+size: huge
+alignment: neutral evil
+move: 210ft swimming
+armour_class: 5 [15]/0 [20]
+hit_dice: '20'
+melee_attacks: 2 barbed tentacles (2d6), 6  tentacles (2d4) and 1 bite  (5d4)
+senses: Infravision 60ft, Detect  invisible 95%
+lair_chance: 75%
+intelligence: genius (17-18)
+morale: 145
+loot: Hoard 7, Cache 4 and 5
+experience: 17,500 +30/hp
+description: It is rumoured that the krakens once lived in shallower coast - al waters and had armies of slaves who worshipped them. For  some reason they were forced to retreat to the deepest depths  of the oceans. In the darkness they grew larger and more pow - erful. They excavated huge labyrinths in the sea floor. Now they  prey on ships for food and slaves which they drag down to their  watery dungeons.
+abilities:
+- heading: Special Features
+  text: 'Spell-Like Abilities. 1/day: create a sphere of airy water 240ft across, faerie fire (8  hours), control temperature (40ft), control winds, and weather  summoning.  3/day: animal (fish) summoning III which gives them the ability  to summon the fish but not control them. Segmented Armour Class. A kraken’s body is protected by a tough  shell with AC 0 [20], but its tentacles and head are more vul - nerable, with AC 5 [15].'
+- heading: Special Attacks
+  text: Attacking Ships. A kraken will attack a ship in the same way a  giant squid does, by anchoring itself with 2 arms and attacking  with the other 6. If the kraken wraps 6 tentacles around a ship  and squeezes for 3 consecutive rounds, it will cause enough  damage to sink the ship. If the kraken loses more than 3 arms it  will release the ship, squirt ink, and flee.  Tentacle. With each successful hit the kraken grabs its victim and  holds it (see below). Each round after the hit, the tentacle does  automatic damage without a to-hit roll, inflicting normal dam- age plus an additional 3d4 blunt damage from crushing. The  only way to get free is to sever the tentacle by causing 16 hp  damage to it (which does not damage the monster itself). Those within the tentacle’s grasp are 25% likely to have both  arms held, and as such they cannot attack. Most of the time  (50%) they will have one limb held and may attack with a -3  penalty. The other 25% of the time the victim will have both  arms
+    free and can attack the kraken with only a -1 penalty. Ink. When fleeing, a kraken releases ink in the water, leaving a  cloud 80ft deep by 80ft wide by 120ft long. A kraken’s ink is poi- sonous and will cause 1d4 points of damage per round until the  ink dissipates. The ink lasts for about 5 rounds.

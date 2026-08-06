@@ -1,0 +1,17 @@
+name: Walrus
+frequency: uncommon
+no_encountered: 3d6
+size: large
+alignment: neutral
+move: 60ft; 180ft swimming
+armour_class: 5 [15]
+hit_dice: '6'
+melee_attacks: 3 (1d6/1d6/2d12)
+senses: Standard
+lair_chance: 20%
+intelligence: animal (1)
+morale: 75
+loot: See below
+experience: 160 +6/hp
+description: 'Walruses are large, flippered animals with long ivory tusks. They  are carnivorous and very aggressive in defending their territory,  and are made every more dangerous due to their great size and  the fact several are usually encountered. The largest males can  weight as much as 4,400 lbs. In combat a walrus attacks with its clawed front flippers and its  tusks. Males will primarily defend the herd from intruders but  the females, who are also tusked, will fight if necessary. Treasure: The ivory tusks of this animal can be sold for 1d4+1×100  gp on the market.'
+abilities: []

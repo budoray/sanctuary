@@ -1,0 +1,115 @@
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+note: >
+  Supplements data/tables/2.13.1r, 2.13.1s and 2.13.1t (LESS-COMMON,
+  UNCOMMON and RARE MISCELLANEOUS MAGIC ITEMS) - the same shared-extractor
+  page-break gap that truncated data/tables/2.12.5a (see
+  jewellery_types.yaml's note) also truncated these three: each stops partway
+  through its d100 range (1r at 26, 1s at 31, 1t at 46) because the table
+  crosses a "=== PAGE ===" marker and tools/extract.py closes a block there.
+  Do not hand-edit data/tables/ to fix that - out of this chapter's file
+  scope. This file transcribes each table's REMAINING rows directly from the
+  source, in the same [range, ...name words, value] shape
+  sanctuary.tables.rows() would have produced, so
+  sanctuary.treasure._flat_item can use tables.rows(id) + this file's rows
+  for id as one continuous table without a second code path.
+  A "meta" row (e.g. "99 Roll Twice on Table 1") is a re-roll instruction,
+  not a named item - sanctuary.treasure returns its instruction text as the
+  MagicItem name rather than resolving it recursively.
+rows:
+  2.13.1r:
+    - {range: "27-28", name: "Bracers of Archery, Lesser", value: "5,000"}
+    - {range: "29-30", name: "Candle of Truth", value: "2,500"}
+    - {range: "31-32", name: "Cloak of Displacement, Minor", value: "24,000"}
+    - {range: "33-34", name: "Cloak of the Bat", value: "26,000"}
+    - {range: "35-36", name: "Dark Skull", value: "60,000"}
+    - {range: "37-38", name: "Dust of Tracelessness", value: "250"}
+    - {range: "39-40", name: "Elixir of Truth", value: "500"}
+    - {range: "41-42", name: "Elixir of Vision", value: "250"}
+    - {range: "43-44", name: "Glove of Storing", value: "10,000"}
+    - {range: "45-46", name: "Horn of the Tritons", value: "15,100"}
+    - {range: "47-48", name: "Necklace of Fireballs", value: "see entry"}
+    - {range: "49-50", name: "Periapt of Wound Closure", value: "15,000"}
+    - {range: "51-52", name: "Phylactery of Undead Turning", value: "11,000"}
+    - {range: "53-54", name: "Rope of Entanglement", value: "21,000"}
+    - {range: "55-56", name: "Stone Horse (draft or heavy war)", value: "see entry"}
+    - {range: "57-58", name: "Stone of Alarm", value: "2,700"}
+    - {range: "59-60", name: "Sustaining Spoon", value: "5,400"}
+    - {range: "61-62", name: "Wind Fan", value: "5,500"}
+    - {range: "63-65", name: "Bag of Holding", value: "see entry"}
+    - {range: "66-68", name: "Boots of Levitation", value: "7,500"}
+    - {range: "69-71", name: "Bottle of Air", value: "7,250"}
+    - {range: "72-74", name: "Broom of Flying", value: "17,000"}
+    - {range: "75-77", name: "Crystal Ball", value: "42,000"}
+    - {range: "78-80", name: "Elixir of Fire Breath", value: "1,100"}
+    - {range: "81-83", name: "Elixir of Hiding", value: "250"}
+    - {range: "84-86", name: "Handy Haversack", value: "2,000"}
+    - {range: "87-89", name: "Harp of Charming", value: "7,500"}
+    - {range: "90-92", name: "Helm of Comprehend Languages/Read Magic", value: "5,200"}
+    - {range: "93-95", name: "Helm of Underwater Action", value: "24,000"}
+    - {range: "96-98", name: "Horn of Fog", value: "2,000"}
+    - {range: "99", name: "Roll Twice on Table 2.13.1r", value: "n/a"}
+    - {range: "100", name: "Roll Twice, Ignore Results Over 98, on Table 2.13.1r", value: "n/a"}
+  2.13.1s:
+    - {range: "06", name: "Bag of Tricks (Gray, Rust or Tan)", value: "see entry"}
+    - {range: "32", name: "Eyes of the Eagle", value: "2,500"}
+    - {range: "33", name: "Gauntlets of Ogre Power", value: "4,000"}
+    - {range: "34", name: "Gauntlet of Rust", value: "11,500"}
+    - {range: "35", name: "Gloves of Dexterity", value: "4,000"}
+    - {range: "36", name: "Goggles of Minute Seeing", value: "1,250"}
+    - {range: "37", name: "Headband of Intellect", value: "4,000"}
+    - {range: "38", name: "Helm of Telepathy", value: "27,000"}
+    - {range: "39", name: "Horn of Goodness/Evil", value: "6,500"}
+    - {range: "40", name: "Horseshoes of the Zephyr", value: "6,000"}
+    - {range: "41", name: "Instant Fortress", value: "55,000"}
+    - {range: "42", name: "Iron Bands of Binding", value: "26,000"}
+    - {range: "43", name: "Iron Flask", value: "170,000"}
+    - {range: "44", name: "Lantern of Revealing", value: "30,000"}
+    - {range: "45", name: "Mantle of Faith", value: "76,000"}
+    - {range: "46", name: "Mantle of Magic Resistance", value: "90,000"}
+    - {range: "47", name: "Marvellous Pigments (1d4 Pots)", value: "4,000/pot"}
+    - {range: "48", name: "Mask of the Skull", value: "22,000"}
+    - {range: "49", name: "Medallion of Thoughts", value: "12,000"}
+    - {range: "50", name: "Pearl of Power", value: "see entry"}
+    - {range: "51", name: "Pearl of the Sirines", value: "15,300"}
+    - {range: "52", name: "Periapt of Wisdom", value: "4,000"}
+    - {range: "53", name: "Pipes of Pain", value: "12,000"}
+    - {range: "54", name: "Pipes of Sounding", value: "1,800"}
+    - {range: "55", name: "Plentiful Vessel", value: "3,500"}
+    - {range: "56", name: "Robe of Stars", value: "58,000"}
+    - {range: "57", name: "Scabbard of Keen Edges", value: "16,000"}
+    - {range: "58", name: "Scarab of Golem Bane", value: "2,500"}
+    - {range: "59", name: "Silversheen", value: "250"}
+    - {range: "60", name: "Sovereign Glue", value: "2,400"}
+    - {range: "61", name: "Stone of Controlling Earth Elementals", value: "100,000"}
+    - {range: "62", name: "Stone of Good Luck", value: "20,000"}
+    - {range: "63", name: "Stone Salve", value: "4,000"}
+    - {range: "64", name: "Vestment, Druid's", value: "10,000"}
+    - {range: "65", name: "Well of Many Worlds", value: "82,000"}
+    - {range: "66-75", name: "Roll Twice on Table 2.13.1q", value: "n/a"}
+    - {range: "76-85", name: "Roll once on Table 2.13.1q and once on Table 2.13.1r", value: "n/a"}
+    - {range: "86-95", name: "Roll twice on Table 2.13.1r", value: "n/a"}
+    - {range: "96-99", name: "Re-roll Ignoring Results Over 65, then Roll once on Table 2.13.1r", value: "n/a"}
+    - {range: "100", name: "Roll Twice, Ignore Results Over 65, on Table 2.13.1s", value: "n/a"}
+  2.13.1t:
+    - {range: "31-32", name: "Golem Manual (Flesh, Clay, Stone or Iron)", value: "see entry"}
+    - {range: "47-48", name: "Manual of Gainful Exercise", value: "4,000"}
+    - {range: "49-50", name: "Manual of Quickness of Action", value: "4,000"}
+    - {range: "51-52", name: "Mattock of the Titans", value: "23,348"}
+    - {range: "53-54", name: "Maul of the Titans", value: "25,305"}
+    - {range: "55-56", name: "Mirror of Life Trapping", value: "200,000"}
+    - {range: "57-58", name: "Mirror of Mental Prowess", value: "175,000"}
+    - {range: "59-60", name: "Mirror of Opposition", value: "92,000"}
+    - {range: "61-62", name: "Oil of Famishing", value: "—"}
+    - {range: "63-64", name: "Portable Hole", value: "20,000"}
+    - {range: "65-66", name: "Robe of Eyes", value: "120,000"}
+    - {range: "67-68", name: "Robe of Scintillating Colours", value: "27,000"}
+    - {range: "69-70", name: "Robe of the Archmagi", value: "75,000"}
+    - {range: "71-72", name: "Sagacious Volume", value: "50,000"}
+    - {range: "73-74", name: "Shrouds of Disintegration", value: "6,600"}
+    - {range: "75-76", name: "Tome of Clear Thought", value: "27,500"}
+    - {range: "77-78", name: "Tome of Leadership and Influence", value: "27,500"}
+    - {range: "79-80", name: "Tome of Understanding", value: "27,500"}
+    - {range: "81-85", name: "Roll twice on Table 2.13.1s", value: "n/a"}
+    - {range: "86-90", name: "Roll again and Roll Miscellaneous Magic Weapon", value: "n/a"}
+    - {range: "91-95", name: "Roll again and Roll Magic Sword", value: "n/a"}
+    - {range: "96-100", name: "Roll on Cursed Items Table", value: "n/a"}

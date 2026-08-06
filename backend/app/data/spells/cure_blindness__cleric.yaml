@@ -1,0 +1,14 @@
+name: Cure Blindness
+slug: cure_blindness
+reversible: true
+class: cleric
+level: 3
+school: Clerical Abjuration
+range: Touch
+duration: Instantaneous (permanent)
+area_of_effect: Creature touched
+components: V,S
+casting_time: 1 round
+saving_throw: None (Neg.)
+text: This powerful spell allows the cleric permanently to remove virtually all forms of blindness. The reverse of the spell permits a saving throw, and the cleric must successfully touch the spell's intended target to inflict blindness (permanent duration).
+source: wiki2_spells.txt

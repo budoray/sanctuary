@@ -1,0 +1,25 @@
+name: Achaiyerai
+frequency: very rare
+no_encountered: 1d6
+size: huge
+alignment: chaotic evil
+move: 180ft
+armour_class: 8 [12] or -1 [21] (see below)
+hit_dice: 10 (body); 15hp (per each leg)
+melee_attacks: 1 bite (1d10 piercing) and 2 claws (1d8  slashing), or just 2 claws (1d8 slashing)
+senses: Infravision 120ft
+lair_chance: 5%
+intelligence: average (8-10)
+morale: 90
+loot: Hoard 6
+experience: 1,400 +14/hp
+description: Though not strictly demons, achaiyerai are native to the Abyss.  They are about 16ft tall and look like giant flightless birds with  short necks and four legs.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance ( 35%): Any magic spell or effect has a 35%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.'
+- heading: Special Features
+  text: Height Advantage. Creatures less than 8ft tall that aren’t flying  can only attack the achaiyerai‘s body with missile weapons,  spears, or pole arms. With hand weapons they can only attack  its legs. Special Body-Type. The achaiyerai’s relatively-unprotected body  is AC 8[12] and has 10 hit dice. Its legs are AC -1[21]. If a leg  suffers a total of 15 hit points of damage it is unusable, and the  bird falls if two legs are unusable.  Limited Reach. Because of its stilt legs, the achaiyerai can only  use its bite attack (1d10 damage) against a target that’s more  than 8ft tall or a target that’s flying.
+- heading: Special Attacks
+  text: Toxic Cloud. The achaiyerai can use this power once per day, and  regains its use at dawn. The achaiyerai can emit an opaque,  toxic cloud in a 20ft diameter sphere. Creatures within this  cloud suffer no ill effects if they’re achaiyerai, if they’re immune  to poison, or if they don’t need to breathe. Otherwise they take  2d6 hp of damage, and must attempt a saving throw vs poison.  Creatures that fail this saving throw are feebleminded (as the  7th level druidic spell) for three hours. Unarmed Combat. Achaiyerai cannot be overborne or grappled,  and do not employ these tactics.
+- heading: Languages
+  text: Achaiyerai have their own tongue, and all speak Abyssal, the  lingua franca of the Abyss. Some learn other languages.

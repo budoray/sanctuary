@@ -1,0 +1,4 @@
+name: Detecting Magic
+classes: CDIM
+description: When activated, this wand will vibrate and point to the most powerful magic within 30ft of the wand wielder. If used continuously for more than 1 round, in further rounds the wand will reveal additional sources of magic, in approximate descending rank of their relative power. Should the wielder use a round focusing the wand on a source of magic, the wand will reveal the form of magic it is (such as illusion or charm). This wand may be used for 1 continuous turn per charge spent. However, for each continuous round of use (after the first round) there is a 1% cumulative probability that the wand will offer information that is opposite to the reality. In this case magic items will appear mundane, or non-magical items will seem to radiate magic.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

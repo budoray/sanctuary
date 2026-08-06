@@ -1,0 +1,14 @@
+name: Extension I
+slug: extension_i
+reversible: false
+class: magic-user
+level: 4
+school: Arcane Transmutation/Alteration
+range: Caster
+duration: See below
+area_of_effect: See below
+components: V
+casting_time: 2 segments
+saving_throw: None
+text: The arcane words of an extension I spell act to lengthen the duration of another spell previously cast by the magic user by 50%. The previous spell must still be active and may only be of level 1, 2, or 3.
+source: wiki2_spells.txt

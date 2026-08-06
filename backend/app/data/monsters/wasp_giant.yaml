@@ -1,0 +1,19 @@
+name: Wasp, Giant
+frequency: rare
+no_encountered: 1d20; 1d20+20 in lair
+size: medium
+alignment: neutral
+move: 60ft; 210ft flying (AA:V)
+armour_class: 4 [16]
+hit_dice: '4'
+melee_attacks: 1 bite (1d4) and 1 sting (2d4 + poison)
+senses: Standard
+lair_chance: 25%
+intelligence: non- (0)
+morale: N/A
+loot: Cache 3 (x20)
+experience: 300 +3/hp
+description: Giant wasp nests may be mud-daubed or paper, depending on  the type of wasp. Giant wasp wings are instantly burned away if  they suffer a successful hit with a flaming object; burning away  the wings in this manner does not cause hit point damage to  the wasp, but prevents the creature from flying. Although giant wasps are aerial agility level V, they can hover.
+abilities:
+- heading: Special Attacks
+  text: Stinger. Giant wasps have a poisonous stinger that delivers a  paralysing venom. Any creature hit by the stinger must make  a saving throw vs poison or be paralysed for 1d4+1 days, fol - lowed by death. The wasps generally carry paralysed victims  to their nests, where the victims are kept to be eaten by larvae  when eggs hatch. WEASEL, GIANT

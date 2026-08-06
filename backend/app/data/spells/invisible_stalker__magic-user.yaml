@@ -1,0 +1,14 @@
+name: Invisible Stalker
+slug: invisible_stalker
+reversible: false
+class: magic-user
+level: 6
+school: Arcane Conjuration/Summoning
+range: 10-ft
+duration: See below
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: This spell summons an invisible stalker (see Chapter 5). The stalker will perform one task as commanded by the caster, but resents its slavery and will always seek to misinterpret a command if it is worded ambiguously.
+source: wiki2_spells.txt

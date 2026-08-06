@@ -1,0 +1,18 @@
+name: Yellowmusk Vine Zombie
+frequency: rare
+no_encountered: 1d3
+size: medium
+move: 60ft
+armour_class: Naturally 8 [12], some wear   armour
+hit_dice: '2'
+melee_attacks: 1 slam (1d8 blunt), or weapon
+senses: Can sense living creatures  within 10ft
+lair_chance: 100%
+intelligence: non- (0)
+morale: N/A (fights to the death)
+loot: Nil
+experience: 40 +2/hp
+description: Yellowmusk vine zombies are always human, demi-human, or  humanoid. The zombie’s skin has an amber hue, and its eyes  are glazed and lifeless. The vine zombie tries to bring creatures to the yellowmusk vine  that spawned it. If the vine is attacked, the yellowmusk vine  zombie will defend it. Yellowmusk zombies use whatever weap- ons and armour they had at the time of their conversion. They  fight as 2 HD monsters with no ability score modifiers. They  can’t cast spells or use ranged weapons. After about 2 months, the zombie wanders away from the par - ent plant to find a nice patch of soil in a likely spot, where it dies.  A new yellowmusk vine sprouts from the corpse. Despite their name, yellowmusk zombies aren’t undead and  can’t be turned.  The only known way to cure a yellowmusk zombie is to kill the  controlling creeper and cast both Cure Disease and Heal on the  zombie. It takes the former zombie a month’s convalescence to  return to its pre-conversion self.
+abilities:
+- heading: Immunities and Resistances
+  text: Mindless. The zombie is immune to psychic damage and it can’t  be charmed or dominated. Plant. This creature doesn’t need to eat, drink, sleep, or breathe  as an animal would. Magic can’t put it to sleep. Gases can’t  harm it, and it’s immune to poison and disease. Unarmed Combat. Yellowmusk vine zombies cannot be target - ed with grappling or overbearing attacks, and do not employ  these tactics.

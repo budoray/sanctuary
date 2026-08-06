@@ -1,0 +1,25 @@
+name: Lynx, Giant
+frequency: rare
+no_encountered: 1d4
+size: medium
+alignment: neutral
+move: 120ft
+armour_class: 5 [15]
+hit_dice: 2+2
+melee_attacks: 2 claws (1d2) and 1 bite (1d4)
+senses: Infravision 60ft
+lair_chance: 5%
+intelligence: very (11-12)
+morale: 60
+loot: Nil
+experience: 90 +3/hp
+description: Rare and magical, giant lynxes live in the icy wastes and in deep  forests, where they use their intelligence to advantage against  competing predators.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Owing to their camouflaged pelts, giant lynxes surprise  opponents on a 1–5 on 1d6.
+- heading: Special Features
+  text: Thief Abilities. Giant lynxes have the thief skills Hide, Move Qui - etly and Climb at 90% and Traps at 75%.
+- heading: Special Attacks
+  text: 'Rake. If a giant lynx hits with both claw attacks, it gains an addi- tional 2 attacks with the rear claws (1d3 slashing). Unarmed Combat.  Giant lynxes cannot be targeted with grap - pling or overbearing attacks, but may choose to overbear a  lone opponent. If not fended off, they score an unarmed hit  with a 2+ on 1d20. Hit Mods: ATK/DEF +8/na. Overbear Results  Mods: ATK/DEF +2/na.'
+- heading: Languages
+  text: Giant lynxes speak their own language and that of the fey.

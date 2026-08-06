@@ -1,0 +1,14 @@
+name: Monster Summoning II
+slug: monster_summoning_ii
+reversible: false
+class: magic-user
+level: 4
+school: Arcane Conjuration/Summoning
+range: 40-ft
+duration: 3 rounds+1 round/level
+area_of_effect: Summoned creatures
+components: V,S,M
+casting_time: 4 segments
+saving_throw: None
+text: 'This spell functions in the same manner as monster summoning I, but calls 1d6 creatures as determined on the following table: Monster Summoning II Results (magic user level 4) d6 Monster Summoned 1 Centipede, giant 2 Devil, lemure 3 Gnoll 4 Stirge 5 Toad, giant 6 Troglodyte'
+source: wiki2_spells.txt

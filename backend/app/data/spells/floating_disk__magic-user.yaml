@@ -1,0 +1,14 @@
+name: Floating Disk
+slug: floating_disk
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Evocation
+range: 20-ft
+duration: 3 turns+1 turn/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: This evocation produces an invisible disk about 3-ft across, shaped like a shallow bowl. The disk floats in the air and moves in accordance with the caster's commands (although if it is allowed more than 20-ft from the caster it will disappear). The disk cannot move faster than 60-ft per round. A floating disk can carry up to 100 lbs per level of the caster.
+source: wiki2_spells.txt

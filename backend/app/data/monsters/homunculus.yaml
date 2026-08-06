@@ -1,0 +1,26 @@
+name: Homunculus
+frequency: very rare
+no_encountered: '1'
+size: tiny (1.5ft)
+alignment: any
+move: 60ft; 180ft flying (AA:V)
+armour_class: 6 [14]
+hit_dice: '2'
+melee_attacks: 1 bite (1d3 + sleep)
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: by creator
+morale: N/A
+loot: Nil
+experience: 81 +2/hp
+description: 'A homunculus is a small construct that is vaguely humanoid in  form, stands about 18 inches tall, and has bat-like wings with a  24-in wingspan. homunculi have greenish reptilian skin, a bat- like head and ears, and a mouth full of needle-sharp teeth.  Its alignment is the same as its creator. The homunculus is com- pletely under control of its creator, who need not concentrate  on control to maintain it. This means the homunculus can be  given a specific goal, which it will then plan to achieve, carrying  out its orders without further attention from its creator. Homunculi are created in a process involving both the spell  caster and the services of an alchemist. The alchemist will re - quire 1d4×500 (500–2,000) gold pieces, a pint of the magic-us - er’s blood, and 1d4 weeks to prepare the base mixture of fluids  which will form the creature. Within 24 hours of the alchemist  completing the mixture process the magic-user must cast the  following spells upon the fluid, in order:
+  mending, mirror image,  and wizard eye. The spells must be cast by the person who gave  the blood for the basic mixture (though scrolls may be used).  Failure to cast the spells within 24 hours or casting the required  spells out of order ruins that mixture and the whole process  and all costs must be repeated. Upon completion of the wizard  eye spell, the fluid coalesces into a ready-to-use homunculus. Homunculi make excellent messengers, scouts, or spies. Since  they are constructs and not natural creatures, they are never  encountered in the wild.'
+abilities:
+- heading: Immunities and Resistances
+  text: Per Creator. A homunculus is a reflection of its magic-user cre - ator, and therefore rolls saves at whatever level its owner  makes their saving throws. Magical defences in effect upon  the owner, resist fire or bless for example, also protect the ho - munculus.
+- heading: Special Features
+  text: Climber. This creature can move on walls and ceilings as if they  were floors. Connection to Creator. Killing a homunculus deals an immediate  2d10 points of damage to its master. If the owner of the ho - munculus dies, the homunculus immediately disappears in a  puff of smoke.
+- heading: Special Attacks
+  text: 'Soporific Bite. The bite of a homunculus is venomous and causes  a comatose state for 1d6×5 (5–30) minutes unless the victim  saves vs magic to negate. Unarmed Combat. Homunculi can be targeted with grappling or  overbearing attacks, although they do not use these tactics. If  not fended off, they score an unarmed hit with a 2+ on 1d20.  Hit Mods: ATK/DEF +10/-10. Overbear Results Mods: ATK/DEF  -4/+4. Grappling Result Mods: ATK/DEF -3/+3.'
+- heading: Languages
+  text: A homunculus cannot speak, but knows what its creator knows,  and can communicate what it sees and hears to its creator via  a limited form of telepathy up to 500ft away. A homunculus will  never willingly exceed the maximum communication range. HORSE

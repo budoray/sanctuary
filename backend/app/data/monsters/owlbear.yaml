@@ -1,0 +1,19 @@
+name: Owlbear
+frequency: rare
+no_encountered: 1d4+1
+size: large (8ft tall)
+alignment: neutral
+move: 120ft
+armour_class: 5 [15]
+hit_dice: 5+2
+melee_attacks: 2 claws (1d6) and 1 bite (1d4)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: low (5-7)
+morale: N/A
+loot: Hoard 3
+experience: 225 +8/hp
+description: These nightmarish creatures have the body of a large bear with  the head of an owl. They are voracious eaters and possessed of  a foul temper, fighting to the death. They are typically found in  temperate forests.
+abilities:
+- heading: Special Attacks
+  text: Hug. If an owlbear scores a natural 18 or better on a hit with  either of its paws, it has grabbed the victim in a crushing hug.  The victim takes an additional 2d8 points of blunt damage that  round and the owlbear inflicts an automatic 2d8 points every  following round until the owlbear is slain. Unarmed Combat. Owlbears cannot effectively be targeted with  grappling or overbearing attacks, and do not use these tactics. OTYUGH

@@ -1,0 +1,23 @@
+name: Shadow
+frequency: rare
+no_encountered: 2d10+1
+size: medium
+alignment: chaotic evil
+move: 120ft
+armour_class: 7 [13]
+hit_dice: 3+1
+melee_attacks: 1 (1d6 + special)
+senses: Infravision 60ft
+lair_chance: 40%
+intelligence: low (5-7)
+morale: 65
+loot: Hoard 6
+experience: 250 +4/hp
+description: Shadows flitter about old ruins and dusty dungeons, seeking to  feed upon the living.  Due to their partial immaterialness, they can only be hit by mag- ic weapons. Infravision does not detect them as they do not ra- diate heat, but magical light is sufficient to reveal these horrors  for what they are. Some shadows attack victims in their sleep, giving them night - mares from which they never wake, as their physical forms are  drained of life by the shadows’ horrid ties to worlds beyond  mundane reckoning.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Shadows are turned as type 4 Undead. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Immunities. Shadows are immune to cold damage. As undead  creatures they are also immune to all mind control (including  charm) and hold spells. They cannot be affected by sleep, gas - es, poison, or disease.
+- heading: Special Features
+  text: Hard to See.  Shadows are nearly undetectable in their normal  conditions. In any given round, a shadow has a 90% chance  to be treated as invisible unless the lighting is full daylight or is  magical (such as a light spell).
+- heading: Special Attacks
+  text: Drain Attributes. Any successful hit by a shadow causes the vic - tim to lose a point of strength for a period of 6 turns (no saving  throw). If a victim’s strength score or hit point total is reduced  to zero, they become a shadow under control of the shadow  that drained the last point. A character dying in this way can - not be raised from the dead. Unarmed Combat. Shadows cannot effectively be targeted with  grappling or overbearing attacks, and do not use these tactics.

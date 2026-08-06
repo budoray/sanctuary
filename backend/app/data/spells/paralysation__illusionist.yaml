@@ -1,0 +1,14 @@
+name: Paralysation
+slug: paralysation
+reversible: false
+class: illusionist
+level: 3
+school: Phantasmal Illusion
+range: 10-ft/level
+duration: Permanent
+area_of_effect: 20-ft×20-ft
+components: V,S
+casting_time: 3 segments
+saving_throw: Negates
+text: A certain number of creatures within the spell's area of effect are frozen in place, magically convinced that they cannot move. The caster can affect creatures with a total number of hit dice equal to twice his caster level. Each creature is entitled to a saving throw against the spell. The illusionist can end the paralysis at any time; otherwise a dispel magic (or dispel illusion) spell is the only way to remove the paralysis.
+source: wiki2_spells.txt

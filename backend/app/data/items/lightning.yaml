@@ -1,0 +1,4 @@
+name: Lightning
+classes: DM
+description: If the wielder of a wand of lighting hits an opponent (in melee) with the wand and spends 1 charge, they may deliver an electrical charge to their victim, which inflicts 1d10 hp damage. No saving throw is permitted, and for AC purposes a victim wearing metal armour has an AC of 10 [10], regardless of magical armour bonuses. Non-metal armour and items such as a ring of protection do apply, however. By spending 2 charges, the wielder of this wand may produce a lightning bolt, similar to the magic user spell, to inflict 6d6 hp of damage. Any result of 1 on a damage die is treated as a 2. A save vs wands is allowed for half damage. A wand of lightning can be recharged.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

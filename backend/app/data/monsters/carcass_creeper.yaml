@@ -1,0 +1,21 @@
+name: Carcass Creeper
+frequency: uncommon
+no_encountered: 1d6
+size: large
+alignment: neutral
+move: 120ft
+armour_class: 3 [17] or 7 [13] (see below)
+hit_dice: 3+1
+melee_attacks: 8 (paralysis)
+senses: Infravision 60ft
+lair_chance: 50%
+intelligence: non- (0)
+morale: N/A (fights to the death)
+loot: Hoard 2
+experience: 105 +3/hp
+description: A fearsome creature that roams around in caves and dungeons,  the carcass creeper has a body resembling a caterpillar, with an  armoured head that sprouts 8 tentacles. It requires a steady  supply of fresh corpses in which to lay its eggs. The armoured head belies a tender, vulnerable body so the  creeper will rely on its speed and many paralysing tentacles to  protect itself as it secures prey. Each of the tentacles has a 2ft  reach, although larger specimens are not unknown. If a carcass creeper has paralysed all nearby enemies, it will be- gin biting them, inflicting 1d2 hit  points of damage per round  (the carcass creeper’s mouth is not usable for a bite in actual  melee combat).
+abilities:
+- heading: Special Features
+  text: Sectioned Armour Class. The carcass creeper has a well-ar - moured head, which is AC 3 [17]. Attacks from the sides or  rear may reach the softer, less-protected portion of the beast,  which is only AC 7 [13].
+- heading: Special Attacks
+  text: Paralysing Tentacles. Anyone hit by a tentacle must make a sav - ing throw vs. paralysis or be paralysed for 3d4 turns. Unarmed Combat.  Carcass creepers cannot be overborne or  grappled, and do not employ these tactics.

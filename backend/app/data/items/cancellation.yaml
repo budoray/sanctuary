@@ -1,0 +1,4 @@
+name: Cancellation
+classes: any
+description: 'This dreaded rod is a bane to magic items, for its touch drains an item of all magical properties. The item touched must make a saving throw to prevent the rod from draining it. Contact is made by making an attack roll. Upon draining an item, the rod itself becomes brittle and cannot be used again. Drained items are not restorable even by a wish. See the table below for magic item saving throws against this draining effect: ITEM TYPE SAVE Potion 20 Ring 17 Rod 14 Scroll 19 Staff 13 Wand 15 Artifact 13 Armour and Shields 11 (8 if +5) Sword 9 (7 if a holy sword) Miscellaneous Magic 12 Miscellaneous Weapons* 10 * Note that a single use of the rod of cancellation may drain many small magical items, if they are contained together. For example, a quiver of magical crossbow bolts.'
+source: OSRIC_3.0_Gamemaster_Guide.pdf

@@ -1,0 +1,21 @@
+name: Couatl
+frequency: very rare
+no_encountered: 1d4
+size: medium
+alignment: lawful good
+move: 60ft; 180ft flying (AA:VI)
+armour_class: 5 [15]
+hit_dice: '9'
+melee_attacks: 1 bite (1d3+ poison) and 1 constrict  (2d4)
+senses: Infravision 60ft, Detect invisible 15%
+lair_chance: 10%
+intelligence: genius (17-18)
+morale: 90
+loot: Hoard 2 and 9
+experience: 2,000 +12/hp
+description: Couatl are a species of brightly feathered serpents with wings.  They are extremely intelligent spellcasters. Couatl are rarely en- countered, usually in remote tropical environments. They are  often treated as gods by lesser beings nearby.
+abilities:
+- heading: Special Features
+  text: 'Spellcasting. Roll 1d100 to determine the couatl’s spell-casting  type. 01-45: 5th level magic-user, 46-80: 7th level cleric, 81-00:  5th level magic-user and 7th level cleric. Ethereality. Couatl can shift into the ethereal plane once per day.  In this form they become invisible even while attacking, and  can only be damaged by magic weapons (and spells). Howev - er, they cannot make physical attacks while in ethereal form.  This is usually used to escape through walls rather than as a  combat tactic.'
+- heading: Special Attacks
+  text: Poison Bite. If the couatl’s bite hits, the victim must save vs poi - son or die. Constrict. A couatl can also constrict with its body. A successful  attack means the couatl has grabbed its victim, causing 2d4  damage, with an additional 2d4 damage each round until one  or the other is dead. Unarmed Combat.  Couatls cannot be overborne or grappled,  and do not employ these tactics.

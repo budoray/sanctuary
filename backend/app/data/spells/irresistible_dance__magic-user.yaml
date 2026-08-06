@@ -1,0 +1,14 @@
+name: Irresistible Dance
+slug: irresistible_dance
+reversible: false
+class: magic-user
+level: 8
+school: Arcane Enchantment/Charm
+range: Touch
+duration: 1d4 +1 rounds
+area_of_effect: One creature
+components: V
+casting_time: 5 segments
+saving_throw: None
+text: The creature touched (successful “to hit” roll) flies into an uncontrollable, twitching tarantella, dancing wildly. The creature's armour class is penalised by -4, and it will fail any and all saving throws during the spell's duration. It cannot act in any way, or gain benefit from a shield.
+source: wiki2_spells.txt

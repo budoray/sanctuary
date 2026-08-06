@@ -1,0 +1,19 @@
+name: Camel
+frequency: common
+no_encountered: 1d12
+size: large
+alignment: neutral
+move: 210ft dromedary / 180ft bactrian
+armour_class: 7 [13]
+hit_dice: '3'
+melee_attacks: 1 (1d4)
+senses: Standard
+lair_chance: Nil
+intelligence: animal (1)
+morale: 60
+loot: Nil
+experience: 50 +2/hp
+description: An ornery beast of burden, the camel comes in two types, both  of which have the same stats in game terms. The dromedary has  only one hump and prefers warm climates. The bactrian camel  has two humps, is adaptable to a wider range of temperatures  and environments, and moves 30ft more slowly. Regardless of the type, all camels can be domesticated, can car- ry immense loads (up to 6,000 gp). Between 4 and 6 thousand  gp, speed is reduced to half.
+abilities:
+- heading: Special Attacks
+  text: Spit. Their usual attack is a bite, but they may also spit. Spitting  requires no to-hit roll, and has a 25% chance to blind the oppo- nent for 1d3 rounds (no saving throw).

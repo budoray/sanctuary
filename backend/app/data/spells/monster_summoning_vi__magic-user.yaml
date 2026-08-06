@@ -1,0 +1,14 @@
+name: Monster Summoning VI
+slug: monster_summoning_vi
+reversible: false
+class: magic-user
+level: 8
+school: Arcane Conjuration/Summoning
+range: 80-ft
+duration: 7 rounds+1 round/level
+area_of_effect: Summoned creatures
+components: V,S,M
+casting_time: 8 segments
+saving_throw: None
+text: 'This spell functions in the same manner as monster summoning I, but calls 1d2 creatures as determined on the following table, the monsters appearing in 1d3 rounds: Monster Summoning VI Results (magic user level 8) d10 Monster Summoned 1 Devil, Erinyes 2 Hydra, 8 headed 3 Manticore 4 Ogre Mage 5 Rakshasa 6 Troll 7 Wight 8 Wraith 9 Wyvern 10 Lycanthrope, weretiger'
+source: wiki2_spells.txt

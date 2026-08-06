@@ -1,0 +1,20 @@
+name: Giant Sea Giant Snapping
+frequency: uncommon uncommon no.  encountered 1d3 1d4
+size: large large
+alignment: neutral neutral
+move: 10ft; 150ft  swimming 30ft; 120ft  swimming
+armour_class: 2 [18] (shell) or  5 [15] (head and  flippers) 0 [20] (shell) or 5  [15] (head and legs)
+hit_dice: 15 10
+melee_attacks: 1 bite (4d4) 1 bite (6d4)
+senses: Standard Standard
+lair_chance: Nil Nil
+intelligence: animal (1) animal (1)
+morale: 120 95
+loot: Nil Nil
+experience: 2,400 + 20/hp 1,500 +14/hp
+description: GIANT SEA TURTLES These are massive beasts, normally placid but ferocious when  they feel they are under attack. They have a 90% chance of over- turning a boat, and a 10% chance to overturn even a small ship.  A sea turtle can withdraw its vulnerable head and flippers into  its shell, but obviously cannot attack or move if it does so.
+abilities:
+- heading: Special Features
+  text: Segmented Armour Class. The head and flippers of a giant sea  turtle are AC 5 [15]. Most attacks will have to be directed at its  shell, which is AC 2 [18]. Only a person directly in front of the  turtle can attack its head. GIANT SNAPPING TURTLES These creatures are less massive than giant sea turtles, but they  are aggressive predators, lying in wait for prey in the shallow  waters of swamps, lakes, and coasts. The turtle’s lumpy shell  is excellent camouflage, granting it an excellent chance to sur- prise passing creatures. A giant snapping turtle can retract its  legs and head into its shell, but when it is thus protected it ob - viously cannot attack or move. Like their smaller cousins, giant  snapping turtles have disproportionately long necks, and can  snap at enemies as far as 10ft away.
+- heading: Surprise and Initiative
+  text: Surprise. Giant snapping turtles surprise on a 1–4 on d6.

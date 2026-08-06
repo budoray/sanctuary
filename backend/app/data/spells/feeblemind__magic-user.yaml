@@ -1,0 +1,14 @@
+name: Feeblemind
+slug: feeblemind
+reversible: false
+class: magic-user
+level: 5
+school: Arcane Enchantment/Charm
+range: 10-ft/level
+duration: Permanent
+area_of_effect: One creature
+components: V,S,M
+casting_time: 5 segments
+saving_throw: Negates
+text: The insidious feeblemind spell affects only those who can cast spells, tracing and poisoning the mystical channels of their arcane power like a viral infection. The spell reduces a victim into a state of extreme mental retardation, which persists until the victim is magically restored by means of a heal, wish, or restoration spell. The different types of spell casting ability are not equally vulnerable to the feeblemind spell. Practitioners of clerical magic gain a bonus of +1 to saving throws; druids save at -1; magic users and illusionists save at -4. (Those who can use more than one type of magic must save using the average of their modifiers.)
+source: wiki2_spells.txt

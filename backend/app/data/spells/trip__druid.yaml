@@ -1,0 +1,14 @@
+name: Trip
+slug: trip
+reversible: false
+class: druid
+level: 2
+school: Druidic Enchantment/Charm
+range: Touch
+duration: 1 turn/caster level
+area_of_effect: One object, up to 10-ft length
+components: V,S,M
+casting_time: 4 segments
+saving_throw: Negates
+text: 'This spell turns an appropriate object into a magical trap of sorts. The object rises from the ground and trips any creature crossing over it, even if they are aware of it (saving throw vs spells–unlisted category, +4 if aware of the object). The object is 80% undetectable and will affect even the caster. The trap causes falls to be much worse than normal: a running creature will suffer 1d6 points of damage and be stunned for 1d4+1 rounds, or will merely be stunned if they fall onto a soft surface such as grass. Creatures larger than size M are not affected by the spell.'
+source: wiki2_spells.txt

@@ -1,0 +1,14 @@
+name: Mind Blank
+slug: mind_blank
+reversible: false
+class: magic-user
+level: 8
+school: Arcane Abjuration
+range: 30-ft
+duration: 24 hours
+area_of_effect: One creature
+components: V,S
+casting_time: 1 segment
+saving_throw: None
+text: By means of this spell, the person upon whom it is cast becomes completely protected from all divination and scrying magic. His or her thoughts cannot be detected in any way, he or she cannot be magically overheard when speaking, his or her soul cannot be trapped or affected, etc.
+source: wiki2_spells.txt

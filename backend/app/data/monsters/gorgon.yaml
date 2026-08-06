@@ -1,0 +1,19 @@
+name: Gorgon
+frequency: rare
+no_encountered: 1d4
+size: large
+alignment: neutral
+move: 120ft
+armour_class: 2 [18]
+hit_dice: '8'
+melee_attacks: 1 gore (2d6)
+senses: Infravision 60ft
+lair_chance: 40%
+intelligence: animal (1)
+morale: 85
+loot: Hoard 5
+experience: 1,500 +10/hp
+description: Gorgons are magical creatures resembling giant bulls, but with  thick metal scales instead of hide.
+abilities:
+- heading: Special Attacks
+  text: Petrifying Breath (3/day). Gorgons can breathe a cloud of petrify- ing gas in a cone 60ft long and 10ft in radius at the base up to  3 times per day. Anyone in the cloud must make a saving throw  vs. petrifaction or be turned to stone.  Unarmed Combat. Gorgons cannot be targeted with grappling or  overbearing attacks, and do not use such tactics.

@@ -1,0 +1,33 @@
+id: 2.2.2j
+name: SAGE FIELDS OF STUDY (D100)
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- Roll one major and 1 (or 2 minor fields) such as Humankind or
+- Natural Philosophy. Within the major field, either roll or select
+- the particular categories in the major field that are specialties
+- (such as Biology or Alchemy).
+- Humankind (01–30)
+- Art  Law
+- Biology Politics
+- Demography Psychology
+- History Religion
+- Languages Sociology
+- Demi-humankind (31–40)
+- Art  Law
+- Biology Politics
+- Demography Psychology
+- History Religion
+- Languages Sociology
+- Humanoids (41–50)
+- Art  Law
+- Biology Politics
+- Demography Psychology
+- History Religion
+- Languages Sociology
+- Natural Philosophy (51–65)
+- Alchemy Mathematics
+- Architecture Meteorology
+- Astronomy Metallurgy
+- Chemistry Oceanography
+- Geography Physics
+- Geology Topography

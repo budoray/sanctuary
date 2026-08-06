@@ -1,0 +1,19 @@
+name: Leech, Giant
+frequency: uncommon
+no_encountered: 4d4
+size: small
+alignment: neutral
+move: 30ft
+armour_class: 9 [11]
+hit_dice: 1–4 HD
+melee_attacks: '1 bite. Damage: 1d4 (1 HD),  1d6 (2–3 HD) or 1d8 (4 HD)'
+senses: Standard
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 50 +3/hp
+description: Giant leeches inhabit warmer, fresh water.
+abilities:
+- heading: Special Attacks
+  text: Blood Drain. If a giant leech successfully hits a character, it drains  hp equal to its hit dice each round automatically thereafter (so  a 4 HD leech drains 4hp per round). Disease. A character bitten by a giant leech must save vs poison  or suffer a disease that will be fatal in 1d6 weeks. Unarmed Combat. Giant leeches cannot be targeted with grap - pling or overbearing attacks, and do not use these tactics.

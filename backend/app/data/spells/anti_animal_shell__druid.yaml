@@ -1,0 +1,14 @@
+name: Anti-Animal Shell
+slug: anti_animal_shell
+reversible: false
+class: druid
+level: 6
+school: Druidic Abjuration
+range: '0'
+duration: 1 turn/caster level
+area_of_effect: 10-ft radius sphere (or hemisphere)
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: This spell creates an immobile field of force that hedges out all animal matter. Note that undead and beings not of the material plane are not considered animal matter. The druid's allies must, of course, be within the field at the time it is conjured forth, for they themselves are presumably of animal matter.
+source: wiki2_spells.txt

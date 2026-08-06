@@ -1,0 +1,24 @@
+name: Troll, Spectral
+frequency: very rare
+no_encountered: 1d2
+size: large (8ft tall)
+alignment: chaotic evil
+move: 150ft
+armour_class: 2
+hit_dice: 5+5
+melee_attacks: 2 claws (1d3 + special) and 1  bite (1d6)
+senses: Infravision 120ft
+lair_chance: Nil
+intelligence: very (11-12)
+morale: 75
+loot: Nil
+experience: 625 +6/hp
+description: Long ago these creatures were created in some bizarre and  perverted arcane ritual, merging the life essences of a troll and  some extra-planar creature. Fewer than 50 of these creatures  are believed to exist and the secret of their creation process  died with the creators when the spectral trolls rose up in revolt  and fed upon their life energy (see “claws drain strength”).
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (30%).  Any magic spell or effect has a 30%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Effect of Regeneration. Spectral trolls regenerate all damage ex - cept fire damage and corrosive damage ( acid). Thus, they can  only be permanently killed by fire or acid. Immunity (Cold). Spectral trolls are immune to cold damage.
+- heading: Special Features
+  text: Natural Invisibility. Spectral trolls are invisible. Anyone able to  see invisible will see a monster that appears very much like  a shorter-than-normal troll with somewhat indistinct features  and glowing amber eyes. Regeneration. After three rounds of combat (even if the spectral  troll is dead), its innate regeneration ability will start working,  recovering 3 hit points per round. Their ability to regenerate  even allows detached limbs to reattach to their body. Severed  limbs will even continue to attack foes independently.
+- heading: Special Attacks
+  text: 'Claws Drain Strength. The spectral troll has two claw attacks that  subtract 1d3 points from the victim’s strength ability score as  well as inflicting damage. For example: a 17 strength fighter  struck for 2 hit points of damage will also be reduced to a  strength of 15. Strength is recovered at a rate of 1 point every  2d4 turns. If a victim’s strength is reduced to zero they die; if  strength is reduced to 1 or 2 hit points, the victim will fall co - matose to the ground and will not recover consciousness until  enough strength is recovered to raise the score to 3 or higher. Magic Bite. The bite attack inflicts 1d6 points of damage, but the  troll adds its own hit point value as bonus damage to the attack.  Example: a spectral troll with 38 hit points bites a cleric for 4  points of damage. Total damage dealt to the unfortunate cleric  would 4+38 = 42. Unarmed Combat. Spectral trolls cannot be targeted with over - bearing or grappling attacks, and do not use these tactics. TURTLE,
+    GIANT'

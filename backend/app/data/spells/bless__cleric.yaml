@@ -1,0 +1,14 @@
+name: Bless
+slug: bless
+reversible: true
+class: cleric
+level: 1
+school: Clerical Conjuration/Summoning
+range: 60-ft
+duration: 6 rounds
+area_of_effect: 50×50-ft
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: This minor benison raises the morale and attack rolls of any creatures allied with the casting cleric by +1 or +5% as appropriate. Any creatures already engaged in melee combat will not gain the spell's benefits. The spell is reversible, allowing the cleric to curse his or her enemies with -5% morale and -1 to hit. The spell's area of effect is a circular area centred at the target point, which cannot be more than 60- ft from the cleric. Holy water is required to cast the spell (unholy water for the reverse).
+source: wiki2_spells.txt

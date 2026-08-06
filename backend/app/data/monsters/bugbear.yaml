@@ -1,0 +1,23 @@
+name: Bugbear
+frequency: uncommon
+no_encountered: 6d6 (9d6 in lair)
+size: large (7ft)
+alignment: chaotic evil
+move: 90ft
+armour_class: 5 [15]
+hit_dice: 3+1
+melee_attacks: 1 (2d4 or by weapon)
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: low to average (5-10)
+morale: 65
+loot: Individual 1, 2, 3, 4 (each); in  lair, Hoard 2
+experience: 135 +4/hp
+description: 'Bugbears are related to goblins, although they are much larger  and shaggier than true goblins, with large heads and a gift for  stealthiness. They can live both above and below ground, and  do not have penalties for fighting in sunlight.  Bugbears use a variety of weapons usually gathered from fall - en opponents. These include axes, morning stars, hammers,  swords, spears and missile weapons. Bugbear hunting parties  (12+ creatures) always have a leader who fights as a 4 Hit Dice  creature. (AC 4 [16], 22–25 hp, and do 2d8+1 damage). Within the lair there will be a chieftain and sub-chief. The chief  is also a 4 Hit Dice creature with the following stats: (AC 3 [17],  28–30 hp, 2d8+2 damage). The sub-chief has the same stats as  a leader (see above).'
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Bugbears surprise opponents on a 1–3 on 1d6.
+- heading: Special Attacks
+  text: 'Ranged Attack. Bugbears armed with ranged weapons may use  them as humans do. Unarmed Combat. Bugbears can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with a  12+ on 1d20. Hit Mods: ATK/DEF +6/-2. Overbear Results Mods:  ATK/DEF +2/-2. Grappling Result Mods: ATK/DEF -2/+2.'
+- heading: Languages
+  text: Bugbears speak hobgoblin and goblin as well as chaotic evil and  their own form of speech.

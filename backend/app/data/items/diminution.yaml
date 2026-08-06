@@ -1,0 +1,4 @@
+name: Diminution
+classes: any
+description: This potion lasts for 1d4+7 turns. When it is drunk, the drinker and everything carried shrinks to 5% of original size. If only half of the potion is consumed, it will shrink the imbiber 50% of their original size.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

@@ -1,0 +1,40 @@
+id: 1.4.2.3e
+name: AMMUNITION
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- WEAPON TYPE WEIGHT
+- (IN POUNDS) COST
+- Arrow 4 per dozen 2 gp per dozen
+- Bolt, heavy crossbow 4 per dozen 4 gp per dozen
+- Bolt, light crossbow 2 per dozen 2 gp per dozen
+- Sling bullet 4 per dozen 1 gp per dozen
+- Sling stone 2 per dozen Found
+- 1.4.2.3F. GRENADE-LIKE  MISSILES
+- The grenade-like missiles are acid flasks, holy water, and oil.
+- 'Range: The range increment on grenades is 10ft, so attacks 11-'
+- 20ft distant are made at -2, and 21-30ft distance are at -4, etc.
+- A miss can be calculated by direction (1d8), and automatically
+- hits anyone in that adjacent space. If no one is in the adjacent
+- space, the attack only causes splash damage.
+- 'Container Must Break: The chance of a container not breaking'
+- is 25% unless an action is used to prepare the flask (in other
+- words, a round must be spent preparing it to throw). Once this
+- is done, the flask is no longer usable for safe transport, so if
+- you don’t get rid of it, it will leak. If the flask is prepared ahead
+- of time, it will automatically break when thrown. Flasks of oil
+- can be “prepared” as a Molotov cocktail and set alight before
+- they are thrown (all as part of the “preparing” action, as long as
+- the person preparing has an open flame to light it with). Other-
+- wise the oil will have to be set on fire with a successful hit from
+- a lit torch (this may be adjudicated as AC 10 [10] for hitting oil
+- that is on a moving enemy).
+- Damage
+- Acid Flask. Damage from a direct hit (assuming the flask breaks)
+- is 2d4 hit points of corrosive damage. Splash damage (creatures
+- within 5ft of the impact) is 1 hit point.
+- Holy Water. Damage from a direct hit to undead creatures un -
+- less otherwise stated is 2d4 hit points. Splash damage (undead
+- creatures within 5ft of the impact) is 2 hit points.
+- Oil. Damage from a direct hit is 2d6 hit points of fire damage
+- (starting from the point it is set alight), and 1d6 hit points in the
+- second round. Splash damage (if set alight) is 1d3 hit points.

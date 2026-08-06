@@ -1,0 +1,19 @@
+name: Sea Lion
+frequency: uncommon
+no_encountered: 3d4
+size: large
+alignment: neutral
+move: 180ft swimming
+armour_class: 5 [15] or 3 [17]
+hit_dice: '6'
+melee_attacks: 2 claws (1d6) and 1 bite (2d6)
+senses: Standard
+lair_chance: 20%
+intelligence: semi (2-4)
+morale: 75
+loot: Hoard 2
+experience: 150 +6/hp
+description: Sea lions are not to be confused with the seal-like sealion.  These are fantastical aquatic beasts that could be described as  a mer-lion. They have the head and front legs of a lion, but a  fish-like tail instead of rear legs, and they are entirely aquatic.
+abilities:
+- heading: Special Features
+  text: Sectioned Armour Class. The sea lion’s head is AC 5 [15], but its  scales protect the rest of the body better, having an AC of 3[17]. Unarmed Combat. Sea lions cannot effectively be targeted with  grappling or overbearing attacks, and do not use these tactics.

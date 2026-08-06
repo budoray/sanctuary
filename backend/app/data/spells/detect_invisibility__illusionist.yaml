@@ -1,0 +1,14 @@
+name: Detect Invisibility
+slug: detect_invisibility
+reversible: false
+class: illusionist
+level: 1
+school: Phantasmal Divination
+range: 10-ft/level
+duration: 5 rounds/level
+area_of_effect: Caster
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: This spell allows the caster to see that which is invisible or hidden, and also to perceive the astral and æthereal planes. The spell's sight is limited to the stated range of 10-ft/caster level.
+source: wiki2_spells.txt

@@ -1,0 +1,14 @@
+name: Word of Recall
+slug: word_of_recall
+reversible: false
+class: cleric
+level: 6
+school: Clerical Transmutation/Alteration
+range: Caster
+duration: See below
+area_of_effect: Caster and additional weight (see below)
+components: V
+casting_time: 1 segment
+saving_throw: None
+text: By the utterance of a single word of power, the cleric transports him- or herself infallibly to a prepared place of sanctuary. Before the spell can be cast with success, a place in the sanctuary must be inscribed with a rune corresponding to the cleric's word of recall; any later elimination of this rune by any person other than the cleric will not affect the proper functioning of the spell. Transportation by means of word of recall is instantaneous and not subject to error. The sanctuary may be of any distance from the cleric, and may be above or below ground. The cleric may also transport as much as 25 lbs of other material per level of experience, including equipment or even another living being. Druid Spells Druidic spells draw upon the divine power of nature, and operate according to similar principles as clerical spells. Any druidic spell with a material component requires (at a minimum) the use of mistletoe, holly, or oak leaves as described under the Druid class.
+source: wiki2_spells.txt

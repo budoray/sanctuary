@@ -1,0 +1,14 @@
+name: Purify Water
+slug: purify_water
+reversible: true
+class: druid
+level: 1
+school: Druidic Transmutation/Alteration
+range: 40-ft
+duration: Instantaneous
+area_of_effect: 1 cubic-ft/caster level
+components: V,S
+casting_time: 1 round
+saving_throw: None
+text: This spell removes all impurities from water, making it clear and drinkable. The reverse of the spell contaminates water, making it impossible to drink, and will negate the properties of holy and unholy water.
+source: wiki2_spells.txt

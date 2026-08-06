@@ -1,0 +1,12 @@
+portraits:
+  default: /static/art/portraits/fighter.png
+  fighter: /static/art/portraits/fighter.png
+  cleric: /static/art/portraits/cleric.png
+  druid: /static/art/portraits/druid.png
+  monk: /static/art/portraits/monk.png
+  paladin: /static/art/portraits/paladin.png
+  ranger: /static/art/portraits/ranger.png
+  thief: /static/art/portraits/thief.png
+  assassin: /static/art/portraits/assassin.png
+  magic-user: /static/art/portraits/magic-user.png
+  illusionist: /static/art/portraits/illusionist.png

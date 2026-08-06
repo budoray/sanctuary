@@ -1,0 +1,23 @@
+name: Succubus/incubus
+frequency: rare
+no_encountered: '1'
+size: medium
+alignment: chaotic evil
+move: 120ft; 180ft flying (AA:IV)
+armour_class: 0 [20]
+hit_dice: '6'
+melee_attacks: 2 claws (1d3)
+senses: Infravision 120ft
+lair_chance: 5%
+intelligence: exceptional (15-16)
+morale: 75
+loot: Hoard 9, Cache 3
+experience: 2,100 +6/hp
+description: These solitary demons are called a succubus (if female) and an  incubus (if male). In their true forms they resemble stunning - ly attractive human beings, with leathery bat wings sprouting  from their backs.  If they take a liking to a particular victim, a succubus/incubus  may mate with a human, producing an aluu-demon (see listing  for further details). In the Abyss, the succubi and incubi reign over lesser demons  through intimidation and trickery. They also prize treasure, es - pecially gems and jewellery.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Magic Resistance (70%).  Any magic spell or effect has a 70%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: darkness (5ft radius), become ethereal (as per the  magic item oil of etherealness ), charm person (as the 1st lev - el magic-user spell), ESP (as the 2nd level magic-user spell),  clairaudience (as the 3rd level magic-user spell), suggestion  (as the 3rd level magic-user spell), polymorph self (humanoid  shapes only, otherwise as the 4th level magic-user spell), or  gate (as the 9th level magic-user spell) a class D demon (70%)  or a class E demon (30%) with a 40% chance of success. 1/day: teleport (without fail, otherwise as the 5th level mag - ic-user spell).'
+- heading: Special Attacks
+  text: 'Energy-Draining Kiss.  A succubus or incubus feeds by draining  energy from charmed or unconscious victims by a kiss. Each  kiss, to a maximum of one per day, drains one level from the  victim. Captives of a succubus or incubus do not survive for  long. Unarmed Combat.  Succubi and incubi can make grappling or  overbearing attacks, and often do (their AC makes it difficult  to fend them off). If not fended off, they score an unarmed hit  with a 2+ on 1d20. Hit Mods: ATK/DEF +8/-8. Overbear Results  Mods: ATK/DEF +1/-1. Grappling Result Mods: ATK/DEF +0/+0.'

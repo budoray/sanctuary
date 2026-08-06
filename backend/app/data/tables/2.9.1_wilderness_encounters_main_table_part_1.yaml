@@ -1,0 +1,22 @@
+id: 2.9.1
+name: WILDERNESS  ENCOUNTERS MAIN TABLE (PART 1)
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 AQUATIC D100 ARCTIC D100 DESERT D100 FOREST D100 GRAVEYARD
+- — Airborne 01–05 Airborne 01–04 Airborne 01–10 Airborne 01–03 Airborne
+- 01-30 Animal 06–17 Animal 05–19 Animal 11–30 Animal 04–13 Animal
+- 31-35 Dinosaur 18–22 Dragon 20–24 Dragon 31–36 Dragon 14–16 Dragon
+- 36-45 Giant 23–37 Giant 25–29 Giant 37–41 Giant 17 Giant
+- — Human/
+- demi-human 38–47 Human/
+- demi-human 30–49 Human/
+- demi-human 42–48 Human/
+- demi-human 18–22 Human/
+- demi-human
+- 46-61 Humanoid 48–57 Humanoid 50–61 Humanoid 49–56 Humanoid 23–37 Humanoid
+- 62-70 Monster 58–82 Monster 62–76 Monster 57–76 Monster 38–57 Monster
+- —  NPC 83  NPC 77–83  NPC 77–78  NPC 58–62  NPC
+- 71-75 Undead 84 Undead 84 Undead 79 Undead 63–87 Undead
+- 76-94 Invertebrates 85–89 Invertebrates 85–96 Invertebrates 80–88 Invertebrates 88–97 Invertebrates
+- — Water 90–99 Water 97–98 Water 89–98 Water 98 Water
+- 95-00 Special 00 Special 99–00 Special 99–00 Special 99–00 Special

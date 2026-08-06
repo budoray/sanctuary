@@ -1,0 +1,35 @@
+name: Elemental, Air
+frequency: very rare very rare very rare very rare
+size: large large large large
+alignment: neutral neutral neutral neutral
+move: 360ft flying (AA:VI)
+armour_class: 2 [18] 2 [18] 2 [18] 2 [18]
+hit_dice: 8, 12, or 16 8, 12, or 16 8, 12, or 16 8, 12, or 16
+melee_attacks: 1 strike (2d10)
+senses: Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil
+intelligence: low (5-7) low (5-7) low (5-7) low (5-7)
+morale: N/A N/A N/A N/A
+loot: Nil Nil Nil Nil
+experience: '8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp 8 HD: 900 +12/hp
+  12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp 8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16
+  HD: 3,650 +20/hp 8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp'
+description: AIR ELEMENTALS Air Elementals are creatures from the Elemental Plane
+  of Air,  though they may sometimes be found elsewhere. When en - countered on the
+  Prime Material Plane, usually as a result of  summoning magic, they take the form
+  of billowing air, visible  only because of the dust or vapour blown around by the
+  air col- umn. Immune to Mundane and +1 Weapons.  This creature is immune  to piercing,
+  blunt, and slashing damage from weapons and un- armed attacks, unless the weapon
+  causing that damage has a  magical bonus of +2 or more. Airborne Combat.  The air
+  elemental’s great airborne speed  makes it a swift and formidable opponent. Against
+  an airborne  opponent it gains +1 “to hit” and +4 to damage. Whirlwind. Air Elementals
+  may also use a whirlwind attack if so  commanded. To do this, the Air Elemental
+  must assume the  form of a small cyclone, which takes one full turn (10 combat  rounds).
+  Typically, this appears to be 30ft in diameter at the  top and funnels down to 10ft
+  in diameter at its base; the cone  extends 20ft in height for every 4 HD the elemental
+  possesses.  This whirlwind attack lasts for only one round, but any crea - tures
+  with less than 3 hit dice that find themselves within it are  slain; creatures with
+  3 HD or more take 2d8 damage. Should  the cyclone for some reason be unable to reach
+  its full height,  only creatures with less than 2HD will suffer immediate death,  whilst
+  all others take only 1d8 damage.
+abilities: []

@@ -1,0 +1,19 @@
+name: Crabman
+frequency: rare
+no_encountered: 2d6
+size: large (9ft)
+alignment: neutral
+move: 90ft; 60ft swimming
+armour_class: 4 [16]
+hit_dice: '3'
+melee_attacks: 2 pincers (1d4)
+senses: Standard
+lair_chance: 20%
+intelligence: low to average (5-10)
+morale: 60
+loot: Individual 2
+experience: 40 +2/hp
+description: 'Crabmen are amphibious humanoids. Each has a tough red - dish-brown exoskeleton and pincers in place of hands. They  have smaller, rudimentary “arms” that can work together to  manipulate very light tools. Crabmen lair in caves along the seashore and are general - ly peaceful creatures, though they are often forced to defend  themselves from raids by sahuagin and other marine predators. These creatures prize silver very highly and will attack, on sight,  anyone openly carrying silver objects or items which appear to  be made of silver. Another oddity of the species is that they oc- casionally undergo some sort of group frenzy, forming a band  of 1d10+30 individuals to march inland, raiding any settlements  they find.  Unarmed Combat. Crabmen can be overborne or grappled, and  they may overbear. If not fended off, they score an unarmed  hit with a 2+ on 1d20. Hit Mods: ATK/DEF +6/-10. Overbear Re- sults Mods: ATK/DEF +2/-2. Grappling Result Mods: ATK/DEF  na/-2.'
+abilities:
+- heading: Languages
+  text: Crabmen speak their own language, which appears to be an an- cient offshoot of the Neutral alignment tongue. CROCODILE

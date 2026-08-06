@@ -1,0 +1,23 @@
+name: Remorhaz
+frequency: very rare
+no_encountered: '1'
+size: huge (21ft to 42ft length)
+alignment: neutral
+move: 120ft
+armour_class: Body 0 [20]; head 2 [18]; underside 4  [16]
+hit_dice: 7 to 14 (roll 1d8+6)
+melee_attacks: 1 (6d6)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: animal (1)
+morale: 80+
+loot: Hoard 6
+experience: '7 HD: 625 +8/hp  8 HD: 950 +10/ hp  9 HD: 1,400 +12/hp  10 HD: 1,700 +13/hp  11 HD: 2,100 +14/hp  12 HD: 3,000 +16/hp  13 HD: 3,500 +17/hp  14 HD: 4,200 +18/hp'
+description: 'These great dragon-like creatures are found only in arctic ar - eas. The remorhaz attacks on sight, and if encountered in its lair  there is a 1 in 4 chance it has a mate and 1d3 eggs; the eggs can  be sold on some markets for 5,000 gp each. The HD of the remorhaz determines its length: starting at 21ft,  each hit die above 7 adds 3ft, so that a 14 HD specimen will be  roughly 42ft long. The remorhaz is ice-blue in colour, with vesti- gial wings and odd, spiny protrusions along its back.'
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (75%).  Any magic spell or effect has a 75%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: Heat-Spines. When in combat, the internal heat of the remorhaz  seeps up into the spiny protrusions along the creature’s back.  Non-magical weapons that strike the back will melt (although  they will cause damage first), and any physical touch deals  10d10 hp damage. Sectioned Armour Class. The head of a remorhaz is AC 2 [18] and  its underside is AC 4 [16]. It exposes its belly in front while at - tacking. Anyone not in front of the remorhaz in combat will  have to attack the armoured body, which is AC 0 [20].
+- heading: Special Attacks
+  text: Swallow Whole. The remorhaz can swallow its prey whole on a  natural to-hit roll of 20. All remorhaz generate an intense in - ternal heat that instantly destroys any swallowed opponent  unless the opponent is immune to fire damage. Unarmed Combat. Remorhaz cannot effectively be targeted with  grappling or overbearing attacks, and do not use these tactics. RHINOCEROS

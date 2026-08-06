@@ -1,0 +1,14 @@
+name: Light
+slug: light
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Transmutation/Alteration
+range: 60-ft
+duration: 1 turn/caster level
+area_of_effect: 20-ft radius globe
+components: V,S
+casting_time: 1 segment
+saving_throw: None
+text: The light spell creates a globe of light 20-ft in radius, centered upon whatever spot or object the caster indicates at the time of casting (including a location in thin air). The caster may extinguish the magical light at any time. If it is cast upon a living creature, the creature is entitled to a saving throw (success indicating that the spell affects the area just behind the creature). A light spell cast upon a creature's eyes will blind it for the spell's duration, causing it a penalty of -4 on all rolls “to hit” if sight is its primary sense. The light spell remains stationary if it was not originally cast upon a movable object or creature (in which case the target will bring the illumination with it as it moves).
+source: wiki2_spells.txt

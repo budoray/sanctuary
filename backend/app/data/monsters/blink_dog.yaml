@@ -1,0 +1,22 @@
+name: Blink Dog
+frequency: rare
+no_encountered: 4d4
+size: medium
+alignment: lawful good
+move: 120ft
+armour_class: 5 [15]
+hit_dice: '4'
+melee_attacks: 1 bite (1d6 piercing)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: average (8-10)
+morale: 65
+loot: Hoard 3
+experience: 175 +5/hp
+description: Blink dogs are medium-sized dogs, dark brown with white high- lights. They are intelligent, as smart as the average human.  Blink dogs are so called because they can use a limited form of  teleportation, called a “blink,” in a somewhat random fashion  and at random intervals. Coupled with their pack hunting tactics, blink dogs are fear - some opponents. If the pack takes more than 25% losses all will  simultaneously blink out and not return. There is a long-stand - ing hatred between blink dogs and phase cats (coeurls) and the  two will attack each other on sight. Blinking is a natural ability  for these animals and they will never materialise in an occupied  space or within a solid object. If a blink dog lair is found there is a 60% chance of 3d4 pups.  These younglings fight as 1 HD monsters and inflict 1d2 points  of damage per attack, though they are far more likely to flee us- ing their teleportation ability. A captured pup will make a loyal  companion to a good aligned
+  human, or, it can be sold for 1,500  gp (± 100–600 gp).
+abilities:
+- heading: Special Attacks
+  text: 'Blink. In combat (and if needed, in other situations) blink dogs  use a semi-random, short-range teleportation, called a “blink.”  Each round, roll to see if the blink dog uses this ability: roll  1d20, and if the result is 12 or more, the blink dog teleports to  attack. A second roll of the 1d20 reveals where the dog reap - pears: 01–15 = behind (rear attack at +2), 16–18 = non-shielded  or right flank (defender cannot use shield in this round), 19 =  shielded or left flank (no benefit), 20 = front (no benefit). The  blink dog blinks and attacks in the same round, gaining any  bonuses based on its position relative to the target. Unarmed Combat. Blink dogs cannot be grappled or overborne,  but might overbear a lone opponent. If not fended off, they  score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF  +8/-8. Overbear Results Mods: ATK/DEF +1/na. Grappling Re - sult Mods: ATK/DEF na/na.'
+- heading: Languages
+  text: Blink dogs communicate amongst themselves via their high- pitched barks and low growls. They do not speak or understand  Common. BOAR WILD BOAR GIANT WILD
