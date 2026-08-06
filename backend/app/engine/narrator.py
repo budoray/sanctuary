@@ -202,3 +202,16 @@ class Narrator:
         return (await self._ollama(prompt)) or _pick(
             _VICTORY, rng or random.Random()
         )
+
+    async def narrate_dm_turn(
+        self, events: list[str], rng: random.Random | None = None
+    ) -> str | None:
+        """Summarise a full DM turn in one or two sentences."""
+        if not events:
+            return None
+        prompt = (
+            "As a terse old-school fantasy dungeon master, summarise these "
+            "foes' actions in one or two vivid sentences. No lists, no rules.\n\n"
+            + "\n".join(f"- {e}" for e in events)
+        )
+        return (await self._ollama(prompt)) or " ".join(events)

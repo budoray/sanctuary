@@ -330,6 +330,7 @@ def _nearest_player(state: dict[str, Any], monster: dict[str, Any]) -> dict[str,
 
 
 async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
+    events: list[str] = []
     for monster in state["monsters"]:
         if not monster.get("alive", True):
             continue
@@ -338,6 +339,7 @@ async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
         target = _nearest_player(state, monster)
         # If adjacent, attack.
         if _adjacent(monster, target):
+            events.append(f"{monster['name']} attacks {target['name']}.")
             await _attack(state, monster, target, d)
             continue
         # Move one tile toward the target.
@@ -361,11 +363,19 @@ async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
                 moved = True
                 break
         if moved:
+            events.append(f"{monster['name']} moves toward {target['name']}.")
             line = await narrator.narrate_move(monster, random.Random(state["seed"] + state["version"]))
             if line:
                 state["log"].append(line)
             if _adjacent(monster, target):
                 await _attack(state, monster, target, d)
+
+    if events:
+        summary = await narrator.narrate_dm_turn(
+            events, random.Random(state["seed"] + state["version"])
+        )
+        if summary:
+            state["log"].append(summary)
 
 
 def view(state: dict[str, Any]) -> dict[str, Any]:
