@@ -6,11 +6,11 @@ After=network.target
 
 [Service]
 WorkingDirectory=/opt/tenshin/sanctuary
-Environment=TENSHIN_SECRET=SAME_SECRET_AS_THE_WEBSITE
 Environment=TENSHIN_SITE_URL=https://tenshinarts.com
 Environment=OLLAMA_HOST=http://127.0.0.1:11434
 Environment=OLLAMA_MODEL=llama3.2
-# Persistent DB credentials live in /opt/tenshin/sanctuary/.env so deploys don't overwrite them.
+# Persistent env (TENSHIN_SECRET, DATABASE_URL, OLLAMA_ENABLED, etc.) lives in
+# /opt/tenshin/sanctuary/.env so deploys never overwrite them.
 EnvironmentFile=-/opt/tenshin/sanctuary/.env
 ExecStart=/opt/tenshin/sanctuary/.venv/bin/python app.py
 Restart=always
