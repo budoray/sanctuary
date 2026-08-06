@@ -8,6 +8,7 @@ import random
 from typing import Any
 
 from backend.app.engine import bestiary
+from backend.app.engine import narrator
 from backend.app.engine.character import Character
 from backend.app.engine.dice import Dice, Roll
 from backend.app.engine.module import Module
@@ -88,7 +89,7 @@ def new_game(session_id: str, module: Module, character: Character, seed: int | 
         "seed": seed,
         "player": player,
         "monsters": monsters,
-        "log": ["The dungeon is silent, save for dripping water."],
+        "log": [narrator.narrate_opening(random.Random(seed))],
         "rolls": [_roll_to_dict(r) for r in d.log],
     }
 
@@ -121,6 +122,9 @@ def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, module: 
         raise ValueError("must move to an adjacent tile")
     token["x"] = x
     token["y"] = y
+    line = narrator.narrate_move(token, random.Random(state["seed"] + state["version"]))
+    if line:
+        state["log"].append(line)
 
 
 def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[str, Any], d: Dice) -> None:
@@ -134,20 +138,28 @@ def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[str, A
     roll = d.roll("1d20", reason=f"{attacker['name']} attacks {target['name']}", kind="combat").total
     to_hit = attacker.get("to_hit", 0)
     needed = 20 - target["ac"] + to_hit  # descending AC: lower AC needs higher roll
-    if roll >= needed:
+    hit = roll >= needed
+    fatal = False
+    if hit:
         dmg_roll = d.roll(attacker.get("damage", "1d6"), reason="damage", kind="combat")
         damage = max(1, dmg_roll.total)
         target["hp"] -= damage
-        state["log"].append(f"{attacker['name']} hits {target['name']} for {damage} damage.")
         if target["hp"] <= 0:
+            fatal = True
             target["alive"] = False
-            state["log"].append(f"{target['name']} falls.")
             if target["type"] == "player":
                 state["status"] = STATUS_LOST
             elif all(not m.get("alive", True) for m in state["monsters"]):
                 state["status"] = STATUS_WON
-    else:
-        state["log"].append(f"{attacker['name']} misses {target['name']}.")
+
+    lines = narrator.narrate_attack(
+        attacker, target, hit, fatal,
+        random.Random(state["seed"] + state["version"])
+    )
+    state["log"].extend(lines)
+
+    if state["status"] == STATUS_WON:
+        state["log"].append(narrator.narrate_victory(random.Random(state["seed"] + state["version"])))
 
 
 def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> dict[str, Any]:

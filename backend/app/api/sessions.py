@@ -119,6 +119,27 @@ async def list_sessions(
     return {"sessions": sessions}
 
 
+@router.get("/sessions/active")
+async def get_active_session(
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord)
+        .where(
+            SessionRecord.account_id == account_id,
+            SessionRecord.status == "active",
+        )
+        .order_by(SessionRecord.updated_at.desc())
+        .limit(1)
+    )
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="No active session")
+    state = json.loads(record.state)
+    return {"session": session_engine.view(state)}
+
+
 @router.get("/sessions/{session_id}")
 async def get_session(
     session_id: str,

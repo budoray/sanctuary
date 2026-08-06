@@ -165,6 +165,10 @@ export async function listSessions() {
   return api('/api/sessions') as Promise<{ sessions: { id: string; name: string; module_id: string; character_id: string; status: string; turn: number; phase: string }[] }>;
 }
 
+export async function getActiveSession() {
+  return api('/api/sessions/active') as Promise<{ session: GameSession }>;
+}
+
 export async function getSession(sessionId: string) {
   return api(`/api/sessions/${sessionId}`) as Promise<{ session: GameSession }>;
 }

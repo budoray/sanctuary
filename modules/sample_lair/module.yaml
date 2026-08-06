@@ -2,26 +2,27 @@ id: sample_lair
 name: The Goblin Lair
 ruleset: osric
 description: >-
-  A torch-lit cavern chamber. A goblin scout has made it his den.
-  Slay it, or fall.
+  A torch-lit cavern chamber. Two goblin scouts have made it their den.
+  Slay them, or fall.
 map:
-  width: 16
-  height: 12
+  width: 18
+  height: 14
   tile_size: 40
   tiles:
-    # wall = 1, floor = 0; each string is one row of the grid
-    - "1111111111111111"
-    - "1000000000000001"
-    - "1000000000000001"
-    - "1000000000000001"
-    - "1000000000000001"
-    - "1000000000000001"
-    - "1000000000000001"
-    - "1000000000000001"
-    - "1000000000000001"
-    - "1000000000000001"
-    - "1000000000000001"
-    - "1111111111111111"
+    - "111111111111111111"
+    - "100000000000000001"
+    - "100000000000000001"
+    - "100000111100000001"
+    - "100000111100000001"
+    - "100000000000000001"
+    - "100000000000000001"
+    - "100000111100000001"
+    - "100000111100000001"
+    - "100000000000000001"
+    - "100000000000000001"
+    - "100000000000000001"
+    - "100000000000000001"
+    - "111111111111111111"
 player_start:
   x: 2
   y: 2
@@ -29,6 +30,12 @@ monsters:
   - id: goblin_1
     name: Goblin
     monster: goblin
-    x: 12
-    y: 8
+    x: 14
+    y: 10
+    color: "#2ecc71"
+  - id: goblin_2
+    name: Goblin
+    monster: goblin
+    x: 15
+    y: 9
     color: "#2ecc71"

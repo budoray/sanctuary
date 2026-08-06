@@ -25,7 +25,7 @@ def test_new_game(sample_module, hero):
     assert st["module_id"] == "sample_lair"
     assert st["phase"] == "player"
     assert st["player"]["name"] == "Test"
-    assert len(st["monsters"]) == 1
+    assert len(st["monsters"]) == 2
 
 
 def test_player_move(sample_module, hero):
@@ -42,10 +42,10 @@ def test_player_move_into_wall_fails(sample_module, hero):
 
 def test_player_attack_goblin(sample_module, hero):
     st = session.new_game("s1", sample_module, hero, seed=42)
-    # Walk next to the goblin at (12,8). Player starts at (2,2).
+    # Walk next to goblin_1 at (14,10). Player starts at (2,2).
     path = [
         (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2), (9, 2), (10, 2), (11, 2), (12, 2),
-        (12, 3), (12, 4), (12, 5), (12, 6), (12, 7),
+        (13, 2), (14, 2), (14, 3), (14, 4), (14, 5), (14, 6), (14, 7), (14, 8), (14, 9),
     ]
     for x, y in path:
         st = session.act(st, sample_module, "move", x=x, y=y)
