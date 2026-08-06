@@ -1,3 +1,110 @@
+export type TrackName = 'exploration' | 'combat' | 'victory' | 'defeat' | 'ambient';
+
+export class MusicLibrary {
+  private basePath: string;
+  private tracks = new Map<string, HTMLAudioElement>();
+  private current: HTMLAudioElement | null = null;
+  private currentName: string | null = null;
+  private volume = 0.35;
+  private muted = false;
+  private fallback: ((name: TrackName, loop?: boolean) => void) | null = null;
+
+  constructor(basePath = '/music/') {
+    this.basePath = basePath;
+  }
+
+  setFallback(fn: (name: TrackName, loop?: boolean) => void) {
+    this.fallback = fn;
+  }
+
+  private audioUrl(name: string): string {
+    return `${this.basePath}${name}.mp3`;
+  }
+
+  private getTrack(name: string): HTMLAudioElement | undefined {
+    return this.tracks.get(name);
+  }
+
+  private loadTrack(name: string): Promise<HTMLAudioElement> {
+    const existing = this.getTrack(name);
+    if (existing) return Promise.resolve(existing);
+    return new Promise((resolve, reject) => {
+      const audio = new Audio(this.audioUrl(name));
+      audio.preload = 'auto';
+      audio.addEventListener('canplaythrough', () => {
+        this.tracks.set(name, audio);
+        resolve(audio);
+      }, { once: true });
+      audio.addEventListener('error', () => {
+        reject(new Error(`Unable to load track ${name}`));
+      }, { once: true });
+      // Start loading metadata so canplaythrough fires.
+      audio.load();
+    });
+  }
+
+  async playTrack(name: TrackName, loop = false): Promise<boolean> {
+    if (this.muted) {
+      this.currentName = name;
+      return true;
+    }
+
+    try {
+      const audio = await this.loadTrack(name);
+      if (this.current && this.current !== audio) {
+        this.stopTrack();
+      }
+      audio.loop = loop;
+      audio.volume = this.volume;
+      this.current = audio;
+      this.currentName = name;
+      await audio.play();
+      return true;
+    } catch {
+      this.currentName = name;
+      if (this.fallback) {
+        this.fallback(name, loop);
+      }
+      return false;
+    }
+  }
+
+  stopTrack(): void {
+    if (this.current) {
+      this.current.pause();
+      this.current.currentTime = 0;
+      this.current = null;
+    }
+  }
+
+  setVolume(volume: number): void {
+    this.volume = Math.max(0, Math.min(1, volume));
+    if (this.current) {
+      this.current.volume = this.volume;
+    }
+  }
+
+  getVolume(): number {
+    return this.volume;
+  }
+
+  setMuted(muted: boolean): void {
+    this.muted = muted;
+    if (this.current) {
+      this.current.muted = muted;
+      if (muted) {
+        this.current.pause();
+      } else if (this.currentName) {
+        this.current.play().catch(() => {});
+      }
+    }
+  }
+
+  isMuted(): boolean {
+    return this.muted;
+  }
+}
+
 export class AudioController {
   private ctx: AudioContext | null = null;
   muted = false;
@@ -10,6 +117,12 @@ export class AudioController {
     filter: BiquadFilterNode;
   } | null = null;
   private userGestureStarted = false;
+  private music: MusicLibrary;
+
+  constructor() {
+    this.music = new MusicLibrary();
+    this.music.setFallback((name, loop) => this._fallbackMusic(name, loop));
+  }
 
   private ensureContext(): AudioContext | null {
     if (this.muted) return null;
@@ -41,6 +154,7 @@ export class AudioController {
 
   toggleMute(): boolean {
     this.muted = !this.muted;
+    this.music.setMuted(this.muted);
     if (this.muted && this.ctx) {
       this.ctx.suspend().catch(() => {});
     } else if (!this.muted && this.ctx) {
@@ -54,6 +168,7 @@ export class AudioController {
 
   setMusicVolume(volume: number): void {
     this.musicVolume = Math.max(0, Math.min(1, volume));
+    this.music.setVolume(this.musicVolume);
     if (this.ambientNodes) {
       this.ambientNodes.gain.gain.setTargetAtTime(this.musicVolume, this.ctx?.currentTime || 0, 0.1);
     }
@@ -61,6 +176,83 @@ export class AudioController {
 
   getMusicVolume(): number {
     return this.musicVolume;
+  }
+
+  // MusicLibrary façade.
+  playTrack(name: TrackName, loop = false): Promise<boolean> {
+    return this.music.playTrack(name, loop);
+  }
+
+  stopTrack(): void {
+    this.music.stopTrack();
+  }
+
+  // Asset-aware music triggers with generative fallback.
+  exploration(): void {
+    this.playTrack('exploration', true);
+  }
+
+  combatSting(): void {
+    this.playTrack('combat', true);
+  }
+
+  victory(): void {
+    this.playTrack('victory', false);
+  }
+
+  defeat(): void {
+    this.playTrack('defeat', false);
+  }
+
+  private _fallbackMusic(name: TrackName, _loop = false): void {
+    switch (name) {
+      case 'exploration':
+        this._generativeExploration();
+        break;
+      case 'combat':
+        this._generativeCombatSting();
+        break;
+      case 'victory':
+        this._generativeVictory();
+        break;
+      case 'defeat':
+        this._generativeDefeat();
+        break;
+      case 'ambient':
+        if (this.ambientType) {
+          this._generativeAmbient(this.ambientType);
+        }
+        break;
+    }
+  }
+
+  private _generativeVictory(): void {
+    this.tone(523.25, 0.25, 'sine', 0.18);
+    this.tone(659.25, 0.25, 'sine', 0.18);
+    this.tone(783.99, 0.4, 'sine', 0.18);
+  }
+
+  private _generativeDefeat(): void {
+    this.tone(392.0, 0.35, 'sine', 0.18, 196.0);
+    this.tone(196.0, 0.5, 'sine', 0.18);
+  }
+
+  private _generativeExploration(): void {
+    const base = 261.63; // C4
+    const notes = [base, base * 1.125, base * 1.25, base * 1.5];
+    notes.forEach((freq, i) => {
+      if (typeof window !== 'undefined') {
+        window.setTimeout(() => this.tone(freq, 0.35, 'triangle', 0.08), i * 180);
+      }
+    });
+  }
+
+  private _generativeCombatSting(): void {
+    this.tone(196.0, 0.18, 'sawtooth', 0.12);
+    this.tone(146.83, 0.28, 'sawtooth', 0.12);
+    if (typeof window !== 'undefined') {
+      window.setTimeout(() => this.tone(110.0, 0.45, 'sawtooth', 0.14), 220);
+    }
   }
 
   private noiseBuffer(duration: number): AudioBuffer | null {
@@ -134,45 +326,23 @@ export class AudioController {
     this.playNoise(0.06, 250, 0.08);
   }
 
-  victory(): void {
-    this.tone(523.25, 0.25, 'sine', 0.18);
-    this.tone(659.25, 0.25, 'sine', 0.18);
-    this.tone(783.99, 0.4, 'sine', 0.18);
-  }
-
-  defeat(): void {
-    this.tone(392.0, 0.35, 'sine', 0.18, 196.0);
-    this.tone(196.0, 0.5, 'sine', 0.18);
-  }
-
   trapTrigger(): void {
     this.playNoise(0.25, 600, 0.25);
     this.tone(150, 0.2, 'sawtooth', 0.12);
   }
 
-  exploration(): void {
-    // Short generative music sting for exploration/room entry.
-    const base = 261.63; // C4
-    const notes = [base, base * 1.125, base * 1.25, base * 1.5];
-    notes.forEach((freq, i) => {
-      if (typeof window !== 'undefined') {
-        window.setTimeout(() => this.tone(freq, 0.35, 'triangle', 0.08), i * 180);
+  playAmbient(type: 'dungeon' | 'cave'): void {
+    this.ambientType = type;
+    this.ambientActive = true;
+    // Prefer the ambient.mp3 asset if it exists.
+    this.playTrack('ambient', true).then((played) => {
+      if (!played) {
+        this._generativeAmbient(type);
       }
     });
   }
 
-  combatSting(): void {
-    // Short generative music sting for combat start.
-    this.tone(196.0, 0.18, 'sawtooth', 0.12);
-    this.tone(146.83, 0.28, 'sawtooth', 0.12);
-    if (typeof window !== 'undefined') {
-      window.setTimeout(() => this.tone(110.0, 0.45, 'sawtooth', 0.14), 220);
-    }
-  }
-
-  playAmbient(type: 'dungeon' | 'cave'): void {
-    this.ambientType = type;
-    this.ambientActive = true;
+  private _generativeAmbient(type: 'dungeon' | 'cave'): void {
     if (this.muted) return;
     const ctx = this.ensureContext();
     if (!ctx) return;
@@ -182,7 +352,6 @@ export class AudioController {
     const samples = Math.ceil(ctx.sampleRate * duration);
     const buffer = ctx.createBuffer(1, samples, ctx.sampleRate);
     const data = buffer.getChannelData(0);
-    // Brown-ish noise: low-passed random walk.
     let last = 0;
     for (let i = 0; i < data.length; i++) {
       const white = Math.random() * 2 - 1;
@@ -203,7 +372,6 @@ export class AudioController {
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(this.musicVolume, ctx.currentTime + 1.5);
 
-    // Subtle LFO to create drifting drone texture.
     const lfo = ctx.createOscillator();
     lfo.type = 'sine';
     lfo.frequency.value = type === 'cave' ? 0.12 : 0.2;
@@ -223,6 +391,7 @@ export class AudioController {
 
   stopAmbient(): void {
     this.ambientActive = false;
+    this.music.stopTrack();
     if (!this.ambientNodes) return;
     const ctx = this.ctx;
     if (ctx) {

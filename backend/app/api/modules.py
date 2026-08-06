@@ -1,7 +1,7 @@
 """Module API: load module metadata."""
 from fastapi import APIRouter, HTTPException
 
-from backend.app.engine import module
+from backend.app.engine import bestiary, module
 
 router = APIRouter(tags=["modules"])
 
@@ -26,3 +26,9 @@ async def get_module(module_id: str):
             },
         }
     }
+
+
+@router.get("/bestiary")
+async def list_bestiary():
+    """Return the slugs of all available monster templates."""
+    return {"monsters": bestiary.base_ids()}

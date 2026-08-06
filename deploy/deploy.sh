@@ -204,7 +204,14 @@ PY
   chown root:caddy "$caddyfile"
   chmod 644 "$caddyfile"
 
-  systemctl reload caddy || systemctl start caddy
+  # Ensure Caddy is running, then reload the configuration. If Caddy is stopped,
+  # a reload fails, so fall back to start.
+  systemctl enable caddy
+  if systemctl is-active --quiet caddy; then
+    systemctl reload caddy
+  else
+    systemctl start caddy
+  fi
 }
 
 # ---------------------------------------------------------------------------
@@ -263,7 +270,11 @@ deploy_game() {
   # Frontend
   if command -v npm >/dev/null 2>&1 && [ -f frontend/package.json ]; then
     echo "    Building frontend"
-    (cd frontend && npm ci && npm run build)
+    if [ -f frontend/package-lock.json ]; then
+      (cd frontend && npm ci && npm run build)
+    else
+      (cd frontend && npm install && npm run build)
+    fi
   fi
 
   # Migrations
@@ -286,6 +297,7 @@ Environment=OLLAMA_MODEL=llama3.2
 EnvironmentFile=-${env_file}
 ExecStart=${install_dir}/.venv/bin/python app.py
 Restart=always
+RestartSec=5
 User=${SERVICE_USER}
 
 [Install]
@@ -302,15 +314,20 @@ EOF
 
   # Health check
   echo "    Waiting for ${name}"
+  local healthy=0
   for _ in {1..30}; do
     local code
     code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${port}/health" 2>/dev/null || echo "000")
     if [ "$code" = "200" ] || [ "$code" = "303" ] || [ "$code" = "401" ]; then
       echo "    health check localhost:${port} -> HTTP ${code}"
+      healthy=1
       break
     fi
     sleep 1
   done
+  if [ "$healthy" -ne 1 ]; then
+    echo "    WARN: ${name} did not become healthy on localhost:${port} (see journalctl -u ${service})"
+  fi
 
   local public_code
   public_code=$(curl -s -o /dev/null -w "%{http_code}" "https://${domain}/health" 2>/dev/null || echo "000")

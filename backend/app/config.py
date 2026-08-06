@@ -35,7 +35,9 @@ class Settings(BaseSettings):
     ollama_enabled: bool = True
     ollama_timeout: float = 5.0
     pixellab_host: str | None = None
+    pixellab_key: str | None = None
     pixellab_model: str = "flux"
+    pixellab_timeout: float = 30.0
 
 
 SETTINGS = Settings()

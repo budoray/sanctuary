@@ -63,6 +63,34 @@ async def test_admin_endpoints_are_accessible_in_dev_mode(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_admin_can_create_and_view_campaign(monkeypatch):
+    monkeypatch.setattr(auth_module.SETTINGS, "sanctuary_admin_ids", "")
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            create_resp = await client.post("/api/admin/campaigns", json={
+                "name": "Admin Created",
+                "password": "admin-secret",
+                "module_ids": ["sample_lair", "forsaken_library"],
+            })
+            assert create_resp.status_code == 200
+            campaign = create_resp.json()["campaign"]
+            assert campaign["name"] == "Admin Created"
+            assert campaign["module_ids"] == ["sample_lair", "forsaken_library"]
+            assert campaign["is_dm"] is True
+
+            list_resp = await client.get("/api/admin/campaigns")
+            assert list_resp.status_code == 200
+            campaigns = list_resp.json()["campaigns"]
+            found = next((c for c in campaigns if c["id"] == campaign["id"]), None)
+            assert found is not None
+            assert found["module_ids"] == ["sample_lair", "forsaken_library"]
+
+            del_resp = await client.delete(f"/api/admin/campaigns/{campaign['id']}")
+            assert del_resp.status_code == 200
+            assert del_resp.json()["deleted"] is True
+
+
+@pytest.mark.asyncio
 async def test_admin_env_var_allows_non_cookie_admin(monkeypatch):
     # Verify that the SANCTUARY_ADMIN_IDS fallback works independently of the
     # session-cookie admin flag by forcing the cookie check to return False.

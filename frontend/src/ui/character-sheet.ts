@@ -1,4 +1,4 @@
-import { buyItem, CharacterState, equipItem, Item, useItem } from '../net/api';
+import { buyItem, CharacterState, equipItem, getAppConfig, Item, regeneratePortrait, useItem } from '../net/api';
 import { el, clear } from './utils';
 
 export class CharacterSheet {
@@ -28,6 +28,41 @@ export class CharacterSheet {
       if (e.target === this.overlay) this.close();
     });
     this.root.appendChild(this.overlay);
+    this.addRegenerateButtonIfAvailable();
+  }
+
+  private async addRegenerateButtonIfAvailable() {
+    try {
+      const config = await getAppConfig();
+      if (!config.pixellab_host) return;
+      const header = this.overlay.querySelector('.sheet-header');
+      if (!header) return;
+      const existing = header.querySelector('.regenerate-portrait');
+      if (existing) return;
+      header.appendChild(
+        el(
+          'button',
+          {
+            className: 'reroll regenerate-portrait',
+            onclick: () => this.doRegeneratePortrait(),
+          },
+          'Regenerate Portrait'
+        )
+      );
+    } catch {
+      // If config cannot be loaded, simply omit the button.
+    }
+  }
+
+  private async doRegeneratePortrait() {
+    if (!this.character.id) return;
+    try {
+      const { portrait_url } = await regeneratePortrait(this.character.id);
+      this.character.portrait_url = portrait_url;
+      this.refresh();
+    } catch (err: any) {
+      alert(err.message || 'Portrait generation failed');
+    }
   }
 
   private buildHeader() {
@@ -186,6 +221,7 @@ export class CharacterSheet {
     const closeBtn = el('button', { className: 'enter', onclick: () => this.close() }, 'Close');
     panel.appendChild(closeBtn);
     this.overlay.appendChild(panel);
+    this.addRegenerateButtonIfAvailable();
   }
 
   private close() {

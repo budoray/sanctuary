@@ -210,6 +210,109 @@ async def test_winning_session_persists_progression():
 
 
 @pytest.mark.asyncio
+async def test_save_progression_persists_mid_session():
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            char_resp = await client.post("/api/characters", json={
+                "mode": "normal",
+                "ancestry": "human",
+                "classes": ["fighter"],
+                "name": "SaveTest",
+                "seed": 1,
+            })
+            assert char_resp.status_code == 200
+            char_id = char_resp.json()["character"]["id"]
+            initial_gold = char_resp.json()["character"].get("gold", 0)
+
+            session_resp = await client.post("/api/sessions", json={
+                "character_id": char_id,
+                "module_id": "sample_lair",
+            })
+            assert session_resp.status_code == 200
+            session_id = session_resp.json()["session"]["id"]
+
+            async for db in get_db():
+                result = await db.execute(
+                    select(SessionRecord).where(SessionRecord.id == session_id)
+                )
+                record = result.scalar_one()
+                state = json.loads(record.state)
+                state["players"][0]["xp"] = 75
+                state["players"][0]["gold"] = 42
+                state["players"][0]["hp"] = 8
+                state["players"][0]["max_hp"] = 12
+                state["players"][0]["level"] = 2
+                state["players"][0].setdefault("session_loot", []).append({
+                    "instance_id": "loot01",
+                    "item_id": "healing_potion",
+                    "name": "Potion of Healing",
+                    "type": "potion",
+                    "slot": "consumable",
+                    "effects": {"hp_restore": 10},
+                })
+                record.state = json.dumps(state)
+                await db.commit()
+
+            save_resp = await client.post(f"/api/sessions/{session_id}/save")
+            assert save_resp.status_code == 200
+            assert save_resp.json()["saved"] is True
+            assert char_id in save_resp.json()["character_ids"]
+
+            char_get_resp = await client.get(f"/api/characters/{char_id}")
+            assert char_get_resp.status_code == 200
+            updated = char_get_resp.json()["character"]
+            assert updated["xp"] == 75
+            assert updated["gold"] == 42
+            assert updated["hit_points"] == 8
+            assert updated["max_hp"] == 12
+            assert updated["level"] == 2
+            assert any(i.get("instance_id") == "loot01" for i in updated.get("inventory", []))
+
+            # A second save on the now-clean session loot should not duplicate the item.
+            save_resp2 = await client.post(f"/api/sessions/{session_id}/save")
+            assert save_resp2.status_code == 200
+            char_get_resp2 = await client.get(f"/api/characters/{char_id}")
+            inventory = char_get_resp2.json()["character"].get("inventory", [])
+            assert sum(1 for i in inventory if i.get("instance_id") == "loot01") == 1
+
+
+@pytest.mark.asyncio
+async def test_save_progression_rejects_won_session():
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            char_resp = await client.post("/api/characters", json={
+                "mode": "normal",
+                "ancestry": "human",
+                "classes": ["fighter"],
+                "name": "WonSaveTest",
+                "seed": 1,
+            })
+            assert char_resp.status_code == 200
+            char_id = char_resp.json()["character"]["id"]
+
+            session_resp = await client.post("/api/sessions", json={
+                "character_id": char_id,
+                "module_id": "sample_lair",
+            })
+            assert session_resp.status_code == 200
+            session_id = session_resp.json()["session"]["id"]
+
+            async for db in get_db():
+                result = await db.execute(
+                    select(SessionRecord).where(SessionRecord.id == session_id)
+                )
+                record = result.scalar_one()
+                state = json.loads(record.state)
+                state["status"] = "won"
+                record.state = json.dumps(state)
+                record.status = "won"
+                await db.commit()
+
+            save_resp = await client.post(f"/api/sessions/{session_id}/save")
+            assert save_resp.status_code == 400
+
+
+@pytest.mark.asyncio
 async def test_advance_campaign_session_to_next_module():
     async with LifespanManager(fastapi_app) as manager:
         async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:

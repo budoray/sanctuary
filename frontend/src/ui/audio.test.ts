@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { AudioController } from './audio';
+import { describe, it, expect, vi } from 'vitest';
+import { AudioController, MusicLibrary } from './audio';
 
 describe('AudioController', () => {
   it('starts unmuted and toggles mute state', () => {
@@ -33,5 +33,33 @@ describe('AudioController', () => {
     expect(audio.getMusicVolume()).toBe(1);
     audio.setMusicVolume(-0.5);
     expect(audio.getMusicVolume()).toBe(0);
+  });
+});
+
+describe('MusicLibrary', () => {
+  it('defaults to base volume and clamps input', () => {
+    const lib = new MusicLibrary();
+    expect(lib.getVolume()).toBe(0.35);
+    lib.setVolume(0.9);
+    expect(lib.getVolume()).toBe(0.9);
+    lib.setVolume(-1);
+    expect(lib.getVolume()).toBe(0);
+    lib.setVolume(2);
+    expect(lib.getVolume()).toBe(1);
+  });
+
+  it('calls the fallback when a track cannot load', async () => {
+    const lib = new MusicLibrary();
+    const fallback = vi.fn();
+    lib.setFallback(fallback);
+    // Point to a non-existent path so load fails.
+    const result = await lib.playTrack('exploration', true);
+    expect(result).toBe(false);
+    expect(fallback).toHaveBeenCalledWith('exploration', true);
+  });
+
+  it('stops the current track without throwing', () => {
+    const lib = new MusicLibrary();
+    expect(() => lib.stopTrack()).not.toThrow();
   });
 });

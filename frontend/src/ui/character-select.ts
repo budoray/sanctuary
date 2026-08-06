@@ -5,6 +5,9 @@ import { el, clear } from './utils';
 const AVAILABLE_MODULES = [
   { id: 'sample_lair', name: 'The Goblin Lair' },
   { id: 'sunken_crypt', name: 'The Sunken Crypt' },
+  { id: 'shadow_keep', name: 'The Shadow Keep' },
+  { id: 'forsaken_library', name: 'The Forsaken Library' },
+  { id: 'arena_pit', name: 'The Arena Pit' },
 ];
 
 export class CharacterSelect {

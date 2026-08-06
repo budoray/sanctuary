@@ -372,3 +372,91 @@ async def test_status_ticks_apply_damage_and_expire(sample_module, hero):
     session._tick_statuses(st)
     assert st["player"]["hp"] == 7
     assert st["player"]["statuses"] == []
+
+
+async def test_dm_turn_rolls_initiative_and_may_act_first(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    st = await session.act(st, sample_module, "end_turn")
+    assert st["phase"] == session.PHASE_DM
+    st = await session.act(st, sample_module, "dm_turn")
+    assert st["phase"] == session.PHASE_PLAYER
+    assert st["turn"] == 2
+    assert any("initiative" in entry.lower() or "act first" in entry.lower() for entry in st["log"])
+
+
+async def test_aoe_damages_monsters_in_radius(sample_module):
+    hero = char_engine.generate(seed=1, mode="normal", ancestry_name="human", class_names=["magic-user"], name="Wizard")
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin1 = st["monsters"][0]
+    goblin2 = st["monsters"][1]
+    # Place both goblins within a 2-tile radius of a common point.
+    goblin1["x"] = st["player"]["x"] + 2
+    goblin1["y"] = st["player"]["y"]
+    goblin2["x"] = st["player"]["x"] + 2
+    goblin2["y"] = st["player"]["y"] + 1
+    initial_hp1 = goblin1["hp"]
+    initial_hp2 = goblin2["hp"]
+    st = await session.act(st, sample_module, "aoe", center_x=goblin1["x"], center_y=goblin1["y"])
+    assert goblin1["hp"] < initial_hp1
+    assert goblin2["hp"] < initial_hp2
+    assert st["phase"] == session.PHASE_DM
+
+
+async def test_cover_increases_ranged_target_ac(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = 5
+    goblin["y"] = 2
+    # Put a wall next to the goblin.
+    original_tile = sample_module.map.tiles[2][6]
+    tiles = [list(row) for row in sample_module.map.tiles]
+    tiles[2][6] = "1"
+    wall_module = module.Module(
+        id=sample_module.id,
+        name=sample_module.name,
+        ruleset=sample_module.ruleset,
+        description=sample_module.description,
+        map=module.Map(
+            width=sample_module.map.width,
+            height=sample_module.map.height,
+            tile_size=sample_module.map.tile_size,
+            tiles=["".join(row) for row in tiles],
+        ),
+        player_start=sample_module.player_start,
+        monsters=sample_module.monsters,
+        events=[],
+        branches=[],
+    )
+    assert session._has_cover(st, wall_module, goblin)
+
+
+async def test_flanking_grants_melee_bonus(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    hero2 = char_engine.generate(seed=1, mode="normal", ancestry_name="human", class_names=["fighter"], name="Ally")
+    await session.add_player(st, sample_module, hero2, "char2", account_id=2)
+    goblin = st["monsters"][0]
+    # Hero at (2,2). Place goblin at (3,2) and ally opposite at (4,2).
+    st["players"][1]["x"] = 4
+    st["players"][1]["y"] = 2
+    goblin["x"] = 3
+    goblin["y"] = 2
+    assert session._is_flanking(st, st["players"][0], goblin)
+
+
+async def test_validator_rejects_move_into_wall(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    from backend.app.engine import validate
+    # Move the player next to the northern wall so (2, 0) is an adjacent wall.
+    st["player"]["x"] = 2
+    st["player"]["y"] = 1
+    with pytest.raises(ValueError, match="blocked"):
+        validate.validate_move(st, sample_module, 2, 0)
+
+
+async def test_validator_rejects_attack_on_non_adjacent_target(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    from backend.app.engine import validate
+    st["monsters"][0]["x"] = 10
+    st["monsters"][0]["y"] = 10
+    with pytest.raises(ValueError, match="adjacent"):
+        validate.validate_attack_target(st, st["monsters"][0]["id"])

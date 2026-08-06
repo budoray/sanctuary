@@ -1,0 +1,11 @@
+# Example Caddyfile for the Tenshin platform.
+# deploy/deploy.sh writes a file very similar to this to /etc/caddy/Caddyfile.
+# Replace tenshinarts.com with your actual domain before use.
+
+tenshinarts.com {
+    respond "Tenshin Arts" 200
+}
+
+sanctuary.tenshinarts.com {
+    reverse_proxy 127.0.0.1:9300
+}

@@ -1,6 +1,9 @@
 import { Application, Container, Graphics } from 'pixi.js';
 import type { Socket } from 'socket.io-client';
-import { actInSession, advanceSession, GameSession, getModule, getSessionPresence, Presence, restInSession, Token } from '../net/api';
+import {
+  actInSession, advanceSession, dmMove, dmReveal, dmSpawn, GameSession,
+  getModule, getSessionPresence, Presence, restInSession, saveProgress, Token,
+} from '../net/api';
 import { connectSocket } from '../net/socket';
 import { DiceTray } from './dice-tray';
 import { TokenSprite } from './token-sprite';
@@ -79,7 +82,12 @@ export class Game {
   private stabilizeBtn!: HTMLButtonElement;
   private restBtn!: HTMLButtonElement;
   private endBtn!: HTMLButtonElement;
+  private saveBtn!: HTMLButtonElement;
   private dmTurnBtn!: HTMLButtonElement;
+  private dmToolsEl: HTMLElement = document.createElement('div');
+  private dmMonsterSelect: HTMLSelectElement = document.createElement('select');
+  private dmTokenSelect: HTMLSelectElement = document.createElement('select');
+  private dmAction: 'spawn' | 'move' | 'reveal' | null = null;
   private socket: Socket | null = null;
   private visited: Set<string> = new Set();
   private audio = new AudioController();
@@ -143,9 +151,17 @@ export class Game {
     window.addEventListener('resize', () => this.centerMap());
     this.keydownHandler = (e: KeyboardEvent) => this.onKeyDown(e);
     window.addEventListener('keydown', this.keydownHandler);
+
+    this.beforeUnloadHandler = () => {
+      if (this.session && this.session.status !== 'won') {
+        this.saveProgression().catch(() => {});
+      }
+    };
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
   }
 
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
+  private beforeUnloadHandler: ((e: BeforeUnloadEvent) => void) | null = null;
 
   private isCampaignSession() {
     return !!this.session?.campaign_id;
@@ -308,7 +324,18 @@ export class Game {
     volumeWrap.appendChild(volumeSlider);
     hud.appendChild(volumeWrap);
 
-    const exitBtn = el('button', { className: 'danger', onclick: () => this.onExit() }, 'Leave');
+    const saveBtn = el('button', {
+      className: 'save-btn',
+      onclick: () => this.saveProgression(),
+    }, 'Save Progress') as HTMLButtonElement;
+    this.saveBtn = saveBtn;
+    hud.appendChild(saveBtn);
+
+    this.dmToolsEl = this.buildDmTools();
+    this.dmToolsEl.style.display = 'none';
+    hud.appendChild(this.dmToolsEl);
+
+    const exitBtn = el('button', { className: 'danger', onclick: () => this.leaveSession() }, 'Leave');
     hud.appendChild(exitBtn);
 
     return hud;
@@ -484,6 +511,56 @@ export class Game {
     this.highlightActionTiles();
   }
 
+  private setDmAction(action: 'spawn' | 'move' | 'reveal' | null) {
+    this.dmAction = this.dmAction === action ? null : action;
+    this.updateStatus();
+  }
+
+  private buildDmTools(): HTMLElement {
+    const panel = el('div', { className: 'dm-tools' });
+    panel.appendChild(el('h3', {}, 'DM Tools'));
+
+    const spawnWrap = el('div', { className: 'dm-tool-row' });
+    this.dmMonsterSelect = el('select', {}) as HTMLSelectElement;
+    ['goblin', 'orc', 'skeleton', 'zombie', 'ghoul', 'shadow_imp', 'librarian', 'animated_book'].forEach((m) => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      this.dmMonsterSelect.appendChild(opt);
+    });
+    spawnWrap.appendChild(this.dmMonsterSelect);
+    spawnWrap.appendChild(el('button', { onclick: () => this.setDmAction('spawn') }, 'Spawn'));
+    panel.appendChild(spawnWrap);
+
+    const moveWrap = el('div', { className: 'dm-tool-row' });
+    this.dmTokenSelect = el('select', {}) as HTMLSelectElement;
+    moveWrap.appendChild(this.dmTokenSelect);
+    moveWrap.appendChild(el('button', { onclick: () => this.setDmAction('move') }, 'Move'));
+    panel.appendChild(moveWrap);
+
+    panel.appendChild(
+      el('button', { onclick: () => this.setDmAction('reveal') }, 'Reveal Fog')
+    );
+
+    return panel;
+  }
+
+  private updateDmTools() {
+    const isDm = this.isDm();
+    this.dmToolsEl.style.display = isDm && this.session?.status === 'active' ? 'block' : 'none';
+    if (!isDm || !this.session) return;
+
+    const currentToken = this.dmTokenSelect.value;
+    clear(this.dmTokenSelect);
+    this.session.monsters.filter((m) => m.alive !== false).forEach((m) => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = `${m.name} (${m.id})`;
+      this.dmTokenSelect.appendChild(opt);
+    });
+    if (currentToken) this.dmTokenSelect.value = currentToken;
+  }
+
   private onKeyDown(e: KeyboardEvent) {
     this.ensureAudioStarted();
     if (!this.session || this.session.status !== 'active' || this.session.phase !== 'player') return;
@@ -605,6 +682,34 @@ export class Game {
     } catch (err: any) {
       this.log(err.message || 'Rest failed.');
     }
+  }
+
+  private async saveProgression(): Promise<void> {
+    if (!this.session) return;
+    try {
+      this.saveBtn.disabled = true;
+      this.saveBtn.textContent = 'Saving...';
+      await saveProgress(this.sessionId);
+      this.saveBtn.textContent = 'Saved';
+      window.setTimeout(() => {
+        this.saveBtn.textContent = 'Save Progress';
+        this.saveBtn.disabled = false;
+      }, 1500);
+    } catch (err: any) {
+      this.saveBtn.textContent = 'Save Failed';
+      this.log(err.message || 'Save progress failed.');
+      window.setTimeout(() => {
+        this.saveBtn.textContent = 'Save Progress';
+        this.saveBtn.disabled = false;
+      }, 1500);
+    }
+  }
+
+  private async leaveSession() {
+    if (this.session && this.session.status !== 'won') {
+      await this.saveProgression();
+    }
+    this.onExit();
   }
 
   private async journeyOn() {
@@ -1094,7 +1199,32 @@ export class Game {
   }
 
   private async onTileClick(x: number, y: number) {
-    if (!this.session || this.session.phase !== 'player' || this.action !== 'move') return;
+    if (!this.session || this.session.status !== 'active') return;
+
+    if (this.dmAction && this.isDm()) {
+      try {
+        let response: { session: GameSession } | undefined;
+        if (this.dmAction === 'spawn') {
+          const name = this.dmMonsterSelect.value || 'goblin';
+          response = await dmSpawn(this.sessionId, { name, x, y });
+        } else if (this.dmAction === 'move') {
+          const tokenId = this.dmTokenSelect.value;
+          if (!tokenId) return;
+          response = await dmMove(this.sessionId, { token_id: tokenId, x, y });
+        } else if (this.dmAction === 'reveal') {
+          response = await dmReveal(this.sessionId, { x, y, radius: 4 });
+        }
+        if (response) {
+          this.dmAction = null;
+          this.update(response.session);
+        }
+      } catch (err: any) {
+        this.log(err.message || 'DM action failed.');
+      }
+      return;
+    }
+
+    if (this.session.phase !== 'player' || this.action !== 'move') return;
     try {
       const { session } = await actInSession(this.sessionId, 'move', { x, y });
       this.action = null;
@@ -1111,6 +1241,7 @@ export class Game {
       const player = this.session.player;
       const isAdjacent = Math.abs(player.x - token.x) + Math.abs(player.y - token.y) === 1;
       this.audio.swordHit();
+      this.audio.combatSting();
       try {
         const { session } = await actInSession(this.sessionId, 'attack', { target_id: token.id });
         this.action = null;
@@ -1128,6 +1259,7 @@ export class Game {
       if (token.type !== 'monster') return;
       const player = this.session.player;
       this.audio.rangedShot();
+      this.audio.combatSting();
       try {
         const { session } = await actInSession(this.sessionId, 'ranged', { target_id: token.id });
         this.action = null;
@@ -1149,6 +1281,7 @@ export class Game {
       } else {
         this.audio.swordHit();
       }
+      this.audio.combatSting();
       try {
         const { session } = await actInSession(this.sessionId, 'ability', { target_id: token.id });
         this.action = null;
@@ -1171,9 +1304,22 @@ export class Game {
     const prevPlayerPos = prevSession ? `${prevSession.player.x},${prevSession.player.y}` : '';
 
     this.session = session;
+
+    // Merge DM-revealed fog into the local visited set.
+    session.dm_revealed?.forEach((key) => this.visited.add(key));
+
+    // Music state transitions.
+    if (!prevSession) {
+      if (session.mode === 'arena') {
+        this.audio.combatSting();
+      } else {
+        this.audio.exploration();
+      }
+    }
     if (this.chatPanel) {
       this.chatPanel.style.display = this.isCampaignSession() ? 'flex' : 'none';
     }
+    this.updateDmTools();
     this.renderTokens();
     this.updateLighting();
     this.highlightActionTiles();
@@ -1357,7 +1503,8 @@ export class Game {
       phaseText = "Waiting for DM";
     }
     const actionText = this.action ? ` · ${this.action} mode` : '';
-    this.statusEl.textContent = `Turn ${this.session.turn} · ${phaseText}${actionText}`;
+    const dmActionText = this.dmAction ? ` · DM: ${this.dmAction}` : '';
+    this.statusEl.textContent = `Turn ${this.session.turn} · ${phaseText}${actionText}${dmActionText}`;
 
     const showDmBtn =
       this.session.status === 'active' && isDmPhase && isCampaign && this.isDm();
@@ -1470,6 +1617,10 @@ export class Game {
     if (this.keydownHandler) {
       window.removeEventListener('keydown', this.keydownHandler);
       this.keydownHandler = null;
+    }
+    if (this.beforeUnloadHandler) {
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      this.beforeUnloadHandler = null;
     }
     if (this.socket) {
       this.socket.disconnect();

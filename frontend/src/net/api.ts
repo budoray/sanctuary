@@ -31,6 +31,10 @@ export async function whoami() {
   return api('/api/whoami');
 }
 
+export async function getAppConfig() {
+  return api('/api/config') as Promise<{ pixellab_host: boolean; ollama_enabled: boolean }>;
+}
+
 export async function getRulesetOptions() {
   return api('/api/ruleset/osric/options') as Promise<{
     abilities: string[];
@@ -105,6 +109,12 @@ export async function createCharacter(character: PreviewRequest) {
   }) as Promise<{ character: CharacterState }>;
 }
 
+export async function regeneratePortrait(characterId: string) {
+  return api(`/api/characters/${characterId}/portrait`, {
+    method: 'POST',
+  }) as Promise<{ job_id: string; portrait_url: string }>;
+}
+
 export async function listCharacters() {
   return api('/api/characters') as Promise<{ characters: CharacterState[] }>;
 }
@@ -137,6 +147,7 @@ export interface GameSession {
   turn: number;
   phase: 'player' | 'dm';
   status: 'active' | 'won' | 'lost';
+  mode?: 'campaign' | 'arena';
   players: Token[];
   active_player_index: number;
   player: Token;
@@ -144,6 +155,7 @@ export interface GameSession {
   log: string[];
   turn_timer_seconds: number;
   turn_deadline: string | null;
+  dm_revealed?: string[];
 }
 
 export interface Token {
@@ -193,6 +205,35 @@ export interface User {
   id: number;
   name: string;
   is_admin?: boolean;
+}
+
+export interface Friend {
+  account_id: number;
+  status: string;
+  online?: boolean;
+}
+
+export interface FriendListResponse {
+  friends: Friend[];
+  pending: Friend[];
+}
+
+export interface AnalyticsSummary {
+  sessions: number;
+  wins: number;
+  losses: number;
+  level_ups: number;
+  deaths: number;
+  boss_kills: number;
+}
+
+export interface AnalyticsEvent {
+  id: string;
+  account_id: number | null;
+  session_id: string | null;
+  event_type: string;
+  payload: Record<string, any>;
+  created_at: string;
 }
 
 export async function createCampaign(campaign: { name: string; password: string; ruleset_id?: string; module_ids?: string[] }) {
@@ -282,6 +323,12 @@ export async function restInSession(sessionId: string) {
   }) as Promise<{ session: GameSession }>;
 }
 
+export async function saveProgress(sessionId: string) {
+  return api(`/api/sessions/${sessionId}/save`, {
+    method: 'POST',
+  }) as Promise<{ saved: boolean; character_ids: string[] }>;
+}
+
 export async function buyItem(characterId: string, itemId: string, cost = 15) {
   return api(`/api/characters/${characterId}/buy`, {
     method: 'POST',
@@ -325,11 +372,18 @@ export async function getSessionPresence(sessionId: string) {
 }
 
 export async function adminListCampaigns() {
-  return api('/admin/campaigns') as Promise<{ campaigns: { id: string; name: string; ruleset_id: string; dm_account_id: number; member_count: number; created_at: string | null }[] }>;
+  return api('/admin/campaigns') as Promise<{ campaigns: { id: string; name: string; ruleset_id: string; module_ids: string[]; dm_account_id: number; member_count: number; created_at: string | null }[] }>;
 }
 
 export async function adminDeleteCampaign(campaignId: string) {
   return api(`/admin/campaigns/${campaignId}`, { method: 'DELETE' }) as Promise<{ deleted: boolean }>;
+}
+
+export async function adminCreateCampaign(campaign: { name: string; password: string; module_ids: string[] }) {
+  return api('/admin/campaigns', {
+    method: 'POST',
+    body: JSON.stringify(campaign),
+  }) as Promise<{ campaign: Campaign }>;
 }
 
 export async function adminListSessions() {
@@ -338,4 +392,72 @@ export async function adminListSessions() {
 
 export async function adminDeleteSession(sessionId: string) {
   return api(`/admin/sessions/${sessionId}`, { method: 'DELETE' }) as Promise<{ deleted: boolean }>;
+}
+
+export async function listBestiary() {
+  return api('/api/bestiary') as Promise<{ monsters: string[] }>;
+}
+
+export async function dmSpawn(sessionId: string, payload: { name: string; x: number; y: number; token_id?: string }) {
+  return api(`/api/sessions/${sessionId}/dm/spawn`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }) as Promise<{ session: GameSession }>;
+}
+
+export async function dmMove(sessionId: string, payload: { token_id: string; x: number; y: number }) {
+  return api(`/api/sessions/${sessionId}/dm/move`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }) as Promise<{ session: GameSession }>;
+}
+
+export async function dmDamage(sessionId: string, payload: { token_id: string; amount: number }) {
+  return api(`/api/sessions/${sessionId}/dm/damage`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }) as Promise<{ session: GameSession }>;
+}
+
+export async function dmReveal(sessionId: string, payload: { x: number; y: number; radius?: number }) {
+  return api(`/api/sessions/${sessionId}/dm/reveal`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  }) as Promise<{ session: GameSession }>;
+}
+
+export async function listFriends() {
+  return api('/api/friends') as Promise<FriendListResponse>;
+}
+
+export async function addFriend(accountId: number) {
+  return api('/api/friends', {
+    method: 'POST',
+    body: JSON.stringify({ account_id: accountId }),
+  }) as Promise<{ status: string }>;
+}
+
+export async function acceptFriend(accountId: number) {
+  return api(`/api/friends/${accountId}/accept`, { method: 'POST' }) as Promise<{ status: string }>;
+}
+
+export async function declineFriend(accountId: number) {
+  return api(`/api/friends/${accountId}/decline`, { method: 'POST' }) as Promise<{ declined: boolean }>;
+}
+
+export async function removeFriend(accountId: number) {
+  return api(`/api/friends/${accountId}`, { method: 'DELETE' }) as Promise<{ removed: boolean }>;
+}
+
+export async function inviteCampaign(campaignId: string, accountId: number) {
+  return api(`/api/campaigns/${campaignId}/invite/${accountId}`, { method: 'POST' }) as Promise<{ invited: boolean }>;
+}
+
+export async function adminAnalytics() {
+  return api('/api/admin/analytics') as Promise<AnalyticsSummary>;
+}
+
+export async function adminAnalyticsEvents(eventType?: string) {
+  const query = eventType ? `?type=${encodeURIComponent(eventType)}` : '';
+  return api(`/api/admin/analytics/events${query}`) as Promise<{ events: AnalyticsEvent[] }>;
 }

@@ -1,0 +1,110 @@
+id: forsaken_library
+name: The Forsaken Library
+ruleset: osric
+description: >-
+  Dust-choked shelves tower to unseen ceilings in this forgotten archive. The
+  books here have learned to hate, and their keeper—the Librarian—still enforces
+  a long-broken silence.
+map:
+  width: 20
+  height: 15
+  tile_size: 40
+  tiles:
+    - "11111111111111111111"
+    - "10000010000000010001"
+    - "10111010111111010101"
+    - "10100000000000000101"
+    - "10101110111011101101"
+    - "10000000002000000001"
+    - "11111011111111101111"
+    - "10000000000000000001"
+    - "10101110111210111010"
+    - "10100000000000000010"
+    - "10111010111111010110"
+    - "10000000100000010000"
+    - "10111110101101011110"
+    - "10000000000000000001"
+    - "11111111111111111111"
+player_start:
+  x: 1
+  y: 1
+monsters:
+  - id: librarian
+    name: The Librarian
+    monster: librarian
+    x: 10
+    y: 7
+    color: "#8e44ad"
+    boss: true
+    phases:
+      - hp_threshold: 0.5
+        damage_bonus: 2
+        to_hit_bonus: 1
+        spawn:
+          - id: tome_minion_1
+            name: Animated Tome
+            monster: animated_book
+            x: 9
+            y: 6
+            color: "#c0392b"
+          - id: tome_minion_2
+            name: Animated Tome
+            monster: animated_book
+            x: 11
+            y: 8
+            color: "#c0392b"
+  - id: book_swarm_1
+    name: Animated Tome
+    monster: animated_book
+    x: 3
+    y: 3
+    color: "#c0392b"
+  - id: book_swarm_2
+    name: Animated Tome
+    monster: animated_book
+    x: 16
+    y: 3
+    color: "#c0392b"
+  - id: book_swarm_3
+    name: Animated Tome
+    monster: animated_book
+    x: 3
+    y: 12
+    color: "#c0392b"
+  - id: book_swarm_4
+    name: Animated Tome
+    monster: animated_book
+    x: 16
+    y: 12
+    color: "#c0392b"
+events:
+  - id: forbidden_stacks
+    x: 10
+    y: 5
+    message: >-
+      A lectern glows with forbidden light. Pull a cursed volume to open the
+      sealed wing, or step back and leave the knowledge buried?
+    choices:
+      open: Open the Sealed Wing
+      leave: Leave It Buried
+branches:
+  open:
+    - id: sealed_tome_1
+      name: Animated Tome
+      monster: animated_book
+      x: 12
+      y: 5
+      color: "#c0392b"
+    - id: sealed_tome_2
+      name: Animated Tome
+      monster: animated_book
+      x: 13
+      y: 5
+      color: "#c0392b"
+  leave:
+    - id: guardian_wisp
+      name: Animated Tome
+      monster: animated_book
+      x: 8
+      y: 9
+      color: "#c0392b"

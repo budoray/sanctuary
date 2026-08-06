@@ -2,7 +2,7 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -10,11 +10,16 @@ from backend.app.api.admin import router as admin_router
 from backend.app.api.arena import router as arena_router
 from backend.app.api.campaigns import router as campaigns_router
 from backend.app.api.characters import router as characters_router
+from backend.app.api.dm import router as dm_router
 from backend.app.api.modules import router as modules_router
+from backend.app.api.progression import router as progression_router
 from backend.app.api.sessions import router as sessions_router
+from backend.app.api.social import router as social_router
 from backend.app.config import SETTINGS, ROOT
 from backend.app.db import Base, engine
 from backend.app.auth import is_admin, require_account, require_admin
+import httpx
+
 from backend.app.socket_manager import socket_app
 from backend.app.tenshin_gate import name_from_cookie_header
 
@@ -54,14 +59,49 @@ fastapi_app.add_middleware(
 fastapi_app.include_router(admin_router, prefix="/api")
 fastapi_app.include_router(characters_router, prefix="/api")
 fastapi_app.include_router(campaigns_router, prefix="/api")
+fastapi_app.include_router(dm_router, prefix="/api")
 fastapi_app.include_router(modules_router, prefix="/api")
+fastapi_app.include_router(progression_router, prefix="/api")
 fastapi_app.include_router(sessions_router, prefix="/api")
+fastapi_app.include_router(social_router, prefix="/api")
 fastapi_app.include_router(arena_router, prefix="/api")
 
 
 @fastapi_app.get("/health")
 async def health():
     return {"status": "ok", "env": SETTINGS.app_env}
+
+
+@fastapi_app.get("/health/ready")
+async def health_ready():
+    """Readiness probe: verifies DB and (when enabled) Ollama are reachable."""
+    from sqlalchemy import text
+
+    db_ok = False
+    try:
+        async with engine.connect() as conn:
+            result = await conn.execute(text("SELECT 1"))
+            db_ok = result.scalar() == 1
+    except Exception:
+        db_ok = False
+
+    ollama_ok = False
+    if SETTINGS.ollama_enabled:
+        try:
+            async with httpx.AsyncClient(timeout=SETTINGS.ollama_timeout) as client:
+                resp = await client.get(f"{SETTINGS.ollama_host}/api/tags")
+                ollama_ok = resp.status_code == 200
+        except Exception:
+            ollama_ok = False
+    else:
+        ollama_ok = True
+
+    if db_ok and ollama_ok:
+        return {"status": "ok", "db": True, "ollama": ollama_ok}
+    raise HTTPException(
+        status_code=503,
+        detail={"status": "not ready", "db": db_ok, "ollama": ollama_ok},
+    )
 
 
 @fastapi_app.get("/version")
@@ -79,6 +119,15 @@ async def health_db():
         result = await conn.execute(text("SELECT 1"))
         row = result.scalar()
     return {"status": "ok", "db": row == 1}
+
+
+@fastapi_app.get("/api/config")
+async def app_config():
+    """Public runtime configuration used by the frontend."""
+    return {
+        "pixellab_host": bool(SETTINGS.pixellab_host),
+        "ollama_enabled": SETTINGS.ollama_enabled,
+    }
 
 
 @fastapi_app.get("/api/whoami")

@@ -1,0 +1,21 @@
+name: The Librarian
+frequency: unique
+no_encountered: 1
+size: medium
+alignment: lawful evil
+move: 60ft
+armour_class: 2 [18]
+hit_dice: '5+2'
+melee_attacks: 2 (claw 1d6, book blast 1d8)
+senses: Darkvision 120ft
+lair_chance: 100%
+intelligence: genius (17-18)
+morale: 12
+loot: Special
+experience: 650 +5/hp
+description: A tall, robed figure of dust and ink that tends the cursed stacks. Its voice is the rustle of turning pages, and it commands the books to rise and defend their shelves.
+abilities:
+- heading: Keeper of the Stacks
+  text: The Librarian can animate nearby tomes as servitors and lashes out with razor-edged pages when cornered.
+- heading: Phase Transition
+  text: When wounded, the Librarian summons a pair of animated tomes and its attacks grow more vicious.

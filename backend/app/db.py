@@ -1,5 +1,8 @@
 """Database setup."""
+import json
+import uuid
 from datetime import datetime, timezone
+from typing import Any
 
 from sqlalchemy import Column, DateTime, Integer, String, Text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -72,6 +75,44 @@ class CampaignMemberRecord(Base):
     account_id = Column(Integer, primary_key=True)
     role = Column(String, default="player")  # 'dm' or 'player'
     joined_at = Column(DateTime, default=_utc_now)
+
+
+class FriendRecord(Base):
+    __tablename__ = "friends"
+
+    account_id = Column(Integer, primary_key=True)
+    friend_account_id = Column(Integer, primary_key=True)
+    status = Column(String, default="pending")  # pending, accepted, declined
+    created_at = Column(DateTime, default=_utc_now)
+
+
+class EventRecord(Base):
+    __tablename__ = "events"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4())[:8])
+    account_id = Column(Integer, index=True, nullable=True)
+    session_id = Column(String, index=True, nullable=True)
+    event_type = Column(String, index=True, nullable=False)
+    payload_json = Column(Text, default="{}")
+    created_at = Column(DateTime, default=_utc_now)
+
+
+def record_event(
+    db: AsyncSession,
+    event_type: str,
+    account_id: int | None = None,
+    session_id: str | None = None,
+    payload: dict[str, Any] | None = None,
+) -> EventRecord:
+    """Create an analytics event record (callers must commit)."""
+    record = EventRecord(
+        event_type=event_type,
+        account_id=account_id,
+        session_id=session_id,
+        payload_json=json.dumps(payload or {}),
+    )
+    db.add(record)
+    return record
 
 
 async def get_db():

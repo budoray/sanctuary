@@ -32,7 +32,7 @@ async def osric_options():
     }
 
 
-def _serialize(character: char_engine.Character) -> dict[str, Any]:
+async def _serialize(character: char_engine.Character) -> dict[str, Any]:
     first_class = list(character.classes)[0] if character.classes else "fighter"
     return {
         "id": None,
@@ -47,7 +47,7 @@ def _serialize(character: char_engine.Character) -> dict[str, Any]:
         "saves": character.saves,
         "modifiers": character.modifiers,
         "seed": character.seed,
-        "portrait_url": portraits.character_portrait_url(character.name, first_class),
+        "portrait_url": await portraits.character_portrait_url(character.name, first_class, character.ancestry),
         "log": [
             {
                 "index": r.index,
@@ -67,8 +67,8 @@ def _serialize(character: char_engine.Character) -> dict[str, Any]:
     }
 
 
-def _character_state(character: char_engine.Character, char_id: str) -> dict[str, Any]:
-    state = _serialize(character)
+async def _character_state(character: char_engine.Character, char_id: str) -> dict[str, Any]:
+    state = await _serialize(character)
     state["id"] = char_id
     state.setdefault("inventory", [])
     state.setdefault("equipment", {})
@@ -102,7 +102,7 @@ async def preview_character(data: dict[str, Any]):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    return {"character": _serialize(char)}
+    return {"character": await _serialize(char)}
 
 
 @router.post("/characters")
@@ -136,7 +136,7 @@ async def create_character(
         raise HTTPException(status_code=400, detail=str(e))
 
     char_id = str(uuid.uuid4())[:8]
-    state = _character_state(char, char_id)
+    state = await _character_state(char, char_id)
     record = CharacterRecord(
         id=char_id,
         account_id=account_id,
@@ -185,7 +185,7 @@ async def list_characters(
                 "hit_points": r.hp,
                 "max_hp": r.max_hp,
                 "armour_class": r.ac,
-                "portrait_url": portraits.character_portrait_url(r.name, first_class),
+                "portrait_url": await portraits.character_portrait_url(r.name, first_class, r.ancestry),
             }
         characters.append(state)
     return {"characters": characters}
@@ -207,6 +207,49 @@ async def get_character(
     if not record:
         raise HTTPException(status_code=404, detail="Character not found")
     return {"character": json.loads(record.state)}
+
+
+@router.post("/characters/{character_id}/portrait")
+async def regenerate_portrait(
+    character_id: str,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    """Trigger PixelLab portrait generation for an existing character.
+
+    Returns a stable job ID and the new portrait URL. The URL is saved into the
+    character's state so subsequent loads use it automatically. If PixelLab is
+    not configured or the call fails, the endpoint returns 503 and the previous
+    portrait is left unchanged.
+    """
+    result = await db.execute(
+        select(CharacterRecord).where(
+            CharacterRecord.id == character_id,
+            CharacterRecord.account_id == account_id,
+        )
+    )
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="Character not found")
+
+    first_class = record.class_.split(",")[0] if record.class_ else "fighter"
+    prompt = portraits.build_prompt(record.name, first_class, record.ancestry)
+    portrait_url = await portraits.generate_portrait_url(prompt, first_class)
+    if portrait_url is None:
+        raise HTTPException(
+            status_code=503,
+            detail="PixelLab portrait generation is not available",
+        )
+
+    char_state = json.loads(record.state)
+    char_state["portrait_url"] = portrait_url
+    record.state = json.dumps(char_state)
+    await db.commit()
+
+    return {
+        "job_id": f"portrait-{character_id}",
+        "portrait_url": portrait_url,
+    }
 
 
 @router.delete("/characters/{character_id}")

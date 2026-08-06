@@ -70,6 +70,38 @@ class PresenceTracker:
 
 presence_tracker = PresenceTracker()
 
+
+class OnlineAccounts:
+    """Global, process-local online-account tracking.
+
+    Counts sockets per authenticated account so friends can see who is online.
+    Combined with the Redis adapter, this gives a best-effort global view; each
+    process only knows about sockets connected to it.
+    """
+
+    def __init__(self):
+        self._counts: dict[int, int] = {}
+
+    def add(self, account_id: int | None):
+        if account_id is None:
+            return
+        self._counts[account_id] = self._counts.get(account_id, 0) + 1
+
+    def remove(self, account_id: int | None):
+        if account_id is None:
+            return
+        self._counts[account_id] = self._counts.get(account_id, 0) - 1
+        if self._counts[account_id] <= 0:
+            del self._counts[account_id]
+
+    def is_online(self, account_id: int | None) -> bool:
+        if account_id is None:
+            return False
+        return account_id in self._counts
+
+
+online_accounts = OnlineAccounts()
+
 # Serve Socket.IO at the full /ws/socket.io path so Caddy proxies it cleanly
 # without depending on Starlette's mount path stripping.
 socket_app = socketio.ASGIApp(socket_manager, socketio_path="ws/socket.io")
@@ -155,6 +187,7 @@ def _format_chat_message(account_id, name, text):
 @socket_manager.event
 async def connect(sid, environ, auth=None):
     account_id, name = _account_from_environ(environ)
+    online_accounts.add(account_id)
     await socket_manager.save_session(sid, {"account_id": account_id, "name": name})
     await socket_manager.emit(
         "message", {"type": "system", "text": "Connected."}, to=sid
@@ -163,6 +196,10 @@ async def connect(sid, environ, auth=None):
 
 @socket_manager.event
 async def disconnect(sid):
+    sess = await socket_manager.get_session(sid)
+    account_id = sess.get("account_id") if sess else None
+    online_accounts.remove(account_id)
+
     session_id, occupants = presence_tracker.remove(sid)
     if session_id:
         await socket_manager.emit(

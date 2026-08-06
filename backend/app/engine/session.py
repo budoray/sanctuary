@@ -9,7 +9,7 @@ from collections import deque
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from backend.app.engine import bestiary, items
+from backend.app.engine import bestiary, items, validate
 from backend.app.engine.character import Character
 from backend.app.engine.dice import Dice, Roll
 from backend.app.engine.module import Module, MonsterSpawn
@@ -251,6 +251,7 @@ async def new_game(
         "rolls": [_roll_to_dict(r) for r in d.log],
         "turn_timer_seconds": max(0, turn_timer_seconds),
         "turn_deadline": _deadline(max(0, turn_timer_seconds)),
+        "dm_acted_this_round": False,
     }
 
 
@@ -279,6 +280,7 @@ async def advance_module(state: dict[str, Any], next_module: Module) -> dict[str
     state["turn"] = 1
     state["phase"] = PHASE_PLAYER
     state["active_player_index"] = 0
+    state["dm_acted_this_round"] = False
     state["status"] = STATUS_ACTIVE
     state["campaign_stage"] = state.get("campaign_stage", 0) + 1
     state["version"] += 1
@@ -286,6 +288,137 @@ async def advance_module(state: dict[str, Any], next_module: Module) -> dict[str
     state["log"].append(f"— The party journeys to {next_module.name} —")
     state["player"] = _active_player(state)
     return state
+
+
+def _unique_monster_id(state: dict[str, Any], base_id: str) -> str:
+    existing = {m["id"] for m in state.get("monsters", [])}
+    if base_id not in existing:
+        return base_id
+    suffix = 1
+    while f"{base_id}_{suffix}" in existing:
+        suffix += 1
+    return f"{base_id}_{suffix}"
+
+
+async def dm_spawn(
+    state: dict[str, Any],
+    module: Module,
+    monster_name: str,
+    x: int,
+    y: int,
+    token_id: str | None = None,
+) -> dict[str, Any]:
+    """Spawn a named monster at x, y."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    if not module.map.in_bounds(x, y):
+        raise ValueError("target is out of bounds")
+    if not module.map.walkable(x, y):
+        raise ValueError("target tile is blocked")
+    if _token_at(state, x, y) is not None:
+        raise ValueError("target tile is occupied")
+
+    template = bestiary.load(monster_name)
+    if token_id is None:
+        token_id = _unique_monster_id(state, f"dm_{template['id']}")
+    else:
+        token_id = _unique_monster_id(state, token_id)
+
+    spawn = MonsterSpawn(
+        id=token_id,
+        name=template["name"],
+        monster=monster_name,
+        x=x,
+        y=y,
+        color="#e74c3c",
+    )
+    d = Dice(seed=state["seed"] + state["version"])
+    token = _spawn_token(spawn, state, d)
+    state["monsters"].append(token)
+    state["version"] += 1
+    state["log"].append(f"The DM spawns {token['name']} at ({x}, {y}).")
+    state["rolls"].extend(_roll_to_dict(r) for r in d.log)
+    return token
+
+
+async def dm_move(
+    state: dict[str, Any], module: Module, token_id: str, x: int, y: int
+) -> dict[str, Any]:
+    """Move any monster to x, y."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    token = next(
+        (m for m in state.get("monsters", []) if m["id"] == token_id and m.get("alive", True)),
+        None,
+    )
+    if token is None:
+        raise ValueError("monster not found")
+    if not module.map.in_bounds(x, y):
+        raise ValueError("target is out of bounds")
+    if not module.map.walkable(x, y):
+        raise ValueError("target tile is blocked")
+    if _token_at(state, x, y) is not None:
+        raise ValueError("target tile is occupied")
+    token["x"] = x
+    token["y"] = y
+    state["version"] += 1
+    state["log"].append(f"The DM moves {token['name']} to ({x}, {y}).")
+    return token
+
+
+async def dm_damage(
+    state: dict[str, Any], token_id: str, amount: int
+) -> dict[str, Any]:
+    """Apply damage to a monster or player."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    token = next(
+        (t for t in _tokens(state) if t["id"] == token_id and t.get("alive", True)),
+        None,
+    )
+    if token is None:
+        raise ValueError("token not found")
+    amount = int(amount)
+    if amount <= 0:
+        raise ValueError("damage amount must be positive")
+
+    token["hp"] -= amount
+    state["log"].append(f"The DM deals {amount} damage to {token['name']}.")
+    if token["type"] == "player":
+        if token["hp"] <= -11:
+            token["alive"] = False
+            token["down"] = True
+            token["hp"] = 0
+            _check_loss(state)
+        elif token["hp"] <= 0:
+            token["hp"] = 0
+            token["down"] = True
+    else:
+        if token["hp"] <= 0:
+            token["alive"] = False
+            token["hp"] = 0
+            _grant_rewards(state, token)
+            _check_victory(state)
+    state["version"] += 1
+    return token
+
+
+async def dm_reveal(
+    state: dict[str, Any], module: Module, x: int, y: int, radius: int
+) -> None:
+    """Reveal a radius of fog for all players."""
+    radius = int(radius)
+    if radius < 0 or radius > 20:
+        raise ValueError("radius must be between 0 and 20")
+    revealed = state.setdefault("dm_revealed", set())
+    for dy in range(-radius, radius + 1):
+        for dx in range(-radius, radius + 1):
+            if abs(dx) + abs(dy) <= radius:
+                tx, ty = x + dx, y + dy
+                if module.map.in_bounds(tx, ty):
+                    revealed.add(f"{tx},{ty}")
+    state["version"] += 1
+    state["log"].append(f"The DM reveals the fog around ({x}, {y}).")
 
 
 def _tokens(state: dict[str, Any]) -> list[dict[str, Any]]:
@@ -571,6 +704,35 @@ def _is_undead(name: str) -> bool:
     return any(keyword in lowered for keyword in ("skeleton", "zombie", "ghoul", "wraith", "spectre", "vampire"))
 
 
+def _has_cover(state: dict[str, Any], module: Module, target: dict[str, Any]) -> bool:
+    """True if the target is adjacent to a wall tile and gains +2 AC cover."""
+    for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+        x, y = target["x"] + dx, target["y"] + dy
+        if module.map.in_bounds(x, y) and module.map.tiles[y][x] == "1":
+            return True
+    return False
+
+
+def _is_flanking(state: dict[str, Any], attacker: dict[str, Any], target: dict[str, Any]) -> bool:
+    """True if a living ally of the attacker is on the opposite side of the target."""
+    dx = attacker["x"] - target["x"]
+    dy = attacker["y"] - target["y"]
+    if abs(dx) + abs(dy) != 1:
+        return False
+    opposite_x = target["x"] - dx
+    opposite_y = target["y"] - dy
+    for token in state["players"]:
+        if (
+            token.get("alive", True)
+            and not token.get("down", False)
+            and token["id"] != attacker["id"]
+            and token["x"] == opposite_x
+            and token["y"] == opposite_y
+        ):
+            return True
+    return False
+
+
 def _check_loss(state: dict[str, Any]) -> None:
     """Set session to lost if every player is dead or downed."""
     if state["status"] != STATUS_ACTIVE:
@@ -635,6 +797,8 @@ async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[
 
     roll = d.roll("1d20", reason=f"{attacker['name']} attacks {target['name']}", kind="combat").total
     to_hit = attacker.get("to_hit", 0)
+    if attacker["type"] == "player" and _is_flanking(state, attacker, target):
+        to_hit += 2
     needed = 20 - target["ac"] + to_hit  # descending AC: lower AC needs higher roll
     hit = roll >= needed
     fatal = False
@@ -693,7 +857,10 @@ async def _ranged_attack(
 
     roll = d.roll("1d20", reason=f"{attacker['name']} shoots {target['name']}", kind="combat").total
     to_hit = attacker.get("to_hit", 0)
-    needed = 20 - target["ac"] + to_hit
+    effective_ac = target["ac"]
+    if _has_cover(state, module, target):
+        effective_ac -= 2  # descending AC: lower is better
+    needed = 20 - effective_ac + to_hit
     hit = roll >= needed
     fatal = False
     if hit:
@@ -825,6 +992,54 @@ async def _ability(state: dict[str, Any], token: dict[str, Any], target_id: str,
         raise ValueError(f"no special ability for class {cls!r}")
 
 
+async def _resolve_aoe(
+    state: dict[str, Any],
+    token: dict[str, Any],
+    center_x: int,
+    center_y: int,
+    module: Module,
+    d: Dice,
+) -> None:
+    """Area-of-effect burst for magic-user/illusionist/cleric."""
+    cls = token.get("classes", [""])[0].lower()
+    if cls not in ("magic-user", "illusionist", "cleric"):
+        raise ValueError("this class cannot use area abilities")
+    dist = _ranged_distance(token, {"x": center_x, "y": center_y})
+    if dist > 6:
+        raise ValueError("center is out of range")
+    if not _line_of_sight(state, module, token["x"], token["y"], center_x, center_y):
+        raise ValueError("no line of sight to center")
+
+    if cls == "cleric":
+        damage_expr = "1d6"
+        reason = "Holy Burst damage"
+    else:
+        damage_expr = "1d4+1"
+        reason = "Fireball damage"
+
+    total_damage = 0
+    for monster in state["monsters"]:
+        if not monster.get("alive", True):
+            continue
+        if max(abs(monster["x"] - center_x), abs(monster["y"] - center_y)) > 2:
+            continue
+        if not _line_of_sight(state, module, center_x, center_y, monster["x"], monster["y"]):
+            continue
+        dmg_roll = d.roll(damage_expr, reason=reason, kind="combat")
+        damage = max(1, dmg_roll.total)
+        monster["hp"] -= damage
+        total_damage += damage
+        await _check_boss_phase(state, monster)
+        if monster["hp"] <= 0:
+            monster["alive"] = False
+            monster["hp"] = 0
+            _grant_rewards(state, monster)
+            _check_victory(state)
+    state["log"].append(f"{token['name']} unleashes an area burst for {total_damage} total damage.")
+    if state["status"] == STATUS_WON:
+        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
+
+
 async def _attack_with_bonuses(
     state: dict[str, Any],
     attacker: dict[str, Any],
@@ -836,6 +1051,8 @@ async def _attack_with_bonuses(
 ) -> None:
     roll = d.roll("1d20", reason=f"{attacker['name']} {reason} {target['name']}", kind="combat").total
     to_hit = attacker.get("to_hit", 0) + to_hit_bonus
+    if attacker["type"] == "player" and _is_flanking(state, attacker, target):
+        to_hit += 2
     needed = 20 - target["ac"] + to_hit
     hit = roll >= needed
     fatal = False
@@ -870,6 +1087,31 @@ async def _attack_with_bonuses(
         state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
 
 
+async def _start_round(state: dict[str, Any], module: Module, d: Dice) -> None:
+    """Advance the turn counter and roll initiative for the new round.
+
+    If the DM wins initiative, the DM acts immediately before control returns
+    to the players. Otherwise the players act first.
+    """
+    player_init = d.roll("1d6", reason="player initiative", kind="initiative").total
+    dm_init = d.roll("1d6", reason="DM initiative", kind="initiative").total
+    state["turn"] += 1
+    state["phase"] = PHASE_PLAYER
+    state["active_player_index"] = 0
+    state["dm_acted_this_round"] = False
+    state["player"] = _active_player(state)
+    _tick_statuses(state)
+    state["statuses_tick_index"] = 0
+    state["turn_deadline"] = _deadline(state["turn_timer_seconds"])
+    state["log"].append(f"— Turn {state['turn']} —")
+    if dm_init > player_init:
+        state["log"].append("The DM seizes the initiative!")
+        await _run_dm_turn(state, module, d)
+        state["dm_acted_this_round"] = True
+    else:
+        state["log"].append("The players act first!")
+
+
 async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> dict[str, Any]:
     """Perform one player or DM action and return the updated state."""
     d = Dice(seed=state["seed"] + state["turn"] * 1000 + state["version"])
@@ -878,15 +1120,9 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
         if state["phase"] != PHASE_DM:
             raise ValueError("not the DM's turn")
         _tick_statuses(state)
-        await _run_dm_turn(state, module, d)
-        state["turn"] += 1
-        state["phase"] = PHASE_PLAYER
-        state["active_player_index"] = 0
-        state["player"] = _active_player(state)
-        _tick_statuses(state)
-        state["statuses_tick_index"] = 0
-        state["turn_deadline"] = _deadline(state["turn_timer_seconds"])
-        state["log"].append(f"— Turn {state['turn']} —")
+        if not state.get("dm_acted_this_round", False):
+            await _run_dm_turn(state, module, d)
+        await _start_round(state, module, d)
 
     else:
         if state["phase"] != PHASE_PLAYER:
@@ -897,36 +1133,36 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
             state["statuses_tick_index"] = active_index
         token = _active_player(state)
 
+        # Server-side anti-cheat validation: actor and target must be legal.
         if action == "move":
-            if token.get("down", False):
-                raise ValueError("downed players cannot move")
+            validate.validate_move(state, module, int(kwargs["x"]), int(kwargs["y"]))
+        elif action in ("attack", "ability"):
+            validate.validate_attack_target(state, kwargs["target_id"])
+        elif action == "ranged":
+            validate.validate_ranged_target(state, module, kwargs["target_id"], max_range=RANGED_RANGE)
+        elif action == "aoe":
+            validate.validate_actor(state)
+        elif action in ("use_potion", "end_turn"):
+            validate.validate_actor(state)
+
+        if action == "move":
             await _move(state, token, int(kwargs["x"]), int(kwargs["y"]), module, d)
 
         elif action == "attack":
-            if token.get("down", False):
-                raise ValueError("downed players cannot attack")
             target_id = kwargs["target_id"]
             target = next((m for m in state["monsters"] if m["id"] == target_id), None)
-            if target is None:
-                raise ValueError("target not found")
             await _attack(state, token, target, d)
             state["phase"] = PHASE_DM
             state["turn_deadline"] = None
 
         elif action == "ranged":
-            if token.get("down", False):
-                raise ValueError("downed players cannot attack")
             target_id = kwargs["target_id"]
             target = next((m for m in state["monsters"] if m["id"] == target_id), None)
-            if target is None:
-                raise ValueError("target not found")
             await _ranged_attack(state, token, target, module, d)
             state["phase"] = PHASE_DM
             state["turn_deadline"] = None
 
         elif action == "use_potion":
-            if token.get("down", False):
-                raise ValueError("downed players cannot use potions")
             await _use_potion(state, token, d)
             state["phase"] = PHASE_DM
             state["turn_deadline"] = None
@@ -939,9 +1175,14 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
             state["turn_deadline"] = None
 
         elif action == "ability":
-            if token.get("down", False):
-                raise ValueError("downed players cannot use abilities")
-            await _ability(state, token, kwargs["target_id"], module, d)
+            target_id = kwargs["target_id"]
+            target = next((m for m in state["monsters"] if m["id"] == target_id), None)
+            await _ability(state, token, target_id, module, d)
+            state["phase"] = PHASE_DM
+            state["turn_deadline"] = None
+
+        elif action == "aoe":
+            await _resolve_aoe(state, token, int(kwargs["center_x"]), int(kwargs["center_y"]), module, d)
             state["phase"] = PHASE_DM
             state["turn_deadline"] = None
 
@@ -1122,4 +1363,5 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "log": state["log"],
         "turn_timer_seconds": state.get("turn_timer_seconds", 0),
         "turn_deadline": state.get("turn_deadline"),
+        "dm_revealed": list(state.get("dm_revealed", [])),
     }

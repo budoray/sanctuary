@@ -291,6 +291,30 @@ async def list_campaign_sessions(
     return {"sessions": sessions}
 
 
+@router.post("/campaigns/{campaign_id}/invite/{account_id}")
+async def invite_campaign_member(
+    campaign_id: str,
+    account_id: int,
+    record: CampaignRecord = Depends(_require_campaign_manager),
+    db: AsyncSession = Depends(get_db),
+):
+    """DM-only invite that adds a member record directly."""
+    result = await db.execute(
+        select(CampaignMemberRecord).where(
+            CampaignMemberRecord.campaign_id == campaign_id,
+            CampaignMemberRecord.account_id == account_id,
+        )
+    )
+    if result.scalar_one_or_none() is None:
+        db.add(
+            CampaignMemberRecord(
+                campaign_id=campaign_id, account_id=account_id, role="player"
+            )
+        )
+        await db.commit()
+    return {"invited": True}
+
+
 @router.get("/campaigns/{campaign_id}/members")
 async def list_campaign_members(
     campaign_id: str,

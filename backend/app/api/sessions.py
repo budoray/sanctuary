@@ -8,7 +8,8 @@ from sqlalchemy import exists, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.auth import require_account
-from backend.app.db import CampaignMemberRecord, CampaignRecord, CharacterRecord, SessionRecord, get_db
+from backend.app.db import CampaignMemberRecord, CampaignRecord, CharacterRecord, SessionRecord, get_db, record_event
+from backend.app.dependencies import limit_actions
 import random
 
 from backend.app.engine import character as char_engine
@@ -55,6 +56,70 @@ async def _is_campaign_dm(
         )
     )
     return result.scalar_one_or_none() is not None
+
+
+def _emit_session_events(
+    db: AsyncSession,
+    prev_state: dict[str, Any],
+    state: dict[str, Any],
+    actor_account_id: int,
+) -> None:
+    """Record analytics events based on state changes after an action."""
+    session_id = state.get("id")
+    prev_status = prev_state.get("status")
+    new_status = state.get("status")
+
+    if prev_status == "active" and new_status == "won":
+        record_event(
+            db,
+            "session_end_won",
+            account_id=actor_account_id,
+            session_id=session_id,
+        )
+    if prev_status == "active" and new_status == "lost":
+        record_event(
+            db,
+            "session_end_lost",
+            account_id=actor_account_id,
+            session_id=session_id,
+        )
+
+    prev_players = {p["id"]: p for p in prev_state.get("players", [])}
+    for player in state.get("players", []):
+        prev_player = prev_players.get(player["id"])
+        if prev_player is None:
+            continue
+        if prev_player.get("alive", True) and not player.get("alive", True):
+            record_event(
+                db,
+                "player_death",
+                account_id=player.get("account_id", actor_account_id),
+                session_id=session_id,
+                payload={"name": player["name"], "character_id": player.get("character_id")},
+            )
+        if player.get("level", 1) > prev_player.get("level", 1):
+            record_event(
+                db,
+                "level_up",
+                account_id=player.get("account_id", actor_account_id),
+                session_id=session_id,
+                payload={"name": player["name"], "level": player.get("level", 1)},
+            )
+
+    prev_monsters = {
+        m["id"]: m
+        for m in prev_state.get("monsters", [])
+        if m.get("alive", True) and m.get("boss")
+    }
+    for monster in state.get("monsters", []):
+        if monster["id"] in prev_monsters and not monster.get("alive", True):
+            record_event(
+                db,
+                "boss_kill",
+                account_id=actor_account_id,
+                session_id=session_id,
+                payload={"name": monster["name"]},
+            )
 
 
 @router.post("/sessions")
@@ -136,6 +201,13 @@ async def create_session(
         state=json.dumps(state),
     )
     db.add(session_record)
+    record_event(
+        db,
+        "session_start",
+        account_id=account_id,
+        session_id=session_id,
+        payload={"module_id": module_id, "campaign_id": campaign_id},
+    )
     await db.commit()
 
     return {"session": session_engine.view(state)}
@@ -241,6 +313,7 @@ async def act_in_session(
     data: dict[str, Any],
     db: AsyncSession = Depends(get_db),
     account_id: int = Depends(require_account),
+    _rate_limited: None = Depends(limit_actions),
 ):
     result = await db.execute(
         select(SessionRecord).where(SessionRecord.id == session_id)
@@ -250,6 +323,7 @@ async def act_in_session(
         raise HTTPException(status_code=404, detail="Session not found")
 
     state = json.loads(record.state)
+    prev_state = json.loads(record.state)
     mod = module.load(record.module_id)
 
     action = data.get("action")
@@ -273,6 +347,8 @@ async def act_in_session(
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+    _emit_session_events(db, prev_state, state, account_id)
 
     record.state = json.dumps(state)
     record.status = state["status"]
