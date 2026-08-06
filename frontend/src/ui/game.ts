@@ -46,6 +46,7 @@ export class Game {
   private action: 'move' | 'attack' | null = null;
   private session: GameSession | null = null;
   private onExit: () => void;
+  private onReplay?: (characterId: string) => void;
   private canvasContainer: HTMLElement;
   private timerInterval: number | null = null;
   private timeoutFired = false;
@@ -68,12 +69,14 @@ export class Game {
     sessionId: string,
     module: ModuleData,
     initialSession: GameSession,
-    onExit: () => void
+    onExit: () => void,
+    onReplay?: (characterId: string) => void
   ) {
     this.root = container;
     this.sessionId = sessionId;
     this.module = module;
     this.onExit = onExit;
+    this.onReplay = onReplay;
 
     this.root.className = 'game-shell';
     this.canvasContainer = el('div', { className: 'game-canvas-container' });
@@ -204,8 +207,13 @@ export class Game {
     panel.appendChild(el('p', { className: 'message' }, won
       ? 'The lair is quiet. You survive to adventure again.'
       : 'Your light fades in the dark. The dungeon claims another.'));
-    const again = el('button', { onclick: () => this.onExit() }, 'Return to Sanctuary');
-    panel.appendChild(again);
+    const canReplay = this.onReplay && this.session.character_id;
+    if (canReplay) {
+      const replay = el('button', { className: 'enter', onclick: () => this.onReplay!(this.session!.character_id!) }, 'Play Again');
+      panel.appendChild(replay);
+    }
+    const leave = el('button', { onclick: () => this.onExit() }, 'Return to Sanctuary');
+    panel.appendChild(leave);
     overlay.appendChild(panel);
     this.root.appendChild(overlay);
   }

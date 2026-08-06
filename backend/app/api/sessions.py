@@ -74,7 +74,7 @@ async def create_session(
     mod = module.load(module_id)
     session_id = str(uuid.uuid4())[:8]
     state = await session_engine.new_game(
-        session_id, mod, char, turn_timer_seconds=turn_timer_seconds
+        session_id, mod, char, turn_timer_seconds=turn_timer_seconds, character_id=character_id
     )
 
     session_record = SessionRecord(

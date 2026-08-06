@@ -113,7 +113,8 @@ export class SanctuaryApp {
         session.id,
         module.map,
         session,
-        () => this.showSelect()
+        () => this.showSessions(),
+        (characterId) => this.replayGame(characterId)
       );
       this.current = game;
       await game.init();
@@ -122,6 +123,33 @@ export class SanctuaryApp {
       this.showSelect();
       // eslint-disable-next-line no-console
       console.error('Failed to resume game:', err);
+    }
+  }
+
+  private async replayGame(characterId: string) {
+    this.setScreen('loading');
+    clear(this.app);
+    this.current?.destroy();
+
+    try {
+      const { session } = await createSession(characterId, 'sample_lair');
+      const { module } = await getModule(session.module_id);
+      this.setScreen('game');
+      const game = new Game(
+        this.app,
+        session.id,
+        module.map,
+        session,
+        () => this.showSessions(),
+        (cid) => this.replayGame(cid)
+      );
+      this.current = game;
+      await game.init();
+    } catch (err: any) {
+      this.setScreen('select');
+      this.showSelect();
+      // eslint-disable-next-line no-console
+      console.error('Failed to replay game:', err);
     }
   }
 
@@ -140,7 +168,8 @@ export class SanctuaryApp {
         session.id,
         module.map,
         session,
-        () => this.showSelect()
+        () => this.showSessions(),
+        (characterId) => this.replayGame(characterId)
       );
       this.current = game;
       await game.init();

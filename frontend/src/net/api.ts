@@ -101,6 +101,7 @@ export async function deleteCharacter(characterId: string) {
 export interface GameSession {
   id: string;
   module_id: string;
+  character_id: string | null;
   turn: number;
   phase: 'player' | 'dm';
   status: 'active' | 'won' | 'lost';

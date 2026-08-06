@@ -58,6 +58,7 @@ async def new_game(
     character: Character,
     seed: int | None = None,
     turn_timer_seconds: int = 0,
+    character_id: str | None = None,
 ) -> dict[str, Any]:
     """Create a fresh session state."""
     if seed is None:
@@ -76,7 +77,7 @@ async def new_game(
         "max_hp": character.hit_points,
         "ac": character.armour_class,
         "color": "#3498db",
-        "character_id": None,
+        "character_id": character_id,
     }
 
     monsters: list[dict[str, Any]] = []
@@ -100,6 +101,7 @@ async def new_game(
     return {
         "id": session_id,
         "module_id": module.id,
+        "character_id": character_id,
         "version": 0,
         "turn": 1,
         "phase": PHASE_PLAYER,
@@ -270,6 +272,7 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": state["id"],
         "module_id": state["module_id"],
+        "character_id": state.get("character_id"),
         "turn": state["turn"],
         "phase": state["phase"],
         "status": state["status"],
