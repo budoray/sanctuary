@@ -12,7 +12,11 @@ class DMController:
     """Pluggable DM. Defaults to Ollama locally; falls back to a simple rule DM."""
 
     async def take_turn(self, session) -> dict[str, Any]:
-        """Return a DM turn result: {token_id, x, y, narration, attack?, damage?}."""
+        """Return a DM turn result: {token_id, x, y, narration, attack?, damage?}.
+
+        The DM controller must not mutate session state directly; the caller
+        applies damage/movement events from the returned result.
+        """
         player = session.player_token()
         enemies = session.dm_tokens()
         if not player or not enemies:
@@ -25,12 +29,17 @@ class DMController:
         result: dict[str, Any] = {"token_id": target.id}
 
         if distance == 1:
-            # Attack the player.
-            damage = max(1, random.randint(1, 4))
-            player.hp = max(0, player.hp - damage)
-            result["attack"] = {"target_id": player.id, "damage": damage, "hit": True}
+            # Attack the player. OSRIC-ish: d20 roll, hit on AC or better.
+            roll = random.randint(1, 20)
+            hit = roll >= player.ac
+            damage = random.randint(1, 4) if hit else 0
+            result["attack"] = {"target_id": player.id, "damage": damage, "hit": hit, "roll": roll}
+            event = (
+                f"{target.name} attacks {player.name} and {'hits' if hit else 'misses'}"
+                + (f" for {damage} damage." if hit else ".")
+            )
             result["narration"] = await self.narrate({
-                "event": f"{target.name} attacks {player.name} for {damage} damage.",
+                "event": event,
                 "session": session.to_dict(),
             })
             return result
@@ -94,8 +103,43 @@ class DMController:
 
     def _fallback(self, context: dict[str, Any]) -> str:
         event = context.get("event", "")
-        if "attacks" in event.lower():
-            return "Steel clashes in the dark."
-        if "moved" in event.lower():
-            return "The figure shifts across the stone floor."
-        return "The dungeon is silent, save for dripping water."
+        text = event.lower()
+
+        if "misses" in text:
+            return random.choice([
+                "A blade whistles through empty air.",
+                "The blow glances off armor and stone alike.",
+                "Teeth snap shut on nothing.",
+                "The attacker overextends, leaving an opening.",
+            ])
+
+        if "hits" in text or "damage" in text:
+            return random.choice([
+                "Steel finds flesh in the gloom.",
+                "A wet cry echoes off the walls.",
+                "The strike lands with a sickening crunch.",
+                "Pain flares sharp and sudden.",
+            ])
+
+        if "moves toward" in text or "moved" in text:
+            return random.choice([
+                "Claws scrape over cold flagstones as it closes in.",
+                "Shadows lengthen with each step it takes.",
+                "It pads forward, eyes fixed and unblinking.",
+                "The stench grows stronger as it nears.",
+            ])
+
+        if "cannot reach" in text:
+            return random.choice([
+                "It snarls at the obstacle, foiled for now.",
+                "Frustrated claws rake the stone.",
+                "It paces, searching for another way through.",
+                "The barrier holds, but not for long.",
+            ])
+
+        return random.choice([
+            "The dungeon is silent, save for dripping water.",
+            "Somewhere in the dark, something shifts.",
+            "Torchlight flickers against damp stone.",
+            "A draft carries the smell of old decay.",
+        ])
