@@ -42,6 +42,24 @@ else
   fi
 fi
 
+# The running Sanctuary process holds the database open, so drop will fail unless
+# we stop it first. We remember whether it was active so we can return to that
+# state afterward (deploy will restart it anyway, but a standalone setup run
+# should not leave the game down unexpectedly).
+SERVICE="tenshin-sanctuary.service"
+SERVICE_WAS_ACTIVE=""
+if systemctl list-unit-files "$SERVICE" >/dev/null 2>&1; then
+  if systemctl is-active --quiet "$SERVICE"; then
+    SERVICE_WAS_ACTIVE=1
+    echo ">> Stopping ${SERVICE} so the database can be dropped..."
+    systemctl stop "$SERVICE"
+    # Wait a moment for connections to close; DROP DATABASE is impatient.
+    sleep 2
+  else
+    echo ">> ${SERVICE} is already stopped"
+  fi
+fi
+
 echo ">> Dropping existing ${DB_NAME} database and user (if any)..."
 "${PSQL_CMD[@]}" -c "DROP DATABASE IF EXISTS ${DB_NAME};" >/dev/null
 "${PSQL_CMD[@]}" -c "DROP USER IF EXISTS ${DB_USER};" >/dev/null
@@ -85,6 +103,11 @@ else
   echo ">> WARN: ${ENV_FILE} directory does not exist; not writing .env"
   echo "    Add this line manually:"
   echo "    DATABASE_URL=\"postgresql+asyncpg://${DB_USER}:${DB_PASSWORD}@127.0.0.1:5432/${DB_NAME}\""
+fi
+
+if [ -n "$SERVICE_WAS_ACTIVE" ]; then
+  echo ">> Restarting ${SERVICE} with the fresh database..."
+  systemctl start "$SERVICE"
 fi
 
 echo ">> Done. Sanctuary PostgreSQL database is fresh and ready."
