@@ -256,8 +256,12 @@ async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
                 monster["y"] = ty
                 moved = True
                 break
-        if moved and _adjacent(monster, player):
-            await _attack(state, monster, player, d)
+        if moved:
+            line = await narrator.narrate_move(monster, random.Random(state["seed"] + state["version"]))
+            if line:
+                state["log"].append(line)
+            if _adjacent(monster, player):
+                await _attack(state, monster, player, d)
 
 
 def view(state: dict[str, Any]) -> dict[str, Any]:

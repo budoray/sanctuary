@@ -590,6 +590,8 @@ export class Game {
   }
 
   private update(session: GameSession) {
+    const wasDm = this.session?.phase === 'dm';
+    const playerHurt = this.session ? session.player.hp < this.session.player.hp : false;
     this.session = session;
     this.renderTokens();
     this.updateLighting();
@@ -598,6 +600,29 @@ export class Game {
     this.updateActions();
     this.updateTimer();
     this.renderLog();
+
+    if (wasDm && session.phase === 'player' && playerHurt) {
+      this.spawnMonsterAttackSlash();
+    }
+  }
+
+  private spawnMonsterAttackSlash() {
+    if (!this.session) return;
+    const player = this.session.player;
+    let attacker: Token | null = null;
+    let bestDist = Infinity;
+    for (const m of this.session.monsters) {
+      if (m.alive === false) continue;
+      const dist = Math.abs(m.x - player.x) + Math.abs(m.y - player.y);
+      if (dist <= 1 && dist < bestDist) {
+        attacker = m;
+        bestDist = dist;
+      }
+    }
+    if (attacker) {
+      this.spawnSlashEffect(attacker.x, attacker.y, player.x, player.y);
+      this.shakeFrames = 12;
+    }
   }
 
   private updateActions() {
