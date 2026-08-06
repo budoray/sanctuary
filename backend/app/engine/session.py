@@ -140,6 +140,7 @@ def new_session(account_id: int | None = None, module_id: str = "sample_lair", r
         account_id=account_id,
         map=_build_lair(),
     )
-    session.add_token("Hero", 3, 4, owner="player", hp=8, max_hp=8, ac=10)
+    # Place the hero clear of the top-left HUD overlay.
+    session.add_token("Hero", 10, 6, owner="player", hp=8, max_hp=8, ac=10)
     session.add_token("Goblin", 21, 5, color="#2ecc71", hp=4, max_hp=4, ac=6)
     return session
