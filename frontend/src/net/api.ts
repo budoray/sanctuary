@@ -107,6 +107,8 @@ export interface GameSession {
   player: Token;
   monsters: Token[];
   log: string[];
+  turn_timer_seconds: number;
+  turn_deadline: string | null;
 }
 
 export interface Token {
@@ -154,10 +156,20 @@ export async function joinCampaign(campaignId: string, password: string) {
   }) as Promise<{ campaign: Campaign }>;
 }
 
-export async function createSession(characterId: string, moduleId = 'sample_lair', campaignId?: string) {
-  return api('/api/sessions', {
+export async function createSession(
+  characterId: string,
+  moduleId = 'sample_lair',
+  campaignId?: string,
+  turnTimerSeconds = 0,
+) {
+  return api('/sessions', {
     method: 'POST',
-    body: JSON.stringify({ character_id: characterId, module_id: moduleId, campaign_id: campaignId }),
+    body: JSON.stringify({
+      character_id: characterId,
+      module_id: moduleId,
+      campaign_id: campaignId,
+      turn_timer_seconds: turnTimerSeconds,
+    }),
   }) as Promise<{ session: GameSession }>;
 }
 

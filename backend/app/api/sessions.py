@@ -26,6 +26,7 @@ async def create_session(
     character_id = data.get("character_id")
     module_id = data.get("module_id", DEFAULT_MODULE)
     campaign_id = data.get("campaign_id")
+    turn_timer_seconds = int(data.get("turn_timer_seconds", 0) or 0)
 
     result = await db.execute(
         select(CharacterRecord).where(
@@ -72,7 +73,9 @@ async def create_session(
 
     mod = module.load(module_id)
     session_id = str(uuid.uuid4())[:8]
-    state = session_engine.new_game(session_id, mod, char)
+    state = await session_engine.new_game(
+        session_id, mod, char, turn_timer_seconds=turn_timer_seconds
+    )
 
     session_record = SessionRecord(
         id=session_id,
@@ -180,7 +183,7 @@ async def act_in_session(
     mod = module.load(record.module_id)
     action = data.get("action")
     try:
-        state = session_engine.act(
+        state = await session_engine.act(
             state,
             mod,
             action,
