@@ -1,5 +1,6 @@
-import { Container, Graphics, Text } from 'pixi.js';
+import { Container, Graphics, Sprite, Text } from 'pixi.js';
 import { Token } from '../net/api';
+import { tokenFrame } from '../lib/tile-atlas';
 
 interface Floater {
   text: Text;
@@ -55,6 +56,8 @@ export class TokenSprite {
     const pad = 3;
     const size = tileSize - pad * 2;
     const baseColor = this.resolveColor(token);
+    const atlasKey = this.resolveAtlasKey(token);
+    const atlasTex = atlasKey ? tokenFrame(atlasKey) : null;
 
     // Drop shadow
     this.shadow = new Graphics();
@@ -64,7 +67,18 @@ export class TokenSprite {
 
     // Body
     this.body = new Graphics();
-    if (token.type === 'player') {
+    if (atlasTex) {
+      const atlas = new Sprite(atlasTex);
+      atlas.width = size * 0.9;
+      atlas.height = size * 0.9;
+      atlas.anchor.set(0.5);
+      atlas.x = cx;
+      atlas.y = cy;
+      this.body.addChild(atlas);
+      // Tint faint class colour around the edges for readability
+      this.body.circle(cx, cy, size * 0.44);
+      this.body.stroke({ width: 2, color: baseColor, alpha: 0.65 });
+    } else if (token.type === 'player') {
       // Hero: shield-shaped body
       this.body.roundRect(cx - size * 0.38, cy - size * 0.38, size * 0.76, size * 0.76, 8);
       this.body.fill({ color: baseColor });
@@ -81,7 +95,9 @@ export class TokenSprite {
 
     // Detail icon
     this.detail = new Graphics();
-    if (token.type === 'player') {
+    if (atlasTex) {
+      // No extra vector detail when using atlas sprite
+    } else if (token.type === 'player') {
       // Sword cross
       const bladeW = size * 0.12;
       const bladeH = size * 0.5;
@@ -160,6 +176,14 @@ export class TokenSprite {
     }
     const key = token.name?.toLowerCase().replace(/[\s-]/g, '') || 'monster';
     return TOKEN_COLORS[key] || parseInt((token.color || '#2ecc71').replace('#', ''), 16) || TOKEN_COLORS.monster;
+  }
+
+  private resolveAtlasKey(token: Token): string | undefined {
+    if (token.type === 'player') {
+      const cls = token.classes?.[0]?.toLowerCase().replace(/[-\s]/g, '') || 'player';
+      return cls;
+    }
+    return token.monster || token.name?.toLowerCase().replace(/[\s-]/g, '') || '';
   }
 
   updateHP(hp: number, maxHp: number) {

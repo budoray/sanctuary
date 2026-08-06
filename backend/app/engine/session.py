@@ -89,6 +89,7 @@ def _spawn_token(spawn, state: dict[str, Any], d: Dice) -> dict[str, Any]:
         "id": spawn.id,
         "name": spawn.name,
         "type": "monster",
+        "monster": spawn.monster,
         "x": spawn.x,
         "y": spawn.y,
         "hp": _roll_hp(template, d),

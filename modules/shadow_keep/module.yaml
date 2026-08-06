@@ -9,6 +9,7 @@ map:
   width: 20
   height: 15
   tile_size: 40
+  theme: dungeon
   tiles:
     - "11111111111111111111"
     - "10000000000000000001"

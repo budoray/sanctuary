@@ -20,6 +20,7 @@ class Map:
     height: int
     tile_size: int
     tiles: list[str]
+    theme: str | None = None
 
     def in_bounds(self, x: int, y: int) -> bool:
         return 0 <= x < self.width and 0 <= y < self.height
@@ -86,6 +87,7 @@ def load(module_id: str) -> Module:
         height=map_doc.get("height", height),
         tile_size=map_doc.get("tile_size", 40),
         tiles=tiles,
+        theme=map_doc.get("theme"),
     )
 
     player_start = doc.get("player_start", {"x": 1, "y": 1})

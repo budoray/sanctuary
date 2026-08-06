@@ -8,6 +8,7 @@ map:
   width: 18
   height: 14
   tile_size: 40
+  theme: cave
   tiles:
     - "111111111111111111"
     - "100000000000000001"

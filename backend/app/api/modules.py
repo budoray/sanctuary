@@ -23,6 +23,7 @@ async def get_module(module_id: str):
                 "height": mod.map.height,
                 "tile_size": mod.map.tile_size,
                 "tiles": mod.map.tiles,
+                "theme": mod.map.theme,
             },
         }
     }

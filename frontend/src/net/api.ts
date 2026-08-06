@@ -162,6 +162,7 @@ export interface Token {
   id: string;
   name: string;
   type: 'player' | 'monster';
+  monster?: string;
   x: number;
   y: number;
   hp: number;
@@ -299,6 +300,7 @@ export async function getModule(moduleId: string) {
         height: number;
         tile_size: number;
         tiles: string[];
+        theme?: string;
       };
     };
   }>;

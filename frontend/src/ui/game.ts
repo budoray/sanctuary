@@ -1,4 +1,4 @@
-import { Application, Container, Graphics } from 'pixi.js';
+import { Application, Container, Graphics, Sprite } from 'pixi.js';
 import type { Socket } from 'socket.io-client';
 import {
   actInSession, advanceSession, dmMove, dmReveal, dmSpawn, GameSession,
@@ -9,6 +9,7 @@ import { DiceTray } from './dice-tray';
 import { TokenSprite } from './token-sprite';
 import { el, clear } from './utils';
 import { AudioController } from './audio';
+import { getTheme, loadAtlas, tileFrame } from '../lib/tile-atlas';
 
 const TILE_SIZE = 40;
 const WALL_BASE = 0x23262d;
@@ -28,6 +29,7 @@ interface ModuleData {
   height: number;
   tile_size: number;
   tiles: string[];
+  theme?: string;
 }
 
 interface Particle {
@@ -64,7 +66,7 @@ export class Game {
   private timerInterval: number | null = null;
   private timeoutFired = false;
   private tokenSprites: Map<string, TokenSprite> = new Map();
-  private tileSprites: Graphics[][] = [];
+  private tileSprites: Container[][] = [];
   private lastTokenHp: Map<string, number> = new Map();
   private shakeFrames = 0;
   private lastLogLength = 0;
@@ -97,6 +99,8 @@ export class Game {
   private chatCollapsed = false;
   private presencePanel: HTMLElement | null = null;
   private presenceList: HTMLElement = document.createElement('div');
+  private journalPanel: HTMLElement | null = null;
+  private journalOpen = false;
   private heartbeatInterval: number | null = null;
   private moduleId: string;
 
@@ -198,6 +202,7 @@ export class Game {
     this.app.stage.addChild(this.tokenContainer);
     this.app.stage.addChild(this.fxContainer);
 
+    await loadAtlas();
     this.renderMap();
     this.renderTokens(true);
     this.centerMap();
@@ -331,6 +336,12 @@ export class Game {
     this.saveBtn = saveBtn;
     hud.appendChild(saveBtn);
 
+    const journalBtn = el('button', {
+      className: 'journal-btn',
+      onclick: () => this.toggleJournal(),
+    }, 'Journal') as HTMLButtonElement;
+    hud.appendChild(journalBtn);
+
     this.dmToolsEl = this.buildDmTools();
     this.dmToolsEl.style.display = 'none';
     hud.appendChild(this.dmToolsEl);
@@ -386,6 +397,86 @@ export class Game {
     panel.appendChild(this.presenceList);
     panel.style.display = 'none';
     return panel;
+  }
+
+  private buildJournalPanel(): HTMLElement {
+    const panel = el('div', { className: 'journal-overlay' });
+    const card = el('div', { className: 'journal-card' });
+    const header = el('div', { className: 'journal-header' });
+    header.appendChild(el('h2', {}, 'Adventure Journal'));
+    const close = el('button', { className: 'journal-close', onclick: () => this.toggleJournal() }, '×');
+    header.appendChild(close);
+    card.appendChild(header);
+
+    const body = el('div', { className: 'journal-body' });
+    const moduleName = el('h3', { className: 'journal-module' }, this.moduleId);
+    body.appendChild(moduleName);
+
+    const bestiary = el('div', { className: 'journal-bestiary' });
+    bestiary.appendChild(el('h4', {}, 'Bestiary'));
+    const bestiaryList = el('div', { className: 'journal-bestiary-list' });
+    bestiary.appendChild(bestiaryList);
+    body.appendChild(bestiary);
+
+    const chronicle = el('div', { className: 'journal-chronicle' });
+    chronicle.appendChild(el('h4', {}, 'Chronicle'));
+    const chronicleList = el('div', { className: 'journal-chronicle-list' });
+    chronicle.appendChild(chronicleList);
+    body.appendChild(chronicle);
+
+    card.appendChild(body);
+    panel.appendChild(card);
+    panel.style.display = 'none';
+    return panel;
+  }
+
+  private toggleJournal() {
+    if (!this.journalPanel) {
+      this.journalPanel = this.buildJournalPanel();
+      this.root.appendChild(this.journalPanel);
+    }
+    this.journalOpen = !this.journalOpen;
+    this.journalPanel.style.display = this.journalOpen ? 'flex' : 'none';
+    if (this.journalOpen) this.updateJournal();
+  }
+
+  private updateJournal() {
+    if (!this.journalPanel || !this.session) return;
+    const moduleName = this.journalPanel.querySelector('.journal-module') as HTMLElement | null;
+    if (moduleName) moduleName.textContent = this.moduleId;
+
+    const bestiaryList = this.journalPanel.querySelector('.journal-bestiary-list') as HTMLElement | null;
+    if (bestiaryList) {
+      clear(bestiaryList);
+      const seen = new Set<string>();
+      [...this.session.monsters, ...(this.session.players || [])].forEach((t) => {
+        const key = t.type === 'monster' ? t.monster || t.name : t.name;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        const row = el('div', { className: 'journal-bestiary-row' });
+        row.appendChild(el('span', { className: 'journal-bestiary-name' }, key));
+        row.appendChild(el('span', { className: 'journal-bestiary-hp' }, `HP ${t.hp}/${t.max_hp}`));
+        row.appendChild(el('span', { className: 'journal-bestiary-ac' }, `AC ${t.ac}`));
+        bestiaryList.appendChild(row);
+      });
+      if (bestiaryList.childElementCount === 0) {
+        bestiaryList.appendChild(el('div', { className: 'journal-empty' }, 'No creatures encountered yet.'));
+      }
+    }
+
+    const chronicleList = this.journalPanel.querySelector('.journal-chronicle-list') as HTMLElement | null;
+    if (chronicleList) {
+      clear(chronicleList);
+      const log = this.session.log.slice(-30);
+      if (log.length === 0) {
+        chronicleList.appendChild(el('div', { className: 'journal-empty' }, 'No events recorded yet.'));
+      } else {
+        log.forEach((entry) => {
+          const row = el('div', { className: 'journal-chronicle-row' }, entry);
+          chronicleList.appendChild(row);
+        });
+      }
+    }
   }
 
   private updatePresence(present: Presence[]) {
@@ -752,27 +843,40 @@ export class Game {
     if (!this.app) return;
     this.mapContainer.removeChildren();
     this.tileSprites = [];
+    const theme = getTheme(this.module.theme);
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || '';
-      const tileRow: Graphics[] = [];
+      const tileRow: Container[] = [];
       for (let x = 0; x < this.module.width; x++) {
         const tile = row[x] || '0';
-        const g = new Graphics();
-        this.drawTile(g, tile, x, y);
-        g.x = x * TILE_SIZE;
-        g.y = y * TILE_SIZE;
-        g.eventMode = 'static';
-        g.on('pointerdown', () => this.onTileClick(x, y));
-        this.mapContainer.addChild(g);
-        tileRow.push(g);
+        const c = new Container();
+        this.drawTile(c, tile, x, y, theme);
+        c.x = x * TILE_SIZE;
+        c.y = y * TILE_SIZE;
+        c.eventMode = 'static';
+        c.on('pointerdown', () => this.onTileClick(x, y));
+        this.mapContainer.addChild(c);
+        tileRow.push(c);
       }
       this.tileSprites.push(tileRow);
     }
     this.centerMap();
   }
 
-  private drawTile(g: Graphics, tile: string, x: number, y: number) {
-    if (tile === '1') {
+  private drawTile(c: Container, tile: string, x: number, y: number, theme: import('../lib/tile-atlas').TileTheme | null) {
+    const tex = theme ? tileFrame(theme, tile) : null;
+    if (tex) {
+      const s = new Sprite(tex);
+      s.width = TILE_SIZE;
+      s.height = TILE_SIZE;
+      c.addChild(s);
+      // Slight shading to keep lighting effects readable
+      const overlay = new Graphics();
+      overlay.rect(0, 0, TILE_SIZE, TILE_SIZE);
+      overlay.fill({ color: 0x000000, alpha: 0.12 });
+      c.addChild(overlay);
+    } else if (tile === '1') {
+      const g = new Graphics();
       // Wall with depth
       g.rect(0, 0, TILE_SIZE, TILE_SIZE);
       g.fill({ color: WALL_SHADOW });
@@ -785,7 +889,9 @@ export class Game {
       g.fill({ color: WALL_BASE, alpha: 0.5 });
       g.rect(24, 20, 3, 8);
       g.fill({ color: WALL_BASE, alpha: 0.4 });
+      c.addChild(g);
     } else {
+      const g = new Graphics();
       // Floor
       g.rect(0, 0, TILE_SIZE, TILE_SIZE);
       g.fill({ color: FLOOR_COLOR });
@@ -809,6 +915,7 @@ export class Game {
         g.rect(TILE_SIZE * 0.45, TILE_SIZE * 0.65, 2, 2);
         g.fill({ color: TRAP_COLOR, alpha: 0.4 });
       }
+      c.addChild(g);
     }
   }
 
@@ -1103,32 +1210,85 @@ export class Game {
     this.particles.push({ gfx: g, vx, vy, life, maxLife: life });
   }
 
+  private ambientEffectConfig() {
+    const theme = this.module.theme || 'dungeon';
+    switch (theme) {
+      case 'ice':
+        return {
+          count: 4,
+          color: 0xd6eaf8,
+          size: 1.1,
+          alpha: 0.7,
+          vx: () => (Math.random() - 0.5) * 0.2,
+          vy: () => 0.4 + Math.random() * 0.4,
+          life: 100 + Math.random() * 80,
+        };
+      case 'lava':
+        return {
+          count: 4,
+          color: Math.random() < 0.5 ? 0xff5500 : 0xffaa00,
+          size: 1.3,
+          alpha: 0.85,
+          vx: () => (Math.random() - 0.5) * 0.4,
+          vy: () => -0.5 - Math.random() * 0.5,
+          life: 70 + Math.random() * 60,
+        };
+      case 'forest':
+        return {
+          count: 2,
+          color: 0xa9dfbf,
+          size: 0.9,
+          alpha: 0.4,
+          vx: () => 0.2 + Math.random() * 0.3,
+          vy: () => 0.6 + Math.random() * 0.4,
+          life: 90 + Math.random() * 70,
+        };
+      case 'library':
+        return {
+          count: 2,
+          color: 0xf7dc6f,
+          size: 0.8,
+          alpha: 0.5,
+          vx: () => (Math.random() - 0.5) * 0.15,
+          vy: () => -0.2 - Math.random() * 0.2,
+          life: 140 + Math.random() * 100,
+        };
+      default:
+        return {
+          count: 3,
+          color: Math.random() < 0.25 ? 0xffaa44 : 0x9a9590,
+          size: Math.random() < 0.25 ? 1.2 : 0.8,
+          alpha: Math.random() < 0.25 ? 0.9 : 0.45,
+          vx: () => (Math.random() - 0.5) * 0.3,
+          vy: () => (Math.random() < 0.25 ? -0.3 - Math.random() * 0.4 : (Math.random() - 0.5) * 0.2),
+          life: 120 + Math.random() * 120,
+        };
+    }
+  }
+
   private spawnAmbientParticles() {
     if (!this.session || !this.app) return;
     const px = this.session.player.x * TILE_SIZE + TILE_SIZE / 2;
     const py = this.session.player.y * TILE_SIZE + TILE_SIZE / 2;
     const radius = VISION_RADIUS * TILE_SIZE;
-    const count = 3;
-    for (let i = 0; i < count; i++) {
+    const cfg = this.ambientEffectConfig();
+    for (let i = 0; i < cfg.count; i++) {
       const angle = Math.random() * Math.PI * 2;
       const dist = Math.random() * radius;
       const x = px + Math.cos(angle) * dist;
       const y = py + Math.sin(angle) * dist;
-      const isSpark = Math.random() < 0.25;
-      const color = isSpark ? 0xffaa44 : 0x9a9590;
-      const size = isSpark ? 1.2 : 0.8;
       const g = new Graphics();
-      g.circle(0, 0, size);
-      g.fill({ color, alpha: isSpark ? 0.9 : 0.45 });
+      g.circle(0, 0, cfg.size);
+      g.fill({ color: cfg.color, alpha: cfg.alpha });
       g.x = x;
       g.y = y;
       this.fxContainer.addChild(g);
       this.particles.push({
         gfx: g,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: isSpark ? -0.3 - Math.random() * 0.4 : (Math.random() - 0.5) * 0.2,
-        life: 120 + Math.random() * 120,
-        maxLife: 120 + Math.random() * 120,
+        vx: cfg.vx(),
+        vy: cfg.vy(),
+        life: cfg.life,
+        maxLife: cfg.life,
       });
     }
   }
@@ -1320,6 +1480,7 @@ export class Game {
       this.chatPanel.style.display = this.isCampaignSession() ? 'flex' : 'none';
     }
     this.updateDmTools();
+    this.updateJournal();
     this.renderTokens();
     this.updateLighting();
     this.highlightActionTiles();

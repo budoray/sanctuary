@@ -1,0 +1,118 @@
+id: volcanic_depths
+name: The Volcanic Depths
+ruleset: osric
+description: >-
+  Beneath a sleeping mountain, molten halls glow with ember light. Cultists of
+  the Cinder Circle chant around a flame altar, and their fire-blessed champion
+  waits in the heart of the caldera.
+map:
+  width: 22
+  height: 16
+  tile_size: 40
+  theme: lava
+  tiles:
+    - "1111111111111111111111"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1000000000200000000001"
+    - "1001110111011101110001"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1011101111101110111001"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1001111101110111110001"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1000111011101110100001"
+    - "1000000000000000000001"
+    - "1111111111111111111111"
+player_start:
+  x: 1
+  y: 1
+monsters:
+  - id: cinder_champion
+    name: Cinder Champion
+    monster: orc
+    x: 11
+    y: 7
+    color: "#e67e22"
+    boss: true
+    phases:
+      - hp_threshold: 0.5
+        damage_bonus: 2
+        to_hit_bonus: 1
+        spawn:
+          - id: cultist_minion_1
+            name: Cinder Cultist
+            monster: goblin
+            x: 10
+            y: 6
+            color: "#c0392b"
+          - id: cultist_minion_2
+            name: Cinder Cultist
+            monster: goblin
+            x: 12
+            y: 8
+            color: "#c0392b"
+  - id: cultist_1
+    name: Cinder Cultist
+    monster: goblin
+    x: 3
+    y: 3
+    color: "#c0392b"
+  - id: cultist_2
+    name: Cinder Cultist
+    monster: goblin
+    x: 18
+    y: 3
+    color: "#c0392b"
+  - id: cultist_3
+    name: Cinder Cultist
+    monster: goblin
+    x: 3
+    y: 13
+    color: "#c0392b"
+  - id: cultist_4
+    name: Cinder Cultist
+    monster: goblin
+    x: 18
+    y: 13
+    color: "#c0392b"
+  - id: ember_ghoul
+    name: Ember Ghoul
+    monster: ghoul
+    x: 11
+    y: 3
+    color: "#d35400"
+events:
+  - id: flame_altar
+    x: 11
+    y: 5
+    message: >-
+      A flame altar crackles with heat. Douse it to weaken the champion, or
+      kindle it for a fleeting boon?
+    choices:
+      douse: Douse the flames
+      kindle: Kindle the altar
+branches:
+  douse:
+    - id: altar_defender_1
+      name: Cinder Cultist
+      monster: goblin
+      x: 13
+      y: 5
+      color: "#c0392b"
+    - id: altar_defender_2
+      name: Cinder Cultist
+      monster: goblin
+      x: 14
+      y: 5
+      color: "#c0392b"
+  kindle:
+    - id: flame_ghoul
+      name: Ember Ghoul
+      monster: ghoul
+      x: 9
+      y: 9
+      color: "#d35400"

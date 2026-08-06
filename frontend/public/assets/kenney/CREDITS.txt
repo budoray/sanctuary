@@ -1,0 +1,7 @@
+Kenney Roguelike/RPG Pack
+https://www.kenney.nl/assets/roguelike-rpg-pack
+
+Licensed under CC0 1.0 Universal (Public Domain).
+You may copy, modify, and distribute these assets, even for commercial purposes, without asking permission.
+
+Sprite sheet contains 16x16 pixel tiles with 1 pixel spacing.

@@ -1,0 +1,111 @@
+id: frozen_caverns
+name: The Frozen Caverns
+ruleset: osric
+description: >-
+  Ice winds howl through these blue-lit caves. A pack of starving wolves has
+  claimed the depths, led by a pale alpha whose breath freezes the air.
+map:
+  width: 20
+  height: 16
+  tile_size: 40
+  theme: ice
+  tiles:
+    - "11111111111111111111"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "10000000002000000001"
+    - "10011101110111011101"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "10111011111011101101"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "10011111011101111001"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "10001110111011100001"
+    - "10000000000000000001"
+    - "11111111111111111111"
+player_start:
+  x: 1
+  y: 1
+monsters:
+  - id: frost_alpha
+    name: Frost Alpha
+    monster: wolf
+    x: 10
+    y: 7
+    color: "#aed6f1"
+    boss: true
+    phases:
+      - hp_threshold: 0.5
+        damage_bonus: 1
+        to_hit_bonus: 2
+        spawn:
+          - id: ice_wolf_1
+            name: Ice Wolf
+            monster: wolf
+            x: 9
+            y: 6
+            color: "#7f8c8d"
+          - id: ice_wolf_2
+            name: Ice Wolf
+            monster: wolf
+            x: 11
+            y: 8
+            color: "#7f8c8d"
+  - id: ice_wolf_3
+    name: Ice Wolf
+    monster: wolf
+    x: 3
+    y: 3
+    color: "#7f8c8d"
+  - id: ice_wolf_4
+    name: Ice Wolf
+    monster: wolf
+    x: 16
+    y: 3
+    color: "#7f8c8d"
+  - id: ice_wolf_5
+    name: Ice Wolf
+    monster: wolf
+    x: 3
+    y: 13
+    color: "#7f8c8d"
+  - id: ice_wolf_6
+    name: Ice Wolf
+    monster: wolf
+    x: 16
+    y: 13
+    color: "#7f8c8d"
+events:
+  - id: frozen_altar
+    x: 10
+    y: 5
+    message: >-
+      A frozen altar hums with winter magic. Touch it to claim its blessing,
+      or shatter it and risk the pack's wrath?
+    choices:
+      touch: Touch the altar
+      shatter: Shatter it
+branches:
+  touch:
+    - id: blessed_wolf
+      name: Ice Wolf
+      monster: wolf
+      x: 10
+      y: 3
+      color: "#7f8c8d"
+  shatter:
+    - id: enraged_wolf_1
+      name: Ice Wolf
+      monster: wolf
+      x: 8
+      y: 9
+      color: "#7f8c8d"
+    - id: enraged_wolf_2
+      name: Ice Wolf
+      monster: wolf
+      x: 12
+      y: 9
+      color: "#7f8c8d"
