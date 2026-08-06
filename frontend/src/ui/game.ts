@@ -12,6 +12,16 @@ import { AudioController } from './audio';
 import { getTheme, loadAtlas, tileFrame } from '../lib/tile-atlas';
 
 const TILE_SIZE = 40;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, reason = 'Operation timed out'): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error(reason)), ms);
+    promise
+      .then((value) => { window.clearTimeout(timer); resolve(value); })
+      .catch((err) => { window.clearTimeout(timer); reject(err); });
+  });
+}
+
 const WALL_BASE = 0x23262d;
 const WALL_TOP = 0x3a3f4a;
 const WALL_SHADOW = 0x15171c;
@@ -191,9 +201,24 @@ export class Game {
     return !this.session.campaign_id || this.session.account_id === this.userId;
   }
 
+  private setLoadingStatus(text: string) {
+    const span = this.loadingOverlay.querySelector('span');
+    if (span) span.textContent = text;
+  }
+
   async init() {
+    // Safety net: never let the loading overlay block the player forever.
+    const safetyTimeout = window.setTimeout(() => {
+      // eslint-disable-next-line no-console
+      console.error('Game init safety timeout fired; forcing overlay removal.');
+      this.loadingOverlay?.remove();
+    }, 15000);
+
+    const releaseSafety = () => window.clearTimeout(safetyTimeout);
+
     try {
       this.app = new Application();
+      this.setLoadingStatus('Opening the gate...');
       await this.app.init({
         resizeTo: this.canvasContainer,
         backgroundColor: 0x050607,
@@ -208,13 +233,22 @@ export class Game {
       this.app.stage.addChild(this.tokenContainer);
       this.app.stage.addChild(this.fxContainer);
 
-      await loadAtlas();
+      this.setLoadingStatus('Loading realm tiles...');
+      try {
+        await withTimeout(loadAtlas(), 5000, 'Tile atlas load timed out');
+      } catch (err: any) {
+        // eslint-disable-next-line no-console
+        console.warn('Proceeding without tile atlas:', err);
+      }
+
+      this.setLoadingStatus('Carving the dungeon...');
       this.renderMap();
       this.renderTokens(true);
       this.centerMap();
 
       this.app.ticker.add((ticker) => this.onTick(ticker));
 
+      this.setLoadingStatus('Joining the session...');
       this.socket = connectSocket();
       this.socket.emit('join_session', { session_id: this.sessionId });
       this.socket.on('session_update', (payload: { session?: GameSession }) => {
@@ -232,7 +266,7 @@ export class Game {
       });
 
       try {
-        const { present } = await getSessionPresence(this.sessionId);
+        const { present } = await withTimeout(getSessionPresence(this.sessionId), 5000, 'Presence fetch timed out');
         this.updatePresence(present);
       } catch {
         // Presence is best-effort; the socket will keep it updated.
@@ -242,6 +276,7 @@ export class Game {
         this.socket?.emit('heartbeat', { session_id: this.sessionId });
       }, 30000);
     } catch (err: any) {
+      releaseSafety();
       // eslint-disable-next-line no-console
       console.error('Failed to initialize game:', err);
       this.loadingOverlay.innerHTML = '<span>Failed to enter the realm.</span><button>Return</button>';
@@ -249,6 +284,7 @@ export class Game {
       if (btn) btn.onclick = () => this.onExit();
       throw err;
     }
+    releaseSafety();
     this.loadingOverlay.remove();
   }
 
