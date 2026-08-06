@@ -1,12 +1,14 @@
-import { Application, Container, Graphics, Text } from 'pixi.js';
+import { Application, Container, Graphics } from 'pixi.js';
 import { actInSession, GameSession, Token } from '../net/api';
 import { DiceTray } from './dice-tray';
+import { TokenSprite } from './token-sprite';
 import { el, clear } from './utils';
 
 const TILE_SIZE = 40;
 const WALL_COLOR = 0x2a2d35;
 const FLOOR_COLOR = 0x121418;
 const FLOOR_BORDER = 0x2c2f38;
+const VISION_RADIUS = 6;
 
 interface ModuleData {
   width: number;
@@ -32,6 +34,10 @@ export class Game {
   private canvasContainer: HTMLElement;
   private timerInterval: number | null = null;
   private timeoutFired = false;
+  private tokenSprites: Map<string, TokenSprite> = new Map();
+  private tileSprites: Graphics[][] = [];
+  private shakeFrames = 0;
+  private lastLogLength = 0;
 
   constructor(
     container: HTMLElement,
@@ -75,8 +81,10 @@ export class Game {
     this.app.stage.addChild(this.tokenContainer);
 
     this.renderMap();
-    this.renderTokens();
+    this.renderTokens(true);
     this.centerMap();
+
+    this.app.ticker.add((ticker) => this.onTick(ticker));
   }
 
   private buildUI() {
@@ -136,8 +144,10 @@ export class Game {
   private renderMap() {
     if (!this.app) return;
     this.mapContainer.removeChildren();
+    this.tileSprites = [];
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || '';
+      const tileRow: Graphics[] = [];
       for (let x = 0; x < this.module.width; x++) {
         const tile = row[x] || '0';
         const g = new Graphics();
@@ -153,9 +163,35 @@ export class Game {
         g.eventMode = 'static';
         g.on('pointerdown', () => this.onTileClick(x, y));
         this.mapContainer.addChild(g);
+        tileRow.push(g);
       }
+      this.tileSprites.push(tileRow);
     }
     this.centerMap();
+  }
+
+  private updateLighting() {
+    if (!this.session) return;
+    const px = this.session.player.x;
+    const py = this.session.player.y;
+    for (let y = 0; y < this.module.height; y++) {
+      const row = this.module.tiles[y] || '';
+      for (let x = 0; x < this.module.width; x++) {
+        const tile = row[x] || '0';
+        const dist = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
+        const isWall = tile === '1';
+        let alpha: number;
+        if (dist <= VISION_RADIUS - 1) {
+          alpha = 1;
+        } else if (dist <= VISION_RADIUS + 1) {
+          const t = (dist - (VISION_RADIUS - 1)) / 2;
+          alpha = 1 - t * (1 - (isWall ? 0.22 : 0.1));
+        } else {
+          alpha = isWall ? 0.22 : 0.1;
+        }
+        this.tileSprites[y][x].alpha = alpha;
+      }
+    }
   }
 
   private centerMap() {
@@ -164,41 +200,82 @@ export class Game {
     const mh = this.module.height * TILE_SIZE;
     const cx = (this.app.screen.width - mw) / 2;
     const cy = (this.app.screen.height - mh) / 2;
-    this.mapContainer.x = Math.max(0, cx);
-    this.mapContainer.y = Math.max(0, cy);
-    this.tokenContainer.x = this.mapContainer.x;
-    this.tokenContainer.y = this.mapContainer.y;
+    const baseX = Math.max(0, cx);
+    const baseY = Math.max(0, cy);
+    this.applyMapPosition(baseX, baseY);
   }
 
-  private renderTokens() {
-    if (!this.app) return;
-    this.tokenContainer.removeChildren();
-    if (!this.session) return;
-    const tokens = [this.session.player, ...this.session.monsters];
-    tokens.forEach((t) => {
-      if (t.alive === false) return;
-      const g = new Graphics();
-      g.rect(4, 4, TILE_SIZE - 8, TILE_SIZE - 8);
-      g.fill({ color: parseInt(t.color.replace('#', ''), 16) });
-      g.x = t.x * TILE_SIZE;
-      g.y = t.y * TILE_SIZE;
-      g.eventMode = 'static';
-      g.on('pointerdown', () => this.onTokenClick(t));
-      this.tokenContainer.addChild(g);
+  private applyMapPosition(x: number, y: number) {
+    let ox = 0;
+    let oy = 0;
+    if (this.shakeFrames > 0) {
+      const intensity = Math.min(this.shakeFrames, 8);
+      ox = (Math.random() - 0.5) * intensity;
+      oy = (Math.random() - 0.5) * intensity;
+    }
+    this.mapContainer.x = x + ox;
+    this.mapContainer.y = y + oy;
+    this.tokenContainer.x = x + ox;
+    this.tokenContainer.y = y + oy;
+  }
 
-      const label = new Text({
-        text: t.name,
-        style: {
-          fontSize: 10,
-          fill: 0xffffff,
-          align: 'center',
-        },
-      });
-      label.anchor.set(0.5, 1);
-      label.x = g.x + TILE_SIZE / 2;
-      label.y = g.y - 2;
-      this.tokenContainer.addChild(label);
+  private renderTokens(snap = false) {
+    if (!this.session) return;
+    const tokens: Token[] = [this.session.player, ...this.session.monsters];
+    const aliveIds = new Set<string>();
+
+    tokens.forEach((t) => {
+      if (t.alive === false) {
+        const existing = this.tokenSprites.get(t.id);
+        if (existing) {
+          existing.destroy();
+          this.tokenSprites.delete(t.id);
+        }
+        return;
+      }
+      aliveIds.add(t.id);
+      let sprite = this.tokenSprites.get(t.id);
+      if (!sprite) {
+        sprite = new TokenSprite(t, TILE_SIZE);
+        sprite.container.eventMode = 'static';
+        sprite.container.cursor = 'pointer';
+        sprite.container.on('pointerdown', () => this.onTokenClick(t));
+        this.tokenContainer.addChild(sprite.container);
+        this.tokenSprites.set(t.id, sprite);
+        if (snap) sprite.snapToTarget();
+      }
+      sprite.setTarget(t.x, t.y);
+      sprite.updateHP(t.hp, t.max_hp);
     });
+
+    // Remove sprites for tokens that disappeared or died.
+    for (const [id, sprite] of this.tokenSprites) {
+      if (!aliveIds.has(id)) {
+        sprite.destroy();
+        this.tokenSprites.delete(id);
+      }
+    }
+  }
+
+  private onTick(ticker: import('pixi.js').Ticker) {
+    const dt = ticker.deltaTime / 60; // seconds at target 60fps
+    const speed = 12;
+    for (const sprite of this.tokenSprites.values()) {
+      const dx = sprite.targetX - sprite.container.x;
+      const dy = sprite.targetY - sprite.container.y;
+      if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+        sprite.container.x += dx * (1 - Math.exp(-speed * dt));
+        sprite.container.y += dy * (1 - Math.exp(-speed * dt));
+      } else {
+        sprite.container.x = sprite.targetX;
+        sprite.container.y = sprite.targetY;
+      }
+    }
+
+    if (this.shakeFrames > 0) {
+      this.shakeFrames -= ticker.deltaTime;
+      this.centerMap();
+    }
   }
 
   private async onTileClick(x: number, y: number) {
@@ -230,6 +307,7 @@ export class Game {
   private update(session: GameSession) {
     this.session = session;
     this.renderTokens();
+    this.updateLighting();
     this.updateStatus();
     this.updateTimer();
     this.renderLog();
@@ -285,10 +363,21 @@ export class Game {
   private renderLog() {
     clear(this.logEl);
     if (!this.session) return;
-    this.session.log.slice(-20).forEach((entry) => {
+    const log = this.session.log;
+    log.slice(-20).forEach((entry) => {
       this.logEl.appendChild(el('div', { className: 'log-entry' }, entry));
     });
     this.logEl.scrollTop = this.logEl.scrollHeight;
+
+    // Trigger combat feedback for newly added entries.
+    if (log.length > this.lastLogLength) {
+      const newEntries = log.slice(this.lastLogLength);
+      const combatKeywords = ['strike', 'blow', 'hit', 'miss', 'pain', 'weapon', 'crumple', 'fall', 'dies'];
+      if (newEntries.some((e) => combatKeywords.some((k) => e.toLowerCase().includes(k)))) {
+        this.shakeFrames = 12;
+      }
+      this.lastLogLength = log.length;
+    }
   }
 
   private log(message: string) {
