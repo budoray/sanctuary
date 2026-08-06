@@ -62,6 +62,8 @@ class CampaignRecord(Base):
     name = Column(String, nullable=False)
     ruleset_id = Column(String, default="osric")
     module_ids = Column(Text, default="[]")  # JSON list
+    cleared_module_ids = Column(Text, default="[]")  # JSON list
+    current_module_index = Column(Integer, default=0)
     password_hash = Column(String, nullable=False)
     dm_account_id = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=_utc_now)

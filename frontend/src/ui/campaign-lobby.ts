@@ -134,7 +134,13 @@ export class CampaignLobby {
     campaigns.forEach((c) => {
       const info = el('div', { className: 'session-info' });
       info.appendChild(el('strong', {}, c.name));
-      info.appendChild(el('span', {}, `${c.ruleset_id} · ${c.is_dm ? 'DM' : 'Player'}`));
+      const total = c.module_ids.length;
+      const cleared = (c.cleared_module_ids || []).length;
+      const progressText = total > 0 ? `Progress ${cleared}/${total}` : 'No modules';
+      info.appendChild(el('span', {}, `${c.ruleset_id} · ${c.is_dm ? 'DM' : 'Player'} · ${progressText}`));
+      if (c.completed) {
+        info.appendChild(el('span', { className: 'campaign-completed' }, 'Completed'));
+      }
       const idSpan = el('span', { className: 'session-id' }, c.id);
       const item = el('li', { onclick: () => this.onSelect(c) });
       item.appendChild(info);

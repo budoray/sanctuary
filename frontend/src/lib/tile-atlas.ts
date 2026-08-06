@@ -63,6 +63,19 @@ export const THEMES: Record<string, TileTheme> = {
     trap: [8, 6],
     water: [1, 0],
   },
+  tomb: {
+    name: 'Tomb',
+    floor: [20, 13],
+    wall: [21, 13],
+    trap: [8, 6],
+  },
+  sewer: {
+    name: 'Sewer',
+    floor: [10, 13],
+    wall: [12, 13],
+    trap: [8, 6],
+    water: [1, 0],
+  },
 };
 
 export function getTheme(id?: string): TileTheme | null {

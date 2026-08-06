@@ -1,0 +1,117 @@
+id: sunken_tomb
+name: The Sunken Tomb
+ruleset: osric
+description: >-
+  A noble crypt has flooded and sunk into the mud. The dead refuse to rest,
+  and the tomb's warden—a mailed skeleton lord—still stands watch.
+map:
+  width: 20
+  height: 16
+  tile_size: 40
+  theme: tomb
+  tiles:
+    - "11111111111111111111"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "10000000002000000001"
+    - "10011101110111011101"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "10111011111011101101"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "10011111011101111001"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "10001110111011100001"
+    - "10000000000000000001"
+    - "11111111111111111111"
+player_start:
+  x: 1
+  y: 1
+monsters:
+  - id: tomb_warden
+    name: Tomb Warden
+    monster: skeleton
+    x: 10
+    y: 7
+    color: "#95a5a6"
+    boss: true
+    phases:
+      - hp_threshold: 0.5
+        damage_bonus: 2
+        to_hit_bonus: 1
+        spawn:
+          - id: risen_1
+            name: Risen Skeleton
+            monster: skeleton
+            x: 9
+            y: 6
+            color: "#bdc3c7"
+          - id: risen_2
+            name: Risen Skeleton
+            monster: skeleton
+            x: 11
+            y: 8
+            color: "#bdc3c7"
+  - id: skeleton_1
+    name: Risen Skeleton
+    monster: skeleton
+    x: 3
+    y: 3
+    color: "#bdc3c7"
+  - id: skeleton_2
+    name: Risen Skeleton
+    monster: skeleton
+    x: 16
+    y: 3
+    color: "#bdc3c7"
+  - id: skeleton_3
+    name: Risen Skeleton
+    monster: skeleton
+    x: 3
+    y: 13
+    color: "#bdc3c7"
+  - id: skeleton_4
+    name: Risen Skeleton
+    monster: skeleton
+    x: 16
+    y: 13
+    color: "#bdc3c7"
+  - id: tomb_zombie
+    name: Drowned Dead
+    monster: zombie
+    x: 10
+    y: 3
+    color: "#556b2f"
+events:
+  - id: sarcophagus
+    x: 10
+    y: 5
+    message: >-
+      A sealed sarcophagus whispers your name. Open it, or leave the dead
+      to their dreams?
+    choices:
+      open: Open the sarcophagus
+      leave: Leave it sealed
+branches:
+  open:
+    - id: curse_wraith
+      name: Drowned Dead
+      monster: zombie
+      x: 12
+      y: 5
+      color: "#556b2f"
+    - id: curse_ghoul
+      name: Drowned Ghoul
+      monster: ghoul
+      x: 13
+      y: 5
+      color: "#1abc9c"
+  leave:
+    - id: patrol_skeleton
+      name: Risen Skeleton
+      monster: skeleton
+      x: 8
+      y: 9
+      color: "#bdc3c7"

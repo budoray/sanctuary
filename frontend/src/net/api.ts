@@ -186,6 +186,10 @@ export interface Campaign {
   name: string;
   ruleset_id: string;
   module_ids: string[];
+  cleared_module_ids?: string[];
+  current_module_index?: number;
+  current_module_id?: string | null;
+  completed?: boolean;
   dm_account_id: number;
   is_member?: boolean;
   is_dm?: boolean;
@@ -286,6 +290,21 @@ export async function getActiveSession() {
 
 export async function getSession(sessionId: string) {
   return api(`/api/sessions/${sessionId}`) as Promise<{ session: GameSession }>;
+}
+
+export interface ModuleInfo {
+  id: string;
+  name: string;
+  ruleset: string;
+  description: string;
+  theme?: string;
+  width: number;
+  height: number;
+  tiles: string[];
+}
+
+export async function listModules() {
+  return api('/api/modules') as Promise<{ modules: ModuleInfo[] }>;
 }
 
 export async function getModule(moduleId: string) {
@@ -453,6 +472,10 @@ export async function removeFriend(accountId: number) {
 
 export async function inviteCampaign(campaignId: string, accountId: number) {
   return api(`/api/campaigns/${campaignId}/invite/${accountId}`, { method: 'POST' }) as Promise<{ invited: boolean }>;
+}
+
+export async function getAccountProgress() {
+  return api('/api/account/progress') as Promise<AnalyticsSummary>;
 }
 
 export async function adminAnalytics() {

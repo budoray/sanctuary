@@ -159,7 +159,9 @@ async def create_session(
         if not result.scalar_one_or_none():
             raise HTTPException(status_code=403, detail="Not a member of this campaign")
         if module_id == DEFAULT_MODULE and campaign.module_ids:
-            module_id = json.loads(campaign.module_ids)[0]
+            module_ids = json.loads(campaign.module_ids)
+            index = campaign.current_module_index or 0
+            module_id = module_ids[index % len(module_ids)]
 
     char_state = json.loads(record.state)
     char = char_engine.Character(
@@ -433,12 +435,20 @@ async def advance_session(
         current_index = module_ids.index(record.module_id)
     except ValueError:
         current_index = -1
+    current_module_id = module_ids[current_index]
     next_index = (current_index + 1) % len(module_ids)
     next_module_id = module_ids[next_index]
 
     state = json.loads(record.state)
     next_module = module.load(next_module_id)
     state = await session_engine.advance_module(state, next_module)
+
+    # Update campaign progress: mark current module cleared and move index forward.
+    cleared = json.loads(campaign.cleared_module_ids or "[]")
+    if current_module_id not in cleared:
+        cleared.append(current_module_id)
+    campaign.cleared_module_ids = json.dumps(cleared)
+    campaign.current_module_index = next_index
 
     record.module_id = next_module_id
     record.state = json.dumps(state)
@@ -582,3 +592,52 @@ async def join_session(
         pass
 
     return {"session": session_view}
+
+
+@router.get("/account/progress")
+async def account_progress(
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    """Aggregate account-wide progression stats from analytics events."""
+    from sqlalchemy import func
+    from backend.app.db import EventRecord
+
+    result = await db.execute(
+        select(EventRecord.event_type, func.count())
+        .where(EventRecord.account_id == account_id)
+        .group_by(EventRecord.event_type)
+    )
+    counts = {event_type: count for event_type, count in result.all()}
+
+    # Modules cleared across all campaigns the account owns or belongs to.
+    member_campaign_ids = (
+        select(CampaignMemberRecord.campaign_id)
+        .where(CampaignMemberRecord.account_id == account_id)
+        .scalar_subquery()
+    )
+    cleared_result = await db.execute(
+        select(CampaignRecord.cleared_module_ids)
+        .where(
+            or_(
+                CampaignRecord.account_id == account_id,
+                CampaignRecord.id.in_(member_campaign_ids),
+            )
+        )
+    )
+    modules_cleared = set()
+    for (cleared_json,) in cleared_result.all():
+        try:
+            modules_cleared.update(json.loads(cleared_json or "[]"))
+        except Exception:
+            pass
+
+    return {
+        "wins": counts.get("session_end_won", 0),
+        "losses": counts.get("session_end_lost", 0),
+        "deaths": counts.get("player_death", 0),
+        "level_ups": counts.get("level_up", 0),
+        "boss_kills": counts.get("boss_kill", 0),
+        "sessions": counts.get("session_start", 0),
+        "modules_cleared": len(modules_cleared),
+    }

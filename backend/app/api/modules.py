@@ -6,6 +6,11 @@ from backend.app.engine import bestiary, module
 router = APIRouter(tags=["modules"])
 
 
+@router.get("/modules")
+async def list_all_modules():
+    return {"modules": module.list_modules()}
+
+
 @router.get("/modules/{module_id}")
 async def get_module(module_id: str):
     try:

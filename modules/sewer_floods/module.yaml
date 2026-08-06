@@ -1,0 +1,118 @@
+id: sewer_floods
+name: The Sewer Floods
+ruleset: osric
+description: >-
+  Beneath the old city, brackish water churns through crumbling brick tunnels.
+  A cult of bog-reeking fanatics worships something that moves in the dark,
+  and their hulking champion blocks the only dry way out.
+map:
+  width: 22
+  height: 16
+  tile_size: 40
+  theme: sewer
+  tiles:
+    - "1111111111111111111111"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1000000000200000000001"
+    - "1001110111011101110001"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1011101111101110111001"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1001111101110111110001"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1000111011101110100001"
+    - "1000000000000000000001"
+    - "1111111111111111111111"
+player_start:
+  x: 1
+  y: 1
+monsters:
+  - id: brine_hulk
+    name: Brine Hulk
+    monster: orc
+    x: 11
+    y: 7
+    color: "#27ae60"
+    boss: true
+    phases:
+      - hp_threshold: 0.5
+        damage_bonus: 2
+        to_hit_bonus: 1
+        spawn:
+          - id: cultist_minion_1
+            name: Sewer Cultist
+            monster: goblin
+            x: 10
+            y: 6
+            color: "#2ecc71"
+          - id: cultist_minion_2
+            name: Sewer Cultist
+            monster: goblin
+            x: 12
+            y: 8
+            color: "#2ecc71"
+  - id: cultist_1
+    name: Sewer Cultist
+    monster: goblin
+    x: 3
+    y: 3
+    color: "#2ecc71"
+  - id: cultist_2
+    name: Sewer Cultist
+    monster: goblin
+    x: 18
+    y: 3
+    color: "#2ecc71"
+  - id: cultist_3
+    name: Sewer Cultist
+    monster: goblin
+    x: 3
+    y: 13
+    color: "#2ecc71"
+  - id: cultist_4
+    name: Sewer Cultist
+    monster: goblin
+    x: 18
+    y: 13
+    color: "#2ecc71"
+  - id: sewer_ghoul
+    name: Drowned Ghoul
+    monster: ghoul
+    x: 11
+    y: 3
+    color: "#1abc9c"
+events:
+  - id: flood_gate
+    x: 11
+    y: 5
+    message: >-
+      A rusted flood gate groans under pressure. Open it to flush the cultists,
+      or seal it and fight your way through?
+    choices:
+      open: Open the gate
+      seal: Seal the gate
+branches:
+  open:
+    - id: flush_survivor_1
+      name: Sewer Cultist
+      monster: goblin
+      x: 13
+      y: 5
+      color: "#2ecc71"
+    - id: flush_survivor_2
+      name: Sewer Cultist
+      monster: goblin
+      x: 14
+      y: 5
+      color: "#2ecc71"
+  seal:
+    - id: drowned_wolf
+      name: Drowned Wolf
+      monster: wolf
+      x: 9
+      y: 9
+      color: "#7f8c8d"

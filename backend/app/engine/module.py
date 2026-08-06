@@ -71,6 +71,28 @@ class Module:
     branches: list[Branch]
 
 
+def list_modules() -> list[dict]:
+    """Return metadata for every module under the module root."""
+    modules = []
+    for path in sorted(SETTINGS.module_root.glob("*/module.yaml")):
+        try:
+            doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        map_doc = doc.get("map", {})
+        modules.append({
+            "id": doc["id"],
+            "name": doc.get("name", doc["id"]),
+            "ruleset": doc.get("ruleset", "osric"),
+            "description": doc.get("description", ""),
+            "theme": map_doc.get("theme"),
+            "width": map_doc.get("width", 0),
+            "height": map_doc.get("height", 0),
+            "tiles": map_doc.get("tiles", []),
+        })
+    return modules
+
+
 def load(module_id: str) -> Module:
     root = SETTINGS.module_root / module_id
     path = root / "module.yaml"

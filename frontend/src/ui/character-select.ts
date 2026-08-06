@@ -1,14 +1,17 @@
-import { CharacterState, deleteCharacter, listCharacters } from '../net/api';
+import { CharacterState, deleteCharacter, getAccountProgress, listCharacters, listModules, ModuleInfo } from '../net/api';
 import { CharacterSheet } from './character-sheet';
 import { el, clear } from './utils';
 
-const AVAILABLE_MODULES = [
-  { id: 'sample_lair', name: 'The Goblin Lair' },
-  { id: 'sunken_crypt', name: 'The Sunken Crypt' },
-  { id: 'shadow_keep', name: 'The Shadow Keep' },
-  { id: 'forsaken_library', name: 'The Forsaken Library' },
-  { id: 'arena_pit', name: 'The Arena Pit' },
-];
+const THEME_LABELS: Record<string, string> = {
+  dungeon: 'Dungeon',
+  cave: 'Cave',
+  library: 'Library',
+  ice: 'Frozen',
+  lava: 'Volcanic',
+  forest: 'Forest',
+  tomb: 'Tomb',
+  sewer: 'Sewer',
+};
 
 export class CharacterSelect {
   private root: HTMLElement;
@@ -17,7 +20,11 @@ export class CharacterSelect {
   private onSessions?: () => void;
   private listEl: HTMLElement;
   private timerInput: HTMLSelectElement;
-  private moduleInput: HTMLSelectElement;
+  private moduleCardsEl: HTMLElement;
+  private moduleErrorEl: HTMLElement;
+  private modules: ModuleInfo[] = [];
+  private selectedModuleId = 'sample_lair';
+  private progressEl: HTMLElement;
 
   constructor(
     container: HTMLElement,
@@ -34,6 +41,9 @@ export class CharacterSelect {
     const panel = el('div', { className: 'session-panel' });
     panel.appendChild(el('h1', {}, 'Sanctuary'));
     panel.appendChild(el('p', { className: 'subtitle' }, 'Choose an adventurer, or begin anew.'));
+
+    this.progressEl = el('div', { className: 'account-progress' });
+    panel.appendChild(this.progressEl);
 
     const timerWrap = el('div', { className: 'timer-config' });
     timerWrap.appendChild(el('label', { htmlFor: 'turn-timer' }, 'Turn timer'));
@@ -52,17 +62,12 @@ export class CharacterSelect {
     timerWrap.appendChild(this.timerInput);
     panel.appendChild(timerWrap);
 
-    const moduleWrap = el('div', { className: 'timer-config' });
-    moduleWrap.appendChild(el('label', { htmlFor: 'module-select' }, 'Adventure'));
-    this.moduleInput = el('select', { id: 'module-select' }) as HTMLSelectElement;
-    AVAILABLE_MODULES.forEach((opt) => {
-      const option = document.createElement('option');
-      option.value = opt.id;
-      option.textContent = opt.name;
-      this.moduleInput.appendChild(option);
-    });
-    moduleWrap.appendChild(this.moduleInput);
-    panel.appendChild(moduleWrap);
+    const moduleLabel = el('div', { className: 'module-select-label' }, 'Adventure');
+    panel.appendChild(moduleLabel);
+    this.moduleCardsEl = el('div', { className: 'module-cards' });
+    this.moduleErrorEl = el('div', { className: 'module-select-error' });
+    panel.appendChild(this.moduleCardsEl);
+    panel.appendChild(this.moduleErrorEl);
 
     this.listEl = el('ul', { className: 'session-list' });
     panel.appendChild(this.listEl);
@@ -85,11 +90,83 @@ export class CharacterSelect {
 
   async load() {
     try {
-      const { characters } = await listCharacters();
+      const [{ characters }, { modules }, progress] = await Promise.all([
+        listCharacters(),
+        listModules(),
+        getAccountProgress().catch(() => null),
+      ]);
+      this.modules = modules;
+      this.renderModules();
       this.render(characters);
+      this.renderProgress(progress);
     } catch (err: any) {
       this.listEl.appendChild(el('li', { className: 'empty' }, err.message || 'Failed to load characters.'));
+      this.moduleErrorEl.textContent = err.message || 'Failed to load adventures.';
     }
+  }
+
+  private renderProgress(progress: { wins?: number; losses?: number; boss_kills?: number; modules_cleared?: number; deaths?: number; level_ups?: number; sessions?: number } | null) {
+    clear(this.progressEl);
+    if (!progress) {
+      this.progressEl.style.display = 'none';
+      return;
+    }
+    this.progressEl.style.display = 'block';
+    this.progressEl.appendChild(el('span', {}, `Wins ${progress.wins ?? 0}`));
+    this.progressEl.appendChild(el('span', {}, `Losses ${progress.losses ?? 0}`));
+    this.progressEl.appendChild(el('span', {}, `Boss Kills ${progress.boss_kills ?? 0}`));
+    this.progressEl.appendChild(el('span', {}, `Modules Cleared ${progress.modules_cleared ?? 0}`));
+    this.progressEl.appendChild(el('span', {}, `Deaths ${progress.deaths ?? 0}`));
+    this.progressEl.appendChild(el('span', {}, `Level Ups ${progress.level_ups ?? 0}`));
+  }
+
+  private renderModules() {
+    clear(this.moduleCardsEl);
+    clear(this.moduleErrorEl);
+    if (this.modules.length === 0) {
+      this.moduleErrorEl.textContent = 'No adventures available.';
+      return;
+    }
+    this.modules.forEach((m) => {
+      const card = el('div', {
+        className: `module-card${m.id === this.selectedModuleId ? ' selected' : ''}`,
+        onclick: () => this.selectModule(m.id),
+      });
+      const header = el('div', { className: 'module-card-header' });
+      const theme = THEME_LABELS[m.theme || 'dungeon'] || m.theme || 'Dungeon';
+      const badge = el('span', { className: `module-theme theme-${m.theme || 'dungeon'}` }, theme);
+      header.appendChild(badge);
+      header.appendChild(el('span', { className: 'module-size' }, `${m.width}×${m.height}`));
+      card.appendChild(header);
+      card.appendChild(el('h3', {}, m.name));
+      card.appendChild(el('p', { className: 'module-desc' }, m.description || ''));
+      const preview = this.buildMiniMap(m);
+      if (preview) card.appendChild(preview);
+      this.moduleCardsEl.appendChild(card);
+    });
+  }
+
+  private buildMiniMap(m: ModuleInfo): HTMLElement | null {
+    if (!m.tiles || m.tiles.length === 0) return null;
+    const wrap = el('div', { className: 'module-mini-map' });
+    const maxRows = Math.min(m.height, 16);
+    const maxCols = Math.min(m.width, 22);
+    wrap.style.gridTemplateRows = `repeat(${maxRows}, 1fr)`;
+    wrap.style.gridTemplateColumns = `repeat(${maxCols}, 1fr)`;
+    for (let y = 0; y < maxRows; y++) {
+      const row = m.tiles[y] || '';
+      for (let x = 0; x < maxCols; x++) {
+        const tile = row[x] || '0';
+        const cell = el('span', { className: `mini-tile mini-tile-${tile === '1' ? 'wall' : tile === '2' ? 'trap' : 'floor'}` });
+        wrap.appendChild(cell);
+      }
+    }
+    return wrap;
+  }
+
+  private selectModule(id: string) {
+    this.selectedModuleId = id;
+    this.renderModules();
   }
 
   private render(characters: CharacterState[]) {
@@ -118,7 +195,7 @@ export class CharacterSelect {
       );
       const idSpan = el('span', { className: 'session-id' }, c.id || '');
       const actions = el('div', { className: 'session-actions' });
-      const playBtn = el('button', { onclick: () => this.onPlay(c, parseInt(this.timerInput.value, 10) || 0, this.moduleInput.value) }, 'Play');
+      const playBtn = el('button', { onclick: () => this.onPlay(c, parseInt(this.timerInput.value, 10) || 0, this.selectedModuleId) }, 'Play');
       const sheetBtn = el('button', { onclick: () => this.openSheet(c) }, 'Sheet');
       const delBtn = el('button', {
         className: 'danger',

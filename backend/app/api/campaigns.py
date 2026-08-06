@@ -67,11 +67,17 @@ async def _require_campaign_member(
 
 
 def _campaign_response(record: CampaignRecord, is_member: bool = False, is_dm: bool = False) -> dict[str, Any]:
+    module_ids = json.loads(record.module_ids)
+    cleared = json.loads(record.cleared_module_ids or "[]")
     out = {
         "id": record.id,
         "name": record.name,
         "ruleset_id": record.ruleset_id,
-        "module_ids": json.loads(record.module_ids),
+        "module_ids": module_ids,
+        "cleared_module_ids": cleared,
+        "current_module_index": record.current_module_index or 0,
+        "current_module_id": module_ids[record.current_module_index or 0] if module_ids else None,
+        "completed": len(cleared) >= len(module_ids) and len(module_ids) > 0,
         "dm_account_id": record.dm_account_id,
         "created_at": record.created_at.isoformat() if record.created_at else None,
     }

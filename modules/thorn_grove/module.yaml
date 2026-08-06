@@ -1,0 +1,118 @@
+id: thorn_grove
+name: The Thorn Grove
+ruleset: osric
+description: >-
+  A forest shrine has grown wild and hungry. Thorn-crowned druids guard the
+  overgrown altar, and their chief—a hulking brute called Briarback—wears
+  armour woven from living brambles.
+map:
+  width: 22
+  height: 16
+  tile_size: 40
+  theme: forest
+  tiles:
+    - "1111111111111111111111"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1000000000200000000001"
+    - "1001110111011101110001"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1011101111101110111001"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1001111101110111110001"
+    - "1000000000000000000001"
+    - "1000000000000000000001"
+    - "1000111011101110100001"
+    - "1000000000000000000001"
+    - "1111111111111111111111"
+player_start:
+  x: 1
+  y: 1
+monsters:
+  - id: briarback
+    name: Briarback
+    monster: orc
+    x: 11
+    y: 7
+    color: "#2ecc71"
+    boss: true
+    phases:
+      - hp_threshold: 0.5
+        damage_bonus: 2
+        to_hit_bonus: 1
+        spawn:
+          - id: thorn_druid_1
+            name: Thorn Druid
+            monster: goblin
+            x: 10
+            y: 6
+            color: "#27ae60"
+          - id: thorn_druid_2
+            name: Thorn Druid
+            monster: goblin
+            x: 12
+            y: 8
+            color: "#27ae60"
+  - id: thorn_druid_3
+    name: Thorn Druid
+    monster: goblin
+    x: 3
+    y: 3
+    color: "#27ae60"
+  - id: thorn_druid_4
+    name: Thorn Druid
+    monster: goblin
+    x: 18
+    y: 3
+    color: "#27ae60"
+  - id: thorn_druid_5
+    name: Thorn Druid
+    monster: goblin
+    x: 3
+    y: 13
+    color: "#27ae60"
+  - id: thorn_druid_6
+    name: Thorn Druid
+    monster: goblin
+    x: 18
+    y: 13
+    color: "#27ae60"
+  - id: grove_wolf
+    name: Thorn Wolf
+    monster: wolf
+    x: 11
+    y: 3
+    color: "#7f8c8d"
+events:
+  - id: overgrown_altar
+    x: 11
+    y: 5
+    message: >-
+      Brambles choke a mossy altar. Burn them to clear a path, or pray and
+      accept the grove's gift?
+    choices:
+      burn: Burn the brambles
+      pray: Pray at the altar
+branches:
+  burn:
+    - id: angry_druid_1
+      name: Thorn Druid
+      monster: goblin
+      x: 13
+      y: 5
+      color: "#27ae60"
+    - id: angry_druid_2
+      name: Thorn Druid
+      monster: goblin
+      x: 14
+      y: 5
+      color: "#27ae60"
+  pray:
+    - id: blessed_wolf
+      name: Thorn Wolf
+      monster: wolf
+      x: 9
+      y: 9
+      color: "#7f8c8d"

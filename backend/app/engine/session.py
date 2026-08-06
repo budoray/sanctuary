@@ -40,13 +40,22 @@ STATUS_LOST = "lost"
 
 RANGED_RANGE = 4
 
-TILE_LAVA = "3"
-TILE_SPIKES = "4"
+TILE_HAZARD_1 = "3"
+TILE_HAZARD_2 = "4"
+TILE_LAVA = TILE_HAZARD_1
+TILE_SPIKES = TILE_HAZARD_2
 TILE_EVENT = "5"
 
-HAZARD_DAMAGE = {
-    TILE_LAVA: ("lava", "1d6"),
-    TILE_SPIKES: ("spikes", "1d8"),
+# Theme-aware hazard tiles. Most deal damage; ice has a special slip effect.
+THEME_HAZARDS: dict[str | None, dict[str, tuple[str, str]]] = {
+    "dungeon": {TILE_HAZARD_1: ("ember coals", "1d4"), TILE_HAZARD_2: ("spikes", "1d8")},
+    "cave": {TILE_HAZARD_1: ("lava", "1d6"), TILE_HAZARD_2: ("spikes", "1d8")},
+    "library": {TILE_HAZARD_1: ("cursed tome", "1d4"), TILE_HAZARD_2: ("falling shelf", "1d6")},
+    "ice": {TILE_HAZARD_1: ("ice", "slip"), TILE_HAZARD_2: ("frost", "1d4")},
+    "lava": {TILE_HAZARD_1: ("lava", "1d6"), TILE_HAZARD_2: ("magma", "1d8")},
+    "forest": {TILE_HAZARD_1: ("brush", "cover"), TILE_HAZARD_2: ("poison thorns", "1d6")},
+    "tomb": {TILE_HAZARD_1: ("sarcophagus trap", "1d6"), TILE_HAZARD_2: ("falling stone", "1d8")},
+    "sewer": {TILE_HAZARD_1: ("toxic water", "1d6"), TILE_HAZARD_2: ("sewage geyser", "1d8")},
 }
 
 ARENA_BASE_WAVE_TEMPLATES = ["goblin", "orc", "skeleton", "ghoul", "zombie"]
@@ -572,19 +581,43 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
             )
             state["log"].append(f"{trap_line} {token['name']} suffers {damage} damage.")
 
-    # Hazard tiles: 3 = lava, 4 = spikes.
+    # Theme-aware hazard tiles: 3 and 4.
     tile = module.map.tiles[y][x] if module.map.in_bounds(x, y) else "0"
-    if tile in HAZARD_DAMAGE:
-        await _apply_hazard(state, token, tile, d)
+    hazards = THEME_HAZARDS.get(module.map.theme, THEME_HAZARDS["dungeon"])
+    if tile in hazards:
+        await _apply_hazard(state, token, tile, module.map.theme, d, module)
 
     # Event/branch tile: 5.
     if tile == TILE_EVENT:
         _trigger_event(state, module, x, y)
 
 
-async def _apply_hazard(state: dict[str, Any], token: dict[str, Any], tile: str, d: Dice) -> None:
-    """Apply hazard damage to a token that enters or starts its turn on a hazard tile."""
-    name, expr = HAZARD_DAMAGE[tile]
+async def _apply_hazard(state: dict[str, Any], token: dict[str, Any], tile: str, theme: str | None, d: Dice, module: Module | None = None) -> None:
+    """Apply theme-aware hazard damage or effects to a token on a hazard tile."""
+    hazards = THEME_HAZARDS.get(theme, THEME_HAZARDS["dungeon"])
+    name, expr = hazards[tile]
+
+    if expr == "slip":
+        # Ice: chance to slide one tile in a random direction.
+        slip_roll = d.roll("1d6", reason="ice slip", kind="hazard").total
+        if slip_roll <= 2 and module is not None:
+            dx = random.choice([-1, 0, 1])
+            dy = random.choice([-1, 0, 1])
+            nx, ny = token["x"] + dx, token["y"] + dy
+            if module.map.in_bounds(nx, ny) and module.map.walkable(nx, ny) and _token_at(state, nx, ny) is None:
+                token["x"] = nx
+                token["y"] = ny
+                state["log"].append(f"{token['name']} slips on the ice and slides.")
+            else:
+                state["log"].append(f"{token['name']} slips on the ice but catches themself.")
+        return
+
+    if expr == "cover":
+        # Forest brush: grant temporary cover status.
+        token.setdefault("statuses", []).append({"type": "cover", "duration": 1})
+        state["log"].append(f"{token['name']} takes cover in the brush.")
+        return
+
     damage_roll = d.roll(expr, reason=f"{name} damage", kind="hazard")
     damage = max(1, damage_roll.total)
     token["hp"] -= damage
@@ -706,10 +739,15 @@ def _is_undead(name: str) -> bool:
 
 
 def _has_cover(state: dict[str, Any], module: Module, target: dict[str, Any]) -> bool:
-    """True if the target is adjacent to a wall tile and gains +2 AC cover."""
+    """True if the target is adjacent to a wall or standing in forest brush."""
     for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
         x, y = target["x"] + dx, target["y"] + dy
         if module.map.in_bounds(x, y) and module.map.tiles[y][x] == "1":
+            return True
+    # Forest brush tiles grant cover.
+    if module.map.theme == "forest":
+        tile = module.map.tiles[target["y"]][target["x"]]
+        if tile == TILE_HAZARD_1:
             return True
     return False
 
@@ -1269,13 +1307,14 @@ async def _spawn_arena_wave(state: dict[str, Any], module: Module, d: Dice) -> N
 
 
 async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
-    # Lava damages any token that ends its turn standing on it.
+    # Hazard tiles damage tokens that end their turn standing on them.
+    hazards = THEME_HAZARDS.get(module.map.theme, THEME_HAZARDS["dungeon"])
     for token in _tokens(state):
         if not token.get("alive", True):
             continue
         tile = module.map.tiles[token["y"]][token["x"]]
-        if tile == TILE_LAVA:
-            await _apply_hazard(state, token, tile, d)
+        if tile in hazards:
+            await _apply_hazard(state, token, tile, module.map.theme, d, module)
 
     events: list[str] = []
     for monster in state["monsters"]:
