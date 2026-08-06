@@ -11,7 +11,23 @@ from backend.app.auth import require_account
 from backend.app.db import CharacterRecord, get_db
 from backend.app.engine import character as char_engine
 
+from backend.app.engine.character import ABILITIES, ANCESTRIES, CLASSES, GEN_MODES, arrangeable
+
 router = APIRouter(tags=["characters"])
+
+
+@router.get("/ruleset/osric/options")
+async def osric_options():
+    """Player-facing options for the OSRIC ruleset."""
+    return {
+        "abilities": list(ABILITIES),
+        "ancestries": list(ANCESTRIES),
+        "classes": list(CLASSES),
+        "modes": [
+            {"id": m, "roll": "3d6" if "hardest" in m or "difficult" in m else "4d6 drop lowest", "arrange": arrangeable(m)}
+            for m in GEN_MODES
+        ],
+    }
 
 
 def _serialize(character: char_engine.Character) -> dict[str, Any]:
@@ -48,6 +64,36 @@ def _character_state(character: char_engine.Character, char_id: str) -> dict[str
     state = _serialize(character)
     state["id"] = char_id
     return state
+
+
+@router.post("/characters/preview")
+async def preview_character(data: dict[str, Any]):
+    """Generate a character without saving it. Used by the creator UI for rolls and previews."""
+    mode = data.get("mode", "normal")
+    ancestry_name = data.get("ancestry", "human")
+    class_names = data.get("classes", ["fighter"])
+    name = data.get("name", "Hero")
+    arrangement = data.get("arrangement")
+    seed = data.get("seed")
+
+    if seed is None:
+        import random
+
+        seed = random.randint(1, 1_000_000_000)
+
+    try:
+        char = char_engine.generate(
+            seed=seed,
+            mode=mode,
+            ancestry_name=ancestry_name,
+            class_names=class_names,
+            name=name,
+            arrangement=arrangement,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return {"character": _serialize(char)}
 
 
 @router.post("/characters")
