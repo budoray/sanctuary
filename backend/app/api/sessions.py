@@ -9,8 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.auth import require_account
 from backend.app.db import CampaignMemberRecord, CampaignRecord, CharacterRecord, SessionRecord, get_db
+import random
+
 from backend.app.engine import character as char_engine
-from backend.app.engine import module, session as session_engine
+from backend.app.engine import items, module, session as session_engine
 from backend.app.socket_manager import socket_manager
 
 router = APIRouter(tags=["sessions"])
@@ -110,6 +112,8 @@ async def create_session(
         xp=char_state.get("xp", 0),
         level=char_state.get("level", 1),
         gold=char_state.get("gold", 0),
+        inventory=tuple(char_state.get("inventory", [])),
+        equipment=char_state.get("equipment", {}),
     )
 
     mod = module.load(module_id)
@@ -276,6 +280,13 @@ async def act_in_session(
             char_state["gold"] = player.get("gold", char_state.get("gold", 0))
             char_state["hit_points"] = player.get("hp", char_state.get("hit_points", 0))
             char_state["max_hp"] = player.get("max_hp", char_state.get("max_hp", char_state["hit_points"]))
+            char_state.setdefault("inventory", [])
+            char_state.setdefault("equipment", {})
+            if player.get("alive", True):
+                rng = random.Random(state.get("seed", 0) + state.get("version", 0) + sum(ord(c) for c in player.get("id", "")))
+                loot = items.generate_loot(rng)
+                items.add_item(char_state, loot)
+                state["log"].append(f"{player['name']} finds {loot['name']}.")
             char_record.state = json.dumps(char_state)
             char_record.level = char_state["level"]
             char_record.hp = char_state["hit_points"]
@@ -338,6 +349,8 @@ async def join_session(
         xp=char_state.get("xp", 0),
         level=char_state.get("level", 1),
         gold=char_state.get("gold", 0),
+        inventory=tuple(char_state.get("inventory", [])),
+        equipment=char_state.get("equipment", {}),
     )
 
     state = json.loads(record.state)

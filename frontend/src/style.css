@@ -1292,3 +1292,114 @@ button.danger:hover:not(:disabled) {
   text-shadow: 0 0 18px rgba(241, 196, 15, 0.45);
   box-shadow: 0 0 40px rgba(241, 196, 15, 0.15);
 }
+
+/* Character sheet overlay */
+.character-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 6, 7, 0.85);
+  z-index: 200;
+  padding: 24px;
+}
+
+.character-sheet-panel {
+  width: 420px;
+  max-width: 100%;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  box-shadow: 0 16px 60px rgba(0, 0, 0, 0.7);
+}
+
+.character-sheet-panel .sheet-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.character-sheet-panel .sheet-header h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.character-sheet-panel .sheet-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.character-sheet-panel .sheet-stat-box {
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.character-sheet-panel .sheet-stat-box span {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.character-sheet-panel .sheet-stat-box strong {
+  display: block;
+  font-size: 18px;
+  color: var(--text);
+  margin-top: 4px;
+}
+
+.character-sheet-panel .sheet-section {
+  margin-bottom: 18px;
+}
+
+.character-sheet-panel .sheet-section h2 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 4px;
+}
+
+.character-sheet-panel .sheet-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
+}
+
+.character-sheet-panel .sheet-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.character-sheet-panel .sheet-list li.empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.character-sheet-panel .sheet-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.character-sheet-panel .sheet-item-actions button {
+  padding: 4px 10px;
+  font-size: 11px;
+}

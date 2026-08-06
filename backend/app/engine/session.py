@@ -9,7 +9,7 @@ from collections import deque
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from backend.app.engine import bestiary
+from backend.app.engine import bestiary, items
 from backend.app.engine.character import Character
 from backend.app.engine.dice import Dice, Roll
 from backend.app.engine.module import Module
@@ -112,6 +112,19 @@ def _ranged_damage_for_classes(classes: list[str]) -> str:
     return "1d6"
 
 
+def _melee_damage_for_classes(classes: list[str]) -> str:
+    """Default melee damage for a player based on their first class."""
+    if not classes:
+        return "1d6"
+    cls = classes[0].lower()
+    if cls == "fighter":
+        return "1d8"
+    if cls in ("magic-user", "illusionist"):
+        return "1d4"
+    # cleric, thief, druid and everything else default to 1d6
+    return "1d6"
+
+
 async def new_game(
     session_id: str,
     module: Module,
@@ -137,6 +150,7 @@ async def new_game(
         "hp": character.hit_points,
         "max_hp": character.hit_points,
         "ac": character.armour_class,
+        "damage": _melee_damage_for_classes(list(character.classes)),
         "ranged_damage": _ranged_damage_for_classes(list(character.classes)),
         "color": "#3498db",
         "character_id": character_id,
@@ -145,6 +159,10 @@ async def new_game(
         "level": getattr(character, "level", 1),
         "gold": getattr(character, "gold", 0),
     }
+    items.apply_gear(
+        {"equipment": getattr(character, "equipment", {}), "inventory": list(getattr(character, "inventory", ()))},
+        player,
+    )
     players = [player]
 
     monsters: list[dict[str, Any]] = []
@@ -261,6 +279,7 @@ async def add_player(
         "hp": character.hit_points,
         "max_hp": character.hit_points,
         "ac": character.armour_class,
+        "damage": _melee_damage_for_classes(list(character.classes)),
         "ranged_damage": _ranged_damage_for_classes(list(character.classes)),
         "color": _PLAYER_COLORS[len(state["players"]) % len(_PLAYER_COLORS)],
         "character_id": character_id,
@@ -270,6 +289,10 @@ async def add_player(
         "level": getattr(character, "level", 1),
         "gold": getattr(character, "gold", 0),
     }
+    items.apply_gear(
+        {"equipment": getattr(character, "equipment", {}), "inventory": list(getattr(character, "inventory", ()))},
+        token,
+    )
     state["players"].append(token)
     state["version"] += 1
     state["log"].append(f"{character.name} joins the party.")
@@ -344,7 +367,11 @@ async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[
     hit = roll >= needed
     fatal = False
     if hit:
-        dmg_roll = d.roll(attacker.get("damage", "1d6"), reason="damage", kind="combat")
+        damage_expr = attacker.get("damage", "1d6")
+        damage_bonus = attacker.get("damage_bonus", 0)
+        if damage_bonus:
+            damage_expr = f"{damage_expr}+{damage_bonus}"
+        dmg_roll = d.roll(damage_expr, reason="damage", kind="combat")
         damage = max(1, dmg_roll.total)
         target["hp"] -= damage
         if target["hp"] <= 0:
@@ -391,6 +418,9 @@ async def _ranged_attack(
     fatal = False
     if hit:
         dmg_expr = attacker.get("ranged_damage", "1d6")
+        damage_bonus = attacker.get("damage_bonus", 0)
+        if damage_bonus:
+            dmg_expr = f"{dmg_expr}+{damage_bonus}"
         dmg_roll = d.roll(dmg_expr, reason="ranged damage", kind="combat")
         damage = max(1, dmg_roll.total)
         target["hp"] -= damage

@@ -5,7 +5,7 @@ from asgi_lifespan import LifespanManager
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy import select
 
-from backend.app.db import SessionRecord, get_db
+from backend.app.db import CharacterRecord, SessionRecord, get_db
 from backend.app.engine import module as module_engine
 from backend.app.main import fastapi_app
 

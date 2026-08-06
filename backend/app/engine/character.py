@@ -400,6 +400,8 @@ class Character:
     xp: int = 0
     level: int = 1
     gold: int = 0
+    inventory: tuple = field(default=(), compare=False)
+    equipment: dict = field(default_factory=dict, compare=False)
 
 
 def is_legal_multiclass(ancestry_name: str, class_names) -> bool:

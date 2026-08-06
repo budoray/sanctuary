@@ -1,4 +1,5 @@
 import { CharacterState, deleteCharacter, listCharacters } from '../net/api';
+import { CharacterSheet } from './character-sheet';
 import { el, clear } from './utils';
 
 const AVAILABLE_MODULES = [
@@ -107,6 +108,7 @@ export class CharacterSelect {
       const idSpan = el('span', { className: 'session-id' }, c.id || '');
       const actions = el('div', { className: 'session-actions' });
       const playBtn = el('button', { onclick: () => this.onPlay(c, parseInt(this.timerInput.value, 10) || 0, this.moduleInput.value) }, 'Play');
+      const sheetBtn = el('button', { onclick: () => this.openSheet(c) }, 'Sheet');
       const delBtn = el('button', {
         className: 'danger',
         onclick: async () => {
@@ -117,6 +119,7 @@ export class CharacterSelect {
         },
       }, 'Delete');
       actions.appendChild(playBtn);
+      actions.appendChild(sheetBtn);
       actions.appendChild(delBtn);
 
       const item = el('li', {});
@@ -125,6 +128,10 @@ export class CharacterSelect {
       item.appendChild(actions);
       this.listEl.appendChild(item);
     });
+  }
+
+  private openSheet(character: CharacterState) {
+    new CharacterSheet(this.root, character, () => this.load());
   }
 
   private titleCase(str: string) {

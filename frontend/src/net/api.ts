@@ -49,6 +49,15 @@ export interface PreviewRequest {
   arrangement?: Record<string, number>;
 }
 
+export interface Item {
+  instance_id: string;
+  item_id: string;
+  name: string;
+  type: string;
+  slot: string;
+  effects: Record<string, any>;
+}
+
 export interface CharacterState {
   id: string | null;
   name: string;
@@ -63,6 +72,11 @@ export interface CharacterState {
   modifiers: Record<string, number>;
   seed: number;
   log: RollRecord[];
+  xp?: number;
+  level?: number;
+  gold?: number;
+  inventory?: Item[];
+  equipment?: Record<string, Item>;
 }
 
 export interface RollRecord {
@@ -96,6 +110,20 @@ export async function listCharacters() {
 
 export async function deleteCharacter(characterId: string) {
   return api(`/api/characters/${characterId}`, { method: 'DELETE' }) as Promise<{ deleted: boolean }>;
+}
+
+export async function equipItem(characterId: string, instanceId: string) {
+  return api(`/api/characters/${characterId}/equip`, {
+    method: 'POST',
+    body: JSON.stringify({ instance_id: instanceId }),
+  }) as Promise<{ character: CharacterState }>;
+}
+
+export async function useItem(characterId: string, instanceId: string) {
+  return api(`/api/characters/${characterId}/use`, {
+    method: 'POST',
+    body: JSON.stringify({ instance_id: instanceId }),
+  }) as Promise<{ character: CharacterState; restored: number }>;
 }
 
 export interface GameSession {
