@@ -49,6 +49,13 @@ async def health():
     return {"status": "ok", "env": SETTINGS.app_env}
 
 
+@fastapi_app.get("/version")
+async def version():
+    version_file = ROOT / "VERSION"
+    version = version_file.read_text().strip() if version_file.exists() else "unknown"
+    return {"version": version}
+
+
 @fastapi_app.get("/health/db")
 async def health_db():
     from sqlalchemy import text

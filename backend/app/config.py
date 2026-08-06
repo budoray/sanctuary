@@ -17,7 +17,12 @@ class Settings(BaseSettings):
     secret_key: str = "dev-secret-not-for-production"
     database_url: str = f"sqlite+aiosqlite:///{ROOT / 'sanctuary.db'}"
     redis_url: str | None = None
-    cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    cors_origins: list[str] = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://tenshinarts.com",
+        "https://www.tenshinarts.com",
+    ]
     ruleset_root: Path = ROOT / "rulesets"
     module_root: Path = ROOT / "modules"
     tenshin_secret: str | None = None
