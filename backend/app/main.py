@@ -65,16 +65,21 @@ async def whoami(request: Request, account_id: int = Depends(require_account)):
     return {"user": {"id": account_id, "name": name or "player"}}
 
 
-if FRONTEND_DIST.exists():
-    fastapi_app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+FRONTEND_ASSETS = FRONTEND_DIST / "assets"
+FRONTEND_INDEX = FRONTEND_DIST / "index.html"
 
+if FRONTEND_ASSETS.exists():
+    fastapi_app.mount("/assets", StaticFiles(directory=FRONTEND_ASSETS), name="assets")
+
+if FRONTEND_INDEX.exists():
     @fastapi_app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
-        index = FRONTEND_DIST / "index.html"
-        if index.exists():
-            from fastapi.responses import FileResponse
+        from fastapi.responses import FileResponse
 
-            return FileResponse(index)
+        return FileResponse(FRONTEND_INDEX)
+else:
+    @fastapi_app.get("/{full_path:path}")
+    async def serve_backend_only(full_path: str):
         return {"status": "backend only", "path": full_path}
 
 
