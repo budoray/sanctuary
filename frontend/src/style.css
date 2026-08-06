@@ -26,6 +26,64 @@ html, body, #app {
   overflow: hidden;
 }
 
+#splash {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #121418 0%, #050607 100%);
+  z-index: 1000;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#splash.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-content {
+  text-align: center;
+  color: var(--text);
+}
+
+.splash-content h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 18px var(--accent-glow);
+  animation: splash-pulse 2.5s ease-in-out infinite;
+}
+
+.splash-content p {
+  margin: 0 0 24px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+
+.splash-spinner {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto;
+  border: 2px solid var(--panel-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: splash-spin 1s linear infinite;
+}
+
+@keyframes splash-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes splash-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 #game-canvas {
   position: absolute;
   inset: 0;

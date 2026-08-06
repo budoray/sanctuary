@@ -10,6 +10,13 @@ if (!app) {
   throw new Error('Missing #app container');
 }
 
+function hideSplash() {
+  const splash = document.getElementById('splash');
+  if (!splash) return;
+  splash.classList.add('hidden');
+  setTimeout(() => splash.remove(), 600);
+}
+
 async function init() {
   let sessions: any[] = [];
   let characters: any[] = [];
@@ -30,15 +37,18 @@ async function init() {
 
   if (sessions.length > 0) {
     showSessionSelect(sessions);
+    hideSplash();
     return;
   }
 
   if (characters.length > 0) {
     startGame(characters[0] as CharacterInfo);
+    hideSplash();
     return;
   }
 
   showCharacterCreator();
+  hideSplash();
 }
 
 function showSessionSelect(sessions: any[]) {
