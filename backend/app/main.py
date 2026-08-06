@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.api.characters import router as characters_router
+from backend.app.api.modules import router as modules_router
+from backend.app.api.sessions import router as sessions_router
 from backend.app.config import SETTINGS, ROOT
 from backend.app.db import Base, engine
 from backend.app.auth import require_account
@@ -47,6 +49,8 @@ fastapi_app.add_middleware(
 )
 
 fastapi_app.include_router(characters_router, prefix="/api")
+fastapi_app.include_router(modules_router, prefix="/api")
+fastapi_app.include_router(sessions_router, prefix="/api")
 
 
 @fastapi_app.get("/health")

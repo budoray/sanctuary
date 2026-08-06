@@ -2,19 +2,33 @@ id: sample_lair
 name: The Goblin Lair
 ruleset: osric
 description: >-
-  A single cavern chamber overrun with goblins. A minimal test adventure
-  for the Sanctuary engine.
+  A torch-lit cavern chamber. A goblin scout has made it his den.
+  Slay it, or fall.
 map:
-  width: 20
-  height: 15
-  tile_size: 32
-starting_tokens:
-  - name: Hero
-    x: 2
-    y: 2
-    color: "#3498db"
-    owner: player
-  - name: Goblin
-    x: 10
+  width: 16
+  height: 12
+  tile_size: 40
+  tiles:
+    # wall = 1, floor = 0; each string is one row of the grid
+    - "1111111111111111"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1111111111111111"
+player_start:
+  x: 2
+  y: 2
+monsters:
+  - id: goblin_1
+    name: Goblin
+    monster: goblin
+    x: 12
     y: 8
     color: "#2ecc71"

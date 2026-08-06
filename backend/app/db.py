@@ -36,6 +36,20 @@ class CharacterRecord(Base):
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
 
 
+class SessionRecord(Base):
+    __tablename__ = "sessions"
+
+    id = Column(String, primary_key=True)
+    account_id = Column(Integer, index=True, nullable=False)
+    module_id = Column(String, nullable=False)
+    character_id = Column(String, nullable=False)
+    name = Column(String, nullable=False, default="Adventure")
+    status = Column(String, default="active")
+    state = Column(Text, default="{}")  # full session engine state
+    created_at = Column(DateTime, default=_utc_now)
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
+
+
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
