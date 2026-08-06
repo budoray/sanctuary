@@ -40,7 +40,7 @@ async def test_version():
     async with AsyncClient(transport=ASGITransport(app=fastapi_app), base_url="http://test") as client:
         r = await client.get("/version")
     assert r.status_code == 200
-    assert "version" in r.json()
+    assert r.text.startswith("v")
 
 
 @pytest.mark.asyncio

@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request
+from starlette.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -104,11 +105,10 @@ async def health_ready():
     )
 
 
-@fastapi_app.get("/version")
+@fastapi_app.get("/version", response_class=PlainTextResponse)
 async def version():
     version_file = ROOT / "VERSION"
-    version = version_file.read_text().strip() if version_file.exists() else "unknown"
-    return {"version": version}
+    return version_file.read_text().strip() if version_file.exists() else "unknown"
 
 
 @fastapi_app.get("/health/db")

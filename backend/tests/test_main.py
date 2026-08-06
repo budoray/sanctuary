@@ -23,8 +23,7 @@ async def test_version_and_cors_whitelist():
                 headers={"Origin": "https://tenshinarts.com"},
             )
             assert resp.status_code == 200
-            data = resp.json()
-            assert "version" in data
+            assert resp.text.startswith("v")
             # CORS: the tenshinarts.com games page must be able to fetch /version
             assert "access-control-allow-origin" in {k.lower() for k in resp.headers.keys()}
             assert resp.headers["access-control-allow-origin"] == "https://tenshinarts.com"
