@@ -849,22 +849,41 @@ export class Game {
   }
 
   private renderLog() {
-    clear(this.logEl);
     if (!this.session) return;
     const log = this.session.log;
-    log.slice(-20).forEach((entry) => {
-      this.logEl.appendChild(el('div', { className: 'log-entry' }, entry));
-    });
-    this.logEl.scrollTop = this.logEl.scrollHeight;
 
     if (log.length > this.lastLogLength) {
+      const newCount = log.length - this.lastLogLength;
+      for (let i = log.length - newCount; i < log.length; i++) {
+        const entry = log[i];
+        const isTurn = entry.startsWith('— Turn');
+        const className = isTurn ? 'log-entry turn-marker' : 'log-entry fresh';
+        const row = el('div', { className }, entry);
+        this.logEl.appendChild(row);
+        if (!isTurn) {
+          window.setTimeout(() => row.classList.remove('fresh'), 600);
+        }
+      }
+      // Trim old entries to keep the log from growing forever.
+      while (this.logEl.childElementCount > 20) {
+        this.logEl.firstElementChild?.remove();
+      }
       const newEntries = log.slice(this.lastLogLength);
       const combatKeywords = ['strike', 'blow', 'hit', 'miss', 'pain', 'weapon', 'crumple', 'fall', 'dies', 'bites', 'stinging'];
       if (newEntries.some((e) => combatKeywords.some((k) => e.toLowerCase().includes(k)))) {
         this.shakeFrames = 12;
       }
       this.lastLogLength = log.length;
+    } else if (this.logEl.childElementCount === 0) {
+      log.slice(-20).forEach((entry) => {
+        const isTurn = entry.startsWith('— Turn');
+        const className = isTurn ? 'log-entry turn-marker' : 'log-entry';
+        this.logEl.appendChild(el('div', { className }, entry));
+      });
+      this.lastLogLength = log.length;
     }
+
+    this.logEl.scrollTop = this.logEl.scrollHeight;
   }
 
   private log(message: string) {
