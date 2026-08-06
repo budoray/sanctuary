@@ -102,6 +102,8 @@ export interface GameSession {
   id: string;
   module_id: string;
   character_id: string | null;
+  campaign_id: string | null;
+  dm_account_id: number | null;
   turn: number;
   phase: 'player' | 'dm';
   status: 'active' | 'won' | 'lost';

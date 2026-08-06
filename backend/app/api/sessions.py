@@ -18,6 +18,43 @@ router = APIRouter(tags=["sessions"])
 DEFAULT_MODULE = "sample_lair"
 
 
+async def _can_access_session(
+    record: SessionRecord, account_id: int, db: AsyncSession
+) -> bool:
+    if record.account_id == account_id:
+        return True
+    if not record.campaign_id:
+        return False
+    result = await db.execute(
+        select(CampaignMemberRecord).where(
+            CampaignMemberRecord.campaign_id == record.campaign_id,
+            CampaignMemberRecord.account_id == account_id,
+        )
+    )
+    return result.scalar_one_or_none() is not None
+
+
+async def _is_campaign_dm(
+    record: SessionRecord, account_id: int, db: AsyncSession
+) -> bool:
+    if not record.campaign_id:
+        return False
+    result = await db.execute(
+        select(CampaignRecord).where(CampaignRecord.id == record.campaign_id)
+    )
+    campaign = result.scalar_one_or_none()
+    if campaign and campaign.dm_account_id == account_id:
+        return True
+    result = await db.execute(
+        select(CampaignMemberRecord).where(
+            CampaignMemberRecord.campaign_id == record.campaign_id,
+            CampaignMemberRecord.account_id == account_id,
+            CampaignMemberRecord.role == "dm",
+        )
+    )
+    return result.scalar_one_or_none() is not None
+
+
 @router.post("/sessions")
 async def create_session(
     data: dict[str, Any],
@@ -77,6 +114,9 @@ async def create_session(
     state = await session_engine.new_game(
         session_id, mod, char, turn_timer_seconds=turn_timer_seconds, character_id=character_id
     )
+    if campaign_id:
+        state["campaign_id"] = campaign_id
+        state["dm_account_id"] = campaign.dm_account_id
 
     session_record = SessionRecord(
         id=session_id,
@@ -151,13 +191,10 @@ async def get_session(
     account_id: int = Depends(require_account),
 ):
     result = await db.execute(
-        select(SessionRecord).where(
-            SessionRecord.id == session_id,
-            SessionRecord.account_id == account_id,
-        )
+        select(SessionRecord).where(SessionRecord.id == session_id)
     )
     record = result.scalar_one_or_none()
-    if not record:
+    if not record or not await _can_access_session(record, account_id, db):
         raise HTTPException(status_code=404, detail="Session not found")
     state = json.loads(record.state)
     return {"session": session_engine.view(state)}
@@ -171,18 +208,20 @@ async def act_in_session(
     account_id: int = Depends(require_account),
 ):
     result = await db.execute(
-        select(SessionRecord).where(
-            SessionRecord.id == session_id,
-            SessionRecord.account_id == account_id,
-        )
+        select(SessionRecord).where(SessionRecord.id == session_id)
     )
     record = result.scalar_one_or_none()
-    if not record:
+    if not record or not await _can_access_session(record, account_id, db):
         raise HTTPException(status_code=404, detail="Session not found")
+
+    action = data.get("action")
+    if action == "dm_turn" and record.campaign_id and not await _is_campaign_dm(record, account_id, db):
+        raise HTTPException(status_code=403, detail="Only the DM can run the DM turn")
+    if action in ("move", "attack", "end_turn") and record.account_id != account_id:
+        raise HTTPException(status_code=403, detail="Only the session owner can control the hero")
 
     state = json.loads(record.state)
     mod = module.load(record.module_id)
-    action = data.get("action")
     try:
         state = await session_engine.act(
             state,

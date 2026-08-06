@@ -273,6 +273,8 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "id": state["id"],
         "module_id": state["module_id"],
         "character_id": state.get("character_id"),
+        "campaign_id": state.get("campaign_id"),
+        "dm_account_id": state.get("dm_account_id"),
         "turn": state["turn"],
         "phase": state["phase"],
         "status": state["status"],
