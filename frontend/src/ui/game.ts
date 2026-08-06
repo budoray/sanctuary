@@ -1,5 +1,7 @@
 import { Application, Container, Graphics } from 'pixi.js';
+import type { Socket } from 'socket.io-client';
 import { actInSession, GameSession, Token } from '../net/api';
+import { connectSocket } from '../net/socket';
 import { DiceTray } from './dice-tray';
 import { TokenSprite } from './token-sprite';
 import { el, clear } from './utils';
@@ -64,6 +66,7 @@ export class Game {
   private moveBtn!: HTMLButtonElement;
   private attackBtn!: HTMLButtonElement;
   private endBtn!: HTMLButtonElement;
+  private socket: Socket | null = null;
 
   constructor(
     container: HTMLElement,
@@ -131,6 +134,14 @@ export class Game {
     this.centerMap();
 
     this.app.ticker.add((ticker) => this.onTick(ticker));
+
+    this.socket = connectSocket();
+    this.socket.emit('join_session', { session_id: this.sessionId });
+    this.socket.on('session_update', (payload: { session?: GameSession }) => {
+      if (payload.session && payload.session.id === this.sessionId) {
+        this.update(payload.session);
+      }
+    });
   }
 
   private buildUI() {
@@ -869,6 +880,10 @@ export class Game {
     if (this.keydownHandler) {
       window.removeEventListener('keydown', this.keydownHandler);
       this.keydownHandler = null;
+    }
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
     }
     this.app?.destroy(true, { children: true });
     clear(this.root);
