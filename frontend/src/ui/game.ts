@@ -1,4 +1,4 @@
-import { Application, Assets, Container, Graphics, Sprite } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { Socket } from 'socket.io-client';
 import {
   actInSession, advanceSession, dmMove, dmReveal, dmSpawn, GameSession,
@@ -6,7 +6,6 @@ import {
 } from '../net/api';
 import { connectSocket } from '../net/socket';
 import { DiceTray } from './dice-tray';
-import { TokenSprite } from './token-sprite';
 import { el, clear } from './utils';
 import { AudioController } from './audio';
 import { getTheme, loadAtlas, tileFrame } from '../lib/tile-atlas';
@@ -75,7 +74,6 @@ export class Game {
   private canvasContainer: HTMLElement;
   private timerInterval: number | null = null;
   private timeoutFired = false;
-  private tokenSprites: Map<string, TokenSprite> = new Map();
   private tileSprites: Container[][] = [];
   private lastTokenHp: Map<string, number> = new Map();
   private shakeFrames = 0;
@@ -1153,13 +1151,6 @@ export class Game {
 
   private playerPixelCenter(): { x: number; y: number } | null {
     if (!this.session) return null;
-    const sprite = this.tokenSprites.get(this.session.player.id);
-    if (sprite) {
-      return {
-        x: sprite.targetX + TILE_SIZE / 2,
-        y: sprite.targetY + TILE_SIZE / 2,
-      };
-    }
     return {
       x: this.session.player.x * TILE_SIZE + TILE_SIZE / 2,
       y: this.session.player.y * TILE_SIZE + TILE_SIZE / 2,
@@ -1182,84 +1173,91 @@ export class Game {
     this.fxContainer.y = this.cameraY + oy;
   }
 
-  private renderTokens(snap = false) {
+  private renderTokens(_snap = false) {
     if (!this.session) return;
     const session = this.session;
     const tokens: Token[] = [...session.players, ...session.monsters];
-    const aliveIds = new Set<string>();
+    const activeId = session.phase === 'player' ? session.player?.id : null;
+
+    this.tokenContainer.removeChildren();
 
     tokens.forEach((t) => {
-      if (t.alive === false) {
-        const existing = this.tokenSprites.get(t.id);
-        if (existing) {
-          this.spawnDeathParticles(existing.container.x + TILE_SIZE / 2, existing.container.y + TILE_SIZE / 2, t.type === 'player' ? 0x3498db : 0x2ecc71);
-          existing.destroy();
-          this.tokenSprites.delete(t.id);
-        }
-        return;
+      if (t.alive === false) return;
+      const isPlayer = t.type === 'player';
+      const isActive = t.id === activeId;
+      const color = isPlayer ? 0x3498db : 0x2ecc71;
+      const x = t.x * TILE_SIZE;
+      const y = t.y * TILE_SIZE;
+      const cx = x + TILE_SIZE / 2;
+      const cy = y + TILE_SIZE / 2;
+      const radius = TILE_SIZE * 0.38;
+
+      const g = new Graphics();
+      g.eventMode = 'static';
+      g.cursor = 'pointer';
+      g.on('pointerdown', () => this.onTokenClick(t));
+      g.on('pointerover', (e: any) => {
+        const rect = this.canvasContainer.getBoundingClientRect();
+        this.showTooltip(t, rect.left + e.global.x, rect.top + e.global.y);
+      });
+      g.on('pointermove', (e: any) => {
+        const rect = this.canvasContainer.getBoundingClientRect();
+        this.moveTooltip(rect.left + e.global.x, rect.top + e.global.y);
+      });
+      g.on('pointerout', () => this.hideTooltip());
+
+      // Drop shadow
+      g.ellipse(cx, cy + 5, radius * 0.85, radius * 0.45);
+      g.fill({ color: 0x000000, alpha: 0.4 });
+
+      // Active-player gold ring
+      if (isActive) {
+        g.circle(cx, cy, radius + 4);
+        g.fill({ color: 0xf1c40f, alpha: 0.95 });
       }
-      aliveIds.add(t.id);
-      let sprite = this.tokenSprites.get(t.id);
-      if (!sprite) {
-        sprite = new TokenSprite(t, TILE_SIZE);
-        sprite.container.eventMode = 'static';
-        sprite.container.cursor = 'pointer';
-        sprite.container.on('pointerdown', () => this.onTokenClick(t));
-        sprite.container.on('pointerover', (e: any) => {
-          const rect = this.canvasContainer.getBoundingClientRect();
-          this.showTooltip(t, rect.left + e.global.x, rect.top + e.global.y);
-        });
-        sprite.container.on('pointermove', (e: any) => {
-          const rect = this.canvasContainer.getBoundingClientRect();
-          this.moveTooltip(rect.left + e.global.x, rect.top + e.global.y);
-        });
-        sprite.container.on('pointerout', () => this.hideTooltip());
-        this.tokenContainer.addChild(sprite.container);
-        this.tokenSprites.set(t.id, sprite);
-        if (snap) sprite.snapToTarget();
+
+      // Token body
+      g.circle(cx, cy, radius);
+      g.fill({ color, alpha: 1 });
+      g.circle(cx, cy, radius);
+      g.stroke({ width: 2, color: 0xffffff, alpha: 0.9 });
+
+      // Downed overlay
+      if (t.down) {
+        g.circle(cx, cy, radius);
+        g.fill({ color: 0x000000, alpha: 0.5 });
       }
-      sprite.setTarget(t.x, t.y);
-      const prevHp = this.lastTokenHp.get(t.id);
-      sprite.updateHP(t.hp, t.max_hp);
-      if (prevHp !== undefined && t.hp !== prevHp) {
-        const delta = t.hp - prevHp;
-        sprite.showFloat(`${delta > 0 ? '+' : ''}${delta}`, delta < 0 ? 0xc0392b : 0x2ecc71);
-        if (delta < 0) {
-          this.spawnBloodSplatter(sprite.container.x + TILE_SIZE / 2, sprite.container.y + TILE_SIZE / 2, Math.abs(delta));
-        }
-      }
-      const isActivePlayer = t.type === 'player' && t.id === session.player.id && session.phase === 'player';
-      sprite.setActive(isActivePlayer);
-      sprite.setDown(t.down ?? false);
+
+      this.tokenContainer.addChild(g);
+
+      // Initial label
+      const initial = (t.name || '?').charAt(0).toUpperCase();
+      const label = new Text(initial, {
+        fontSize: 16, fill: 0xffffff, fontWeight: 'bold', align: 'center',
+      });
+      label.anchor.set(0.5);
+      label.x = cx;
+      label.y = cy;
+      this.tokenContainer.addChild(label);
+
+      // HP bar
+      const hpRatio = Math.max(0, Math.min(1, t.hp / t.max_hp));
+      const barW = TILE_SIZE - 8;
+      const barH = 4;
+      const barX = x + 4;
+      const barY = y + TILE_SIZE - 6;
+      const hpColor = hpRatio > 0.5 ? 0x2ecc71 : hpRatio > 0.25 ? 0xf1c40f : 0xc0392b;
+      const hpBar = new Graphics();
+      hpBar.rect(barX, barY, barW, barH);
+      hpBar.fill({ color: 0x000000, alpha: 0.7 });
+      hpBar.rect(barX, barY, barW * hpRatio, barH);
+      hpBar.fill({ color: hpColor, alpha: 1 });
+      this.tokenContainer.addChild(hpBar);
     });
 
     this.lastTokenHp.clear();
     for (const t of tokens) {
       if (t.alive !== false) this.lastTokenHp.set(t.id, t.hp);
-    }
-
-    for (const [id, sprite] of this.tokenSprites) {
-      if (!aliveIds.has(id)) {
-        sprite.destroy();
-        this.tokenSprites.delete(id);
-      }
-    }
-  }
-
-  private spawnDeathParticles(x: number, y: number, color: number) {
-    for (let i = 0; i < 12; i++) {
-      const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.5;
-      const speed = 1 + Math.random() * 2;
-      this.spawnParticle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, color, 30 + Math.random() * 20);
-    }
-  }
-
-  private spawnBloodSplatter(x: number, y: number, damage: number) {
-    const count = Math.min(20, 6 + damage * 2);
-    for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = 0.8 + Math.random() * 2.5;
-      this.spawnParticle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, 0xc0392b, 25 + Math.random() * 20);
     }
   }
 
@@ -1285,16 +1283,6 @@ export class Game {
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
-  }
-
-  private spawnParticle(x: number, y: number, vx: number, vy: number, color: number, life: number) {
-    const g = new Graphics();
-    g.circle(0, 0, 2 + Math.random() * 2);
-    g.fill({ color });
-    g.x = x;
-    g.y = y;
-    this.fxContainer.addChild(g);
-    this.particles.push({ gfx: g, vx, vy, life, maxLife: life });
   }
 
   private ambientEffectConfig() {
@@ -1383,25 +1371,11 @@ export class Game {
   private onTick(ticker: import('pixi.js').Ticker) {
     const dt = ticker.deltaTime;
     const dtSec = dt / 60;
-    const speed = 12;
 
     // Ambient dust / torch sparks
     if (this.session && this.session.status === 'active' && Math.random() < 0.08) {
       this.spawnAmbientParticles();
     }
-    for (const sprite of this.tokenSprites.values()) {
-      const dx = sprite.targetX - sprite.container.x;
-      const dy = sprite.targetY - sprite.container.y;
-      if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
-        sprite.container.x += dx * (1 - Math.exp(-speed * dtSec));
-        sprite.container.y += dy * (1 - Math.exp(-speed * dtSec));
-      } else {
-        sprite.container.x = sprite.targetX;
-        sprite.container.y = sprite.targetY;
-      }
-      sprite.tick(dt);
-    }
-
     if (this.shakeFrames > 0) {
       this.shakeFrames -= dt;
     }
