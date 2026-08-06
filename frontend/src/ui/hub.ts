@@ -1,5 +1,16 @@
-import { listCampaigns, listModules, listSessions, ModuleInfo } from '../net/api';
-import { el } from './utils';
+import { getAccountProgress, listCampaigns, listModules, listSessions, ModuleInfo } from '../net/api';
+import { el, clear } from './utils';
+
+const THEME_LABELS: Record<string, string> = {
+  dungeon: 'Dungeon',
+  cave: 'Cave',
+  library: 'Library',
+  ice: 'Frozen',
+  lava: 'Volcanic',
+  forest: 'Forest',
+  tomb: 'Tomb',
+  sewer: 'Sewer',
+};
 
 export class Hub {
   private root: HTMLElement;
@@ -9,6 +20,7 @@ export class Hub {
   private onResume: () => void;
   private container: HTMLElement;
   private modules: ModuleInfo[] = [];
+  private progressEl: HTMLElement;
 
   constructor(
     container: HTMLElement,
@@ -26,7 +38,7 @@ export class Hub {
     const background = el('div', { className: 'hub-background' });
     const vignette = el('div', { className: 'hub-vignette' });
     const particles = el('div', { className: 'hub-particles' });
-    for (let i = 0; i < 24; i++) {
+    for (let i = 0; i < 32; i++) {
       const p = el('span', { className: 'hub-particle' });
       p.style.left = `${Math.random() * 100}%`;
       p.style.top = `${Math.random() * 100}%`;
@@ -36,6 +48,8 @@ export class Hub {
     }
 
     this.container = el('div', { className: 'hub-container' });
+    this.progressEl = el('div', { className: 'hub-progress' });
+    this.container.appendChild(this.progressEl);
     this.renderHeader();
     this.renderActions();
     this.renderRealm();
@@ -66,7 +80,7 @@ export class Hub {
     const solo = this.buildCard(
       'solo',
       'Solo Adventure',
-      'Create a hero and delve into a module alone. Your torch, your choices, your fate.',
+      'Forge a hero and delve into any realm alone. Your torch, your choices, your fate.',
       'Begin Solo',
       () => this.onSolo()
     );
@@ -74,7 +88,7 @@ export class Hub {
     const join = this.buildCard(
       'join',
       'Join Adventure',
-      'Resume a saved session or join an active campaign already in progress.',
+      'Resume a saved session or join an active campaign already in progress with friends.',
       'Join / Resume',
       () => this.onJoin()
     );
@@ -82,7 +96,7 @@ export class Hub {
     const group = this.buildCard(
       'group',
       'Create Group Adventure',
-      'Start a campaign, invite friends, and lead (or follow) as DM.',
+      'Start a campaign, invite friends, and lead or follow as DM with AI assistance.',
       'Create Campaign',
       () => this.onCampaigns()
     );
@@ -131,12 +145,36 @@ export class Hub {
 
   private async loadData() {
     try {
-      const { modules } = await listModules();
+      const [{ modules }, progress] = await Promise.all([
+        listModules(),
+        getAccountProgress().catch(() => null),
+      ]);
       this.modules = modules;
+      this.renderProgress(progress);
       this.renderRealm();
     } catch {
       // Realm preview is best-effort.
     }
+  }
+
+  private renderProgress(progress: { wins?: number; losses?: number; boss_kills?: number; modules_cleared?: number; deaths?: number; level_ups?: number; sessions?: number } | null) {
+    clear(this.progressEl);
+    if (!progress) {
+      this.progressEl.style.display = 'none';
+      return;
+    }
+    this.progressEl.style.display = 'flex';
+    const stats = [
+      ['Wins', progress.wins ?? 0],
+      ['Losses', progress.losses ?? 0],
+      ['Boss Kills', progress.boss_kills ?? 0],
+      ['Cleared', progress.modules_cleared ?? 0],
+      ['Deaths', progress.deaths ?? 0],
+      ['Level Ups', progress.level_ups ?? 0],
+    ];
+    stats.forEach(([label, value]) => {
+      this.progressEl.appendChild(el('span', {}, `${label} ${value}`));
+    });
   }
 
   private renderRealm() {
@@ -144,7 +182,10 @@ export class Hub {
     if (existing) existing.remove();
 
     const realm = el('div', { className: 'hub-realm' });
-    realm.appendChild(el('h3', {}, 'Realms'));
+    const header = el('div', { className: 'hub-realm-header' });
+    header.appendChild(el('h3', {}, 'Realms'));
+    header.appendChild(el('span', { className: 'hub-realm-count' }, `${this.modules.length} available`));
+    realm.appendChild(header);
 
     if (this.modules.length === 0) {
       realm.appendChild(el('p', { className: 'hub-realm-empty' }, 'Loading realms...'));
@@ -152,16 +193,38 @@ export class Hub {
       const scroll = el('div', { className: 'hub-realm-scroll' });
       this.modules.forEach((m) => {
         const chip = el('div', { className: 'hub-realm-chip' });
+        const preview = this.buildMiniMap(m);
+        if (preview) chip.appendChild(preview);
+        const meta = el('div', { className: 'hub-realm-meta' });
         const theme = m.theme || 'dungeon';
-        chip.appendChild(el('span', { className: `hub-realm-theme theme-${theme}` }, theme));
-        chip.appendChild(el('strong', {}, m.name));
-        chip.appendChild(el('span', { className: 'hub-realm-size' }, `${m.width}×${m.height}`));
+        meta.appendChild(el('span', { className: `hub-realm-theme theme-${theme}` }, THEME_LABELS[theme] || theme));
+        meta.appendChild(el('strong', {}, m.name));
+        meta.appendChild(el('span', { className: 'hub-realm-size' }, `${m.width}×${m.height}`));
+        chip.appendChild(meta);
         scroll.appendChild(chip);
       });
       realm.appendChild(scroll);
     }
 
     this.container.appendChild(realm);
+  }
+
+  private buildMiniMap(m: ModuleInfo): HTMLElement | null {
+    if (!m.tiles || m.tiles.length === 0) return null;
+    const wrap = el('div', { className: 'hub-realm-map' });
+    const maxRows = Math.min(m.height, 12);
+    const maxCols = Math.min(m.width, 18);
+    wrap.style.gridTemplateRows = `repeat(${maxRows}, 1fr)`;
+    wrap.style.gridTemplateColumns = `repeat(${maxCols}, 1fr)`;
+    for (let y = 0; y < maxRows; y++) {
+      const row = m.tiles[y] || '';
+      for (let x = 0; x < maxCols; x++) {
+        const tile = row[x] || '0';
+        const cell = el('span', { className: `mini-tile mini-tile-${tile === '1' ? 'wall' : tile === '2' ? 'trap' : 'floor'}` });
+        wrap.appendChild(cell);
+      }
+    }
+    return wrap;
   }
 
   destroy() {

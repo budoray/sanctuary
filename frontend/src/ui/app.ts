@@ -57,7 +57,8 @@ export class SanctuaryApp {
       (character, timerSeconds, moduleId) => this.enterGame(character, undefined, timerSeconds, moduleId),
       () => this.showCreate(),
       () => this.showCampaigns(),
-      () => this.showSessions()
+      () => this.showSessions(),
+      () => this.showHub()
     );
   }
 
@@ -114,7 +115,8 @@ export class SanctuaryApp {
       (character, timerSeconds, _moduleId) => this.enterGame(character, campaign.id, timerSeconds),
       () => this.showCreate(),
       () => this.showCampaigns(),
-      () => this.showSessions()
+      () => this.showSessions(),
+      () => this.showHub()
     );
   }
 
