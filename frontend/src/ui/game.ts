@@ -60,6 +60,7 @@ export class Game {
   private lastTokenHp: Map<string, number> = new Map();
   private shakeFrames = 0;
   private lastLogLength = 0;
+  private lastBannerTurn = 0;
   private particles: Particle[] = [];
   private ambientTime = 0;
   private cameraX = 0;
@@ -104,6 +105,9 @@ export class Game {
 
     this.damageFlash = el('div', { className: 'damage-flash' });
     this.root.appendChild(this.damageFlash);
+
+    const scanlines = el('div', { className: 'scanlines' });
+    this.root.appendChild(scanlines);
 
     const trayAnchor = el('div', { className: 'tray-anchor' });
     this.root.appendChild(trayAnchor);
@@ -760,6 +764,11 @@ export class Game {
     this.updateTimer();
     this.renderLog();
 
+    if (session.status === 'active' && session.phase === 'player' && session.turn !== this.lastBannerTurn) {
+      this.showTurnBanner(session.turn);
+      this.lastBannerTurn = session.turn;
+    }
+
     if (wasDm && session.phase === 'player' && playerHurt) {
       this.spawnMonsterAttackSlash();
       this.triggerDamageFlash();
@@ -771,6 +780,19 @@ export class Game {
     void this.damageFlash.offsetWidth; // reflow
     this.damageFlash.classList.add('active');
     window.setTimeout(() => this.damageFlash.classList.remove('active'), 350);
+  }
+
+  private showTurnBanner(turn: number) {
+    const existing = this.root.querySelector('.turn-banner');
+    if (existing) existing.remove();
+    const banner = el('div', { className: 'turn-banner' });
+    banner.innerHTML = `<span>Turn ${turn}</span>`;
+    this.root.appendChild(banner);
+    window.setTimeout(() => banner.classList.add('visible'), 10);
+    window.setTimeout(() => {
+      banner.classList.remove('visible');
+      window.setTimeout(() => banner.remove(), 600);
+    }, 1400);
   }
 
   private updateStats() {
