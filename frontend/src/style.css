@@ -1308,6 +1308,53 @@ button.danger:hover:not(:disabled) {
   padding: 6px 0;
 }
 
+.game-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  background: radial-gradient(circle at center, #121418 0%, #050607 100%);
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  z-index: 50;
+}
+
+.game-loading .game-loading-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid var(--panel-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: game-loading-spin 1s linear infinite;
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+@keyframes game-loading-spin {
+  to { transform: rotate(360deg); }
+}
+
+.game-loading button {
+  margin-top: 8px;
+  padding: 8px 18px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.game-loading button:hover {
+  border-color: var(--accent);
+  background: rgba(192, 57, 43, 0.12);
+}
+
 .dm-overlay {
   position: absolute;
   inset: 0 300px 0 0;

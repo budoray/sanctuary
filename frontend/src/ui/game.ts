@@ -103,6 +103,7 @@ export class Game {
   private journalOpen = false;
   private heartbeatInterval: number | null = null;
   private moduleId: string;
+  private loadingOverlay: HTMLElement;
 
   constructor(
     container: HTMLElement,
@@ -150,6 +151,10 @@ export class Game {
     this.root.appendChild(trayAnchor);
     new DiceTray(trayAnchor);
 
+    this.loadingOverlay = el('div', { className: 'game-loading' });
+    this.loadingOverlay.innerHTML = '<div class="game-loading-spinner"></div><span>Entering the realm...</span>';
+    this.root.appendChild(this.loadingOverlay);
+
     this.update(initialSession);
 
     window.addEventListener('resize', () => this.centerMap());
@@ -187,54 +192,64 @@ export class Game {
   }
 
   async init() {
-    this.app = new Application();
-    await this.app.init({
-      resizeTo: this.canvasContainer,
-      backgroundColor: 0x050607,
-      antialias: true,
-    });
-    this.canvasContainer.appendChild(this.app.canvas as HTMLCanvasElement);
-
-    this.mapContainer = new Container();
-    this.tokenContainer = new Container();
-    this.fxContainer = new Container();
-    this.app.stage.addChild(this.mapContainer);
-    this.app.stage.addChild(this.tokenContainer);
-    this.app.stage.addChild(this.fxContainer);
-
-    await loadAtlas();
-    this.renderMap();
-    this.renderTokens(true);
-    this.centerMap();
-
-    this.app.ticker.add((ticker) => this.onTick(ticker));
-
-    this.socket = connectSocket();
-    this.socket.emit('join_session', { session_id: this.sessionId });
-    this.socket.on('session_update', (payload: { session?: GameSession }) => {
-      if (payload.session && payload.session.id === this.sessionId) {
-        this.update(payload.session);
-      }
-    });
-    this.socket.on('chat_broadcast', (payload: { account_id?: number; name?: string; text?: string; timestamp?: string }) => {
-      this.appendChatMessage(payload);
-    });
-    this.socket.on('presence_update', (payload: { session_id?: string; present?: Presence[] }) => {
-      if (payload.session_id === this.sessionId && payload.present) {
-        this.updatePresence(payload.present);
-      }
-    });
-
     try {
-      const { present } = await getSessionPresence(this.sessionId);
-      this.updatePresence(present);
-    } catch {
-      // Presence is best-effort; the socket will keep it updated.
-    }
+      this.app = new Application();
+      await this.app.init({
+        resizeTo: this.canvasContainer,
+        backgroundColor: 0x050607,
+        antialias: true,
+      });
+      this.canvasContainer.appendChild(this.app.canvas as HTMLCanvasElement);
 
-    this.heartbeatInterval = window.setInterval(() => {
-      this.socket?.emit('heartbeat', { session_id: this.sessionId });
-    }, 30000);
+      this.mapContainer = new Container();
+      this.tokenContainer = new Container();
+      this.fxContainer = new Container();
+      this.app.stage.addChild(this.mapContainer);
+      this.app.stage.addChild(this.tokenContainer);
+      this.app.stage.addChild(this.fxContainer);
+
+      await loadAtlas();
+      this.renderMap();
+      this.renderTokens(true);
+      this.centerMap();
+
+      this.app.ticker.add((ticker) => this.onTick(ticker));
+
+      this.socket = connectSocket();
+      this.socket.emit('join_session', { session_id: this.sessionId });
+      this.socket.on('session_update', (payload: { session?: GameSession }) => {
+        if (payload.session && payload.session.id === this.sessionId) {
+          this.update(payload.session);
+        }
+      });
+      this.socket.on('chat_broadcast', (payload: { account_id?: number; name?: string; text?: string; timestamp?: string }) => {
+        this.appendChatMessage(payload);
+      });
+      this.socket.on('presence_update', (payload: { session_id?: string; present?: Presence[] }) => {
+        if (payload.session_id === this.sessionId && payload.present) {
+          this.updatePresence(payload.present);
+        }
+      });
+
+      try {
+        const { present } = await getSessionPresence(this.sessionId);
+        this.updatePresence(present);
+      } catch {
+        // Presence is best-effort; the socket will keep it updated.
+      }
+
+      this.heartbeatInterval = window.setInterval(() => {
+        this.socket?.emit('heartbeat', { session_id: this.sessionId });
+      }, 30000);
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to initialize game:', err);
+      this.loadingOverlay.innerHTML = '<span>Failed to enter the realm.</span><button>Return</button>';
+      const btn = this.loadingOverlay.querySelector('button');
+      if (btn) btn.onclick = () => this.onExit();
+      throw err;
+    }
+    this.loadingOverlay.remove();
   }
 
   private buildUI() {
