@@ -78,7 +78,11 @@ export class Game {
     this.update(initialSession);
 
     window.addEventListener('resize', () => this.centerMap());
+    this.keydownHandler = (e: KeyboardEvent) => this.onKeyDown(e);
+    window.addEventListener('keydown', this.keydownHandler);
   }
+
+  private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
   async init() {
     this.app = new Application();
@@ -112,9 +116,9 @@ export class Game {
     hud.appendChild(this.timerEl);
 
     const actions = el('div', { className: 'game-actions' });
-    const moveBtn = el('button', { onclick: () => this.setAction('move') }, 'Move');
-    const attackBtn = el('button', { onclick: () => this.setAction('attack') }, 'Attack');
-    const endBtn = el('button', { onclick: () => this.endTurn() }, 'End Turn');
+    const moveBtn = el('button', { onclick: () => this.setAction('move') }, 'Move [M]');
+    const attackBtn = el('button', { onclick: () => this.setAction('attack') }, 'Attack [F]');
+    const endBtn = el('button', { onclick: () => this.endTurn() }, 'End [E]');
     actions.appendChild(moveBtn);
     actions.appendChild(attackBtn);
     actions.appendChild(endBtn);
@@ -151,6 +155,66 @@ export class Game {
     this.action = this.action === action ? null : action;
     this.updateStatus();
     this.highlightActionTiles();
+  }
+
+  private onKeyDown(e: KeyboardEvent) {
+    if (!this.session || this.session.status !== 'active' || this.session.phase !== 'player') return;
+
+    switch (e.key.toLowerCase()) {
+      case 'escape':
+        if (this.action) {
+          this.action = null;
+          this.updateStatus();
+          this.highlightActionTiles();
+        }
+        break;
+      case 'm':
+        this.setAction('move');
+        break;
+      case 'f':
+        this.setAction('attack');
+        break;
+      case 'e':
+      case ' ':
+        e.preventDefault();
+        this.endTurn();
+        break;
+      case 'arrowup':
+      case 'w':
+        e.preventDefault();
+        this.tryMove(0, -1);
+        break;
+      case 'arrowdown':
+      case 's':
+        e.preventDefault();
+        this.tryMove(0, 1);
+        break;
+      case 'arrowleft':
+      case 'a':
+        e.preventDefault();
+        this.tryMove(-1, 0);
+        break;
+      case 'arrowright':
+      case 'd':
+        e.preventDefault();
+        this.tryMove(1, 0);
+        break;
+    }
+  }
+
+  private async tryMove(dx: number, dy: number) {
+    if (!this.session || this.session.phase !== 'player' || this.session.status !== 'active') return;
+    if (this.action && this.action !== 'move') return;
+    const player = this.session.player;
+    const x = player.x + dx;
+    const y = player.y + dy;
+    try {
+      const { session } = await actInSession(this.sessionId, 'move', { x, y });
+      this.action = null;
+      this.update(session);
+    } catch (err: any) {
+      this.log(err.message || 'Move failed.');
+    }
   }
 
   private async endTurn() {
@@ -561,6 +625,10 @@ export class Game {
     if (this.timerInterval) {
       window.clearInterval(this.timerInterval);
       this.timerInterval = null;
+    }
+    if (this.keydownHandler) {
+      window.removeEventListener('keydown', this.keydownHandler);
+      this.keydownHandler = null;
     }
     this.app?.destroy(true, { children: true });
     clear(this.root);
