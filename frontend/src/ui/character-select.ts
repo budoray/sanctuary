@@ -3,13 +3,14 @@ import { el, clear } from './utils';
 
 export class CharacterSelect {
   private root: HTMLElement;
-  private onPlay: (character: CharacterState) => void;
+  private onPlay: (character: CharacterState, turnTimerSeconds: number) => void;
   private onCreate: () => void;
   private listEl: HTMLElement;
+  private timerInput: HTMLSelectElement;
 
   constructor(
     container: HTMLElement,
-    onPlay: (character: CharacterState) => void,
+    onPlay: (character: CharacterState, turnTimerSeconds: number) => void,
     onCreate: () => void,
     onCampaigns: () => void
   ) {
@@ -20,6 +21,23 @@ export class CharacterSelect {
     const panel = el('div', { className: 'session-panel' });
     panel.appendChild(el('h1', {}, 'Sanctuary'));
     panel.appendChild(el('p', { className: 'subtitle' }, 'Choose an adventurer, or begin anew.'));
+
+    const timerWrap = el('div', { className: 'timer-config' });
+    timerWrap.appendChild(el('label', { htmlFor: 'turn-timer' }, 'Turn timer'));
+    this.timerInput = el('select', { id: 'turn-timer' }) as HTMLSelectElement;
+    [
+      { value: '0', label: 'Off' },
+      { value: '15', label: '15 seconds' },
+      { value: '30', label: '30 seconds' },
+      { value: '60', label: '1 minute' },
+    ].forEach((opt) => {
+      const option = document.createElement('option');
+      option.value = opt.value;
+      option.textContent = opt.label;
+      this.timerInput.appendChild(option);
+    });
+    timerWrap.appendChild(this.timerInput);
+    panel.appendChild(timerWrap);
 
     this.listEl = el('ul', { className: 'session-list' });
     panel.appendChild(this.listEl);
@@ -51,6 +69,7 @@ export class CharacterSelect {
       this.listEl.appendChild(el('li', { className: 'empty' }, 'No adventurers yet.'));
       return;
     }
+    const timerSeconds = parseInt(this.timerInput.value, 10) || 0;
     characters.forEach((c) => {
       const info = el('div', { className: 'session-info' });
       info.appendChild(el('strong', {}, c.name));
@@ -63,7 +82,7 @@ export class CharacterSelect {
       );
       const idSpan = el('span', { className: 'session-id' }, c.id || '');
       const actions = el('div', { className: 'session-actions' });
-      const playBtn = el('button', { onclick: () => this.onPlay(c) }, 'Play');
+      const playBtn = el('button', { onclick: () => this.onPlay(c, timerSeconds) }, 'Play');
       const delBtn = el('button', {
         className: 'danger',
         onclick: async () => {

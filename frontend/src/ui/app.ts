@@ -42,7 +42,7 @@ export class SanctuaryApp {
     this.current?.destroy();
     this.current = new CharacterSelect(
       this.app,
-      (character) => this.enterGame(character),
+      (character, timerSeconds) => this.enterGame(character, undefined, timerSeconds),
       () => this.showCreate(),
       () => this.showCampaigns()
     );
@@ -76,7 +76,7 @@ export class SanctuaryApp {
     this.current?.destroy();
     this.current = new CharacterSelect(
       this.app,
-      (character) => this.enterGame(character, campaign.id),
+      (character, timerSeconds) => this.enterGame(character, campaign.id, timerSeconds),
       () => this.showCreate(),
       () => this.showCampaigns()
     );
@@ -119,14 +119,14 @@ export class SanctuaryApp {
     }
   }
 
-  private async enterGame(character: CharacterState, campaignId?: string) {
+  private async enterGame(character: CharacterState, campaignId?: string, turnTimerSeconds = 0) {
     if (!character.id) return;
     this.setScreen('loading');
     clear(this.app);
     this.current?.destroy();
 
     try {
-      const { session } = await createSession(character.id, 'sample_lair', campaignId);
+      const { session } = await createSession(character.id, 'sample_lair', campaignId, turnTimerSeconds);
       const { module } = await getModule(session.module_id);
       this.setScreen('game');
       const game = new Game(

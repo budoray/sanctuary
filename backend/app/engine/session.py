@@ -5,6 +5,7 @@ The state is a plain dict so it serialises cleanly to JSON and the DB.
 from __future__ import annotations
 
 import random
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from backend.app.engine import bestiary
@@ -44,7 +45,20 @@ def _roll_hp(monster: dict, d: Dice) -> int:
     return max(1, total)
 
 
-async def new_game(session_id: str, module: Module, character: Character, seed: int | None = None) -> dict[str, Any]:
+def _deadline(seconds: int) -> str | None:
+    """Return an ISO UTC deadline ``seconds`` from now, or ``None`` if disabled."""
+    if seconds <= 0:
+        return None
+    return (datetime.now(timezone.utc) + timedelta(seconds=seconds)).isoformat()
+
+
+async def new_game(
+    session_id: str,
+    module: Module,
+    character: Character,
+    seed: int | None = None,
+    turn_timer_seconds: int = 0,
+) -> dict[str, Any]:
     """Create a fresh session state."""
     if seed is None:
         seed = random.randint(1, 1_000_000_000)
@@ -94,6 +108,8 @@ async def new_game(session_id: str, module: Module, character: Character, seed: 
         "monsters": monsters,
         "log": [await narrator.narrate_opening(random.Random(seed))],
         "rolls": [_roll_to_dict(r) for r in d.log],
+        "turn_timer_seconds": max(0, turn_timer_seconds),
+        "turn_deadline": _deadline(max(0, turn_timer_seconds)),
     }
 
 
@@ -184,11 +200,13 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
             raise ValueError("target not found")
         await _attack(state, state["player"], target, d)
         state["phase"] = PHASE_DM
+        state["turn_deadline"] = None
 
     elif action == "end_turn":
         if state["phase"] != PHASE_PLAYER:
             raise ValueError("not the player's turn")
         state["phase"] = PHASE_DM
+        state["turn_deadline"] = None
 
     elif action == "dm_turn":
         if state["phase"] != PHASE_DM:
@@ -196,6 +214,7 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
         await _run_dm_turn(state, module, d)
         state["turn"] += 1
         state["phase"] = PHASE_PLAYER
+        state["turn_deadline"] = _deadline(state["turn_timer_seconds"])
 
     else:
         raise ValueError(f"unknown action: {action!r}")
@@ -251,4 +270,6 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "player": state["player"],
         "monsters": state["monsters"],
         "log": state["log"],
+        "turn_timer_seconds": state.get("turn_timer_seconds", 0),
+        "turn_deadline": state.get("turn_deadline"),
     }

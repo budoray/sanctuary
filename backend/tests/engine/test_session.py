@@ -81,3 +81,18 @@ async def test_dm_turn_advances_turn(sample_module, hero):
     st = await session.act(st, sample_module, "dm_turn")
     assert st["phase"] == "player"
     assert st["turn"] == 2
+
+
+async def test_new_game_with_timer(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42, turn_timer_seconds=30)
+    assert st["turn_timer_seconds"] == 30
+    assert st["turn_deadline"] is not None
+
+
+async def test_timer_deadline_resets_after_dm_turn(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42, turn_timer_seconds=30)
+    st = await session.act(st, sample_module, "end_turn")
+    assert st["turn_deadline"] is None
+    st = await session.act(st, sample_module, "dm_turn")
+    assert st["phase"] == "player"
+    assert st["turn_deadline"] is not None

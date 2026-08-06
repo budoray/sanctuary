@@ -25,10 +25,13 @@ export class Game {
   private ui: HTMLElement;
   private logEl: HTMLElement = document.createElement('div');
   private statusEl: HTMLElement = document.createElement('div');
+  private timerEl: HTMLElement = document.createElement('div');
   private action: 'move' | 'attack' | null = null;
   private session: GameSession | null = null;
   private onExit: () => void;
   private canvasContainer: HTMLElement;
+  private timerInterval: number | null = null;
+  private timeoutFired = false;
 
   constructor(
     container: HTMLElement,
@@ -81,6 +84,8 @@ export class Game {
     hud.appendChild(el('h1', {}, 'SANCTUARY'));
     this.statusEl = el('div', { className: 'game-status' }, 'Turn 1 · Your Move');
     hud.appendChild(this.statusEl);
+    this.timerEl = el('div', { className: 'game-timer' });
+    hud.appendChild(this.timerEl);
 
     const actions = el('div', { className: 'game-actions' });
     const moveBtn = el('button', { onclick: () => this.setAction('move') }, 'Move');
@@ -226,6 +231,7 @@ export class Game {
     this.session = session;
     this.renderTokens();
     this.updateStatus();
+    this.updateTimer();
     this.renderLog();
   }
 
@@ -237,6 +243,43 @@ export class Game {
     if (this.session.status !== 'active') {
       this.statusEl.textContent = `Game ${this.session.status.toUpperCase()}`;
     }
+  }
+
+  private updateTimer() {
+    if (this.timerInterval) {
+      window.clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+    if (
+      !this.session ||
+      this.session.status !== 'active' ||
+      this.session.phase !== 'player' ||
+      this.session.turn_timer_seconds <= 0 ||
+      !this.session.turn_deadline
+    ) {
+      this.timerEl.textContent = '';
+      return;
+    }
+
+    const tick = () => {
+      const deadline = new Date(this.session!.turn_deadline!).getTime();
+      const remaining = Math.ceil((deadline - Date.now()) / 1000);
+      if (remaining <= 0) {
+        this.timerEl.textContent = 'Time up!';
+        if (!this.timeoutFired) {
+          this.timeoutFired = true;
+          this.endTurn();
+        }
+      } else {
+        this.timeoutFired = false;
+        const mins = Math.floor(remaining / 60);
+        const secs = remaining % 60;
+        this.timerEl.textContent = `${mins}:${secs.toString().padStart(2, '0')} remaining`;
+      }
+    };
+
+    tick();
+    this.timerInterval = window.setInterval(tick, 250);
   }
 
   private renderLog() {
@@ -254,6 +297,10 @@ export class Game {
   }
 
   destroy() {
+    if (this.timerInterval) {
+      window.clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
     this.app?.destroy(true, { children: true });
     clear(this.root);
   }
