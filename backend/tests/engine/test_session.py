@@ -96,3 +96,23 @@ async def test_timer_deadline_resets_after_dm_turn(sample_module, hero):
     st = await session.act(st, sample_module, "dm_turn")
     assert st["phase"] == "player"
     assert st["turn_deadline"] is not None
+
+
+async def test_add_player_increases_party(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    hero2 = char_engine.generate(seed=1, mode="normal", ancestry_name="human", class_names=["fighter"], name="Elara")
+    token = await session.add_player(st, sample_module, hero2, "char2", account_id=2)
+    assert token["id"] == "player_1"
+    assert len(st["players"]) == 2
+    assert st["players"][1]["name"] == "Elara"
+
+
+async def test_add_player_finds_free_tile(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    # Occupy the default spawn tile with a monster-like token so the new player must spread out.
+    st["players"][0]["x"] = sample_module.player_start[0]
+    st["players"][0]["y"] = sample_module.player_start[1]
+    hero2 = char_engine.generate(seed=1, mode="normal", ancestry_name="human", class_names=["fighter"], name="Bruenor")
+    token = await session.add_player(st, sample_module, hero2, "char3", account_id=3)
+    assert (token["x"], token["y"]) != (sample_module.player_start[0], sample_module.player_start[1])
+    assert sample_module.map.walkable(token["x"], token["y"])

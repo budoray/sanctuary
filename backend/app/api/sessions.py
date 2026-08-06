@@ -4,7 +4,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import exists, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.auth import require_account
@@ -139,9 +139,22 @@ async def list_sessions(
     db: AsyncSession = Depends(get_db),
     account_id: int = Depends(require_account),
 ):
+    member_of_campaign = (
+        select(CampaignMemberRecord)
+        .where(
+            CampaignMemberRecord.campaign_id == SessionRecord.campaign_id,
+            CampaignMemberRecord.account_id == account_id,
+        )
+        .exists()
+    )
     result = await db.execute(
         select(SessionRecord)
-        .where(SessionRecord.account_id == account_id)
+        .where(
+            or_(
+                SessionRecord.account_id == account_id,
+                member_of_campaign,
+            )
+        )
         .order_by(SessionRecord.updated_at.desc())
     )
     records = result.scalars().all()
@@ -214,14 +227,21 @@ async def act_in_session(
     if not record or not await _can_access_session(record, account_id, db):
         raise HTTPException(status_code=404, detail="Session not found")
 
+    state = json.loads(record.state)
+    mod = module.load(record.module_id)
+
     action = data.get("action")
     if action == "dm_turn" and record.campaign_id and not await _is_campaign_dm(record, account_id, db):
         raise HTTPException(status_code=403, detail="Only the DM can run the DM turn")
-    if action in ("move", "attack", "end_turn") and record.account_id != account_id:
-        raise HTTPException(status_code=403, detail="Only the session owner can control the hero")
-
-    state = json.loads(record.state)
-    mod = module.load(record.module_id)
+    if action in ("move", "attack", "end_turn"):
+        if record.campaign_id:
+            active_index = state.get("active_player_index", 0)
+            active_players = state.get("players", [])
+            active = active_players[active_index] if active_players else {}
+            if active.get("account_id") != account_id:
+                raise HTTPException(status_code=403, detail="Not your turn")
+        elif record.account_id != account_id:
+            raise HTTPException(status_code=403, detail="Only the session owner can control the hero")
     try:
         state = await session_engine.act(
             state,
@@ -232,6 +252,73 @@ async def act_in_session(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    record.state = json.dumps(state)
+    record.status = state["status"]
+    await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update",
+            {"session": session_view},
+            room=session_id,
+        )
+    except Exception:
+        pass
+
+    return {"session": session_view}
+
+
+@router.post("/sessions/{session_id}/join")
+async def join_session(
+    session_id: str,
+    data: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord).where(SessionRecord.id == session_id)
+    )
+    record = result.scalar_one_or_none()
+    if not record or not await _can_access_session(record, account_id, db):
+        raise HTTPException(status_code=404, detail="Session not found")
+    if not record.campaign_id:
+        raise HTTPException(status_code=400, detail="Only campaign sessions can be joined")
+
+    character_id = data.get("character_id")
+    result = await db.execute(
+        select(CharacterRecord).where(
+            CharacterRecord.id == character_id,
+            CharacterRecord.account_id == account_id,
+        )
+    )
+    char_record = result.scalar_one_or_none()
+    if not char_record:
+        raise HTTPException(status_code=404, detail="Character not found")
+
+    char_state = json.loads(char_record.state)
+    char = char_engine.Character(
+        name=char_state["name"],
+        ancestry=char_state["ancestry"],
+        classes=tuple(char_state["classes"]),
+        levels=char_state["levels"],
+        scores=char_state["scores"],
+        hit_points=char_state["hit_points"],
+        armour_class=char_state["armour_class"],
+        saves=char_state["saves"],
+        modifiers=char_state["modifiers"],
+        seed=char_state["seed"],
+        log=tuple(),
+    )
+
+    state = json.loads(record.state)
+    mod = module.load(record.module_id)
+    try:
+        await session_engine.add_player(state, mod, char, character_id, account_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    state["version"] += 1
     record.state = json.dumps(state)
     record.status = state["status"]
     await db.commit()

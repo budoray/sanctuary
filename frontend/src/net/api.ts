@@ -217,3 +217,16 @@ export async function actInSession(sessionId: string, action: string, payload: R
     body: JSON.stringify({ action, ...payload }),
   }) as Promise<{ session: GameSession }>;
 }
+
+export async function joinSession(sessionId: string, characterId: string) {
+  return api(`/api/sessions/${sessionId}/join`, {
+    method: 'POST',
+    body: JSON.stringify({ character_id: characterId }),
+  }) as Promise<{ session: GameSession }>;
+}
+
+export async function listCampaignSessions(campaignId: string) {
+  return api(`/api/campaigns/${campaignId}/sessions`) as Promise<{
+    sessions: { id: string; name: string; module_id: string; status: string; turn: number; phase: string; player_count: number }[];
+  }>;
+}

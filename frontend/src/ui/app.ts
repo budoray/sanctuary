@@ -1,5 +1,6 @@
 import { CampaignLobby } from './campaign-lobby';
-import { Campaign, CharacterState, createSession, getModule, listSessions, whoami } from '../net/api';
+import { CampaignDetail } from './campaign-detail';
+import { Campaign, CharacterState, createSession, getModule, getSession, listSessions, whoami } from '../net/api';
 import { CharacterCreator } from './character-creator';
 import { CharacterSelect } from './character-select';
 import { Game } from './game';
@@ -11,7 +12,7 @@ type Screen = 'loading' | 'select' | 'create' | 'campaigns' | 'sessions' | 'game
 export class SanctuaryApp {
   private app: HTMLElement;
   private userId: number | null = null;
-  private current: CharacterCreator | CharacterSelect | CampaignLobby | SessionSelect | Game | null = null;
+  private current: CharacterCreator | CharacterSelect | CampaignLobby | CampaignDetail | SessionSelect | Game | null = null;
 
   constructor(app: HTMLElement) {
     this.app = app;
@@ -72,9 +73,31 @@ export class SanctuaryApp {
     this.current = new CampaignLobby(
       this.app,
       (campaign) => {
-        this.showSelectForCampaign(campaign);
+        this.showCampaignDetail(campaign);
       },
       () => this.showSelect()
+    );
+  }
+
+  private showCampaignDetail(campaign: Campaign) {
+    this.setScreen('campaigns');
+    clear(this.app);
+    this.current?.destroy();
+    this.current = new CampaignDetail(
+      this.app,
+      campaign,
+      (c) => this.showSelectForCampaign(c),
+      async (s) => {
+        try {
+          const { session } = await getSession(s.id);
+          this.resumeGame(session);
+        } catch (err: any) {
+          // eslint-disable-next-line no-console
+          console.error('Failed to load joined session:', err);
+          this.showCampaigns();
+        }
+      },
+      () => this.showCampaigns()
     );
   }
 

@@ -540,7 +540,7 @@ export class Game {
 
   private renderTokens(snap = false) {
     if (!this.session) return;
-    const tokens: Token[] = [this.session.player, ...this.session.monsters];
+    const tokens: Token[] = [...this.session.players, ...this.session.monsters];
     const aliveIds = new Set<string>();
     const playerPhase = this.session.phase === 'player';
 

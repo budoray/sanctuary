@@ -5,6 +5,7 @@ The state is a plain dict so it serialises cleanly to JSON and the DB.
 from __future__ import annotations
 
 import random
+from collections import deque
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -130,6 +131,81 @@ def _tokens(state: dict[str, Any]) -> list[dict[str, Any]]:
 
 def _active_player(state: dict[str, Any]) -> dict[str, Any]:
     return state["players"][state.get("active_player_index", 0)]
+
+
+_PLAYER_COLORS = [
+    "#3498db",
+    "#e74c3c",
+    "#2ecc71",
+    "#f1c40f",
+    "#9b59b6",
+    "#e67e22",
+    "#1abc9c",
+    "#34495e",
+]
+
+
+def _find_spawn_tile(state: dict[str, Any], module: Module) -> tuple[int, int]:
+    """Return a free walkable tile near the module start or existing players."""
+    start_x, start_y = module.player_start
+    occupied = {(t["x"], t["y"]) for t in _tokens(state)}
+    if module.map.walkable(start_x, start_y) and (start_x, start_y) not in occupied:
+        return start_x, start_y
+
+    # Prefer spreading around existing players if any are already on the map.
+    seeds = [(p["x"], p["y"]) for p in state["players"]]
+    if not seeds:
+        seeds = [(start_x, start_y)]
+
+    for sx, sy in seeds:
+        queue: deque[tuple[int, int]] = deque([(sx, sy)])
+        seen = {(sx, sy)}
+        while queue:
+            x, y = queue.popleft()
+            if module.map.walkable(x, y) and (x, y) not in occupied:
+                return x, y
+            for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                nx, ny = x + dx, y + dy
+                if module.map.in_bounds(nx, ny) and (nx, ny) not in seen:
+                    seen.add((nx, ny))
+                    queue.append((nx, ny))
+
+    # Fallback to the module start even if occupied; the caller must decide.
+    return start_x, start_y
+
+
+async def add_player(
+    state: dict[str, Any],
+    module: Module,
+    character: Character,
+    character_id: str,
+    account_id: int,
+) -> dict[str, Any]:
+    """Add a new party member to an existing session."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("session is not active")
+
+    player_id = f"player_{len(state['players'])}"
+    x, y = _find_spawn_tile(state, module)
+    token = {
+        "id": player_id,
+        "name": character.name,
+        "type": "player",
+        "classes": list(character.classes),
+        "x": x,
+        "y": y,
+        "hp": character.hit_points,
+        "max_hp": character.hit_points,
+        "ac": character.armour_class,
+        "color": _PLAYER_COLORS[len(state["players"]) % len(_PLAYER_COLORS)],
+        "character_id": character_id,
+        "account_id": account_id,
+        "alive": True,
+    }
+    state["players"].append(token)
+    state["version"] += 1
+    state["log"].append(f"{character.name} joins the party.")
+    return token
 
 
 def _token_at(state: dict[str, Any], x: int, y: int) -> dict[str, Any] | None:

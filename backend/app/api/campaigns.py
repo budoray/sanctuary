@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.auth import require_account
-from backend.app.db import CampaignMemberRecord, CampaignRecord, get_db
+from backend.app.db import CampaignMemberRecord, CampaignRecord, SessionRecord, get_db
 
 router = APIRouter(tags=["campaigns"])
 
@@ -195,3 +195,52 @@ async def add_campaign_member(
         db.add(CampaignMemberRecord(campaign_id=campaign_id, account_id=target_account_id, role=role))
         await db.commit()
     return {"joined": True}
+
+
+@router.get("/campaigns/{campaign_id}/sessions")
+async def list_campaign_sessions(
+    campaign_id: str,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(CampaignRecord).where(CampaignRecord.id == campaign_id)
+    )
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    result = await db.execute(
+        select(CampaignMemberRecord).where(
+            CampaignMemberRecord.campaign_id == campaign_id,
+            CampaignMemberRecord.account_id == account_id,
+        )
+    )
+    is_member = result.scalar_one_or_none() is not None
+    if not is_member and record.account_id != account_id:
+        raise HTTPException(status_code=403, detail="Not a member of this campaign")
+
+    result = await db.execute(
+        select(SessionRecord)
+        .where(
+            SessionRecord.campaign_id == campaign_id,
+            SessionRecord.status == "active",
+        )
+        .order_by(SessionRecord.updated_at.desc())
+    )
+    sessions = []
+    for r in result.scalars().all():
+        try:
+            state = json.loads(r.state)
+        except Exception:
+            state = {}
+        sessions.append({
+            "id": r.id,
+            "name": r.name,
+            "module_id": r.module_id,
+            "status": r.status,
+            "turn": state.get("turn", 1),
+            "phase": state.get("phase", "player"),
+            "player_count": len(state.get("players", [])),
+        })
+    return {"sessions": sessions}
