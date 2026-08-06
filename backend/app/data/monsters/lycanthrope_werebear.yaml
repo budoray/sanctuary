@@ -1,0 +1,31 @@
+name: Lycanthrope, Werebear
+frequency: rare rare uncommon very rare common no.  encountered 1d4 2d4 4d6 1d6 3d6
+size: large large small to medium large medium
+alignment: chaotic good neutral lawful evil neutral chaotic evil
+move: 90ft 120ft 120ft 120ft 150ft
+armour_class: 2 [18]
+hit_dice: 7+3
+melee_attacks: 2 claws (1d3) and 1 bite (2d4)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft Infravision 60ft Infravision
+  60ft
+lair_chance: 10% 20% 30% 15% 25%
+intelligence: exceptional (15-16) average (8-10) very (11-12) average (8-10) average
+  (8-10)
+morale: 85 70 60 75 70
+loot: Cache 4, 6, 10 Hoard 2, Cache 5 Hoard 3 Hoard 4, Cache 3  (x5) Hoard 2
+experience: 850 +10/hp
+description: WEREBEAR A werebear appears in human form as a large hairy human with  a
+  solitary disposition. In ursine form, they are 50% likely to be  accompanied by
+  1d6 brown bears. Immune to Non-Silver Mundane Weapons.  This creature is im - mune
+  to piercing, blunt, and slashing damage from weapons  and unarmed attacks, unless
+  the weapon causing that damage  has a magical bonus of +1 or more, or is made of
+  silver. Robust Health. Werebears are immune to disease and heal at 3x  the normal
+  rate. Summon Allies. A werebear may summon 1d6 brown bears in  2d6 turns if they
+  are within one mile. Physic. Wearbears can cure disease in another creature in 1d10  x3
+  days. This might not be fast enough to save a person’s life,  but if there is no
+  cleric available with cure disease, it might be  the only option. Lycanthropy. See
+  general description for all lycanthropes (shape- shifting and transmission). Bear
+  Hug. If the werebear hits with both claw attacks, it crushes  the opponent for an
+  additional 2d8 points of blunt damage,  and can continue inflicting this 2d8 damage
+  automatically each  round thereafter without making a to-hit roll.
+abilities: []

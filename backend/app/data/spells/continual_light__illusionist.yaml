@@ -1,0 +1,14 @@
+name: Continual Light
+slug: continual_light
+reversible: false
+class: illusionist
+level: 3
+school: Phantasmal Transmutation/Alteration
+range: 60-ft
+duration: Permanent
+area_of_effect: 60-ft radius globe
+components: V,S
+casting_time: 3 segments
+saving_throw: None
+text: This spell brings into being a bright, magical illumination almost sufficient to rival the light of day. In some respects the spell is identical to the spell light, but its effects are permanent until dispelled. The light cast is greater than that produced by a light spell, extending 60-ft into the darkness. By casting the spell upon an enemy's eyes or other organs of sight, the caster may blind the spell's subject, causing the same penalties as if the creature were blinded by a light spell. In this instance, a saving throw is permitted, and if it is successful the spell's effect will centre upon the area immediately behind the targeted creature.
+source: wiki2_spells.txt

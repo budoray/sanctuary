@@ -1,0 +1,21 @@
+name: Dakon
+frequency: uncommon
+no_encountered: 6d10
+size: medium
+alignment: lawful neutral
+move: 60ft
+armour_class: 5 [15]
+hit_dice: 1+1
+melee_attacks: 2 claws (1d10 slashing)
+senses: Standard
+lair_chance: 50%
+intelligence: average (8-10)
+morale: 55
+loot: Hoard 5
+experience: 25 +2/hp
+description: Dakons are intelligent apes resembling gorillas. They are peace- ful, fighting only in defence or to regain treasure stolen from  them. These apes are likely to be settle anywhere, but avoid  large expanses of water. They are on good terms with lawful  humans and demi-humans and are able to speak the common  tongue, but they have a deep mistrust of humanoids and shun  them.
+abilities:
+- heading: Special Attacks
+  text: 'To-Hit Bonus: Dakons attack with a +2 to-hit bonus due to their  incredible strength and the knife-edged sharpness of their  claws. Unarmed Combat. Dakons can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with a  2+ on 1d20. Hit Mods: ATK/DEF +4/-4. Overbear Results Mods:  ATK/DEF +0/-0. Grappling Result Mods: ATK/DEF +0/-0.'
+- heading: Languages
+  text: Dakons speak the common tongue.

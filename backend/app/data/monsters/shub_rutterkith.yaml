@@ -1,0 +1,21 @@
+name: Shub (rutterkith)
+frequency: common
+no_encountered: 1d4 or 3d4 (in the Abyss)
+size: medium
+alignment: chaotic evil
+move: 120ft
+armour_class: 1 [19]
+hit_dice: 5+1
+melee_attacks: 2 claws (1d6+1) or 1 weapon
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: average (8-10)
+morale: 70
+loot: Individual 3 and 4 each; Cache 1 and  3 in lair
+experience: 425 +6/hp
+description: Shub resemble humanoids, but with hunched backs, twisted  arms and legs, and a strange, loping gait. Their pointed skulls  are bald and misshapen. While physically among the weakest of demonkind, the shub  are a vile, vengeful sort. They are the continual target of abuse  by other classes of demon, and the shub are quick to respond  in kind if given the opportunity. Shub particularly enjoy bullying  the dretch, whom they despise as lumbering and stupid. In combat, shub prefer to wield a variety of strange, wick - ed-looking pole arms, saw-toothed swords, and bizarre atlatls  and throwing knives.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (40%).  Any magic spell or effect has a 40%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: darkness (5ft radius), fear (touch only, otherwise as the  4th level magic-user spell), fly (as the 3rd level magic-user  spell), telekinesis (as the 5th level magic-user spell, up to 100  lbs), attempt to gate in an ekivu (15% chance of success). 1/day: teleport (without fail, otherwise as the 5th level mag - ic-user spell). Unarmed Combat.  Shub demons can make grappling or over - bearing attacks, but ordinarily don’t. If not fended off, they  score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF  +8/-8. Overbear Results Mods: ATK/DEF +1/-1. Grappling Result  Mods: ATK/DEF +0/+0.'

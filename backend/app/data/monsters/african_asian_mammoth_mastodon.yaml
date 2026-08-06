@@ -1,0 +1,19 @@
+name: African Asian Mammoth Mastodon
+frequency: common common very rare very rare
+no_encountered: 1d12 1d12 1d12 1d12
+size: huge huge huge huge
+alignment: neutral neutral neutral neutral
+move: 150ft 150ft 150ft 150ft
+armour_class: 6 [14] 5 [15] 6 [14] 6 [14]
+hit_dice: 11 10 13 12
+melee_attacks: 2 tusks (2d8), 1 trunk  (2d6) and 2 front feet  (2d6) 2 tusks (2d6), 1 trunk  (2d6) and 2 front feet  (2d6) 2 tusks (3d6), 1 trunk  (2d8) and 2 front feet  (2d8) 2 tusks (2d8), 1 trunk  (2d6) and 2 front feet  (2d6)
+senses: Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil
+intelligence: animal (1) animal (1) animal (1) animal (1)
+morale: 100 95 110 105
+loot: Nil Nil Nil Nil
+experience: 1,400 +14/hp 1,100 +13/hp 2,300 +17/hp 1,900 +16/hp
+description: 'Elephants are large mammals found in subtropical climates,  where they roam wide open plains and grasslands in small herds  or families. They have a tough hoary grey hide, four sturdy legs,  two large tusks, a great trunk that they use to manipulate their  surroundings and two very large ears. African elephants are  typically larger than their Asian cousins and have proportionally  larger ears, but both are relatively intelligent animals that can  be trained to work as beasts of burden and obey simple com - mands and are occasionally even used for warfare. Mammoths  and mastodons are thought to be the ancestors of the common  elephant, the principal difference being their great woolly coats,  which make them better suited to subarctic environments. In general, elephants are relatively peaceful creatures, but when  roused they can be devastating.  Treasure: Ivory is worth 1d6×100 gp per tusk. An elephant tusk  is hugely encumbering (due to the size as much as the weight).'
+abilities:
+- heading: Special Attacks
+  text: Limitation on Multiple Attacks.  No single opponent may be sub - ject to more than two of an elephant’s attacks at one time,  though elephants can simultaneously combat as many ene - mies as it has attacks. Unarmed Combat. Elephants cannot be overborne or grappled,  and do not employ these tactics.

@@ -1,0 +1,14 @@
+name: Spell Immunity
+slug: spell_immunity
+reversible: false
+class: magic-user
+level: 8
+school: Arcane Abjuration
+range: Touch
+duration: 1 turn/level, divided among recipients
+area_of_effect: One creature/ 4 levels
+components: V,S,M
+casting_time: 1 round/ recipient
+saving_throw: None
+text: This spell confers tremendous protection against magical attacks that affect the mind. A creature warded by this spell gains a +8 bonus to such saving throws. The caster may divide the spell's duration among as many recipients as his or her caster level divided by four. The material component for this spell is a gem of any kind or size.
+source: wiki2_spells.txt

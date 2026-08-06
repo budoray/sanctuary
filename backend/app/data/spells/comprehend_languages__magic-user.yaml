@@ -1,0 +1,14 @@
+name: Comprehend Languages
+slug: comprehend_languages
+reversible: true
+class: magic-user
+level: 1
+school: Arcane Transmutation/Alteration
+range: Caster
+duration: 5 rounds/caster level
+area_of_effect: One written object or one creature
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: This spell allows the magic user to decipher a written language (including pictographs, but not including magical script), or to understand the speech of another creature. The spell does not permit the magic user to understand the “speech” of animals; only true, spoken languages can be understood. The caster gains no ability to speak or write the language, only to comprehend meaning. The spell's reverse makes a particular creature or piece of writing indecipherable, or may be used to cancel the effects of a comprehend languages spell.
+source: wiki2_spells.txt

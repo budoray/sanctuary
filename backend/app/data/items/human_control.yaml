@@ -1,0 +1,4 @@
+name: Human Control
+classes: any
+description: Once quaffed, this potion grants the spell-like ability of charm person to the drinker for 5d6 rounds. Many kinds of humanoids, demi-humans, and humans can be affected by this potion (see the table below), and 32 hit dice/ levels of these beings are affected. Only whole hit dice are considered when calculating how many individuals are affected, and any bonuses are dropped (3+1, 4+2 are treated as 3, 4). The specific kind of human–like being affected for each potion is determined on the table below. D20 RESULT 1–2 dwarfs 3–4 elves and half- elves 5 elves, half- elves, and humans 6–7 gnomes 8–9 halflings 10–11 half-orcs 12–17 humans 18–20 other humanoids (orcs, gnolls, goblins, etc.)
+source: OSRIC_3.0_Gamemaster_Guide.pdf

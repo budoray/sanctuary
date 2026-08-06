@@ -1,0 +1,23 @@
+name: Ghast
+frequency: rare
+no_encountered: 1d6
+size: medium
+alignment: chaotic evil
+move: 150ft
+armour_class: 4 [16]
+hit_dice: '4'
+melee_attacks: 2 claws (1d4) and 1 bite (1d8)
+senses: Infravision 60ft
+lair_chance: 10%
+intelligence: very (11-12)
+morale: 65
+loot: Hoard 2, Cache 3, 4, 5 and 6
+experience: 195 +4/hp
+description: These terrible undead creatures are more powerful versions of  ghouls, and are indistinguishable from them save their terrible  stench, released when engaged in melee. Ghasts, when acting  as a pack, can travel the dream-realms and can also enter the  lower planes. However, this takes too long for it to be a factor in  combat situations. Certain entities of the higher hells use ghasts  as slaves.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Ghasts are turned as type 6 Undead. Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease. Immune to Protection from Evil.  Ghasts are not affected by pro- tection from evil spells (or effects, such as a paladin’s ability).
+- heading: Special Features
+  text: Stench. When ghasts are in melee combat, they release a stench  of death so strong that anyone within 10ft must make a saving  throw vs poison. Anyone affected by the stench begins retch - ing, suffering -2 to all actions, including to-hit rolls and damage.
+- heading: Special Attacks
+  text: 'Paralysation. If a ghast hits with its claws or bite, the victim must  make a saving throw vs. paralysation or be paralysed for 3d4  full turns. Unarmed Combat. Ghasts can attack and be targeted with grap- pling or overbearing attacks although they seldom use this  tactic. If not fended off, they score an unarmed hit with a 2+  on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear Results Mods:  ATK/DEF +1/-1. Grappling Result Mods: ATK/DEF +0/-0.'

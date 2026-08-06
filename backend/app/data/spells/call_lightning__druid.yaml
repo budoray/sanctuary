@@ -1,0 +1,14 @@
+name: Call Lightning
+slug: call_lightning
+reversible: false
+class: druid
+level: 3
+school: Druidic Transmutation/Alteration
+range: '0'
+duration: 1 turn/caster level
+area_of_effect: 360-ft radius
+components: V,S,M
+casting_time: 1 turn
+saving_throw: Half
+text: Provided that there is already significant cloud cover in the area, the druid may use this spell to call down a shattering barrage of lightning bolts from the sky to the ground. One bolt may be called every turn (10 minutes). The bolts inflict 2d8 points of damage, plus another d8 per level of the caster. Any creature within 10-ft of a bolt's impact (or along its downward path) will sustain damage. The spell may only be cast outdoors.
+source: wiki2_spells.txt

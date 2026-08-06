@@ -1,0 +1,14 @@
+name: Improved Invisibility
+slug: improved_invisibility
+reversible: false
+class: illusionist
+level: 4
+school: Phantasmal Illusion
+range: Touch
+duration: 4 rounds+1 round/level
+area_of_effect: One creature
+components: V,S
+casting_time: 4 segments
+saving_throw: None
+text: This spell functions in the same manner as the invisibility spell, but is not terminated if the invisible creature attacks.
+source: wiki2_spells.txt

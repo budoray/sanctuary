@@ -1,0 +1,4 @@
+name: Wind Fan
+classes: any
+description: A magical hand fan which, upon command, creates a gust of wind as the spell. The fan can be used once per day without risk; additional uses in a day garner a 20% cumulative chance of destroying the fan.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

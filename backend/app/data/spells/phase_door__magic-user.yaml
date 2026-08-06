@@ -1,0 +1,14 @@
+name: Phase Door
+slug: phase_door
+reversible: false
+class: magic-user
+level: 7
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: See below
+area_of_effect: See below
+components: V
+casting_time: 7 segments
+saving_throw: None
+text: The caster opens, by means of this spell, a dimensional pathway through a solid object, 10-ft in depth. It is a pathway that only the caster may use, and it remains until the caster has traversed it twice. In other respects, the spell is similar to a passwall.
+source: wiki2_spells.txt

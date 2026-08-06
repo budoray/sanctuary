@@ -1,0 +1,18 @@
+name: Archelon Dunkleosteus Elasmosaurus Mosasaurus Nothosaurus Plesiosaurus
+frequency: uncommon common uncommon uncommon uncommon common no.  encountered 1d4 1d2 1d2 1d3 1d4 1d3
+size: huge huge huge huge large huge
+alignment: neutral neutral neutral neutral neutral neutral
+move: 150ft swimming 210ft swimming 150ft swimming 150ft swimming 60ft; 90ft  swimming 150ft swimming
+armour_class: 3 [17] 6 [14] 6 [14] 6 [14] 5 [15] 6 [14]
+hit_dice: 7 10 16 12 10 20
+melee_attacks: 1 bite (3d4) 1 bite (5d4) 1 bite (4d8) 1 bite (4d8) 1 bite (3d6) 1 bite (5d4)
+senses: Standard Standard Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0) non- (0) non- (0) non- (0)
+morale: N/A N/A N/A N/A N/A N/A
+loot: Nil Nil Nil Nil Nil Nil
+experience: 475 +10/hp 1,000 +12/hp 2,000 +16/hp 1,200 +16/hp 1,000 +12/hp 5,000 +25/hp
+description: 'None of these creatures are technically dinosaurs, though all  are found in “Lost World” areas. Dunkleosteus can swallow prey  whole on a roll of “20” “to hit” and actually preceded the dino - saurs by many millions of years. Elasmosaurus can also swallow  whole, needing only 18–20 on its “to hit” roll to do so but oth - erwise as dunkleosteus. Mosasaurus filled the same ecological  niche as sharks. Plesiosaurs may have preferred smaller prey  than a man but would still be dangerous. Nothosaurs were am- phibious, like huge seals. Archelon was a kind of gigantic turtle. Dunkleosteus: Formerly known as dinichthys; Huge Devonian  carnivore. Elasmosaurus: Huge Cretaceous carnivore. Mosasau- rus: Huge Cretaceous carnivore. Plesiosaurus: Huge Jurassic car- nivore. Nothosaurus: Large Triassic carnivore. Archelon: Huge  Cretaceous carnivore.'
+abilities:
+- heading: Special Attacks
+  text: Dunkleosteus can swallow prey whole on a to-hit roll of 20.  Elasmosaurus can also swallow whole, needing only 18–20 on  its “to hit” roll. Swallow Whole. On a bite attack that rolls a natural 20, the dino- saur swallows the victim. If the victim is not rescued, they will  die at the end of 6 rounds spent in the creature’s stomach.  It is possible for the victim to cut their way out (the inside  is armour class 10 [10]). For each round the victim is inside,  subtract 1 from their damage that they inflict. This penalty is  cumulative for each round, so after four rounds the damage  inflicted is at -4. FLYING DINOSAURS

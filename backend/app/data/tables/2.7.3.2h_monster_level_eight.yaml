@@ -1,0 +1,38 @@
+id: 2.7.3.2h
+name: MONSTER LEVEL EIGHT
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 01–03 Naga, Guardian 1d2 1
+- 04–07 Golem, Stone 1 1
+- 08–11 Giant, Cloud 1 1
+- 12–15 Vampire 1d2 1
+- 16–20 Devil, Ice 1 1
+- 21–25 Devil, Barbed 1d2 1
+- 26–30 Otyugh, Lesser 1d2 1
+- 31–40 Demon, Class A 1d3 1
+- 41–50  NPC Party—see Sub-
+- table varies varies
+- 51–60 Demon, Ekivu 1d4 1
+- 61–70 Hydra, 11 or 12 heads 1 1
+- 71–80
+- Elemental; (1–2) Earth,
+- (3–4) Air, (5–6) Fire,
+- (7–8) Water
+- 1 1
+- 81–89 Dragon—see Sub-table 1 1
+- 90–93 Lammasu 1d4 1
+- 94–00 Ghost 1 1
+- MONSTER LEVEL EIGHT—DRAGON SUB–TABLE
+- D100 TYPE  AGE HIT POINTS PER HD
+- 01–12 Black Ancient 8
+- 13–25 Blue Very Old 7
+- 26–30 Brass Ancient 8
+- 31–35 Bronze Very Old 7
+- 36–45 Copper Very Old 7
+- 46–50 Gold Very Old 7
+- 51–60 Green Very Old 7
+- 61–80 Red Very Old 7
+- 81–85 Silver Very Old 7
+- 86–00 White Ancient 8

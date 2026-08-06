@@ -1,0 +1,19 @@
+name: Shrieker
+frequency: common
+no_encountered: 2d4
+size: small to large
+alignment: neutral
+move: 10ft
+armour_class: 7 [12]
+hit_dice: '3'
+melee_attacks: Nil
+senses: N/A
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 50 +2/hp
+description: Shriekers are mobile fungi that wander around quietly under - ground soaking up moisture. They are the favourite food of pur- ple worms and shambling mounds.
+abilities:
+- heading: Special Features
+  text: Shriek. Shriekers give off an ear-piercing shriek whenever they  detect light within 30ft, or movement within 10ft. Shriekers will  continue to shriek for 1d3 rounds, with a 50% chance to attract  a wandering monster each round.

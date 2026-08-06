@@ -1,0 +1,18 @@
+name: Wolf, Dire
+frequency: common rare no.  encountered 3d10 3d4
+size: small medium
+alignment: neutral neutral
+move: 180ft 180ft
+armour_class: 6 [14]
+hit_dice: 3+3
+melee_attacks: 1 bite (2d4)
+senses: Keen Keen
+lair_chance: 10% 10%
+intelligence: semi- (2-4) semi- (2-4)
+morale: 60 65
+loot: Nil Nil
+experience: 75 +3/hp
+description: Dire wolves are massive wolves, prehistoric ancestors of the  normal
+  species. Like normal wolves, they hunt in packs and  their howl has a 50% chance
+  to panic herbivores such as horses.
+abilities: []

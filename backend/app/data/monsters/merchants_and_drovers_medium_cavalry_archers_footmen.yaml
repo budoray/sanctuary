@@ -1,0 +1,20 @@
+name: Merchants And Drovers Medium Cavalry Archers Footmen
+frequency: common common common common
+no_encountered: 10% of base (each) 50% of base number 10% of base (each) 20% of base number
+size: medium medium medium medium
+alignment: neutral neutral neutral neutral
+move: 120ft 240ft (mounted) 120ft 90ft
+armour_class: 8 [12] 4 [16] 6 [14] 5 [15]
+hit_dice: 1d6 hp 1d6+1 hp 1d6 hp 1d6+1 hp
+melee_attacks: 1 dagger (1d4) or staff (1d6) Lance (2d4+1) and  sword (1d8) 1 dagger (1d4) Polearm (1d6+1) or  sword (1d8)
+senses: Standard Standard Standard Standard
+lair_chance: 0% 0% 0% 0%
+intelligence: very to high (11-14) very to high (11-14) very to high (11-14) very to high (11-14)
+morale: 50 50 50 50
+loot: See below See below See below See below
+experience: 5 +1/hp 10 +1/hp 5 +1/hp 5 +1/hp
+description: 'Merchant encounters are actually caravans of merchants, drov- ers, and guards. The caravan will also contain pack animals,  carts, and horses.  The guards will always be led by a higher-level fighter of 6th to  11th level (1d6+5), a lieutenant (1 level lower than the captain),  and 12 guards (2nd level fighters). • There is a 10% chance per 50 persons that a magic-user of 6th  to 8th level is present (1d3+5).  • There is a 5% chance per 50 persons that a cleric of 5th to 7th  level (1d3+4) is present.  • There is also a 15% chance per 50 persons that a thief of  8th to 10th level will be present (along with 1d4 lower level  thieves of 3rd to 7th level).  All of the above leader or special character types are in addition  to the number of merchants generated.  Treasure: The treasure for a caravan will be as follows: • Individual Merchants: 3d12 cp, 3d6 sp, 2d6 ep, 2d4 gp, 1d6 pp,  2d4 gp (40%), 1d6x10 pp (50%), 4d8  gems (55%), 1d12 pieces  of jewellery (45%). • Individual  Mercenaries:
+  3d6 sp. Individual Leaders: 2d4 gp. • Mercenary Pay Box (Hidden in Caravan):  2,000–4,000 gold  (1d3+1), 100–400 pp (1d4), and 4d4  gems). • Caravan Goods: The caravan will be carrying goods and mer - chandise worth 10,000 to 60,000 gp. This requires either 10  pack animals or 1 cart per 5,000 gp worth of goods.'
+abilities:
+- heading: Special Attacks
+  text: 'Ranged Attack (Archers). Archers are armed with longbows (1d6  piercing). Unarmed Combat. Footmen can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with a  12+ on 1d20. Hit Mods: ATK/DEF +6/-6. Overbear Results Mods:  ATK/DEF +0/+0. Grappling Result Mods: ATK/DEF +0/+0. HYDRA If not indicated by an encounter table, roll 1d8+4 to determine the number of heads.'

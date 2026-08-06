@@ -1,0 +1,14 @@
+name: Mirror Image
+slug: mirror_image
+reversible: false
+class: illusionist
+level: 2
+school: Phantasmal Illusion
+range: Caster
+duration: 3 rounds/level
+area_of_effect: 6-ft radius
+components: V,S
+casting_time: 2 segments
+saving_throw: None
+text: Except for the duration and number of images (1d4+1), this spell is identical to the magic user spell of the same name.
+source: wiki2_spells.txt

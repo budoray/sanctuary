@@ -1,0 +1,25 @@
+name: Efreet
+frequency: very rare
+no_encountered: '1'
+size: large
+alignment: lawful evil
+move: 90ft; 240ft flying
+armour_class: 2 [18]
+hit_dice: '10'
+melee_attacks: 1 fist (1d8 blunt plus 2d8 fire)
+senses: Standard, Sixth sense 5%
+lair_chance: Nil
+intelligence: very (11-12)
+morale: 95
+loot: Nil
+experience: 7,000 +12/hp
+description: Efreet are creatures from the Elemental Plane of Fire, and can  travel the elemental planes (although they usually avoid the  Elemental Plane of Water), the ethereal or astral planes, and  the Prime Material Plane. They hate djinn and attack them on  sight. They are lawful and follow agreements and contracts to  the letter, if not necessarily the original intention. An agreement  or contract to serve, if you can persuade or threaten the efreet  into consenting to one, binds the efreet to obedience for 1,001  days or until it has granted three wishes, whichever is earlier.  Once the Efreet’s service is complete, it is freed, and cannot be  subdued by the same person again. Efreet are strong and can carry 750 lbs without being encum - bered.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to fire.  Efreet ignore fire damage and fire-related ef - fects.
+- heading: Special Features
+  text: 'Spell-Like Abilities. Efreet can cast the following spells, without  material components:  At Will: detect magic, enlarge (only on the efreet itself), invisi- bility (only on the efreet itself), polymorph self, wall of fire, Im - proved phantasmal force. Gaseous Form.  Efreet can turn themselves to a cloud of lumi - nous, burning flame. While in this form, the Efreet can fit  through a gap one inch wide, can’t be restrained, and isn’t af - fected by being prone. Three Wishes. Many efreet can cast the wish spell, but only to  grant another’s wish—they can’t grant wishes for themselves  or for other efreet. They can use this power to grant up to three  wishes, and regain spent uses at dawn. Some efreet don’t have  this power.'
+- heading: Special Attacks
+  text: 'Ranged Attack (Hurl Flame). Efreet can attack with 1 hurled flame  (3d6 fire damage) with a range of 90ft (not modified by range  increments). Unarmed Combat. Efreet can be targeted with grappling or over- bearing attacks, and under some circumstances they may use  these tactics. If not fended off, they score an unarmed hit with  a 2+ on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear Results  Mods: ATK/DEF +4/-4. Grappling Result Mods: ATK/DEF +2/-2.'
+- heading: Languages
+  text: Efreet have limited telepathy. Any creature that understands at  least one language, understands the efreet; and the efreet can  understand it. In addition, efreet have their own language, and  all speak Ignan, the lingua franca of the Elemental Plane of Fire.  Almost all efreet met on the Prime Material Plane also speak  Common and many speak other languages as well. ELEMENTAL

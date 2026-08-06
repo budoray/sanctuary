@@ -1,0 +1,3396 @@
+gm_count: 291
+wiki_count: 286
+matched_by_name: 187
+unmatched_wiki_names:
+- (Greater Devil; Cornugon, Malibranchai)
+- (Least Devil; Nipheribu, Ashashimu, Nishershimu)
+- (Lesser Devil)
+- (Lesser Devil; Barbazu, Tothmys, Thissuzim)
+- (Lesser Devil; Hamatula, Barbicale)
+- (Lesser Devil; Osyluth, Gerotephys, Calcinnim)
+- (Lesser Devil; She-Devils)
+- (Turned as type 1 or 3)
+- (Turned as type 8)
+- (turned as type 1)
+- (turned as type 11)
+- (turned as type 12)
+- (turned as type 13)
+- (turned as type 4)
+- (turned as type 5)
+- (turned as type 6)
+- (turned as type 6)
+- (turned as type 7)
+- (turned as type 9)
+- (turned as type 9)
+- Achaierai
+- Afreet
+- Al-Mi'raj
+- Annis
+- Bandit (Brigand)
+- Barghest
+- Batrachian Anuran Female Eft
+- Blow Fly, Giant Horsefly, Giant
+- Bombardier Boring Death Watch Fire Rhinoceros Stag Water
+- Buffalo Bull Wild
+- Charonosaurus Edmontosaurus Hypacrosaurus Saurolophus Shantungosaurus Telmatosaurus
+- Chimæra Gorgimæra
+- Clay Flesh Iron Stone
+- Coeurl
+- Common Mage
+- Crab Crayfish
+- Dark Creeper Dark Stalker
+- Demonette
+- Demoniac
+- Dervish (Nomad)
+- Domestic Wild Lynx, Giant
+- Ekivu (Fly Demon)
+- Executioner's Hood
+- Faun (Satyr)
+- Gar, Giant Pike, Giant Leviathan
+- Genie
+- Giant Giant Poisonous
+- Gnoll Flind
+- Homonculus
+- Huge Giant
+- Hydra
+- Indricotherium
+- Kullule (Demonic Hordling)
+- Large Huge Giant
+- Large Huge Giant
+- Merchant
+- Mongrelman
+- Moray Electric Weed
+- Nilbog
+- Normal Carnivorous
+- Phantom
+- Phoenix
+- Portuguese Man O' War, Giant
+- Quickling
+- Shark
+- Shub
+- Soul Worm
+- Sphinx, Crio-
+- Sphinx, Gyno-
+- Sphinx, Hieraco-
+- Spider, Giant
+- Spider, Huge
+- Spider, Large
+- Squealer
+- Squid Octopus
+- Succubus
+- Troll, Giant Two-Headed
+- Uduk
+- Vilstrak
+- Vine Vine Zombie
+- War Wild
+- Warrior Female Hatchling Guard Warchief
+- Wiki and Other Goodies - https://osricwiki.presgas.name/
+- Wiki and Other Goodies - https://osricwiki.presgas.name/
+- Wiki and Other Goodies - https://osricwiki.presgas.name/
+- Wiki and Other Goodies - https://osricwiki.presgas.name/
+- Wild Giant
+- Will-O-the-Wisp
+- Worker Honeybee Soldier Honeybee Bumblebee
+- 'characteristic is as follows:'
+- https://osricwiki.presgas.name/ Printed on 2025/12/28 08:29
+- https://osricwiki.presgas.name/ Printed on 2025/12/28 08:29
+- https://osricwiki.presgas.name/ Printed on 2025/12/28 08:29
+- https://osricwiki.presgas.name/ Printed on 2025/12/28 08:29
+- https://osricwiki.presgas.name/ Printed on 2025/12/28 08:29
+- https://osricwiki.presgas.name/ Printed on 2025/12/28 08:29
+- https://osricwiki.presgas.name/ Printed on 2025/12/28 08:29
+- https://osricwiki.presgas.name/ Printed on 2025/12/28 08:29
+- https://osricwiki.presgas.name/ Printed on 2025/12/28 08:29
+disagreements:
+- name: Berserker
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Berserker
+  field: move
+  gm_guide: 12ft
+  wiki: 12-ft
+- name: Berserker
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Berserker
+  field: melee_attacks
+  gm_guide: By weapon
+  wiki: 1 (or 2) (By weapon)
+- name: Berserker
+  field: intelligence
+  gm_guide: average (8-10) to very
+  wiki: Mean (average to very)
+- name: Berserker
+  field: experience
+  gm_guide: 10 +1/hp
+  wiki: Variable
+- name: Buccaneer (pirate)
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Buccaneer (pirate)
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Buccaneer (pirate)
+  field: armour_class
+  gm_guide: By  armour type
+  wiki: Determined by armour worn
+- name: Buccaneer (pirate)
+  field: melee_attacks
+  gm_guide: Axe or sword (1d8)
+  wiki: 1 (By weapon)
+- name: Buccaneer (pirate)
+  field: lair_chance
+  gm_guide: 80% (100% by sea)
+  wiki: 80% or 100%
+- name: Buccaneer (pirate)
+  field: intelligence
+  gm_guide: mean (average to very) (8-12)
+  wiki: Mean (average to very)
+- name: Buccaneer (pirate)
+  field: experience
+  gm_guide: Varies
+  wiki: Variable
+- name: Pilgrim
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Pilgrim
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Pilgrim
+  field: armour_class
+  gm_guide: 8 [12]
+  wiki: Determined by armour worn
+- name: Pilgrim
+  field: melee_attacks
+  gm_guide: Staff (1d6)
+  wiki: See below (By weapon)
+- name: Pilgrim
+  field: lair_chance
+  gm_guide: 100%
+  wiki: Nil
+- name: Dwarf
+  field: no_encountered
+  gm_guide: 4d100
+  wiki: 40d10
+- name: Dwarf
+  field: size
+  gm_guide: small (4ft)
+  wiki: Small (4-ft tall)
+- name: Dwarf
+  field: move
+  gm_guide: 60ft
+  wiki: 60-ft
+- name: Dwarf
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Dwarf
+  field: melee_attacks
+  gm_guide: By weapon
+  wiki: 1 (1d8 or by weapon)
+- name: Elf
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Elf
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Elf
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Bugbear
+  field: no_encountered
+  gm_guide: 6d6 (9d6 in lair)
+  wiki: 6d6
+- name: Bugbear
+  field: size
+  gm_guide: large (7ft)
+  wiki: Large (7-ft tall)
+- name: Bugbear
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Bugbear
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Bugbear
+  field: intelligence
+  gm_guide: low to average (5-10)
+  wiki: Low to average
+- name: Bugbear
+  field: experience
+  gm_guide: 135 +4/hp
+  wiki: 3/135+4/hp
+- name: Goblin
+  field: size
+  gm_guide: small (4ft)
+  wiki: Small (4-ft tall)
+- name: Goblin
+  field: move
+  gm_guide: 60ft
+  wiki: 60-ft
+- name: Goblin
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Goblin
+  field: hit_dice
+  gm_guide: 1d8-1  hit points
+  wiki: 1-1
+- name: Goblin
+  field: melee_attacks
+  gm_guide: 1d6 or by weapon
+  wiki: 1 (1d6 or by weapon)
+- name: Goblin
+  field: intelligence
+  gm_guide: average (low) (8-10)
+  wiki: Average (low)
+- name: Goblin
+  field: experience
+  gm_guide: 10 +1/hp
+  wiki: 1/10+1/hp
+- name: Grimlock
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Grimlock
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Grimlock
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Grimlock
+  field: melee_attacks
+  gm_guide: 1d6 or by weapon
+  wiki: 1 (1d6 or by weapon)
+- name: Grimlock
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Grimlock
+  field: experience
+  gm_guide: 28 +2/hp
+  wiki: 2/28+2/hp
+- name: Hobgoblin
+  field: size
+  gm_guide: medium (6.5ft)
+  wiki: Man-sized (61⁄2-ft tall)
+- name: Hobgoblin
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Hobgoblin
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Hobgoblin
+  field: melee_attacks
+  gm_guide: 1d8 or by weapon
+  wiki: 1 (1d8 or by weapon)
+- name: Hobgoblin
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Hobgoblin
+  field: experience
+  gm_guide: 20 +2/hp
+  wiki: 2/20+2/hp
+- name: Lizard Man
+  field: size
+  gm_guide: medium (7ft tall)
+  wiki: Man-sized (7-ft tall)
+- name: Lizard Man
+  field: move
+  gm_guide: 60ft; 120ft swimming
+  wiki: 60-ft; 120-ft swimming
+- name: Lizard Man
+  field: armour_class
+  gm_guide: 5 [15] or 4 [16] with shield
+  wiki: 5 (4 with shield)
+- name: Lizard Man
+  field: melee_attacks
+  gm_guide: 2 claws (1d2) and 1 bite (1d8)  or by weapon
+  wiki: 3 (1d2/1d2/1d8)
+- name: Orc
+  field: size
+  gm_guide: medium (6ft tall)
+  wiki: Man-sized (6-ft tall)
+- name: Orc
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Orc
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Orc
+  field: melee_attacks
+  gm_guide: 1 weapon
+  wiki: 1 (1d8 or by weapon)
+- name: Orc
+  field: intelligence
+  gm_guide: average or low (5-10)
+  wiki: Average (low)
+- name: Orc
+  field: experience
+  gm_guide: 10 +1 per hp
+  wiki: 1/10+1 per hp
+- name: Troglodyte
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Troglodyte
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Troglodyte
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Troglodyte
+  field: melee_attacks
+  gm_guide: 2 claws (1d3) and 1 bite (1d4+1) or by  weapon
+  wiki: 3 or 1 (1d3/1d3/1d4+1 or by weapon)
+- name: Troglodyte
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Troglodyte
+  field: experience
+  gm_guide: 20 +2/hp
+  wiki: 2/20+2/hp
+- name: Cyclops
+  field: size
+  gm_guide: large (20ft)
+  wiki: Large (20-ft)
+- name: Cyclops
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft
+- name: Cyclops
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Cyclops
+  field: melee_attacks
+  gm_guide: 1 club (6d6)
+  wiki: 1 (6d6 or 4d10)
+- name: Cyclops
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Cyclops
+  field: experience
+  gm_guide: 3,300 +17/hp
+  wiki: 7/3,300+17/hp
+- name: Giant, Cloud
+  field: size
+  gm_guide: large (18ft tall)
+  wiki: Large (18-ft tall)
+- name: Giant, Cloud
+  field: alignment
+  gm_guide: neutral good (50%) or neutral evil  (50%)
+  wiki: Neutral good (50%) / neutral evil (50%)
+- name: Giant, Cloud
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft
+- name: Giant, Cloud
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Giant, Cloud
+  field: hit_dice
+  gm_guide: 12 (+1d6 hp)
+  wiki: 12+1d6+1
+- name: Giant, Cloud
+  field: melee_attacks
+  gm_guide: 1 weapon (6d6)
+  wiki: 1 (6d6)
+- name: Giant, Cloud
+  field: intelligence
+  gm_guide: average (8-10) up to very (11-12)
+  wiki: Average up to very
+- name: Giant, Cloud
+  field: experience
+  gm_guide: 3,520 +16/hp
+  wiki: 8/3,520+16/hp
+- name: Giant, Fire
+  field: size
+  gm_guide: large (12ft)
+  wiki: Large (12-ft tall)
+- name: Giant, Fire
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Giant, Fire
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Giant, Fire
+  field: hit_dice
+  gm_guide: 11 (+1d4 hp)
+  wiki: 11+1d4+1
+- name: Giant, Fire
+  field: melee_attacks
+  gm_guide: 1 weapon (5d6)
+  wiki: '1'
+- name: Giant, Frost
+  field: size
+  gm_guide: large (15ft)
+  wiki: Large (15-ft tall)
+- name: Giant, Frost
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Giant, Frost
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Giant, Frost
+  field: hit_dice
+  gm_guide: 10 (+1d4 hp)
+  wiki: 10+1d4
+- name: Giant, Frost
+  field: melee_attacks
+  gm_guide: 1 weapon (4d6)
+  wiki: 1 (4d6)
+- name: Giant, Frost
+  field: intelligence
+  gm_guide: low up to average (5-10)
+  wiki: Low up to average
+- name: Giant, Frost
+  field: experience
+  gm_guide: 1,820 +14/hp
+  wiki: 7/1,820+14/hp
+- name: Giant, Hill
+  field: size
+  gm_guide: large (10.5ft)
+  wiki: Large (10-ft 6-in)
+- name: Giant, Hill
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Giant, Hill
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Giant, Hill
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Giant, Hill
+  field: experience
+  gm_guide: 1,200 +12/hp
+  wiki: 6/1,200+12/hp
+- name: Giant, Stone
+  field: size
+  gm_guide: large (12ft)
+  wiki: Large (12-ft)
+- name: Giant, Stone
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Giant, Stone
+  field: armour_class
+  gm_guide: 0 [20]
+  wiki: '0'
+- name: Giant, Stone
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Giant, Stone
+  field: experience
+  gm_guide: 1,500 +14/hp
+  wiki: 7/1,500+14/hp
+- name: Giant, Storm
+  field: size
+  gm_guide: huge (21ft)
+  wiki: Large (21-ft)
+- name: Giant, Storm
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft
+- name: Giant, Storm
+  field: armour_class
+  gm_guide: 1 [19]
+  wiki: '1'
+- name: Giant, Storm
+  field: hit_dice
+  gm_guide: 15 (+1d6  hit points)
+  wiki: 15+1d6+1
+- name: Ettin
+  field: size
+  gm_guide: large (13ft)
+  wiki: Large (13-ft+)
+- name: Ettin
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Ettin
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Ettin
+  field: melee_attacks
+  gm_guide: 1 club (2d8) and 1 other club (3d6)
+  wiki: 2 (2d8/3d6)
+- name: Ettin
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Ettin
+  field: experience
+  gm_guide: 1,370 +14/hp
+  wiki: 7/1,370+14/hp
+- name: Troll
+  field: size
+  gm_guide: large (9ft+ tall)
+  wiki: Large (9-ft+ tall)
+- name: Troll
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Troll
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Troll
+  field: melee_attacks
+  gm_guide: 2 claws (1d4+4) and 1 bite (2d6)
+  wiki: 3 (1d4+4/1d4+4/2d6)
+- name: Troll
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Troll
+  field: experience
+  gm_guide: 525 +8/hp
+  wiki: 6/525+8/hp
+- name: Troll, Giant
+  field: size
+  gm_guide: large (10ft tall)
+  wiki: Large (10-ft tall)
+- name: Troll, Giant
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Troll, Giant
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Troll, Giant
+  field: melee_attacks
+  gm_guide: 1 club (2d8) or 2 claws (1d6)
+  wiki: 1 (2d8)
+- name: Troll, Giant
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Troll, Giant
+  field: experience
+  gm_guide: 750 +10/hp
+  wiki: 6/750+10/hp
+- name: Troll, Ice
+  field: size
+  gm_guide: large (9ft tall)
+  wiki: Large (9-ft tall)
+- name: Troll, Ice
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Troll, Ice
+  field: melee_attacks
+  gm_guide: 2 claws (1d8)
+  wiki: 2 (1d8/1d8)
+- name: Troll, Ice
+  field: intelligence
+  gm_guide: semi- (2-4)
+  wiki: Semi-
+- name: Troll, Ice
+  field: experience
+  gm_guide: 45 +2/hp
+  wiki: 2/45+2/hp
+- name: Troll, Spectral
+  field: size
+  gm_guide: large (8ft tall)
+  wiki: Large (8-ft tall)
+- name: Troll, Spectral
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft
+- name: Troll, Spectral
+  field: melee_attacks
+  gm_guide: 2 claws (1d3 + special) and 1  bite (1d6)
+  wiki: 3 (1d6/1d3/1d3)
+- name: Troll, Spectral
+  field: intelligence
+  gm_guide: very (11-12)
+  wiki: Very
+- name: Troll, Spectral
+  field: experience
+  gm_guide: 625 +6/hp
+  wiki: 6/625+6/hp
+- name: Dragon, Black
+  field: size
+  gm_guide: varies by age
+  wiki: Large (30-ft long)
+- name: Dragon, Black
+  field: move
+  gm_guide: 120ft; 240ft flying (AA:II)
+  wiki: 120-ft; 240-ft flying (AA:II)
+- name: Dragon, Black
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Dragon, Black
+  field: melee_attacks
+  gm_guide: 2 claws (1d4) and 1 bite (3d6)
+  wiki: 3 (1d4/1d4/3d6)
+- name: Dragon, Blue
+  field: size
+  gm_guide: varies by age
+  wiki: Large (42-ft long)
+- name: Dragon, Blue
+  field: move
+  gm_guide: 90ft; 240ft flying (AA:II)
+  wiki: 90-ft; 240-ft flying (AA:II)
+- name: Dragon, Blue
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Dragon, Blue
+  field: melee_attacks
+  gm_guide: 2 claws (1d6) and 1 bite (3d8)
+  wiki: 3 (1d6/1d6/3d8)
+- name: Dragon, Blue
+  field: intelligence
+  gm_guide: very (11-12)
+  wiki: Very
+- name: Dragon, Blue
+  field: experience
+  gm_guide: Varies by hit dice and age
+  wiki: Variable
+- name: Dragon, Brass
+  field: size
+  gm_guide: varies by age
+  wiki: Large (30-ft long)
+- name: Dragon, Brass
+  field: move
+  gm_guide: 120ft; 240ft flying (AA:II)
+  wiki: 120-ft; 240-ft flying (AA:II)
+- name: Dragon, Brass
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Dragon, Brass
+  field: melee_attacks
+  gm_guide: 2 claws (1d4) and 1 bite (4d4)
+  wiki: 3 (1d4/1d4/4d4)
+- name: Dragon, Brass
+  field: intelligence
+  gm_guide: high (13-14)
+  wiki: High
+- name: Dragon, Brass
+  field: experience
+  gm_guide: Varies by hit dice and age
+  wiki: Variable
+- name: Dragon, Bronze
+  field: size
+  gm_guide: varies by age
+  wiki: Large (42-ft long)
+- name: Dragon, Bronze
+  field: move
+  gm_guide: 90ft; 240ft flying (AA:II)
+  wiki: 90-ft; 240-ft flying (AA:II)
+- name: Dragon, Bronze
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Dragon, Bronze
+  field: intelligence
+  gm_guide: exceptional (15-16)
+  wiki: Exceptional
+- name: Dragon, Bronze
+  field: experience
+  gm_guide: Varies by hit dice and age
+  wiki: Variable
+- name: Dragon, Copper
+  field: size
+  gm_guide: varies by age
+  wiki: Large (36-ft long)
+- name: Dragon, Copper
+  field: move
+  gm_guide: 90ft; 240ft flying (AA:II)
+  wiki: 90-ft; 240-ft flying (AA:II)
+- name: Dragon, Copper
+  field: armour_class
+  gm_guide: 1 [19]
+  wiki: '1'
+- name: Dragon, Copper
+  field: melee_attacks
+  gm_guide: 2 claws (1d4) and 1 bite (3d6+2)
+  wiki: 3 (1d4/1d4/3d6+2)
+- name: Dragon, Gold
+  field: size
+  gm_guide: varies by age
+  wiki: Large (54-ft long)
+- name: Dragon, Gold
+  field: move
+  gm_guide: 120ft; 300ft flying (AA:II)
+  wiki: 120-ft; 300-ft flying (AA:II)
+- name: Dragon, Gold
+  field: armour_class
+  gm_guide: -2 [22]
+  wiki: '-2'
+- name: Dragon, Gold
+  field: melee_attacks
+  gm_guide: 2 claws (1d8) and 1 bite (6d6)
+  wiki: 3 (1d8/1d8/6d6)
+- name: Dragon, Gold
+  field: intelligence
+  gm_guide: genius (17-18)
+  wiki: Genius
+- name: Dragon, Gold
+  field: experience
+  gm_guide: Varies by hit dice and age
+  wiki: Variable
+- name: Dragon, Green
+  field: size
+  gm_guide: varies by age
+  wiki: Large (36-ft long)
+- name: Dragon, Green
+  field: move
+  gm_guide: 90ft; 240ft flying (AA:II)
+  wiki: 90-ft; 240-ft flying (AA:II)
+- name: Dragon, Green
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Dragon, Green
+  field: melee_attacks
+  gm_guide: 2 claws (1d6) and 1 bite (2d10)
+  wiki: 3 (1d6/1d6/2d10)
+- name: Dragon, Green
+  field: intelligence
+  gm_guide: average (8-10) to very (11-12)
+  wiki: Average to very
+- name: Dragon, Green
+  field: experience
+  gm_guide: Varies by hit dice and age
+  wiki: Variable
+- name: Dragon, Silver
+  field: size
+  gm_guide: varies by age
+  wiki: Large (48-ft long)
+- name: Dragon, Silver
+  field: move
+  gm_guide: 90ft; 240ft flying (AA:II)
+  wiki: 90-ft; 240-ft flying (AA:II)
+- name: Dragon, Silver
+  field: armour_class
+  gm_guide: -1 [21]
+  wiki: '-1'
+- name: Dragon, White
+  field: size
+  gm_guide: varies by age
+  wiki: Large (24-ft long)
+- name: Dragon, White
+  field: move
+  gm_guide: 120ft; 300ft flying (AA:II)
+  wiki: 120-ft; 300-ft flying (AA:II)
+- name: Dragon, White
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Dragon, White
+  field: melee_attacks
+  gm_guide: 2 claws (1d4) and 1 bite (2d8)
+  wiki: 3 (1d4/1d4/2d8)
+- name: Dragon, White
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Dragon, White
+  field: experience
+  gm_guide: Varies by hit dice and age
+  wiki: Variable
+- name: Babau
+  field: size
+  gm_guide: medium (7ft)
+  wiki: Man-sized (7-ft)
+- name: Babau
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft
+- name: Babau
+  field: armour_class
+  gm_guide: -3 [23]
+  wiki: '-3'
+- name: Babau
+  field: melee_attacks
+  gm_guide: 2 claws (1d4+1) and 1 bite (2d4) or 1  weapon (+7 damage)
+  wiki: 2 claws/1 bite or 1 weapon (1d4+1/1d4+1/2d4 or by weapon +7)
+- name: Babau
+  field: experience
+  gm_guide: 2,000 +12/hp
+  wiki: 8/2,000+ 12/hp
+- name: Class A Demon (vrock)
+  field: size
+  gm_guide: large (9ft)
+  wiki: Large
+- name: Class A Demon (vrock)
+  field: move
+  gm_guide: 120ft; 180ft flying (AA:IV)
+  wiki: 120-ft; 180-ft flying (AA:IV)
+- name: Class A Demon (vrock)
+  field: armour_class
+  gm_guide: 0 [20]
+  wiki: '0'
+- name: Class A Demon (vrock)
+  field: melee_attacks
+  gm_guide: 2 talons (1d4), 2 claws (1d8)  and 1 bite (1d6)
+  wiki: 2 talons/2 claws/1 bite (1d4/1d4/1d8/1d8/1d6)
+- name: Class A Demon (vrock)
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Class A Demon (vrock)
+  field: experience
+  gm_guide: 1,275 +10/hp
+  wiki: 7/1,275 +10/hp
+- name: Class B Demon (hezrou)
+  field: size
+  gm_guide: large (8ft)
+  wiki: Large
+- name: Class B Demon (hezrou)
+  field: move
+  gm_guide: 60ft; 120ft hopping
+  wiki: 60-ft; 120-ft hopping
+- name: Class B Demon (hezrou)
+  field: armour_class
+  gm_guide: -2 [22]
+  wiki: '-2'
+- name: Class B Demon (hezrou)
+  field: melee_attacks
+  gm_guide: 2 claws (1d3) and 1 bite (4d4)
+  wiki: 2 claws/1 bite (1d3/1d3/4d4)
+- name: Class B Demon (hezrou)
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Class C Demon (glabrezu)
+  field: size
+  gm_guide: large (10ft)
+  wiki: Large
+- name: Class C Demon (glabrezu)
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Class C Demon (glabrezu)
+  field: armour_class
+  gm_guide: -4 [24]
+  wiki: '-4'
+- name: Class C Demon (glabrezu)
+  field: melee_attacks
+  gm_guide: 2 pincers (2d6 piercing), 2 claws (1d3  slashing), and 1 bite (1d4+1 piercing)
+  wiki: 2 pincers/2 claws/1 bite (2d6/2d6/1d3/1d3/1d4+1)
+- name: Class C Demon (glabrezu)
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Class C Demon (glabrezu)
+  field: experience
+  gm_guide: 2,400 +14/hp
+  wiki: 8/2,400+14/hp
+- name: Class E Demon (marilith And Others)
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Class E Demon (marilith And Others)
+  field: armour_class
+  gm_guide: -7 [27]
+  wiki: '-7'
+- name: Class E Demon (marilith And Others)
+  field: melee_attacks
+  gm_guide: 6 arms (2d4) and 1 constriction (1d6)
+  wiki: 6 arms/1 constriction (2d4 (×6)/1d6)
+- name: Class F Demon (balor And Others)
+  field: size
+  gm_guide: large (12ft)
+  wiki: Large
+- name: Class F Demon (balor And Others)
+  field: move
+  gm_guide: 60ft; 150ft flying (AA:III)
+  wiki: 60-ft; 150-ft flying (AA:III)
+- name: Class F Demon (balor And Others)
+  field: armour_class
+  gm_guide: -2 [22]
+  wiki: '-2'
+- name: Class F Demon (balor And Others)
+  field: melee_attacks
+  gm_guide: 1 weapon/sword (+1) (1d12) or 1 whip  (1d6 + fire)
+  wiki: 1 weapon/sword or 1 whip attack (1d12+1)
+- name: Dretch
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Dretch
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Dretch
+  field: melee_attacks
+  gm_guide: 2 claws (1d4) and 1 bite(1d4+1)
+  wiki: 2 claws/1 bite (1d4/1d4/1d4+1)
+- name: Dretch
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Dretch
+  field: experience
+  gm_guide: 175 +4/hp
+  wiki: 4/175+4/hp
+- name: Quasit
+  field: size
+  gm_guide: tiny
+  wiki: Small
+- name: Quasit
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft
+- name: Quasit
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Quasit
+  field: melee_attacks
+  gm_guide: 2 claws (1d2) and 1 bite (1d4)
+  wiki: 2 claws/1 bite (1d2/1d2/1d4)
+- name: Ice Devil (greater Devil)
+  field: size
+  gm_guide: large (11ft)
+  wiki: Large
+- name: Imp (lesser Devil)
+  field: size
+  gm_guide: tiny
+  wiki: Small
+- name: Imp (lesser Devil)
+  field: move
+  gm_guide: 60ft; 180ft flying (AA:V)
+  wiki: 60-ft; 180-ft flying (AA:V)
+- name: Imp (lesser Devil)
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Imp (lesser Devil)
+  field: melee_attacks
+  gm_guide: Tail (1d4 + poison)
+  wiki: Tail (1d4+poison (See below))
+- name: Imp (lesser Devil)
+  field: lair_chance
+  gm_guide: Nil
+  wiki: None
+- name: Imp (lesser Devil)
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Lemure (least Devil)
+  field: move
+  gm_guide: 30ft
+  wiki: 30-ft
+- name: Lemure (least Devil)
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Lemure (least Devil)
+  field: intelligence
+  gm_guide: semi- (2-4)
+  wiki: Semi-
+- name: Lemure (least Devil)
+  field: experience
+  gm_guide: 65 +3/hp
+  wiki: 3/65+3/hp
+- name: Black Blue Green Red White
+  field: frequency
+  gm_guide: common common common common common no.  encountered 1d3 or 2d4 1d4 or 2d4 1d3 or 3d3 1d4 or 3d4 1d3 or 3d4
+  wiki: Common Common Common Common Common
+- name: Black Blue Green Red White
+  field: size
+  gm_guide: large (8ft) medium (5ft) medium (6ft) small (4ft) medium (7ft)
+  wiki: Large Medium Medium Small Medium
+- name: Black Blue Green Red White
+  field: move
+  gm_guide: '90ft, 120ft flying  (AA: IV) 150ft, 150ft flying  (AA: IV) 120ft, 150ft flying  (AA: IV) 180ft, 180ft flying  (AA: IV) 90ft, 150ft flying  (AA: IV)  ARMOUR CLASS 2 [18] 3 [17] 3 [17] 1 [19] 3 [17]'
+  wiki: 90-ft, 120-ft
+- name: Shaitan (greater Devil; Styx Fiend)
+  field: move
+  gm_guide: 60ft; 150ft flying (AA:IV)
+  wiki: 60-ft; 150-ft flying (AA:IV)
+- name: Shaitan (greater Devil; Styx Fiend)
+  field: armour_class
+  gm_guide: -1 [21]
+  wiki: '-1'
+- name: Shaitan (greater Devil; Styx Fiend)
+  field: melee_attacks
+  gm_guide: 1 touch (2d4 + imprisonment)
+  wiki: 1 touch (2d4)
+- name: Shaitan (greater Devil; Styx Fiend)
+  field: intelligence
+  gm_guide: high (13-14)
+  wiki: High
+- name: Shaitan (greater Devil; Styx Fiend)
+  field: experience
+  gm_guide: 1,275+ 8/hp
+  wiki: 7/1,275+ 8/hp
+- name: Spiked Devil (least Devil; Spined Fiend)
+  field: size
+  gm_guide: small (4ft)
+  wiki: Small
+- name: Spiked Devil (least Devil; Spined Fiend)
+  field: move
+  gm_guide: 60ft; 180ft flying (AA:IV)
+  wiki: 60-ft; 180-ft flying (AA:IV)
+- name: Spiked Devil (least Devil; Spined Fiend)
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Spiked Devil (least Devil; Spined Fiend)
+  field: melee_attacks
+  gm_guide: 1 weapon and/or 2 claws (1d4)
+  wiki: 1 weapon and/or 2 claws (By weapon and/or 1d4/1d4)
+- name: Spiked Devil (least Devil; Spined Fiend)
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Pit Fiend (greater Devil)
+  field: size
+  gm_guide: large (12ft)
+  wiki: Large
+- name: Pit Fiend (greater Devil)
+  field: move
+  gm_guide: 60ft; 150ft flying (AA:III)
+  wiki: 60-ft; 150-ft flying (AA:III)
+- name: Pit Fiend (greater Devil)
+  field: armour_class
+  gm_guide: –3 [23]
+  wiki: '-3'
+- name: Pit Fiend (greater Devil)
+  field: melee_attacks
+  gm_guide: 1 scimitar (1d8+6) and 1 spiked club  (1d6+7) and tail (2d4 constriction)
+  wiki: 1 scimitar/1 spiked club or tail (1d8+6/1d6+7 or 2d4 constriction)
+- name: Pit Fiend (greater Devil)
+  field: intelligence
+  gm_guide: exceptional (15-16)
+  wiki: Exceptional
+- name: Pit Fiend (greater Devil)
+  field: experience
+  gm_guide: 7,900 +18/hp
+  wiki: 10/7,900+18/hp
+- name: Albertosaurus Allosaurus Gorgosaurus Saurophaganax Tarbosaurus Tyrannosaurus
+  field: frequency
+  gm_guide: common uncommon uncommon uncommon uncommon uncommon no.  encountered 1 or 4d6 1 or 2d8 1 or 2d8 1 or 2d8 1 or 2d6 1 or 2d6
+  wiki: Common Uncommon Uncommon Uncommon Uncommon Uncommon
+- name: Apatosaurus Argentinosaurus Brachiosaurus Camarasaurus Cetiosaurus Diplodocus
+  field: frequency
+  gm_guide: common uncommon uncommon common common common no.  encountered 4d10 4d6 4d8 5d10 5d10 5d10
+  wiki: Common Uncommon Uncommon Common Common Common
+- name: Centrosaurus Diceratus Monoclonius Pentaceratops Styracosaurus Triceratops
+  field: frequency
+  gm_guide: rare very rare uncommon uncommon uncommon common no.  encountered 1d6 1d3 1d6 10d100 1d20 1d20
+  wiki: Rare Very Rare Uncommon Uncommon Uncommon Common
+- name: Anklyosaurus Ceratosaurus Iguanodon Plateosaurus Stegosaurus Velociraptor
+  field: frequency
+  gm_guide: uncommon uncommon common common common common no.  encountered 1d4+1 1d4 3d6 5d4 2d4 4d4
+  wiki: Uncommon Uncommon Common Common Common Common
+- name: Compsognathus Deinonychus Dimetrodon Dilophosaurus Euparkeria Ornitholestes
+  field: frequency
+  gm_guide: common uncommon uncommon uncommon uncommon common no.  encountered 8d4 1 or 2d4 3d6 1d4+1 5d8 5d4
+  wiki: Common Uncommon Uncommon Uncommon Uncommon Common
+- name: Archelon Dunkleosteus Elasmosaurus Mosasaurus Nothosaurus Plesiosaurus
+  field: frequency
+  gm_guide: uncommon common uncommon uncommon uncommon common no.  encountered 1d4 1d2 1d2 1d3 1d4 1d3
+  wiki: Uncommon Common Uncommon Uncommon Uncommon Common
+- name: Archaeopteryx Pteradon Pterodactyl Quetzalcoatlus Rhamphorynchus
+  field: frequency
+  gm_guide: common uncommon common rare uncommon no.  encountered 4d12 2d10 3d12 1d2 2d12
+  wiki: Common Uncommon Common Rare Uncommon
+- name: Werebear Wereboar Wererat Weretiger Werewolf
+  field: frequency
+  gm_guide: rare rare uncommon very rare common no.  encountered 1d4 2d4 4d6 1d6 3d6
+  wiki: Rare Rare Uncommon Very rare Common
+- name: Brownie
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Brownie
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Brownie
+  field: intelligence
+  gm_guide: high (13-14)
+  wiki: High
+- name: Brownie
+  field: experience
+  gm_guide: 50 +1/hp
+  wiki: 2/50+1/hp
+- name: Centaur
+  field: alignment
+  gm_guide: neutral good or chaotic good
+  wiki: Neutral to chaotic good
+- name: Centaur
+  field: move
+  gm_guide: 180ft
+  wiki: 180-ft
+- name: Centaur
+  field: armour_class
+  gm_guide: 5 [15] or 4 [16]
+  wiki: 5(4)
+- name: Centaur
+  field: melee_attacks
+  gm_guide: 2 hooves (1d6) and weapon
+  wiki: 2 (1d6/1d6)
+- name: Centaur
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Centaur
+  field: experience
+  gm_guide: 75 +3/hp
+  wiki: 3/75+3/hp
+- name: Dryad
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Dryad
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Dryad
+  field: armour_class
+  gm_guide: 10 [10]
+  wiki: '10'
+- name: Dryad
+  field: intelligence
+  gm_guide: high (13-14)
+  wiki: High
+- name: Dryad
+  field: experience
+  gm_guide: 100 +3/hp.
+  wiki: 2/30 +10/hp
+- name: Leprechaun
+  field: size
+  gm_guide: tiny (2ft)
+  wiki: Small
+- name: Leprechaun
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft
+- name: Leprechaun
+  field: armour_class
+  gm_guide: 8 [12]
+  wiki: '8'
+- name: Leprechaun
+  field: melee_attacks
+  gm_guide: Nil
+  wiki: None (Nil)
+- name: Leprechaun
+  field: intelligence
+  gm_guide: exceptional (15-16)
+  wiki: Exceptional
+- name: Leprechaun
+  field: experience
+  gm_guide: 50 +3/hp
+  wiki: 3/50+3/hp
+- name: Nixie
+  field: size
+  gm_guide: small (4ft tall)
+  wiki: Small (4-ft tall)
+- name: Nixie
+  field: move
+  gm_guide: 60ft; 120ft swimming
+  wiki: 60-ft; 120-ft swimming
+- name: Nixie
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Nixie
+  field: melee_attacks
+  gm_guide: 1 (by weapon)
+  wiki: 1 (By weapon type)
+- name: Nixie
+  field: intelligence
+  gm_guide: very (11-12)
+  wiki: Very
+- name: Nixie
+  field: experience
+  gm_guide: 35 +1/hp
+  wiki: 1/35+1/hp
+- name: Nymph
+  field: size
+  gm_guide: medium
+  wiki: Man-Sized
+- name: Nymph
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Nymph
+  field: armour_class
+  gm_guide: 9 [11]
+  wiki: '9'
+- name: Nymph
+  field: melee_attacks
+  gm_guide: 1 (1d2 or by weapon)
+  wiki: 1 (1-2 or by weapon)
+- name: Nymph
+  field: intelligence
+  gm_guide: exceptional (15-16)
+  wiki: Exceptional
+- name: Nymph
+  field: experience
+  gm_guide: 350 +3/hp
+  wiki: 3/105+3/hp
+- name: Pixie
+  field: size
+  gm_guide: tiny (2ft)
+  wiki: Small
+- name: Pixie
+  field: move
+  gm_guide: 60ft; 120ft flying (AA:V)
+  wiki: 60-ft; 120-ft flying (AA:V)
+- name: Pixie
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Pixie
+  field: melee_attacks
+  gm_guide: 1 dagger (1d4) or short bow  (special)
+  wiki: 1 (By weapon)
+- name: Pixie
+  field: intelligence
+  gm_guide: exceptional (15-16)
+  wiki: Exceptional
+- name: Pixie
+  field: experience
+  gm_guide: 50 +1/hp
+  wiki: 3/50+1/hp
+- name: Sprite
+  field: size
+  gm_guide: tiny (1ft)
+  wiki: Small
+- name: Sprite
+  field: move
+  gm_guide: 90ft; 180ft flying (AA:III)
+  wiki: 90-ft; 180-ft flying (AA:III)
+- name: Sprite
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Sylph
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Sylph
+  field: move
+  gm_guide: 120ft; 360ft flying (AA:V)
+  wiki: 120-ft; 360-ft flying (AA:V)
+- name: Sylph
+  field: armour_class
+  gm_guide: 10 [10]
+  wiki: '10'
+- name: Sylph
+  field: melee_attacks
+  gm_guide: Nil
+  wiki: None (None)
+- name: Sylph
+  field: intelligence
+  gm_guide: exceptional (15-16)
+  wiki: Exceptional
+- name: Sylph
+  field: experience
+  gm_guide: 100 +3/hp
+  wiki: 3/100+3/hp
+- name: Tree, Animated
+  field: move
+  gm_guide: 30ft
+  wiki: 30-ft
+- name: Tree, Animated
+  field: armour_class
+  gm_guide: 0 [20]
+  wiki: '0'
+- name: Tree, Animated
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Unicorn
+  field: move
+  gm_guide: 240ft
+  wiki: 240-ft
+- name: Unicorn
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Unicorn
+  field: melee_attacks
+  gm_guide: 2 hooves (1d6) and 1 horn (1d12)
+  wiki: 3 (hoof/hoof/horn) (1d6/1d6/1d12)
+- name: Wraith
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Wraith
+  field: move
+  gm_guide: 120ft; 240ft flying (AA:IV)
+  wiki: 120-ft; 240-ft flying (AA:IV)
+- name: Wraith
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Axe Beak (phorusrhacid)
+  field: move
+  gm_guide: 180ft
+  wiki: 180-ft
+- name: Axe Beak (phorusrhacid)
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Baboon
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Baboon
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Baboon
+  field: melee_attacks
+  gm_guide: 1 bite (1d4 piercing)
+  wiki: 1 (1d4)
+- name: Baboon
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Baboon
+  field: experience
+  gm_guide: 30 +1/hp
+  wiki: 2/30+1/hp
+- name: Ordinary Giant
+  field: frequency
+  gm_guide: common uncommon no.  encountered 1d100×10 3d6
+  wiki: Uncommon Very Rare
+- name: Ordinary Giant
+  field: size
+  gm_guide: small small
+  wiki: Small Medium
+- name: Ordinary Giant
+  field: move
+  gm_guide: 10ft; 240ft flying  (AA:V) 10ft; 240ft flying  (AA:V)
+  wiki: 60-ft; 30-ft swimming 60-ft; 30-ft swimming
+- name: Ordinary Giant
+  field: armour_class
+  gm_guide: 8 [12], see below 8 [12], see below
+  wiki: 4 4
+- name: Ordinary Giant
+  field: hit_dice
+  gm_guide: 1d2  hit points 1d4  hit points
+  wiki: 1+2 3
+- name: Ordinary Giant
+  field: melee_attacks
+  gm_guide: 1 bite (1 hp) 1 bite (1d2)
+  wiki: 3 3
+- name: Ordinary Giant
+  field: frequency
+  gm_guide: common uncommon no.  encountered 1d100×10 3d6
+  wiki: Common Uncommon
+- name: Ordinary Giant
+  field: move
+  gm_guide: 10ft; 240ft flying  (AA:V) 10ft; 240ft flying  (AA:V)
+  wiki: 10-ft; 240-ft flying (AA:V) 10-ft; 240-ft flying (AA:V)
+- name: Ordinary Giant
+  field: armour_class
+  gm_guide: 8 [12], see below 8 [12], see below
+  wiki: 8, see below 8, see below
+- name: Ordinary Giant
+  field: hit_dice
+  gm_guide: 1d2  hit points 1d4  hit points
+  wiki: 1d2 hp 1d4 hp
+- name: Ordinary Giant
+  field: melee_attacks
+  gm_guide: 1 bite (1 hp) 1 bite (1d2)
+  wiki: 1 1 (1 1d2)
+- name: Ordinary Giant
+  field: intelligence
+  gm_guide: animal (1) animal (1)
+  wiki: Animal Animal
+- name: Ordinary Giant
+  field: experience
+  gm_guide: 1 +0/hp 5 +1/hp
+  wiki: 1/1 1/5+1/hp
+- name: Bat, Mobat
+  field: alignment
+  gm_guide: neutral evil
+  wiki: Neutral (evil)
+- name: Bat, Mobat
+  field: move
+  gm_guide: 30ft; 150ft flying (AA:IV)
+  wiki: 30-ft; 150-ft flying (AA:IV)
+- name: Bat, Mobat
+  field: armour_class
+  gm_guide: 2 [18] or 10 [10]
+  wiki: 2 to 10, see below
+- name: Bat, Mobat
+  field: hit_dice
+  gm_guide: 4-6
+  wiki: 4 to 6, see below
+- name: Bat, Mobat
+  field: melee_attacks
+  gm_guide: 1 bite (2d4)
+  wiki: 1 (2d4)
+- name: Bat, Mobat
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Bat, Mobat
+  field: experience
+  gm_guide: '4HD: 135 +3/hp 5HD: 190 +4/hp 6HD: 300 +6/hp'
+  wiki: 3/135+3/hp (4 HD) 5/300+6/hp (6 HD)
+- name: Barracuda
+  field: size
+  gm_guide: small
+  wiki: Small to Large
+- name: Barracuda
+  field: move
+  gm_guide: 300ft swimming
+  wiki: 30-ft swimming
+- name: Barracuda
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Barracuda
+  field: melee_attacks
+  gm_guide: 1 bite (2d4 piercing)
+  wiki: 1 (2d4)
+- name: Barracuda
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Barracuda
+  field: experience
+  gm_guide: '1HD: 10 +1/hp 2HD: 30 +1/hp 3HD: 50 +2/hp'
+  wiki: ''
+- name: Black Brown
+  field: size
+  gm_guide: medium large (9ft)
+  wiki: Medium Large (9-ft)
+- name: Black Brown
+  field: move
+  gm_guide: 120ft 120ft
+  wiki: 120-ft 120-ft
+- name: Black Brown
+  field: armour_class
+  gm_guide: 7 [13] 6 [14]
+  wiki: 7 6
+- name: Black Brown
+  field: melee_attacks
+  gm_guide: 3 (1d3/1d3/1d6) 3 (1d6/1d6/1d8)
+  wiki: 3 3 (1d3/1d3/1d6 1d6/1d6/1d8)
+- name: Black Brown
+  field: intelligence
+  gm_guide: semi- (2-4) semi- (2-4)
+  wiki: Semi- Semi-
+- name: Black Brown
+  field: experience
+  gm_guide: 75 +3/hp 160 +6/hp
+  wiki: 3/75+3/hp 4/160+6/hp
+- name: Cave Polar
+  field: size
+  gm_guide: large (12ft) large (14ft)
+  wiki: Large (12-ft) Large (14-ft)
+- name: Cave Polar
+  field: move
+  gm_guide: 120ft 120ft; 90ft  swimming
+  wiki: 120-ft 120-ft; 90-ft swimming
+- name: Cave Polar
+  field: armour_class
+  gm_guide: 6 [14] 6 [14]
+  wiki: 6 6
+- name: Cave Polar
+  field: melee_attacks
+  gm_guide: 1d8/1d8/1d12 1d10/1d10/2d6
+  wiki: 3 3 (1d8/1d8/1d12 1d10/1d10/2d6)
+- name: Normal Huge Giant
+  field: frequency
+  gm_guide: common rare very rare no.  encountered 1d6 1d6 1d4
+  wiki: Common Rare Very rare
+- name: Normal Huge Giant
+  field: move
+  gm_guide: 120ft 150ft 180ft
+  wiki: 30-ft; 360-ft flying (AA:IV) 30-ft; 360-ft flying (AA:IV) 30-ft; 360-ft flying (AA:IV)
+- name: Normal Huge Giant
+  field: armour_class
+  gm_guide: 7 [13] 6 [14] 5 [15]
+  wiki: 6 5 7
+- name: Normal Huge Giant
+  field: melee_attacks
+  gm_guide: 1 bite (1d4 1 bite (1d4+1) 1 bite (1d8)
+  wiki: 3 3 3 (1d2/1d2/1 1d4/1d4/2 1d6/1d6/2d6)
+- name: Normal Huge Giant
+  field: lair_chance
+  gm_guide: 25% 25% 25%
+  wiki: 20% 20% 20%
+- name: Normal Huge Giant
+  field: intelligence
+  gm_guide: animal (1) animal (1) animal (1)
+  wiki: Animal Animal Animal
+- name: Normal Huge Giant
+  field: experience
+  gm_guide: 10 +1/hp 30 +1/hp 75 +3/hp
+  wiki: 1/15+1/hp 2/40+1/hp 4/105+3/hp
+- name: Boar, Warthog
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Boar, Warthog
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Camel
+  field: move
+  gm_guide: 210ft dromedary / 180ft bactrian
+  wiki: 210-ft dromedary / 180-ft bactrian
+- name: Camel
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Camel
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Camel
+  field: experience
+  gm_guide: 50 +2/hp
+  wiki: 2/50+2/hp
+- name: Normal Giant
+  field: frequency
+  gm_guide: uncommon rare
+  wiki: Common Rare
+- name: Normal Giant
+  field: no_encountered
+  gm_guide: 1 1
+  wiki: 3d8 1 to 2d6
+- name: Normal Giant
+  field: size
+  gm_guide: small medium
+  wiki: Large Large
+- name: Normal Giant
+  field: alignment
+  gm_guide: neutral evil neutral evil
+  wiki: Neutral Neutral
+- name: Normal Giant
+  field: move
+  gm_guide: 120ft 150ft
+  wiki: 60-ft; 120-ft swimming 60-ft; 120-ft swimming
+- name: Normal Giant
+  field: armour_class
+  gm_guide: 5 [15] 4 [16]
+  wiki: 4 3
+- name: Normal Giant
+  field: hit_dice
+  gm_guide: 3 4+4
+  wiki: 3 7
+- name: Normal Giant
+  field: melee_attacks
+  gm_guide: 2 claws (1d4) and 1 bite (1d4+1) 2 claws (1d6) and 1 bite (2d4)
+  wiki: 2 2 (2d4/1d12 3d6/2d10)
+- name: Normal Giant
+  field: lair_chance
+  gm_guide: 15% 15%
+  wiki: Nil Nil
+- name: Normal Giant
+  field: intelligence
+  gm_guide: semi- (2-4) semi- (2-4)
+  wiki: Animal Animal
+- name: Normal Giant
+  field: experience
+  gm_guide: 125 +2/hp 235 +4/hp
+  wiki: 2/50+2/hp 5/225+8/hp
+- name: Frog, Giant
+  field: move
+  gm_guide: 30ft; 90ft swimming
+  wiki: 30-ft; 90-ft swimming
+- name: Frog, Giant
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Draft Heavy Light Medium Pony Wild
+  field: frequency
+  gm_guide: common uncommon uncommon uncommon uncommon uncommon no.  encountered 1 1 1 1 1 5d6
+  wiki: Common Uncommon Uncommon Uncommon Uncommon Uncommon
+- name: Draft Heavy Light Medium Pony Wild
+  field: move
+  gm_guide: 120ft 150ft 240ft 180ft 120ft 240ft
+  wiki: 120-ft 150-ft 240-ft 180-ft 120-ft 240-ft
+- name: Draft Heavy Light Medium Pony Wild
+  field: armour_class
+  gm_guide: 7 [13] 7 [13] 7 [13] 7 [13] 7 [13] 7 [13]
+  wiki: 7 7 7 7 7 7
+- name: Draft Heavy Light Medium Pony Wild
+  field: melee_attacks
+  gm_guide: 1 bite (1d3) 2 hooves (1d8)  and 1 bite (1d3) 2 hooves (1d4) 2 hooves (1d6)  and 1 bite (1d3) 1 bite (1d2) 1 bite (1d3)
+  wiki: 1 3 2 3 1 1 (1d3 1d8/1d8/1d3 1d4/1d4 1d6/1d6/1d3 1d2 1d3)
+- name: Hippopotamus
+  field: move
+  gm_guide: 90ft; 120ft swimming
+  wiki: 90-ft; 120-ft swimming
+- name: Hippopotamus
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Hippopotamus
+  field: melee_attacks
+  gm_guide: 1 bite (3d6 or 2d6 piercing)
+  wiki: 1 (2d6 or 3d6)
+- name: Hippopotamus
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Hippopotamus
+  field: experience
+  gm_guide: 600 +12/hp
+  wiki: 5/600+12/hp
+- name: Normal Huge Giant
+  field: frequency
+  gm_guide: common rare very rare no.  encountered 1d6 1d6 1d4
+  wiki: Common Rare Very rare
+- name: Normal Huge Giant
+  field: size
+  gm_guide: small small medium
+  wiki: Medium Medium Large
+- name: Normal Huge Giant
+  field: move
+  gm_guide: 120ft 150ft 180ft
+  wiki: 120-ft 120-ft 180-ft
+- name: Normal Huge Giant
+  field: armour_class
+  gm_guide: 7 [13] 6 [14] 5 [15]
+  wiki: 7 6 5
+- name: Normal Huge Giant
+  field: hit_dice
+  gm_guide: 1 2 4
+  wiki: 2 3 4
+- name: Normal Huge Giant
+  field: melee_attacks
+  gm_guide: 1 bite (1d4 1 bite (1d4+1) 1 bite (1d8)
+  wiki: 1 1 1 (2d4 2d4+1 2d6)
+- name: Normal Huge Giant
+  field: frequency
+  gm_guide: common rare very rare no.  encountered 1d6 1d6 1d4
+  wiki: Common Rare Very rare
+- name: Lion Cougar Prehistoric
+  field: move
+  gm_guide: 120ft 150ft 120ft
+  wiki: 120-ft 150-ft 120-ft
+- name: Lion Cougar Prehistoric
+  field: armour_class
+  gm_guide: 5 [15] 6 [14] 5 [15]
+  wiki: 5 6 5
+- name: Lion Cougar Prehistoric
+  field: melee_attacks
+  gm_guide: 2 claws (1d6) and 1 bite (1d10) 2 claws (1d4) and 1 bite (1d6) 2 claws (2d4) and 1 bite (2d6)
+  wiki: 3 3 3 (1d6/1d6/1d10 1d4/1d4/1d6 2d4/2d4/2d6)
+- name: Lion Cougar Prehistoric
+  field: intelligence
+  gm_guide: semi- (2-4) semi- (2-4) semi- (2-4)
+  wiki: Semi- Semi- Semi-
+- name: Lion Cougar Prehistoric
+  field: experience
+  gm_guide: 250 +6/hp 100 +3/hp 300 +6/hp
+  wiki: 4/250+6/hp 3/100+3/hp 4/300+6/hp
+- name: Mule
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Mule
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Mule
+  field: melee_attacks
+  gm_guide: 1 bite (1d2) or 2 kicks (1d6)
+  wiki: 1 or 2 (1d2 (bite) or 1d6/1d6 (kick))
+- name: Mule
+  field: intelligence
+  gm_guide: semi- (2-4)
+  wiki: Semi-
+- name: Mule
+  field: experience
+  gm_guide: 20 +2/hp
+  wiki: 2/20+2/hp
+- name: Common Woolly
+  field: frequency
+  gm_guide: common common no.  encountered 1d6 1d4
+  wiki: Common Common
+- name: Common Woolly
+  field: move
+  gm_guide: 120ft 120ft
+  wiki: 120-ft 120-ft
+- name: Common Woolly
+  field: armour_class
+  gm_guide: 6 [14] 5 [15]
+  wiki: 6 5
+- name: Common Woolly
+  field: melee_attacks
+  gm_guide: 1 (2d4 or 2d6) 1 (2d6)
+  wiki: 1 1 (2d4 or 2d6 2d6)
+- name: Common Woolly
+  field: intelligence
+  gm_guide: animal (1) animal (1)
+  wiki: Animal Animal
+- name: Common Woolly
+  field: experience
+  gm_guide: 550 +10/hp 900 +12/hp
+  wiki: 7/550+10/hp 7/900+12/hp
+- name: Tiger Smilodon
+  field: frequency
+  gm_guide: uncommon rare no.  encountered 1d4 1d2
+  wiki: Uncommon Rare
+- name: Tiger Smilodon
+  field: move
+  gm_guide: 120ft 120ft
+  wiki: 120-ft 120-ft
+- name: Tiger Smilodon
+  field: armour_class
+  gm_guide: 6 [14] 6 [14]
+  wiki: 6 6
+- name: Tiger Smilodon
+  field: melee_attacks
+  gm_guide: 2 claws (1d6) and 1  bite (1d10) 2 claws (1d8) and 1  bite (2d6)
+  wiki: 3 3 (1d6/1d6/1d10 1d8/1d8/2d6)
+- name: Tiger Smilodon
+  field: intelligence
+  gm_guide: animal (1) animal (1)
+  wiki: Animal Animal
+- name: Tiger Smilodon
+  field: experience
+  gm_guide: 250 +6/hp 525 +10/hp
+  wiki: 4/250+6/hp 5/525+10/hp
+- name: Giant Sea Giant Snapping
+  field: frequency
+  gm_guide: uncommon uncommon no.  encountered 1d3 1d4
+  wiki: Uncommon Uncommon
+- name: Giant Sea Giant Snapping
+  field: move
+  gm_guide: 10ft; 150ft  swimming 30ft; 120ft  swimming
+  wiki: 10-ft; 150-ft swimming 30-ft; 120-ft swimming
+- name: Giant Sea Giant Snapping
+  field: armour_class
+  gm_guide: 2 [18] (shell) or  5 [15] (head and  flippers) 0 [20] (shell) or 5  [15] (head and legs)
+  wiki: 2 (shell) or 5 (head and flippers) 0 (shell) or 5 (head and legs)
+- name: Giant Sea Giant Snapping
+  field: melee_attacks
+  gm_guide: 1 bite (4d4) 1 bite (6d4)
+  wiki: 1 1 (4d4 6d4)
+- name: Walrus
+  field: move
+  gm_guide: 60ft; 180ft swimming
+  wiki: 60-ft; 180-ft swimming
+- name: Walrus
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Walrus
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Walrus
+  field: experience
+  gm_guide: 160 +6/hp
+  wiki: 4/160+6/hp
+- name: Whale
+  field: size
+  gm_guide: huge
+  wiki: Large
+- name: Whale
+  field: move
+  gm_guide: 180ft to 240ft swimming
+  wiki: 180-ft to 240-ft swimming
+- name: Whale
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Whale
+  field: melee_attacks
+  gm_guide: 1 bite or 1 tail. 5–15 d4 (bite),  1–5 d8 (tail)
+  wiki: 1 bite or 1 tail (5-15 d4 (bite), 1-5 d8 (tail))
+- name: Whale
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Normal Dire
+  field: frequency
+  gm_guide: common rare no.  encountered 3d10 3d4
+  wiki: Common Rare
+- name: Normal Dire
+  field: move
+  gm_guide: 180ft 180ft
+  wiki: 180-ft 180-ft
+- name: Normal Dire
+  field: armour_class
+  gm_guide: 7 [13] 6 [14]
+  wiki: 7 6
+- name: Normal Dire
+  field: melee_attacks
+  gm_guide: 1 bite (1d4+1) 1 bite (2d4)
+  wiki: 1 1 (1d4+1 2d4)
+- name: Normal Dire
+  field: intelligence
+  gm_guide: semi- (2-4) semi- (2-4)
+  wiki: Semi- Semi-
+- name: Normal Dire
+  field: experience
+  gm_guide: 50 +2/hp 75 +3/hp
+  wiki: 2/50+2/hp 3/75+3/hp
+- name: Normal Giant
+  field: move
+  gm_guide: 120ft 150ft
+  wiki: 120-ft 150-ft
+- name: Normal Giant
+  field: armour_class
+  gm_guide: 5 [15] 4 [16]
+  wiki: 5 4
+- name: Normal Giant
+  field: melee_attacks
+  gm_guide: 2 claws (1d4) and 1 bite (1d4+1) 2 claws (1d6) and 1 bite (2d4)
+  wiki: 3 3 (1d4/1d4/1d4+1 1d6/1d6/2d4)
+- name: Worg
+  field: move
+  gm_guide: 180ft
+  wiki: 180-ft
+- name: Worg
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Worg
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Worg
+  field: experience
+  gm_guide: 75 +3/hp
+  wiki: 3/75+3/hp
+- name: Aerial Servant
+  field: size
+  gm_guide: large
+  wiki: Large (8-ft tall)
+- name: Aerial Servant
+  field: move
+  gm_guide: 240ft flying
+  wiki: 240-ft flying (AA:VI)
+- name: Aerial Servant
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Aerial Servant
+  field: melee_attacks
+  gm_guide: 1 slam (8d4 blunt)
+  wiki: 1 (8d4)
+- name: Aerial Servant
+  field: intelligence
+  gm_guide: semi (2-4)
+  wiki: Semi-
+- name: Aerial Servant
+  field: experience
+  gm_guide: 5,250 +20/hp
+  wiki: 9/5,250+20/hp
+- name: Ankheg
+  field: size
+  gm_guide: large
+  wiki: Large (10-ft+)
+- name: Ankheg
+  field: move
+  gm_guide: 120ft; 60ft burrowing
+  wiki: 120-ft; 60-ft burrowing
+- name: Ankheg
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Ankheg
+  field: hit_dice
+  gm_guide: 3 to 8 (GM decides, or roll 1d6+2)
+  wiki: 3 to 8
+- name: Ankheg
+  field: melee_attacks
+  gm_guide: 1 bite (3d6 piercing)
+  wiki: 1 (3d6)
+- name: Ankheg
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Ankheg
+  field: experience
+  gm_guide: 'Varies by HD: 3 HD: 65 +2/hp 4 HD: 105 +3/hp 5 HD: 155 +4/hp 6 HD: 230 +6/hp 7 HD: 345 +8/hp 8 HD: 550 +10/hp'
+  wiki: Variable
+- name: Worker Soldier Queen
+  field: no_encountered
+  gm_guide: 1d100 1/5 the number of workers 1
+  wiki: 1d100 Varies 1
+- name: Worker Soldier Queen
+  field: size
+  gm_guide: small medium large
+  wiki: Small Small Large
+- name: Worker Soldier Queen
+  field: move
+  gm_guide: 180ft 180ft Can’t move
+  wiki: 180-ft 180-ft Nil
+- name: Worker Soldier Queen
+  field: armour_class
+  gm_guide: 3 [17] 3 [17] 4 [16]
+  wiki: 3 3 4
+- name: Worker Soldier Queen
+  field: melee_attacks
+  gm_guide: 1 bite (1d6 piercing) 1 bite (2d4 piercing & 3d4  poison) None
+  wiki: 1 2 Nil (1d6 2d4/3d4 Nil)
+- name: Worker Soldier Queen
+  field: intelligence
+  gm_guide: animal (1) animal (1) low (5-7)
+  wiki: Animal Animal Low
+- name: Worker Soldier Queen
+  field: experience
+  gm_guide: 30 +1/hp 50 +2/hp 700 +13/hp
+  wiki: 2/30+1/hp 2/50+2/hp 7/700+13/hp
+- name: Aurumvorax
+  field: move
+  gm_guide: 90ft; 30ft burrowing
+  wiki: 90-ft; 30-ft burrowing
+- name: Aurumvorax
+  field: armour_class
+  gm_guide: 0 [20]
+  wiki: '0'
+- name: Babbler
+  field: size
+  gm_guide: large
+  wiki: Large (8-ft tall)
+- name: Babbler
+  field: move
+  gm_guide: 120ft
+  wiki: 60-ft bipedal; 120-ft quadrupedal gait
+- name: Babbler
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Babbler
+  field: melee_attacks
+  gm_guide: 2 claws (1d6 slashing), 1 bite (1d8  piercing)
+  wiki: 3 (1d6/1d6/1d8)
+- name: Babbler
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Babbler
+  field: experience
+  gm_guide: 100 +5/hp
+  wiki: 3/100+5/hp
+- name: Behir
+  field: no_encountered
+  gm_guide: 'Encountered: 1d2'
+  wiki: 1d2
+- name: Behir
+  field: size
+  gm_guide: huge
+  wiki: Large
+- name: Behir
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft
+- name: Behir
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Behir
+  field: melee_attacks
+  gm_guide: 1 bite (2d4) or bite plus 6 claws (1d6)
+  wiki: 2 or 7 (2d4/1d4 +1 or 2d4/1d6/1d6/1d6/1d6/1d6/1d6)
+- name: Behir
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Behir
+  field: experience
+  gm_guide: 2,750 +16/hp
+  wiki: 7/2,750+16/hp
+- name: Blindheim
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Blindheim
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Blindheim
+  field: melee_attacks
+  gm_guide: 1 bite (1d8 piercing)
+  wiki: 1 (1d8)
+- name: Blindheim
+  field: intelligence
+  gm_guide: semi- (2-4)
+  wiki: Animal
+- name: Blindheim
+  field: experience
+  gm_guide: 110 +5/hp
+  wiki: 3/110+5/hp
+- name: Blink Dog
+  field: size
+  gm_guide: medium
+  wiki: Medium (3-ft at shoulder)
+- name: Blink Dog
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Blink Dog
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Blink Dog
+  field: melee_attacks
+  gm_guide: 1 bite (1d6 piercing)
+  wiki: 1 (1d6)
+- name: Bulette
+  field: move
+  gm_guide: 140ft; 30ft burrowing
+  wiki: 140-ft; 30-ft burrowing
+- name: Bulette
+  field: armour_class
+  gm_guide: -2 [22] (see below)
+  wiki: -2/4/6
+- name: Bulette
+  field: lair_chance
+  gm_guide: 0%
+  wiki: Nil
+- name: Bulette
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Bulette
+  field: experience
+  gm_guide: 2,000 +12/hp
+  wiki: 8/2,000+12/hp
+- name: Carbuncle
+  field: move
+  gm_guide: 30ft
+  wiki: 30-ft
+- name: Carbuncle
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Carbuncle
+  field: melee_attacks
+  gm_guide: None
+  wiki: None (None)
+- name: Carbuncle
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Carbuncle
+  field: experience
+  gm_guide: 5 +1/hp
+  wiki: 1/5+1/hp
+- name: Caryatid Column
+  field: move
+  gm_guide: 60ft
+  wiki: 60-ft
+- name: Caryatid Column
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Caryatid Column
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Caryatid Column
+  field: experience
+  gm_guide: 110 +3/hp
+  wiki: 5/110+3/hp
+- name: Caterwaul
+  field: move
+  gm_guide: 180ft or 240ft
+  wiki: 180-ft or 240-ft
+- name: Caterwaul
+  field: armour_class
+  gm_guide: 6 [14] (see below)
+  wiki: 6 (see below)
+- name: Caterwaul
+  field: hit_dice
+  gm_guide: 4+2
+  wiki: 4 +2
+- name: Caterwaul
+  field: melee_attacks
+  gm_guide: 2 claws (1d4) and 1 bite (1d6)
+  wiki: 3 (1d4/1d4/1d6)
+- name: Caterwaul
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Caterwaul
+  field: experience
+  gm_guide: 400 +5/hp
+  wiki: 5/400+5/hp
+- name: Cockatrice
+  field: move
+  gm_guide: 60ft; 180ft flying (AA:IV)
+  wiki: 60-ft; 180-ft flying (AA:IV)
+- name: Cockatrice
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Cockatrice
+  field: hit_dice
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Cockatrice
+  field: melee_attacks
+  gm_guide: 1 bite (1d3 + petrifaction)
+  wiki: 1 (1d3)
+- name: Couatl
+  field: frequency
+  gm_guide: very rare
+  wiki: Vary rare
+- name: Crabman
+  field: size
+  gm_guide: large (9ft)
+  wiki: Large (9-ft tall)
+- name: Crabman
+  field: move
+  gm_guide: 90ft; 60ft swimming
+  wiki: 90-ft; 60-ft swimming
+- name: Crabman
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Crabman
+  field: melee_attacks
+  gm_guide: 2 pincers (1d4)
+  wiki: 2 (1d4/1d4)
+- name: Crabman
+  field: intelligence
+  gm_guide: low to average (5-10)
+  wiki: Low to average
+- name: Crabman
+  field: experience
+  gm_guide: 40 +2/hp
+  wiki: 2/40+2/hp
+- name: Crypt Thing
+  field: frequency
+  gm_guide: very rare
+  wiki: Vary rare
+- name: Crypt Thing
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Crypt Thing
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Crypt Thing
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Crypt Thing
+  field: melee_attacks
+  gm_guide: 1 clawed hand (1d8 slashing)
+  wiki: 1 (1d8)
+- name: Crypt Thing
+  field: experience
+  gm_guide: 160 +4/hp
+  wiki: 4/160+4/hp
+- name: Disenchanter
+  field: size
+  gm_guide: medium (5ft at shoulder)
+  wiki: Medium (5-ft high at shoulder)
+- name: Disenchanter
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Disenchanter
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Disenchanter
+  field: melee_attacks
+  gm_guide: 1 (special)
+  wiki: 1 (See below-special effect only)
+- name: Disenchanter
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Disenchanter
+  field: experience
+  gm_guide: 225 +5/hp
+  wiki: 4/225+5/hp
+- name: Doppelgänger
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Doppelgänger
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Doppelgänger
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Doppelgänger
+  field: melee_attacks
+  gm_guide: 1 bite (1d12)
+  wiki: 1 (1d12)
+- name: Dracolisk
+  field: size
+  gm_guide: huge
+  wiki: Large (20-ft)
+- name: Dracolisk
+  field: move
+  gm_guide: 90ft; 150ft flying (AA:II)
+  wiki: 90-ft; 150-ft flying (AA:II)
+- name: Dracolisk
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Dracolisk
+  field: intelligence
+  gm_guide: low to average (5-10)
+  wiki: Low to average
+- name: Dracolisk
+  field: experience
+  gm_guide: 1,000 +10/hp
+  wiki: 7/1,000+10/hp
+- name: Dragon Turtle
+  field: size
+  gm_guide: huge
+  wiki: Large
+- name: Dragon Turtle
+  field: move
+  gm_guide: 30ft; 90ft swimming
+  wiki: 90-ft swimming
+- name: Dragon Turtle
+  field: armour_class
+  gm_guide: 0 [20]
+  wiki: '0'
+- name: Dragon Turtle
+  field: hit_dice
+  gm_guide: 12 to 15
+  wiki: '13'
+- name: Dragon Turtle
+  field: melee_attacks
+  gm_guide: 2 claws (2d6) and 1 bite (4d8)
+  wiki: 3 (2d6/2d6/4d8)
+- name: Dragon Turtle
+  field: intelligence
+  gm_guide: very (11-12)
+  wiki: Very
+- name: Dragon Turtle
+  field: experience
+  gm_guide: '12HD: 2750 +16/hp  13HD: 3300 +17/HP  14HD: 3950 +18/HP  15HD: 4600 +19/HP'
+  wiki: 10/7,000+18/hp
+- name: Ettercap
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Ettercap
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Eye Of The Deep
+  field: move
+  gm_guide: 60ft swimming
+  wiki: 60-ft swimming
+- name: Eye Of The Deep
+  field: melee_attacks
+  gm_guide: 2 pincers (2d4) and bite (1d6)
+  wiki: 3 (2d4/2d4/1d6)
+- name: Eye Of The Deep
+  field: intelligence
+  gm_guide: very (11-12)
+  wiki: Very
+- name: Eye Of The Deep
+  field: experience
+  gm_guide: 3,000 +16/hp
+  wiki: 9/3,000+16/hp
+- name: Fungi, Violet
+  field: move
+  gm_guide: 10ft
+  wiki: 10-ft
+- name: Fungi, Violet
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Fungi, Violet
+  field: melee_attacks
+  gm_guide: 1d4 branches (special)
+  wiki: 1d4 (See below)
+- name: Fungi, Violet
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Fungi, Violet
+  field: experience
+  gm_guide: 110 +2/hp
+  wiki: 3/50+1/hp
+- name: Gelatinous Cube
+  field: size
+  gm_guide: large
+  wiki: Large (typically 10-ft cube)
+- name: Gelatinous Cube
+  field: move
+  gm_guide: 60ft
+  wiki: 60-ft
+- name: Gelatinous Cube
+  field: armour_class
+  gm_guide: 8 [12]
+  wiki: '8'
+- name: Gelatinous Cube
+  field: lair_chance
+  gm_guide: Nil
+  wiki: Nil (no lair)
+- name: Gelatinous Cube
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Gelatinous Cube
+  field: experience
+  gm_guide: 150 +4/hp
+  wiki: 3/150+4/hp
+- name: Gorgon
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Gorgon
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Gorgon
+  field: melee_attacks
+  gm_guide: 1 gore (2d6)
+  wiki: 1 (2d6)
+- name: Gorgon
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Gorgon
+  field: experience
+  gm_guide: 1,500 +10/hp
+  wiki: 7/1,500+10/hp
+- name: Grey Ooze
+  field: move
+  gm_guide: 10ft
+  wiki: 10-ft
+- name: Grey Ooze
+  field: armour_class
+  gm_guide: 8 [12]
+  wiki: '8'
+- name: Grey Ooze
+  field: melee_attacks
+  gm_guide: 1 pseudopod (2d8)
+  wiki: 1 (2d8)
+- name: Grey Ooze
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Grey Ooze
+  field: experience
+  gm_guide: 75 +3/hp
+  wiki: 4/75+3/hp
+- name: Griffon
+  field: move
+  gm_guide: 120ft; 300ft flying (AA:IV)
+  wiki: 120-ft; 300-ft flying (AA:IV)
+- name: Griffon
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Griffon
+  field: melee_attacks
+  gm_guide: 2 claws (1d4) and 1 bite (2d8)
+  wiki: 3 (1d4/1d4/2d8)
+- name: Griffon
+  field: intelligence
+  gm_guide: semi- (2-4)
+  wiki: Semi-
+- name: Griffon
+  field: experience
+  gm_guide: 225 +8/hp
+  wiki: 7/225+8/hp
+- name: Harpy
+  field: move
+  gm_guide: 60ft; 150ft flying (AA:IV)
+  wiki: 60-ft; 150-ft flying (AA:IV)
+- name: Harpy
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Hell Hound
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Hell Hound
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Hell Hound
+  field: melee_attacks
+  gm_guide: 1 bite (1d10)
+  wiki: 1 (1d10)
+- name: Hell Hound
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Hell Hound
+  field: experience
+  gm_guide: '4 HD: 75 +4/hp  5 HD: 110 +5/hp  6 HD: 160 +6/hp  7 HD: 225 +8/hp'
+  wiki: ''
+- name: Hippogriff
+  field: move
+  gm_guide: 180ft; 360ft flying (AA:IV)
+  wiki: 180-ft; 360-ft flying (AA:IV)
+- name: Hippogriff
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Hippogriff
+  field: melee_attacks
+  gm_guide: 1d6/1d6/1d10
+  wiki: 3 (1d6/1d6/1d10)
+- name: Hippogriff
+  field: intelligence
+  gm_guide: semi- (2-4)
+  wiki: Semi-
+- name: Hippogriff
+  field: experience
+  gm_guide: 150 +3/hp
+  wiki: 4/150+3/hp
+- name: Invisible Stalker
+  field: size
+  gm_guide: large (8ft)
+  wiki: Large (8-ft tall)
+- name: Invisible Stalker
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Invisible Stalker
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Invisible Stalker
+  field: melee_attacks
+  gm_guide: 1 strike (2d8)
+  wiki: 1 (2d8)
+- name: Invisible Stalker
+  field: intelligence
+  gm_guide: high (13-14)
+  wiki: High
+- name: Invisible Stalker
+  field: experience
+  gm_guide: 1,100 +10/hp
+  wiki: 7/1,100+10/hp
+- name: Jackalwere
+  field: size
+  gm_guide: medium (small)
+  wiki: Small (medium)
+- name: Jackalwere
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Jackalwere
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Jackalwere
+  field: melee_attacks
+  gm_guide: 2d8 or by weapon
+  wiki: 1 (2d8 or by weapon)
+- name: Jackalwere
+  field: intelligence
+  gm_guide: very (11-12)
+  wiki: Very
+- name: Jackalwere
+  field: experience
+  gm_guide: 75 +4/hp
+  wiki: 4/75+4/hp
+- name: Lammasu
+  field: move
+  gm_guide: 120ft; 240ft flying (AA:III)
+  wiki: 120-ft; 240-ft flying (AA:III)
+- name: Lammasu
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Lammasu
+  field: melee_attacks
+  gm_guide: 2 claws (1d6+1)
+  wiki: 2 (1d6+1/1d6+1)
+- name: Lammasu
+  field: intelligence
+  gm_guide: genius (17-18)
+  wiki: Genius
+- name: Lammasu
+  field: experience
+  gm_guide: 875 +10/hp
+  wiki: 8/875+10/hp
+- name: Leech, Giant
+  field: move
+  gm_guide: 30ft
+  wiki: 30-ft
+- name: Leech, Giant
+  field: armour_class
+  gm_guide: 9 [11]
+  wiki: '9'
+- name: Leech, Giant
+  field: hit_dice
+  gm_guide: 1–4 HD
+  wiki: 1-4 HD
+- name: Leech, Giant
+  field: melee_attacks
+  gm_guide: '1 bite. Damage: 1d4 (1 HD),  1d6 (2–3 HD) or 1d8 (4 HD)'
+  wiki: 1 (1d4 (1 HD), 1d6 (2-3 HD) or 1d8 (4 HD))
+- name: Leech, Giant
+  field: lair_chance
+  gm_guide: Nil
+  wiki: Nil (no lair)
+- name: Leech, Giant
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Leech, Giant
+  field: experience
+  gm_guide: 50 +3/hp
+  wiki: 2/50+3/hp
+- name: Fire Giant Monitor Cave
+  field: size
+  gm_guide: huge (30ft long) large (20ft long) huge (40ft long) large (20ft long)
+  wiki: Large (30-ft long) Large (20-ft long) Large (40-ft long) Large (20-ft long)
+- name: Fire Giant Monitor Cave
+  field: move
+  gm_guide: 90ft 150ft 60ft 120ft
+  wiki: 90-ft 150-ft 60-ft 120-ft
+- name: Fire Giant Monitor Cave
+  field: armour_class
+  gm_guide: 3 [17] 5 [15] 5 [15] 5 [15]
+  wiki: 3 5 5 5
+- name: Fire Giant Monitor Cave
+  field: melee_attacks
+  gm_guide: 2 claws (1d8) and 1 bite  (2d8) 1 bite (1d8+1) 2 claws (2d6) and 1 bite  (3d6) 1 bite (2d6)
+  wiki: 3 1 3 1 (1d8/1d8/2d8 1d8+1 2d6/2d6/3d6 2d6)
+- name: Fire Giant Monitor Cave
+  field: lair_chance
+  gm_guide: 40% Nil 80% 20%
+  wiki: 40% Nil Nil Nil
+- name: Fire Giant Monitor Cave
+  field: intelligence
+  gm_guide: animal (1) non- (0) non- (0) non- (0)
+  wiki: Animal Non- Non- Non-
+- name: Fire Giant Monitor Cave
+  field: experience
+  gm_guide: 1,500 +14/hp 120 +4/hp 925 +10/hp 375 +6/hp
+  wiki: 7/1,500+14/hp 3/120+4/hp 6/925+10/hp 7/375+6/hp
+- name: Locathah
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Locathah
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Locathah
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Locathah
+  field: intelligence
+  gm_guide: very (11-12)
+  wiki: Very
+- name: Locathah
+  field: experience
+  gm_guide: 30 +1/hp
+  wiki: 2/30+1/hp
+- name: Lurker Above
+  field: move
+  gm_guide: 10ft; 90ft flying (AA:I)
+  wiki: 10-ft; 90-ft flying (AA:I)
+- name: Lurker Above
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Lurker Above
+  field: melee_attacks
+  gm_guide: 1 (Smother)
+  wiki: 1 (1d6)
+- name: Lurker Above
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Lurker Above
+  field: experience
+  gm_guide: 1,500 +10/hp
+  wiki: 7/1,500+4/hp
+- name: Medusa
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Medusa
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Medusa
+  field: melee_attacks
+  gm_guide: 1 snakebite (1d6 + poison)
+  wiki: 1 (1d6)
+- name: Medusa
+  field: intelligence
+  gm_guide: very (11-12) to high (13-14)
+  wiki: Very to High
+- name: Medusa
+  field: experience
+  gm_guide: 750 +6/hp
+  wiki: 5/750+6/hp
+- name: Fire Lava Smoke Steam
+  field: size
+  gm_guide: medium (5ft tall) medium (5ft tall) medium (5ft tall) medium (5ft tall)
+  wiki: Man-sized (5-ft tall) Man-sized (5-ft tall) Man-sized (5-ft tall) Man-sized (5-ft tall)
+- name: Fire Lava Smoke Steam
+  field: move
+  gm_guide: '120ft; 240ft flying (AA:  IV) 120ft; 240ft flying (AA:  IV) 120ft; 240ft flying (AA:  IV) 120ft; 240ft flying (AA:  IV)'
+  wiki: 120-ft; 240-ft flying
+- name: Merman
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Merman
+  field: move
+  gm_guide: 10ft; 180ft swimming
+  wiki: 10-ft; 180-ft swimming
+- name: Merman
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Merman
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Merman
+  field: experience
+  gm_guide: 30 +1/hp
+  wiki: 2/30 + 1/hp
+- name: Minotaur
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Minotaur
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Minotaur
+  field: melee_attacks
+  gm_guide: 1 gore (2d4) or 1 bite (1d4), or  by weapon
+  wiki: 2 or 1 (2d4/1d4, or by weapon)
+- name: Minotaur
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Minotaur
+  field: experience
+  gm_guide: 225 +6/hp
+  wiki: 5/225 + 6/hp
+- name: Guardian Spirit Water
+  field: size
+  gm_guide: large (20ft long) large (15ft long) medium (10ft long)
+  wiki: Large (20-ft long) Large (15-ft long) Medium(10-ft long)
+- name: Guardian Spirit Water
+  field: move
+  gm_guide: 150ft 120ft 90ft swimming
+  wiki: 150-ft 120-ft 90-ft swimming
+- name: Guardian Spirit Water
+  field: armour_class
+  gm_guide: 3 [17] 4 [16] 5 [15]
+  wiki: 3 4 5
+- name: Guardian Spirit Water
+  field: melee_attacks
+  gm_guide: 1 bite (1d6) and tail lash (2d8) 1 bite (1d3) 1 bite (1d4)
+  wiki: 2 1 1 (1d6/2d8 1d3 1d4)
+- name: Necrophidius
+  field: size
+  gm_guide: large (15ft long)
+  wiki: Large (15-ft long)
+- name: Necrophidius
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Necrophidius
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Necrophidius
+  field: melee_attacks
+  gm_guide: 1 bite (1d8 + paralysis)
+  wiki: 1 (1d8)
+- name: Necrophidius
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Necrophidius
+  field: experience
+  gm_guide: 125 +2/hp
+  wiki: 3/125+2/hp
+- name: Nereid
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Nereid
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Nereid
+  field: armour_class
+  gm_guide: 10 [10]
+  wiki: '10'
+- name: Nereid
+  field: melee_attacks
+  gm_guide: None
+  wiki: None (Nil)
+- name: Nereid
+  field: intelligence
+  gm_guide: very (11-12)
+  wiki: Very
+- name: Nereid
+  field: experience
+  gm_guide: 150 +4/hp
+  wiki: 4/150+4/hp
+- name: Night Hag
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Nightmare
+  field: move
+  gm_guide: 150ft; 360ft flying (AA:IV)
+  wiki: 150-ft; 360-ft flying (AA:IV)
+- name: Owlbear
+  field: size
+  gm_guide: large (8ft tall)
+  wiki: Large (8-ft tall)
+- name: Owlbear
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Owlbear
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Owlbear
+  field: melee_attacks
+  gm_guide: 2 claws (1d6) and 1 bite (1d4)
+  wiki: 3 (1d6/1d6/1d4)
+- name: Owlbear
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Lesser Greater
+  field: frequency
+  gm_guide: uncommon rare no.  encountered 1d2 1
+  wiki: Uncommon Rare
+- name: Lesser Greater
+  field: move
+  gm_guide: 60ft 60ft
+  wiki: 60-ft 60-ft
+- name: Lesser Greater
+  field: armour_class
+  gm_guide: 3 [17] 0 [20]
+  wiki: 3 0
+- name: Lesser Greater
+  field: hit_dice
+  gm_guide: 6 to 8 10 to 12
+  wiki: 6 to 8 9 to 12
+- name: Lesser Greater
+  field: melee_attacks
+  gm_guide: 2 tentacles (1d8)  and 1 bite (1d4+1) 2 tentacles (1d12)  and 1 bite (1d4+1)
+  wiki: 3 3 (1d8/1d8/1d4+1 1d12/1d12/1d4+1)
+- name: Lesser Greater
+  field: intelligence
+  gm_guide: low (5-7) average (8-10)
+  wiki: Low Average
+- name: Lesser Greater
+  field: experience
+  gm_guide: '6 HD: 275 +6/hp  7 HD: 400 +8/hp  8 HD: 650 +10/hp 10 HD: 1,500 +14/hp  11 HD: 2,000 +16/hp  12 HD: 2,300 +17/hp'
+  wiki: ''
+- name: Pegasus
+  field: move
+  gm_guide: 240ft; 480ft flying (AA:IV)
+  wiki: 240-ft; 480-ft flying (AA:IV)
+- name: Pegasus
+  field: armour_class
+  gm_guide: 6 [14]
+  wiki: '6'
+- name: Pegasus
+  field: melee_attacks
+  gm_guide: 2 hooves (1d8 blunt) and 1  bite (1d3 piercing)
+  wiki: 3 (1d8/1d8/1d3)
+- name: Pegasus
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Pegasus
+  field: experience
+  gm_guide: 75 +3/hp
+  wiki: 3/75+3/hp
+- name: Piercer
+  field: move
+  gm_guide: 10ft
+  wiki: 10-ft
+- name: Piercer
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Piercer
+  field: melee_attacks
+  gm_guide: 1 pierce (1d6, 2d6, 3d6 or 4d6)
+  wiki: 1 (1d6, 2d6, 3d6 or 4d6)
+- name: Piercer
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Piercer
+  field: experience
+  gm_guide: '1 HD: 10 +1/hp 2 HD: 30 +2/hp 3 HD: 50 +3/hp 4 HD: 80 +4/hp'
+  wiki: ''
+- name: Pseudo-Dragon
+  field: move
+  gm_guide: 60ft; 240ft flying (AA:V)
+  wiki: 60-ft; 240-ft flying (AA:V)
+- name: Pseudo-Dragon
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Pseudo-Dragon
+  field: melee_attacks
+  gm_guide: 1 bite (1d3) and 1 sting  (poison)
+  wiki: 1 (1d3)
+- name: Purple Worm
+  field: size
+  gm_guide: huge
+  wiki: Large
+- name: Purple Worm
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Purple Worm
+  field: melee_attacks
+  gm_guide: 1 bite (2d12 piercing) and 1 tail sting  (2d4 piercing+poison)
+  wiki: 1 (+1, see below) (2d12/2d4)
+- name: Purple Worm
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Purple Worm
+  field: experience
+  gm_guide: 5,000 +20/hp
+  wiki: 9/5,000+20/hp
+- name: Rakshasa
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Rakshasa
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft
+- name: Rakshasa
+  field: armour_class
+  gm_guide: -4 [24]
+  wiki: '-4'
+- name: Rakshasa
+  field: melee_attacks
+  gm_guide: 2 claws (1d3 slashing) and 1  bite (1d4+1 piercing)
+  wiki: 3 (1d3/1d3/1d4 +1)
+- name: Rakshasa
+  field: intelligence
+  gm_guide: very (11-12)
+  wiki: Very
+- name: Rakshasa
+  field: experience
+  gm_guide: 1,000 +8/hp
+  wiki: 7/1,000+8/hp
+- name: Remorhaz
+  field: size
+  gm_guide: huge (21ft to 42ft length)
+  wiki: Large (21-ft to 42-ft length)
+- name: Remorhaz
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Remorhaz
+  field: armour_class
+  gm_guide: Body 0 [20]; head 2 [18]; underside 4  [16]
+  wiki: Body 0; head 2; underside 4
+- name: Remorhaz
+  field: hit_dice
+  gm_guide: 7 to 14 (roll 1d8+6)
+  wiki: 7 to 14
+- name: Roc
+  field: size
+  gm_guide: huge (60ft+ wingspan)
+  wiki: Large (60-ft+wingspan)
+- name: Roc
+  field: move
+  gm_guide: 30ft; 300ft flying (AA:II)
+  wiki: 30-ft; 300-ft flying (AA:II)
+- name: Roc
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Roc
+  field: melee_attacks
+  gm_guide: 1 bite (4d6) or 2 talons (3d6)
+  wiki: 1 or 2 (4d6 or 3d6/3d6)
+- name: Normal Quartz
+  field: frequency
+  gm_guide: rare rare no.  encountered 1d4 1
+  wiki: Rare Rare
+- name: Normal Quartz
+  field: size
+  gm_guide: large medium (5ft)
+  wiki: Large Medium (5-ft)
+- name: Normal Quartz
+  field: move
+  gm_guide: 30ft 10ft
+  wiki: 30-ft 10-ft
+- name: Normal Quartz
+  field: armour_class
+  gm_guide: 0 [20] 0 [20]
+  wiki: 0 0
+- name: Normal Quartz
+  field: melee_attacks
+  gm_guide: 6 tentacles (grab)  and 1 bite (5d4) 6 tentacles (grab)  and 1 bite (5d4)
+  wiki: 1 1 (2d10+2 1d10)
+- name: Normal Quartz
+  field: lair_chance
+  gm_guide: 95% 95%
+  wiki: 93% 93%
+- name: Normal Quartz
+  field: intelligence
+  gm_guide: exceptional (15-16) high (13-14)
+  wiki: Exceptional High
+- name: Normal Quartz
+  field: experience
+  gm_guide: 2,700 +16/hp 525 +6/hp
+  wiki: 9/2,700+16/hp 5/525+6/hp
+- name: Rust Monster
+  field: size
+  gm_guide: medium (5ft long)
+  wiki: Medium (5-ft long)
+- name: Rust Monster
+  field: move
+  gm_guide: 180ft
+  wiki: 180-ft
+- name: Rust Monster
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Rust Monster
+  field: melee_attacks
+  gm_guide: 2 (Special)
+  wiki: 2 (Nil)
+- name: Rust Monster
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Rust Monster
+  field: experience
+  gm_guide: 185 +4 per hp
+  wiki: 3/185+4 per hp
+- name: Priestess Baron Prince King
+  field: size
+  gm_guide: medium medium medium medium
+  wiki: Man-sized Man-sized Man-sized Man-sized
+- name: Priestess Baron Prince King
+  field: move
+  gm_guide: 120ft; 240ft swimming 120ft; 240ft swimming 20ft; 240ft swimming 120ft; 240ft swimming
+  wiki: 120-ft; 240-ft
+- name: Sea Serpent
+  field: size
+  gm_guide: huge (50ft long)
+  wiki: Large (50-ft long)
+- name: Sea Serpent
+  field: move
+  gm_guide: 120ft swimming
+  wiki: 120-ft swimming
+- name: Sea Serpent
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Sea Serpent
+  field: melee_attacks
+  gm_guide: 1 bite (1d6 + poison) and 1  constrict (3d6)
+  wiki: 2 (1d6/3d6)
+- name: Sea Serpent
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Sea Serpent
+  field: experience
+  gm_guide: 1,000 +12/hp
+  wiki: 7/1,000+12/hp
+- name: Shambling Mound
+  field: move
+  gm_guide: 60ft
+  wiki: 60-ft
+- name: Shambling Mound
+  field: armour_class
+  gm_guide: 0 [20]
+  wiki: '0'
+- name: Shambling Mound
+  field: melee_attacks
+  gm_guide: 2 strikes (2d8 blunt)
+  wiki: 2 (2d8/2d8)
+- name: Shambling Mound
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Shedu
+  field: move
+  gm_guide: 120ft; 240ft flying (AA:IV)
+  wiki: 120-ft; 240-ft flying (AA:IV)
+- name: Shedu
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Shedu
+  field: melee_attacks
+  gm_guide: 2 hooves (1d6 blunt)
+  wiki: 2 (1d6/1d6)
+- name: Shedu
+  field: intelligence
+  gm_guide: exceptional (15-16)
+  wiki: Exceptional
+- name: Shedu
+  field: experience
+  gm_guide: 1,950 +14/hp
+  wiki: 7/1,950+14/hp
+- name: Skeleton Warrior
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Skeleton Warrior
+  field: move
+  gm_guide: 60ft
+  wiki: 60-ft
+- name: Skeleton Warrior
+  field: armour_class
+  gm_guide: 2 [18]
+  wiki: '2'
+- name: Skeleton Warrior
+  field: melee_attacks
+  gm_guide: 1 By weapon (+3 to hit)
+  wiki: 1 (By weapon (+3 to hit))
+- name: Skeleton Warrior
+  field: intelligence
+  gm_guide: exceptional (15-16)
+  wiki: Exceptional
+- name: Skeleton Warrior
+  field: experience
+  gm_guide: 2,000 +16/hp
+  wiki: 7/2,000+16/hp
+- name: Slithering Tracker
+  field: move
+  gm_guide: 120ft
+  wiki: 120-ft
+- name: Slithering Tracker
+  field: armour_class
+  gm_guide: 5 [15]
+  wiki: '5'
+- name: Slithering Tracker
+  field: melee_attacks
+  gm_guide: Special
+  wiki: None (None)
+- name: Slime, Green
+  field: armour_class
+  gm_guide: 10 [10]
+  wiki: '10'
+- name: Slime, Green
+  field: melee_attacks
+  gm_guide: Special
+  wiki: None (Nil)
+- name: Slime, Green
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Slime, Green
+  field: experience
+  gm_guide: 20 +2/hp
+  wiki: 2/20+2/hp
+- name: Boa Adder Cobra Amphisbaena
+  field: size
+  gm_guide: large large large medium (6ft long)
+  wiki: Large Large Large Medium (6-ft long)
+- name: Boa Adder Cobra Amphisbaena
+  field: move
+  gm_guide: 90ft 150ft 120ft 120ft
+  wiki: 90-ft 150-ft 120-ft 120-ft
+- name: Boa Adder Cobra Amphisbaena
+  field: armour_class
+  gm_guide: 5 [15] 5 [15] 5 [15] 3 [17]
+  wiki: 5 5 5 3
+- name: Boa Adder Cobra Amphisbaena
+  field: melee_attacks
+  gm_guide: 1 bite (1d4) and 1  constrict (2d4) 1 bite (1d4+poison) 1 bite (1d4+poison) 2 bites (1d4+ poison)
+  wiki: 2 1 1 2 (1d4/2d4 1d4 1d4 1d4/1d4)
+- name: Boa Adder Cobra Amphisbaena
+  field: intelligence
+  gm_guide: animal (1) animal (1) animal (1) animal (1)
+  wiki: Animal Animal Animal Animal
+- name: Boa Adder Cobra Amphisbaena
+  field: experience
+  gm_guide: 345 +8/hp 155 +4/hp 190 +4/hp 475 +6/hp
+  wiki: 5/345+8/hp 4/155+4/hp 4/190+4/hp 5/475+6/hp
+- name: Sphinx, Andro-
+  field: size
+  gm_guide: large (12ft long)
+  wiki: Large (12-ft long)
+- name: Sphinx, Andro-
+  field: move
+  gm_guide: 180ft; 240ft flying (AA:III)
+  wiki: 180-ft; 240-ft flying (AA:III)
+- name: Sphinx, Andro-
+  field: armour_class
+  gm_guide: -1 [21]
+  wiki: '-1'
+- name: Sphinx, Andro-
+  field: melee_attacks
+  gm_guide: 2 claws (2d6)
+  wiki: 2 (1d10+1/1d10+1)
+- name: Spider, Giant Water
+  field: move
+  gm_guide: 140ft underwater
+  wiki: 140-ft underwater
+- name: Spider, Giant Water
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Spider, Phase
+  field: move
+  gm_guide: 60ft; 120ft in web
+  wiki: 60-ft; 120-ft in web
+- name: Spider, Phase
+  field: armour_class
+  gm_guide: 7 [13]
+  wiki: '7'
+- name: Spider, Phase
+  field: melee_attacks
+  gm_guide: 1 bite (1d4+1 + poison)
+  wiki: 1 (1d4+1)
+- name: Spider, Phase
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Spider, Phase
+  field: experience
+  gm_guide: 700 +6/hp
+  wiki: 5/700+6/hp
+- name: Stirge
+  field: move
+  gm_guide: 30ft; 180ft flying (AA:IV)
+  wiki: 30-ft; 180-ft flying (AA:IV)
+- name: Stirge
+  field: armour_class
+  gm_guide: 8 [12]
+  wiki: '8'
+- name: Stirge
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Stirge
+  field: experience
+  gm_guide: 35 +2/hp
+  wiki: 2/35+2/hp
+- name: Stunjelly
+  field: move
+  gm_guide: 30ft
+  wiki: 30-ft
+- name: Stunjelly
+  field: armour_class
+  gm_guide: 8 [12]
+  wiki: '8'
+- name: Stunjelly
+  field: melee_attacks
+  gm_guide: 1 tendril (2d4 + paralysis)
+  wiki: 1 (2d4)
+- name: Stunjelly
+  field: intelligence
+  gm_guide: non- (0)
+  wiki: Non-
+- name: Stunjelly
+  field: experience
+  gm_guide: 150 +4/hp
+  wiki: 4/150+4/hp
+- name: Tick, Giant
+  field: move
+  gm_guide: 30ft
+  wiki: 30-ft
+- name: Tick, Giant
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Titan
+  field: size
+  gm_guide: huge (18ft or more)
+  wiki: Large (18-ft or more)
+- name: Titan
+  field: hit_dice
+  gm_guide: 17–22
+  wiki: 17-22
+- name: Titan
+  field: melee_attacks
+  gm_guide: 1 (See below)
+  wiki: 1 (Depends on HD (see below))
+- name: Titan
+  field: intelligence
+  gm_guide: genius (17-18) or supra– genius
+  wiki: Genius or Supra-Genius
+- name: Trapper
+  field: move
+  gm_guide: 30ft
+  wiki: 30-ft
+- name: Trapper
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Trapper
+  field: melee_attacks
+  gm_guide: 1 (special)
+  wiki: Special enfolding attack (See below)
+- name: Trapper
+  field: intelligence
+  gm_guide: high (13-14)
+  wiki: High
+- name: Trapper
+  field: experience
+  gm_guide: 3,000 +16/hp
+  wiki: 9/3,000+16/hp
+- name: Triton
+  field: no_encountered
+  gm_guide: 10d6 (10–60)
+  wiki: 10d6 (10-60)
+- name: Triton
+  field: size
+  gm_guide: medium
+  wiki: Man-sized
+- name: Volt
+  field: move
+  gm_guide: 60ft levitating (AA:II)
+  wiki: 60-ft levitating (AA:II)
+- name: Volt
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Volt
+  field: melee_attacks
+  gm_guide: 1 (1d4 + shock)
+  wiki: 1 (1d4)
+- name: Volt
+  field: intelligence
+  gm_guide: animal (1)
+  wiki: Animal
+- name: Volt
+  field: experience
+  gm_guide: 50 +3/hp
+  wiki: 2/50+3/hp
+- name: Vulchling
+  field: move
+  gm_guide: 60ft; 30ft flying (AA:IV)
+  wiki: 60-ft; 30-ft flying (AA:IV)
+- name: Vulchling
+  field: armour_class
+  gm_guide: 7 [12]
+  wiki: '7'
+- name: Vulchling
+  field: melee_attacks
+  gm_guide: 1 bite (1d4+1) or 2 claws (1d4)
+  wiki: 1 or 2 (1d4+1 or 1d4/1d4)
+- name: Vulchling
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Vulchling
+  field: experience
+  gm_guide: 10 +1/hp
+  wiki: 1/10+1/hp
+- name: Wasp, Giant
+  field: move
+  gm_guide: 60ft; 210ft flying (AA:V)
+  wiki: 60-ft; 210-ft flying (AA:V)
+- name: Wasp, Giant
+  field: armour_class
+  gm_guide: 4 [16]
+  wiki: '4'
+- name: Wasp, Giant
+  field: melee_attacks
+  gm_guide: 1 bite (1d4) and 1 sting (2d4 + poison)
+  wiki: 2 (bite/sting) (1d4/2d4)
+- name: Wyvern
+  field: size
+  gm_guide: huge (30ft to 40ft long)
+  wiki: Large (30-ft to 40-ft long)
+- name: Wyvern
+  field: move
+  gm_guide: 60ft; 240ft flying (AA:III)
+  wiki: 60-ft; 240-ft flying (AA:III)
+- name: Wyvern
+  field: armour_class
+  gm_guide: 3 [17]
+  wiki: '3'
+- name: Wyvern
+  field: melee_attacks
+  gm_guide: 1 bite (1d6) and 1 sting (2d8 +poison)
+  wiki: 2 (1d6/2d8)
+- name: Wyvern
+  field: intelligence
+  gm_guide: low (5-7)
+  wiki: Low
+- name: Wyvern
+  field: experience
+  gm_guide: 850 +10/hp
+  wiki: 6/850+10/hp
+- name: Xorn
+  field: move
+  gm_guide: 90ft
+  wiki: 90-ft
+- name: Xorn
+  field: armour_class
+  gm_guide: -2 [22]
+  wiki: '-2'
+- name: Xorn
+  field: melee_attacks
+  gm_guide: 3 claws (1d3) and 1 bite (6d4)
+  wiki: 3 claws, 1 bite (1d3/1d3/1d3/6d4)
+- name: Xorn
+  field: intelligence
+  gm_guide: average (8-10)
+  wiki: Average
+- name: Xorn
+  field: experience
+  gm_guide: 1,350 +10/hp
+  wiki: 7/1,350+10/hp
+- name: Yeti
+  field: size
+  gm_guide: large (8ft tall)
+  wiki: Large (8-ft tall)
+- name: Yeti
+  field: move
+  gm_guide: 150ft
+  wiki: 150-ft

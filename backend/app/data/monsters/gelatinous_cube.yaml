@@ -1,0 +1,23 @@
+name: Gelatinous Cube
+frequency: uncommon
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 60ft
+armour_class: 8 [12]
+hit_dice: '4'
+melee_attacks: 1 (2d4)
+senses: Special
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: See below
+experience: 150 +4/hp
+description: Gelatinous cubes are dungeon scavengers. They move slowly  through corridors and rooms, absorbing carrion, fungi, algae  and other nutrients from the surfaces they touch. Gelatinous cubes can only digest organic material, and they  will sometimes sweep up inorganic substances (including met - al items such as coins, glass or ceramic items such as potion  bottles, etc.). These incidental items are sometimes kept in the  body of the ‘cube for many days before being ejected. Such  items form the creature’s treasure.
+abilities:
+- heading: Surprise and Initiative
+  text: Being silent and virtually transparent, gelatinous cubes have a  higher-than-usual chance to surprise (1–3 on 1d6).
+- heading: Immunities and Resistances
+  text: Ooze. This creature cannot be knocked prone, and is not affect- ed by lack of light, invisible opponents, gases, or other circum- stances that would not affect an ooze. Immunities. Gelatinous cubes are immune to electricity, fear,  sleep, hold, paralysis, and polymorph.  Reaction to Cold. Cold-based attacks slow a gelatinous cube (as  the spell) but only inflict a maximum of 1d4 damage, unless  they make a saving throw, in which case the cold-based attack  will have no effect at all (including the slowing effect).
+- heading: Special Attacks
+  text: Paralysing Touch. The touch of a gelatinous cube causes paraly- sis for 3d6+2 rounds (a saving throw vs paralysation is permit- ted to avoid this effect). Unarmed Combat.  It should go without saying that gelatinous  cubes cannot and should not be overborne or grappled. They  do not employ these tactics.

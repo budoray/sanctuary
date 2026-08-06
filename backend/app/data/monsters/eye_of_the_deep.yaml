@@ -1,0 +1,19 @@
+name: Eye Of The Deep
+frequency: very rare
+no_encountered: '1'
+size: large
+alignment: lawful evil
+move: 60ft swimming
+armour_class: 5
+hit_dice: '11'
+melee_attacks: 2 pincers (2d4) and bite (1d6)
+senses: Standard
+lair_chance: 20%
+intelligence: very (11-12)
+morale: 100
+loot: Cache 4
+experience: 3,000 +16/hp
+description: The eye of the deep is a fish, globular in shape (about 4ft in di - ameter) with a massive central eye. Two further eyes on stalks  sprout from the top of the monster, two huge lobster-like pin - cers emerge from the side, and it has a gaping maw below.
+abilities:
+- heading: Special Attacks
+  text: Each eye has a unique power. Central Eye. The central eye can fire a cone 30ft long and 20ft  in diameter at the base that stuns all within the area of effect  for 2d4 rounds (save vs aimed magic items to avoid the effect) Eyestalks. The left and right eyestalks can cast hold monster and  hold person respectively, once each per round, at will. The two  eyestalks together can cast phantasmal force once per round,  at will, if not used to cast hold spells. F FISH, GIANT

@@ -1,0 +1,17 @@
+id: d-13
+name: STAIRS
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT
+- 1–5 Down 1 level
+- 6 Down 2 levels
+- 7 Down 3 levels
+- 8–9 Up 1 level
+- 10 Up to a dead end
+- 11 Down to a dead end
+- 12 Chimney up 1 level, passage continues
+- 13 Chimney up 2 levels, passage continues
+- 14 Chimney down 2 levels, passage continues
+- 15–16 Trap  door down 1 level, passage continues
+- 17 Trap  door down 2 levels, passage continues
+- 18–20 Down 1 level into chamber

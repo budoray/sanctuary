@@ -1,0 +1,17 @@
+name: Griffon
+frequency: uncommon
+no_encountered: 2d6
+size: large
+alignment: neutral
+move: 120ft; 300ft flying (AA:IV)
+armour_class: 3 [17]
+hit_dice: '7'
+melee_attacks: 2 claws (1d4) and 1 bite (2d8)
+senses: Standard
+lair_chance: 25%
+intelligence: semi- (2-4)
+morale: 80
+loot: Hoard 3, Cache 5
+experience: 225 +8/hp
+description: 'Griffons build nests on cliff faces and rocky outcrops. Where  possible they even have been known to build nests inside shal - low caves. Horses are their favourite meal and being the fear - some hunters they are, griffons will usually attack their prey on  sight. Hatchlings are particularly valuable as they can be trained as  mounts. This takes time, effort, and money. The training takes  years and must begin early in a griffon’s life. Once the griffon  reaches maturity there is no chance of training it. When ridden by a creature weighing more than 100 lbs, a grif - fon’s aerial agility decreases to III. Unarmed Combat. Griffons cannot be attacked or targeted with  grappling or overbearing attacks although they may occasion - ally overbear as the end of an aerial attack. If not fended off,  they score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/ DEF +10/na. Overbear Results Mods: ATK/DEF +3/na. Grappling  Result Mods: ATK/DEF na/na.'
+abilities: []

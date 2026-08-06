@@ -1,0 +1,4 @@
+name: Ring of Fire Resistance
+classes: any
+description: 'This ring grants immunity to normal fires such as torches or flaming oil. Very hot fires such as molten lava or hell hound breath inflict only 1 hp of damage per segment, and even then only if the wearer is directly touching or targeted by such. Exceptionally hot fires such as red dragon breath or fireballs inflict -2 points of damage per die (but always inflict at least 1 point of damage) and saving throws are rolled at +4. The following rule of thumb should assist with determining damage reduction: “very hot” fires inflict up to 24 points of maximum damage, “exceptionally hot” fires cause 25 or more points of maximum damage.'
+source: OSRIC_3.0_Gamemaster_Guide.pdf

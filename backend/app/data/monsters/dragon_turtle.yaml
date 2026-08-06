@@ -1,0 +1,21 @@
+name: Dragon Turtle
+frequency: very rare
+no_encountered: '1'
+size: huge
+alignment: neutral
+move: 30ft; 90ft swimming
+armour_class: 0 [20]
+hit_dice: 12 to 15
+melee_attacks: 2 claws (2d6) and 1 bite (4d8)
+senses: Standard, Detect invisible  25%, 35%, 45% or 55% by HD
+lair_chance: 5%
+intelligence: very (11-12)
+morale: Depends on HD
+loot: Hoard 2, Cache 4-6, Cache 8
+experience: '12HD: 2750 +16/hp  13HD: 3300 +17/HP  14HD: 3950 +18/HP  15HD: 4600 +19/HP'
+description: Dragon turtles are not true dragons, but they are clearly relat - ed, looking much like a dragon with a turtle shell.
+abilities:
+- heading: Special Attacks
+  text: Breath Weapon.  Dragon turtles can breathe a cone of steam,  60ft long and 40ft wide at the base. It does damage equal to  the dragon turtle’s (uninjured) hit points to all in the area of  effect, but a save vs breath weapons reduces the damage to  half. The dragon turtle may use this breath weapon up to three  times per day. Unarmed Combat. Dragon turtles cannot be overborne or grap - pled, and do not employ these tactics.
+- heading: Languages
+  text: Dragon turtles speak their own language and that of the Neu - tral alignment. There is a 20% chance that a dragon turtle will  also be able to speak common.

@@ -1,0 +1,22 @@
+name: Piercer
+frequency: uncommon
+no_encountered: 3d6
+size: small to medium
+alignment: neutral
+move: 10ft
+armour_class: 3 [17]
+hit_dice: 1 to 4
+melee_attacks: 1 pierce (1d6, 2d6, 3d6 or 4d6)
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: '1 HD: 10 +1/hp 2 HD: 30 +2/hp 3 HD: 50 +3/hp 4 HD: 80 +4/hp'
+description: A piercer looks exactly like a stalactite, but it is a living creature  encased in a stone covering. Piercers are sensitive to noise and  heat; when they detect a source of either passing beneath them  they drop, seeking to kill and devour their target. A piercer has a single attack, seeking to impale the unlucky vic - tim with its sharp point. After killing and feasting the piercer will  move via tiny cilia in its base back up to the ceiling. Any grouping  of piercers will include a mix of the various HD, roll 1d4 with 1 =  1 HD, 2 = 2 HD, 3 = 3 HD, and 4 = 4 HD. A piercer will do 1d6 of  damage for each of its HD. The 1 HD piercer is 3ft long and weighs about 200 lbs. With each  additional HD the piercer adds another foot of length and an - other 100 lbs of weight. Piercers devour even the bones of their  victims and any intelligent cave or dungeon dwelling denizens  living nearby will often (carefully) scavenge any armour, weap- ons, money, magic, or anything else remaining
+  of even the least  value.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Piercers cannot be surprised, and have a 95% chance  to attack with 1 segment of surprise whenever someone walks  underneath them.
+- heading: Immunities and Resistances
+  text: Cannot be Prone. Piercers are unaffected by being prone.

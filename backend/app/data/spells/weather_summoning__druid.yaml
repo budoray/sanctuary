@@ -1,0 +1,14 @@
+name: Weather Summoning
+slug: weather_summoning
+reversible: false
+class: druid
+level: 6
+school: Druidic Conjuration/Summoning
+range: '0'
+duration: See below
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: The area of effect of this spell is d% square miles, bringing about a rapid change in the weather for several square miles surrounding the point where the spell is cast. It requires no more than 10-40 minutes for the spell to take its full effect across the vast area it covers. The spell affects precipitation, temperature, and wind speed. Existing weather conditions cannot be utterly changed by the force of this spell; a clear day cannot be made cloudy, for instance, but it can be made partly cloudy. Hot weather can be made merely warm, and only a light breeze can be raised from calm weather. Magic User Spells Unlike clerical and druidic spells, magic user spells (also known as Arcane spells in the OSRIC system) do not require a holy symbol or mistletoe as material components.
+source: wiki2_spells.txt

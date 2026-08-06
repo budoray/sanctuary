@@ -1,0 +1,23 @@
+id: d-18
+name: GENERAL
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT
+- '1–3 Chamber. Roll on Table D-2b: Chambers. Check'
+- again on this table 30ft after leaving chamber
+- 4 Continue straight, check this table again in 50ft
+- '5 Dead End, check for secret doors as per Table D-6:'
+- Exit Location
+- 6–10
+- 'Door. Consult Table D-19: Door Location, if result'
+- is not a straight ahead  door result check this table
+- again in 30ft
+- '11–14 Side passage. See Table D-21: Side Passages, check'
+- this table again in 30ft
+- '15 Stairs. Go to Table D-13: Stairs'
+- '16–19 Turn. Consult Table D-24: Turns and check this'
+- table again in 30ft
+- '20'
+- Wandering Monster, re-roll on this table to
+- determine monster location and approach. If
+- you’re just creating a map, re-roll this result.

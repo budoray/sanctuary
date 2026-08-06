@@ -1,0 +1,19 @@
+id: 2.2.2c
+name: SHIP CREWS
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- SHIP CREW MONTHLY
+- WAGE
+- EQUIPMENT
+- COST
+- MOVEMENT
+- RATE
+- ARMOUR
+- CLASS DAMAGE RANGE
+- INCREMENT
+- Lieutenant Special as type as type as type as type as type
+- Marine 60 sp 70 gp 60 5 [15] 1d6 15 or 10
+- Master Special as type as type as type as type as type
+- Mate 600 sp as type as type as type as type as type
+- Oarsman 100 sp 35 gp 90 6 [14] 1d6 or 1d4 10
+- Sailor 40 sp 20 gp 120 9 [11] 1d6 or 1d4 10

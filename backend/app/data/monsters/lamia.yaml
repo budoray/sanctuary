@@ -1,0 +1,23 @@
+name: Lamia
+frequency: very rare
+no_encountered: '1'
+size: large
+alignment: chaotic evil
+move: 240ft
+armour_class: 3 [17]
+hit_dice: '9'
+melee_attacks: 1 dagger (1d4)
+senses: Infravision 60ft
+lair_chance: 60%
+intelligence: high (13-14)
+morale: 90
+loot: Hoard 4
+experience: 1,500 +12/hp
+description: Lamiai like to live in deserted towns, ruins, and other desolate  places. These creatures have the upper body of a woman and  the lower half of an animal (usually a lion or tiger, but some - times a serpent). Typically a lamia is armed with a dagger, but  these are really just tools. They use spells to lure their victims  close, and then drain their wisdom by touch.
+abilities:
+- heading: Special Features
+  text: 'Spell-Like Abilities. 1/day: charm person, mirror image, suggestion, and illusion (like  the wand).'
+- heading: Special Attacks
+  text: Wisdom-Draining Touch.  The touch of a lamia permanently  drains a single point of wisdom. The lamia does not need to  roll to hit against a charmed victim, but must attack normally  to touch a resisting opponent. Once a victim’s wisdom falls be- low 3, they become permanent slaves of the lamia (although  they are likely to just be eaten). Unarmed Combat. Lamiai cannot be targeted with grappling or  overbearing attacks, and do not use these tactics.
+- heading: Languages
+  text: Lamiai speak the common tongue as well as the alignment lan- guage of Chaotic evil.

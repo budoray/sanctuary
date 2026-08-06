@@ -1,0 +1,14 @@
+name: Stone Tell
+slug: stone_tell
+reversible: false
+class: cleric
+level: 6
+school: Clerical Divination
+range: Touch
+duration: 1 turn
+area_of_effect: 1 cubic yard of stone
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: This spell causes stone to hear and speak. Rock and stones in the area of effect will answer any of the cleric's questions about what has transpired in their immediate vicinity, or what lies behind them.
+source: wiki2_spells.txt

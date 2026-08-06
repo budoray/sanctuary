@@ -1,0 +1,14 @@
+name: Detect Evil
+slug: detect_evil
+reversible: true
+class: cleric
+level: 1
+school: Clerical Divination
+range: Caster
+duration: 1 turn+5 rounds/level
+area_of_effect: Path 10-ft wide, 120-ft long
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: This spell allows the cleric to discern emanations of evil (or good, in the case of the spell's reverse) within the spell's area of effect, a beam-like pathway. The spell detects evil, not danger, so it will be useless to discover such things as a mindless trap or a poisoned wineglass. Neither will it detect a cursed item unless the nature of the curse is such that the cursed item becomes inherently evil.
+source: wiki2_spells.txt

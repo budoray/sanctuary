@@ -1,0 +1,4 @@
+name: Resurrection
+classes: C
+description: This rod may be used to the same effect as the cleric spell resurrection. The rod may resurrect both humans and demi-humans, including half-orcs and elves. This rod may be used only once each day. A quantity of charges will be expended to resurrect a character based on the character’s ancestry and class. Refer to the table below, adding the charge cost for each of these variables together. Any character with more than one class will cost the higher quantity of charges for their classes. ANCESTRY CHARGES CLASS CHARGES Human 1 Fighter 2 Half–elf 2 Paladin 1 Half-orc 4 Ranger 2 Halfling 2 Magic User 3 Elf 4 Illusionist 3 Dwarf 3 Thief 3 Gnome 3 Assassin 4 Cleric 1 Druid 2 The rod of resurrection is not rechargeable.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

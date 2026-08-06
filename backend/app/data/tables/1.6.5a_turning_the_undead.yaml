@@ -1,0 +1,33 @@
+id: 1.6.5a
+name: TURNING THE UNDEAD
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- CLERIC LEVEL
+- TYPE OF
+- UNDEAD EXAMPLE 1 2 3 4 5 6 7 8 9-13 14-18 19+
+- Type 1 Skeleton 10 7 4 T T D D D* D* D* D*
+- Type 2 Zombie 13 10 7 T T D D D D* D* D*
+- Type 3 Ghoul 16 13 10 4 T T D D D D* D*
+- Type 4 Shadow 19 16 13 7 4 T T D D D D*
+- Type 5 Wight 20 19 16 10 7 4 T T D D D
+- Type 6 Ghast — 20 19 13 10 7 4 T T D D
+- Type 7 Wraith — — 20 16 13 10 7 4 T T D
+- Type 8 Mummy — — — 19 16 13 10 7 4 T D
+- Type 9 Spectre — — — 20 19 16 13 10 7 T T
+- Type 10 Vampire — — — — 20 19 16 13 10 7 4
+- Type 11 Ghost — — — — — 20 19 16 13 10 7
+- Type 12 Lich — — — — — — 20 19 16 13 10
+- Type 13 Fiend — — — — — — — 20 19 16 13
+- For the purposes of evil clerics turning paladins, paladins are
+- treated as Type 8 if they are level 1–2, Type 9 if level 3–4, Type
+- 10 if level 5–6, Type 11 if level 7–8, Type 12 if level 9–10 and Type
+- 13 if level 11 or higher. However, paladins cannot be destroyed
+- by turning.
+- Once a creature is turned, it can’t be turned again until it recov-
+- ers.
+- 'Experience: You do not receive XP for undead that are de -'
+- stroyed by turning (such a relatively weak creature presents no
+- challenge). If a turning attempt is used in such a way that the
+- monsters are completely bypassed, the GM may rule that this
+- means they were “defeated”, and award XP, half XP, or some
+- other benefit.

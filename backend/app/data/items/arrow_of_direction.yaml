@@ -1,0 +1,4 @@
+name: Arrow of Direction
+classes: any
+description: 'This appears to be an ordinary arrow, although a detect magic spell will reveal that it has eldritch properties. Unlike other magic arrows, its enchantment does not aid in combat, however. Instead, once per day the arrow of direction can be used—by tossing it in the air and noting which direction it points when it lands—to show the way to one of several specific features: a stairway or sloping passage (either up or down), or the entrance or exit to a dungeon, cavern or cave. The feature sought must be identified either by distance (nearest, lowest, etc.) or by direction (north, leftmost, etc.). The query can be repeated up to 7 times over the next 7 turns.'
+source: OSRIC_3.0_Gamemaster_Guide.pdf

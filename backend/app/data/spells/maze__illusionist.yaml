@@ -1,0 +1,14 @@
+name: Maze
+slug: maze
+reversible: false
+class: illusionist
+level: 5
+school: Phantasmal Conjuration/Summoning
+range: 5-ft/level
+duration: See below
+area_of_effect: One creature
+components: V,S
+casting_time: 5 segments
+saving_throw: None
+text: Other than as may be noted above, this spell is identical to the magic user spell of the same name.
+source: wiki2_spells.txt

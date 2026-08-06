@@ -1,0 +1,13 @@
+id: 2.8.1b
+name: NIGHTTIME  ENCOUNTERS
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100  ENCOUNTER
+- 01–03 Assassins.* 1d3 encountered, possibly in  disguise.
+- 04–05 Bandits. 3d4 plus a Leader
+- 06–08 Beggars. 1d2 0 level NPCs.
+- 09–10 Brigands. 3d4 plus a Leader
+- 11 Town Guards. 2d8 plus a Leader.
+- '12 Town Official: roll 1d10: (1–9) Minor Official (10) Major Official and 2d4 Guardsmen.'
+- '13–21 Town Watch: 5 Men–at–Arms (0–lvl) and Sergeant (lvl 1d3) and a Cleric (lvl d4+1)'
+- 22 Cleric.* A d6+5–lvl Cleric with 1d6–1 d4–lvl Assistant Clerics

@@ -1,0 +1,14 @@
+name: Pass Without Trace
+slug: pass_without_trace
+reversible: false
+class: druid
+level: 1
+school: Druidic Enchantment/Charm
+range: Touch
+duration: 1 turn/caster level
+area_of_effect: Creature touched
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: Any creature upon which this spell is cast can move through any sort of terrain without leaving behind the slightest sign of its passage. It leaves no footprints, no scent and no other telltales of movement. It is impossible to trace its path except, temporarily, by one method–the path will radiate magic for 6d6 turns. Once this time elapses, the magical aura will fade away, leaving the trail undisturbed by any sign that the spell's recipient was ever there.
+source: wiki2_spells.txt

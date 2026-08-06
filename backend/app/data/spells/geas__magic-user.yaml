@@ -1,0 +1,14 @@
+name: Geas
+slug: geas
+reversible: false
+class: magic-user
+level: 6
+school: Arcane Enchantment/Charm
+range: Touch
+duration: See below
+area_of_effect: One creature
+components: V,S
+casting_time: 4 segments
+saving_throw: None
+text: A geas is a magical compulsion placed upon an intelligent creature to perform, or refrain from performing, some task set by the caster. While the geas cannot compel suicide or its equivalent, it is a very powerful spell. If the creature under the geas avoids or is prevented from performing the task, it will sicken and die within 1d4 weeks if the task is not resumed. The disease will, of course, create symptoms that the GM will determine; if the geas is resumed, these may or may not remain until the task is completed. Even a remove curse spell will not remove a geas, although a wish spell is powerful enough to dispel it.
+source: wiki2_spells.txt

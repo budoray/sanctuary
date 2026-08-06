@@ -1,0 +1,26 @@
+id: 2.7.3.2a
+name: MONSTER LEVEL ONE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 01–02 Devil, Assagim 1d10 1d2
+- 03–04 Halfling 3d6 3d6
+- 05–07  NPC Party varies varies
+- 08–11 Larval Fiend 1 1
+- 12–15 Rat, Giant 5d4 1d6
+- 16–20 Vulchling 1d4 1d2
+- 21–25 Bat 5d10 1d10
+- 26–30 Goblin 2d10 1d6
+- 31–40 Men, Bandit 2d4 1d4
+- 41–50 Orc 1d6+6 1d6
+- 51–60 Frog, Giant 1d2 1
+- 61–70 Beetle, Giant Fire 1d4 1d2
+- 71–75 Kobold 1d12+5 2d6
+- 76–80 Dog, Wild 1d4 1d2
+- 81–85 Bat, Giant 1d6 1d2
+- 86–89 Skeleton 1d4 1d4
+- 90–93 Rot Grub 5d4 N/A
+- 94–96 Vilstraak 1d6 1d2
+- 97–98 Gnome 4d6 1d6
+- 99–00 Men, Berserker 1d6 1d4

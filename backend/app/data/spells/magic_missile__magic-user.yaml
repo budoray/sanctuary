@@ -1,0 +1,14 @@
+name: Magic Missile
+slug: magic_missile
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Evocation
+range: 60-ft+10-ft/caster level
+duration: Instantaneous
+area_of_effect: 1+ creatures in a 10-ft×10-ft area
+components: V,S
+casting_time: 1 segment
+saving_throw: None
+text: When this spell is cast, missiles of magical energy dart forth from the caster's fingertips, striking unerringly at his or her intended target(s), even if the target(s) are in melee or are partially concealed. The missiles inflict 1d4+1 points of damage each. For every two caster levels beyond first, the caster gains an additional missile; thus, a first-level magic user can cast one missile, a third-level caster may cast 2, a fifth-level caster may cast 3, and so on.
+source: wiki2_spells.txt

@@ -1,0 +1,21 @@
+name: Vilstraak
+frequency: rare
+no_encountered: 2d10
+size: medium
+alignment: neutral evil
+move: 90ft
+armour_class: 2 [18]
+hit_dice: 1d6  hit points
+melee_attacks: 1d4+1/1d4+1
+senses: Infravision 60ft
+lair_chance: 10%
+intelligence: low (5-7)
+morale: 50
+loot: Hoard 3
+experience: 5 +1/hp
+description: Vilstraaks appear as a 6ft tall cross between a human and a bug,  and have hides with the consistency of heavy rock. The fore - arms are longer than a human’s and much more massive, end - ing in two heavy fists. Vilstraaks blend well with their subterranean habitat, and have  an innate ability to merge with (and move through) rock. These  creatures tend to lair in hollows of rock and earth. These lairs  usually have entrances too small to enter without traveling  through solid rock, but they can be detected and dug into if  there is enough time and the right tools.
+abilities:
+- heading: Surprise and Initiative
+  text: Stone Ambush. When merged with stone, vilstraaks surprise on  1–4 on a 1d6.
+- heading: Special Features
+  text: Travel Through Stone. These creatures can merge into stone and  move through it, at half their normal movement rate. Unarmed Combat. Vilstraaks cannot be targeted with overbear - ing or grappling attacks, and do not use these tactics.

@@ -1,0 +1,14 @@
+name: Remove Curse
+slug: remove_curse
+reversible: true
+class: magic-user
+level: 4
+school: Arcane Abjuration
+range: Touch
+duration: Instantaneous (permanent)
+area_of_effect: See below
+components: V,S
+casting_time: 4 segments
+saving_throw: See below
+text: Other than as noted above, this spell is identical to the clerical spell remove curse.
+source: wiki2_spells.txt

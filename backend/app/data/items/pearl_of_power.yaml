@@ -1,0 +1,4 @@
+name: Pearl of Power
+classes: CDIM
+description: A magical pearl that enables a spell user to recall once per day a spell they have prepared and cast. This benefit applies to any spell caster who memorises spells, but the pearl only works on spells of a certain level. Roll 1d6 to determine the level of the spell. If a “6” appears on the die, reroll using 1d8. If an “8” appears on this die, re-roll using 1d10. If a “10” appears on this die, two spell levels are affected; re-roll the d6 twice. Determine gp value by squaring the spell level (i.e., 1st level = 1,000 gp, 2nd level = 4,000 gp, etc.).
+source: OSRIC_3.0_Gamemaster_Guide.pdf

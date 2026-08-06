@@ -1,0 +1,14 @@
+name: Slow
+slug: slow
+reversible: false
+class: magic-user
+level: 3
+school: Arcane Transmutation/Alteration
+range: 90-ft+10-ft/level
+duration: 3 rounds+1 round/level
+area_of_effect: 1 creature/level in a 40-ft×40-ft area
+components: V,S,M
+casting_time: 3 segments
+saving_throw: None
+text: This spell acts upon its targets to slow down their movements, or can be used to negate the effects of a haste spell. Any creature affected by a slow spell will find that it can only move at half normal speed and attack at half its normal rate. The spell may be cast upon up to 1 creature/caster level, but all must be within the area of the spell's area of effect at the time of casting. If more than one slow spell is cast upon the same subject, the effects of the two spells will be cumulative.
+source: wiki2_spells.txt

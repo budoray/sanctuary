@@ -1,0 +1,25 @@
+name: Brownie
+frequency: rare
+no_encountered: 4d4
+size: small
+alignment: lawful good
+move: 120ft
+armour_class: 3 [17]
+hit_dice: 1d4 hp
+melee_attacks: 1 (1d3)
+senses: Standard
+lair_chance: 20%
+intelligence: high (13-14)
+morale: 50
+loot: Cache 1, 2, and 3
+experience: 50 +1/hp
+description: Found in sylvan woodland, often along with fauns, unicorns  and similar creatures, brownies are shy and retiring. They can  sometimes be persuaded to help good-aligned creatures. They  are skilled craftsmen, adept at making and repairing ordinary  things, and are highly magical.
+abilities:
+- heading: Surprise and Initiative
+  text: Cannot be Surprised. Thanks to their excellent senses and habit- ual alertness, brownies cannot be surprised.
+- heading: Immunities and Resistances
+  text: 'Improved Saving Throw.  Brownies are inherently lucky and  strongly defended against magic, which means they make all  saving throws as follows: Aimed magic items 11, Breath weap- ons 13, Death/Paralysis/ Poison 7, Petrifaction/Polymorph 10,  Spells 12. As Familiar. If a brownie is a familiar, it confers a +2 bonus on all  saving throws to its character ally.'
+- heading: Special Features
+  text: 'Spell-like Abilities. Brownies can cast each of the following spells,  without material components: At will: Brownies may become invisible at will, provided they re- main still while doing so. 1/day: confusion, continual light, dancing lights, dimension door,  mending, mirror image, protection from evil, and ventriloquism.  Unarmed Combat.  Brownies do not employ unarmed combat  but can be grappled or overborne. If not fended off, they score  an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +8/- 8. Overbear Results Mods: ATK/DEF -2/+2. Grappling Result  Mods: ATK/DEF -2/+2.'
+- heading: Languages
+  text: Brownies speak their own tongue, as well as elven and halfling.  They also speak sylvan, the language of other fey creatures such  as spites, nymphs and dryads.

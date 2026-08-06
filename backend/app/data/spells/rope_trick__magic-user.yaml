@@ -1,0 +1,14 @@
+name: Rope Trick
+slug: rope_trick
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: 2 turns/level
+area_of_effect: One piece of rope
+components: V,S,M
+casting_time: 2 segments
+saving_throw: None
+text: This spell enchants a rope to become a portal into an extra-dimensional pocket of unreality opened by the spell. The rope rises in the air and then hangs, suspended by its connection to the extra- dimensional hideaway. Up to six medium-size people can hide in the space (five, if the rope is to be pulled up and into the space as well). At the spell's expiration, the inhabitants or contents of the space will fall into normal reality if they have not already departed. True reality is visible through the portal, but cannot be affected from within.
+source: wiki2_spells.txt

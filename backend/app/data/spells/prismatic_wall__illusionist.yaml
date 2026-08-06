@@ -1,0 +1,14 @@
+name: Prismatic Wall
+slug: prismatic_wall
+reversible: false
+class: illusionist
+level: 7
+school: Phantasmal Abjuration
+range: 10-ft
+duration: 1 turn/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 7 segments
+saving_throw: None
+text: This spell is similar to the magic user spell prismatic sphere, but it creates a wall rather than a sphere, up to 40-ft/caster level in length and 20-ft/caster level in height.
+source: wiki2_spells.txt

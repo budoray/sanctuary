@@ -1,0 +1,14 @@
+name: Slow Poison
+slug: slow_poison
+reversible: false
+class: cleric
+level: 2
+school: Clerical Necromancy
+range: Touch
+duration: 6 turns/level
+area_of_effect: Creature touched
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: This spell is used to slow the progress of poison through the body. Even a person who has died from poison may be revived if he succumbed to the poison within a number of turns less than or equal to the caster's level of experience. The spell does not eliminate or neutralise poison; it merely slows it. A poisoned creature will lose 1 hit point per turn (but will not fall below 1) during the spell's duration; once the spell's protection expires, the victim will suffer the full potency of the poison. The spell is generally used to keep someone alive until the poison can be neutralised completely by other means, such as a neutralise poison spell.
+source: wiki2_spells.txt

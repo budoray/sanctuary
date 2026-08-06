@@ -1,0 +1,25 @@
+name: Gnome
+frequency: rare
+no_encountered: 40d10
+size: small
+alignment: neutral good or lawful good
+move: 60ft
+armour_class: 5 [15]
+hit_dice: '1'
+melee_attacks: 1d6 or by weapon
+senses: Infravision 60ft
+lair_chance: 50%
+intelligence: very (11-12)
+morale: 50
+loot: Individual 4 (x3) each; in lair Hoard 3,  Cache 3 (x20)
+experience: 10 +1/hp
+description: Gnomes live underground in hills that they have burrowed into,  seeking gems and precious metals. They are divided into clans  which are rather competitive with each other, but are never out- right hostile. They are a distant relative to dwarfs. For every 40 gnomes encountered there usually is a fighter of  2nd level or higher levels acting as leader. When the groups are  of 200 or more there are clerics as well, usually 4th level or high- er.  Most of the time the gnomes will have badgers, or other bur - rowing animals, that they have trained to act as sentries. Typically when gnomes are encountered they will be wearing  studded leather armour or ring armour and a shield. Gnomes  are usually armed with a club and spear, sometimes with a  short sword and spear.
+abilities:
+- heading: Immunities and Resistances
+  text: Saving Throw. Due to their natural resilience to both magic and  poison, gnomes save against these effects at four levels higher  than they actually are.  Nimbleness. When gnomes battle gnolls, bugbears, ogres, trolls,  or giants these creatures receive a -4 to their attack rolls due  to the gnomes’ smaller size and nimbleness.
+- heading: Special Features
+  text: Gnomes are excellent miners, possessing the abilities to detect  whether a passage slopes upward or downward or if a corridor,  walls, floors or ceiling is safe or not. They can even estimate  depth and direction underground.
+- heading: Special Attacks
+  text: 'Kobolds and Goblins.  When gnomes fight kobolds and goblins  they gain an additional +1 to hit.  Unarmed Combat. Gnomes can attack and be targeted with  grappling or overbearing attacks. For a gnome wearing chain  mail - if not fended off, they score an unarmed hit with a 12+  on 1d20. Hit Mods: ATK/DEF +4/+0. Overbear Results Mods:  ATK/DEF -2/+2. Grappling Result Mods: ATK/DEF -2/+2.'
+- heading: Languages
+  text: In addition to their own language, gnomes can also speak ko - bold, goblin, halfling, dwarfish, and can also speak a language  commonly known to all burrowing animals.

@@ -1,0 +1,21 @@
+name: Troll, Ice
+frequency: rare
+no_encountered: 1d6
+size: large (9ft tall)
+alignment: chaotic evil
+move: 90ft
+armour_class: 8
+hit_dice: '2'
+melee_attacks: 2 claws (1d8)
+senses: Infravision 90ft
+lair_chance: 10%
+intelligence: semi- (2-4)
+morale: 55
+loot: Hoard 4 (with no magic)
+experience: 45 +2/hp
+description: An ice troll has the general form of a troll, but its cold, semi-trans- parent body seems to have been chiselled from blue-tinged ice.  Ice trolls prefer underground dwellings such as dungeons or  caverns and will always lair near running water if possible or,  failing that, the wettest spot they can find.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Immune to Cold. Ice trolls are immune to cold damage.  Vulnerability to Fire. Fire inflicts double damage upon ice trolls. Effect of Regeneration.  Ice trolls regenerate all damage except  fire damage and corrosive damage (acid). Thus, an ice troll can  only be permanently killed by fire or acid.
+- heading: Special Features
+  text: 'Regeneration. These trolls regenerate 2 hp per round (except  damage from fire and acid) and are capable of rebonding sev- ered limbs, but only if the limb is immersed in water. A severed  limb will move toward the nearest body of water if one is with- in 30ft. Severed limbs will not attack independently. Unarmed Combat. Ice trolls do not engage in grappling or over - bearing attacks, but can be targeted this way. If not fended off,  they score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/ DEF +6/-6. Overbear Results Mods: ATK/DEF +3/-3. Grappling  Result Mods: ATK/DEF +2/-2.'

@@ -1,0 +1,23 @@
+name: Trapper
+frequency: rare
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 30ft
+armour_class: 3 [17]
+hit_dice: '12'
+melee_attacks: 1 (special)
+senses: Infravision 60ft
+lair_chance: 85%
+intelligence: high (13-14)
+morale: 105
+loot: Hoard 7
+experience: 3,000 +16/hp
+description: Trappers are underground predators, creatures with flat bodies  like a manta ray and the ability to blend in almost perfectly with  stone patterns (including flagstones). They are roughly square  in shape, about 20ft by 20ft in size (larger and smaller trappers,  with proportionally higher or lower hit dice have been encoun - tered), but can alter their dimensions to a considerable degree.  These dangerous creatures lie flat on dungeon floors, waiting  for prey to step onto them.
+abilities:
+- heading: Surprise and Initiative
+  text: Undetectable. It cannot be surprised, and has a 95% chance to  surprise for 1 segment.
+- heading: Immunities and Resistances
+  text: Resistance (fire and cold).  Trappers take half damage from fire  and cold, and no damage at all from such attacks if the mon - ster is entitled to a saving throw and succeeds.
+- heading: Special Attacks
+  text: Enfold. When potential prey steps onto the trapper, the monster  whips upward to enfold all creatures standing on it. The trap - per’s stone-hard skin and powerful muscles are deadly. Victims  enfolded in the trapper cannot use weapons and will suffocate  in 6 rounds. Moreover, before suffocating, victims will suffer  6hp damage per round. Rescue must come from outside. Unarmed Combat. Trappers cannot be effectively targeted with  grappling or overbearing attacks, and do not use these tactics.

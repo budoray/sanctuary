@@ -1,0 +1,23 @@
+name: Dragon, Blue
+frequency: rare
+no_encountered: 1d4
+size: varies by age
+alignment: lawful evil
+move: 90ft; 240ft flying (AA:II)
+armour_class: 2 [18]
+hit_dice: 8 to 10
+melee_attacks: 2 claws (1d6) and 1 bite (3d8)
+senses: Infravision 60ft, Detect  invisibility by age category
+lair_chance: 50%
+intelligence: very (11-12)
+morale: 85, 90, or 95 (by HD)
+loot: Hoard 8, Cache 5
+experience: Varies by hit dice and age
+description: Deserts and dry wastes are home to the deadly blue dragons.  These creatures usually dwell in vast caves or deserted towers  in arid lands.
+abilities:
+- heading: Special Features
+  text: Sleeping Dragon. A blue dragon encountered in its lair has a 30%  chance to be sleeping when the adventurers approach. If the  dragon is asleep, there is a 1 in 6 chance that it will awaken  from the mere presence of adventurers. Dragons also some - times feign sleep. Spellcasting Dragon. Roughly 30% of blue dragons are spellcast- ers. If it can cast spells, it does so as a magic-user with a level  equal to the dragon’s age category.
+- heading: Special Attacks
+  text: Breath Weapon. Blue dragon breath is a bolt of lightning, 100ft  long×5ft wide. It does electrical damage equal to the dragon’s  (uninjured) hit points to everyone in the area of effect, but a sav- ing throw vs dragon breath reduces this amount to half dam - age. The dragon may use this breath weapon up to three times  per day.
+- heading: Languages
+  text: All dragons speak the draconic tongue, and there is a 60%  chance that a blue dragon will also be able to speak common.

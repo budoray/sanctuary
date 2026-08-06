@@ -1,0 +1,19 @@
+id: 2.13.1c
+name: ARMOUR AND SHIELD PROPERTIES
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT VALUE MODIFIER
+- 01–10 +1 ×1
+- 11–15 +2 ×2
+- 16 +3 ×3
+- '17 Roll d100: (01–65): +4;'
+- '(66–00): +5'
+- ×4
+- ×5
+- 18 Cursed (see Section 2.13.10) —
+- 19–20 Special (see Section 2.13.5) Variable
+- 'Multiply the base value from Table 2.13.1b: Armour and Shield'
+- 'Type by the Value Modifier in Table 2.13.1c: Armour and Shield'
+- Properties to determine the item’s sale value. XP value is one-
+- tenth the gold piece value if a character keeps the item (see
+- Section 2.1.4. Awarding Experience).

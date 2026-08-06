@@ -1,0 +1,25 @@
+name: Pit Fiend (greater Devil)
+frequency: rare
+no_encountered: 1 or 1d3
+size: large (12ft)
+alignment: lawful evil
+move: 60ft; 150ft flying (AA:III)
+armour_class: –3 [23]
+hit_dice: '13'
+melee_attacks: 1 scimitar (1d8+6) and 1 spiked club  (1d6+7) and tail (2d4 constriction)
+senses: Infravision 60ft, Detect invisible 65%
+lair_chance: 65%
+intelligence: exceptional (15-16)
+morale: 110
+loot: Individual 1 and Cache 4
+experience: 7,900 +18/hp
+description: Pit fiends are native to the 9th Plane of Hell, and are the per - sonal servants of Asmodeus, the Lord of Hell. They are both  incredibly strong and diabolically evil. All pit fiends have secret  personal names which can be used to summon them.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (65%).  Any magic spell or effect has a 65%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane and +1 Weapons.  This creature is immune  to piercing, blunt, and slashing damage from weapons and un- armed attacks, unless the weapon causing that damage has a  magical bonus of +2 or more.
+- heading: Special Features
+  text: 'Fear Aura.  Pit fiends exude fear (as the 4th level magic-user  spell) in a 20ft radius. Regeneration. Pit fiends regenerate 2 hp per combat round until  they are killed, at which point the regeneration stops. Spell-Like Abilities. At Will: animate dead (as the 5th level magic-user spell), charm  person (as the 1st level magic-user spell), fear (effect varies,  as the 4th level magic-user spell), know alignment (as the 2nd  level cleric spell), spectral force  (as the 3rd level illusionist  spell), suggestion (as the 3rd level magic-user spell), teleport  (no chance of error, otherwise as the 5th level magic-user  spell), detect invisibility (as the 2nd level magic-user spell), de- tect magic (as the 1st level magic-user spell), hold person (as  the 3rd level magic-user spell), polymorph self (as the 4th level  magic-user spell), produce flame (as the 2nd level druid spell),  pyrotechnics (as the 2nd level magic-user spell), wall of fire (as  the 4th level magic-user spell), or
+    summon 1d3 barbed devils  (60%) or another pit fiend (70%).  1/day: Once per day, a pit fiend can use a symbol of pain (as the  7th level cleric spell).'
+- heading: Special Attacks
+  text: 'Tail Constriction. In addition to their weapons, pit fiends can also  strike with their serpentine tail. A hit causes 2d4 points of con- striction damage per round (automatically after a hit) and can  only be escaped if the victim makes a successful Open Doors  roll as an action. Unarmed Combat. Pit fiends can be targeted with grappling or  overbearing attacks, and under some circumstances they may  use these tactics. If not fended off, they score an unarmed hit  with a 2+ on 1d20. Hit Mods: ATK/DEF +4/-4. Overbear Results  Mods: ATK/DEF +4/-4. Grappling Result Mods: ATK/DEF +3/-3. DINOSAURS In OSRIC the “dinosaur” category also includes other creatures  contemporaneous with or predating the dinosaurs. This means  that for the purposes of the OSRIC core rules, prehistoric crea - tures such as dimetrodon or plesiosaurus are included with  “dinosaurs”, even though palaeontologists classify them sepa - rately. These rules do include an indication of the rough period in  which the dinosaur
+    lived, but dinosaur-infested areas often re - semble Sir Arthur Conan Doyle’s The Lost World in that a mish - mash of dinosaurs from different times co-exist. Dinosaur areas  are only really suitable for relatively high-level play. Portals to  such areas can sometimes be found in the nethermost depths  of large dungeons. Unarmed Combat. Dinosaurs cannot be overborne or grappled,  and do not employ these tactics.  TYRANNOSAURIDS AND ALLOSAURIDS'

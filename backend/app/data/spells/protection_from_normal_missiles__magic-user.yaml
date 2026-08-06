@@ -1,0 +1,14 @@
+name: Protection From Normal Missiles
+slug: protection_from_normal_missiles
+reversible: false
+class: magic-user
+level: 3
+school: Arcane Abjuration
+range: Touch
+duration: 1 turn/level
+area_of_effect: One creature
+components: V,S,M
+casting_time: 3 segments
+saving_throw: None
+text: The subject of this spell becomes completely invulnerable to the effects of projectiles. The spell's power is not sufficient to completely ward off the larger missiles hurled by siege engines such as catapults and ballistae, nor the enchantment of a magic arrow or bolt, but does reduce any damage caused by such weapons by 1 hit point per die of damage. The spell conveys no protection whatsoever against spells, including spells with missile-like qualities such as fireball or ray of enfeeblement.
+source: wiki2_spells.txt

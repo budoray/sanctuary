@@ -1,0 +1,21 @@
+name: Big Bigger Biggest
+frequency: common uncommon uncommon
+no_encountered: 1d6 1d4 1d3
+size: small small medium
+alignment: neutral neutral neutral
+move: 90ft 120ft 150ft
+armour_class: 5 [15] 4 [16] 3 [17]
+hit_dice: 2+2 4+4 5+5
+melee_attacks: 2 claws (1d4) and 1 bite (1d2  +poison) 2 claws (1d8) and 1 bite  (1d3+poison) 2 claws (1d10) and 1 bite  (1d4+poison)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft
+lair_chance: 25% 25% 50%
+intelligence: non- (0) non- (0) non- (0)
+morale: N/A N/A N/A
+loot: Nil Nil Hoard 4
+experience: 75 +3/hp 125 +5/hp 600 +6/hp
+description: Immune to Non-Silver Mundane Weapons.  This creature is im - mune to piercing, blunt, and slashing damage from weapons  and unarmed attacks, unless the weapon causing that damage  has a magical bonus of +1 or more, or is a silver weapon. Cold  iron weapons also affect this creature. Immunities. Sea hags are immune to charm, fear, sleep and fire- or  cold-based spells.
+abilities:
+- heading: Special Features
+  text: Change Self (At Will). A sea hag can change self at will, with un - limited duration. Evil Gaze. A sea hag can employ an evil gaze up to three times  per day that subjects one creature within thirty feet to a saving  throw vs poison; failure results in immediate collapse and paral- ysis for three days, though for 1 in 4 victims the effect is stronger  and causes instant death.
+- heading: Special Attacks
+  text: 'Horrific Appearance. Should a sea hag’s true appearance ever be  revealed, then the horror causes anyone within thirty feet to be  subject to a saving throw versus spells to avoid losing half their  strength score for 1d6 turns. Unarmed Combat.  Sea hags can engage in grappling or over - bearing attacks if not in the water. If not fended off, they score  an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +6/- 6. Overbear Results Mods: ATK/DEF +0/-0. Grappling Result  Mods: ATK/DEF +0/-0.'

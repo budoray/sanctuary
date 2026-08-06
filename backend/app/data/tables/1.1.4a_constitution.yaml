@@ -1,0 +1,23 @@
+id: 1.1.4a
+name: CONSTITUTION
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- CONSTITUTION HIT POINT MODIFIER RESURRECTION SUCCESS (D100)  SYSTEM SHOCK (D100)
+- 3 -2 40 35
+- 4 -1 45 40
+- 5 -1 50 45
+- 6 -1 55 50
+- 7 0 60 55
+- 8 0 65 60
+- 9 0 70 65
+- 10 0 75 70
+- 11 0 80 75
+- 12 0 85 80
+- 13 0 90 85
+- 14 0 92 88
+- 15 +1 94 91
+- 16 +2 96 95
+- 17 +2 (+3 for fighters, paladins, and rangers) 98 97
+- 18 +2 (+4 for fighters, paladins, and rangers) 100 99
+- 19 +2 and see below (+5 for fighters, paladins,
+- and rangers) 100 99

@@ -1,0 +1,14 @@
+name: Mending
+slug: mending
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Transmutation/Alteration
+range: 30-ft
+duration: Instantaneous
+area_of_effect: One object
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: This spell repairs small breaks or tears in an object. It can weld together broken metallic objects, such as a chain link or a broken dagger, rejoin a broken bottle, and repair holes in leather or cloth, for example. The spell does not repair magic items in any way that would restore or affect their magical qualities.
+source: wiki2_spells.txt

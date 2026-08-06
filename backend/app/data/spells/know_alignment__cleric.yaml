@@ -1,0 +1,14 @@
+name: Know Alignment
+slug: know_alignment
+reversible: true
+class: cleric
+level: 2
+school: Clerical Divination
+range: Touch
+duration: 1 turn
+area_of_effect: 1 creature/round
+components: V,S
+casting_time: 1 round
+saving_throw: None
+text: All creatures are surrounded by an aura that can indicate their alignment, and this spell allows the caster to perceive and read such auras. The auras of up to ten creatures may be examined by use of the spell, and the cleric will be able to identify the exact alignment of each. The reverse of the spell obscures alignment (even against the use of this spell) with respect to one creature for a period of 1 turn, two people for a period of 5 rounds, and so on.
+source: wiki2_spells.txt

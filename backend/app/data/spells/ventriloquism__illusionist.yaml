@@ -1,0 +1,14 @@
+name: Ventriloquism
+slug: ventriloquism
+reversible: false
+class: illusionist
+level: 2
+school: Phantasmal Illusion
+range: 10-ft/level, to a maximum of 90-ft
+duration: 4 rounds+1 round/level
+area_of_effect: One object
+components: V,M
+casting_time: 2 segments
+saving_throw: None
+text: The caster makes his or her voice (or any sound he or she can vocalize) seem to issue from someplace else, such as from another creature, a statue, from behind a door, down a passage, etc. For each point of intelligence of the listener over 12, there is a cumulative 10% chance to correctly perceive the source of the sound.
+source: wiki2_spells.txt

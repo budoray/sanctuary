@@ -1,0 +1,14 @@
+name: Grasping Hand
+slug: grasping_hand
+reversible: false
+class: magic-user
+level: 7
+school: Arcane Evocation
+range: 10-ft/level
+duration: 1 round/level
+area_of_effect: Magical hand
+components: V,S,M
+casting_time: 7 segments
+saving_throw: None
+text: This spell is a more powerful evocation of the forceful hand spell, acting in the same manner but able to hold motionless a creature of up to 1,000 lbs or move creatures with twice the force of a forceful hand.
+source: wiki2_spells.txt

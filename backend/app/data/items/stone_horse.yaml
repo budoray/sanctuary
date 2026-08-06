@@ -1,0 +1,4 @@
+name: Stone Horse
+classes: any
+description: Appears as a life-sized statue of a stone horse of one of two types; a draft horse or a heavy warhorse, animated by a command word. Both types can carry up to 1,000 lbs, never need rest or food, and can attack as a real horse of their respective types. Damage to the stone horse can be repaired by feeding it gems, restoring 1 hp for each 50 gp worth of gems it consumes. The stone horse can also be healed by casting stone to flesh upon it to turn it into a flesh-and-blood horse, then healing it using standard methods or spells. When the horse reaches its maximum hit points, it reverts back to stone form. Stone horses are AC 0 [20] and a stone horse reaching 0 hp shatters into worthless dust and rock, irrevocably destroyed.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

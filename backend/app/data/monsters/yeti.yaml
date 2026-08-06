@@ -1,0 +1,23 @@
+name: Yeti
+frequency: very rare
+no_encountered: 1d6
+size: large (8ft tall)
+alignment: neutral
+move: 150ft
+armour_class: 6 [14]
+hit_dice: 4+4
+melee_attacks: 2 claws (1d6)
+senses: Standard
+lair_chance: 10%
+intelligence: average (8-10)
+morale: 70
+loot: Hoard 4
+experience: 435 +5/hp
+description: Yetis are tall and vaguely ape-like humanoids completely cov - ered in thick white hair and weighing in at 300 lbs. They have  ivory-clawed feet and hands, a mouthful of sharp fangs, and are  known to crave the taste of human flesh. Yetis inhabit regions  of ice and snow, generally in the cold regions of the world, but  sometimes in areas with mountains high enough to stay snow- capped the year round. In spite of their appearance yetis are  not albinos, they have eyes of pale blue or a very light, almost  white, grey. Though yetis have no real use for treasure, they do realise its  worth to other beings and, as such, a random collection of coins  and valuables can be found in their lairs.
+abilities:
+- heading: Surprise and Initiative
+  text: Invisible at Distance.  Because of their colouration and habitat,  yetis are virtually invisible until within 20ft of their prey, though  higher–level characters have a 10% chance per level of spot - ting one at normal viewing ranges.
+- heading: Immunities and Resistances
+  text: Immune to Cold. Yetis are immune to cold damage. Vulnerability to Fire. Because of their extreme adaptation to liv - ing in cold climates, yetis suffer 50% greater damage from fire  damage (and heat).
+- heading: Special Attacks
+  text: 'Squeeze. If a yeti strikes with a roll of a natural 20, it grabs and  squeezes the target in its powerful arms, inflicting another 2d8  points of damage (1d8 points of damage from this attack are  cold damage). Gaze Attack. If surprised by a yeti, an adventurer must roll a sav- ing throw vs paralysis. Failing the save means they inadvertent- ly looked into the creature’s eyes and are struck with intense  fright, unable to move or react during 2 surprise segments.  The yeti hits automatically with its attacks (and automatically  squeezes) in these two segments. The gaze has no effect if the  opponents are not surprised. Unarmed Combat. Yetis may engage in grappling or overbearing  attacks. If not fended off, they score an unarmed hit with a 2+  on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear Results Mods:  ATK/DEF +3/-3. Grappling Result Mods: ATK/DEF +2/-2. ZOMBIE'

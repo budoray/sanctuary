@@ -1,0 +1,14 @@
+name: Commune With Nature
+slug: commune_with_nature
+reversible: false
+class: druid
+level: 5
+school: Druidic Divination
+range: Caster
+duration: See below
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: To cast this spell, the druid enters into a trance that brings him or her into a state of oneness with the natural surroundings. He or she gains knowledge of the area, learning one fact for each of his or her caster levels. The radius of the area with which the druid can commune is a half-mile for every caster level. Facts that the druid may divine include the paths of water, inhabitants in a part of the region, etc.
+source: wiki2_spells.txt

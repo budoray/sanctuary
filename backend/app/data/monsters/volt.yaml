@@ -1,0 +1,21 @@
+name: Volt
+frequency: uncommon
+no_encountered: 2d12
+size: small
+alignment: neutral
+move: 60ft levitating (AA:II)
+armour_class: 3 [17]
+hit_dice: 2+1
+melee_attacks: 1 (1d4 + shock)
+senses: Infravision 60ft
+lair_chance: 10%
+intelligence: animal (1)
+morale: 55
+loot: Nil
+experience: 50 +3/hp
+description: Volts are peculiar, magical creatures that attack almost any - thing that ventures near their lair. They appear as little balls of  grey fur with two protruding eyes and a long, whip-like tail that  crackles with electricity. Volt lairs usually smell slightly of ozone.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Electricity.  Volts are immune to electricity and light - ning damage.
+- heading: Special Attacks
+  text: Latch, Bite, and Shock.  If the volt’s bite attack succeeds, it has  latched onto its target and will do normal bite damage (1d4  hp) automatically every round. At the same time it will lash its  foe with its tail (not an automatic hit). The tail attack inflicts  a strong electric shock (2d6 hp damage) with a hit. Only vic - tims not wearing metal armour receive a saving throw (for half  damage), and any victim wearing metal armour is treated as  unarmoured (AC 10 [10]) for the purposes of the volt’s attack.  Unarmed Combat. Volts cannot be targeted with overbearing or  grappling attacks, and do not use these tactics.

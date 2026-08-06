@@ -1,0 +1,116 @@
+# OSRIC 3.0 Player Guide, Chapter Two: Ancestry (§1.2.1-1.2.7).
+#
+# `minimums`/`maximums` only carry an ability when Table 1.2.0A's range for
+# that ancestry differs from the default 3-18 (e.g. a dwarf's default INT
+# 3-18 is omitted; its STR floor of 8 and CON ceiling of 19 are not).
+# `level_limits` collapses a Strength/Intelligence/Dexterity-conditioned cap
+# to the best-case (highest qualifying score) ceiling, since the schema
+# holds one integer per class; 0 means unlimited.
+#
+# WARNING: every non-zero level_limits value is an UPPER bound only. Several
+# are conditioned in the book on an ability score (e.g. dwarf fighter: 9 if
+# Strength 18+, 8 if 17, 7 if 16 or less) and this schema cannot express that
+# condition - it stores only the best-case ceiling. Code that enforces these
+# limits (Chapter 3 levelling) must also check the relevant ability score
+# against the book; do not treat these numbers as unconditional caps.
+dwarf:
+  ability_adjustments: {constitution: 1, charisma: -1}
+  minimums: {strength: 8, constitution: 12}
+  maximums: {dexterity: 17, constitution: 19, charisma: 16}
+  infravision_ft: 60
+  allowed_classes: [assassin, cleric, fighter, thief]
+  level_limits: {assassin: 9, cleric: 8, fighter: 9, thief: 0}
+  # osric.txt:1087 "As a dwarf you can be an assassin, cleric, fighter,
+  # thief, or fighter/thief."
+  multiclass_combinations:
+    - [fighter, thief]
+elf:
+  ability_adjustments: {dexterity: 1, constitution: -1}
+  minimums: {dexterity: 7, constitution: 6, intelligence: 8, charisma: 8}
+  maximums: {dexterity: 19}
+  infravision_ft: 60
+  allowed_classes: [assassin, cleric, fighter, magic-user, thief]
+  level_limits: {assassin: 10, cleric: 7, fighter: 7, magic-user: 11, thief: 0}
+  # osric.txt:1213-1215 "As an elf you can be an assassin, cleric, fighter,
+  # magic-user, thief, fighter/magic-user, fighter/thief, magic-user/thief,
+  # or fighter/magic-user/thief."
+  multiclass_combinations:
+    - [fighter, magic-user]
+    - [fighter, thief]
+    - [magic-user, thief]
+    - [fighter, magic-user, thief]
+gnome:
+  ability_adjustments: {}
+  minimums: {strength: 6, constitution: 8, intelligence: 7}
+  maximums: {}
+  infravision_ft: 60
+  allowed_classes: [assassin, cleric, fighter, illusionist, thief]
+  level_limits: {assassin: 8, cleric: 7, fighter: 6, illusionist: 7, thief: 0}
+  # osric.txt:1342-1344 "As a gnome, you can be an assassin, a cleric, a
+  # fighter, an illusionist, a thief, a fighter/illusionist, a fighter/thief,
+  # or an illusionist/thief."
+  multiclass_combinations:
+    - [fighter, illusionist]
+    - [fighter, thief]
+    - [illusionist, thief]
+half-elf:
+  ability_adjustments: {}
+  minimums: {dexterity: 6, constitution: 6, intelligence: 4}
+  maximums: {}
+  infravision_ft: 60
+  allowed_classes: [assassin, cleric, druid, fighter, magic-user, ranger, thief]
+  level_limits: {assassin: 11, cleric: 5, druid: 14, fighter: 8, magic-user: 8, ranger: 8, thief: 0}
+  # osric.txt:1448-1451 "As a half-elf you can be an assassin, cleric, druid,
+  # fighter, magic-user, ranger, thief, cleric/fighter, cleric/ranger,
+  # cleric/magic-user, fighter/magic-user, fighter/thief,
+  # cleric/fighter/magic-user, or fighter/magic-user/thief."
+  multiclass_combinations:
+    - [cleric, fighter]
+    - [cleric, ranger]
+    - [cleric, magic-user]
+    - [fighter, magic-user]
+    - [fighter, thief]
+    - [cleric, fighter, magic-user]
+    - [fighter, magic-user, thief]
+halfling:
+  ability_adjustments: {dexterity: 1, strength: -1}
+  minimums: {strength: 6, dexterity: 8, constitution: 10, intelligence: 6}
+  maximums: {strength: 17, constitution: 19, wisdom: 17}
+  infravision_ft: 60
+  allowed_classes: [druid, fighter, thief]
+  level_limits: {druid: 6, fighter: 4, thief: 0}
+  # osric.txt:1575 "As a halfling you can be a fighter, druid, thief, or
+  # fighter/thief."
+  multiclass_combinations:
+    - [fighter, thief]
+half-orc:
+  ability_adjustments: {strength: 1, constitution: 1, charisma: -2}
+  minimums: {strength: 6, constitution: 13}
+  maximums: {dexterity: 17, constitution: 19, intelligence: 17, wisdom: 14, charisma: 12}
+  infravision_ft: 60
+  allowed_classes: [assassin, cleric, fighter, thief]
+  level_limits: {assassin: 15, cleric: 4, fighter: 10, thief: 7}
+  # osric.txt:1653-1655 "As a half-orc you can be an assassin, a cleric, a
+  # fighter, a thief, a cleric/fighter, a cleric/thief, a cleric/assassin, a
+  # fighter/thief or a fighter/assassin."
+  multiclass_combinations:
+    - [cleric, fighter]
+    - [cleric, thief]
+    - [cleric, assassin]
+    - [fighter, thief]
+    - [fighter, assassin]
+human:
+  ability_adjustments: {}
+  minimums: {}
+  maximums: {}
+  infravision_ft: 0
+  allowed_classes: [assassin, cleric, druid, fighter, illusionist, magic-user, monk, paladin, ranger, thief]
+  # Unlike the other ancestries, these three are not ancestral penalties -
+  # they're the universal class ceilings for Assassin/Druid/Monk that no one
+  # of ANY ancestry exceeds (OSRIC 3.0 SS1.2.7.3). Humans just have no
+  # ancestral adjustments to offset them.
+  level_limits: {assassin: 15, druid: 14, monk: 17}
+  # osric.txt:1713 "You may not be a multi-classed character, but uniquely to
+  # humans, you can be dual-classed" - dual-classing is a different
+  # mechanism (SS1.3.12) and not part of this task.
+  multiclass_combinations: []

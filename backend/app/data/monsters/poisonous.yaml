@@ -1,0 +1,18 @@
+name: Poisonous
+frequency: common uncommon no.  encountered 1d12 1d8
+size: medium medium
+alignment: neutral neutral
+move: 60ft; 60ft leaping 60ft; 60ft leaping
+armour_class: 6 [14] 7 [13]
+hit_dice: 2+4 2
+melee_attacks: 2d4 1d4+1 + poison
+senses: Keen Keen
+lair_chance: Nil Nil
+intelligence: animal (1) animal (1)
+morale: 60 55
+loot: Nil Nil
+experience: 20 +2/hp 50 +2/hp
+description: Giant toads hunt any sort of prey, including humans. Poisonous  giant toads are indistinguishable from normal giant toads.
+abilities:
+- heading: Special Attacks
+  text: Leap. Giant toads can leap forward up to 60ft and attack in the  same round (treat as a charge). Venomous Bite (Poisonous Toad Only).  The giant poisonous toad  has a venomous bite. Anyone successfully hit by the toad’s bite  attack must make a saving throw vs. poison or die. Unarmed Combat.  Giant toads cannot be effectively targeted  with grappling or overbearing attacks, and do not use these  tactics.

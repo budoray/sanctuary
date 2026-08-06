@@ -1,0 +1,23 @@
+name: Shaitan (greater Devil; Styx Fiend)
+frequency: very rare
+no_encountered: 1d2
+size: medium
+alignment: lawful evil
+move: 60ft; 150ft flying (AA:IV)
+armour_class: -1 [21]
+hit_dice: 6+6
+melee_attacks: 1 touch (2d4 + imprisonment)
+senses: Infravision 60ft
+lair_chance: 60%
+intelligence: high (13-14)
+morale: 80
+loot: Cache 3 and 4
+experience: 1,275+ 8/hp
+description: These devils resemble humanoids with large, bulbous heads  and small, evil features. Their wings are black with silver tips. Shaitan dwell on the 5th plane of Hell, where they serve the  archdevil, Geryon. Their primary task is to acquire souls for  their master. Occasionally, they will travel to the Prime Material  plane on a mission of murder and mayhem.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Non-Silver Mundane Weapons.  This creature is im - mune to piercing, blunt, and slashing damage from weapons  and unarmed attacks, unless the weapon causing that damage  has a magical bonus of +1 or more, or is a silver weapon.
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: animate dead (as the 5th level magic-user spell), charm  person (as the 1st level magic-user spell), fear (effect varies, as  the 4th level magic-user spell), know alignment (as the 2nd lev- el cleric spell), spectral force (as the 3rd level illusionist spell),  suggestion (as the 3rd level magic-user spell), teleport (no  chance of error, otherwise as the 5th level magic-user spell). Dispelling. Dispelling a shaitan on the Prime Material plane  requires pronouncement of a holy word (the 7th level cleric  spell).'
+- heading: Special Attacks
+  text: 'Imprisonment. In combat, these devils will attempt to touch their  victim (2d4 damage) and thereby cast an imprisonment spell  (as the 9th level magic-user spell). Unarmed Combat. Shaitan devils can be targeted with grappling  or overbearing attacks, although they do not use these tactics.  If not fended off, they score an unarmed hit with a 2+ on 1d20.  Hit Mods: ATK/DEF +4/-4. Overbear Results Mods: ATK/DEF  +1/-1. Grappling Result Mods: ATK/DEF +0/+0.'

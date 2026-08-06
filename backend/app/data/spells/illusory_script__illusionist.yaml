@@ -1,0 +1,14 @@
+name: Illusory Script
+slug: illusory_script
+reversible: false
+class: illusionist
+level: 3
+school: Phantasmal Illusion
+range: '0'
+duration: Permanent
+area_of_effect: Enchanted script
+components: V,S,M
+casting_time: Time of writing
+saving_throw: None
+text: This is an enchantment placed upon a piece of writing to guard its true contents from prying eyes. The illusionist may specify a particular person, group of people, type of person, etc., that will be allowed to read the script without risking the adverse effects of the spell. All others will perceive the script as an undecipherable language, which causes confusion (as per the spell) for 5d4 turns (minus one per hit die of the reader). An illusionist can recognize the script as illusory early enough to avoid the confusion effect, but cannot necessarily see past the illusion.
+source: wiki2_spells.txt

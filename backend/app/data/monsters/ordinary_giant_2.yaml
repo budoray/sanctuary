@@ -1,0 +1,26 @@
+name: Ordinary Giant
+frequency: common uncommon no.  encountered 1d100×10 3d6
+size: small small
+alignment: neutral neutral
+move: 10ft; 240ft flying  (AA:V) 10ft; 240ft flying  (AA:V)
+armour_class: 8 [12], see below 8 [12], see below
+hit_dice: 1d2  hit points 1d4  hit points
+melee_attacks: 1 bite (1 hp) 1 bite (1d2)
+senses: Echolocation Echolocation
+lair_chance: 10% 10%
+intelligence: animal (1) animal (1)
+morale: 50 50
+loot: Nil Nil
+experience: 1 +0/hp 5 +1/hp
+description: ORDINARY BATS This listing includes all types of normal bats. They will only at - tack when trapped, seeking to escape. When startled, they will  swarm, causing confusion, extinguishing torches, etc.
+abilities:
+- heading: Immunities and Resistances
+  text: Echolocator. Sight isn’t this creature’s primary sense. Silence  affects it in the same way that darkness affects sighted crea - tures. Invisible opponents are detected and may be attacked  without any penalty.
+- heading: Special Attacks
+  text: 'Bat Swarm.  If more than 5 bats are startled and swarm, they  cause confusion, extinguish torches, and can interrupt spell  casting. Every 5 bats in the swarm occupies an area of about  10x10ft. Any person in the area must make a saving throw  vs. petrifaction or be affected in some way by the bats, in the  following order: (1) an open flame carried by the character is  extinguished, (2) if the character is not carrying an open flame  but is casting a spell, the spell is lost, (3) if the character is nei- ther carrying an open flame nor casting a spell, the character is  confused and cannot take actions for 1d4 rounds. GIANT BATS These are giant versions of carnivorous ordinary bats. Their  bodies grow up to 3ft long, and they can have wingspans of up  to 6ft.'
+- heading: Immunities and Resistances
+  text: Echolocator. Sight isn’t this creature’s primary sense. Silence  affects it in the same way that darkness affects sighted crea - tures. Invisible opponents are detected and may be attacked  without any penalty.
+- heading: Special Features
+  text: Highly Manoeuvrable. Users of missile weapons will suffer a -3  “to hit” penalty unless the attacker’s dexterity is 13 or higher.  Giant bats must land on their intended victims to attack, losing  this benefit when they do so.
+- heading: Special Attacks
+  text: Disease. There is a 1% chance that anyone bitten will contract  rabies, or some similar blood-borne infection.

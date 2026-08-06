@@ -1,0 +1,4 @@
+name: Climbing
+classes: any
+description: 'This potion lasts for 1 turn + 5d4 rounds, during which time the drinker gains the ability to climb like a thief with 99% ability (a roll of 00 means failure). However, the odds of failure increase by 1% for every 1,000 gp worth of weight carried. Furthermore, the type of armour worn will influence climbing ability by decreasing the percentage chance of success as follows: -1% Any type of magical armour -1% Studded leather -2% Ring mail -4% Scale mail -7% Chain mail -8% Banded and splinted armour -10% Plate mail Cursed: A cursed potion may be generated with reference to section 2.13.10, or might just be poison.'
+source: OSRIC_3.0_Gamemaster_Guide.pdf

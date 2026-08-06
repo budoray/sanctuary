@@ -1,0 +1,18 @@
+name: Apatosaurus Argentinosaurus Brachiosaurus Camarasaurus Cetiosaurus Diplodocus
+frequency: common uncommon uncommon common common common no.  encountered 4d10 4d6 4d8 5d10 5d10 5d10
+size: gigantic gigantic gigantic gigantic gigantic gigantic
+alignment: neutral neutral neutral neutral neutral neutral
+move: 90ft 90ft 90ft 90ft 90ft 90ft
+armour_class: 7 [13] 7 [13] 7 [13] 7 [13] 7 [13] 7 [13]
+hit_dice: 30 38 36 18 20 25
+melee_attacks: 1 bite (1d10) 1 bite (1d12) 1 bite (1d12) 1 bite (1d8) 1 bite (1d8) 1 bite (1d8)
+senses: Standard Standard Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0) non- (0) non- (0) non- (0)
+morale: N/A N/A N/A N/A N/A N/A
+loot: Nil Nil Nil Nil Nil Nil
+experience: 2,500 +35/hp 2,500 +35/hp 2,500 +35/hp 2,000 +30/hp 2,000 +30/hp 2,500 +35/hp
+description: 'Large quadrupedal herbivores with elephantine bodies and ex- tremely longnecks and tails, the sauropods are herd animals.  They can bite, but are only really dangerous when they trample.  Trampling automatically kills any creature weighing less than a  ton in their path—saving throw vs death to avoid. A whole herd  stampeding is an impressive sight, best viewed from a safe dis- tance. In fantasy gaming environments sauropods might make  good meat animals or beasts of burden. Apatosaurus: Jurassic herbivore, once called brontosaurus. Di- plodocus: Jurassic herbivore, famously long. Brachiosaurus: Ju- rassic herbivore; long thought to be the largest land dinosaur.  Argentinosaurus: Cretaceous herbivore, relatively recently dis - covered, twice as massive as brachiosaurus. Camarasaurus:  Very common Jurassic herbivore. Cetiosaurus: Jurassic herbi - vore, earlier relative of the other types.'
+abilities:
+- heading: Special Attacks
+  text: Trample. Any sauropod listed here can trample as well as bite if  the dinosaur can move across the victim’s location. Trampling  requires no to-hit roll and requires the target (if the target is  smaller than size Huge) to make a saving throw vs. death or be  crushed to death under the sauropod’s feet. CERATOPSIANS

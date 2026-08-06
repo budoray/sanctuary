@@ -1,0 +1,14 @@
+name: Locate Plants
+slug: locate_plants
+reversible: false
+class: druid
+level: 2
+school: Druidic Divination
+range: Caster
+duration: 1 turn/caster level
+area_of_effect: 5-ft radius/caster level
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: Upon casting this spell, the druid is imbued with the ability to mentally locate any specific type of plant upon which he or she concentrates, in the area the spell radiates around him or her as he or she moves.
+source: wiki2_spells.txt

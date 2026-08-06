@@ -1,0 +1,19 @@
+name: Sphinx, Gyno–
+frequency: rare
+no_encountered: '1'
+size: large (10ft long)
+alignment: chaotic neutral or chaotic  good
+move: 150ft; 240ft flying (AA:III)
+armour_class: 0 [20]
+hit_dice: '7'
+melee_attacks: 2 claws (2d4)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: very (11-12)
+morale: 80
+loot: Cache 4, 10
+experience: 650 +8/hp
+description: The storied gynosphinx is a winged half-woman, half lion crea - ture that dwells in arid climes, amid abandoned tombs and the  like. Like the androsphinx, the gynosphinx is a winged lion with a  human head, sometimes with human head and torso (although  the front arms are always lion-like). The chief pursuits of the gy- nosphinx are intellectual; their kind prefers riddles and puzzles  and complex games to (almost) any other type of activity. Although basically good in nature, the gynosphinx is capricious  and will not hesitate to “corner” a creature and demand some  sort of payment for release (usually in the form of a song, story,  a game of chess, etc.). Offers of payment in the form of material  bribes are always welcome.
+abilities:
+- heading: Special Features
+  text: 'Spell-Like Abilities.  1/day: read magic, read languages, detect invisibility, locate ob- ject, dispel magic, clairvoyance, clairaudience, remove curse or  legend lore (this last spell she greatly prefers to use as gyno - sphinxes can be storehouses of knowledge and pride them - selves on the ability).'

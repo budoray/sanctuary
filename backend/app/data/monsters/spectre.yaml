@@ -1,0 +1,21 @@
+name: Spectre
+frequency: rare
+no_encountered: 1d6
+size: medium
+alignment: lawful evil
+move: 150ft hovering; 300ft flying  (AA:IV)
+armour_class: 2 [18]
+hit_dice: 7+3
+melee_attacks: 1 (1d8)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: high (13-14)
+morale: N/A
+loot: Cache 3 (x3), 10, 11
+experience: 1,815 +10/hp
+description: Spectres are similar to ghosts, but unlike the ethereal-dwelling  ghost, a spectre is an undead spirit that dwells mostly on the  negative material plane with a “shadow” in the prime material  plane.  If a cleric (good or evil) attempts to restore a spectre back to life  via a spell or ritual, the spectre must make a saving throw or it  is destroyed. Some sages speculate that spectres have no power in sunlight,  but no one has ever proved this theory.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Spectres are turned as type 9 Undead. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Immunities. Spectres are immune to cold damage, paralysation,  and elemental spells (any spell relying on fire, water, earth, or  air). Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease.
+- heading: Special Attacks
+  text: 'Level Drain. With a successful hit, a spectre drains two levels of  experience from the victim. Those reduced below zero energy  levels become half-strength spectres under control of the one  that stole their life-force. Unarmed Combat. Spectres cannot effectively be targeted with  grappling or overbearing attacks, and do not use these tactics. SPHINXES There are four kinds of sphinx. Androsphinxes are always male,  while gynosphinxes are always female. It is not clear whether  criosphinxes and hieracosphinxes are related to the andro-gy - no type of sphinx, or even whether these types are related to  each other. Unarmed Combat. Sphinxes cannot be targeted with grappling  or overbearing attacks, but they may overbear. If not fended  off, they score an unarmed hit with a 2+ on 1d20. Hit Mods:  ATK/DEF +10/na. Overbear Results Mods: ATK/DEF +6/na. Grap- pling Result Mods: ATK/DEF na/na.'

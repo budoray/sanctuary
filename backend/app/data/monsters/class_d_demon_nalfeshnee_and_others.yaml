@@ -1,0 +1,23 @@
+name: Class D Demon (nalfeshnee And Others)
+frequency: uncommon
+no_encountered: 1d3 or 1d6 (in the Abyss)
+size: large (11ft)
+alignment: chaotic evil
+move: 90ft; 120ft flying (AA:II)
+armour_class: -1 [21]
+hit_dice: '11'
+melee_attacks: 1 claw (1d4) and 1 bite (2d4)
+senses: Infravision 120ft, Detect invisible 15%
+lair_chance: 15%
+intelligence: very (11-12)
+morale: 100
+loot: Hoard 5
+experience: 3,000 +16/hp
+description: Particularly malevolent demons, the class D have the upper  body of an ape and the cloven-hoofed lower body (and head) of  a boar. They have rather small, feathered wings as well, which  seem undersized compared to their corpulent bodies.  Certain class D demons have their own secret names, which  makes it 90% certain they will answer a summons if it is spoken.  Conjurers should be prepared to make impressive promises of  treasure, magical items or living sacrifices when summoning a  class D demon, especially by name. It should also be remem - bered that these demons particularly enjoy feasting on human  blood and meat.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (65%).  Any magic spell or effect has a 65%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: Darkness, 10ft radius, improved phantasmal force  (as  the 2nd level illusionist spell), fear (as the 4th level magic-user  spell), levitate (as the 2nd level magic-user spell), detect magic  (as the 1st level magic-user spell), comprehend languages (as  the 1st level magic-user spell), dispel magic (as the 3rd level  magic-user spell), polymorph self (as the 4th level magic-user  spell), telekinesis (as the 5th level magic-user spell, up to 500  lbs), project image  (as the 6th level magic-user spell), use a  symbol of fear  or discord (as the 8th level magic-user spell),  and gate (as the 9th level magic-user spell) another class A to  D demon (random class, 60% chance of success).'
+- heading: Special Attacks
+  text: 'Strength Bonus. These demons have a +2 bonus on to-hit rolls. Unarmed Combat. Nalfeshnee demons can make grappling or  overbearing attacks. If not fended off, they score an unarmed  hit with a 2+ on 1d20. Hit Mods: ATK/DEF +6/-6. Overbear Re - sults Mods: ATK/DEF +5/-5. Grappling Result Mods: ATK/DEF  +2/-2.'

@@ -1,0 +1,24 @@
+name: Giant Crab Giant Crayfish
+frequency: common rare
+size: large large
+alignment: neutral neutral no.  encountered 3d8 1 or 2d6 (in lair)
+move: 90ft 60ft; 120ft  swimming
+armour_class: 3 [17] 4 [16]
+hit_dice: 3 4+4
+melee_attacks: 2 pincers (2d4  slashing) 2 pincers (2d6  slashing)
+senses: Standard Standard
+lair_chance: Nil Nil
+intelligence: non- (0) non- (0)
+morale: N/A N/A
+loot: Nil Nil
+experience: 75 +3/hp 110 +4/hp
+description: Unarmed Combat.  Giant crustaceans cannot be overborne or  grappled, and do not employ these tactics.  GIANT CRAB These creatures are only found near water (fresh or salt). They  will typically rush their prey from a place of concealment, having  “scouted” the area with their eyes (which are on stalks).
+abilities:
+- heading: Surprise and Initiative
+  text: Giant crabs achieve surprise on 1–4 of 1d6.
+- heading: Immunities and Resistances
+  text: Many-legged. This creature cannot be knocked prone. GIANT CRAYFISH Giant crayfish are only encountered near fresh water. They will  typically rush their prey from a place of concealment, but they  do not have the advantage of the giant crab’s eyestalks.
+- heading: Surprise and Initiative
+  text: Giant crayfish achieve surprise on 1–3 of 1d6.
+- heading: Immunities and Resistances
+  text: Many-legged. This creature cannot be knocked prone.

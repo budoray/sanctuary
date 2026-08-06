@@ -1,0 +1,14 @@
+name: Detect Evil
+slug: detect_evil
+reversible: true
+class: magic-user
+level: 2
+school: Arcane Divination
+range: Caster
+duration: 5 rounds/level
+area_of_effect: Path 10-ft wide, 60-ft long
+components: V,S
+casting_time: 2 segments
+saving_throw: None
+text: This spell allows the magic user to detect emanations of evil (or good, in the case of the spell's reverse) within the spell's area of effect, a beam-like pathway. The spell detects evil, not danger, so it will be useless to discover such things as a mindless trap or a poisoned wineglass. Neither will it detect a cursed item unless the nature of the curse is such that the cursed item becomes inherently evil.
+source: wiki2_spells.txt

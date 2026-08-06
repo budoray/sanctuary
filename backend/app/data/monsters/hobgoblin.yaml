@@ -1,0 +1,23 @@
+name: Hobgoblin
+frequency: uncommon
+no_encountered: 20d10
+size: medium (6.5ft)
+alignment: lawful evil
+move: 90ft
+armour_class: 5 [15]
+hit_dice: 1+1
+melee_attacks: 1d8 or by weapon
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: average (8-10)
+morale: 50
+loot: Individual 1 and 4 each; in lair,  Hoard 4 and Cache 3 (x5)
+experience: 20 +2/hp
+description: Hobgoblins are bigger cousins of goblins, and form their own  society. In general, they have red or orange skin, and are hair - ier than normal goblins. Their organisation is usually into war- bands, which may fight each other over territory if they are not  restrained by strong leadership. Although hobgoblins are not  affected by sunlight as goblins are, they are still essentially a  subterranean species. They typically lair underground, and will  sometimes (50%) keep carnivorous apes as guards. Hobgoblin raiding parties are led by a sergeant and 2 assis - tants, each with 9 hp. Hobgoblin war parties are led by a captain (AC 3 [17], 16 hp,  fights as a 3 HD monster, doing 1d8+2 damage). In their lair, hobgoblins are led by a chief (AC 2 [18], 22 hp, fights  as a 4 HD monster, doing 1d10+1 damage) and 5d4 personal  guards (AC 3 [17], 16 hp, fights as a 3 HD monster, doing 1d8+2  damage). Hobgoblins hate elves, and will attack them on sight.
+abilities:
+- heading: Special Features
+  text: Hobgoblins are very skilled miners and cavers, and can detect  new construction, sloping passages and shifting walls with a  40% chance.
+- heading: Special Attacks
+  text: 'Ranged Attack: One in five hobgoblins will carry a bow or other  ranged weapon as well as a sword or spear. Unarmed Combat. Hobgoblins can make grappling or overbear- ing attacks. If not fended off, they score an unarmed hit with a  12+ on 1d20. Hit Mods: ATK/DEF +6/-2. Overbear Results Mods:  ATK/DEF +0/+0. Grappling Result Mods: ATK/DEF +0/+0.'
+- heading: Languages
+  text: Hobgoblins speak goblin, orcish, their own brutish tongue and  the very limited language of carnivorous apes. Some can speak  common as well.

@@ -1,0 +1,21 @@
+name: Troglodyte
+frequency: common
+no_encountered: 10d10
+size: medium
+alignment: chaotic evil
+move: 120ft
+armour_class: 5 [15]
+hit_dice: '2'
+melee_attacks: 2 claws (1d3) and 1 bite (1d4+1) or by  weapon
+senses: Infravision 90ft
+lair_chance: 15%
+intelligence: low (5-7)
+morale: 55
+loot: Hoard 1
+experience: 20 +2/hp
+description: Troglodytes are a reptilian species that make their lairs deep  underground. They have an unnatural hatred of humans, and  will attack them on sight. Raiding parties (10 or more) will be led by a troglodyte that has  3 HD. War parties (20 or more) will be led by 2 troglodytes with  4 HD each. In their lair a chief will be present (a 6 HD monster)  as well as 2d4 guards (3 HD creatures). Some troglodytes attack with their claws and teeth, and some  use weapons that they have taken in previous battles.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise (Chameleon). Troglodytes have the ability to alter their  colouration depending on the area around them. This ability  allows them to surprise others on a 1–4 on 1d6. This surprise  bonus does not work when they are emitting their odour.
+- heading: Special Features
+  text: 'Emit Repulsive Odour.  They also have a special attack, once in  combat they emit a sickening odour against which humans (as  well as elves, half-elves, dwarfs, halflings, and gnomes) must  save vs poison. If they fail, they lose 1 point of strength per  round for 1d6 rounds. This effect lasts for 10 rounds after the  last round it was active. Unarmed Combat. Troglodytes can be targeted and may engage  in overbearing and grappling. If not fended off, they score an  unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +8/-8. Over- bear Results Mods: ATK/DEF +0/-0. Grappling Result Mods:  ATK/DEF +0/-0.'

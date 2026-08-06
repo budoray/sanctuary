@@ -1,0 +1,14 @@
+name: Restoration
+slug: restoration
+reversible: true
+class: cleric
+level: 7
+school: Clerical Necromancy
+range: Touch
+duration: Instantaneous (permanent)
+area_of_effect: One creature
+components: V,S
+casting_time: 3 rounds
+saving_throw: None
+text: By casting this spell, the cleric restores one lost level of experience to the spell's target. Not necessarily all lost experience points are restored; an afflicted character will only regain enough experience points to regain the lost level, no more. A cleric can only restore a level lost within as many days as the cleric's caster level. For example, a cleric of 12th level cannot restore an experience level lost 13 or more days prior to the casting of the spell. The spell's reverse causes the target to lose one experience level. No saving throw applies, but a successful attack is required. In addition to restoring lost levels, the spell can affect other sorts of magically-induced debilities. The effects of a feeblemind spell are reversed by restoration, for example. The reverse of restoration, energy drain, removes one level of experience as well as the neccessary amount of experience points to take the victim to that level.
+source: wiki2_spells.txt

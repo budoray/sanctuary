@@ -1,0 +1,23 @@
+name: Harpy
+frequency: rare
+no_encountered: 2d6
+size: medium
+alignment: chaotic evil
+move: 60ft; 150ft flying (AA:IV)
+armour_class: 7 [13]
+hit_dice: '3'
+melee_attacks: 2 claws (1d3) and 1 club (1d6)
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: low (5-7)
+morale: 60
+loot: Hoard 3
+experience: 50 +3/hp
+description: These creatures are part vulture (wings and lower body) and  part woman (head and torso). Harpies use their charm ability to  bind prey, after which the harpies will torture, kill, and consume  the victims. In combat a harpy attacks with her clawed feet and,  usually, some kind of club as a melee weapon.
+abilities:
+- heading: Special Features
+  text: Singing. Anyone hearing the song of a harpy must make a saving  throw vs spells or move toward the source of the song.
+- heading: Special Attacks
+  text: Charm. If the harpy hits with either of its claw attacks, the victim  must make a saving throw vs. spells or be charmed (as per the  magic-user spell). Unarmed Combat. Harpies cannot be targeted with grappling or  overbearing attacks, and do not use such tactics.
+- heading: Languages
+  text: Most harpies speak only their own language and the alignment  tongue of chaotic evil.

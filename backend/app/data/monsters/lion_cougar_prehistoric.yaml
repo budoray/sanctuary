@@ -1,0 +1,23 @@
+name: Lion Cougar Prehistoric
+frequency: common common rare
+no_encountered: 2d6 1d2 2d4
+size: large medium large
+alignment: neutral neutral neutral
+move: 120ft 150ft 120ft
+armour_class: 5 [15] 6 [14] 5 [15]
+hit_dice: 5+3 3+2 6+3
+melee_attacks: 2 claws (1d6) and 1 bite (1d10) 2 claws (1d4) and 1 bite (1d6) 2 claws (2d4) and 1 bite (2d6)
+senses: Standard Standard Standard
+lair_chance: 25% 15% 25%
+intelligence: semi- (2-4) semi- (2-4) semi- (2-4)
+morale: 75 65 80
+loot: Nil Nil Nil
+experience: 250 +6/hp 100 +3/hp 300 +6/hp
+description: LION These prefer warm climates and thrive in any such locale be  it jungle or savannah. Lions organise themselves into family  units called prides. Males are aggressive fighters, defending the  territory and the other members of the pride. The female, re - ferred to as a lioness, does all the hunting. A pride will have 1d2  males and 2d4+1 females. If encountered in their lair, there will  be 1d10 cubs in various stages of growth but too immature to  fight. All adult pride members will fight to the death to protect  the young. Lions cannot climb trees and will only swim under  duress. COUGAR Popularly known as mountain lions, these great cats are not true  lions but are similar in most respects. Cougars are more solitary  than lions and tend to range more widely while hunting. They  are also more prone to attack if approached than are true lions.  Though they share habitat preferences with lions they also inhab- it mountains as well, giving rise to their popular name. Mountain  lions
+  can leap 20ft to attack or spring upwards 15ft. PREHISTORIC LION Also known as “cave lions” or “spotted lions,” with the excep - tion of their larger size these cats are very similar to regular  lions. Cave lions tend to be found in “lost world” type settings  but have been encountered in the same areas as ordinary lions.
+abilities:
+- heading: Surprise and Initiative
+  text: Alert. Lions (all types) are only surprised on a 1 in 1d6.
+- heading: Special Attacks
+  text: 'Rake. All lions gain an extra two rear leg raking claw attacks (for  the same damage as their forepaws) if they successfully hit  with both clawing attacks in melee. Unarmed Combat (Lions and Prehistoric Lions):  Lions cannot be  targeted with grappling or overbearing attacks, but they may  overbear. If not fended off, they score an unarmed hit with a  2+ on 1d20. Hit Mods: ATK/DEF +8/na. Overbear Results Mods:  ATK/DEF +5/na.  Unarmed Combat (Cougars):  Cougars cannot be targeted with  grappling or overbearing attacks, but they may overbear. If not  fended off, they score an unarmed hit with a 2+ on 1d20. Hit  Mods: ATK/DEF +10/na. Overbear Results Mods: ATK/DEF +3/na.  LYCANTHROPE A lycanthrope is a human with the ability to change their shape  to some animal form, or a hybrid human-animal form, during  the night hours. A full moon is 90% likely to trigger the transi - tion to animal form automatically. Any humanoid bitten by a  lycanthrope and damaged for 50% or more of its total
+    hp who  survives will contract the lycanthropic disease of its attacker. A  cure disease from a cleric of 12th level or higher will remove the  disease if performed within three days of the attack. If the vic - tim ingests belladonna within one hour after the attack there is  a 25% chance the disease will be cured. However, swallowing  belladonna in such a manner will incapacitate the victim for 1d4  days; there is also a 1% chance of the herb killing the victim. A lycanthrope’s “size” stat shows its shape-changed size. In hu - man form they are obviously always medium-sized. Each type of lycanthrope has its own language. The five most  common types are listed below.'

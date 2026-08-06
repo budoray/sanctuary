@@ -1,0 +1,23 @@
+name: Class F Demon (balor And Others)
+frequency: rare
+no_encountered: 1d3 or 1d6 (in the Abyss)
+size: large (12ft)
+alignment: chaotic evil
+move: 60ft; 150ft flying (AA:III)
+armour_class: -2 [22]
+hit_dice: 8+8
+melee_attacks: 1 weapon/sword (+1) (1d12) or 1 whip  (1d6 + fire)
+senses: Infravision 120ft
+lair_chance: 20%
+intelligence: high (13-14)
+morale: 95
+loot: Hoard 6
+experience: 3,600 +12/hp
+description: Reportedly only six of this class of demon exist, each with its  own secret name. In combat they wield massive +1 swords and  a cat-o-nine-tails whip which they employ to drag their victims  into the flames that they continually immolate themselves in.  Summoning class F demons requires significant offerings or fu- ture promises of service or sacrifice. If negotiation is successful,  they might be persuaded to aid the summoner or associated  group for a while. In any case, these demons will always try to  bully and intimidate their masters in an effort to usurp leader - ship, which they crave. Many other chaotic evil monsters and  demons are attracted to the aura of charismatic evil that sur - rounds class F demons, so they are often found in the forefront  of evil hordes.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (75%).  Any magic spell or effect has a 75%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: Darkness, 10ft radius, fear (as the 4th level magic-us - er spell), detect magic (as the 1st level magic-user spell), read  magic (as the 1st level magic-user spell), comprehend languag- es (as the 1st level magic-user spell), detect invisibility (objects  only, otherwise as the 2nd level magic-user spell), pyrotech- nics (as the 2nd level magic-user spell ), dispel magic (as the  3rd level magic-user spell), suggestion (as the 3rd level mag - ic-user spell), telekinesis (as the 5th level magic-user spell, up  to 600 lbs), use a symbol of fear, discord, sleep, or stunning (as  the 8th level magic-user spell), and gate (as the 9th level mag- ic-user spell) another demon of class C (80% chance) or class  D (20% chance) with a 70% chance of success.'
+- heading: Special Attacks
+  text: 'Whip. Each round, there is a 4 in 6 chance the Balor will use  its fiery whip. Victims who are hit and fail a saving throw vs  spells are burnt by the flames and suffer 4d6 additional points  of damage. Unarmed Combat.  Balor demons can make grappling or over - bearing attacks. If not fended off, they score an unarmed hit  with a 2+ on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear Re - sults Mods: ATK/DEF +3/-3. Grappling Result Mods: ATK/DEF  +2/-2.'

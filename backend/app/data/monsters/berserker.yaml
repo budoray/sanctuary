@@ -1,0 +1,20 @@
+name: Berserker
+frequency: rare
+no_encountered: 10d10
+size: medium
+alignment: neutral
+move: 12ft
+armour_class: 7 [13]
+hit_dice: 1d6+1 hp
+melee_attacks: By weapon
+senses: Standard
+lair_chance: 10%
+intelligence: average (8-10) to very
+morale: N/A
+loot: Individual 2 each; in lair Hoard  2
+experience: 10 +1/hp
+description: 'Berserkers are roaming bands of fighters. They are always un - armoured, as they see it as a sign of weakness (but have an  improved armour class).  There will always be higher level fighters found with large  groups of berserkers. Consult the chart below to determine the  exact number and level. • For every 10 berserkers: 1 additional 1st level fighter • For every 20 berserkers: 1 additional 2nd level fighter • For every 30 berserkers: 1 additional 3rd level fighter • For every 40 berserkers: 1 additional 4th level fighter • For every 50 berserkers: 1 additional 5th level fighter Berserkers will always be led by a war chief of 9th or 10th level  and a sub-chief of 6th or 7th level, as follows. • If less than 60: 9th level chief & 6th level sub-chief • If more than 60: 10th level chief & 7th level sub-chief Other Leaders: There is a 50% chance per every 10 berserkers,  that a cleric will be present. The cleric will be of 7th level and will  have 1d4 assistant clerics of 3rd
+  or 4th level.'
+abilities:
+- heading: Special Attacks
+  text: 'Frenzy. Berserkers fight with a fierce battle-lust, and as a result  they may either strike twice in a round or make one attack at +2. Unarmed Combat. Berserkers can make grappling or overbear - ing attacks. If not fended off, they score an unarmed hit with an  2+ on 1d20. Hit Mods: ATK/DEF +8/-8 (with additional +2 on at - tack). Overbear Results Mods: ATK/DEF +0/+0. Grappling Result  Mods: ATK/DEF +0/+0.'

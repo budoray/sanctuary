@@ -1,0 +1,17 @@
+name: Larval Fiend
+frequency: common
+no_encountered: 10d4
+size: medium
+alignment: any evil
+move: 60ft
+armour_class: 7 [13]
+hit_dice: '1'
+melee_attacks: 1 bite (1d4+1)
+senses: Infravision 60ft
+lair_chance: 100%
+intelligence: low (5-7)
+morale: 50
+loot: Nil
+experience: 10 +1/hp
+description: Larval fiends, sometimes called soul worms, are the extraplanar  form of evil souls. Their appearance is similar to a putrescent  maggot with a leering humanoid face. They live in great squirm- ing masses and are tended by night hags, who trade them to  demons and devils for the creation of quasits and imps. Liches  also make use of soul worms to help preserve their essence  throughout the centuries. They are not usually found on the  prime material plane unless they have somehow been inter - cepted by a night hag or lich. Unarmed Combat. Larval fiends cannot be targeted with grap - pling or overbearing attacks, and do not use these tactics.
+abilities: []

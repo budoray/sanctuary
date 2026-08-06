@@ -1,0 +1,23 @@
+name: Caterwaul
+frequency: rare
+no_encountered: '1'
+size: medium
+alignment: chaotic evil
+move: 180ft or 240ft
+armour_class: 6 [14] (see below)
+hit_dice: 4+2
+melee_attacks: 2 claws (1d4) and 1 bite (1d6)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: low (5-7)
+morale: 70
+loot: Individual 5, Cache 4, 5 and 7
+experience: 400 +5/hp
+description: A caterwaul is a bipedal feline predator that stalks darkened  caves waiting for prey to walk past. These unusual creatures re- semble black panthers walking upright. On their hind legs they  move at 180ft, but they can drop to all fours and sprint very fast  (240ft) for short distances.  What makes these creatures unique is their unusually high dex- terity. This will vary from individual to individual. Roll d100 and  check the chart below. D100 AC BONUS ATTACKS/ROUND 01–30 0 [0] 1/1 31–60 -1 [+1] 3/2 61–90 -2 [+2] 3/2 91–93 -3 [+3] 2/1 94–97 -4 [+4] 2/1 98 -5 [+5] 2/1 99 -6 [+6] 5/2 00 -7 [+7] 5/2 The attacks per round works much the same way as for fighters,  referring to a full attack routine (claw, claw, bite) rather than  individual attacks.
+abilities:
+- heading: Surprise and Initiative
+  text: Caterwauls can only be surprised (for one segment) on a roll of  1 on a d10.
+- heading: Special Features
+  text: Thief-Type Abilities. Climb 95%, Move quietly 75%, Hide 75%.
+- heading: Special Attacks
+  text: 'Screech. When a caterwaul attacks for the first time in a com- bat, it lets out a distinctive screech, which inflicts 1d8 hit points  of damage to all within 60ft. This may also summon wandering  monsters. Unarmed Combat. Caterwauls do not employ unarmed combat  but can be grappled. If not fended off, they score an unarmed  hit with a 2+ on 1d20. Hit Mods: ATK/DEF +10/-10. Overbear  Results Mods: ATK/DEF na/na. Grappling Result Mods: ATK/DEF  +0/+0. CATTLE'

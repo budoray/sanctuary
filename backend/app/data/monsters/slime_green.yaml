@@ -1,0 +1,21 @@
+name: Slime, Green
+frequency: rare
+no_encountered: 1d4
+size: small
+alignment: neutral
+move: None
+armour_class: 10 [10]
+hit_dice: '2'
+melee_attacks: Special
+senses: Special
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 20 +2/hp
+description: Green slime is an occasional dungeon hazard. Sages debate  whether it is vegetable or fungoid in nature. It grows over the  ceiling of an area until a pendulous bulb of slime is almost ready  to drop. The vibrations from passing creatures cause these  bulbs to fall. This hazard makes it a good idea for adventurers  to carry open flame and cure disease spells.
+abilities:
+- heading: Immunities and Resistances
+  text: Only Damaged by Fire, Cold, Cure Disease.  Green slime is un - harmed by weapons and most spells. It does take damage  from cold and fire, and can be instantly killed by a cure disease  spell.
+- heading: Special Attacks
+  text: Converts Flesh to Slime.  If green slime touches exposed flesh,  it will convert the flesh rapidly to green slime. It can also eat  through wood (slowly) and metal (quickly—a metal item will be  consumed in 1d6 rounds). Only stone can stop it. Failing that, a creature with green slime on it must cut away the  affected area, amputate the affected limb, or die in 1d4 rounds  (after which it will be converted to green slime and cannot be  raised or resurrected).

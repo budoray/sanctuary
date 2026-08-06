@@ -1,0 +1,30 @@
+name: Lycanthrope, Wererat
+frequency: rare rare uncommon very rare common no.  encountered 1d4 2d4 4d6 1d6 3d6
+size: large large small to medium large medium
+alignment: chaotic good neutral lawful evil neutral chaotic evil
+move: 90ft 120ft 120ft 120ft 150ft
+armour_class: 6 [14]
+hit_dice: 3+1
+melee_attacks: 1 sword (1d8)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft Infravision 60ft Infravision
+  60ft
+lair_chance: 10% 20% 30% 15% 25%
+intelligence: exceptional (15-16) average (8-10) very (11-12) average (8-10) average
+  (8-10)
+morale: 85 70 60 75 70
+loot: Cache 4, 6, 10 Hoard 2, Cache 5 Hoard 3 Hoard 4, Cache 3  (x5) Hoard 2
+experience: 150 +4/hp
+description: 'WERERAT The horrid ratmen infest the underground sewers and cata - combs
+  under large cities. They can assume any of three forms:  human, giant rat, or man-rat.
+  In human or man-rat form, they  often arm themselves with swords, but prefer to
+  lure unsus - pecting individuals into traps where the victim may be held for  ransom
+  or later meals. Rumours persist of a city of black wer - erats on a remote shore;
+  the more fanciful tales suggest the  black wererats may have powerful spell casters
+  among their  number who can magically affect the phases of the moon. Stealth. Wererats
+  surprise on a 1-4 on 1d6. Immune to Non-Silver Mundane Weapons.  This creature is
+  im - mune to piercing, blunt, and slashing damage from weapons  and unarmed attacks,
+  unless the weapon causing that damage  has a magical bonus of +1 or more, or is
+  made of silver. Summon Rats. A wererat may summon 2d6 giant rats and con - trol
+  them. They appear in 1d4 rounds. Lycanthropy. See general description for all lycanthropes
+  (shape- shifting and transmission).'
+abilities: []

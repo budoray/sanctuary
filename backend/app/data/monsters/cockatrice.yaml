@@ -1,0 +1,19 @@
+name: Cockatrice
+frequency: uncommon
+no_encountered: 1d6
+size: small
+alignment: neutral
+move: 60ft; 180ft flying (AA:IV)
+armour_class: 6 [14]
+hit_dice: 5 [15]
+melee_attacks: 1 bite (1d3 + petrifaction)
+senses: Infravision 60ft
+lair_chance: 40%
+intelligence: animal (1)
+morale: 70
+loot: Hoard 4
+experience: 170 +4/hp
+description: These creatures have the head, legs and wings of a rooster,  while the body is that of a serpent. Its wings are functional and  allow it to fly. The creature is believed to be from a rooster’s egg  hatched by a serpent. Although the beast is capable of inflicting light wounds with its  beak, the mere touch of the cockatrice is capable of turning any  creature to stone.
+abilities:
+- heading: Special Attacks
+  text: Petrifaction. If the cockatrice hits with beak or claws, the touched  creature must roll a successful saving throw vs petrifaction or  be instantly turned to stone. The power of this touch is capable  of affecting astral and ethereal beings. Unarmed Combat.  Cockatrices cannot be overborne or grap - pled, and do not employ these tactics.

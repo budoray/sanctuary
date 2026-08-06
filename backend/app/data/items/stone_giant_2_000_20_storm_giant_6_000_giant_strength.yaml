@@ -1,0 +1,4 @@
+name: Stone giant 2,000 20 Storm giant 6,000 Giant Strength
+classes: FPR
+description: There is a separate potion for each type of giant, and the drinker of this potion temporarily gains the strength score of the appropriate type of giant. This bonus in strength is accompanied by the giant ability to toss rocks at opponents (range of 10-200ft). Consult the table below for the giant types and strength abilities granted. Giants are listed in order of ascending strength. D20 GIANT STRENGTH MELEE DMG WT ALLOW. ROCK DMG MAJOR TEST VALUE (GP) 1-6 Hill +1d8 +450 1d6 50% 900 7-10 Stone +1d10 +500 1d12 60% 1,000 11-14 Frost +1d12 +600 1d8 70% 1,100 15-17 Fire +2d6 +750 1d8 80% 1,200 18-19 Cloud +2d8 +900 1d10 90% 1,300 20 Storm +2d10 +1200 1d12 99% 1,400
+source: OSRIC_3.0_Gamemaster_Guide.pdf

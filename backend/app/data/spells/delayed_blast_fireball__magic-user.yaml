@@ -1,0 +1,14 @@
+name: Delayed Blast Fireball
+slug: delayed_blast_fireball
+reversible: false
+class: magic-user
+level: 7
+school: Arcane Evocation
+range: 100-ft+10-ft/level
+duration: See below
+area_of_effect: 20-ft radius sphere
+components: V,S,M
+casting_time: 7 segments
+saving_throw: Half
+text: A delayed blast fireball is somewhat more powerful than a normal fireball (+1 damage on each die). At the time of casting, the magic user states an amount of time, from 1 segment (6 seconds) to 5 rounds (5 minutes), and the fireball will not explode until that time is reached. Otherwise, except as noted above, the spell functions as per the description of the fireball spell.
+source: wiki2_spells.txt

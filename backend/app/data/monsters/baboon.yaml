@@ -1,0 +1,17 @@
+name: Baboon
+frequency: common
+no_encountered: 10d4
+size: small
+alignment: neutral
+move: 120ft
+armour_class: 7 [13]
+hit_dice: 1+1
+melee_attacks: 1 bite (1d4 piercing)
+senses: Keen-eared (detect invisible 5%)
+lair_chance: 10%
+intelligence: low (5-7)
+morale: 50
+loot: Nil
+experience: 30 +1/hp
+description: 'Baboons are communal, omnivorous creatures found in warm- er climes. They live in troops. Baboons sometimes enter houses  to steal food, or raid farms to take goats or swine. They tend to  flee from serious resistance.  Unarmed Combat. Baboons can choose to overbear instead of  making a regular melee attack, and can be grappled. If not  fended off, they score an unarmed hit with a 2+ on 1d20. Hit  Mods: ATK/DEF +8/-8. Overbear Results Mods: ATK/DEF +2/-2.  Grappling Result Mods: ATK/DEF -2/+2. BADGER'
+abilities: []

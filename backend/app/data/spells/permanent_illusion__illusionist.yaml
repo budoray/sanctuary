@@ -1,0 +1,14 @@
+name: Permanent Illusion
+slug: permanent_illusion
+reversible: false
+class: illusionist
+level: 6
+school: Phantasmal Illusion
+range: 30-ft
+duration: Permanent
+area_of_effect: 40×40-ft square+10×10-ft square/level
+components: V,S,M
+casting_time: 6 segments
+saving_throw: See below
+text: Except as noted otherwise above, this spell functions as a spectral force spell requiring no concentration to maintain.
+source: wiki2_spells.txt

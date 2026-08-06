@@ -1,0 +1,14 @@
+name: Push
+slug: push
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Conjuration/Summoning
+range: 10-ft+3-ft/level
+duration: Instantaneous
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: The magic user casts this spell and points toward the desired target, which is instantly pushed away from the caster. The supernatural force exerted by the spell is only about one pound per level of the caster, but the spell can be used to move small objects or to throw enemies off balance. A small object can be moved at a rate of 10-ft/round(directly away from the caster), and if the object is a weapon held by a creature, the creature will suffer a penalty “to hit” equal to the caster's level. For example, a tenth level magic user could exert so much eldritch force against an attacking orc's axe that the orc would suffer a -10 “to hit” with it. Moving an actual creature or a heavier object is only possible if the creature's weight in pounds is not more than 50 times the caster's level.
+source: wiki2_spells.txt

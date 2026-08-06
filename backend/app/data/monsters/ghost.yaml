@@ -1,0 +1,25 @@
+name: Ghost
+frequency: very rare
+no_encountered: '1'
+size: medium
+alignment: any evil
+move: 90ft floating
+armour_class: 0 [20] when manifest/special
+hit_dice: 10+4
+melee_attacks: 1 (Wither)
+senses: Infravision 60ft, Detect invisible 25%
+lair_chance: 25%
+intelligence: high (13-14)
+morale: 100
+loot: Hoard 5, Cache 5
+experience: 4,200 +14/hp
+description: Ghosts are the spiritual remains of extremely evil humans who  have been denied the ordinarily inexorable movement of their  souls to the outer planes of existence after discarding their  mortal shell. This sundering of their metaphysical essence cre - ates a foul thing, roaming dark and desolate places, existing in  both the ethereal plane and the prime material, seeking to slake  a thirst that can never be sated. This exigent need for living es - sences is what drives these spirits into contact with mortals. The  ghost has different attributes when non-manifest (ethereal) and  after it has manifested. A ghost’s first attack, before it manifests itself, is an attempt at a  magic jar. Any creature within 180ft is threatened by the being’s  magic jar ability, as per the spell. The ghost cannot be attacked  while it is still unmanifested (unless the attacker is also ethere- al). If the magic jar fails, then the ghost will manifest itself, taking  on an ectoplasmic quality. Specially
+  forged “pure” metals, espe- cially silver, can cause half-damage to a ghost while it is mani - fested in this fashion, and magic weapons can affect it normally.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Ghosts are turned as type 11 Undead. Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease. Ethereal Form. Until the ghost manifests itself physically, it is im- mune to all attacks, spell or no, unless the attacker has a meth- od to become ethereal. Even if the spell caster is in this state,  ghosts are still immune to many forms of spells, though no  sage has recorded what those magics might be. Magical weap- ons used in an ethereal state against a ghost typically have to  strike against AC 7 [13] or 8 [12]. Immune to Non-Silver Mundane Weapons.  Once manifested, the  ghost is still immune to piercing, blunt, and slashing damage  from weapons, unless the weapon causing that damage has a  magical bonus of +1 or more, or is silver (which only inflicts half  damage unless also magical).
+- heading: Special Features
+  text: Deadly to Look Upon.  Merely beholding the awfulness of the  ghost requires a saving throw vs magic (bonus described be - low). Failure causes the viewer to flee in panic (for 2d8 turns)  and initiates a weaker form of the ghost’s wither attack—which  ages the victim 3d6 years as the ghost feasts on the life of the  victim. Clerics level 7 or greater can ignore this effect, as they  have a better understanding of how to ward off such meta - physical forces, while other creatures with 9 or more hit dice  or levels gain a +3 to their saves.
+- heading: Special Attacks
+  text: 'Magic Jar. A ghost’s first attack, before it manifests itself, is an  attempt at a magic jar. Any creature within 180ft is threatened  by the being’s magic jar ability, as per the spell.  Wither. The manifest state allows the ghost to strike victims  physically, with the full power of their withering attack—caus - ing the victim to age 7d6 years per successful attack, no save  possible. Victims who exceed their allotted lifespan are forever  dead, with only a wish capable of reversing this end. Optional Rule: As an abstract way of handling aging, for every  10 years of aging, the victim is treated as having a -1 to all sav- ing throws (until the aging is reversed). If the victim has been  aged 60 years (120 years in the case of demi-humans), this  indicates death from old age. Demi-humans generally have a  longer lifespan than 120 years, but it’s easy to consider that  ghostly aging is also quite traumatic. Unarmed Combat. Ghosts cannot be overborne or grappled, and  do not employ
+    these tactics.'

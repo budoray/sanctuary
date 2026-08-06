@@ -1,0 +1,14 @@
+name: Monster Summoning III
+slug: monster_summoning_iii
+reversible: false
+class: magic-user
+level: 5
+school: Arcane Conjuration/Summoning
+range: 50-ft
+duration: 4 rounds+1 round/level
+area_of_effect: Summoned creatures
+components: V,S,M
+casting_time: 5 segments
+saving_throw: None
+text: 'This spell functions in the same manner as monster summoning I, but calls 1d4 creatures as determined on the following table: Monster Summoning III Results (magic user level 5) d10 Monster Summoned 1 Beetle, giant boring 2 Bugbear 3 Gelatinous Cube 4 Ghoul 5 Lizard, giant 6 Lycanthrope, wererat 7 Ogre 8 Spider, huge 9 Spider, large 10 Weasel, giant'
+source: wiki2_spells.txt

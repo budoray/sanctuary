@@ -1,0 +1,25 @@
+name: Aerial Servant
+frequency: very rare
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 240ft flying
+armour_class: 3 [17]
+hit_dice: '16'
+melee_attacks: 1 slam (8d4 blunt)
+senses: Standard, Detect invisible 15%
+lair_chance: Nil
+intelligence: semi (2-4)
+morale: 125
+loot: Nil
+experience: 5,250 +20/hp
+description: Aerial servants are creatures from the Elemental Plane of Air,  sometimes met on the ethereal or astral planes (where they are  visible), but more often met when conjured by the divine spell  aerial servant. On the Prime Material Plane, aerial servants are  invisible. These beings are very strong and can carry 1,000 lbs without  being encumbered. If a summoned aerial servant can’t carry out its mission, it will  go back to the cleric who summoned it and attack them.
+abilities:
+- heading: Surprise and Initiative
+  text: The Aerial servant surprises opponents on 1-4 on 1d6.
+- heading: Immunities and Resistances
+  text: Magical Phenomenon.  The aerial servant doesn’t need to eat,  drink, sleep, or breathe. Magic can’t put it to sleep. Gases can’t  harm it, and it is immune to poison and disease. Immune to Mundane Weapons.  The aerial servant is immune to  piercing, blunt, or cutting damage, unless the weapon causing  that damage is magical.
+- heading: Special Features
+  text: Compressible. The aerial servant can fit through a gap one inch  wide. It can’t be restrained and isn’t affected by being prone. Invisible. While on the Prime Material Plane, the aerial servant  is invisible. Unarmed Combat. Aerial servants cannot be overborne or grap- pled, and do not employ these tactics.
+- heading: Languages
+  text: Aerial servants can’t talk and don’t speak languages, but the di- vine spell Aerial Servant enables the creature to understand its  summoner’s commands.

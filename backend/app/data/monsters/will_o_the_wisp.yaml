@@ -1,0 +1,21 @@
+name: Will–o–the–wisp
+frequency: uncommon
+no_encountered: 1d3
+size: small
+alignment: chaotic evil
+move: 180ft flying (AA:VI)
+armour_class: –8 [28]
+hit_dice: '9'
+melee_attacks: 1 electric shock (2d8)
+senses: Infravision 60ft
+lair_chance: 50%
+intelligence: exceptional (15-16)
+morale: 90
+loot: Cache 12
+experience: 1,400 +12/hp
+description: Will-o-the-wisps are strange, fey creatures that resemble danc - ing lights or torches. Living in desolate and dangerous locations,  they seek to draw unwary travellers into bogs or quicksand. If a  will-o-the-wisp is clearly faced with death in combat, it will bar- gain the location of its treasure in exchange for freedom.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Immunity. Will-o-the-wisps are immune to all spells with  the exception of protection from evil, magic missile, and maze.
+- heading: Special Attacks
+  text: Electric Shock. The will o the wisp can deliver its electric shock at  a range of up to 10ft. WOLF

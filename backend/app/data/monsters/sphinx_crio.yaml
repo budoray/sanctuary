@@ -1,0 +1,19 @@
+name: Sphinx, Crio–
+frequency: very rare
+no_encountered: 1d2
+size: large (9ft long)
+alignment: neutral
+move: 160ft; 240ft flying (AA:III)
+armour_class: -2 [22]
+hit_dice: '9'
+melee_attacks: 2 claws (2d4) and 1 head-butt  (3d6)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: average (8-10)
+morale: 90
+loot: Hoard 6
+experience: 900 +4/hp
+description: Less “magical” than their more human-seeming kin, the crio - sphinx is a winged lion with the head of a ram. These creatures  simply collect treasure and hunt much as other intelligent be - ings.
+abilities:
+- heading: Special Attacks
+  text: On a successful to-hit roll of 20, a head-butted opponent is  stunned for a single round.

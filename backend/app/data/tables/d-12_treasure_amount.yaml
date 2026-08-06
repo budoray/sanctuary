@@ -1,0 +1,22 @@
+id: d-12
+name: TREASURE AMOUNT
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- If the treasure is guarded by a monster, roll twice and add 1 to
+- each roll. Otherwise roll once at no bonus.
+- D20 RESULT
+- 1–5 2d10×100cp
+- 6–10 2d10×100 sp
+- 11–13 2d8×100 ep
+- 14–15 1d4×100 gp
+- 16–17 2d10×10pp
+- 18 Gems/ Jewellery—roll 1d8, 1–5 = 1d3  gems, 6–8 = 1
+- jewellery
+- '19 Roll 1d8: 1–5 = no treasure, 6–8 = 1 magic item'
+- 20 1 magic item
+- Results from this table should be multiplied by the level of the
+- dungeon concerned, with the exception of magic items. A magic
+- item will be more powerful if found in a deeper dungeon level.
+- So if the party is on the third dungeon level and the d20 shows
+- “14”, they will receive 3d4×100 gp rather than 1d4. The GM
+- should adjust any extreme results to keep them proportional.

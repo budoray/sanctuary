@@ -1,0 +1,4 @@
+name: Negation
+classes: CDIM
+description: This device negates the spell or spell-like function or functions of magic items. The wielder points the wand at the magic item, and a pale grey beam shoots forth to touch the target device or being after 1 segment. The ray negates any function of all wands, and any other target item or magical effect (including spells cast by the target) has a 25% chance of resisting the negation. Each use of the wand costs 1 charge, and may be used one time per round. A wand of negation can never be recharged.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

@@ -1,0 +1,14 @@
+name: Cure Critical Wounds
+slug: cure_critical_wounds
+reversible: true
+class: druid
+level: 6
+school: Druidic Necromancy
+range: Touch
+duration: Instantaneous (permanent)
+area_of_effect: One creature
+components: V,S,M
+casting_time: 8 segments
+saving_throw: None (neg.)
+text: This powerful spell is similar in nature to cure light wounds, operating in the same fashion but healing 3d8+3 hit points of damage. The reverse of the spell functions as cause critical wounds, but delivers 3d8+3 points of damage.
+source: wiki2_spells.txt

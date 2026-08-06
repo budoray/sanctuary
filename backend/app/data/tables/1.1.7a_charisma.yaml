@@ -1,0 +1,26 @@
+id: 1.1.7a
+name: CHARISMA
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- CHARISMA SIDEKICK
+- LIMIT
+- LOYALTY
+- MODIFIER
+- REACTION
+- MODIFIER
+- 3 1 -30 -25
+- 4 1 -25 -20
+- 5 2 -20 -15
+- 6 2 -15 -10
+- 7 3 -10 -5
+- 8 3 -5 0
+- 9-11 4 0 0
+- 12 5 0 0
+- 13 5 0 +5
+- 14 6 +5 +10
+- 15 7 +15 +15
+- 16 8 +20 +25
+- 17 10 +30 +30
+- 18 15 +40 +35
+- 19 20 +50 +40
+- Notes To  Charisma Table

@@ -1,0 +1,14 @@
+name: Veil
+slug: veil
+reversible: false
+class: illusionist
+level: 6
+school: Phantasmal Illusion
+range: 10-ft/level
+duration: 1 turn/level
+area_of_effect: 20×20-ft/level
+components: V,S
+casting_time: 3 segments
+saving_throw: None
+text: Veil is an extremely powerful spell of the same type as hallucinatory terrain, which alters the appearance of an area and everything in it, including people and other creatures. The illusion will fool even the sense of touch.
+source: wiki2_spells.txt

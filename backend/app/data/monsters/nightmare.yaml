@@ -1,0 +1,24 @@
+name: Nightmare
+frequency: very rare
+no_encountered: '1'
+size: large
+alignment: neutral evil
+move: 150ft; 360ft flying (AA:IV)
+armour_class: -4 [24]
+hit_dice: 6+6
+melee_attacks: 2 hooves (1d6+4) and 1 bite  (2d4)
+senses: Infravision 60ft
+lair_chance: 50%
+intelligence: very (11-12)
+morale: 80
+loot: Nil
+experience: 525 +8/hp
+description: Nightmares serve as mounts for powerful evil beings. Whilst in  shape they resemble large warhorses, they are unmistakably  otherworldly, having blood red eyes, fiery nostrils, powerful  fangs, a midnight black coat, a mane of shadow and hooves that  appear to leap aflame when they run.  Although most nightmares do not possess wings, they can fly  through the air considerably faster than they can run along the  ground. Their capacity for such swift flight is greatly valued by  those they serve, as is their ferocity in combat. Nightmares hate  living creatures and, being given to viciousness, will generally  attack any non-evil entity they encounter.  Nightmares have a strong sense of purpose and this can make  them difficult to control; it takes an iron will or powerful magic  for a rider to perpetually retain mastery. It is thought that their  services can also be bargained for, but exactly what evil such an  agreement might entail is unknown. If ridden by a creature weighing
+  more than 100 lbs, the night - mare’s aerial agility level is reduced to III.
+abilities:
+- heading: Special Features
+  text: Smoke Aura. Nightmares give off wisps of noxious smoke, caus- ing anyone within ten feet to make a saving throw vs paralysis  or suffer a -2 penalty on “to hit” and damage rolls while in the  radius of effect.
+- heading: Special Attacks
+  text: Flaming Hooves. A hit by a nightmare’s hooves may set flamma - ble objects on fire.  Unarmed Combat.  Nightmares cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics.
+- heading: Languages
+  text: Though it is known that nightmares can understand what their  riders ask of them, they are not thought to be able to speak  themselves; but they seem to be able to communicate with one  another well enough.

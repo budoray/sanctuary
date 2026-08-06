@@ -1,0 +1,8 @@
+id: 2.8.1e
+name: NOBLE PROFESSIONS SUB-TABLE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 CLASS LEVEL
+- 01–50 Normal Human 0
+- 51–85  Fighter d8+4
+- 86–00 Cleric d8+4

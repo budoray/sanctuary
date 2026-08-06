@@ -1,0 +1,27 @@
+name: Annis Hag
+frequency: very rare
+no_encountered: 1d3
+size: large
+alignment: chaotic evil
+move: 150ft
+armour_class: 0 [20]
+hit_dice: '9'
+melee_attacks: 2 claws (1d8+1 slashing) and 1 bite  (1d8+1 piercing)
+senses: Infravision 60ft, Detect invisible 5%,  and Illusion sense
+lair_chance: 20%
+intelligence: exceptional (15-16)
+morale: 90
+loot: Hoard 4
+experience: 1,300 +12/hp
+description: When an evil fey abducts the infant daughter of giants or ogres,  they can raise it as an annis hag. Annis hags have a variable  creature type—some are giants, others fey. They are carnivo - rous and suffer from constant, gnawing hunger, which they can  temporarily relieve by devouring a human, demi-human or hu - manoid.
+abilities:
+- heading: Immunities and Resistances
+  text: Illusion Sense. Annis hags are never fooled by illusion magic.
+- heading: Special Features
+  text: 'Spell-Like Abilities.  Annis hags can cast each of the following  spells, without material components: 3/day: Change self (Illusionist 1) 3/day: Fog cloud (Illusionist 2)'
+- heading: Special Attacks
+  text: 'Melee Attack: Seize and Devour. Seizing: When both of an annis hag’s claw attacks hit the same  target, and the target’s size is medium or smaller, the target is  seized. The seize ends when the creature escapes, when either  the annis or the seized creature is killed, or when something  moves the seized creature such that it’s no longer within 5ft of  the annis. • While it’s seized, the seized creature can’t attack, move, or use  its arms and legs. When the annis moves, the seized creature  moves with it. The annis’ movement speed is halved while it’s  seized a creature. Each annis can only seize one creature at  a time, and two or more annis can’t seize the same creature. • A creature that’s seized can try to escape on its  initiative. It at- tempts a Major Test of Strength. If the creature passes, then it  escapes the annis. It can then choose to move up to its speed  away from the annis, but it can’t take any other action that  round. If it fails, then it remains seized and
+    can’t take any oth- er action that round. • Other creatures can help the seized creature to escape by at- tempting a Major Test of Strength. If they pass, they wrestle  the creature away from the annis, so the creature is no longer  seized. They can’t take any other action that round. If they  fail, then the seized creature remains seized and the other  creature can’t take any other action that round. Devouring. If the annis has seized a creature, then on its initia- tive in the next round, instead of attacking, the annis can de- vour the creature it has seized. The creature takes 3d8+3 pierc- ing damage (no saving throw). If this damage kills the creature,  then the devoured creature is no longer seized but inside the  annis’ belly. The annis digests the corpse 1d3 rounds later. A  digested corpse can’t be raised. Unarmed Combat. Annis hags can choose to overbear instead  of making a regular melee attack. If not fended off, they score  an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF
+    +10/- 10. Overbear Results Mods: ATK/DEF +4/-4. Grappling Result  Mods: ATK/DEF +2/-2. They do not employ grappling tactics.'
+- heading: Languages
+  text: Annis speak common, and the tongue of the fey that raised  them. Most also speak various giantish tongues, which can in - clude the languages of ogres, ettins, and/or trolls. ANT, GIANT

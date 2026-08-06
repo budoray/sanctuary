@@ -1,0 +1,23 @@
+name: Dragon, Bronze
+frequency: rare
+no_encountered: 1d4
+size: varies by age
+alignment: lawful good
+move: 90ft; 240ft flying (AA:II)
+armour_class: 2 [18]
+hit_dice: 8 to 10
+melee_attacks: 3 (1d6/1d6/4d6)
+senses: Infravision 60ft, Detect invisibility by  age category
+lair_chance: 45%
+intelligence: exceptional (15-16)
+morale: 85, 90, or 95 (by HD)
+loot: Hoard 8, Cache 5 and 6
+experience: Varies by hit dice and age
+description: The reclusive bronze dragons live in caverns in temperate cli - mates. They are interested in the ways of humanity and often  use shape-changing powers to watch, observe and help peo - ple. They prefer to have their lairs in places isolated from prying  eyes, however, and thus often place their entrances in lakes or  ponds. They have found that their treasure hordes are tempting  targets for evil or even neutral adventurers.
+abilities:
+- heading: Special Features
+  text: Sleeping Dragon. A bronze dragon encountered in its lair has a  25% chance to be sleeping when the adventurers approach. If  the dragon is asleep, there is a 1 in 6 chance that it will awaken  from the mere presence of adventurers. Dragons also some - times feign sleep. Spellcasting Dragon. Roughly 60% of bronze dragons are spell - casters. If it can cast spells, it does so as a magic-user with a  level equal to the dragon’s age category.
+- heading: Special Attacks
+  text: Breath Weapon. Bronze dragon breath is (at the dragon’s choice)  one of two types. The first is a bolt of lightning, 100ft long and  5ft wide. It does damage equal to the dragon’s hit points (but a  save vs dragon breath halves this amount). The other option is  to breathe a cloud of repulsion gas (20ft ×30ft×30ft) which re - quires all subjects to save vs dragon breath or be repulsed for  6 minutes (as per the level 6 magic-user spell). The dragon may  use breath weapons up to three times per day.
+- heading: Languages
+  text: All dragons speak the draconic tongue, and there is a 60%  chance that a bronze dragon will also be able to speak common.

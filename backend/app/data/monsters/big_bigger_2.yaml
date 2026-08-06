@@ -1,0 +1,18 @@
+name: Big Bigger
+frequency: uncommon rare no.  encountered 2d6 1d8
+size: small medium
+alignment: neutral neutral
+move: 150ft 150ft
+armour_class: 7 [13] 6 [14]
+hit_dice: 1+1 3+3
+melee_attacks: 1 (1d8) 1 (2d6)
+senses: Keen Keen
+lair_chance: 10% 10%
+intelligence: animal (1) animal (1)
+morale: 50 65
+loot: See below See below
+experience: 40 +2/hp 75 +3/hp
+description: Big and bigger giant weasels are typically encountered in forest- ed areas, though some may also be found in dungeons.  Their pelts are quite valuable. Big weasel pelts sell for 1d6×100  gp, bigger weasel pelts for twice that amount or more.
+abilities:
+- heading: Special Attacks
+  text: Drain Blood. The bite of a giant weasel drains blood (automatic  damage after the first successful attack). The drain is 1d8 hp  per round for “big” giant weasels, and 2d6 hp per round for  the bigger version. Unarmed Combat. Giant weasels cannot be targeted with grap - pling or overbearing attacks, and they do not use these tactics.

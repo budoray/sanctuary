@@ -1,0 +1,19 @@
+name: Octopus, Giant
+frequency: rare
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 180ft swimming
+armour_class: 7 [13]
+hit_dice: '8'
+melee_attacks: 8 tentacles (1d4) and 1 bite  (2d6)
+senses: Standard
+lair_chance: 40%
+intelligence: non- (0)
+morale: N/A
+loot: Cache 4
+experience: 500 +10/hp
+description: Occasionally a giant octopus will surface to attack a passing  ship. They will attach themselves with two tentacles to the ship,  leaving the other 6 tentacles free to go after the crew. When the  squid has picked the ship clean it will crush the hull and drag the  wreckage to its lair. If the octopus loses more than 3 arms it will release the ship and  flee. As it does, the monster will release ink in the water leaving  a cloud 60ft deep by 80ft wide.
+abilities:
+- heading: Special Attacks
+  text: 'Grab and Constrict.  With a successful hit, the octopus grabs its  victim and holds it. The tentacle does an automatic 2d4 points  of blunt damage each round after a successful grab (only 1d4  on the initial hit). It takes one round to eat a dead victim, then  the tentacle is free to attack a new target. The only way to es - cape is to sever the tentacle (inflict 10 hp damage to it, which  doesn’t affect the creature’s total hp). When the tentacle hits,  roll 1d100 to determine how well it is holding the victim. • 01-25: Both arms are held and the victim cannot attack. • 26-75: One limb is held and the victim can attack with a -3  penalty.  • 76-00: Both arms are free and the victim can attack with only  a -1 penalty. OGRE'

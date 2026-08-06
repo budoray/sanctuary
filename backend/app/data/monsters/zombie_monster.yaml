@@ -1,0 +1,18 @@
+name: Zombie, Monster
+frequency: rare very rare no.  encountered 3d8 1d6
+size: medium large
+alignment: neutral neutral
+move: 60ft 90ft
+armour_class: 6 [14]
+hit_dice: '6'
+melee_attacks: 1 attack (2d8)
+senses: Infravision 60ft Infravision 60ft
+lair_chance: Nil Nil
+intelligence: non- (0) non- (0)
+morale: N/A N/A
+loot: Nil Nil
+experience: 145+6/hp
+description: Monster zombies are the animated corpses of larger humanoid  monsters
+  such as bugbears, ettins or ogres. They are harder for  a cleric to turn than a
+  normal zombie.
+abilities: []

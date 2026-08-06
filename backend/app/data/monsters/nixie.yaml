@@ -1,0 +1,27 @@
+name: Nixie
+frequency: rare
+no_encountered: 10d10
+size: small (4ft tall)
+alignment: neutral
+move: 60ft; 120ft swimming
+armour_class: 7 [13]
+hit_dice: 1d4 hp
+melee_attacks: 1 (by weapon)
+senses: Standard
+lair_chance: 95%
+intelligence: very (11-12)
+morale: 50
+loot: Hoard 3, Cache 3
+experience: 35 +1/hp
+description: 'Nixies are fey creatures, related to sprites, that make their  homes in freshwater lakes. They appear as strangely beautiful  humanoids with lightly scaled greenish skin and webbed hands  and feet. Their eyes are silver and their hair is dark green, and  they garb themselves in clothes of seaweed. Being fey, nixies  take great delight in enslaving humans.  Nixies are weak in combat but make up for this weakness by  attacking en masse and overwhelming their enemies. They fa - vour fighting with daggers (1d4 damage) and short spears (1d6  damage) which can be thrown. Nixies fear bright light and fire; their aquatic nature makes  these things foreign to them and a strong presentation of either  will drive them away. A strong light source presented underwa- ter will be obscured by schools of summoned fish surrounding  the spell effect.  Nixies lair at the bottom of lakes, where they weave living sea - weed into dwellings. These dwellings blend in with the under - water growth so
+  well they are 90% unlikely to be noted until  within 20ft of them. These underwater villages are guarded by  either 1d4 giant gar (25%) or 2d4 giant pike (75%) which will  obey commands from the nixies (see: Fish, Giant). Nixies can  venture onto dry land but do so only with great reluctance.'
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (25%).  Any magic spell or effect has a 25%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: Confer Water-Breathing (1/day). Nixies can confer the ability to  breathe water on another being, with duration of 24 hours. Summon Fish (3/day).  Nixies can summon 20d4 small fish to  obstruct both an invader’s vision and movement by massing  upon them. Vision is reduced to 10ft, and underwater move - ment is reduced by half.
+- heading: Special Attacks
+  text: 'Group Charm.  If a human or demi-human approaches within  30ft of a group of nixies they will attempt to charm him or her  with a special group charm spell. This charm requires a min - imum of 10 nixies to join hands and chant, and any person  hearing this fey chanting must save vs spells at -2 or enter the  water to serve the nixies for a period of a year and a day. It  should be noted: a side effect of this charm grants the ability to  breathe water for the duration of the spell. There is a brief op- portunity to break the charm; if a dispel magic is cast upon the  enthralled person before they enter the water there is a 75%  the spell will be broken, but once the victim has begun breath- ing water the chances of breaking the charm drop to only 10%. Unarmed Combat.  Out of water, nixies can be targeted with  grappling or overbearing attacks. If not fended off, they score  an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +4/- 4. Overbear Results Mods: ATK/DEF -2/+2. Grappling
+    Result  Mods: ATK/DEF -2/+2.'
+- heading: Languages
+  text: Nixies speak their own language and the common tongue. They  also appear to be able to communicate, at least on a rudimen - tary level, with freshwater fish of all types.

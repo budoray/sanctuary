@@ -1,0 +1,32 @@
+id: 2.14.1a
+name: STRONGHOLD BUILDING COST
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- STRUCTURE COST SHP
+- Barbican, stone (90ft L x 30ft W x 30ft H) 5,000 GP 150
+- Building, stone (60ft L x 60ft W x 20ft H) 600 GP 30
+- Building, wood (60ft L x 60ft W x 20ft H) 300 GP 12
+- Drawbridge (15ft L x 10ft W) 500 GP 15
+- Gate (10ft W x 15ft H) 600 GP 12
+- Gatehouse, stone
+- (70ft L x 70ft W x 30ft H) 2,500 GP 120
+- Keep, stone (150ft L x 150ft W x 30ft H) 8,000 GP 175
+- Moat (100ft L, 10ft D, 20ft W) 200 GP N/A
+- Palisade, wood (100ft L x 10ft H) 150 GP 8
+- Rampart, earthen (100ft L x 10ft H) 150 GP 20
+- Tower, stone (20ft L x 20ft W x 30ft H) 1,000 GP 40
+- Tower, stone (30ft L x 30ft W x 30ft H) 1,500 GP 60
+- Tunnel, underground
+- (10ft L x 10ft W x 10ft H) 250 GP N/A
+- Wall, stone (100ft L x 10ft W x 30ft H) 1,000 GP 30
+- WAR MACHINES
+- These massive contraptions require crews of up to half a dozen
+- trained soldiers to operate. They aim and fire so slowly that they
+- are unable to purposefully target small moving objects. That
+- said, any being unfortunate enough to be present on the spot
+- a catapult or trebuchet missile hits must save versus death or
+- suffer ten times the rolled SHP damage as HP damage.
+- Additionally, giant-hurled boulders and the mighty blows of
+- such eldritch beings as iron golems, stone golems, and earth el-
+- ementals inflict 1d3 SHP damage. Some particularly devastating
+- spells and magic items also cause SHP damage as shown below.

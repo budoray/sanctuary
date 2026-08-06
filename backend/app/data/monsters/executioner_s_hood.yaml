@@ -1,0 +1,19 @@
+name: Executioner’s Hood
+frequency: rare
+no_encountered: '1'
+size: small
+alignment: neutral evil
+move: 60ft
+armour_class: 6 [14]
+hit_dice: 3 to 6 hit dice
+melee_attacks: 1 (1d4)
+senses: Standard
+lair_chance: Nil
+intelligence: semi- (2-4)
+morale: N/A
+loot: Nil
+experience: 250 +4/hp
+description: A small, weird monster that may be related to the lurker above,  the executioner’s hood often dwells underground or in ruins.  The creature drops from above to cover a victim’s head and  suffocate them. Because the executioner’s hood actually sur - rounds its victim’s head, any attack affecting the creature will  also affect its victim. The only known ways to remove an executioner’s hood are to  kill it or to bathe it in alcohol, which will intoxicate it until it be - comes flaccid and helpless.
+abilities:
+- heading: Special Attacks
+  text: Strangle. The executioner’s hood drops from niches, cracks or  anchor-points on the ceiling onto its victim’s head and begins  to strangle. If its first attack is successful, the creature will hit  automatically each round thereafter, inflicting rolled damage  (1d4 hp). Unarmed Combat. Executioner’s hoods cannot be overborne or  grappled, and do not employ these tactics.

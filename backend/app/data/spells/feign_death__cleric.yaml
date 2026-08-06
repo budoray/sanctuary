@@ -1,0 +1,14 @@
+name: Feign Death
+slug: feign_death
+reversible: false
+class: cleric
+level: 3
+school: Clerical Necromancy
+range: Touch
+duration: 1 turn+1 round/level
+area_of_effect: One willing creature
+components: V,S,M
+casting_time: 2 segments
+saving_throw: None
+text: This spell magically slows the recipient's metabolism into a state so close to death that it is impossible to distinguish the enspelled person from a corpse by any means other than magical. The recipient can hear, smell, and think; the senses of touch and sight no longer function. Damage caused to the pseudo-corpse is reduced by one half, and the spell's recipient will not even know that the damage has been caused–potentially a dangerous situation. A person under the influence of this spell is not subject to level draining by the undead and will not be affected by poisons until the spell wears off or is otherwise removed; the caster can remove the catalepsy at will, and the spell is subject to being dispelled. The clerical version of the spell is not subject to a limit on the character level it can affect. Note that the spell cannot be cast upon an unwilling subject.
+source: wiki2_spells.txt

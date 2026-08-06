@@ -1,0 +1,20 @@
+name: Mystic Nomad
+frequency: rare (uncommon)
+no_encountered: 30d10
+size: medium
+alignment: any lawful
+move: 120ft
+armour_class: Usually 7 [13]
+hit_dice: 1d6 hp
+melee_attacks: By weapon
+senses: Standard
+lair_chance: 5%
+intelligence: average (8-10)
+morale: N/A
+loot: Individual 1 each; in lair Cache 12
+experience: Varies
+description: 'Previous editions used the term “dervish”, which isn’t accurate  to the broader concept. Mystic nomads are highly-religious warrior-bands, of any lawful  alignment. They will always be led by higher level fighters and  clerics as follows.  Fighters • For every 30 mystic nomads: 1 additional 3rd level fighter • For every 40 mystic nomads: 1 additional 4th level fighter • For every 50 mystic nomads: 1 additional 5th level fighter Clerics • If under 125 mystic nomads: (1) 10th level cleric and 2 assis - tants (4th & 5th level  clerics) • If under 250 mystic nomads: (1) 11th level cleric and 2 assis - tants (6th & 7th level  clerics) • If more than 250: (1) 12th level cleric and 2 assistants (both  8th level  clerics) There is a 15% chance per 50 mystic nomads that a magic-us - er will be present. The magic-user will be of 7th or 8th level (if  more than 200 mystic nomads are present) with two assistants  of 3rd or 4th level. Mystic nomads are always mounted on light or medium
+  war - horses.'
+abilities:
+- heading: Special Attacks
+  text: 'Mystic nomads are disciplined and fearless, attacking with +1  on to-hit and damage rolls. Unarmed Combat. Mystic nomads can make grappling or over - bearing attacks. If not fended off, they score an unarmed hit  with an 8+ on 1d20. Hit Mods: ATK/DEF +8/-6. Overbear Results  Mods: ATK/DEF +0/+0. Grappling Result Mods: ATK/DEF +0/+0.'

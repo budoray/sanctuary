@@ -1,0 +1,23 @@
+name: Slithering Tracker
+frequency: rare
+no_encountered: '1'
+size: small
+alignment: neutral
+move: 120ft
+armour_class: 5 [15]
+hit_dice: '5'
+melee_attacks: Special
+senses: Special
+lair_chance: 10%
+intelligence: average (8-10)
+morale: 70
+loot: Hoard 3
+experience: 250 +5/hp
+description: Slithering trackers live in dungeons, ruins and dark places. They  are transparent and if not in natural sunlight are almost impos- sible to see. They almost never attack their prey immediately,  instead following and waiting until their target is asleep. They  can follow through almost anything, being amorphous in shape  and capable of seeping through tiny gaps, such as door jambs  or cracks in stonework.
+abilities:
+- heading: Immunities and Resistances
+  text: Ooze. This creature cannot be knocked prone, and is not affect- ed by lack of light, invisible opponents, gases, or other circum- stances that would not affect an ooze. Compressible. This creature can fit through a gap one inch wide.  It can’t be restrained and isn’t affected by being prone.
+- heading: Special Features
+  text: Almost Invisible. If not in natural sunlight, a slithering tracker has  a 19 in 20 chance to be effectively invisible. Since the tracker  tries to follow its prey, this should be determined in one die  roll by the GM that covers all the adventurers. Once combat  begins, each adventurer may roll separately to determine if  they can see the creature.
+- heading: Special Attacks
+  text: Paralyse Sleeping Opponent. If a slithering tracker catches its vic- tim asleep, it will touch it, forcing the victim to roll a saving  throw vs paralysation or be totally paralysed for 1d6 hours.  The tracker will then feed directly on its victim’s life energy,  killing it in 1 hour. Unarmed Combat. These creatures cannot effectively be target - ed with grappling or overbearing attacks, and do not use these  tactics.

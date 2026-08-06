@@ -1,0 +1,19 @@
+name: Giant, Hill
+frequency: common
+no_encountered: 1d10
+size: large (10.5ft)
+alignment: chaotic evil
+move: 120ft
+armour_class: 4 [16]
+hit_dice: 8+1d2
+melee_attacks: 1 (2d8)
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: low (5-7)
+morale: 85
+loot: Hoard 4
+experience: 1,200 +12/hp
+description: In many ways hill giants resemble large ogres, and they will often  wield some type of bludgeoning weapon. They dress in animal  skins and live in mostly inhospitable locations. Half of the time  hill giants have other animals or beings guarding their homes.  When guards are present, there is a 30% probability they are 1  to 3 giant lizards, 20% probability they are 2d4 ogres, and 50%  probability they are 2d4 dire wolves. When encountering more  than 4 hill giants, the first seven are adults and additional indi - viduals are young (treat as ogres).
+abilities:
+- heading: Special Attacks
+  text: 'Ranged Attack (Thrown Rocks). Hill giants can cause 2d8 hit points  in damage by throwing large rocks from between 10ft to 200ft.  Likewise, they can catch rocks tossed at them with a 30% prob- ability. Unarmed Combat. Hill giants cannot be targeted with grappling  or overbearing attacks. They will occasionally make an over - bearing attack. If not fended off, they score an unarmed hit  with a 2+ on 1d20. Hit Mods: ATK/DEF +8/na. Overbear Results  Mods: ATK/DEF +4/na. Grappling Result Mods: ATK/DEF na/na.'

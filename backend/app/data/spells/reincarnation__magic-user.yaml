@@ -1,0 +1,14 @@
+name: Reincarnation
+slug: reincarnation
+reversible: false
+class: magic-user
+level: 6
+school: Arcane Necromancy
+range: Touch
+duration: Instantaneous
+area_of_effect: Person touched
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: Provided that a body has been dead for no more than one day per caster level, a powerful magic user can recall its spirit from the dead, investing it into another body. The form of the new body is not subject to the magic user's control and is determined by means of the table below. The new body will appear within 1d6 turns near the soul's former body. Elves may be brought back to life by reincarnation. The new incarnation will retain the original character's experience points, but will have new physical (Str, Dex, Con) ability scores randomly rolled and adjusted for the new race. The character will retain his or her original mental ability scores (Int, Wis, Cha). Arcane Reincarnation Table Die Roll New Incarnation Die Roll New Incarnation 01-03 Bugbear 40-42 Half-orc 04-06 Dwarf 43-45 Hobgoblin 07-14 Elf 46-85 Human 15-17 Gnoll 86-88 Kobold 18-25 Gnome 89-91 Orc 26-28 Goblin 92-94 Ogre 29-36 Half-elf 95-97 Ogre Mage 37-39 Halfling 98-00 Troll
+source: wiki2_spells.txt

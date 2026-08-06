@@ -1,0 +1,23 @@
+name: Giant Gar Giant Pike Leviathan
+frequency: rare rare very rare
+no_encountered: 1d6 1d8 1
+size: large large huge
+alignment: neutral neutral neutral
+move: 300ft  swimming 300ft  swimming 300ft  swimming
+armour_class: 3 [17] 5 [15] 6 [14]
+hit_dice: 8 4 24
+melee_attacks: 1 bite (2d10) 1 bite (3d6) 1 bite (5d4)
+senses: Standard Standard Detect  invisible 45%
+lair_chance: Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0)
+morale: N/A N/A N/A
+loot: Nil Nil Nil
+experience: 575 +4/hp 90 +10/hp 5,000 +24/hp
+description: GIANT GAR Giant gar live in deep rivers and lakes.
+abilities:
+- heading: Special Attacks
+  text: Swallow Whole. Giant gar can swallow prey whole on an attack roll of  20, including creatures up to Medium size. A swallowed person has  a cumulative 5% chance per segment of drowning, but if they have a  bladed weapon they can try to cut their way out of the fish. To do so,  25% of the giant gar’s total hp must be inflicted. Any piercing attack  against a giant gar has a 20% chance of causing equal damage to a  swallowed creature. GIANT PIKE Giant pike are aggressive predators found in larger and deeper lakes.  They often guard nixie lairs.
+- heading: Surprise and Initiative
+  text: Due to their great speed and acuity of vision, giant pike will surprise  their prey on a 1–4 on 1d6. LEVIATHANS Leviathans are huge fish that may originate from the deepest oceans  or the Elemental Plane of Water.
+- heading: Special Attacks
+  text: Capsize Ships.  Leviathans can overturn small vessels  90% of the time, oceangoing ships 50% of the time,  and huge vessels 10% of the time. Swallow Whole. A successful “to hit” roll inflicts the dam- age shown and any creature attacked must save vs  death or be swallowed whole (see “giant gar” for the  effects of this). FLY, GIANT GIANT   BLOW FLY GIANT

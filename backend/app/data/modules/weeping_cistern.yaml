@@ -1,0 +1,240 @@
+# The Weeping Cistern - a hand-authored fixture module for Sanctuary
+# Chapter 7 (module.py). Written for this project; NOT a reproduction of any
+# published module. Exercises every §8.1 feature: two regions with different
+# wandering-check cadences, a module-local monster, a module-local item, a
+# tier-3 prose mechanic, a hidden exit, and a discovery gated on both action
+# and elapsed time.
+module:
+  title: The Weeping Cistern
+  version: "1.0"
+  party_guidance: {size: [4, 6], total_levels: [8, 12]}
+  background: |
+    Below the ruined aqueduct of a nameless hill town, an old cistern still
+    holds water it should not - fed by no spring anyone living remembers.
+    Something in its lower vaults has been carving new channels for a
+    hundred years, and the town's well has started to run brackish.
+  start: |
+    The party stands at the cracked capstone of the cistern's access shaft,
+    a rope ladder already fixed by the last party that did not come back
+    up it.
+
+regions:
+  - id: upper
+    areas: [1, 4]
+    check: {chance: "1-in-6", every: "2 turns"}
+    table:
+      die: d6
+      entries:
+        - A rat-king skitters across the ledge and vanishes into a crack.
+        - Dripping echoes resolve into nothing; a false alarm.
+        - A slick of algae blooms suddenly bright, then fades.
+        - 1d4 giant rats, hungry and unafraid of torchlight.
+        - The distant clank of the sluice gates, cycling on their own.
+        - A silt lurker (see monsters), surfacing to test the party's scent.
+
+  - id: lower
+    areas: [5, 8]
+    check: {chance: "1-in-8", every: "1 turn"}
+    table:
+      die: d8
+      entries:
+        - The water itself seems to hold its breath; nothing happens.
+        - A pressure wave rolls through the flooded vault, no source found.
+        - 1d3 silt lurkers, hunting as a pack.
+        - An algae candle (see items) bobs past, still lit, from nowhere.
+        - The Weeping Font (area 8) sighs, audible even from area 5.
+        - A drowned archivist's ledger surfaces, pages long since ruined.
+        - Cold current, sudden and localized, gone within a round.
+        - The Custodian (see mechanics) is heard moving one vault over.
+
+areas:
+  - id: 1
+    name: Cistern Entrance
+    description: |
+      A stone shaft opens onto a ledge above black water. Rungs corroded
+      to lace descend into the dark. The air smells of wet limestone.
+    exits:
+      - {to: 2, kind: ledge, hidden: false}
+    contents:
+      - A coil of someone else's rope, cut rather than untied.
+    monsters: []
+    treasure: []
+    discoveries:
+      - what: a chalked warning on the shaft wall, "IT COUNTS TURNS"
+        trigger: {action: search, scope: "shaft wall"}
+
+  - id: 2
+    name: Flooded Corridor
+    description: |
+      Knee-deep water runs the length of a vaulted corridor. Old iron
+      brackets, empty of torches, line both walls at shoulder height.
+    exits:
+      - {to: 1, kind: ledge, hidden: false}
+      - {to: 3, kind: archway, hidden: false}
+      - {to: 4, kind: "low crawl behind a loose stone", hidden: true}
+    contents:
+      - Three empty torch brackets, one bent as if grabbed.
+    monsters: []
+    treasure: []
+    discoveries:
+      - what: the loose stone hiding the crawl to area 4
+        trigger: {action: search, scope: "walls", chance: "1-in-6", per: turn}
+
+  - id: 3
+    name: Sluice Chamber
+    description: |
+      A stone sluice gate, still functional, divides this chamber from the
+      lower cistern. A wheel of green-corroded bronze controls it.
+    exits:
+      - {to: 2, kind: archway, hidden: false}
+      - {to: 5, kind: "sluice gate", hidden: false}
+    contents:
+      - A bronze control wheel, stiff but operable.
+    monsters: []
+    treasure:
+      - 40 sp scattered on the sill, dropped by someone in a hurry
+    discoveries: []
+
+  - id: 4
+    name: Guardian's Alcove
+    description: |
+      A dry alcove above the flood line, reachable only through the hidden
+      crawl from area 2. A niche in the wall holds a cracked stone idol.
+    exits:
+      - {to: 2, kind: "low crawl behind a loose stone", hidden: true}
+    contents:
+      - A cracked idol of a robed, faceless figure.
+    monsters: []
+    treasure:
+      - a tarnished cistern key (see items)
+    discoveries:
+      - what: a hollow behind the idol holding a sealed clay jar
+        trigger: {action: search, scope: idol}
+
+  - id: 5
+    name: Lower Cistern
+    description: |
+      The sluice gate opens onto a vault twice the height of the upper
+      corridor, water black and still. Something has been dredging silt
+      into deliberate ridges along the far wall.
+    exits:
+      - {to: 3, kind: "sluice gate", hidden: false}
+      - {to: 6, kind: passage, hidden: false}
+    contents:
+      - Ridges of dredged silt, patterned but not readable.
+    monsters:
+      - silt lurker (see monsters)
+    treasure: []
+    discoveries: []
+
+  - id: 6
+    name: Silt Passage
+    description: |
+      A low passage floored in soft silt that swallows sound. Handprints,
+      too many-fingered to be human, press into both walls at intervals.
+    exits:
+      - {to: 5, kind: passage, hidden: false}
+      - {to: 7, kind: passage, hidden: false}
+    contents:
+      - Many-fingered handprints pressed into the silt walls.
+    monsters: []
+    treasure: []
+    discoveries:
+      - what: a drowned archivist's satchel, buried shallow in the silt
+        trigger: {action: search, scope: "silt floor", chance: "1-in-6", per: hour}
+
+  - id: 7
+    name: Drowned Archive
+    description: |
+      Shelving, once wooden, has long since rotted; what remains are
+      slate tablets stacked where the shelves used to be, unreadable
+      by torchlight alone.
+    exits:
+      - {to: 6, kind: passage, hidden: false}
+      - {to: 8, kind: archway, hidden: false}
+    contents:
+      - Stacks of slate tablets, algae-slicked.
+    monsters: []
+    treasure:
+      - a spectral algae candle, unlit (see items)
+    discoveries:
+      - what: one legible tablet naming the Custodian's old bargain
+        trigger: {action: search, scope: tablets}
+
+  - id: 8
+    name: The Weeping Font
+    description: |
+      Water beads continuously from a carved face in the vault's ceiling
+      and has for longer than the town above has existed. The Custodian
+      keeps this chamber, and rarely leaves it.
+    exits:
+      - {to: 7, kind: archway, hidden: false}
+    contents:
+      - A carved weeping face, ceiling-set, source of every drop below.
+    monsters:
+      - the Custodian (see monsters)
+    treasure:
+      - a prime rod, corroded but whole (see items)
+    discoveries: []
+
+monsters:
+  - name: Silt Lurker
+    hit_dice: "3+1"
+    armour_class: 6
+    attacks: "1 bite (1d8) or engulf"
+    description: |
+      A pale, boneless predator that lives buried in cistern silt,
+      surfacing only to strike. Engulf forces a save vs. paralysis or the
+      target is dragged under for 1d4 rounds of drowning damage.
+    xp: 175
+
+  - name: the Custodian
+    hit_dice: "6"
+    armour_class: 2
+    attacks: "2 slams (1d6 each) or the Weeping Font"
+    description: |
+      What is left of the mason who sealed this cistern a century ago,
+      bound to it by a bargain the drowned archive still half-remembers.
+      Cannot leave area 8 while the Font still weeps.
+    xp: 950
+
+items:
+  - name: algae candle
+    type: wondrous item
+    description: |
+      A stub of pressed cistern algae that burns cold and green underwater
+      as readily as in open air, for 1 hour per candle. Tier 3 - see
+      mechanics for how it interacts with the Custodian.
+
+  - name: tarnished cistern key
+    type: wondrous item
+    description: |
+      Opens the sluice gate between areas 3 and 5 from either side without
+      the control wheel, silently. Fits no other lock in the module.
+
+  - name: prime rod
+    type: wondrous item
+    description: |
+      A short rod of black stone, always faintly wet to the touch. Tier 3 -
+      see mechanics; no general engine will ever execute what it does.
+
+mechanics:
+  - name: Algae candlelight and the Custodian
+    tier: 3
+    description: |
+      The Custodian tracks parties by torchlight but is blind to algae
+      candlelight - it reads as the cistern's own bioluminescence. A party
+      lit only by algae candles gets a DM-adjudicated bonus to any attempt
+      to avoid the Custodian's notice; the exact odds are the DM's call,
+      not a rollable table, since it depends on how the party is behaving
+      in the scene, not just what they are holding.
+
+  - name: The prime rod and the Weeping Font
+    tier: 3
+    description: |
+      Touching a prime rod to the Weeping Font (area 8) is the only way to
+      stop it weeping, which the drowned archive (area 7) implies but never
+      states will free the Custodian from its bargain rather than kill it.
+      What actually happens - release, death, something else - is left to
+      the DM to decide from the campaign's own needs; this is deliberately
+      not resolved by rule.

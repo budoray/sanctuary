@@ -1,0 +1,24 @@
+name: Lich
+frequency: very rare
+no_encountered: '1'
+size: medium
+alignment: any evil
+move: 60ft
+armour_class: 0 [20]
+hit_dice: 12 or more
+melee_attacks: 1 strike (2d6+paralysation)
+senses: Infravision 60ft, Detect  invisible 95%
+lair_chance: 95%
+intelligence: genius (17-18) or higher
+morale: 95
+loot: Hoard 1
+experience: at least 10,000 +16/hp
+description: Liches are the remains of powerful wizard-priests who, through  fell magics and sinister grimoires, have cheated death and  live on beyond the grave in a decaying shell that still revels in  awesome magical energies. Unholy magics and an unwavering  devotion are not the only things keeping them on the prime  material plane. Their souls are already traded to dark gods, but  a spark of their essence remains that must be encased in a tal - isman of sorts. This trinket is a requirement of their Unlife, but  no scholar knows how or why this is. The lair of a lich will often be a complex underworld maze or a  wickedly diseased stretch of thick wilderness, at whose black  heart resides a tower riddled with magic traps and deadly  guardians. Liches do not suffer the fools who would tread upon  their mysteries. Often dressed in rich decaying rags that were exquisite in life,  liches are now horrors to behold. They are cadaverous in ap - pearance, with unholy pin-points of green light
+  emanating from  the otherwise empty pits that are the eye-sockets of its fleshless  skull. Diseased and leprous tatters of meat cling feebly to an - cient bones, reeking with the rot of the grave. Liches are believed to feast on larval fiends as part of the regi - men that maintains their unlife.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Liches are turned as type 12 Undead. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease. Other Immunities. Liches are immune to cold, electrical, paral - ysation, polymorph, and death magic . Spells that drain attri - butes or statistics also have no effect.
+- heading: Special Features
+  text: Spell Use. All liches are powerful spellcasters. 40% of liches cast  spells as a magic-user, 40% as a cleric, and 20% as both, at 18th  level of ability. Those with magic-user abilities will have multi - ple copies of powerful spell tomes. Aura of Fear. Anything below 6th level beholding a lich (even in  a reflection or a projected image) must save vs magic or flee,  never to return to the area again.
+- heading: Special Attacks
+  text: 'Paralysing Touch. The mere touch of a lich will inflict 2d6 cold  damage upon the victim, and they must save vs paralysation  or be held frozen to the spot for 3d8 turns.  Unarmed Combat. Liches can be targeted with grappling or over- bearing attacks. If not fended off, they score an unarmed hit  with an 2+ on 1d20. Hit Mods: ATK/DEF +4/-4. Overbear Results  Mods: ATK/DEF +2/-2. Grappling Result Mods: ATK/DEF +0/+0. LION'

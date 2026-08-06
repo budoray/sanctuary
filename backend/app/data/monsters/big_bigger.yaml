@@ -1,0 +1,18 @@
+name: Big Bigger
+frequency: common common no.  encountered 4d20 5d10
+size: tiny tiny
+alignment: neutral neutral
+move: 120ft 120ft
+armour_class: 8 [12] 7 [13]
+hit_dice: 1 hp 1d4 hp
+melee_attacks: 1 (1 hp) 1 (1d3)
+senses: Keen Keen
+lair_chance: 10% 10%
+intelligence: semi- (2-4) semi- (2-4)
+morale: 45 50
+loot: Nil Nil
+experience: 5 +1/hp 7 +1/hp
+description: Giant rats of both size categories are vicious, opportunistic om- nivores often found in ruins and upper dungeon levels.
+abilities:
+- heading: Special Attacks
+  text: Disease. Each successful bite from a giant rat has a 5% chance of  causing a disease (as the cleric spell cause disease) unless the  victim passes a saving throw vs poison.

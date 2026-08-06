@@ -1,0 +1,21 @@
+name: Hellcat (devilcat)
+frequency: rare
+no_encountered: '1'
+size: large
+alignment: lawful evil
+move: 120ft
+armour_class: 6 [14]
+hit_dice: 7+2
+melee_attacks: 2 claws (1d4+1) and 1 bite (2d6)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: average (8-10)
+morale: 85
+loot: Nil
+experience: 1,000 +10/hp
+description: Hellcats are a minor type of devil, often seen serving their in - fernal masters in the nine planes of Hell. Rarely, hellcats also  travel to the Prime Material Plane to serve as a familiar for an  important evil spell caster. Hellcats encountered on the Prime Material Plane who are not  already serving as a familiar may attach themselves to a suitable  lawful evil character. They prefer to serve clerics, but will also at- tach themselves to a magic-user or illusionist. If a stronger lawful  evil character is present, hellcats will willingly switch to the new  master, even betraying or attacking their former master in the  process. In any case, a hellcat is only allowed to remain on the  Prime Material Plane for a year and day. At the end of this period  they must return to Hell. Sometimes they may later travel to the  Prime Material Plane again, but will not necessarily seek out their  old master.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (20%).  Any magic spell or effect has a 20%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Other Immunities.  Hellcats are immune to the effects of all  charm, sleep, hold and suggestion spells.
+- heading: Special Features
+  text: Invisible in Light. In normal lighting, hellcats are invisible. In total  darkness however, they can be dimly seen as a glowing red - dish aura resembling a large feline.  Unarmed Combat.  Hellcats cannot be overborne or grappled,  and do not employ these tactics.

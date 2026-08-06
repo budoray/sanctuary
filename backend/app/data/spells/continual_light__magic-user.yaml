@@ -1,0 +1,14 @@
+name: Continual Light
+slug: continual_light
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Transmutation/Alteration
+range: 60-ft
+duration: Permanent
+area_of_effect: 60-ft radius sphere
+components: V,S
+casting_time: 2 segments
+saving_throw: See below
+text: This spell brings into being a bright, magical illumination almost sufficient to rival the light of day. In all respects, the spell is identical to the first level cleric spell light, but its effects are permanent until dispelled. The light cast is greater than that produced by a light spell, extending 60-ft into the darkness. The magic user spell cannot be used to create continual darkness.
+source: wiki2_spells.txt

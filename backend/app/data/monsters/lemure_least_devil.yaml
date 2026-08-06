@@ -1,0 +1,21 @@
+name: Lemure (least Devil)
+frequency: common
+no_encountered: 5d6
+size: medium
+alignment: lawful evil
+move: 30ft
+armour_class: 7 [13]
+hit_dice: '3'
+melee_attacks: 1 pseudopod (1d3)
+senses: Infravision 60ft
+lair_chance: 100%
+intelligence: semi- (2-4)
+morale: 60
+loot: Nil
+experience: 65 +3/hp
+description: Lemures are the primal form of evil souls damned to spend  eternity in Hell. They are only vaguely humanoid, with crude  arms and heads. Due to their ongoing torment, lemures are  quite insane and will attack any non-devils coming close to  them. Certain lemures (5%) are chosen by archdevils to form  wraiths, spectres, and other ethereal undead. Lemures cannot normally be destroyed, except by blessed or  holy items or weapons.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Immunities. Lemures are immune to all forms of sleep or charm  spells, and to fire damage. Damage Resistances  (all half damage): Cold, Poison (including  gases).'
+- heading: Special Features
+  text: Regeneration. Lemures regenerate 1 hit point per round unless  the damage is caused by holy water or a weapon that has had  a bless spell cast upon it.  Unarmed Combat.  Lemures are too squishy/oozy to be over - borne or grappled, and do not employ these tactics.  MANALISHI (LESSER DEVIL; SCALY DEVIL, ABYSSAI)

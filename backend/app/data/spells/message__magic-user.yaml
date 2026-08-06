@@ -1,0 +1,14 @@
+name: Message
+slug: message
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Transmutation/Alteration
+range: 60-ft+10-ft/level
+duration: 5 segments+1 segment/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: Once this spell is cast, the magic user may point to any creature in range and whisper a message that the other creature will hear. If there is time remaining, the recipient may whisper a message in reply. Only one creature may be in contact with the caster at a time, but if time allows, the caster may make contact with more than one possible recipient. The gestures of this spell are subtle, and it is easy to conceal that the enchantment is being cast. Note that the path between the magic user and the recipient must be a straight line and not completely blocked.
+source: wiki2_spells.txt
