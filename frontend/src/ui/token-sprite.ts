@@ -48,18 +48,19 @@ export class TokenSprite {
 
     // Active turn ring
     this.ring = new Graphics();
-    this.ring.circle(cx, cy, tileSize * 0.46);
-    this.ring.stroke({ width: 3, color: 0xf1c40f, alpha: 0.95 });
-    this.ring.circle(cx, cy, tileSize * 0.40);
-    this.ring.stroke({ width: 1, color: 0xffffff, alpha: 0.6 });
+    this.ring.circle(cx, cy, tileSize * 0.52);
+    this.ring.stroke({ width: 4, color: 0xf1c40f, alpha: 0.95 });
+    this.ring.circle(cx, cy, tileSize * 0.44);
+    this.ring.stroke({ width: 2, color: 0xffffff, alpha: 0.7 });
     this.ring.visible = false;
     this.container.addChild(this.ring);
 
-    const pad = 3;
+        const pad = 3;
     const size = tileSize - pad * 2;
     const baseColor = this.resolveColor(token);
     const atlasKey = this.resolveAtlasKey(token);
     const atlasTex = atlasKey ? tokenFrame(atlasKey) : null;
+    const initial = this.resolveInitial(token);
 
     // Drop shadow
     this.shadow = new Graphics();
@@ -67,49 +68,56 @@ export class TokenSprite {
     this.shadow.fill({ color: 0x000000, alpha: 0.45 });
     this.container.addChild(this.shadow);
 
-    // Outer glow ring for visibility
-    const glow = new Graphics();
-    glow.circle(cx, cy, size * 0.50);
-    glow.fill({ color: baseColor, alpha: 0.25 });
-    glow.circle(cx, cy, size * 0.46);
-    glow.stroke({ width: 2, color: baseColor, alpha: 0.65 });
-    this.container.addChild(glow);
-
-    // Body backing: a solid coloured disc so the token is always visible
+    // Large solid backing disc so the token is unmistakable on any tile
     const backing = new Graphics();
-    backing.circle(cx, cy, size * 0.40);
+    backing.circle(cx, cy, size * 0.46);
     backing.fill({ color: baseColor });
-    backing.circle(cx, cy, size * 0.40);
-    backing.stroke({ width: 2, color: 0xffffff, alpha: 0.55 });
+    backing.circle(cx, cy, size * 0.46);
+    backing.stroke({ width: 3, color: 0xffffff, alpha: 0.7 });
     this.container.addChild(backing);
 
-    // Body
+    // Inner darker inset for depth
+    const inset = new Graphics();
+    inset.circle(cx, cy, size * 0.36);
+    inset.fill({ color: 0x000000, alpha: 0.25 });
+    this.container.addChild(inset);
+
+    // Body / sprite
     this.body = new Graphics();
     if (atlasTex) {
       const atlas = new Sprite(atlasTex);
-      atlas.width = size * 0.80;
-      atlas.height = size * 0.80;
+      atlas.width = size * 0.55;
+      atlas.height = size * 0.55;
       atlas.anchor.set(0.5);
       atlas.x = cx;
       atlas.y = cy;
       this.body.addChild(atlas);
-      // Tint faint class colour around the edges for readability
-      this.body.circle(cx, cy, size * 0.40);
-      this.body.stroke({ width: 2, color: 0xffffff, alpha: 0.4 });
     } else if (token.type === 'player') {
       // Hero: shield-shaped body
-      this.body.roundRect(cx - size * 0.38, cy - size * 0.38, size * 0.76, size * 0.76, 8);
+      this.body.roundRect(cx - size * 0.30, cy - size * 0.30, size * 0.60, size * 0.60, 6);
       this.body.fill({ color: baseColor });
-      this.body.roundRect(cx - size * 0.38, cy - size * 0.38, size * 0.76, size * 0.76, 8);
-      this.body.stroke({ width: 2, color: 0xffffff, alpha: 0.35 });
     } else {
-      // Monster: jagged/circle hybrid
-      this.body.circle(cx, cy, size * 0.38);
+      // Monster: circle
+      this.body.circle(cx, cy, size * 0.30);
       this.body.fill({ color: baseColor });
-      this.body.circle(cx, cy, size * 0.38);
-      this.body.stroke({ width: 2, color: 0x000000, alpha: 0.35 });
     }
     this.container.addChild(this.body);
+
+    // Initial letter so the token is readable even if the sprite is dark
+    const initialText = new Text({
+      text: initial,
+      style: {
+        fontSize: Math.floor(size * 0.45),
+        fill: 0xffffff,
+        fontWeight: 'bold',
+        align: 'center',
+        dropShadow: { color: '#000000', distance: 1, blur: 2, alpha: 0.8 },
+      },
+    });
+    initialText.anchor.set(0.5);
+    initialText.x = cx;
+    initialText.y = cy;
+    this.container.addChild(initialText);
 
     // Detail icon
     this.detail = new Graphics();
@@ -202,6 +210,14 @@ export class TokenSprite {
       return cls;
     }
     return token.monster || token.name?.toLowerCase().replace(/[\s-]/g, '') || '';
+  }
+
+  private resolveInitial(token: Token): string {
+    if (token.type === 'player') {
+      const cls = token.classes?.[0]?.charAt(0).toUpperCase() || 'H';
+      return cls;
+    }
+    return token.name?.charAt(0).toUpperCase() || 'M';
   }
 
   updateHP(hp: number, maxHp: number) {
