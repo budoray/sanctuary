@@ -784,7 +784,7 @@ button.danger:hover:not(:disabled) {
   font-family: monospace;
 }
 
-#game-over {
+.game-over-overlay {
   position: absolute;
   inset: 0;
   display: flex;
@@ -792,6 +792,12 @@ button.danger:hover:not(:disabled) {
   justify-content: center;
   background: rgba(5, 6, 7, 0.92);
   z-index: 200;
+  animation: fade-in 0.4s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .game-over-panel {

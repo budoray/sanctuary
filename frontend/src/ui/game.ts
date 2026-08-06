@@ -130,6 +130,23 @@ export class Game {
     return hud;
   }
 
+  private showGameOver() {
+    if (!this.session || this.session.status === 'active') return;
+    const existing = this.root.querySelector('.game-over-overlay');
+    if (existing) return;
+    const overlay = el('div', { className: 'game-over-overlay' });
+    const panel = el('div', { className: 'game-over-panel' });
+    const won = this.session.status === 'won';
+    panel.appendChild(el('h1', {}, won ? 'Victory' : 'Defeat'));
+    panel.appendChild(el('p', { className: 'message' }, won
+      ? 'The lair is quiet. You survive to adventure again.'
+      : 'Your light fades in the dark. The dungeon claims another.'));
+    const again = el('button', { onclick: () => this.onExit() }, 'Return to Sanctuary');
+    panel.appendChild(again);
+    overlay.appendChild(panel);
+    this.root.appendChild(overlay);
+  }
+
   private setAction(action: 'move' | 'attack') {
     this.action = this.action === action ? null : action;
     this.updateStatus();
@@ -475,6 +492,7 @@ export class Game {
     this.statusEl.textContent = `Turn ${this.session.turn} · ${phaseText}${actionText}`;
     if (this.session.status !== 'active') {
       this.statusEl.textContent = `Game ${this.session.status.toUpperCase()}`;
+      this.showGameOver();
     }
   }
 
