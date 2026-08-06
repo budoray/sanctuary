@@ -1,4 +1,4 @@
-import { Application, Container, Graphics, Sprite } from 'pixi.js';
+import { Application, Assets, Container, Graphics, Sprite } from 'pixi.js';
 import type { Socket } from 'socket.io-client';
 import {
   actInSession, advanceSession, dmMove, dmReveal, dmSpawn, GameSession,
@@ -203,27 +203,35 @@ export class Game {
 
   private setLoadingStatus(text: string) {
     const span = this.loadingOverlay.querySelector('span');
-    if (span) span.textContent = text;
+    if (span) {
+      span.textContent = text;
+      // Force the browser to paint the update so users see progress.
+      span.getBoundingClientRect();
+    }
   }
 
   async init() {
-    // Safety net: never let the loading overlay block the player forever.
+    // Hard safety net: if anything hangs, surface a return button.
     const safetyTimeout = window.setTimeout(() => {
       // eslint-disable-next-line no-console
-      console.error('Game init safety timeout fired; forcing overlay removal.');
-      this.loadingOverlay?.remove();
-    }, 15000);
+      console.error('Game init safety timeout fired.');
+      this.showInitFailure('The realm is taking too long to answer.');
+    }, 12000);
 
     const releaseSafety = () => window.clearTimeout(safetyTimeout);
 
     try {
       this.app = new Application();
       this.setLoadingStatus('Opening the gate...');
-      await this.app.init({
-        resizeTo: this.canvasContainer,
-        backgroundColor: 0x050607,
-        antialias: true,
-      });
+      await withTimeout(
+        this.app.init({
+          resizeTo: this.canvasContainer,
+          backgroundColor: 0x050607,
+          antialias: true,
+        }),
+        5000,
+        'Pixi renderer failed to start'
+      );
       this.canvasContainer.appendChild(this.app.canvas as HTMLCanvasElement);
 
       this.mapContainer = new Container();
@@ -235,6 +243,8 @@ export class Game {
 
       this.setLoadingStatus('Loading realm tiles...');
       try {
+        // Pixi Assets must be initialised before loading in some environments.
+        await withTimeout(Assets.init(), 3000, 'Pixi Assets init timed out');
         await withTimeout(loadAtlas(), 5000, 'Tile atlas load timed out');
       } catch (err: any) {
         // eslint-disable-next-line no-console
@@ -279,13 +289,17 @@ export class Game {
       releaseSafety();
       // eslint-disable-next-line no-console
       console.error('Failed to initialize game:', err);
-      this.loadingOverlay.innerHTML = '<span>Failed to enter the realm.</span><button>Return</button>';
-      const btn = this.loadingOverlay.querySelector('button');
-      if (btn) btn.onclick = () => this.onExit();
+      this.showInitFailure(err?.message || 'Failed to enter the realm.');
       throw err;
     }
     releaseSafety();
     this.loadingOverlay.remove();
+  }
+
+  private showInitFailure(message: string) {
+    this.loadingOverlay.innerHTML = `<span>${message}</span><button>Return</button>`;
+    const btn = this.loadingOverlay.querySelector('button');
+    if (btn) btn.onclick = () => this.onExit();
   }
 
   private buildUI() {
