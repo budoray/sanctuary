@@ -33,11 +33,24 @@ export class CharacterSheet {
   private buildHeader() {
     const c = this.character;
     const header = el('div', { className: 'sheet-header' });
+    const portraitUrl = c.portrait_url || this.fallbackPortraitUrl(c.classes[0]);
+    const portrait = el('img', {
+      className: 'sheet-portrait',
+      src: portraitUrl,
+      alt: c.name,
+      onerror: () => { portrait.src = this.fallbackPortraitUrl(); },
+    }) as HTMLImageElement;
+    header.appendChild(portrait);
     header.appendChild(el('h1', {}, c.name));
     header.appendChild(
       el('p', { className: 'subtitle' }, `${this.titleCase(c.ancestry)} ${c.classes.map((x) => this.titleCase(x)).join('/')}`)
     );
     return header;
+  }
+
+  private fallbackPortraitUrl(className?: string): string {
+    const key = (className || 'generic').toLowerCase().replace(/\s+/g, '-');
+    return `/portraits/${key}.png`;
   }
 
   private buildStats() {

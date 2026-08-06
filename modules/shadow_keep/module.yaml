@@ -1,0 +1,116 @@
+id: shadow_keep
+name: The Shadow Keep
+ruleset: osric
+description: >-
+  A crumbling keep where the walls bleed shadow and every torch burns low.
+  The Shadow Warden waits in the inner sanctum, and the corridors themselves
+  seem to choose who lives and who is devoured.
+map:
+  width: 20
+  height: 15
+  tile_size: 40
+  tiles:
+    - "11111111111111111111"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "10200010000000002001"
+    - "10110110000000001011"
+    - "10110010000000001011"
+    - "10100010000020001111"
+    - "10110000000000000001"
+    - "10000000500000000001"
+    - "10000000111011100001"
+    - "10000000143430100001"
+    - "10000000102010100001"
+    - "10000000111011100001"
+    - "10000000000000000001"
+    - "11111111111111111111"
+player_start:
+  x: 1
+  y: 1
+monsters:
+  - id: shadow_warden
+    name: Shadow Warden
+    monster: shadow_warden
+    x: 10
+    y: 10
+    color: "#2c3e50"
+    boss: true
+    phases:
+      - hp_threshold: 0.5
+        damage_bonus: 2
+        to_hit_bonus: 1
+        spawn:
+          - id: imp_minion_1
+            name: Shadow Imp
+            monster: shadow_imp
+            x: 9
+            y: 9
+            color: "#5d6d7e"
+          - id: imp_minion_2
+            name: Shadow Imp
+            monster: shadow_imp
+            x: 11
+            y: 11
+            color: "#5d6d7e"
+  - id: imp_guard_1
+    name: Shadow Imp
+    monster: shadow_imp
+    x: 5
+    y: 5
+    color: "#5d6d7e"
+  - id: imp_guard_2
+    name: Shadow Imp
+    monster: shadow_imp
+    x: 14
+    y: 5
+    color: "#5d6d7e"
+events:
+  - id: crossroads
+    x: 8
+    y: 8
+    message: >-
+      The corridor splits. To the left, iron gates rattle with the dead.
+      To the right, the dark churns with imps. Which path do you take?
+    choices:
+      left: The Left Path (legions of bones)
+      right: The Right Path (imp swarm)
+branches:
+  left:
+    - id: branch_skeleton_1
+      name: Skeleton
+      monster: skeleton
+      x: 3
+      y: 12
+      color: "#e0e0e0"
+    - id: branch_skeleton_2
+      name: Skeleton
+      monster: skeleton
+      x: 4
+      y: 12
+      color: "#e0e0e0"
+    - id: branch_zombie_1
+      name: Zombie
+      monster: zombie
+      x: 5
+      y: 12
+      color: "#556b2f"
+  right:
+    - id: branch_imp_1
+      name: Shadow Imp
+      monster: shadow_imp
+      x: 15
+      y: 12
+      color: "#5d6d7e"
+    - id: branch_imp_2
+      name: Shadow Imp
+      monster: shadow_imp
+      x: 16
+      y: 12
+      color: "#5d6d7e"
+    - id: branch_imp_3
+      name: Shadow Imp
+      monster: shadow_imp
+      x: 17
+      y: 12
+      color: "#5d6d7e"

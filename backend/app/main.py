@@ -6,13 +6,15 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from backend.app.api.admin import router as admin_router
+from backend.app.api.arena import router as arena_router
 from backend.app.api.campaigns import router as campaigns_router
 from backend.app.api.characters import router as characters_router
 from backend.app.api.modules import router as modules_router
 from backend.app.api.sessions import router as sessions_router
 from backend.app.config import SETTINGS, ROOT
 from backend.app.db import Base, engine
-from backend.app.auth import require_account
+from backend.app.auth import is_admin, require_account, require_admin
 from backend.app.socket_manager import socket_app
 from backend.app.tenshin_gate import name_from_cookie_header
 
@@ -49,10 +51,12 @@ fastapi_app.add_middleware(
     allow_headers=["*"],
 )
 
+fastapi_app.include_router(admin_router, prefix="/api")
 fastapi_app.include_router(characters_router, prefix="/api")
 fastapi_app.include_router(campaigns_router, prefix="/api")
 fastapi_app.include_router(modules_router, prefix="/api")
 fastapi_app.include_router(sessions_router, prefix="/api")
+fastapi_app.include_router(arena_router, prefix="/api")
 
 
 @fastapi_app.get("/health")
@@ -80,7 +84,7 @@ async def health_db():
 @fastapi_app.get("/api/whoami")
 async def whoami(request: Request, account_id: int = Depends(require_account)):
     name = name_from_cookie_header(request.headers.get("cookie", ""))
-    return {"user": {"id": account_id, "name": name or "player"}}
+    return {"user": {"id": account_id, "name": name or "player", "is_admin": is_admin(account_id, request.headers.get("cookie", ""))}}
 
 
 @fastapi_app.get("/licence")

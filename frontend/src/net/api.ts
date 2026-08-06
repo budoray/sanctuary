@@ -71,6 +71,7 @@ export interface CharacterState {
   saves: Record<string, number>;
   modifiers: Record<string, number>;
   seed: number;
+  portrait_url?: string;
   log: RollRecord[];
   xp?: number;
   level?: number;
@@ -175,6 +176,23 @@ export interface Campaign {
   dm_account_id: number;
   is_member?: boolean;
   is_dm?: boolean;
+}
+
+export interface CampaignMember {
+  account_id: number;
+  role: string;
+  joined_at?: string;
+}
+
+export interface Presence {
+  account_id: number | null;
+  name: string;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  is_admin?: boolean;
 }
 
 export async function createCampaign(campaign: { name: string; password: string; ruleset_id?: string; module_ids?: string[] }) {
@@ -282,4 +300,42 @@ export async function listCampaignSessions(campaignId: string) {
   return api(`/api/campaigns/${campaignId}/sessions`) as Promise<{
     sessions: { id: string; name: string; module_id: string; status: string; turn: number; phase: string; player_count: number }[];
   }>;
+}
+
+export async function getCampaignMembers(campaignId: string) {
+  return api(`/api/campaigns/${campaignId}/members`) as Promise<{ members: CampaignMember[] }>;
+}
+
+export async function transferDm(campaignId: string, accountId: number) {
+  return api(`/api/campaigns/${campaignId}/transfer_dm`, {
+    method: 'POST',
+    body: JSON.stringify({ account_id: accountId }),
+  }) as Promise<{ campaign: Campaign }>;
+}
+
+export async function setMemberRole(campaignId: string, accountId: number, role: 'dm' | 'player' | 'none') {
+  return api(`/api/campaigns/${campaignId}/members/${accountId}/role`, {
+    method: 'POST',
+    body: JSON.stringify({ role }),
+  }) as Promise<{ account_id: number; role: string }>;
+}
+
+export async function getSessionPresence(sessionId: string) {
+  return api(`/api/sessions/${sessionId}/presence`) as Promise<{ session_id: string; present: Presence[] }>;
+}
+
+export async function adminListCampaigns() {
+  return api('/admin/campaigns') as Promise<{ campaigns: { id: string; name: string; ruleset_id: string; dm_account_id: number; member_count: number; created_at: string | null }[] }>;
+}
+
+export async function adminDeleteCampaign(campaignId: string) {
+  return api(`/admin/campaigns/${campaignId}`, { method: 'DELETE' }) as Promise<{ deleted: boolean }>;
+}
+
+export async function adminListSessions() {
+  return api('/admin/sessions') as Promise<{ sessions: { id: string; name: string; module_id: string; campaign_id: string | null; status: string; turn: number; phase: string; player_count: number }[] }>;
+}
+
+export async function adminDeleteSession(sessionId: string) {
+  return api(`/admin/sessions/${sessionId}`, { method: 'DELETE' }) as Promise<{ deleted: boolean }>;
 }

@@ -96,6 +96,14 @@ export class CharacterSelect {
       return;
     }
     characters.forEach((c) => {
+      const portraitUrl = c.portrait_url || this.fallbackPortraitUrl(c.classes[0]);
+      const portrait = el('img', {
+        className: 'session-portrait',
+        src: portraitUrl,
+        alt: c.name,
+        onerror: () => { portrait.src = this.fallbackPortraitUrl(); },
+      }) as HTMLImageElement;
+
       const info = el('div', { className: 'session-info' });
       info.appendChild(el('strong', {}, c.name));
       info.appendChild(
@@ -123,11 +131,17 @@ export class CharacterSelect {
       actions.appendChild(delBtn);
 
       const item = el('li', {});
+      item.appendChild(portrait);
       item.appendChild(info);
       item.appendChild(idSpan);
       item.appendChild(actions);
       this.listEl.appendChild(item);
     });
+  }
+
+  private fallbackPortraitUrl(className?: string): string {
+    const key = (className || 'generic').toLowerCase().replace(/\s+/g, '-');
+    return `/portraits/${key}.png`;
   }
 
   private openSheet(character: CharacterState) {

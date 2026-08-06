@@ -1,11 +1,15 @@
-import { Campaign, createCampaign, getCampaign, joinCampaign, listCampaigns } from '../net/api';
+import { Campaign, User, createCampaign, getCampaign, joinCampaign, listCampaigns, whoami } from '../net/api';
+import { AdminPanel } from './admin-panel';
 import { el, clear } from './utils';
 
 export class CampaignLobby {
   private root: HTMLElement;
+  private container: HTMLElement;
   private onSelect: (campaign: Campaign) => void;
   private onBack: () => void;
   private listEl: HTMLElement;
+  private user: User | null = null;
+  private adminBar: HTMLElement | null = null;
 
   constructor(
     container: HTMLElement,
@@ -13,12 +17,17 @@ export class CampaignLobby {
     onBack: () => void
   ) {
     this.root = el('div', { className: 'session-select' });
+    this.container = container;
     this.onSelect = onSelect;
     this.onBack = onBack;
 
     const panel = el('div', { className: 'session-panel' });
     panel.appendChild(el('h1', {}, 'Campaigns'));
     panel.appendChild(el('p', { className: 'subtitle' }, 'Create a private campaign or join one by link and password.'));
+
+    this.adminBar = el('div', { className: 'admin-bar' });
+    this.adminBar.style.display = 'none';
+    panel.appendChild(this.adminBar);
 
     const createForm = this.buildCreateForm();
     panel.appendChild(createForm);
@@ -87,11 +96,33 @@ export class CampaignLobby {
 
   async load() {
     try {
-      const { campaigns } = await listCampaigns();
+      const [{ campaigns }, userData] = await Promise.all([
+        listCampaigns(),
+        whoami().catch(() => ({ user: { id: 0, name: '', is_admin: false } })),
+      ]);
+      this.user = userData.user as User;
       this.render(campaigns);
+      this.renderAdminBar();
     } catch (err: any) {
       this.listEl.appendChild(el('li', { className: 'empty' }, err.message || 'Failed to load campaigns.'));
     }
+  }
+
+  private renderAdminBar() {
+    if (!this.adminBar || !this.user?.is_admin) return;
+    clear(this.adminBar);
+    this.adminBar.style.display = 'block';
+    this.adminBar.appendChild(el('span', { className: 'admin-badge' }, 'Admin'));
+    this.adminBar.appendChild(el('button', {
+      onclick: () => this.showAdminPanel(),
+    }, 'Open Admin Panel'));
+  }
+
+  private showAdminPanel() {
+    this.destroy();
+    new AdminPanel(this.container, () => {
+      new CampaignLobby(this.container, this.onSelect, this.onBack);
+    });
   }
 
   private render(campaigns: Campaign[]) {

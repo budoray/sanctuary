@@ -29,10 +29,13 @@ class Settings(BaseSettings):
     tenshin_site_url: str = "https://tenshinarts.com"
     tenshin_dev: bool = False
     tenshin_dev_account: int = 1
+    sanctuary_admin_ids: str | None = None
     ollama_host: str = "http://127.0.0.1:11434"
     ollama_model: str = "llama3.2"
     ollama_enabled: bool = True
     ollama_timeout: float = 5.0
+    pixellab_host: str | None = None
+    pixellab_model: str = "flux"
 
 
 SETTINGS = Settings()

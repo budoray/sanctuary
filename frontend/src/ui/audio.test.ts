@@ -19,5 +19,19 @@ describe('AudioController', () => {
     expect(() => audio.victory()).not.toThrow();
     expect(() => audio.defeat()).not.toThrow();
     expect(() => audio.trapTrigger()).not.toThrow();
+    expect(() => audio.exploration()).not.toThrow();
+    expect(() => audio.combatSting()).not.toThrow();
+    expect(() => audio.playAmbient('dungeon')).not.toThrow();
+    expect(() => audio.stopAmbient()).not.toThrow();
+  });
+
+  it('clamps and returns music volume', () => {
+    const audio = new AudioController();
+    audio.setMusicVolume(0.8);
+    expect(audio.getMusicVolume()).toBe(0.8);
+    audio.setMusicVolume(2);
+    expect(audio.getMusicVolume()).toBe(1);
+    audio.setMusicVolume(-0.5);
+    expect(audio.getMusicVolume()).toBe(0);
   });
 });

@@ -13,7 +13,7 @@ import random
 
 from backend.app.engine import character as char_engine
 from backend.app.engine import items, module, session as session_engine
-from backend.app.socket_manager import socket_manager
+from backend.app.socket_manager import presence_tracker, socket_manager
 
 router = APIRouter(tags=["sessions"])
 
@@ -220,6 +220,21 @@ async def get_session(
     return {"session": session_engine.view(state)}
 
 
+@router.get("/sessions/{session_id}/presence")
+async def get_session_presence(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord).where(SessionRecord.id == session_id)
+    )
+    record = result.scalar_one_or_none()
+    if not record or not await _can_access_session(record, account_id, db):
+        raise HTTPException(status_code=404, detail="Session not found")
+    return {"session_id": session_id, "present": presence_tracker.get(session_id)}
+
+
 @router.post("/sessions/{session_id}/act")
 async def act_in_session(
     session_id: str,
@@ -282,9 +297,13 @@ async def act_in_session(
             char_state["max_hp"] = player.get("max_hp", char_state.get("max_hp", char_state["hit_points"]))
             char_state.setdefault("inventory", [])
             char_state.setdefault("equipment", {})
+            # Persist any loot collected during the session.
+            for loot in player.get("session_loot", []):
+                items.add_item(char_state, loot)
+                state["log"].append(f"{player['name']} keeps {loot['name']}.")
             if player.get("alive", True):
                 rng = random.Random(state.get("seed", 0) + state.get("version", 0) + sum(ord(c) for c in player.get("id", "")))
-                loot = items.generate_loot(rng)
+                loot = items.generate_loot(level=player.get("level", 1), rng=rng)
                 items.add_item(char_state, loot)
                 state["log"].append(f"{player['name']} finds {loot['name']}.")
             char_record.state = json.dumps(char_state)

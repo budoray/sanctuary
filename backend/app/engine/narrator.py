@@ -116,6 +116,36 @@ _TRAP_TRIGGERED = [
     "The floor gives way just enough to bite into flesh.",
 ]
 
+_HAZARD_LAVA = [
+    "Searing lava bites at {name}.",
+    "Molten stone sears {name}'s flesh.",
+    "The lava hisses as it touches {name}.",
+]
+
+_HAZARD_SPIKES = [
+    "Jagged spikes leap up beneath {name}.",
+    "Rusted spikes pierce {name}.",
+    "The floor bites {name} with iron teeth.",
+]
+
+_HAZARD_GENERIC = [
+    "The hazard claims its due from {name}.",
+    "Perilous stone catches {name}.",
+]
+
+_BANTER = [
+    "The crowd roars, hungry for blood.",
+    "A harsh voice calls for a proper kill.",
+    "Dust and jeers fill the air.",
+    "Somewhere, a gate grinds open.",
+]
+
+_PHASE = [
+    "{name} falters, then surges with renewed fury!",
+    "Wounded, {name} calls forth more shadows to its aid.",
+    "{name}'s form shifts; the fight just got uglier.",
+]
+
 _SYSTEM = (
     "You are a terse old-school fantasy dungeon master. "
     "Reply with one or two vivid sentences. No lists, no rules, no signatures."
@@ -211,10 +241,30 @@ class Narrator:
             timeout=self.settings.ollama_timeout,
         )
 
-    async def narrate_opening(self, rng: random.Random | None = None) -> str:
+    def _party_status_summary(
+        self, attacker: dict[str, Any], target: dict[str, Any]
+    ) -> str:
+        """Short combat context for prompts: who is hurt and how badly."""
+        tokens = [attacker, target]
+        summaries: list[str] = []
+        for t in tokens:
+            hp = t.get("hp", 0)
+            max_hp = t.get("max_hp", hp or 1)
+            ratio = hp / max_hp if max_hp else 1
+            if ratio <= 0.25 and hp > 0:
+                summaries.append(f"{t.get('name', 'someone')} is bloodied")
+            elif hp <= 0 and t.get("alive", True):
+                summaries.append(f"{t.get('name', 'someone')} has fallen")
+        return f"{' ; '.join(summaries)}." if summaries else ""
+
+    async def narrate_opening(
+        self, rng: random.Random | None = None, module: str = "", mode: str = "campaign"
+    ) -> str:
+        mode_hint = "an arena pit" if mode == "arena" else "a torch-lit dungeon"
+        quest_hook = f"in '{module}'" if module else "where danger waits"
         prompt = (
-            "Set the scene: a lone adventurer steps into a torch-lit dungeon "
-            "chamber where danger waits. Keep it under 30 words."
+            f"Set the scene: a lone adventurer steps into {mode_hint} "
+            f"{quest_hook}. Mention a rumour or goal in one sentence. Keep it under 35 words."
         )
         return (await self._ollama(prompt)) or _pick(
             _OPENING, rng or random.Random()
@@ -227,7 +277,7 @@ class Narrator:
         kind = room_type or "chamber"
         prompt = (
             f"Describe the adventurers entering a {kind} in '{module_name}' "
-            "in one vivid sentence. Keep it under 25 words."
+            "in one vivid sentence. Mention the atmosphere and any obvious threat. Keep it under 25 words."
         )
         return (await self._ollama(prompt)) or _pick(_ROOM, rng or random.Random())
 
@@ -264,16 +314,18 @@ class Narrator:
     ) -> list[str]:
         attacker_name = attacker.get("name", "the attacker")
         target_name = target.get("name", "the target")
+        target_species = target.get("name", "foe")
+        party_status = self._party_status_summary(attacker, target)
         if attacker.get("type") == "player":
             verb = "strikes" if hit else "misses"
             prompt = (
-                f"The adventurer {verb} {target_name}. "
+                f"The adventurer {verb} the {target_species}. {party_status} "
                 f"{'The blow is fatal.' if fatal else ''} One vivid sentence."
             )
         else:
             verb = "hits" if hit else "misses"
             prompt = (
-                f"{attacker_name} {verb} the adventurer. "
+                f"The {attacker_name} {verb} the adventurer. {party_status} "
                 f"{'The blow is fatal.' if fatal else ''} One vivid sentence."
             )
         result = await self._ollama(prompt)
@@ -291,16 +343,18 @@ class Narrator:
     ) -> list[str]:
         attacker_name = attacker.get("name", "the attacker")
         target_name = target.get("name", "the target")
+        target_species = target.get("name", "foe")
+        party_status = self._party_status_summary(attacker, target)
         if attacker.get("type") == "player":
             verb = "hits" if hit else "misses"
             prompt = (
-                f"The adventurer fires a missile and {verb} {target_name}. "
+                f"The adventurer fires a missile and {verb} the {target_species}. {party_status} "
                 f"{'The shot is fatal.' if fatal else ''} One vivid sentence."
             )
         else:
             verb = "hits" if hit else "misses"
             prompt = (
-                f"{attacker_name} fires a missile and {verb} the adventurer. "
+                f"The {attacker_name} fires a missile and {verb} the adventurer. {party_status} "
                 f"{'The shot is fatal.' if fatal else ''} One vivid sentence."
             )
         result = await self._ollama(prompt)
@@ -308,14 +362,62 @@ class Narrator:
             return [result]
         return _template_ranged_attack(attacker, target, hit, fatal, rng)
 
-    async def narrate_victory(self, rng: random.Random | None = None) -> str:
+    async def narrate_victory(
+        self, rng: random.Random | None = None, module: str = ""
+    ) -> str:
+        hook = f" in {module}" if module else ""
         prompt = (
             "The last enemy falls. Describe the brief, grim quiet after the "
-            "fight in one sentence."
+            f"fight{hook} and hint at what might come next in one sentence."
         )
         return (await self._ollama(prompt)) or _pick(
             _VICTORY, rng or random.Random()
         )
+
+    async def narrate_banter(
+        self, room_type: str | None = None, rng: random.Random | None = None
+    ) -> str:
+        """Arena crowd or environmental commentary."""
+        prompt = (
+            "Describe the reaction of an unseen arena crowd or the environment "
+            "in one terse sentence. Keep it under 20 words."
+        )
+        return (await self._ollama(prompt)) or _pick(_BANTER, rng or random.Random())
+
+    async def narrate_hazard(
+        self,
+        hazard_name: str,
+        victim_name: str,
+        rng: random.Random | None = None,
+    ) -> str:
+        """Describe a hazard hurting someone."""
+        prompt = (
+            f"Describe {hazard_name} harming {victim_name} in one vivid sentence. "
+            "Keep it under 20 words."
+        )
+        result = await self._ollama(prompt)
+        if result:
+            return result
+        lowered = hazard_name.lower()
+        if "lava" in lowered:
+            pool = _HAZARD_LAVA
+        elif "spike" in lowered:
+            pool = _HAZARD_SPIKES
+        else:
+            pool = _HAZARD_GENERIC
+        return _pick(pool, rng or random.Random()).format(name=victim_name)
+
+    async def narrate_phase_transition(
+        self, boss_name: str, phase: dict[str, Any], rng: random.Random | None = None
+    ) -> str:
+        """Describe a boss entering a new combat phase."""
+        prompt = (
+            f"Describe {boss_name} transforming or rallying into a deadlier phase "
+            "in one vivid sentence. Keep it under 25 words."
+        )
+        return (await self._ollama(prompt)) or _pick(
+            _PHASE, rng or random.Random()
+        ).format(name=boss_name)
 
     async def narrate_dm_turn(
         self, events: list[str], rng: random.Random | None = None

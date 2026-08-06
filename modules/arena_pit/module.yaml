@@ -1,0 +1,39 @@
+id: arena_pit
+name: The Arena Pit
+ruleset: osric
+description: >-
+  A sand-streaked fighting pit surrounded by broken columns and the jeers of
+  unseen spectators. The gate slams shut; another wave is coming.
+map:
+  width: 16
+  height: 12
+  tile_size: 40
+  tiles:
+    - "1111111111111111"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1000000000000001"
+    - "1111111111111111"
+player_start:
+  x: 2
+  y: 5
+monsters:
+  - id: arena_goblin_1
+    name: Goblin
+    monster: goblin
+    x: 12
+    y: 4
+    color: "#2ecc71"
+  - id: arena_goblin_2
+    name: Goblin
+    monster: goblin
+    x: 13
+    y: 5
+    color: "#2ecc71"

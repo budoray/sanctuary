@@ -1,6 +1,6 @@
 import { Application, Container, Graphics } from 'pixi.js';
 import type { Socket } from 'socket.io-client';
-import { actInSession, advanceSession, GameSession, getModule, restInSession, Token } from '../net/api';
+import { actInSession, advanceSession, GameSession, getModule, getSessionPresence, Presence, restInSession, Token } from '../net/api';
 import { connectSocket } from '../net/socket';
 import { DiceTray } from './dice-tray';
 import { TokenSprite } from './token-sprite';
@@ -87,6 +87,10 @@ export class Game {
   private chatMessages: HTMLElement = document.createElement('div');
   private chatInput: HTMLInputElement = document.createElement('input');
   private chatCollapsed = false;
+  private presencePanel: HTMLElement | null = null;
+  private presenceList: HTMLElement = document.createElement('div');
+  private heartbeatInterval: number | null = null;
+  private moduleId: string;
 
   constructor(
     container: HTMLElement,
@@ -100,6 +104,7 @@ export class Game {
     this.root = container;
     this.sessionId = sessionId;
     this.module = module;
+    this.moduleId = initialSession.module_id;
     this.userId = userId ?? null;
     this.onExit = onExit;
     this.onReplay = onReplay;
@@ -108,9 +113,11 @@ export class Game {
     this.canvasContainer = el('div', { className: 'game-canvas-container' });
     this.ui = this.buildUI();
     this.chatPanel = this.buildChatPanel();
+    this.presencePanel = this.buildPresencePanel();
     this.root.appendChild(this.canvasContainer);
     this.root.appendChild(this.ui);
-    this.root.appendChild(this.chatPanel);
+    if (this.presencePanel) this.root.appendChild(this.presencePanel);
+    if (this.chatPanel) this.root.appendChild(this.chatPanel);
 
     this.tooltip = el('div', { className: 'token-tooltip' });
     this.tooltip.style.display = 'none';
@@ -191,6 +198,22 @@ export class Game {
     this.socket.on('chat_broadcast', (payload: { account_id?: number; name?: string; text?: string; timestamp?: string }) => {
       this.appendChatMessage(payload);
     });
+    this.socket.on('presence_update', (payload: { session_id?: string; present?: Presence[] }) => {
+      if (payload.session_id === this.sessionId && payload.present) {
+        this.updatePresence(payload.present);
+      }
+    });
+
+    try {
+      const { present } = await getSessionPresence(this.sessionId);
+      this.updatePresence(present);
+    } catch {
+      // Presence is best-effort; the socket will keep it updated.
+    }
+
+    this.heartbeatInterval = window.setInterval(() => {
+      this.socket?.emit('heartbeat', { session_id: this.sessionId });
+    }, 30000);
   }
 
   private buildUI() {
@@ -202,14 +225,14 @@ export class Game {
     hud.appendChild(this.timerEl);
 
     const actions = el('div', { className: 'game-actions' });
-    this.moveBtn = el('button', { onclick: () => this.setAction('move') }, 'Move [M]') as HTMLButtonElement;
-    this.attackBtn = el('button', { onclick: () => this.setAction('attack') }, 'Attack [F]') as HTMLButtonElement;
-    this.rangedBtn = el('button', { onclick: () => this.setAction('ranged') }, 'Ranged [R]') as HTMLButtonElement;
-    this.potionBtn = el('button', { onclick: () => this.usePotion() }, 'Potion [P]') as HTMLButtonElement;
-    this.abilityBtn = el('button', { onclick: () => this.setAction('ability') }, 'Ability [Q]') as HTMLButtonElement;
-    this.stabilizeBtn = el('button', { onclick: () => this.stabilize() }, 'Stabilize [S]') as HTMLButtonElement;
-    this.restBtn = el('button', { onclick: () => this.rest() }, 'Rest') as HTMLButtonElement;
-    this.endBtn = el('button', { onclick: () => this.endTurn() }, 'End [E]') as HTMLButtonElement;
+    this.moveBtn = el('button', { onclick: () => { this.ensureAudioStarted(); this.setAction('move'); } }, 'Move [M]') as HTMLButtonElement;
+    this.attackBtn = el('button', { onclick: () => { this.ensureAudioStarted(); this.setAction('attack'); } }, 'Attack [F]') as HTMLButtonElement;
+    this.rangedBtn = el('button', { onclick: () => { this.ensureAudioStarted(); this.setAction('ranged'); } }, 'Ranged [R]') as HTMLButtonElement;
+    this.potionBtn = el('button', { onclick: () => { this.ensureAudioStarted(); this.usePotion(); } }, 'Potion [P]') as HTMLButtonElement;
+    this.abilityBtn = el('button', { onclick: () => { this.ensureAudioStarted(); this.setAction('ability'); } }, 'Ability [Q]') as HTMLButtonElement;
+    this.stabilizeBtn = el('button', { onclick: () => { this.ensureAudioStarted(); this.stabilize(); } }, 'Stabilize [S]') as HTMLButtonElement;
+    this.restBtn = el('button', { onclick: () => { this.ensureAudioStarted(); this.rest(); } }, 'Rest') as HTMLButtonElement;
+    this.endBtn = el('button', { onclick: () => { this.ensureAudioStarted(); this.endTurn(); } }, 'End [E]') as HTMLButtonElement;
     actions.appendChild(this.moveBtn);
     actions.appendChild(this.attackBtn);
     actions.appendChild(this.rangedBtn);
@@ -245,6 +268,7 @@ export class Game {
     const muteBtn = el('button', {
       className: 'mute-btn',
       onclick: () => {
+        this.ensureAudioStarted();
         const muted = this.audio.toggleMute();
         muteBtn.textContent = muted ? 'Unmute' : 'Mute';
         muteBtn.classList.toggle('muted', muted);
@@ -252,10 +276,46 @@ export class Game {
     }, 'Mute') as HTMLButtonElement;
     hud.appendChild(muteBtn);
 
+    const ambientBtn = el('button', {
+      className: 'ambient-btn',
+      onclick: () => {
+        this.ensureAudioStarted();
+        if (this.audio.isAmbientActive()) {
+          this.audio.stopAmbient();
+          ambientBtn.textContent = 'Ambient: Off';
+        } else {
+          this.audio.playAmbient(this.moduleId === 'sunken_crypt' ? 'cave' : 'dungeon');
+          ambientBtn.textContent = 'Ambient: On';
+        }
+      },
+    }, 'Ambient: Off') as HTMLButtonElement;
+    hud.appendChild(ambientBtn);
+
+    const volumeWrap = el('div', { className: 'volume-control' });
+    volumeWrap.appendChild(el('label', { htmlFor: 'music-volume' }, 'Music'));
+    const volumeSlider = el('input', {
+      id: 'music-volume',
+      type: 'range',
+      min: '0',
+      max: '1',
+      step: '0.05',
+      value: String(this.audio.getMusicVolume()),
+      oninput: (e: Event) => {
+        const val = parseFloat((e.target as HTMLInputElement).value);
+        this.audio.setMusicVolume(val);
+      },
+    }) as HTMLInputElement;
+    volumeWrap.appendChild(volumeSlider);
+    hud.appendChild(volumeWrap);
+
     const exitBtn = el('button', { className: 'danger', onclick: () => this.onExit() }, 'Leave');
     hud.appendChild(exitBtn);
 
     return hud;
+  }
+
+  private ensureAudioStarted() {
+    this.audio.ensureStartedFromGesture().catch(() => {});
   }
 
   private buildChatPanel(): HTMLElement {
@@ -290,6 +350,29 @@ export class Game {
 
     panel.style.display = 'none';
     return panel;
+  }
+
+  private buildPresencePanel(): HTMLElement {
+    const panel = el('div', { className: 'presence-panel' });
+    panel.appendChild(el('h3', {}, 'Online'));
+    this.presenceList = el('div', { className: 'presence-list' });
+    panel.appendChild(this.presenceList);
+    panel.style.display = 'none';
+    return panel;
+  }
+
+  private updatePresence(present: Presence[]) {
+    if (!this.presencePanel) return;
+    clear(this.presenceList);
+    if (present.length === 0) {
+      this.presencePanel.style.display = 'none';
+      return;
+    }
+    this.presencePanel.style.display = 'block';
+    present.forEach((p) => {
+      const name = p.name || `Account ${p.account_id ?? '?'}`;
+      this.presenceList.appendChild(el('div', { className: 'presence-row' }, name));
+    });
   }
 
   private toggleChat() {
@@ -402,6 +485,7 @@ export class Game {
   }
 
   private onKeyDown(e: KeyboardEvent) {
+    this.ensureAudioStarted();
     if (!this.session || this.session.status !== 'active' || this.session.phase !== 'player') return;
 
     switch (e.key.toLowerCase()) {
@@ -914,10 +998,45 @@ export class Game {
     this.particles.push({ gfx: g, vx, vy, life, maxLife: life });
   }
 
+  private spawnAmbientParticles() {
+    if (!this.session || !this.app) return;
+    const px = this.session.player.x * TILE_SIZE + TILE_SIZE / 2;
+    const py = this.session.player.y * TILE_SIZE + TILE_SIZE / 2;
+    const radius = VISION_RADIUS * TILE_SIZE;
+    const count = 3;
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.random() * radius;
+      const x = px + Math.cos(angle) * dist;
+      const y = py + Math.sin(angle) * dist;
+      const isSpark = Math.random() < 0.25;
+      const color = isSpark ? 0xffaa44 : 0x9a9590;
+      const size = isSpark ? 1.2 : 0.8;
+      const g = new Graphics();
+      g.circle(0, 0, size);
+      g.fill({ color, alpha: isSpark ? 0.9 : 0.45 });
+      g.x = x;
+      g.y = y;
+      this.fxContainer.addChild(g);
+      this.particles.push({
+        gfx: g,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: isSpark ? -0.3 - Math.random() * 0.4 : (Math.random() - 0.5) * 0.2,
+        life: 120 + Math.random() * 120,
+        maxLife: 120 + Math.random() * 120,
+      });
+    }
+  }
+
   private onTick(ticker: import('pixi.js').Ticker) {
     const dt = ticker.deltaTime;
     const dtSec = dt / 60;
     const speed = 12;
+
+    // Ambient dust / torch sparks
+    if (this.session && this.session.status === 'active' && Math.random() < 0.08) {
+      this.spawnAmbientParticles();
+    }
     for (const sprite of this.tokenSprites.values()) {
       const dx = sprite.targetX - sprite.container.x;
       const dy = sprite.targetY - sprite.container.y;
@@ -943,8 +1062,11 @@ export class Game {
       p.gfx.x += p.vx;
       p.gfx.y += p.vy;
       p.gfx.alpha = Math.max(0, p.life / p.maxLife);
-      p.vx *= 0.95;
-      p.vy *= 0.95;
+      // Ambient motes keep drifting; combat particles decay quickly.
+      if (Math.abs(p.vx) > 1 || Math.abs(p.vy) > 1) {
+        p.vx *= 0.95;
+        p.vy *= 0.95;
+      }
       if (p.life <= 0) {
         p.gfx.destroy();
         this.particles.splice(i, 1);
@@ -1116,6 +1238,7 @@ export class Game {
       <div class="ac-text">AC ${p.ac}</div>
       <div class="progression-text">Level ${p.level ?? 1} · XP ${p.xp ?? 0} · Gold ${p.gold ?? 0}</div>
     `;
+    this.root.classList.toggle('low-hp', ratio <= 0.25 && p.hp > 0);
   }
 
   private updatePartyRoster() {
@@ -1127,6 +1250,14 @@ export class Game {
       const ratio = Math.max(0, Math.min(1, p.hp / p.max_hp));
       const hpColor = ratio > 0.5 ? '#2ecc71' : ratio > 0.25 ? '#f1c40f' : '#c0392b';
       const row = el('div', { className: `party-row${isActive ? ' active' : ''}` });
+      const portraitUrl = this.fallbackPortraitUrl((p.classes?.[0] ?? ''));
+      const portrait = el('img', {
+        className: 'party-portrait',
+        src: portraitUrl,
+        alt: p.name,
+        onerror: () => { portrait.src = this.fallbackPortraitUrl(); },
+      }) as HTMLImageElement;
+      row.appendChild(portrait);
       row.appendChild(el('span', { className: 'party-name' }, p.name));
       const barWrap = el('div', { className: 'party-hp-bar' });
       barWrap.innerHTML = `<span style="width:${Math.round(ratio * 100)}%; background:${hpColor};"></span>`;
@@ -1143,6 +1274,11 @@ export class Game {
       row.appendChild(el('span', { className: 'party-progression' }, `Lv${p.level ?? 1} · XP ${p.xp ?? 0} · G ${p.gold ?? 0}`));
       this.partyEl.appendChild(row);
     });
+  }
+
+  private fallbackPortraitUrl(className?: string): string {
+    const key = (className || 'generic').toLowerCase().replace(/\s+/g, '-');
+    return `/portraits/${key}.png`;
   }
 
   private updateRoster() {
@@ -1301,6 +1437,8 @@ export class Game {
       }
       if (newEntries.some((e) => e.toLowerCase().includes('trap') || e.toLowerCase().includes('spike'))) {
         this.audio.trapTrigger();
+        this.shakeFrames = 20;
+        this.triggerDamageFlash();
       }
       this.lastLogLength = log.length;
     } else if (this.logEl.childElementCount === 0) {
@@ -1324,6 +1462,10 @@ export class Game {
     if (this.timerInterval) {
       window.clearInterval(this.timerInterval);
       this.timerInterval = null;
+    }
+    if (this.heartbeatInterval) {
+      window.clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
     }
     if (this.keydownHandler) {
       window.removeEventListener('keydown', this.keydownHandler);

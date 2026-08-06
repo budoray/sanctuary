@@ -339,6 +339,8 @@ def _module_with_trap(base_module):
         map=new_map,
         player_start=base_module.player_start,
         monsters=base_module.monsters,
+        events=[],
+        branches=[],
     )
 
 

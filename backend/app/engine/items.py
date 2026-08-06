@@ -23,11 +23,23 @@ LOOT_TABLE: dict[str, dict[str, Any]] = {
         "slot": "body",
         "effects": {"ac_bonus": 4},
     },
+    "plate_mail": {
+        "name": "Plate Mail",
+        "type": "armor",
+        "slot": "body",
+        "effects": {"ac_bonus": 6},
+    },
     "short_sword": {
         "name": "Short Sword",
         "type": "weapon",
         "slot": "main_hand",
         "effects": {"damage_bonus": 1},
+    },
+    "longsword": {
+        "name": "Longsword",
+        "type": "weapon",
+        "slot": "main_hand",
+        "effects": {"damage_bonus": 2},
     },
     "longbow": {
         "name": "Longbow",
@@ -41,6 +53,12 @@ LOOT_TABLE: dict[str, dict[str, Any]] = {
         "slot": "off_hand",
         "effects": {"ac_bonus": 1},
     },
+    "tower_shield": {
+        "name": "Tower Shield",
+        "type": "shield",
+        "slot": "off_hand",
+        "effects": {"ac_bonus": 2},
+    },
     "healing_potion": {
         "name": "Potion of Healing",
         "type": "potion",
@@ -53,19 +71,54 @@ LOOT_TABLE: dict[str, dict[str, Any]] = {
         "slot": "finger",
         "effects": {"ac_bonus": 1},
     },
+    "ring_of_might": {
+        "name": "Ring of Might",
+        "type": "ring",
+        "slot": "finger",
+        "effects": {"damage_bonus": 1},
+    },
+    "boots_of_striding": {
+        "name": "Boots of Striding",
+        "type": "boots",
+        "slot": "feet",
+        "effects": {"ac_bonus": 1},
+    },
+    "crown_of_wisdom": {
+        "name": "Crown of Wisdom",
+        "type": "helm",
+        "slot": "head",
+        "effects": {"ac_bonus": 1},
+    },
 }
 
 
-def generate_loot(rng: random.Random | None = None) -> dict[str, Any]:
-    """Return one random loot item instance."""
+def generate_loot(level: int = 1, rng: random.Random | None = None) -> dict[str, Any]:
+    """Return one random loot item instance, with mild level scaling.
+
+    Higher levels slightly favour non-consumable gear and may add a small
+    damage or AC bonus to ordinary items.
+    """
     rng = rng or random.Random()
     item_id = rng.choice(list(LOOT_TABLE.keys()))
     template = LOOT_TABLE[item_id]
-    return {
+    item = {
         "instance_id": str(uuid.uuid4())[:8],
         "item_id": item_id,
         **template,
     }
+
+    # Scale non-potion gear upward at higher levels.
+    if level > 1 and item.get("slot") != "consumable":
+        effects = dict(item.get("effects", {}))
+        bonus = min(level // 3, 2)
+        if bonus:
+            if "ac_bonus" in effects:
+                effects["ac_bonus"] = effects["ac_bonus"] + bonus
+            if "damage_bonus" in effects:
+                effects["damage_bonus"] = effects["damage_bonus"] + bonus
+            item["effects"] = effects
+            item["name"] = f"+{bonus} {item['name']}"
+    return item
 
 
 def _equipment_bonuses(equipment: dict[str, dict[str, Any]]) -> dict[str, Any]:

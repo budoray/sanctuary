@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.ai import portraits
 from backend.app.auth import require_account
 from backend.app.db import CharacterRecord, get_db
 from backend.app.engine import character as char_engine
@@ -32,6 +33,7 @@ async def osric_options():
 
 
 def _serialize(character: char_engine.Character) -> dict[str, Any]:
+    first_class = list(character.classes)[0] if character.classes else "fighter"
     return {
         "id": None,
         "name": character.name,
@@ -45,6 +47,7 @@ def _serialize(character: char_engine.Character) -> dict[str, Any]:
         "saves": character.saves,
         "modifiers": character.modifiers,
         "seed": character.seed,
+        "portrait_url": portraits.character_portrait_url(character.name, first_class),
         "log": [
             {
                 "index": r.index,
@@ -172,6 +175,7 @@ async def list_characters(
         try:
             state = json.loads(r.state)
         except Exception:
+            first_class = r.class_.split(",")[0] if r.class_ else "fighter"
             state = {
                 "id": r.id,
                 "name": r.name,
@@ -181,6 +185,7 @@ async def list_characters(
                 "hit_points": r.hp,
                 "max_hp": r.max_hp,
                 "armour_class": r.ac,
+                "portrait_url": portraits.character_portrait_url(r.name, first_class),
             }
         characters.append(state)
     return {"characters": characters}

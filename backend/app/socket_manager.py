@@ -3,8 +3,10 @@ import socketio
 
 from backend.app.config import SETTINGS
 
-# In-memory adapter for single-process deployments. Swap to Redis adapter
-# (socketio.AsyncRedisManager) when scaling horizontally.
+# Horizontal scaling: when SETTINGS.redis_url is set, python-socketio uses the
+# Redis adapter as its client manager so rooms/events are shared across server
+# processes. Without Redis the server falls back to the in-memory manager and
+# only works for a single process.
 if SETTINGS.redis_url:
     mgr = socketio.AsyncRedisManager(SETTINGS.redis_url)
 else:
@@ -19,6 +21,54 @@ socket_manager = socketio.AsyncServer(
     logger=SETTINGS.app_env == "development",
     engineio_logger=SETTINGS.app_env == "development",
 )
+
+
+class PresenceTracker:
+    """Per-session-room presence tracking.
+
+    Tracks which authenticated sockets are in each session room and broadcasts
+    ``presence_update`` events on join, disconnect, and heartbeat. This tracker
+    is local to the process; combined with the Redis adapter above, clients see
+    presence updates from every server but each process only knows about the
+    sockets connected to it.
+    """
+
+    def __init__(self):
+        # session_id -> {sid: {"account_id": int, "name": str}}
+        self._rooms: dict[str, dict[str, dict]] = {}
+
+    def add(self, sid: str, session_id: str, account_id: int | None, name: str | None):
+        room = self._rooms.setdefault(session_id, {})
+        room[sid] = {"account_id": account_id, "name": name or "Player"}
+        return list(room.values())
+
+    def remove(self, sid: str):
+        for session_id, occupants in list(self._rooms.items()):
+            if sid in occupants:
+                del occupants[sid]
+                remaining = list(occupants.values())
+                if not occupants:
+                    del self._rooms[session_id]
+                return session_id, remaining
+        return None, []
+
+    def heartbeat(self, sid: str, session_id: str, account_id: int | None, name: str | None):
+        room = self._rooms.setdefault(session_id, {})
+        if sid in room:
+            if account_id is not None:
+                room[sid]["account_id"] = account_id
+            if name is not None:
+                room[sid]["name"] = name or "Player"
+        return list(room.values())
+
+    def get(self, session_id: str):
+        return list(self._rooms.get(session_id, {}).values())
+
+    def _payload(self, session_id: str, occupants: list[dict]):
+        return {"session_id": session_id, "present": occupants}
+
+
+presence_tracker = PresenceTracker()
 
 # Serve Socket.IO at the full /ws/socket.io path so Caddy proxies it cleanly
 # without depending on Starlette's mount path stripping.
@@ -113,20 +163,55 @@ async def connect(sid, environ, auth=None):
 
 @socket_manager.event
 async def disconnect(sid):
-    pass
+    session_id, occupants = presence_tracker.remove(sid)
+    if session_id:
+        await socket_manager.emit(
+            "presence_update",
+            presence_tracker._payload(session_id, occupants),
+            room=session_id,
+        )
 
 
 @socket_manager.event
 async def join_session(sid, data):
     session_id = data.get("session_id")
-    if session_id:
-        await socket_manager.enter_room(sid, session_id)
-        await socket_manager.emit(
-            "message",
-            {"type": "system", "text": f"Joined session {session_id}."},
-            room=session_id,
-            skip_sid=sid,
-        )
+    if not session_id:
+        return
+
+    sess = await socket_manager.get_session(sid)
+    account_id = sess.get("account_id") if sess else None
+    name = sess.get("name") if sess else None
+
+    await socket_manager.enter_room(sid, session_id)
+    occupants = presence_tracker.add(sid, session_id, account_id, name)
+    await socket_manager.emit(
+        "message",
+        {"type": "system", "text": f"Joined session {session_id}."},
+        room=session_id,
+        skip_sid=sid,
+    )
+    await socket_manager.emit(
+        "presence_update",
+        presence_tracker._payload(session_id, occupants),
+        room=session_id,
+    )
+
+
+@socket_manager.event
+async def heartbeat(sid, data):
+    """Keep presence fresh and recover if a reconnect reused the same sid."""
+    session_id = (data or {}).get("session_id")
+    if not session_id:
+        return
+    sess = await socket_manager.get_session(sid)
+    account_id = sess.get("account_id") if sess else None
+    name = sess.get("name") if sess else None
+    occupants = presence_tracker.heartbeat(sid, session_id, account_id, name)
+    await socket_manager.emit(
+        "presence_update",
+        presence_tracker._payload(session_id, occupants),
+        room=session_id,
+    )
 
 
 @socket_manager.event

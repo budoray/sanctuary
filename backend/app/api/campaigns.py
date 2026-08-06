@@ -4,11 +4,11 @@ import json
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.auth import require_account
+from backend.app.auth import is_admin, require_account
 from backend.app.db import CampaignMemberRecord, CampaignRecord, SessionRecord, get_db
 
 router = APIRouter(tags=["campaigns"])
@@ -20,6 +20,50 @@ def _hash_password(password: str) -> str:
 
 def _check_password(password: str, hashed: str) -> bool:
     return _hash_password(password) == hashed
+
+
+async def _require_campaign_manager(
+    campaign_id: str,
+    request: Request,
+    account_id: int = Depends(require_account),
+    db: AsyncSession = Depends(get_db),
+) -> CampaignRecord:
+    """Return the campaign if the caller is the DM or an admin, else 403."""
+    result = await db.execute(select(CampaignRecord).where(CampaignRecord.id == campaign_id))
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    if record.dm_account_id == account_id:
+        return record
+    if is_admin(account_id, request.headers.get("cookie", "")):
+        return record
+    raise HTTPException(status_code=403, detail="Only the DM or an admin can manage this campaign")
+
+
+async def _require_campaign_member(
+    campaign_id: str,
+    request: Request,
+    account_id: int = Depends(require_account),
+    db: AsyncSession = Depends(get_db),
+) -> CampaignRecord:
+    """Return the campaign if the caller is a member or an admin, else 403."""
+    result = await db.execute(select(CampaignRecord).where(CampaignRecord.id == campaign_id))
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    if record.dm_account_id == account_id or record.account_id == account_id:
+        return record
+    if is_admin(account_id, request.headers.get("cookie", "")):
+        return record
+    result = await db.execute(
+        select(CampaignMemberRecord).where(
+            CampaignMemberRecord.campaign_id == campaign_id,
+            CampaignMemberRecord.account_id == account_id,
+        )
+    )
+    if result.scalar_one_or_none():
+        return record
+    raise HTTPException(status_code=403, detail="Not a member of this campaign")
 
 
 def _campaign_response(record: CampaignRecord, is_member: bool = False, is_dm: bool = False) -> dict[str, Any]:
@@ -128,7 +172,8 @@ async def get_campaign(
         # Public metadata only for non-members.
         return {"campaign": _campaign_response(record)}
 
-    return {"campaign": _campaign_response(record, is_member=True, is_dm=record.dm_account_id == account_id)}
+    is_dm = record.dm_account_id == account_id or (membership is not None and membership.role == "dm")
+    return {"campaign": _campaign_response(record, is_member=True, is_dm=is_dm)}
 
 
 @router.post("/campaigns/{campaign_id}/join")
@@ -244,3 +289,105 @@ async def list_campaign_sessions(
             "player_count": len(state.get("players", [])),
         })
     return {"sessions": sessions}
+
+
+@router.get("/campaigns/{campaign_id}/members")
+async def list_campaign_members(
+    campaign_id: str,
+    request: Request,
+    account_id: int = Depends(require_account),
+    db: AsyncSession = Depends(get_db),
+):
+    record = await _require_campaign_member(campaign_id, request, account_id, db)
+    result = await db.execute(
+        select(CampaignMemberRecord).where(CampaignMemberRecord.campaign_id == campaign_id)
+    )
+    members = [
+        {"account_id": m.account_id, "role": m.role, "joined_at": m.joined_at.isoformat() if m.joined_at else None}
+        for m in result.scalars().all()
+    ]
+    return {"campaign_id": record.id, "members": members}
+
+
+@router.post("/campaigns/{campaign_id}/transfer_dm")
+async def transfer_dm(
+    campaign_id: str,
+    data: dict[str, Any],
+    request: Request,
+    record: CampaignRecord = Depends(_require_campaign_manager),
+    account_id: int = Depends(require_account),
+    db: AsyncSession = Depends(get_db),
+):
+    target_account_id = data.get("account_id")
+    if target_account_id is None:
+        raise HTTPException(status_code=400, detail="account_id is required")
+    try:
+        target_account_id = int(target_account_id)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=400, detail="account_id must be an integer")
+
+    result = await db.execute(
+        select(CampaignMemberRecord).where(
+            CampaignMemberRecord.campaign_id == campaign_id,
+            CampaignMemberRecord.account_id == target_account_id,
+        )
+    )
+    target_member = result.scalar_one_or_none()
+    if not target_member:
+        raise HTTPException(status_code=400, detail="Target is not a campaign member")
+
+    # Update the campaign DM and member roles.
+    record.dm_account_id = target_account_id
+    target_member.role = "dm"
+
+    if target_account_id != account_id:
+        result = await db.execute(
+            select(CampaignMemberRecord).where(
+                CampaignMemberRecord.campaign_id == campaign_id,
+                CampaignMemberRecord.account_id == account_id,
+            )
+        )
+        caller_member = result.scalar_one_or_none()
+        if caller_member and caller_member.role == "dm":
+            caller_member.role = "player"
+
+    await db.commit()
+    await db.refresh(record)
+    return {"campaign": _campaign_response(record, is_member=True, is_dm=record.dm_account_id == account_id)}
+
+
+@router.post("/campaigns/{campaign_id}/members/{member_account_id}/role")
+async def set_member_role(
+    campaign_id: str,
+    member_account_id: int,
+    data: dict[str, Any],
+    request: Request,
+    record: CampaignRecord = Depends(_require_campaign_manager),
+    db: AsyncSession = Depends(get_db),
+):
+    role = data.get("role")
+    if role not in ("dm", "player", "none"):
+        raise HTTPException(status_code=400, detail="role must be dm, player, or none")
+
+    result = await db.execute(
+        select(CampaignMemberRecord).where(
+            CampaignMemberRecord.campaign_id == campaign_id,
+            CampaignMemberRecord.account_id == member_account_id,
+        )
+    )
+    member = result.scalar_one_or_none()
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+    if role == "none":
+        await db.execute(
+            delete(CampaignMemberRecord).where(
+                CampaignMemberRecord.campaign_id == campaign_id,
+                CampaignMemberRecord.account_id == member_account_id,
+            )
+        )
+    else:
+        member.role = role
+
+    await db.commit()
+    return {"account_id": member_account_id, "role": role}

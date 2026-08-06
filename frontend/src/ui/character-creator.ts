@@ -179,6 +179,15 @@ export class CharacterCreator {
     if (!this.preview) return;
     const char = this.preview;
 
+    const portraitUrl = char.portrait_url || this.fallbackPortraitUrl(char.classes[0]);
+    const portrait = el('img', {
+      className: 'creator-portrait',
+      src: portraitUrl,
+      alt: char.name,
+      onerror: () => { portrait.src = this.fallbackPortraitUrl(); },
+    }) as HTMLImageElement;
+    this.previewPanel.appendChild(portrait);
+
     const grid = el('div', { className: 'abilities-grid' });
     this.options?.abilities.forEach((ability) => {
       const score = char.scores[ability];
@@ -198,6 +207,11 @@ export class CharacterCreator {
 
     this.previewPanel.appendChild(grid);
     this.previewPanel.appendChild(derived);
+  }
+
+  private fallbackPortraitUrl(className?: string): string {
+    const key = (className || 'generic').toLowerCase().replace(/\s+/g, '-');
+    return `/portraits/${key}.png`;
   }
 
   private renderArrange() {

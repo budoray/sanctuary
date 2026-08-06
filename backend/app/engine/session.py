@@ -12,7 +12,7 @@ from typing import Any
 from backend.app.engine import bestiary, items
 from backend.app.engine.character import Character
 from backend.app.engine.dice import Dice, Roll
-from backend.app.engine.module import Module
+from backend.app.engine.module import Module, MonsterSpawn
 from backend.app.engine.narrator import Narrator
 
 
@@ -39,6 +39,17 @@ STATUS_WON = "won"
 STATUS_LOST = "lost"
 
 RANGED_RANGE = 4
+
+TILE_LAVA = "3"
+TILE_SPIKES = "4"
+TILE_EVENT = "5"
+
+HAZARD_DAMAGE = {
+    TILE_LAVA: ("lava", "1d6"),
+    TILE_SPIKES: ("spikes", "1d8"),
+}
+
+ARENA_BASE_WAVE_TEMPLATES = ["goblin", "orc", "skeleton", "ghoul", "zombie"]
 
 MONSTER_XP = {
     "goblin": 50,
@@ -71,8 +82,33 @@ def _roll_hp(monster: dict, d: Dice) -> int:
     return max(1, total)
 
 
+def _spawn_token(spawn, state: dict[str, Any], d: Dice) -> dict[str, Any]:
+    """Create a live monster token from a MonsterSpawn."""
+    template = bestiary.load(spawn.monster)
+    token = {
+        "id": spawn.id,
+        "name": spawn.name,
+        "type": "monster",
+        "x": spawn.x,
+        "y": spawn.y,
+        "hp": _roll_hp(template, d),
+        "max_hp": _roll_hp(template, d),
+        "ac": template["ac"],
+        "damage": template["damage"],
+        "to_hit": 0,
+        "color": spawn.color,
+        "alive": True,
+        "xp_value": _xp_value(spawn.name),
+    }
+    if spawn.boss:
+        token["boss"] = True
+        token["phases"] = list(spawn.phases)
+        token["phases_triggered"] = []
+    return token
+
+
 def _grant_rewards(state: dict[str, Any], monster: dict[str, Any]) -> None:
-    """Award XP and gold to living players when a monster dies."""
+    """Award XP, gold, and possibly loot to living players when a monster dies."""
     xp_value = monster.get("xp_value", 50)
     gold_value = xp_value // 10
     for player in state["players"]:
@@ -80,6 +116,17 @@ def _grant_rewards(state: dict[str, Any], monster: dict[str, Any]) -> None:
             continue
         player["gold"] = player.get("gold", 0) + gold_value
         player["xp"] = player.get("xp", 0) + xp_value
+
+        # Chance for a loot drop, higher for boss monsters.
+        drop_chance = 0.10
+        if monster.get("boss"):
+            drop_chance = 0.75
+        rng = random.Random(state["seed"] + state["version"] + sum(ord(c) for c in player["id"]))
+        if rng.random() < drop_chance:
+            loot = items.generate_loot(level=player.get("level", 1), rng=rng)
+            player.setdefault("session_loot", []).append(loot)
+            state["log"].append(f"{player['name']} loots {loot['name']} from {monster['name']}.")
+
         while player["xp"] >= player.get("level", 1) * 100:
             player["level"] = player.get("level", 1) + 1
             cls = player["classes"][0] if player.get("classes") else ""
@@ -133,6 +180,7 @@ async def new_game(
     turn_timer_seconds: int = 0,
     character_id: str | None = None,
     account_id: int | None = None,
+    mode: str = "campaign",
 ) -> dict[str, Any]:
     """Create a fresh session state."""
     if seed is None:
@@ -158,6 +206,7 @@ async def new_game(
         "xp": getattr(character, "xp", 0),
         "level": getattr(character, "level", 1),
         "gold": getattr(character, "gold", 0),
+        "session_loot": [],
     }
     items.apply_gear(
         {"equipment": getattr(character, "equipment", {}), "inventory": list(getattr(character, "inventory", ()))},
@@ -173,22 +222,14 @@ async def new_game(
 
     monsters: list[dict[str, Any]] = []
     for spawn in module.monsters:
-        template = bestiary.load(spawn.monster)
-        monsters.append({
-            "id": spawn.id,
-            "name": spawn.name,
-            "type": "monster",
-            "x": spawn.x,
-            "y": spawn.y,
-            "hp": _roll_hp(template, d),
-            "max_hp": _roll_hp(template, d),
-            "ac": template["ac"],
-            "damage": template["damage"],
-            "to_hit": 0,
-            "color": spawn.color,
-            "alive": True,
-            "xp_value": _xp_value(spawn.name),
-        })
+        monsters.append(_spawn_token(spawn, {}, d))
+
+    log = [
+        await narrator.narrate_opening(random.Random(seed), module=module.name, mode=mode),
+        await narrator.narrate_room(module.name, room_type=None, rng=random.Random(seed + 1)),
+    ]
+    if mode == "arena":
+        log.append(await narrator.narrate_banter("arena", rng=random.Random(seed + 2)))
 
     return {
         "id": session_id,
@@ -200,14 +241,13 @@ async def new_game(
         "phase": PHASE_PLAYER,
         "status": STATUS_ACTIVE,
         "seed": seed,
+        "mode": mode,
+        "wave": 1,
         "players": players,
         "active_player_index": 0,
         "player": player,
         "monsters": monsters,
-        "log": [
-            await narrator.narrate_opening(random.Random(seed)),
-            await narrator.narrate_room(module.name, room_type=None, rng=random.Random(seed + 1)),
-        ],
+        "log": log,
         "rolls": [_roll_to_dict(r) for r in d.log],
         "turn_timer_seconds": max(0, turn_timer_seconds),
         "turn_deadline": _deadline(max(0, turn_timer_seconds)),
@@ -232,22 +272,7 @@ async def advance_module(state: dict[str, Any], next_module: Module) -> dict[str
 
     monsters: list[dict[str, Any]] = []
     for spawn in next_module.monsters:
-        template = bestiary.load(spawn.monster)
-        monsters.append({
-            "id": spawn.id,
-            "name": spawn.name,
-            "type": "monster",
-            "x": spawn.x,
-            "y": spawn.y,
-            "hp": _roll_hp(template, d),
-            "max_hp": _roll_hp(template, d),
-            "ac": template["ac"],
-            "damage": template["damage"],
-            "to_hit": 0,
-            "color": spawn.color,
-            "alive": True,
-            "xp_value": _xp_value(spawn.name),
-        })
+        monsters.append(_spawn_token(spawn, state, d))
 
     state["module_id"] = next_module.id
     state["monsters"] = monsters
@@ -346,6 +371,7 @@ async def add_player(
         "xp": getattr(character, "xp", 0),
         "level": getattr(character, "level", 1),
         "gold": getattr(character, "gold", 0),
+        "session_loot": [],
     }
     items.apply_gear(
         {"equipment": getattr(character, "equipment", {}), "inventory": list(getattr(character, "inventory", ()))},
@@ -412,6 +438,97 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
             )
             state["log"].append(f"{trap_line} {token['name']} suffers {damage} damage.")
 
+    # Hazard tiles: 3 = lava, 4 = spikes.
+    tile = module.map.tiles[y][x] if module.map.in_bounds(x, y) else "0"
+    if tile in HAZARD_DAMAGE:
+        await _apply_hazard(state, token, tile, d)
+
+    # Event/branch tile: 5.
+    if tile == TILE_EVENT:
+        _trigger_event(state, module, x, y)
+
+
+async def _apply_hazard(state: dict[str, Any], token: dict[str, Any], tile: str, d: Dice) -> None:
+    """Apply hazard damage to a token that enters or starts its turn on a hazard tile."""
+    name, expr = HAZARD_DAMAGE[tile]
+    damage_roll = d.roll(expr, reason=f"{name} damage", kind="hazard")
+    damage = max(1, damage_roll.total)
+    token["hp"] -= damage
+    hazard_line = await narrator.narrate_hazard(
+        name, token.get("name", "someone"), rng=random.Random(state["seed"] + state["version"])
+    )
+    state["log"].append(f"{hazard_line} {token['name']} suffers {damage} damage.")
+    if token["type"] == "player":
+        if token["hp"] <= -11:
+            token["alive"] = False
+            token["down"] = True
+            token["hp"] = 0
+            _check_loss(state)
+        elif token["hp"] <= 0:
+            token["hp"] = 0
+            token["down"] = True
+    else:
+        if token["hp"] <= 0:
+            token["alive"] = False
+            token["hp"] = 0
+            _grant_rewards(state, token)
+            _check_victory(state)
+
+
+def _trigger_event(state: dict[str, Any], module: Module, x: int, y: int) -> None:
+    """Fire a map event when a player steps on an event tile."""
+    for event in module.events:
+        if event.x == x and event.y == y:
+            state["pending_branch"] = event.id
+            state["log"].append(event.message)
+            choices = " ".join(f"[{k}: {v}]" for k, v in event.choices.items())
+            state["log"].append(f"Choose a path: {choices}")
+            return
+
+
+def _spawn_branch(state: dict[str, Any], module: Module, branch_id: str, d: Dice) -> None:
+    """Spawn the monsters for a chosen branch."""
+    branch = next((b for b in module.branches if b.id == branch_id), None)
+    if branch is None:
+        raise ValueError(f"unknown branch: {branch_id!r}")
+    for spawn in branch.monsters:
+        state["monsters"].append(_spawn_token(spawn, state, d))
+    state["log"].append(f"The {branch_id} branch reveals its guardians.")
+    state.pop("pending_branch", None)
+
+
+async def _check_boss_phase(state: dict[str, Any], monster: dict[str, Any]) -> None:
+    """Trigger boss phase transitions when HP crosses configured thresholds."""
+    if not monster.get("boss") or not monster.get("alive", True):
+        return
+    phases = monster.get("phases", [])
+    triggered = set(monster.get("phases_triggered", []))
+    max_hp = monster.get("max_hp", max(monster["hp"], 1))
+    ratio = monster["hp"] / max_hp
+    for i, phase in enumerate(phases):
+        if i in triggered:
+            continue
+        threshold = phase.get("hp_threshold", 0)
+        if ratio <= threshold:
+            triggered.add(i)
+            monster["damage_bonus"] = monster.get("damage_bonus", 0) + phase.get("damage_bonus", 0)
+            monster["to_hit"] = monster.get("to_hit", 0) + phase.get("to_hit_bonus", 0)
+            for spawn in phase.get("spawn", []):
+                ms = MonsterSpawn(
+                    id=spawn["id"],
+                    name=spawn["name"],
+                    monster=spawn["monster"],
+                    x=spawn["x"],
+                    y=spawn["y"],
+                    color=spawn.get("color", "#e74c3c"),
+                )
+                d = Dice(seed=state["seed"] + state["version"] + len(state["monsters"]))
+                state["monsters"].append(_spawn_token(ms, state, d))
+            state["log"].append(
+                await narrator.narrate_phase_transition(monster["name"], phase)
+            )
+    monster["phases_triggered"] = list(triggered)
+
 
 def _line_of_sight(state: dict[str, Any], module: Module, x0: int, y0: int, x1: int, y1: int) -> bool:
     """Simple grid ray-cast (Bresenham) returning False if any tile between
@@ -461,6 +578,20 @@ def _check_loss(state: dict[str, Any]) -> None:
     players = state.get("players", [])
     if players and all((not p.get("alive", True)) or p.get("down", False) for p in players):
         state["status"] = STATUS_LOST
+
+
+def _check_victory(state: dict[str, Any]) -> None:
+    """Set session to won if all monsters are dead.
+
+    In arena mode the fight continues until the player falls, so victories
+    are handled by wave spawning instead.
+    """
+    if state["status"] != STATUS_ACTIVE:
+        return
+    if state.get("mode") == "arena":
+        return
+    if all(not m.get("alive", True) for m in state["monsters"]):
+        state["status"] = STATUS_WON
 
 
 def _tick_statuses(state: dict[str, Any]) -> None:
@@ -526,12 +657,12 @@ async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[
                 target["hp"] = 0
                 target["down"] = True
         else:
+            await _check_boss_phase(state, target)
             if target["hp"] <= 0:
                 fatal = True
                 target["alive"] = False
                 _grant_rewards(state, target)
-                if all(not m.get("alive", True) for m in state["monsters"]):
-                    state["status"] = STATUS_WON
+                _check_victory(state)
 
     lines = await narrator.narrate_attack(
         attacker, target, hit, fatal,
@@ -540,7 +671,7 @@ async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[
     state["log"].extend(lines)
 
     if state["status"] == STATUS_WON:
-        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"])))
+        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
 
 
 async def _ranged_attack(
@@ -584,12 +715,12 @@ async def _ranged_attack(
                 target["hp"] = 0
                 target["down"] = True
         else:
+            await _check_boss_phase(state, target)
             if target["hp"] <= 0:
                 fatal = True
                 target["alive"] = False
                 _grant_rewards(state, target)
-                if all(not m.get("alive", True) for m in state["monsters"]):
-                    state["status"] = STATUS_WON
+                _check_victory(state)
 
     lines = await narrator.narrate_ranged_attack(
         attacker, target, hit, fatal,
@@ -598,7 +729,7 @@ async def _ranged_attack(
     state["log"].extend(lines)
 
     if state["status"] == STATUS_WON:
-        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"])))
+        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
 
 
 async def _use_potion(state: dict[str, Any], token: dict[str, Any], d: Dice) -> None:
@@ -661,14 +792,15 @@ async def _ability(state: dict[str, Any], token: dict[str, Any], target_id: str,
             dmg_roll = d.roll("1d6", reason="Turn Undead damage", kind="combat")
             damage = max(1, dmg_roll.total)
             target["hp"] -= damage
+            await _check_boss_phase(state, target)
             state["log"].append(f"{token['name']} turns the undead, dealing {damage} damage.")
             if target["hp"] <= 0:
                 target["alive"] = False
                 target["hp"] = 0
                 _grant_rewards(state, target)
-                if all(not m.get("alive", True) for m in state["monsters"]):
-                    state["status"] = STATUS_WON
-                    state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"])))
+                _check_victory(state)
+                if state["status"] == STATUS_WON:
+                    state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
         else:
             state["log"].append(f"{token['name']} attempts to turn the undead, but it holds fast.")
     elif cls in ("magic-user", "illusionist"):
@@ -680,14 +812,15 @@ async def _ability(state: dict[str, Any], token: dict[str, Any], target_id: str,
         dmg_roll = d.roll("1d4+1", reason="Magic Missile damage", kind="combat")
         damage = max(2, dmg_roll.total)
         target["hp"] -= damage
+        await _check_boss_phase(state, target)
         state["log"].append(f"{token['name']} fires a magic missile for {damage} damage.")
         if target["hp"] <= 0:
             target["alive"] = False
             target["hp"] = 0
             _grant_rewards(state, target)
-            if all(not m.get("alive", True) for m in state["monsters"]):
-                state["status"] = STATUS_WON
-                state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"])))
+            _check_victory(state)
+            if state["status"] == STATUS_WON:
+                state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
     else:
         raise ValueError(f"no special ability for class {cls!r}")
 
@@ -726,15 +859,15 @@ async def _attack_with_bonuses(
                 target["hp"] = 0
                 target["down"] = True
         else:
+            await _check_boss_phase(state, target)
             if target["hp"] <= 0:
                 fatal = True
                 target["alive"] = False
                 _grant_rewards(state, target)
-                if all(not m.get("alive", True) for m in state["monsters"]):
-                    state["status"] = STATUS_WON
+                _check_victory(state)
     state["log"].append(f"{attacker['name']} uses {reason} and {'hits' if hit else 'misses'} {target['name']}{' for ' + str(max(0, attacker.get('damage_bonus', 0) + damage_bonus)) + ' bonus damage' if hit else ''}.")
     if state["status"] == STATUS_WON:
-        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"])))
+        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
 
 
 async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> dict[str, Any]:
@@ -812,6 +945,14 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
             state["phase"] = PHASE_DM
             state["turn_deadline"] = None
 
+        elif action == "choose_path":
+            branch_id = kwargs.get("branch_id")
+            if not branch_id:
+                raise ValueError("branch_id is required")
+            _spawn_branch(state, module, branch_id, d)
+            state["phase"] = PHASE_DM
+            state["turn_deadline"] = None
+
         elif action == "end_turn":
             active = active_index + 1
             if active >= len(state["players"]):
@@ -837,7 +978,63 @@ def _nearest_player(state: dict[str, Any], monster: dict[str, Any]) -> dict[str,
     return min(alive, key=lambda p: abs(p["x"] - monster["x"]) + abs(p["y"] - monster["y"]))
 
 
+async def _spawn_arena_wave(state: dict[str, Any], module: Module, d: Dice) -> None:
+    """Spawn a scaled arena wave."""
+    wave = state.get("wave", 1)
+    rng = random.Random(state["seed"] + wave)
+    player_level = max(p.get("level", 1) for p in state["players"])
+    count = min(2 + wave, 6)
+    template_name = rng.choice(ARENA_BASE_WAVE_TEMPLATES)
+
+    # Scale up monster HP and damage for later waves.
+    hp_bonus = wave - 1
+    damage_bonus = wave // 3
+    to_hit_bonus = wave // 4
+
+    spawned = 0
+    for _ in range(count * 2):
+        if spawned >= count:
+            break
+        sx = rng.randint(1, module.map.width - 2)
+        sy = rng.randint(1, module.map.height - 2)
+        if not module.map.walkable(sx, sy) or _token_at(state, sx, sy) is not None:
+            continue
+        template = bestiary.load(template_name)
+        monster = {
+            "id": f"arena_w{wave}_{spawned}",
+            "name": template["name"],
+            "type": "monster",
+            "x": sx,
+            "y": sy,
+            "hp": max(1, _roll_hp(template, d) + hp_bonus),
+            "max_hp": max(1, _roll_hp(template, d) + hp_bonus),
+            "ac": max(0, template["ac"] - wave // 5),
+            "damage": template["damage"],
+            "to_hit": to_hit_bonus,
+            "color": "#e74c3c",
+            "alive": True,
+            "xp_value": _xp_value(template["name"]),
+        }
+        if damage_bonus:
+            monster["damage_bonus"] = damage_bonus
+        state["monsters"].append(monster)
+        spawned += 1
+
+    state["log"].append(f"Wave {wave} enters the arena!")
+    banter = await narrator.narrate_banter("arena", rng=rng)
+    if banter:
+        state["log"].append(banter)
+
+
 async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
+    # Lava damages any token that ends its turn standing on it.
+    for token in _tokens(state):
+        if not token.get("alive", True):
+            continue
+        tile = module.map.tiles[token["y"]][token["x"]]
+        if tile == TILE_LAVA:
+            await _apply_hazard(state, token, tile, d)
+
     events: list[str] = []
     for monster in state["monsters"]:
         if not monster.get("alive", True):
@@ -885,6 +1082,12 @@ async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
         if summary:
             state["log"].append(summary)
 
+    # In arena mode, spawn the next wave if all monsters are dead.
+    if state.get("mode") == "arena" and state["status"] == STATUS_ACTIVE:
+        if all(not m.get("alive", True) for m in state["monsters"]):
+            state["wave"] = state.get("wave", 1) + 1
+            await _spawn_arena_wave(state, module, d)
+
 
 def view(state: dict[str, Any]) -> dict[str, Any]:
     """Return a client-safe view of the state."""
@@ -910,6 +1113,8 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "turn": state["turn"],
         "phase": state["phase"],
         "status": state["status"],
+        "mode": state.get("mode", "campaign"),
+        "wave": state.get("wave", 1),
         "players": players,
         "active_player_index": active_index,
         "player": players[active_index] if players else state.get("player"),

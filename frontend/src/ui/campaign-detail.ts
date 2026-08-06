@@ -1,9 +1,13 @@
 import {
   Campaign,
+  CampaignMember,
   CharacterState,
+  getCampaignMembers,
   joinSession,
   listCampaignSessions,
   listCharacters,
+  setMemberRole,
+  transferDm,
 } from '../net/api';
 import { el, clear } from './utils';
 
@@ -24,7 +28,9 @@ export class CampaignDetail {
   private onJoinSession: (session: CampaignSession) => void;
   private onBack: () => void;
   private sessionsEl: HTMLElement;
+  private membersEl: HTMLElement;
   private characters: CharacterState[] = [];
+  private members: CampaignMember[] = [];
 
   constructor(
     container: HTMLElement,
@@ -41,7 +47,8 @@ export class CampaignDetail {
 
     const panel = el('div', { className: 'session-panel' });
     panel.appendChild(el('h1', {}, campaign.name));
-    panel.appendChild(el('p', { className: 'subtitle' }, `${campaign.ruleset_id} · ${campaign.is_dm ? 'You are the DM' : 'Campaign'}`));
+    const roleText = campaign.is_dm ? 'You are a DM' : 'Campaign';
+    panel.appendChild(el('p', { className: 'subtitle' }, `${campaign.ruleset_id} · ${roleText}`));
 
     const actions = el('div', { className: 'session-actions' });
     const newBtn = el('button', {
@@ -55,6 +62,10 @@ export class CampaignDetail {
     this.sessionsEl = el('ul', { className: 'session-list' });
     panel.appendChild(this.sessionsEl);
 
+    this.membersEl = el('div', { className: 'members-panel' });
+    panel.appendChild(el('h2', {}, 'Members'));
+    panel.appendChild(this.membersEl);
+
     const backBtn = el('button', { className: 'enter', onclick: () => this.onBack() }, 'Back');
     panel.appendChild(backBtn);
 
@@ -65,12 +76,15 @@ export class CampaignDetail {
 
   async load() {
     try {
-      const [{ sessions }, { characters }] = await Promise.all([
+      const [{ sessions }, { characters }, { members }] = await Promise.all([
         listCampaignSessions(this.campaign.id),
         listCharacters(),
+        getCampaignMembers(this.campaign.id),
       ]);
       this.characters = characters;
+      this.members = members;
       this.render(sessions);
+      this.renderMembers();
     } catch (err: any) {
       clear(this.sessionsEl);
       this.sessionsEl.appendChild(el('li', { className: 'empty error' }, err.message || 'Failed to load sessions.'));
@@ -126,6 +140,80 @@ export class CampaignDetail {
       item.appendChild(info);
       item.appendChild(row);
       this.sessionsEl.appendChild(item);
+    });
+  }
+
+  private renderMembers() {
+    clear(this.membersEl);
+    if (this.members.length === 0) {
+      this.membersEl.appendChild(el('p', { className: 'empty' }, 'No members.'));
+      return;
+    }
+
+    const isDm = this.campaign.is_dm;
+    this.members.forEach((m) => {
+      const row = el('div', { className: 'member-row' });
+      row.appendChild(el('span', {}, `Account ${m.account_id} · ${m.role}`));
+
+      if (isDm) {
+        const controls = el('span', { className: 'member-controls' });
+
+        if (m.role !== 'dm') {
+          controls.appendChild(el('button', {
+            onclick: async () => {
+              try {
+                await transferDm(this.campaign.id, m.account_id);
+                alert('DM role transferred.');
+                this.campaign.dm_account_id = m.account_id;
+                await this.load();
+              } catch (err: any) {
+                alert(err.message || 'Transfer failed');
+              }
+            },
+          }, 'Make DM'));
+        }
+
+        if (m.role !== 'dm') {
+          controls.appendChild(el('button', {
+            onclick: async () => {
+              try {
+                await setMemberRole(this.campaign.id, m.account_id, 'dm');
+                await this.load();
+              } catch (err: any) {
+                alert(err.message || 'Promote failed');
+              }
+            },
+          }, 'Promote to DM'));
+        } else if (this.campaign.dm_account_id !== m.account_id) {
+          controls.appendChild(el('button', {
+            onclick: async () => {
+              try {
+                await setMemberRole(this.campaign.id, m.account_id, 'player');
+                await this.load();
+              } catch (err: any) {
+                alert(err.message || 'Demote failed');
+              }
+            },
+          }, 'Demote to Player'));
+        }
+
+        controls.appendChild(el('button', {
+          className: 'danger',
+          onclick: async () => {
+            if (!confirm(`Kick account ${m.account_id}?`)) return;
+            try {
+              await setMemberRole(this.campaign.id, m.account_id, 'none');
+              await this.load();
+            } catch (err: any) {
+              alert(err.message || 'Kick failed');
+            }
+          },
+        }, 'Kick'));
+
+        row.appendChild(controls);
+      }
+
+      this.membersEl.appendChild(row);
     });
   }
 
