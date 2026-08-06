@@ -53,6 +53,8 @@ export class Game {
   private lastLogLength = 0;
   private particles: Particle[] = [];
   private ambientTime = 0;
+  private cameraX = 0;
+  private cameraY = 0;
   private tooltip: HTMLElement;
   private moveBtn!: HTMLButtonElement;
   private attackBtn!: HTMLButtonElement;
@@ -386,16 +388,74 @@ export class Game {
 
   private centerMap() {
     if (!this.app) return;
+    const target = this.playerPixelCenter();
     const mw = this.module.width * TILE_SIZE;
     const mh = this.module.height * TILE_SIZE;
-    const cx = (this.app.screen.width - mw) / 2;
-    const cy = (this.app.screen.height - mh) / 2;
-    const baseX = Math.max(0, cx);
-    const baseY = Math.max(0, cy);
-    this.applyMapPosition(baseX, baseY);
+
+    let baseX: number;
+    let baseY: number;
+    if (mw <= this.app.screen.width && mh <= this.app.screen.height) {
+      baseX = (this.app.screen.width - mw) / 2;
+      baseY = (this.app.screen.height - mh) / 2;
+    } else {
+      const px = target ? target.x : mw / 2;
+      const py = target ? target.y : mh / 2;
+      baseX = this.app.screen.width / 2 - px;
+      baseY = this.app.screen.height / 2 - py;
+      baseX = Math.min(0, Math.max(this.app.screen.width - mw, baseX));
+      baseY = Math.min(0, Math.max(this.app.screen.height - mh, baseY));
+    }
+
+    this.cameraX = baseX;
+    this.cameraY = baseY;
+    this.applyMapPosition();
   }
 
-  private applyMapPosition(x: number, y: number) {
+  private updateCamera(dt: number) {
+    if (!this.app) return;
+    const target = this.playerPixelCenter();
+    const mw = this.module.width * TILE_SIZE;
+    const mh = this.module.height * TILE_SIZE;
+
+    let desiredX: number;
+    let desiredY: number;
+    if (mw <= this.app.screen.width && mh <= this.app.screen.height) {
+      desiredX = (this.app.screen.width - mw) / 2;
+      desiredY = (this.app.screen.height - mh) / 2;
+    } else {
+      const px = target ? target.x : mw / 2;
+      const py = target ? target.y : mh / 2;
+      desiredX = this.app.screen.width / 2 - px;
+      desiredY = this.app.screen.height / 2 - py;
+      desiredX = Math.min(0, Math.max(this.app.screen.width - mw, desiredX));
+      desiredY = Math.min(0, Math.max(this.app.screen.height - mh, desiredY));
+    }
+
+    const speed = 8;
+    const dtSec = dt / 60;
+    this.cameraX += (desiredX - this.cameraX) * (1 - Math.exp(-speed * dtSec));
+    this.cameraY += (desiredY - this.cameraY) * (1 - Math.exp(-speed * dtSec));
+    if (Math.abs(this.cameraX - desiredX) < 0.2) this.cameraX = desiredX;
+    if (Math.abs(this.cameraY - desiredY) < 0.2) this.cameraY = desiredY;
+    this.applyMapPosition();
+  }
+
+  private playerPixelCenter(): { x: number; y: number } | null {
+    if (!this.session) return null;
+    const sprite = this.tokenSprites.get(this.session.player.id);
+    if (sprite) {
+      return {
+        x: sprite.targetX + TILE_SIZE / 2,
+        y: sprite.targetY + TILE_SIZE / 2,
+      };
+    }
+    return {
+      x: this.session.player.x * TILE_SIZE + TILE_SIZE / 2,
+      y: this.session.player.y * TILE_SIZE + TILE_SIZE / 2,
+    };
+  }
+
+  private applyMapPosition() {
     let ox = 0;
     let oy = 0;
     if (this.shakeFrames > 0) {
@@ -403,12 +463,12 @@ export class Game {
       ox = (Math.random() - 0.5) * intensity;
       oy = (Math.random() - 0.5) * intensity;
     }
-    this.mapContainer.x = x + ox;
-    this.mapContainer.y = y + oy;
-    this.tokenContainer.x = x + ox;
-    this.tokenContainer.y = y + oy;
-    this.fxContainer.x = x + ox;
-    this.fxContainer.y = y + oy;
+    this.mapContainer.x = this.cameraX + ox;
+    this.mapContainer.y = this.cameraY + oy;
+    this.tokenContainer.x = this.cameraX + ox;
+    this.tokenContainer.y = this.cameraY + oy;
+    this.fxContainer.x = this.cameraX + ox;
+    this.fxContainer.y = this.cameraY + oy;
   }
 
   private renderTokens(snap = false) {
@@ -531,8 +591,8 @@ export class Game {
 
     if (this.shakeFrames > 0) {
       this.shakeFrames -= dt;
-      this.centerMap();
     }
+    this.updateCamera(dt);
 
     // Particles
     for (let i = this.particles.length - 1; i >= 0; i--) {
