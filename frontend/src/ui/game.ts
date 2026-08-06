@@ -52,6 +52,10 @@ export class Game {
   private lastLogLength = 0;
   private particles: Particle[] = [];
   private ambientTime = 0;
+  private tooltip: HTMLElement;
+  private moveBtn!: HTMLButtonElement;
+  private attackBtn!: HTMLButtonElement;
+  private endBtn!: HTMLButtonElement;
 
   constructor(
     container: HTMLElement,
@@ -70,6 +74,10 @@ export class Game {
     this.ui = this.buildUI();
     this.root.appendChild(this.canvasContainer);
     this.root.appendChild(this.ui);
+
+    this.tooltip = el('div', { className: 'token-tooltip' });
+    this.tooltip.style.display = 'none';
+    this.root.appendChild(this.tooltip);
 
     const trayAnchor = el('div', { className: 'tray-anchor' });
     this.root.appendChild(trayAnchor);
@@ -116,12 +124,12 @@ export class Game {
     hud.appendChild(this.timerEl);
 
     const actions = el('div', { className: 'game-actions' });
-    const moveBtn = el('button', { onclick: () => this.setAction('move') }, 'Move [M]');
-    const attackBtn = el('button', { onclick: () => this.setAction('attack') }, 'Attack [F]');
-    const endBtn = el('button', { onclick: () => this.endTurn() }, 'End [E]');
-    actions.appendChild(moveBtn);
-    actions.appendChild(attackBtn);
-    actions.appendChild(endBtn);
+    this.moveBtn = el('button', { onclick: () => this.setAction('move') }, 'Move [M]') as HTMLButtonElement;
+    this.attackBtn = el('button', { onclick: () => this.setAction('attack') }, 'Attack [F]') as HTMLButtonElement;
+    this.endBtn = el('button', { onclick: () => this.endTurn() }, 'End [E]') as HTMLButtonElement;
+    actions.appendChild(this.moveBtn);
+    actions.appendChild(this.attackBtn);
+    actions.appendChild(this.endBtn);
     hud.appendChild(actions);
 
     this.logEl = el('div', { className: 'game-log' });
@@ -132,6 +140,39 @@ export class Game {
     hud.appendChild(exitBtn);
 
     return hud;
+  }
+
+  private showTooltip(token: Token, clientX: number, clientY: number) {
+    const subtitle = token.type === 'player'
+      ? (token.classes || ['Adventurer']).join(' / ')
+      : token.name;
+    this.tooltip.innerHTML = `
+      <strong>${token.name}</strong>
+      <div class="token-tooltip-sub">${subtitle}</div>
+      <div>HP ${token.hp}/${token.max_hp}</div>
+      <div>AC ${token.ac}</div>
+    `;
+    this.tooltip.style.display = 'block';
+    this.positionTooltip(clientX, clientY);
+  }
+
+  private moveTooltip(clientX: number, clientY: number) {
+    if (this.tooltip.style.display === 'none') return;
+    this.positionTooltip(clientX, clientY);
+  }
+
+  private positionTooltip(clientX: number, clientY: number) {
+    const rect = this.root.getBoundingClientRect();
+    const x = clientX - rect.left + 14;
+    const y = clientY - rect.top + 14;
+    const maxX = rect.width - 180;
+    const maxY = rect.height - 90;
+    this.tooltip.style.left = `${Math.min(x, maxX)}px`;
+    this.tooltip.style.top = `${Math.min(y, maxY)}px`;
+  }
+
+  private hideTooltip() {
+    this.tooltip.style.display = 'none';
   }
 
   private showGameOver() {
@@ -392,6 +433,15 @@ export class Game {
         sprite.container.eventMode = 'static';
         sprite.container.cursor = 'pointer';
         sprite.container.on('pointerdown', () => this.onTokenClick(t));
+        sprite.container.on('pointerover', (e: any) => {
+          const rect = this.canvasContainer.getBoundingClientRect();
+          this.showTooltip(t, rect.left + e.global.x, rect.top + e.global.y);
+        });
+        sprite.container.on('pointermove', (e: any) => {
+          const rect = this.canvasContainer.getBoundingClientRect();
+          this.moveTooltip(rect.left + e.global.x, rect.top + e.global.y);
+        });
+        sprite.container.on('pointerout', () => this.hideTooltip());
         this.tokenContainer.addChild(sprite.container);
         this.tokenSprites.set(t.id, sprite);
         if (snap) sprite.snapToTarget();
@@ -545,8 +595,16 @@ export class Game {
     this.updateLighting();
     this.highlightActionTiles();
     this.updateStatus();
+    this.updateActions();
     this.updateTimer();
     this.renderLog();
+  }
+
+  private updateActions() {
+    const canAct = !!this.session && this.session.status === 'active' && this.session.phase === 'player';
+    this.moveBtn.disabled = !canAct;
+    this.attackBtn.disabled = !canAct;
+    this.endBtn.disabled = !canAct;
   }
 
   private updateStatus() {

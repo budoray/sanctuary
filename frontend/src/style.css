@@ -942,6 +942,37 @@ button.danger:hover:not(:disabled) {
   text-shadow: 0 0 8px var(--accent-glow);
 }
 
+.token-tooltip {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+  min-width: 120px;
+  max-width: 180px;
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  font-size: 11px;
+  color: var(--text);
+  display: none;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.token-tooltip strong {
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.token-tooltip-sub {
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 3px;
+}
+
 .timer-config {
   display: flex;
   align-items: center;
