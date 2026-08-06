@@ -72,7 +72,7 @@ async def create_session(
 
     mod = module.load(module_id)
     session_id = str(uuid.uuid4())[:8]
-    state = session_engine.new_game(session_id, mod, char)
+    state = await session_engine.new_game(session_id, mod, char)
 
     session_record = SessionRecord(
         id=session_id,
@@ -180,7 +180,7 @@ async def act_in_session(
     mod = module.load(record.module_id)
     action = data.get("action")
     try:
-        state = session_engine.act(
+        state = await session_engine.act(
             state,
             mod,
             action,

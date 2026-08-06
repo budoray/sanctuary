@@ -8,10 +8,13 @@ import random
 from typing import Any
 
 from backend.app.engine import bestiary
-from backend.app.engine import narrator
 from backend.app.engine.character import Character
 from backend.app.engine.dice import Dice, Roll
 from backend.app.engine.module import Module
+from backend.app.engine.narrator import Narrator
+
+
+narrator = Narrator()
 
 
 def _roll_to_dict(r: Roll) -> dict[str, Any]:
@@ -41,7 +44,7 @@ def _roll_hp(monster: dict, d: Dice) -> int:
     return max(1, total)
 
 
-def new_game(session_id: str, module: Module, character: Character, seed: int | None = None) -> dict[str, Any]:
+async def new_game(session_id: str, module: Module, character: Character, seed: int | None = None) -> dict[str, Any]:
     """Create a fresh session state."""
     if seed is None:
         seed = random.randint(1, 1_000_000_000)
@@ -89,7 +92,7 @@ def new_game(session_id: str, module: Module, character: Character, seed: int | 
         "seed": seed,
         "player": player,
         "monsters": monsters,
-        "log": [narrator.narrate_opening(random.Random(seed))],
+        "log": [await narrator.narrate_opening(random.Random(seed))],
         "rolls": [_roll_to_dict(r) for r in d.log],
     }
 
@@ -111,7 +114,7 @@ def _adjacent(a: dict[str, Any], b: dict[str, Any]) -> bool:
     return abs(a["x"] - b["x"]) + abs(a["y"] - b["y"]) == 1
 
 
-def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, module: Module, d: Dice) -> None:
+async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, module: Module, d: Dice) -> None:
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
     if not module.map.walkable(x, y):
@@ -122,12 +125,12 @@ def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, module: 
         raise ValueError("must move to an adjacent tile")
     token["x"] = x
     token["y"] = y
-    line = narrator.narrate_move(token, random.Random(state["seed"] + state["version"]))
+    line = await narrator.narrate_move(token, random.Random(state["seed"] + state["version"]))
     if line:
         state["log"].append(line)
 
 
-def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[str, Any], d: Dice) -> None:
+async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[str, Any], d: Dice) -> None:
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
     if not _adjacent(attacker, target):
@@ -152,17 +155,17 @@ def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[str, A
             elif all(not m.get("alive", True) for m in state["monsters"]):
                 state["status"] = STATUS_WON
 
-    lines = narrator.narrate_attack(
+    lines = await narrator.narrate_attack(
         attacker, target, hit, fatal,
         random.Random(state["seed"] + state["version"])
     )
     state["log"].extend(lines)
 
     if state["status"] == STATUS_WON:
-        state["log"].append(narrator.narrate_victory(random.Random(state["seed"] + state["version"])))
+        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"])))
 
 
-def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> dict[str, Any]:
+async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> dict[str, Any]:
     """Perform one player or DM action and return the updated state."""
     d = Dice(seed=state["seed"] + state["turn"] * 1000 + state["version"])
 
@@ -170,7 +173,7 @@ def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> di
         if state["phase"] != PHASE_PLAYER:
             raise ValueError("not the player's turn")
         token = state["player"]
-        _move(state, token, int(kwargs["x"]), int(kwargs["y"]), module, d)
+        await _move(state, token, int(kwargs["x"]), int(kwargs["y"]), module, d)
 
     elif action == "attack":
         if state["phase"] != PHASE_PLAYER:
@@ -179,7 +182,7 @@ def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> di
         target = next((m for m in state["monsters"] if m["id"] == target_id), None)
         if target is None:
             raise ValueError("target not found")
-        _attack(state, state["player"], target, d)
+        await _attack(state, state["player"], target, d)
         state["phase"] = PHASE_DM
 
     elif action == "end_turn":
@@ -190,7 +193,7 @@ def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> di
     elif action == "dm_turn":
         if state["phase"] != PHASE_DM:
             raise ValueError("not the DM's turn")
-        _run_dm_turn(state, module, d)
+        await _run_dm_turn(state, module, d)
         state["turn"] += 1
         state["phase"] = PHASE_PLAYER
 
@@ -202,7 +205,7 @@ def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> di
     return state
 
 
-def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
+async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
     player = state["player"]
     for monster in state["monsters"]:
         if not monster.get("alive", True):
@@ -211,7 +214,7 @@ def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
             break
         # If adjacent, attack.
         if _adjacent(monster, player):
-            _attack(state, monster, player, d)
+            await _attack(state, monster, player, d)
             continue
         # Move one tile toward the player.
         dx = 0
@@ -234,7 +237,7 @@ def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
                 moved = True
                 break
         if moved and _adjacent(monster, player):
-            _attack(state, monster, player, d)
+            await _attack(state, monster, player, d)
 
 
 def view(state: dict[str, Any]) -> dict[str, Any]:
