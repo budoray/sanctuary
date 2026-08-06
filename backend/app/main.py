@@ -153,10 +153,13 @@ async def licence():
 
 
 FRONTEND_ASSETS = FRONTEND_DIST / "assets"
+FRONTEND_PORTRAITS = FRONTEND_DIST / "portraits"
 FRONTEND_INDEX = FRONTEND_DIST / "index.html"
 
 if FRONTEND_ASSETS.exists():
     fastapi_app.mount("/assets", StaticFiles(directory=FRONTEND_ASSETS), name="assets")
+if FRONTEND_PORTRAITS.exists():
+    fastapi_app.mount("/portraits", StaticFiles(directory=FRONTEND_PORTRAITS), name="portraits")
 
 if FRONTEND_INDEX.exists():
     @fastapi_app.get("/{full_path:path}")
