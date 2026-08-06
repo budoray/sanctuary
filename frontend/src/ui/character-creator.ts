@@ -16,6 +16,7 @@ export class CharacterCreator {
   private options: { abilities: string[]; ancestries: string[]; classes: string[]; modes: ModeInfo[] } | null = null;
   private preview: CharacterState | null = null;
   private arrangement: Record<string, number> | undefined;
+  private seed: number | undefined;
 
   private nameInput: HTMLInputElement;
   private ancestrySelect: HTMLSelectElement;
@@ -144,6 +145,7 @@ export class CharacterCreator {
       const req = this.buildRequest();
       const { character } = await previewCharacter(req);
       this.preview = character;
+      this.seed = character.seed;
       this.renderPreview();
       this.saveButton.disabled = false;
       if (this.currentMode()?.arrange) {
@@ -166,7 +168,7 @@ export class CharacterCreator {
       ancestry: this.ancestrySelect.value,
       classes: this.selectedClasses(),
       name: this.nameInput.value.trim() || 'Hero',
-      seed: seededRandomSeed(),
+      seed: this.seed ?? seededRandomSeed(),
       arrangement: this.arrangement,
     };
   }
