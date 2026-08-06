@@ -396,6 +396,10 @@ class Character:
     modifiers: dict
     seed: int
     log: tuple = field(default=(), compare=False)
+    # Progression fields persisted across sessions.
+    xp: int = 0
+    level: int = 1
+    gold: int = 0
 
 
 def is_legal_multiclass(ancestry_name: str, class_names) -> bool:

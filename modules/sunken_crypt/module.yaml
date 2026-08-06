@@ -1,0 +1,55 @@
+id: sunken_crypt
+name: The Sunken Crypt
+ruleset: osric
+description: >-
+  A flooded burial hall whose waterlogged corridors still crawl with the restless
+  dead. Pillars rise from the murk like rotted teeth, and the flicker of corpse-light
+  betrays hungry shapes in the dark.
+map:
+  width: 20
+  height: 15
+  tile_size: 40
+  tiles:
+    - "11111111111111111111"
+    - "10000000000000000001"
+    - "10110110000000001011"
+    - "10110010000000001011"
+    - "10100010000000001111"
+    - "10110000000000000001"
+    - "10000000000000000001"
+    - "10000000111011100001"
+    - "10000000101010100001"
+    - "10000000100000100001"
+    - "10000000101010100001"
+    - "10000000111011100001"
+    - "10000000000000000001"
+    - "10000000000000000001"
+    - "11111111111111111111"
+player_start:
+  x: 1
+  y: 1
+monsters:
+  - id: skelly_1
+    name: Skeleton
+    monster: skeleton
+    x: 9
+    y: 8
+    color: "#e0e0e0"
+  - id: ghoul_1
+    name: Ghoul
+    monster: ghoul
+    x: 17
+    y: 3
+    color: "#8e44ad"
+  - id: orc_1
+    name: Orc
+    monster: orc
+    x: 4
+    y: 12
+    color: "#c0392b"
+  - id: zombie_1
+    name: Zombie
+    monster: zombie
+    x: 17
+    y: 12
+    color: "#556b2f"

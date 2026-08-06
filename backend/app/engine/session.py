@@ -38,6 +38,31 @@ STATUS_ACTIVE = "active"
 STATUS_WON = "won"
 STATUS_LOST = "lost"
 
+RANGED_RANGE = 4
+
+MONSTER_XP = {
+    "goblin": 50,
+    "skeleton": 40,
+    "zombie": 60,
+    "ghoul": 80,
+    "orc": 70,
+}
+
+
+def _xp_value(monster_name: str) -> int:
+    return MONSTER_XP.get(monster_name.lower().split()[0], 50)
+
+
+def _hit_die_for_class(class_name: str) -> str:
+    cls = class_name.lower()
+    if cls == "fighter":
+        return "1d10"
+    if cls in ("cleric", "thief"):
+        return "1d8"
+    if cls in ("magic-user", "illusionist"):
+        return "1d4"
+    return "1d6"
+
 
 def _roll_hp(monster: dict, d: Dice) -> int:
     total = monster["hp_adjustment"]
@@ -46,11 +71,45 @@ def _roll_hp(monster: dict, d: Dice) -> int:
     return max(1, total)
 
 
+def _grant_rewards(state: dict[str, Any], monster: dict[str, Any]) -> None:
+    """Award XP and gold to living players when a monster dies."""
+    xp_value = monster.get("xp_value", 50)
+    gold_value = xp_value // 10
+    for player in state["players"]:
+        if not player.get("alive", True):
+            continue
+        player["gold"] = player.get("gold", 0) + gold_value
+        player["xp"] = player.get("xp", 0) + xp_value
+        while player["xp"] >= player.get("level", 1) * 100:
+            player["level"] = player.get("level", 1) + 1
+            cls = player["classes"][0] if player.get("classes") else ""
+            die = _hit_die_for_class(cls)
+            id_seed = sum(ord(c) for c in player["id"])
+            roll = Dice(seed=state["seed"] + state["version"] + id_seed).roll(
+                die, reason=f"{player['name']} level-up hp", kind="progression"
+            )
+            hp_gain = max(1, roll.total)
+            player["hp"] = player.get("hp", 0) + hp_gain
+            player["max_hp"] = player.get("max_hp", player["hp"]) + hp_gain
+            state["log"].append(f"{player['name']} reaches level {player['level']}! (+{hp_gain} HP)")
+
+
 def _deadline(seconds: int) -> str | None:
     """Return an ISO UTC deadline ``seconds`` from now, or ``None`` if disabled."""
     if seconds <= 0:
         return None
     return (datetime.now(timezone.utc) + timedelta(seconds=seconds)).isoformat()
+
+
+def _ranged_damage_for_classes(classes: list[str]) -> str:
+    """Default missile damage for a player based on their first class."""
+    if not classes:
+        return "1d6"
+    cls = classes[0].lower()
+    if cls in ("magic-user", "illusionist"):
+        return "1d4"
+    # fighter, thief, cleric, druid and everything else default to 1d6
+    return "1d6"
 
 
 async def new_game(
@@ -78,9 +137,13 @@ async def new_game(
         "hp": character.hit_points,
         "max_hp": character.hit_points,
         "ac": character.armour_class,
+        "ranged_damage": _ranged_damage_for_classes(list(character.classes)),
         "color": "#3498db",
         "character_id": character_id,
         "account_id": account_id,
+        "xp": getattr(character, "xp", 0),
+        "level": getattr(character, "level", 1),
+        "gold": getattr(character, "gold", 0),
     }
     players = [player]
 
@@ -100,6 +163,7 @@ async def new_game(
             "to_hit": 0,
             "color": spawn.color,
             "alive": True,
+            "xp_value": _xp_value(spawn.name),
         })
 
     return {
@@ -197,10 +261,14 @@ async def add_player(
         "hp": character.hit_points,
         "max_hp": character.hit_points,
         "ac": character.armour_class,
+        "ranged_damage": _ranged_damage_for_classes(list(character.classes)),
         "color": _PLAYER_COLORS[len(state["players"]) % len(_PLAYER_COLORS)],
         "character_id": character_id,
         "account_id": account_id,
         "alive": True,
+        "xp": getattr(character, "xp", 0),
+        "level": getattr(character, "level", 1),
+        "gold": getattr(character, "gold", 0),
     }
     state["players"].append(token)
     state["version"] += 1
@@ -235,6 +303,33 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
         state["log"].append(line)
 
 
+def _line_of_sight(state: dict[str, Any], module: Module, x0: int, y0: int, x1: int, y1: int) -> bool:
+    """Simple grid ray-cast (Bresenham) returning False if any tile between
+    source and target (inclusive of target, exclusive of source) is a wall.
+    """
+    dx = abs(x1 - x0)
+    dy = abs(y1 - y0)
+    sx = 1 if x0 < x1 else -1
+    sy = 1 if y0 < y1 else -1
+    err = dx - dy
+    x, y = x0, y0
+    while (x, y) != (x1, y1):
+        e2 = 2 * err
+        if e2 > -dy:
+            err -= dy
+            x += sx
+        if e2 < dx:
+            err += dx
+            y += sy
+        if (x, y) != (x0, y0) and not module.map.walkable(x, y):
+            return False
+    return True
+
+
+def _ranged_distance(a: dict[str, Any], b: dict[str, Any]) -> float:
+    return abs(a["x"] - b["x"]) + abs(a["y"] - b["y"])
+
+
 async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[str, Any], d: Dice) -> None:
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
@@ -257,10 +352,59 @@ async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[
             target["alive"] = False
             if target["type"] == "player":
                 state["status"] = STATUS_LOST
-            elif all(not m.get("alive", True) for m in state["monsters"]):
-                state["status"] = STATUS_WON
+            else:
+                _grant_rewards(state, target)
+                if all(not m.get("alive", True) for m in state["monsters"]):
+                    state["status"] = STATUS_WON
 
     lines = await narrator.narrate_attack(
+        attacker, target, hit, fatal,
+        random.Random(state["seed"] + state["version"])
+    )
+    state["log"].extend(lines)
+
+    if state["status"] == STATUS_WON:
+        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"])))
+
+
+async def _ranged_attack(
+    state: dict[str, Any],
+    attacker: dict[str, Any],
+    target: dict[str, Any],
+    module: Module,
+    d: Dice,
+) -> None:
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    if not target.get("alive", True):
+        raise ValueError("target is already dead")
+    dist = _ranged_distance(attacker, target)
+    if dist > RANGED_RANGE:
+        raise ValueError("target is out of range")
+    if not _line_of_sight(state, module, attacker["x"], attacker["y"], target["x"], target["y"]):
+        raise ValueError("no line of sight")
+
+    roll = d.roll("1d20", reason=f"{attacker['name']} shoots {target['name']}", kind="combat").total
+    to_hit = attacker.get("to_hit", 0)
+    needed = 20 - target["ac"] + to_hit
+    hit = roll >= needed
+    fatal = False
+    if hit:
+        dmg_expr = attacker.get("ranged_damage", "1d6")
+        dmg_roll = d.roll(dmg_expr, reason="ranged damage", kind="combat")
+        damage = max(1, dmg_roll.total)
+        target["hp"] -= damage
+        if target["hp"] <= 0:
+            fatal = True
+            target["alive"] = False
+            if target["type"] == "player":
+                state["status"] = STATUS_LOST
+            else:
+                _grant_rewards(state, target)
+                if all(not m.get("alive", True) for m in state["monsters"]):
+                    state["status"] = STATUS_WON
+
+    lines = await narrator.narrate_ranged_attack(
         attacker, target, hit, fatal,
         random.Random(state["seed"] + state["version"])
     )
@@ -288,6 +432,17 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
         if target is None:
             raise ValueError("target not found")
         await _attack(state, _active_player(state), target, d)
+        state["phase"] = PHASE_DM
+        state["turn_deadline"] = None
+
+    elif action == "ranged":
+        if state["phase"] != PHASE_PLAYER:
+            raise ValueError("not the player's turn")
+        target_id = kwargs["target_id"]
+        target = next((m for m in state["monsters"] if m["id"] == target_id), None)
+        if target is None:
+            raise ValueError("target not found")
+        await _ranged_attack(state, _active_player(state), target, module, d)
         state["phase"] = PHASE_DM
         state["turn_deadline"] = None
 
@@ -380,7 +535,13 @@ async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
 
 def view(state: dict[str, Any]) -> dict[str, Any]:
     """Return a client-safe view of the state."""
-    players = state.get("players", [])
+    players = []
+    for p in state.get("players", []):
+        token = dict(p)
+        token.setdefault("xp", 0)
+        token.setdefault("level", 1)
+        token.setdefault("gold", 0)
+        players.append(token)
     active_index = state.get("active_player_index", 0)
     return {
         "id": state["id"],

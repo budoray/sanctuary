@@ -1,17 +1,23 @@
 import { CharacterState, deleteCharacter, listCharacters } from '../net/api';
 import { el, clear } from './utils';
 
+const AVAILABLE_MODULES = [
+  { id: 'sample_lair', name: 'The Goblin Lair' },
+  { id: 'sunken_crypt', name: 'The Sunken Crypt' },
+];
+
 export class CharacterSelect {
   private root: HTMLElement;
-  private onPlay: (character: CharacterState, turnTimerSeconds: number) => void;
+  private onPlay: (character: CharacterState, turnTimerSeconds: number, moduleId: string) => void;
   private onCreate: () => void;
   private onSessions?: () => void;
   private listEl: HTMLElement;
   private timerInput: HTMLSelectElement;
+  private moduleInput: HTMLSelectElement;
 
   constructor(
     container: HTMLElement,
-    onPlay: (character: CharacterState, turnTimerSeconds: number) => void,
+    onPlay: (character: CharacterState, turnTimerSeconds: number, moduleId: string) => void,
     onCreate: () => void,
     onCampaigns: () => void,
     onSessions?: () => void
@@ -41,6 +47,18 @@ export class CharacterSelect {
     });
     timerWrap.appendChild(this.timerInput);
     panel.appendChild(timerWrap);
+
+    const moduleWrap = el('div', { className: 'timer-config' });
+    moduleWrap.appendChild(el('label', { htmlFor: 'module-select' }, 'Adventure'));
+    this.moduleInput = el('select', { id: 'module-select' }) as HTMLSelectElement;
+    AVAILABLE_MODULES.forEach((opt) => {
+      const option = document.createElement('option');
+      option.value = opt.id;
+      option.textContent = opt.name;
+      this.moduleInput.appendChild(option);
+    });
+    moduleWrap.appendChild(this.moduleInput);
+    panel.appendChild(moduleWrap);
 
     this.listEl = el('ul', { className: 'session-list' });
     panel.appendChild(this.listEl);
@@ -88,7 +106,7 @@ export class CharacterSelect {
       );
       const idSpan = el('span', { className: 'session-id' }, c.id || '');
       const actions = el('div', { className: 'session-actions' });
-      const playBtn = el('button', { onclick: () => this.onPlay(c, parseInt(this.timerInput.value, 10) || 0) }, 'Play');
+      const playBtn = el('button', { onclick: () => this.onPlay(c, parseInt(this.timerInput.value, 10) || 0, this.moduleInput.value) }, 'Play');
       const delBtn = el('button', {
         className: 'danger',
         onclick: async () => {

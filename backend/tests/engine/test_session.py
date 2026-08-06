@@ -116,3 +116,61 @@ async def test_add_player_finds_free_tile(sample_module, hero):
     token = await session.add_player(st, sample_module, hero2, "char3", account_id=3)
     assert (token["x"], token["y"]) != (sample_module.player_start[0], sample_module.player_start[1])
     assert sample_module.map.walkable(token["x"], token["y"])
+
+
+async def test_player_ranged_attack_hits_within_range(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = 5
+    goblin["y"] = 2
+    goblin["ac"] = 20  # guaranteed hit (descending AC)
+    initial_hp = goblin["hp"]
+    st = await session.act(st, sample_module, "ranged", target_id=goblin["id"])
+    assert goblin["hp"] < initial_hp
+    assert st["phase"] == "dm"
+
+
+async def test_player_ranged_attack_blocked_by_wall(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    st["player"]["x"] = 5
+    st["player"]["y"] = 5
+    goblin = st["monsters"][0]
+    # Place goblin beyond the wall at row 3/4 columns 6-9.
+    goblin["x"] = 6
+    goblin["y"] = 2
+    assert not session._line_of_sight(st, sample_module, st["player"]["x"], st["player"]["y"], goblin["x"], goblin["y"])
+    with pytest.raises(ValueError, match="line of sight"):
+        await session.act(st, sample_module, "ranged", target_id=goblin["id"])
+
+
+async def test_killing_monster_grants_xp_and_gold(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = st["player"]["x"] + 1
+    goblin["y"] = st["player"]["y"]
+    goblin["hp"] = 1
+    goblin["ac"] = 20  # guaranteed hit
+    xp_value = goblin.get("xp_value", 50)
+    initial_xp = st["player"].get("xp", 0)
+    initial_gold = st["player"].get("gold", 0)
+    st = await session.act(st, sample_module, "attack", target_id=goblin["id"])
+    assert goblin["alive"] is False
+    assert st["player"]["xp"] == initial_xp + xp_value
+    assert st["player"]["gold"] == initial_gold + xp_value // 10
+
+
+async def test_killing_monster_triggers_level_up(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = st["player"]["x"] + 1
+    goblin["y"] = st["player"]["y"]
+    goblin["hp"] = 1
+    goblin["ac"] = 20  # guaranteed hit
+    st["player"]["xp"] = 95
+    st["player"]["level"] = 1
+    initial_max_hp = st["player"]["max_hp"]
+    st = await session.act(st, sample_module, "attack", target_id=goblin["id"])
+    assert st["player"]["level"] == 2
+    assert st["player"]["xp"] >= 100
+    assert st["player"]["max_hp"] > initial_max_hp
+    assert any("reaches level 2" in entry for entry in st["log"])

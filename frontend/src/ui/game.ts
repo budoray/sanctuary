@@ -13,7 +13,9 @@ const WALL_SHADOW = 0x15171c;
 const FLOOR_COLOR = 0x121418;
 const FLOOR_BORDER = 0x2c2f38;
 const FLOOR_HIGHLIGHT = 0x1c1f25;
+const FLOOR_RANGE_HIGHLIGHT = 0x2a3a1a;
 const VISION_RADIUS = 6;
+const RANGED_RANGE = 4;
 
 interface ModuleData {
   width: number;
@@ -47,7 +49,7 @@ export class Game {
   private rosterEl: HTMLElement = document.createElement('div');
   private dmOverlay: HTMLElement = document.createElement('div');
   private damageFlash: HTMLElement = document.createElement('div');
-  private action: 'move' | 'attack' | null = null;
+  private action: 'move' | 'attack' | 'ranged' | null = null;
   private session: GameSession | null = null;
   private userId: number | null = null;
   private onExit: () => void;
@@ -68,6 +70,7 @@ export class Game {
   private tooltip: HTMLElement;
   private moveBtn!: HTMLButtonElement;
   private attackBtn!: HTMLButtonElement;
+  private rangedBtn!: HTMLButtonElement;
   private endBtn!: HTMLButtonElement;
   private dmTurnBtn!: HTMLButtonElement;
   private socket: Socket | null = null;
@@ -182,9 +185,11 @@ export class Game {
     const actions = el('div', { className: 'game-actions' });
     this.moveBtn = el('button', { onclick: () => this.setAction('move') }, 'Move [M]') as HTMLButtonElement;
     this.attackBtn = el('button', { onclick: () => this.setAction('attack') }, 'Attack [F]') as HTMLButtonElement;
+    this.rangedBtn = el('button', { onclick: () => this.setAction('ranged') }, 'Ranged [R]') as HTMLButtonElement;
     this.endBtn = el('button', { onclick: () => this.endTurn() }, 'End [E]') as HTMLButtonElement;
     actions.appendChild(this.moveBtn);
     actions.appendChild(this.attackBtn);
+    actions.appendChild(this.rangedBtn);
     actions.appendChild(this.endBtn);
     hud.appendChild(actions);
 
@@ -257,9 +262,14 @@ export class Game {
     const panel = el('div', { className: 'game-over-panel' });
     const won = this.session.status === 'won';
     panel.appendChild(el('h1', {}, won ? 'Victory' : 'Defeat'));
-    panel.appendChild(el('p', { className: 'message' }, won
-      ? 'The lair is quiet. You survive to adventure again.'
-      : 'Your light fades in the dark. The dungeon claims another.'));
+    if (won) {
+      const living = this.session.players.filter((p) => p.alive !== false);
+      const totalXp = living.reduce((sum, p) => sum + (p.xp ?? 0), 0);
+      const totalGold = living.reduce((sum, p) => sum + (p.gold ?? 0), 0);
+      panel.appendChild(el('p', { className: 'message' }, `The lair is quiet. Party gains ${totalXp} XP and ${totalGold} gold.`));
+    } else {
+      panel.appendChild(el('p', { className: 'message' }, 'Your light fades in the dark. The dungeon claims another.'));
+    }
     const canReplay = this.onReplay && this.session.character_id;
     if (canReplay) {
       const replay = el('button', { className: 'enter', onclick: () => this.onReplay!(this.session!.character_id!) }, 'Play Again');
@@ -271,7 +281,7 @@ export class Game {
     this.root.appendChild(overlay);
   }
 
-  private setAction(action: 'move' | 'attack') {
+  private setAction(action: 'move' | 'attack' | 'ranged') {
     this.action = this.action === action ? null : action;
     this.updateStatus();
     this.highlightActionTiles();
@@ -293,6 +303,9 @@ export class Game {
         break;
       case 'f':
         this.setAction('attack');
+        break;
+      case 'r':
+        this.setAction('ranged');
         break;
       case 'e':
       case ' ':
@@ -415,6 +428,32 @@ export class Game {
     }
   }
 
+  private hasLineOfSight(x0: number, y0: number, x1: number, y1: number): boolean {
+    let dx = Math.abs(x1 - x0);
+    let dy = Math.abs(y1 - y0);
+    const sx = x0 < x1 ? 1 : -1;
+    const sy = y0 < y1 ? 1 : -1;
+    let err = dx - dy;
+    let x = x0;
+    let y = y0;
+    while (x !== x1 || y !== y1) {
+      const e2 = 2 * err;
+      if (e2 > -dy) {
+        err -= dy;
+        x += sx;
+      }
+      if (e2 < dx) {
+        err += dx;
+        y += sy;
+      }
+      if (x !== x0 || y !== y0) {
+        const row = this.module.tiles[y] || '';
+        if (row[x] === '1') return false;
+      }
+    }
+    return true;
+  }
+
   private highlightActionTiles() {
     if (!this.session) return;
     const player = this.session.player;
@@ -424,16 +463,18 @@ export class Game {
         const g = this.tileSprites[y]?.[x];
         if (!g) continue;
         const tile = row[x] || '0';
-        let highlight = false;
+        let highlight: number | null = null;
         if (this.action === 'move' && tile !== '1') {
           const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
-          highlight = dist === 1;
+          if (dist === 1) highlight = FLOOR_HIGHLIGHT;
         }
-        if (highlight) {
-          g.tint = FLOOR_HIGHLIGHT;
-        } else {
-          g.tint = 0xffffff;
+        if (this.action === 'ranged' && tile !== '1') {
+          const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
+          if (dist > 0 && dist <= RANGED_RANGE && this.hasLineOfSight(player.x, player.y, x, y)) {
+            highlight = FLOOR_RANGE_HIGHLIGHT;
+          }
         }
+        g.tint = highlight ?? 0xffffff;
       }
     }
   }
@@ -730,22 +771,38 @@ export class Game {
   }
 
   private async onTokenClick(token: Token) {
-    if (!this.session || this.session.phase !== 'player' || this.action !== 'attack') return;
-    if (token.type !== 'monster') return;
-    const player = this.session.player;
-    const isAdjacent = Math.abs(player.x - token.x) + Math.abs(player.y - token.y) === 1;
-    try {
-      const { session } = await actInSession(this.sessionId, 'attack', { target_id: token.id });
-      this.action = null;
-      if (isAdjacent) {
+    if (!this.session || this.session.phase !== 'player') return;
+    if (this.action === 'attack') {
+      if (token.type !== 'monster') return;
+      const player = this.session.player;
+      const isAdjacent = Math.abs(player.x - token.x) + Math.abs(player.y - token.y) === 1;
+      try {
+        const { session } = await actInSession(this.sessionId, 'attack', { target_id: token.id });
+        this.action = null;
+        if (isAdjacent) {
+          this.spawnSlashEffect(player.x, player.y, token.x, token.y);
+        }
+        this.update(session);
+        if (session.phase === 'dm') {
+          setTimeout(() => this.runDmTurn(), 600);
+        }
+      } catch (err: any) {
+        this.log(err.message || 'Attack failed.');
+      }
+    } else if (this.action === 'ranged') {
+      if (token.type !== 'monster') return;
+      const player = this.session.player;
+      try {
+        const { session } = await actInSession(this.sessionId, 'ranged', { target_id: token.id });
+        this.action = null;
         this.spawnSlashEffect(player.x, player.y, token.x, token.y);
+        this.update(session);
+        if (session.phase === 'dm') {
+          setTimeout(() => this.runDmTurn(), 600);
+        }
+      } catch (err: any) {
+        this.log(err.message || 'Ranged attack failed.');
       }
-      this.update(session);
-      if (session.phase === 'dm') {
-        setTimeout(() => this.runDmTurn(), 600);
-      }
-    } catch (err: any) {
-      this.log(err.message || 'Attack failed.');
     }
   }
 
@@ -806,6 +863,7 @@ export class Game {
       <div class="hp-bar"><span style="width:${Math.round(ratio * 100)}%; background:${hpColor};"></span></div>
       <div class="hp-text">HP ${p.hp}/${p.max_hp}</div>
       <div class="ac-text">AC ${p.ac}</div>
+      <div class="progression-text">Level ${p.level ?? 1} · XP ${p.xp ?? 0} · Gold ${p.gold ?? 0}</div>
     `;
   }
 
@@ -823,6 +881,7 @@ export class Game {
       barWrap.innerHTML = `<span style="width:${Math.round(ratio * 100)}%; background:${hpColor};"></span>`;
       row.appendChild(barWrap);
       row.appendChild(el('span', { className: 'party-hp-text' }, `${p.hp}/${p.max_hp}`));
+      row.appendChild(el('span', { className: 'party-progression' }, `Lv${p.level ?? 1} · XP ${p.xp ?? 0} · G ${p.gold ?? 0}`));
       this.partyEl.appendChild(row);
     });
   }
@@ -874,6 +933,7 @@ export class Game {
       this.isPlayer();
     this.moveBtn.disabled = !canAct;
     this.attackBtn.disabled = !canAct;
+    this.rangedBtn.disabled = !canAct;
     this.endBtn.disabled = !canAct;
   }
 

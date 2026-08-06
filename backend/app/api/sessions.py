@@ -107,6 +107,9 @@ async def create_session(
         modifiers=char_state["modifiers"],
         seed=char_state["seed"],
         log=tuple(),
+        xp=char_state.get("xp", 0),
+        level=char_state.get("level", 1),
+        gold=char_state.get("gold", 0),
     )
 
     mod = module.load(module_id)
@@ -233,7 +236,7 @@ async def act_in_session(
     action = data.get("action")
     if action == "dm_turn" and record.campaign_id and not await _is_campaign_dm(record, account_id, db):
         raise HTTPException(status_code=403, detail="Only the DM can run the DM turn")
-    if action in ("move", "attack", "end_turn"):
+    if action in ("move", "attack", "ranged", "end_turn"):
         if record.campaign_id:
             active_index = state.get("active_player_index", 0)
             active_players = state.get("players", [])
@@ -255,6 +258,29 @@ async def act_in_session(
     record.state = json.dumps(state)
     record.status = state["status"]
     await db.commit()
+
+    if state["status"] == "won":
+        for player in state.get("players", []):
+            char_id = player.get("character_id")
+            if not char_id:
+                continue
+            char_result = await db.execute(
+                select(CharacterRecord).where(CharacterRecord.id == char_id)
+            )
+            char_record = char_result.scalar_one_or_none()
+            if not char_record:
+                continue
+            char_state = json.loads(char_record.state)
+            char_state["level"] = player.get("level", char_state.get("level", 1))
+            char_state["xp"] = player.get("xp", char_state.get("xp", 0))
+            char_state["gold"] = player.get("gold", char_state.get("gold", 0))
+            char_state["hit_points"] = player.get("hp", char_state.get("hit_points", 0))
+            char_state["max_hp"] = player.get("max_hp", char_state.get("max_hp", char_state["hit_points"]))
+            char_record.state = json.dumps(char_state)
+            char_record.level = char_state["level"]
+            char_record.hp = char_state["hit_points"]
+            char_record.max_hp = char_state["max_hp"]
+        await db.commit()
 
     session_view = session_engine.view(state)
     try:
@@ -309,6 +335,9 @@ async def join_session(
         modifiers=char_state["modifiers"],
         seed=char_state["seed"],
         log=tuple(),
+        xp=char_state.get("xp", 0),
+        level=char_state.get("level", 1),
+        gold=char_state.get("gold", 0),
     )
 
     state = json.loads(record.state)

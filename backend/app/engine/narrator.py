@@ -61,6 +61,20 @@ _MISS_ENEMY = [
     "{name} snaps at you but finds nothing.",
 ]
 
+_RANGED_HIT_SELF = [
+    "Your shot finds its mark.",
+    "The missile strikes true.",
+    "You loose a well-aimed shot.",
+    "Your projectile bites into the foe.",
+]
+
+_RANGED_MISS_SELF = [
+    "Your shot goes wide.",
+    "The missile whistles past your target.",
+    "You fire but miss.",
+    "Your aim is off by inches.",
+]
+
 _KILL = [
     "{name} crumples to the ground, still.",
     "{name} lets out a final gasp and falls.",
@@ -111,6 +125,35 @@ def _template_attack(
         else:
             out.append(_pick(_MISS_SELF, rng))
     else:
+        if hit:
+            out.append(_pick(_HIT_ENEMY, rng).format(name=attacker["name"]))
+        else:
+            out.append(_pick(_MISS_ENEMY, rng).format(name=attacker["name"]))
+
+    if fatal:
+        if target.get("type") == "player":
+            out.append(_pick(_PLAYER_FALL, rng))
+        else:
+            out.append(_pick(_KILL, rng).format(name=target["name"]))
+    return out
+
+
+def _template_ranged_attack(
+    attacker: dict[str, Any],
+    target: dict[str, Any],
+    hit: bool,
+    fatal: bool,
+    rng: random.Random | None,
+) -> list[str]:
+    rng = rng or random.Random()
+    out: list[str] = []
+    if attacker.get("type") == "player":
+        if hit:
+            out.append(_pick(_RANGED_HIT_SELF, rng))
+        else:
+            out.append(_pick(_RANGED_MISS_SELF, rng))
+    else:
+        # Monster ranged attacks reuse melee enemy templates for now.
         if hit:
             out.append(_pick(_HIT_ENEMY, rng).format(name=attacker["name"]))
         else:
@@ -193,6 +236,33 @@ class Narrator:
         if result:
             return [result]
         return _template_attack(attacker, target, hit, fatal, rng)
+
+    async def narrate_ranged_attack(
+        self,
+        attacker: dict[str, Any],
+        target: dict[str, Any],
+        hit: bool,
+        fatal: bool,
+        rng: random.Random | None = None,
+    ) -> list[str]:
+        attacker_name = attacker.get("name", "the attacker")
+        target_name = target.get("name", "the target")
+        if attacker.get("type") == "player":
+            verb = "hits" if hit else "misses"
+            prompt = (
+                f"The adventurer fires a missile and {verb} {target_name}. "
+                f"{'The shot is fatal.' if fatal else ''} One vivid sentence."
+            )
+        else:
+            verb = "hits" if hit else "misses"
+            prompt = (
+                f"{attacker_name} fires a missile and {verb} the adventurer. "
+                f"{'The shot is fatal.' if fatal else ''} One vivid sentence."
+            )
+        result = await self._ollama(prompt)
+        if result:
+            return [result]
+        return _template_ranged_attack(attacker, target, hit, fatal, rng)
 
     async def narrate_victory(self, rng: random.Random | None = None) -> str:
         prompt = (

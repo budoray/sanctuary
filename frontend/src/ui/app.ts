@@ -50,7 +50,7 @@ export class SanctuaryApp {
     this.current?.destroy();
     this.current = new CharacterSelect(
       this.app,
-      (character, timerSeconds) => this.enterGame(character, undefined, timerSeconds),
+      (character, timerSeconds, moduleId) => this.enterGame(character, undefined, timerSeconds, moduleId),
       () => this.showCreate(),
       () => this.showCampaigns(),
       () => this.showSessions()
@@ -107,7 +107,7 @@ export class SanctuaryApp {
     this.current?.destroy();
     this.current = new CharacterSelect(
       this.app,
-      (character, timerSeconds) => this.enterGame(character, campaign.id, timerSeconds),
+      (character, timerSeconds, _moduleId) => this.enterGame(character, campaign.id, timerSeconds),
       () => this.showCreate(),
       () => this.showCampaigns(),
       () => this.showSessions()
@@ -180,14 +180,14 @@ export class SanctuaryApp {
     }
   }
 
-  private async enterGame(character: CharacterState, campaignId?: string, turnTimerSeconds = 0) {
+  private async enterGame(character: CharacterState, campaignId?: string, turnTimerSeconds = 0, moduleId = 'sample_lair') {
     if (!character.id) return;
     this.setScreen('loading');
     clear(this.app);
     this.current?.destroy();
 
     try {
-      const { session } = await createSession(character.id, 'sample_lair', campaignId, turnTimerSeconds);
+      const { session } = await createSession(character.id, moduleId, campaignId, turnTimerSeconds);
       const { module } = await getModule(session.module_id);
       this.setScreen('game');
       const game = new Game(

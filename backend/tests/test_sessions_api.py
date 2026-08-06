@@ -1,7 +1,12 @@
+import json
+
 import pytest
 from asgi_lifespan import LifespanManager
 from httpx import AsyncClient, ASGITransport
+from sqlalchemy import select
 
+from backend.app.db import SessionRecord, get_db
+from backend.app.engine import module as module_engine
 from backend.app.main import fastapi_app
 
 
@@ -147,3 +152,58 @@ async def test_only_campaign_sessions_can_be_joined():
                 f"/api/sessions/{session_id}/join", json={"character_id": char_id}
             )
             assert join_resp.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_winning_session_persists_progression():
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            char_resp = await client.post("/api/characters", json={
+                "mode": "normal",
+                "ancestry": "human",
+                "classes": ["fighter"],
+                "name": "ProgressionTest",
+                "seed": 1,
+            })
+            assert char_resp.status_code == 200
+            char_id = char_resp.json()["character"]["id"]
+            initial_xp = char_resp.json()["character"].get("xp", 0)
+
+            session_resp = await client.post("/api/sessions", json={
+                "character_id": char_id,
+                "module_id": "sample_lair",
+            })
+            assert session_resp.status_code == 200
+            session_id = session_resp.json()["session"]["id"]
+
+            # Set up a guaranteed kill: one monster adjacent with 1 HP and terrible AC.
+            async for db in get_db():
+                result = await db.execute(
+                    select(SessionRecord).where(SessionRecord.id == session_id)
+                )
+                record = result.scalar_one()
+                state = json.loads(record.state)
+                state["monsters"][0]["x"] = state["player"]["x"] + 1
+                state["monsters"][0]["y"] = state["player"]["y"]
+                state["monsters"][0]["hp"] = 1
+                state["monsters"][0]["ac"] = 20
+                if len(state["monsters"]) > 1:
+                    state["monsters"][1]["alive"] = False
+                record.state = json.dumps(state)
+                await db.commit()
+
+            attack_resp = await client.post(f"/api/sessions/{session_id}/act", json={
+                "action": "attack",
+                "target_id": "goblin_1",
+            })
+            assert attack_resp.status_code == 200
+            assert attack_resp.json()["session"]["status"] == "won"
+            player = attack_resp.json()["session"]["player"]
+            assert player["xp"] > 0
+            assert player["gold"] > 0
+
+            char_get_resp = await client.get(f"/api/characters/{char_id}")
+            assert char_get_resp.status_code == 200
+            updated = char_get_resp.json()["character"]
+            assert updated["xp"] > initial_xp
+            assert updated["gold"] > 0

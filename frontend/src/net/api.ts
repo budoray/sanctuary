@@ -131,6 +131,9 @@ export interface Token {
   classes?: string[];
   account_id?: number;
   character_id?: string;
+  xp?: number;
+  level?: number;
+  gold?: number;
 }
 
 export interface Campaign {
