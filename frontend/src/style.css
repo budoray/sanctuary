@@ -985,6 +985,50 @@ button.danger:hover:not(:disabled) {
   color: var(--text);
 }
 
+.monster-roster {
+  max-height: 120px;
+  overflow-y: auto;
+  font-size: 11px;
+}
+
+.monster-roster .empty-roster {
+  color: var(--muted);
+  font-style: italic;
+  padding: 4px 0;
+}
+
+.monster-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.monster-row:last-child {
+  border-bottom: none;
+}
+
+.monster-row .monster-name {
+  flex: 0 0 70px;
+  color: var(--text);
+}
+
+.monster-row .monster-hp-bar {
+  flex: 1;
+  height: 5px;
+  background: #1a1a1a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.monster-row .monster-hp-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
 .dm-overlay {
   position: absolute;
   inset: 0 300px 0 0;

@@ -69,7 +69,6 @@ export class CharacterSelect {
       this.listEl.appendChild(el('li', { className: 'empty' }, 'No adventurers yet.'));
       return;
     }
-    const timerSeconds = parseInt(this.timerInput.value, 10) || 0;
     characters.forEach((c) => {
       const info = el('div', { className: 'session-info' });
       info.appendChild(el('strong', {}, c.name));
@@ -82,7 +81,7 @@ export class CharacterSelect {
       );
       const idSpan = el('span', { className: 'session-id' }, c.id || '');
       const actions = el('div', { className: 'session-actions' });
-      const playBtn = el('button', { onclick: () => this.onPlay(c, timerSeconds) }, 'Play');
+      const playBtn = el('button', { onclick: () => this.onPlay(c, parseInt(this.timerInput.value, 10) || 0) }, 'Play');
       const delBtn = el('button', {
         className: 'danger',
         onclick: async () => {

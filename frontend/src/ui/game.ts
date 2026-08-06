@@ -41,6 +41,7 @@ export class Game {
   private statusEl: HTMLElement = document.createElement('div');
   private timerEl: HTMLElement = document.createElement('div');
   private statEl: HTMLElement = document.createElement('div');
+  private rosterEl: HTMLElement = document.createElement('div');
   private dmOverlay: HTMLElement = document.createElement('div');
   private action: 'move' | 'attack' | null = null;
   private session: GameSession | null = null;
@@ -144,6 +145,10 @@ export class Game {
 
     this.statEl = el('div', { className: 'player-stats' });
     hud.appendChild(this.statEl);
+
+    this.rosterEl = el('div', { className: 'monster-roster' });
+    hud.appendChild(el('h2', {}, 'Foes'));
+    hud.appendChild(this.rosterEl);
 
     this.logEl = el('div', { className: 'game-log' });
     hud.appendChild(el('h2', {}, 'Chronicle'));
@@ -692,6 +697,7 @@ export class Game {
     this.updateStatus();
     this.updateActions();
     this.updateStats();
+    this.updateRoster();
     this.updateTimer();
     this.renderLog();
 
@@ -712,6 +718,26 @@ export class Game {
       <div class="hp-text">HP ${p.hp}/${p.max_hp}</div>
       <div class="ac-text">AC ${p.ac}</div>
     `;
+  }
+
+  private updateRoster() {
+    if (!this.session) return;
+    clear(this.rosterEl);
+    const alive = this.session.monsters.filter((m) => m.alive !== false);
+    if (alive.length === 0) {
+      this.rosterEl.appendChild(el('div', { className: 'empty-roster' }, 'None remain.'));
+      return;
+    }
+    alive.forEach((m) => {
+      const ratio = Math.max(0, Math.min(1, m.hp / m.max_hp));
+      const hpColor = ratio > 0.5 ? '#2ecc71' : ratio > 0.25 ? '#f1c40f' : '#c0392b';
+      const row = el('div', { className: 'monster-row' });
+      row.appendChild(el('span', { className: 'monster-name' }, m.name));
+      const barWrap = el('div', { className: 'monster-hp-bar' });
+      barWrap.innerHTML = `<span style="width:${Math.round(ratio * 100)}%; background:${hpColor};"></span>`;
+      row.appendChild(barWrap);
+      this.rosterEl.appendChild(row);
+    });
   }
 
   private spawnMonsterAttackSlash() {
