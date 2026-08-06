@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.auth import require_account
-from backend.app.db import CharacterRecord, SessionRecord, get_db
+from backend.app.db import CampaignMemberRecord, CampaignRecord, CharacterRecord, SessionRecord, get_db
 from backend.app.engine import character as char_engine
 from backend.app.engine import module, session as session_engine
 
@@ -25,6 +25,7 @@ async def create_session(
 ):
     character_id = data.get("character_id")
     module_id = data.get("module_id", DEFAULT_MODULE)
+    campaign_id = data.get("campaign_id")
 
     result = await db.execute(
         select(CharacterRecord).where(
@@ -35,6 +36,24 @@ async def create_session(
     record = result.scalar_one_or_none()
     if not record:
         raise HTTPException(status_code=404, detail="Character not found")
+
+    if campaign_id:
+        result = await db.execute(
+            select(CampaignRecord).where(CampaignRecord.id == campaign_id)
+        )
+        campaign = result.scalar_one_or_none()
+        if not campaign:
+            raise HTTPException(status_code=404, detail="Campaign not found")
+        result = await db.execute(
+            select(CampaignMemberRecord).where(
+                CampaignMemberRecord.campaign_id == campaign_id,
+                CampaignMemberRecord.account_id == account_id,
+            )
+        )
+        if not result.scalar_one_or_none():
+            raise HTTPException(status_code=403, detail="Not a member of this campaign")
+        if module_id == DEFAULT_MODULE and campaign.module_ids:
+            module_id = json.loads(campaign.module_ids)[0]
 
     char_state = json.loads(record.state)
     char = char_engine.Character(
@@ -58,6 +77,7 @@ async def create_session(
     session_record = SessionRecord(
         id=session_id,
         account_id=account_id,
+        campaign_id=campaign_id,
         module_id=module_id,
         character_id=character_id,
         name=f"{char.name} in {mod.name}",

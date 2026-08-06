@@ -1,14 +1,15 @@
-import { CharacterState, createSession, getModule, whoami } from '../net/api';
+import { CampaignLobby } from './campaign-lobby';
+import { Campaign, CharacterState, createSession, getModule, whoami } from '../net/api';
 import { CharacterCreator } from './character-creator';
 import { CharacterSelect } from './character-select';
 import { Game } from './game';
 import { clear } from './utils';
 
-type Screen = 'loading' | 'select' | 'create' | 'game';
+type Screen = 'loading' | 'select' | 'create' | 'campaigns' | 'game';
 
 export class SanctuaryApp {
   private app: HTMLElement;
-  private current: CharacterCreator | CharacterSelect | Game | null = null;
+  private current: CharacterCreator | CharacterSelect | CampaignLobby | Game | null = null;
 
   constructor(app: HTMLElement) {
     this.app = app;
@@ -35,7 +36,8 @@ export class SanctuaryApp {
     this.current = new CharacterSelect(
       this.app,
       (character) => this.enterGame(character),
-      () => this.showCreate()
+      () => this.showCreate(),
+      () => this.showCampaigns()
     );
   }
 
@@ -48,14 +50,39 @@ export class SanctuaryApp {
     });
   }
 
-  private async enterGame(character: CharacterState) {
+  private showCampaigns() {
+    this.setScreen('campaigns');
+    clear(this.app);
+    this.current?.destroy();
+    this.current = new CampaignLobby(
+      this.app,
+      (campaign) => {
+        this.showSelectForCampaign(campaign);
+      },
+      () => this.showSelect()
+    );
+  }
+
+  private showSelectForCampaign(campaign: Campaign) {
+    this.setScreen('select');
+    clear(this.app);
+    this.current?.destroy();
+    this.current = new CharacterSelect(
+      this.app,
+      (character) => this.enterGame(character, campaign.id),
+      () => this.showCreate(),
+      () => this.showCampaigns()
+    );
+  }
+
+  private async enterGame(character: CharacterState, campaignId?: string) {
     if (!character.id) return;
     this.setScreen('loading');
     clear(this.app);
     this.current?.destroy();
 
     try {
-      const { session } = await createSession(character.id);
+      const { session } = await createSession(character.id, 'sample_lair', campaignId);
       const { module } = await getModule(session.module_id);
       this.setScreen('game');
       this.current = new Game(

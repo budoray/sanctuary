@@ -41,6 +41,7 @@ class SessionRecord(Base):
 
     id = Column(String, primary_key=True)
     account_id = Column(Integer, index=True, nullable=False)
+    campaign_id = Column(String, index=True, nullable=True)
     module_id = Column(String, nullable=False)
     character_id = Column(String, nullable=False)
     name = Column(String, nullable=False, default="Adventure")
@@ -48,6 +49,29 @@ class SessionRecord(Base):
     state = Column(Text, default="{}")  # full session engine state
     created_at = Column(DateTime, default=_utc_now)
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
+
+
+class CampaignRecord(Base):
+    __tablename__ = "campaigns"
+
+    id = Column(String, primary_key=True)
+    account_id = Column(Integer, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    ruleset_id = Column(String, default="osric")
+    module_ids = Column(Text, default="[]")  # JSON list
+    password_hash = Column(String, nullable=False)
+    dm_account_id = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=_utc_now)
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
+
+
+class CampaignMemberRecord(Base):
+    __tablename__ = "campaign_members"
+
+    campaign_id = Column(String, primary_key=True)
+    account_id = Column(Integer, primary_key=True)
+    role = Column(String, default="player")  # 'dm' or 'player'
+    joined_at = Column(DateTime, default=_utc_now)
 
 
 async def get_db():

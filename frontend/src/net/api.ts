@@ -122,10 +122,42 @@ export interface Token {
   alive?: boolean;
 }
 
-export async function createSession(characterId: string, moduleId = 'sample_lair') {
+export interface Campaign {
+  id: string;
+  name: string;
+  ruleset_id: string;
+  module_ids: string[];
+  dm_account_id: number;
+  is_member?: boolean;
+  is_dm?: boolean;
+}
+
+export async function createCampaign(campaign: { name: string; password: string; ruleset_id?: string; module_ids?: string[] }) {
+  return api('/api/campaigns', {
+    method: 'POST',
+    body: JSON.stringify(campaign),
+  }) as Promise<{ campaign: Campaign }>;
+}
+
+export async function listCampaigns() {
+  return api('/api/campaigns') as Promise<{ campaigns: Campaign[] }>;
+}
+
+export async function getCampaign(campaignId: string) {
+  return api(`/api/campaigns/${campaignId}`) as Promise<{ campaign: Campaign }>;
+}
+
+export async function joinCampaign(campaignId: string, password: string) {
+  return api(`/api/campaigns/${campaignId}/join`, {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  }) as Promise<{ campaign: Campaign }>;
+}
+
+export async function createSession(characterId: string, moduleId = 'sample_lair', campaignId?: string) {
   return api('/api/sessions', {
     method: 'POST',
-    body: JSON.stringify({ character_id: characterId, module_id: moduleId }),
+    body: JSON.stringify({ character_id: characterId, module_id: moduleId, campaign_id: campaignId }),
   }) as Promise<{ session: GameSession }>;
 }
 
