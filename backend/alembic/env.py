@@ -23,9 +23,12 @@ target_metadata = Base.metadata
 
 
 def get_database_url() -> str:
-    url = os.environ.get("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+    url = os.environ.get("DATABASE_URL")
     if not url:
-        raise RuntimeError("DATABASE_URL or sqlalchemy.url must be set")
+        from backend.app.config import SETTINGS
+        url = SETTINGS.database_url
+    if not url:
+        raise RuntimeError("DATABASE_URL or config.database_url must be set")
     return url
 
 
