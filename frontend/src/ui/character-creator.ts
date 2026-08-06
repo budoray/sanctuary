@@ -140,6 +140,7 @@ export class CharacterCreator {
   private async rollPreview() {
     this.rollButton.disabled = true;
     this.saveButton.disabled = true;
+    this.clearMessage();
     this.arrangement = undefined;
     try {
       const req = this.buildRequest();
@@ -152,7 +153,7 @@ export class CharacterCreator {
         this.renderArrange();
       }
     } catch (err: any) {
-      this.showMessage(err.message || 'Roll failed.', true);
+      this.showMessage(this.formatError(err) || 'Roll failed.', true);
     } finally {
       this.rollButton.disabled = false;
     }
@@ -265,14 +266,37 @@ export class CharacterCreator {
   private async save() {
     if (!this.preview) return;
     this.saveButton.disabled = true;
+    this.clearMessage();
     try {
       const req = this.buildRequest();
       const { character } = await createCharacter(req);
       this.onSaved(character);
     } catch (err: any) {
-      this.showMessage(err.message || 'Save failed.', true);
+      this.showMessage(this.formatError(err) || 'Save failed.', true);
       this.saveButton.disabled = false;
     }
+  }
+
+  private formatError(err: any): string {
+    const raw = err?.message || String(err);
+    const detailMatch = raw.match(/\{[^}]*"detail"\s*:\s*"([^"]+)"/);
+    const detail = detailMatch ? detailMatch[1] : raw;
+
+    const minimumsMatch = detail.match(/does not meet ([^']+)'s ability minimums/);
+    if (minimumsMatch) {
+      const className = this.titleCase(minimumsMatch[1].replace(/-/g, ' '));
+      return `${className} requires higher ability scores than your current rolls provide. Try a different class or rearrange your scores.`;
+    }
+
+    if (detail.toLowerCase().includes('may not be')) {
+      return 'That ancestry cannot take that combination of classes.';
+    }
+
+    if (detail.toLowerCase().includes('ability scores do not meet')) {
+      return 'Your rolled scores do not meet the minimum requirements for that ancestry.';
+    }
+
+    return detail;
   }
 
   private showMessage(text: string, error = false) {
