@@ -14,6 +14,11 @@ from sqlalchemy.future import select
 from backend.app.db import Base
 
 
+def _utc_now() -> datetime:
+    """Return a timezone-naive UTC timestamp for PostgreSQL compatibility."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 class EventRecord(Base):
     __tablename__ = "events"
 
@@ -21,7 +26,7 @@ class EventRecord(Base):
     session_id = Column(String, index=True, nullable=False)
     event_type = Column(String, nullable=False)
     payload = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=_utc_now)
 
 
 class SnapshotRecord(Base):
@@ -30,7 +35,7 @@ class SnapshotRecord(Base):
     session_id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     state = Column(Text, nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
 
 
 class EventStore:
