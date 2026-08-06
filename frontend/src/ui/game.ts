@@ -43,6 +43,7 @@ export class Game {
   private statEl: HTMLElement = document.createElement('div');
   private rosterEl: HTMLElement = document.createElement('div');
   private dmOverlay: HTMLElement = document.createElement('div');
+  private damageFlash: HTMLElement = document.createElement('div');
   private action: 'move' | 'attack' | null = null;
   private session: GameSession | null = null;
   private onExit: () => void;
@@ -92,6 +93,9 @@ export class Game {
     this.dmOverlay.innerHTML = '<div class="dm-spinner"></div><span>The DM ponders...</span>';
     this.dmOverlay.style.display = 'none';
     this.root.appendChild(this.dmOverlay);
+
+    this.damageFlash = el('div', { className: 'damage-flash' });
+    this.root.appendChild(this.damageFlash);
 
     const trayAnchor = el('div', { className: 'tray-anchor' });
     this.root.appendChild(trayAnchor);
@@ -711,7 +715,15 @@ export class Game {
 
     if (wasDm && session.phase === 'player' && playerHurt) {
       this.spawnMonsterAttackSlash();
+      this.triggerDamageFlash();
     }
+  }
+
+  private triggerDamageFlash() {
+    this.damageFlash.classList.remove('active');
+    void this.damageFlash.offsetWidth; // reflow
+    this.damageFlash.classList.add('active');
+    window.setTimeout(() => this.damageFlash.classList.remove('active'), 350);
   }
 
   private updateStats() {
