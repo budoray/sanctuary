@@ -240,7 +240,7 @@ async def act_in_session(
     action = data.get("action")
     if action == "dm_turn" and record.campaign_id and not await _is_campaign_dm(record, account_id, db):
         raise HTTPException(status_code=403, detail="Only the DM can run the DM turn")
-    if action in ("move", "attack", "ranged", "end_turn"):
+    if action in ("move", "attack", "ranged", "end_turn", "use_potion", "stabilize", "ability"):
         if record.campaign_id:
             active_index = state.get("active_player_index", 0)
             active_players = state.get("players", [])
@@ -292,6 +292,117 @@ async def act_in_session(
             char_record.hp = char_state["hit_points"]
             char_record.max_hp = char_state["max_hp"]
         await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update",
+            {"session": session_view},
+            room=session_id,
+        )
+    except Exception:
+        pass
+
+    return {"session": session_view}
+
+
+@router.post("/sessions/{session_id}/advance")
+async def advance_session(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord).where(SessionRecord.id == session_id)
+    )
+    record = result.scalar_one_or_none()
+    if not record or not await _can_access_session(record, account_id, db):
+        raise HTTPException(status_code=404, detail="Session not found")
+    if record.account_id != account_id and not await _is_campaign_dm(record, account_id, db):
+        raise HTTPException(status_code=403, detail="Only the session owner or DM can advance")
+    if not record.campaign_id:
+        raise HTTPException(status_code=400, detail="Only campaign sessions can be advanced")
+
+    result = await db.execute(
+        select(CampaignRecord).where(CampaignRecord.id == record.campaign_id)
+    )
+    campaign = result.scalar_one_or_none()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    module_ids = json.loads(campaign.module_ids)
+    if not module_ids:
+        raise HTTPException(status_code=400, detail="Campaign has no modules")
+
+    try:
+        current_index = module_ids.index(record.module_id)
+    except ValueError:
+        current_index = -1
+    next_index = (current_index + 1) % len(module_ids)
+    next_module_id = module_ids[next_index]
+
+    state = json.loads(record.state)
+    next_module = module.load(next_module_id)
+    state = await session_engine.advance_module(state, next_module)
+
+    record.module_id = next_module_id
+    record.state = json.dumps(state)
+    record.status = state["status"]
+    await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update",
+            {"session": session_view},
+            room=session_id,
+        )
+    except Exception:
+        pass
+
+    return {"session": session_view}
+
+
+@router.post("/sessions/{session_id}/rest")
+async def rest_in_session(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord).where(SessionRecord.id == session_id)
+    )
+    record = result.scalar_one_or_none()
+    if not record or not await _can_access_session(record, account_id, db):
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    state = json.loads(record.state)
+    players = state.get("players", [])
+    if record.campaign_id:
+        if account_id not in {p.get("account_id") for p in players if p.get("account_id")}:
+            raise HTTPException(status_code=403, detail="Not a player in this session")
+    elif record.account_id != account_id:
+        raise HTTPException(status_code=403, detail="Only the session owner can rest")
+
+    active_index = state.get("active_player_index", 0)
+    if active_index >= len(players):
+        raise HTTPException(status_code=400, detail="No active player")
+    active_player = players[active_index]
+
+    if active_player.get("gold", 0) < 10:
+        raise HTTPException(status_code=400, detail="Not enough gold")
+
+    active_player["gold"] = active_player.get("gold", 0) - 10
+    active_player["hp"] = active_player.get("max_hp", active_player["hp"])
+    active_player["down"] = False
+    state["version"] += 1
+    state["log"].append(
+        f"{active_player['name']} rests at the campsite and recovers to full HP."
+    )
+
+    record.state = json.dumps(state)
+    record.status = state["status"]
+    await db.commit()
 
     session_view = session_engine.view(state)
     try:

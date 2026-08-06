@@ -174,3 +174,199 @@ async def test_killing_monster_triggers_level_up(sample_module, hero):
     assert st["player"]["xp"] >= 100
     assert st["player"]["max_hp"] > initial_max_hp
     assert any("reaches level 2" in entry for entry in st["log"])
+
+
+async def test_player_goes_down_at_zero_hp(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = st["player"]["x"] + 1
+    goblin["y"] = st["player"]["y"]
+    goblin["damage"] = "1d4-3"  # max(1, total) always deals 1
+    st["player"]["hp"] = 1
+    st["player"]["ac"] = 30  # guaranteed hit (descending AC)
+    await session._attack(st, goblin, st["player"], session.Dice(seed=42))
+    assert st["player"]["hp"] == 0
+    assert st["player"]["down"] is True
+    assert st["player"]["alive"] is True
+    assert st["status"] == session.STATUS_ACTIVE
+
+
+async def test_player_dies_below_negative_ten(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = st["player"]["x"] + 1
+    goblin["y"] = st["player"]["y"]
+    goblin["damage"] = "1d20+20"  # 21-40 damage, guaranteed below -10
+    st["player"]["hp"] = 1
+    st["player"]["ac"] = 30  # guaranteed hit
+    await session._attack(st, goblin, st["player"], session.Dice(seed=42))
+    assert st["player"]["alive"] is False
+    assert st["player"]["down"] is True
+    assert st["status"] == session.STATUS_LOST
+
+
+async def test_stabilize_sets_downed_ally_to_one_hp(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    hero2 = char_engine.generate(seed=1, mode="normal", ancestry_name="human", class_names=["cleric"], name="Elara")
+    await session.add_player(st, sample_module, hero2, "char2", account_id=2)
+    # Place player_1 next to the downed active player.
+    st["players"][0]["down"] = True
+    st["players"][0]["hp"] = 0
+    st["players"][1]["x"] = st["players"][0]["x"] + 1
+    st["players"][1]["y"] = st["players"][0]["y"]
+    st["active_player_index"] = 1
+    st["player"] = session._active_player(st)
+    st = await session.act(st, sample_module, "stabilize", target_id="player")
+    assert st["players"][0]["down"] is False
+    assert st["players"][0]["hp"] == 1
+    assert st["phase"] == session.PHASE_DM
+
+
+async def test_fighter_heavy_strike_deals_damage(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = st["player"]["x"] + 1
+    goblin["y"] = st["player"]["y"]
+    goblin["ac"] = 30  # guaranteed hit
+    initial_hp = goblin["hp"]
+    d = session.Dice(seed=42)
+    await session._ability(st, st["player"], goblin["id"], sample_module, d)
+    assert goblin["hp"] < initial_hp
+
+
+async def test_thief_backstab_deals_damage(sample_module):
+    hero = char_engine.generate(seed=1, mode="normal", ancestry_name="human", class_names=["thief"], name="Rogue")
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = st["player"]["x"] + 1
+    goblin["y"] = st["player"]["y"]
+    goblin["ac"] = 30
+    initial_hp = goblin["hp"]
+    d = session.Dice(seed=42)
+    await session._ability(st, st["player"], goblin["id"], sample_module, d)
+    assert goblin["hp"] < initial_hp
+
+
+async def test_cleric_turn_undead_deals_damage(sample_module):
+    hero = char_engine.generate(seed=1, mode="normal", ancestry_name="human", class_names=["cleric"], name="Cleric")
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    zombie = st["monsters"][0]
+    zombie["name"] = "zombie"
+    zombie["x"] = st["player"]["x"] + 1
+    zombie["y"] = st["player"]["y"]
+    initial_hp = zombie["hp"]
+    d = session.Dice(seed=42)
+    await session._ability(st, st["player"], zombie["id"], sample_module, d)
+    # If the d20 roll is < 10 it misses; retry with fresh dice until it hits.
+    if zombie["hp"] == initial_hp:
+        for seed in range(1, 100):
+            d = session.Dice(seed=seed)
+            zombie["hp"] = initial_hp
+            await session._ability(st, st["player"], zombie["id"], sample_module, d)
+            if zombie["hp"] < initial_hp:
+                break
+        else:
+            pytest.fail("Turn Undead never hit after 100 seeds")
+    assert zombie["hp"] < initial_hp
+
+
+async def test_magic_user_magic_missile_always_hits(sample_module):
+    hero = char_engine.generate(seed=1, mode="normal", ancestry_name="human", class_names=["magic-user"], name="Wizard")
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = st["player"]["x"] + 1
+    goblin["y"] = st["player"]["y"]
+    initial_hp = goblin["hp"]
+    d = session.Dice(seed=42)
+    await session._ability(st, st["player"], goblin["id"], sample_module, d)
+    assert goblin["hp"] < initial_hp
+
+
+async def test_advance_module_keeps_players_and_resets_monsters(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    st["status"] = session.STATUS_WON
+    st["campaign_stage"] = 1
+    st["players"][0]["hp"] = 3
+    st["players"][0]["down"] = True
+    st["players"][0]["statuses"] = [{"type": "poisoned", "duration": 2, "damage": 1}]
+    initial_xp = st["players"][0]["xp"]
+    initial_gold = st["players"][0]["gold"]
+
+    next_module = module.load("sunken_crypt")
+    st = await session.advance_module(st, next_module)
+
+    assert st["status"] == session.STATUS_ACTIVE
+    assert st["module_id"] == "sunken_crypt"
+    assert st["turn"] == 1
+    assert st["phase"] == session.PHASE_PLAYER
+    assert st["active_player_index"] == 0
+    assert st["campaign_stage"] == 2
+    assert len(st["monsters"]) == len(next_module.monsters)
+    assert all(m["alive"] for m in st["monsters"])
+    assert st["players"][0]["x"] == next_module.player_start[0]
+    assert st["players"][0]["y"] == next_module.player_start[1]
+    assert st["players"][0]["hp"] == 3
+    assert st["players"][0]["down"] is True
+    assert st["players"][0]["statuses"] == [{"type": "poisoned", "duration": 2, "damage": 1}]
+    assert st["players"][0]["xp"] == initial_xp
+    assert st["players"][0]["gold"] == initial_gold
+    assert any("journeys to The Sunken Crypt" in entry for entry in st["log"])
+
+
+async def test_advance_module_requires_won_status(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    next_module = module.load("sunken_crypt")
+    with pytest.raises(ValueError, match="won"):
+        await session.advance_module(st, next_module)
+
+
+def _module_with_trap(base_module):
+    """Return a copy of base_module with a trap tile ('2') next to the player start."""
+    tiles = [list(row) for row in base_module.map.tiles]
+    px, py = base_module.player_start
+    tiles[py][px + 1] = "2"
+    new_map = module.Map(
+        width=base_module.map.width,
+        height=base_module.map.height,
+        tile_size=base_module.map.tile_size,
+        tiles=["".join(row) for row in tiles],
+    )
+    return module.Module(
+        id=base_module.id,
+        name=base_module.name,
+        ruleset=base_module.ruleset,
+        description=base_module.description,
+        map=new_map,
+        player_start=base_module.player_start,
+        monsters=base_module.monsters,
+    )
+
+
+async def test_trap_tile_is_walkable_and_deals_damage_when_triggered(hero):
+    base_module = module.load("sample_lair")
+    trap_module = _module_with_trap(base_module)
+    assert trap_module.map.walkable(base_module.player_start[0] + 1, base_module.player_start[1])
+
+    st = await session.new_game("trap_test", trap_module, hero, seed=1)
+    initial_hp = st["player"]["hp"]
+    px, py = st["player"]["x"], st["player"]["y"]
+    st = await session.act(st, trap_module, "move", x=px + 1, y=py)
+    assert st["player"]["x"] == px + 1
+    assert st["player"]["y"] == py
+    assert st["player"]["hp"] < initial_hp
+    assert any("suffers" in entry and "damage" in entry for entry in st["log"])
+
+
+async def test_status_ticks_apply_damage_and_expire(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    st["player"]["hp"] = 10
+    st["player"]["statuses"] = [{"type": "poisoned", "duration": 3, "damage": 1}]
+    session._tick_statuses(st)
+    assert st["player"]["hp"] == 9
+    assert len(st["player"]["statuses"]) == 1
+    assert st["player"]["statuses"][0]["duration"] == 2
+    session._tick_statuses(st)
+    assert st["player"]["hp"] == 8
+    session._tick_statuses(st)
+    assert st["player"]["hp"] == 7
+    assert st["player"]["statuses"] == []

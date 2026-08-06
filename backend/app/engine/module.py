@@ -27,7 +27,7 @@ class Map:
     def walkable(self, x: int, y: int) -> bool:
         if not self.in_bounds(x, y):
             return False
-        return self.tiles[y][x] == "0"
+        return self.tiles[y][x] in ("0", "2")
 
 
 @dataclass(frozen=True)

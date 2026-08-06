@@ -64,6 +64,37 @@ async def test_attack_returns_list_and_falls_back(disabled_settings):
     assert len(lines) > 0
 
 
+async def test_room_uses_ollama_when_enabled():
+    async def fake_generate(prompt, **kwargs):
+        return "Moss clings to the ancient stones."
+
+    narrator = Narrator(
+        settings=SimpleNamespace(
+            ollama_enabled=True,
+            ollama_timeout=1.0,
+            ollama_host="http://localhost:11434",
+            ollama_model="test-model",
+        ),
+        ollama_generate=fake_generate,
+    )
+    line = await narrator.narrate_room("The Sunken Crypt", room_type="crypt", rng=random.Random(1))
+    assert "Moss clings" in line
+
+
+async def test_room_falls_back_when_ollama_disabled(disabled_settings):
+    narrator = Narrator(settings=disabled_settings)
+    line = await narrator.narrate_room("The Sunken Crypt", room_type="crypt", rng=random.Random(1))
+    assert isinstance(line, str)
+    assert len(line) > 0
+
+
+async def test_trap_falls_back_when_ollama_disabled(disabled_settings):
+    narrator = Narrator(settings=disabled_settings)
+    line = await narrator.narrate_trap("hidden spikes", triggered=True, rng=random.Random(1))
+    assert isinstance(line, str)
+    assert len(line) > 0
+
+
 async def test_victory_uses_ollama_when_enabled():
     async def fake_generate(prompt, **kwargs):
         return "Silence claims the chamber."

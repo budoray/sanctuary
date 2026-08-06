@@ -251,6 +251,49 @@ async def equip_item_endpoint(
     return {"character": char_state}
 
 
+@router.post("/characters/{character_id}/buy")
+async def buy_item_endpoint(
+    character_id: str,
+    data: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(CharacterRecord).where(
+            CharacterRecord.id == character_id,
+            CharacterRecord.account_id == account_id,
+        )
+    )
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="Character not found")
+
+    item_id = data.get("item_id", "healing_potion")
+    cost = int(data.get("cost", 15))
+    if item_id not in items.LOOT_TABLE:
+        raise HTTPException(status_code=400, detail="Item not available")
+
+    char_state = json.loads(record.state)
+    char_state.setdefault("inventory", [])
+    char_state.setdefault("equipment", {})
+    gold = char_state.get("gold", 0)
+    if gold < cost:
+        raise HTTPException(status_code=400, detail="Not enough gold")
+
+    char_state["gold"] = gold - cost
+    template = items.LOOT_TABLE[item_id]
+    item = {
+        "instance_id": str(uuid.uuid4())[:8],
+        "item_id": item_id,
+        **template,
+    }
+    items.add_item(char_state, item)
+
+    record.state = json.dumps(char_state)
+    await db.commit()
+    return {"character": char_state}
+
+
 @router.post("/characters/{character_id}/use")
 async def use_item_endpoint(
     character_id: str,

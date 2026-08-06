@@ -207,3 +207,67 @@ async def test_winning_session_persists_progression():
             updated = char_get_resp.json()["character"]
             assert updated["xp"] > initial_xp
             assert updated["gold"] > 0
+
+
+@pytest.mark.asyncio
+async def test_advance_campaign_session_to_next_module():
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            campaign_resp = await client.post("/api/campaigns", json={
+                "name": "Journey",
+                "password": "secret",
+                "module_ids": ["sample_lair", "sunken_crypt"],
+            })
+            assert campaign_resp.status_code == 200
+            campaign_id = campaign_resp.json()["campaign"]["id"]
+
+            char_resp = await client.post("/api/characters", json={
+                "mode": "normal",
+                "ancestry": "human",
+                "classes": ["fighter"],
+                "name": "Journeyer",
+                "seed": 1,
+            })
+            assert char_resp.status_code == 200
+            char_id = char_resp.json()["character"]["id"]
+
+            session_resp = await client.post("/api/sessions", json={
+                "character_id": char_id,
+                "campaign_id": campaign_id,
+                "module_id": "sample_lair",
+            })
+            assert session_resp.status_code == 200
+            session_id = session_resp.json()["session"]["id"]
+
+            async for db in get_db():
+                result = await db.execute(
+                    select(SessionRecord).where(SessionRecord.id == session_id)
+                )
+                record = result.scalar_one()
+                state = json.loads(record.state)
+                state["monsters"][0]["x"] = state["player"]["x"] + 1
+                state["monsters"][0]["y"] = state["player"]["y"]
+                state["monsters"][0]["hp"] = 1
+                state["monsters"][0]["ac"] = 20
+                if len(state["monsters"]) > 1:
+                    state["monsters"][1]["alive"] = False
+                record.state = json.dumps(state)
+                await db.commit()
+
+            attack_resp = await client.post(f"/api/sessions/{session_id}/act", json={
+                "action": "attack",
+                "target_id": "goblin_1",
+            })
+            assert attack_resp.status_code == 200
+            assert attack_resp.json()["session"]["status"] == "won"
+
+            advance_resp = await client.post(f"/api/sessions/{session_id}/advance")
+            assert advance_resp.status_code == 200
+            advanced = advance_resp.json()["session"]
+            assert advanced["status"] == "active"
+            assert advanced["module_id"] == "sunken_crypt"
+            assert len(advanced["monsters"]) == 4
+
+            get_resp = await client.get(f"/api/sessions/{session_id}")
+            assert get_resp.status_code == 200
+            assert get_resp.json()["session"]["module_id"] == "sunken_crypt"

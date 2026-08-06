@@ -29,6 +29,7 @@ export class TokenSprite {
   private tileSize: number;
   private pulse = 0;
   private ring: Graphics;
+  private downCross: Graphics;
   private floaters: Floater[] = [];
   targetX = 0;
   targetY = 0;
@@ -132,6 +133,24 @@ export class TokenSprite {
     this.hpFill = new Graphics();
     this.updateHP(token.hp, token.max_hp);
     this.container.addChild(this.hpFill);
+
+    // Downed indicator (red cross)
+    this.downCross = new Graphics();
+    const crossSize = size * 0.35;
+    this.downCross.moveTo(cx - crossSize, cy - crossSize);
+    this.downCross.lineTo(cx + crossSize, cy + crossSize);
+    this.downCross.moveTo(cx + crossSize, cy - crossSize);
+    this.downCross.lineTo(cx - crossSize, cy + crossSize);
+    this.downCross.stroke({ width: 3, color: 0xc0392b, alpha: 0.95 });
+    this.downCross.visible = false;
+    this.container.addChild(this.downCross);
+
+    this.setDown(token.down ?? false);
+  }
+
+  setDown(down: boolean) {
+    this.downCross.visible = down;
+    this.container.alpha = down ? 0.55 : 1;
   }
 
   private resolveColor(token: Token): number {

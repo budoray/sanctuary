@@ -1,10 +1,11 @@
 import { Application, Container, Graphics } from 'pixi.js';
 import type { Socket } from 'socket.io-client';
-import { actInSession, GameSession, Token } from '../net/api';
+import { actInSession, advanceSession, GameSession, getModule, restInSession, Token } from '../net/api';
 import { connectSocket } from '../net/socket';
 import { DiceTray } from './dice-tray';
 import { TokenSprite } from './token-sprite';
 import { el, clear } from './utils';
+import { AudioController } from './audio';
 
 const TILE_SIZE = 40;
 const WALL_BASE = 0x23262d;
@@ -16,6 +17,8 @@ const FLOOR_HIGHLIGHT = 0x1c1f25;
 const FLOOR_RANGE_HIGHLIGHT = 0x2a3a1a;
 const VISION_RADIUS = 6;
 const RANGED_RANGE = 4;
+const TRAP_COLOR = 0x8b0000;
+const TRAP_HIGHLIGHT = 0xff4444;
 
 interface ModuleData {
   width: number;
@@ -49,7 +52,7 @@ export class Game {
   private rosterEl: HTMLElement = document.createElement('div');
   private dmOverlay: HTMLElement = document.createElement('div');
   private damageFlash: HTMLElement = document.createElement('div');
-  private action: 'move' | 'attack' | 'ranged' | null = null;
+  private action: 'move' | 'attack' | 'ranged' | 'ability' | null = null;
   private session: GameSession | null = null;
   private userId: number | null = null;
   private onExit: () => void;
@@ -71,9 +74,19 @@ export class Game {
   private moveBtn!: HTMLButtonElement;
   private attackBtn!: HTMLButtonElement;
   private rangedBtn!: HTMLButtonElement;
+  private potionBtn!: HTMLButtonElement;
+  private abilityBtn!: HTMLButtonElement;
+  private stabilizeBtn!: HTMLButtonElement;
+  private restBtn!: HTMLButtonElement;
   private endBtn!: HTMLButtonElement;
   private dmTurnBtn!: HTMLButtonElement;
   private socket: Socket | null = null;
+  private visited: Set<string> = new Set();
+  private audio = new AudioController();
+  private chatPanel: HTMLElement | null = null;
+  private chatMessages: HTMLElement = document.createElement('div');
+  private chatInput: HTMLInputElement = document.createElement('input');
+  private chatCollapsed = false;
 
   constructor(
     container: HTMLElement,
@@ -94,8 +107,10 @@ export class Game {
     this.root.className = 'game-shell';
     this.canvasContainer = el('div', { className: 'game-canvas-container' });
     this.ui = this.buildUI();
+    this.chatPanel = this.buildChatPanel();
     this.root.appendChild(this.canvasContainer);
     this.root.appendChild(this.ui);
+    this.root.appendChild(this.chatPanel);
 
     this.tooltip = el('div', { className: 'token-tooltip' });
     this.tooltip.style.display = 'none';
@@ -136,6 +151,7 @@ export class Game {
   private isPlayer() {
     if (!this.session) return false;
     const active = this.session.player;
+    if (active?.down) return false;
     if (active && 'account_id' in active && active.account_id != null) {
       return active.account_id === this.userId;
     }
@@ -172,6 +188,9 @@ export class Game {
         this.update(payload.session);
       }
     });
+    this.socket.on('chat_broadcast', (payload: { account_id?: number; name?: string; text?: string; timestamp?: string }) => {
+      this.appendChatMessage(payload);
+    });
   }
 
   private buildUI() {
@@ -186,10 +205,18 @@ export class Game {
     this.moveBtn = el('button', { onclick: () => this.setAction('move') }, 'Move [M]') as HTMLButtonElement;
     this.attackBtn = el('button', { onclick: () => this.setAction('attack') }, 'Attack [F]') as HTMLButtonElement;
     this.rangedBtn = el('button', { onclick: () => this.setAction('ranged') }, 'Ranged [R]') as HTMLButtonElement;
+    this.potionBtn = el('button', { onclick: () => this.usePotion() }, 'Potion [P]') as HTMLButtonElement;
+    this.abilityBtn = el('button', { onclick: () => this.setAction('ability') }, 'Ability [Q]') as HTMLButtonElement;
+    this.stabilizeBtn = el('button', { onclick: () => this.stabilize() }, 'Stabilize [S]') as HTMLButtonElement;
+    this.restBtn = el('button', { onclick: () => this.rest() }, 'Rest') as HTMLButtonElement;
     this.endBtn = el('button', { onclick: () => this.endTurn() }, 'End [E]') as HTMLButtonElement;
     actions.appendChild(this.moveBtn);
     actions.appendChild(this.attackBtn);
     actions.appendChild(this.rangedBtn);
+    actions.appendChild(this.potionBtn);
+    actions.appendChild(this.abilityBtn);
+    actions.appendChild(this.stabilizeBtn);
+    actions.appendChild(this.restBtn);
     actions.appendChild(this.endBtn);
     hud.appendChild(actions);
 
@@ -215,21 +242,105 @@ export class Game {
     hud.appendChild(el('h2', {}, 'Chronicle'));
     hud.appendChild(this.logEl);
 
+    const muteBtn = el('button', {
+      className: 'mute-btn',
+      onclick: () => {
+        const muted = this.audio.toggleMute();
+        muteBtn.textContent = muted ? 'Unmute' : 'Mute';
+        muteBtn.classList.toggle('muted', muted);
+      },
+    }, 'Mute') as HTMLButtonElement;
+    hud.appendChild(muteBtn);
+
     const exitBtn = el('button', { className: 'danger', onclick: () => this.onExit() }, 'Leave');
     hud.appendChild(exitBtn);
 
     return hud;
   }
 
+  private buildChatPanel(): HTMLElement {
+    const panel = el('div', { className: 'chat-panel' });
+    const header = el('div', {
+      className: 'chat-header',
+      onclick: () => this.toggleChat(),
+    }, 'Party Chat');
+    panel.appendChild(header);
+
+    this.chatMessages = el('div', { className: 'chat-messages' });
+    panel.appendChild(this.chatMessages);
+
+    const controls = el('div', { className: 'chat-controls' });
+    this.chatInput = el('input', {
+      type: 'text',
+      placeholder: 'Say something...',
+      maxlength: 500,
+      onkeydown: (e: KeyboardEvent) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.sendChat();
+        }
+      },
+    }) as HTMLInputElement;
+    const sendBtn = el('button', {
+      onclick: () => this.sendChat(),
+    }, 'Send') as HTMLButtonElement;
+    controls.appendChild(this.chatInput);
+    controls.appendChild(sendBtn);
+    panel.appendChild(controls);
+
+    panel.style.display = 'none';
+    return panel;
+  }
+
+  private toggleChat() {
+    this.chatCollapsed = !this.chatCollapsed;
+    this.chatPanel?.classList.toggle('collapsed', this.chatCollapsed);
+  }
+
+  private sendChat() {
+    if (!this.socket) return;
+    const text = this.chatInput.value.trim();
+    if (!text) return;
+    this.socket.emit('chat_message', {
+      session_id: this.sessionId,
+      text,
+      name: document.body.dataset.user || 'Player',
+    });
+    this.chatInput.value = '';
+  }
+
+  private appendChatMessage(payload: { account_id?: number; name?: string; text?: string; timestamp?: string }) {
+    if (!payload.text) return;
+    const name = payload.name || 'Player';
+    const time = payload.timestamp
+      ? new Date(payload.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : '';
+    const row = el('div', { className: 'chat-message' });
+    const timeSpan = el('span', { className: 'chat-time' }, time);
+    const nameSpan = el('span', { className: 'chat-name' }, name);
+    const textSpan = el('span', { className: 'chat-text' }, payload.text);
+    row.appendChild(timeSpan);
+    row.appendChild(nameSpan);
+    row.appendChild(textSpan);
+    this.chatMessages.appendChild(row);
+    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+  }
+
   private showTooltip(token: Token, clientX: number, clientY: number) {
     const subtitle = token.type === 'player'
       ? (token.classes || ['Adventurer']).join(' / ')
       : token.name;
+    const statusText = (token.statuses || [])
+      .map((s) => `${s.type}${s.duration ? ` (${s.duration})` : ''}`)
+      .join(', ');
+    const downText = token.down ? '<div class="token-tooltip-down">DOWNED</div>' : '';
     this.tooltip.innerHTML = `
       <strong>${token.name}</strong>
       <div class="token-tooltip-sub">${subtitle}</div>
       <div>HP ${token.hp}/${token.max_hp}</div>
       <div>AC ${token.ac}</div>
+      ${downText}
+      ${statusText ? `<div>Status: ${statusText}</div>` : ''}
     `;
     this.tooltip.style.display = 'block';
     this.positionTooltip(clientX, clientY);
@@ -270,8 +381,11 @@ export class Game {
     } else {
       panel.appendChild(el('p', { className: 'message' }, 'Your light fades in the dark. The dungeon claims another.'));
     }
-    const canReplay = this.onReplay && this.session.character_id;
-    if (canReplay) {
+    const isCampaign = this.isCampaignSession();
+    if (isCampaign && won) {
+      const journey = el('button', { className: 'enter', onclick: () => this.journeyOn() }, 'Journey On');
+      panel.appendChild(journey);
+    } else if (this.onReplay && this.session.character_id) {
       const replay = el('button', { className: 'enter', onclick: () => this.onReplay!(this.session!.character_id!) }, 'Play Again');
       panel.appendChild(replay);
     }
@@ -281,7 +395,7 @@ export class Game {
     this.root.appendChild(overlay);
   }
 
-  private setAction(action: 'move' | 'attack' | 'ranged') {
+  private setAction(action: 'move' | 'attack' | 'ranged' | 'ability') {
     this.action = this.action === action ? null : action;
     this.updateStatus();
     this.highlightActionTiles();
@@ -307,28 +421,35 @@ export class Game {
       case 'r':
         this.setAction('ranged');
         break;
+      case 'p':
+        e.preventDefault();
+        this.usePotion();
+        break;
+      case 'q':
+        this.setAction('ability');
+        break;
+      case 's':
+        e.preventDefault();
+        this.stabilize();
+        break;
       case 'e':
       case ' ':
         e.preventDefault();
         this.endTurn();
         break;
       case 'arrowup':
-      case 'w':
         e.preventDefault();
         this.tryMove(0, -1);
         break;
       case 'arrowdown':
-      case 's':
         e.preventDefault();
         this.tryMove(0, 1);
         break;
       case 'arrowleft':
-      case 'a':
         e.preventDefault();
         this.tryMove(-1, 0);
         break;
       case 'arrowright':
-      case 'd':
         e.preventDefault();
         this.tryMove(1, 0);
         break;
@@ -362,6 +483,71 @@ export class Game {
     } catch (err: any) {
       this.log(err.message || 'End turn failed.');
     }
+  }
+
+  private async usePotion() {
+    if (!this.session || this.session.phase !== 'player' || !this.isPlayer()) return;
+    try {
+      const { session } = await actInSession(this.sessionId, 'use_potion');
+      this.update(session);
+      if (session.phase === 'dm' && !this.isCampaignSession()) {
+        setTimeout(() => this.runDmTurn(), 600);
+      }
+    } catch (err: any) {
+      this.log(err.message || 'Potion failed.');
+    }
+  }
+
+  private async stabilize() {
+    if (!this.session || this.session.phase !== 'player' || !this.isPlayer()) return;
+    const target = this.findAdjacentDownedAlly();
+    if (!target) return;
+    try {
+      const { session } = await actInSession(this.sessionId, 'stabilize', { target_id: target.id });
+      this.update(session);
+      if (session.phase === 'dm' && !this.isCampaignSession()) {
+        setTimeout(() => this.runDmTurn(), 600);
+      }
+    } catch (err: any) {
+      this.log(err.message || 'Stabilize failed.');
+    }
+  }
+
+  private async rest() {
+    if (!this.session || this.session.status !== 'active') return;
+    try {
+      const { session } = await restInSession(this.sessionId);
+      this.update(session);
+    } catch (err: any) {
+      this.log(err.message || 'Rest failed.');
+    }
+  }
+
+  private async journeyOn() {
+    if (!this.session || this.session.status !== 'won' || !this.isCampaignSession()) return;
+    try {
+      const { session } = await advanceSession(this.sessionId);
+      const { module } = await getModule(session.module_id);
+      this.module = module.map;
+      this.visited.clear();
+      this.renderMap();
+      this.update(session);
+      const overlay = this.root.querySelector('.game-over-overlay');
+      overlay?.remove();
+    } catch (err: any) {
+      this.log(err.message || 'Journey on failed.');
+    }
+  }
+
+  private findAdjacentDownedAlly(): Token | null {
+    if (!this.session) return null;
+    const player = this.session.player;
+    for (const p of this.session.players) {
+      if (p.id === player.id || !p.down) continue;
+      const dist = Math.abs(player.x - p.x) + Math.abs(player.y - p.y);
+      if (dist === 1) return p;
+    }
+    return null;
   }
 
   private async runDmTurn() {
@@ -425,6 +611,15 @@ export class Game {
         g.rect(TILE_SIZE * 0.7, TILE_SIZE * 0.2, 2, 2);
         g.fill({ color: 0x2a2d35, alpha: 0.3 });
       }
+      if (tile === '2') {
+        // Trap tile: faint red speckle / spike hint
+        g.rect(TILE_SIZE * 0.25, TILE_SIZE * 0.25, 3, 3);
+        g.fill({ color: TRAP_HIGHLIGHT, alpha: 0.35 });
+        g.rect(TILE_SIZE * 0.65, TILE_SIZE * 0.55, 3, 3);
+        g.fill({ color: TRAP_HIGHLIGHT, alpha: 0.3 });
+        g.rect(TILE_SIZE * 0.45, TILE_SIZE * 0.65, 2, 2);
+        g.fill({ color: TRAP_COLOR, alpha: 0.4 });
+      }
     }
   }
 
@@ -474,13 +669,21 @@ export class Game {
             highlight = FLOOR_RANGE_HIGHLIGHT;
           }
         }
+        if (this.action === 'ability' && tile !== '1') {
+          const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
+          const cls = (player.classes?.[0] ?? '').toLowerCase();
+          const abilityRange = cls === 'magic-user' || cls === 'illusionist' ? 6 : cls === 'cleric' ? 4 : 1;
+          if (dist > 0 && dist <= abilityRange && this.hasLineOfSight(player.x, player.y, x, y)) {
+            highlight = FLOOR_RANGE_HIGHLIGHT;
+          }
+        }
         g.tint = highlight ?? 0xffffff;
       }
     }
   }
 
   private updateLighting() {
-    if (!this.session) return;
+    if (!this.session || !this.app || this.tileSprites.length === 0) return;
     const px = this.session.player.x;
     const py = this.session.player.y;
     for (let y = 0; y < this.module.height; y++) {
@@ -488,15 +691,23 @@ export class Game {
       for (let x = 0; x < this.module.width; x++) {
         const tile = row[x] || '0';
         const dist = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
-        const isWall = tile === '1';
+        const inRadius = dist <= VISION_RADIUS + 1;
+        const hasLos = inRadius && this.hasLineOfSight(px, py, x, y);
+        const key = `${x},${y}`;
         let alpha: number;
-        if (dist <= VISION_RADIUS - 1) {
-          alpha = 1;
-        } else if (dist <= VISION_RADIUS + 1) {
-          const t = (dist - (VISION_RADIUS - 1)) / 2;
-          alpha = 1 - t * (1 - (isWall ? 0.22 : 0.1));
+        if (hasLos) {
+          this.visited.add(key);
+          if (dist <= VISION_RADIUS - 1) {
+            alpha = 1;
+          } else {
+            const t = (dist - (VISION_RADIUS - 1)) / 2;
+            const isWall = tile === '1';
+            alpha = 1 - t * (1 - (isWall ? 0.22 : 0.1));
+          }
+        } else if (this.visited.has(key)) {
+          alpha = 0.35;
         } else {
-          alpha = isWall ? 0.22 : 0.1;
+          alpha = 0;
         }
         this.tileSprites[y][x].alpha = alpha;
       }
@@ -636,6 +847,7 @@ export class Game {
       }
       const isActivePlayer = t.type === 'player' && t.id === session.player.id && session.phase === 'player';
       sprite.setActive(isActivePlayer);
+      sprite.setDown(t.down ?? false);
     });
 
     this.lastTokenHp.clear();
@@ -776,6 +988,7 @@ export class Game {
       if (token.type !== 'monster') return;
       const player = this.session.player;
       const isAdjacent = Math.abs(player.x - token.x) + Math.abs(player.y - token.y) === 1;
+      this.audio.swordHit();
       try {
         const { session } = await actInSession(this.sessionId, 'attack', { target_id: token.id });
         this.action = null;
@@ -792,6 +1005,7 @@ export class Game {
     } else if (this.action === 'ranged') {
       if (token.type !== 'monster') return;
       const player = this.session.player;
+      this.audio.rangedShot();
       try {
         const { session } = await actInSession(this.sessionId, 'ranged', { target_id: token.id });
         this.action = null;
@@ -803,13 +1017,41 @@ export class Game {
       } catch (err: any) {
         this.log(err.message || 'Ranged attack failed.');
       }
+    } else if (this.action === 'ability') {
+      if (token.type !== 'monster') return;
+      const player = this.session.player;
+      const cls = (player.classes?.[0] ?? '').toLowerCase();
+      const rangedAbility = cls === 'magic-user' || cls === 'illusionist' || cls === 'cleric';
+      if (rangedAbility) {
+        this.audio.rangedShot();
+      } else {
+        this.audio.swordHit();
+      }
+      try {
+        const { session } = await actInSession(this.sessionId, 'ability', { target_id: token.id });
+        this.action = null;
+        this.spawnSlashEffect(player.x, player.y, token.x, token.y);
+        this.update(session);
+        if (session.phase === 'dm') {
+          setTimeout(() => this.runDmTurn(), 600);
+        }
+      } catch (err: any) {
+        this.log(err.message || 'Ability failed.');
+      }
     }
   }
 
   private update(session: GameSession) {
-    const wasDm = this.session?.phase === 'dm';
-    const playerHurt = this.session ? session.player.hp < this.session.player.hp : false;
+    const prevSession = this.session;
+    const wasDm = prevSession?.phase === 'dm';
+    const playerHurt = prevSession ? session.player.hp < prevSession.player.hp : false;
+    const prevStatus = prevSession?.status;
+    const prevPlayerPos = prevSession ? `${prevSession.player.x},${prevSession.player.y}` : '';
+
     this.session = session;
+    if (this.chatPanel) {
+      this.chatPanel.style.display = this.isCampaignSession() ? 'flex' : 'none';
+    }
     this.renderTokens();
     this.updateLighting();
     this.highlightActionTiles();
@@ -820,6 +1062,15 @@ export class Game {
     this.updateRoster();
     this.updateTimer();
     this.renderLog();
+
+    if (prevStatus === 'active' && session.status === 'won') {
+      this.audio.victory();
+    } else if (prevStatus === 'active' && session.status === 'lost') {
+      this.audio.defeat();
+    }
+    if (prevPlayerPos && prevPlayerPos !== `${session.player.x},${session.player.y}`) {
+      this.audio.footstep();
+    }
 
     if (session.status === 'active' && session.phase === 'player' && session.turn !== this.lastBannerTurn) {
       this.showTurnBanner(session.turn);
@@ -881,6 +1132,14 @@ export class Game {
       barWrap.innerHTML = `<span style="width:${Math.round(ratio * 100)}%; background:${hpColor};"></span>`;
       row.appendChild(barWrap);
       row.appendChild(el('span', { className: 'party-hp-text' }, `${p.hp}/${p.max_hp}`));
+      const statusText = (p.statuses || [])
+        .map((s) => `${s.type}${s.duration ? ` ${s.duration}t` : ''}`)
+        .join(', ');
+      if (statusText || p.down) {
+        const statusEl = el('span', { className: 'party-status' });
+        statusEl.textContent = [p.down ? 'DOWN' : '', statusText].filter(Boolean).join(' · ');
+        row.appendChild(statusEl);
+      }
       row.appendChild(el('span', { className: 'party-progression' }, `Lv${p.level ?? 1} · XP ${p.xp ?? 0} · G ${p.gold ?? 0}`));
       this.partyEl.appendChild(row);
     });
@@ -926,15 +1185,29 @@ export class Game {
   }
 
   private updateActions() {
-    const canAct =
+    const player = this.session?.player;
+    const isActiveUser =
       !!this.session &&
       this.session.status === 'active' &&
       this.session.phase === 'player' &&
-      this.isPlayer();
+      ((player && 'account_id' in player && player.account_id != null && player.account_id === this.userId) ||
+        (!this.session.campaign_id || this.session.account_id === this.userId));
+    const canAct = isActiveUser && !player?.down;
+    const hasPotion = !!player && (player.inventory || []).some((i) => i.slot === 'consumable' || i.type === 'potion');
+    const isSessionPlayer =
+      !!this.session &&
+      this.session.status === 'active' &&
+      (this.session.players.some((p) => p.account_id === this.userId) ||
+        (!this.session.campaign_id && this.session.account_id === this.userId));
     this.moveBtn.disabled = !canAct;
     this.attackBtn.disabled = !canAct;
     this.rangedBtn.disabled = !canAct;
-    this.endBtn.disabled = !canAct;
+    this.potionBtn.disabled = !canAct || !hasPotion;
+    this.abilityBtn.disabled = !canAct;
+    this.endBtn.disabled = !isActiveUser;
+    const canStabilize = canAct && !!this.findAdjacentDownedAlly();
+    this.stabilizeBtn.style.display = canStabilize ? 'inline-block' : 'none';
+    this.restBtn.disabled = !isSessionPlayer;
   }
 
   private updateStatus() {
@@ -1025,6 +1298,9 @@ export class Game {
       const combatKeywords = ['strike', 'blow', 'hit', 'miss', 'pain', 'weapon', 'crumple', 'fall', 'dies', 'bites', 'stinging'];
       if (newEntries.some((e) => combatKeywords.some((k) => e.toLowerCase().includes(k)))) {
         this.shakeFrames = 12;
+      }
+      if (newEntries.some((e) => e.toLowerCase().includes('trap') || e.toLowerCase().includes('spike'))) {
+        this.audio.trapTrigger();
       }
       this.lastLogLength = log.length;
     } else if (this.logEl.childElementCount === 0) {

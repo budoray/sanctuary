@@ -94,6 +94,28 @@ _VICTORY = [
     "You wipe your blade clean and catch your breath.",
 ]
 
+_ROOM = [
+    "A damp chamber stretches before you, its corners lost in shadow.",
+    "Cracked flagstones and crumbling pillars hint at forgotten grandeur.",
+    "The air is thick with dust and the smell of old stone.",
+    "Flickering torchlight reveals a room heavy with silence.",
+    "Water drips somewhere in the dark, counting the seconds.",
+]
+
+_TRAP_DISCOVERED = [
+    "A suspicious groove in the floor betrays a hidden mechanism.",
+    "You notice a thin wire glinting in the torchlight.",
+    "The stones here are slightly misaligned—something lies beneath.",
+    "A faint click echoes from underfoot as you shift your weight.",
+]
+
+_TRAP_TRIGGERED = [
+    "A hidden trap springs with a sharp snap.",
+    "Spikes lance up from the floor without warning.",
+    "A weighted blade swings down from the ceiling.",
+    "The floor gives way just enough to bite into flesh.",
+]
+
 _SYSTEM = (
     "You are a terse old-school fantasy dungeon master. "
     "Reply with one or two vivid sentences. No lists, no rules, no signatures."
@@ -197,6 +219,28 @@ class Narrator:
         return (await self._ollama(prompt)) or _pick(
             _OPENING, rng or random.Random()
         )
+
+    async def narrate_room(
+        self, module_name: str, room_type: str | None = None, rng: random.Random | None = None
+    ) -> str:
+        """Describe a room or area when the party first enters it."""
+        kind = room_type or "chamber"
+        prompt = (
+            f"Describe the adventurers entering a {kind} in '{module_name}' "
+            "in one vivid sentence. Keep it under 25 words."
+        )
+        return (await self._ollama(prompt)) or _pick(_ROOM, rng or random.Random())
+
+    async def narrate_trap(
+        self, name: str, triggered: bool = True, rng: random.Random | None = None
+    ) -> str:
+        """Describe a trap being discovered or triggered."""
+        prompt = (
+            f"Describe {name} being {'triggered' if triggered else 'discovered'} "
+            "in one vivid sentence. Keep it under 25 words."
+        )
+        pool = _TRAP_TRIGGERED if triggered else _TRAP_DISCOVERED
+        return (await self._ollama(prompt)) or _pick(pool, rng or random.Random())
 
     async def narrate_move(
         self, token: dict[str, Any], rng: random.Random | None = None

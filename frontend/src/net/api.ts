@@ -156,6 +156,9 @@ export interface Token {
   ac: number;
   color: string;
   alive?: boolean;
+  down?: boolean;
+  statuses?: { type: string; duration: number; damage?: number }[];
+  inventory?: Item[];
   classes?: string[];
   account_id?: number;
   character_id?: string;
@@ -247,6 +250,25 @@ export async function actInSession(sessionId: string, action: string, payload: R
     method: 'POST',
     body: JSON.stringify({ action, ...payload }),
   }) as Promise<{ session: GameSession }>;
+}
+
+export async function advanceSession(sessionId: string) {
+  return api(`/api/sessions/${sessionId}/advance`, {
+    method: 'POST',
+  }) as Promise<{ session: GameSession }>;
+}
+
+export async function restInSession(sessionId: string) {
+  return api(`/api/sessions/${sessionId}/rest`, {
+    method: 'POST',
+  }) as Promise<{ session: GameSession }>;
+}
+
+export async function buyItem(characterId: string, itemId: string, cost = 15) {
+  return api(`/api/characters/${characterId}/buy`, {
+    method: 'POST',
+    body: JSON.stringify({ item_id: itemId, cost }),
+  }) as Promise<{ character: CharacterState }>;
 }
 
 export async function joinSession(sessionId: string, characterId: string) {

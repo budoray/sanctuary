@@ -1,4 +1,4 @@
-import { CharacterState, equipItem, Item, useItem } from '../net/api';
+import { buyItem, CharacterState, equipItem, Item, useItem } from '../net/api';
 import { el, clear } from './utils';
 
 export class CharacterSheet {
@@ -18,6 +18,7 @@ export class CharacterSheet {
     panel.appendChild(this.buildStats());
     panel.appendChild(this.buildEquipment());
     panel.appendChild(this.buildInventory());
+    panel.appendChild(this.buildShop());
 
     const closeBtn = el('button', { className: 'enter', onclick: () => this.close() }, 'Close');
     panel.appendChild(closeBtn);
@@ -130,6 +131,37 @@ export class CharacterSheet {
     }
   }
 
+  private buildShop() {
+    const section = el('div', { className: 'sheet-section' });
+    section.appendChild(el('h2', {}, 'Shop'));
+    const row = el('div', { className: 'sheet-shop-row' });
+    const gold = this.character.gold ?? 0;
+    const canAfford = gold >= 15;
+    const buyBtn = el(
+      'button',
+      {
+        disabled: !canAfford,
+        onclick: () => this.doBuy(),
+      },
+      'Buy Potion (15g)'
+    );
+    row.appendChild(buyBtn);
+    row.appendChild(el('span', { className: 'sheet-shop-gold' }, `${gold}g`));
+    section.appendChild(row);
+    return section;
+  }
+
+  private async doBuy() {
+    if (!this.character.id) return;
+    try {
+      const { character } = await buyItem(this.character.id, 'healing_potion', 15);
+      this.character = character;
+      this.refresh();
+    } catch (err: any) {
+      alert(err.message || 'Buy failed');
+    }
+  }
+
   private refresh() {
     clear(this.overlay);
     const panel = el('div', { className: 'character-sheet-panel' });
@@ -137,6 +169,7 @@ export class CharacterSheet {
     panel.appendChild(this.buildStats());
     panel.appendChild(this.buildEquipment());
     panel.appendChild(this.buildInventory());
+    panel.appendChild(this.buildShop());
     const closeBtn = el('button', { className: 'enter', onclick: () => this.close() }, 'Close');
     panel.appendChild(closeBtn);
     this.overlay.appendChild(panel);
