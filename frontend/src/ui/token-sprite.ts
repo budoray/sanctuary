@@ -1,13 +1,26 @@
 import { Container, Graphics, Text } from 'pixi.js';
 import { Token } from '../net/api';
 
+const TOKEN_COLORS: Record<string, number> = {
+  player: 0x3498db,
+  fighter: 0x3498db,
+  cleric: 0xf1c40f,
+  thief: 0x9b59b6,
+  magicuser: 0xe74c3c,
+  monster: 0x2ecc71,
+  goblin: 0x2ecc71,
+};
+
 export class TokenSprite {
   readonly container: Container;
   private body: Graphics;
+  private shadow: Graphics;
+  private detail: Graphics;
   private label: Text;
   private hpBar: Graphics;
   private hpFill: Graphics;
   private tileSize: number;
+  private pulse = 0;
   targetX = 0;
   targetY = 0;
 
@@ -19,24 +32,84 @@ export class TokenSprite {
     this.targetX = this.container.x;
     this.targetY = this.container.y;
 
+    const pad = 3;
+    const size = tileSize - pad * 2;
+    const cx = tileSize / 2;
+    const cy = tileSize / 2;
+    const baseColor = this.resolveColor(token);
+
+    // Drop shadow
+    this.shadow = new Graphics();
+    this.shadow.ellipse(cx + 2, cy + 4, size * 0.42, size * 0.18);
+    this.shadow.fill({ color: 0x000000, alpha: 0.45 });
+    this.container.addChild(this.shadow);
+
+    // Body
     this.body = new Graphics();
-    this.body.rect(4, 4, tileSize - 8, tileSize - 8);
-    this.body.fill({ color: parseInt(token.color.replace('#', ''), 16) });
+    if (token.type === 'player') {
+      // Hero: shield-shaped body
+      this.body.roundRect(cx - size * 0.38, cy - size * 0.38, size * 0.76, size * 0.76, 8);
+      this.body.fill({ color: baseColor });
+      this.body.roundRect(cx - size * 0.38, cy - size * 0.38, size * 0.76, size * 0.76, 8);
+      this.body.stroke({ width: 2, color: 0xffffff, alpha: 0.35 });
+    } else {
+      // Monster: jagged/circle hybrid
+      this.body.circle(cx, cy, size * 0.38);
+      this.body.fill({ color: baseColor });
+      this.body.circle(cx, cy, size * 0.38);
+      this.body.stroke({ width: 2, color: 0x000000, alpha: 0.35 });
+    }
     this.container.addChild(this.body);
 
+    // Detail icon
+    this.detail = new Graphics();
+    if (token.type === 'player') {
+      // Sword cross
+      const bladeW = size * 0.12;
+      const bladeH = size * 0.5;
+      const guardW = size * 0.4;
+      const guardH = size * 0.08;
+      this.detail.roundRect(cx - bladeW / 2, cy - bladeH / 2, bladeW, bladeH, 2);
+      this.detail.fill({ color: 0xffffff, alpha: 0.9 });
+      this.detail.roundRect(cx - guardW / 2, cy + bladeH * 0.1 - guardH / 2, guardW, guardH, 2);
+      this.detail.fill({ color: 0xd4af37, alpha: 0.95 });
+    } else {
+      // Monster eyes
+      const eyeR = size * 0.07;
+      this.detail.ellipse(cx - size * 0.12, cy - size * 0.05, eyeR, eyeR * 1.2);
+      this.detail.ellipse(cx + size * 0.12, cy - size * 0.05, eyeR, eyeR * 1.2);
+      this.detail.fill({ color: 0xffeb3b, alpha: 0.9 });
+      // Mouth
+      this.detail.ellipse(cx, cy + size * 0.15, size * 0.14, size * 0.06);
+      this.detail.fill({ color: 0x000000, alpha: 0.45 });
+    }
+    this.container.addChild(this.detail);
+
+    // Name label
     this.label = new Text({
       text: token.name,
-      style: { fontSize: 10, fill: 0xffffff, align: 'center' },
+      style: {
+        fontSize: 10,
+        fill: 0xffffff,
+        align: 'center',
+        dropShadow: {
+          color: '#000000',
+          distance: 1,
+          blur: 2,
+          alpha: 0.8,
+        },
+      },
     });
     this.label.anchor.set(0.5, 1);
-    this.label.x = tileSize / 2;
-    this.label.y = 2;
+    this.label.x = cx;
+    this.label.y = pad + 1;
     this.container.addChild(this.label);
 
+    // HP bar
     const barW = tileSize - 8;
     this.hpBar = new Graphics();
-    this.hpBar.rect(4, -6, barW, 4);
-    this.hpBar.fill({ color: 0x000000 });
+    this.hpBar.roundRect(4, -7, barW, 5, 2);
+    this.hpBar.fill({ color: 0x1a1a1a, alpha: 0.9 });
     this.container.addChild(this.hpBar);
 
     this.hpFill = new Graphics();
@@ -44,14 +117,25 @@ export class TokenSprite {
     this.container.addChild(this.hpFill);
   }
 
+  private resolveColor(token: Token): number {
+    if (token.type === 'player') {
+      const cls = token.classes?.[0]?.toLowerCase().replace(/[-\s]/g, '') || 'player';
+      return TOKEN_COLORS[cls] || TOKEN_COLORS.player;
+    }
+    const key = token.name?.toLowerCase().replace(/[\s-]/g, '') || 'monster';
+    return TOKEN_COLORS[key] || parseInt((token.color || '#2ecc71').replace('#', ''), 16) || TOKEN_COLORS.monster;
+  }
+
   updateHP(hp: number, maxHp: number) {
     const ratio = Math.max(0, Math.min(1, hp / maxHp));
     const barW = this.tileSize - 8;
     this.hpFill.clear();
-    this.hpFill.rect(4, -6, barW * ratio, 4);
-    this.hpFill.fill({
-      color: ratio > 0.5 ? 0x2ecc71 : ratio > 0.25 ? 0xf1c40f : 0xc0392b,
-    });
+    if (ratio > 0) {
+      this.hpFill.roundRect(4, -7, barW * ratio, 5, 2);
+      this.hpFill.fill({
+        color: ratio > 0.5 ? 0x2ecc71 : ratio > 0.25 ? 0xf1c40f : 0xc0392b,
+      });
+    }
   }
 
   setTarget(x: number, y: number) {
@@ -62,6 +146,20 @@ export class TokenSprite {
   snapToTarget() {
     this.container.x = this.targetX;
     this.container.y = this.targetY;
+  }
+
+  setActive(active: boolean) {
+    this.container.alpha = active ? 1 : 0.65;
+    this.pulse = active ? 1 : 0;
+  }
+
+  tick(delta: number) {
+    if (this.pulse > 0) {
+      this.pulse -= delta * 0.05;
+      const s = 1 + Math.sin(this.pulse * 8) * 0.04;
+      this.body.scale.set(s);
+      this.detail.scale.set(s);
+    }
   }
 
   destroy() {

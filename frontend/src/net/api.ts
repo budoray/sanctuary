@@ -122,6 +122,7 @@ export interface Token {
   ac: number;
   color: string;
   alive?: boolean;
+  classes?: string[];
 }
 
 export interface Campaign {
@@ -162,7 +163,7 @@ export async function createSession(
   campaignId?: string,
   turnTimerSeconds = 0,
 ) {
-  return api('/sessions', {
+  return api('/api/sessions', {
     method: 'POST',
     body: JSON.stringify({
       character_id: characterId,

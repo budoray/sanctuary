@@ -69,6 +69,7 @@ async def new_game(
         "id": "player",
         "name": character.name,
         "type": "player",
+        "classes": list(character.classes),
         "x": px,
         "y": py,
         "hp": character.hit_points,
