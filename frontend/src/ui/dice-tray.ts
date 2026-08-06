@@ -19,20 +19,37 @@ interface TrayRoll {
 export class DiceTray {
   private root: HTMLElement;
   private history: HTMLElement;
+  private controls: HTMLElement;
   private rolls: TrayRoll[] = [];
   private onRoll?: (expr: string) => Promise<number>;
+  private collapsed = true;
 
   constructor(container: HTMLElement, onRoll?: (expr: string) => Promise<number>) {
     this.onRoll = onRoll;
-    this.root = el('div', { className: 'dice-tray' });
-    const header = el('div', { className: 'tray-header' }, 'Dice Tray');
-    const controls = this.buildControls();
+    this.root = el('div', { className: 'dice-tray collapsed' });
+    const header = el('div', { className: 'tray-header' });
+    const title = el('span', {}, 'Dice Tray');
+    const toggle = el('button', {
+      className: 'tray-toggle',
+      title: 'Toggle dice tray',
+      onclick: () => this.toggle(),
+    }, '▲') as HTMLButtonElement;
+    header.appendChild(title);
+    header.appendChild(toggle);
+    this.controls = this.buildControls();
     this.history = el('div', { className: 'tray-history' });
     this.root.appendChild(header);
-    this.root.appendChild(controls);
+    this.root.appendChild(this.controls);
     this.root.appendChild(this.history);
     container.appendChild(this.root);
     this.renderHistory();
+  }
+
+  private toggle() {
+    this.collapsed = !this.collapsed;
+    this.root.classList.toggle('collapsed', this.collapsed);
+    const btn = this.root.querySelector('.tray-toggle') as HTMLButtonElement;
+    if (btn) btn.textContent = this.collapsed ? '▲' : '▼';
   }
 
   private buildControls() {

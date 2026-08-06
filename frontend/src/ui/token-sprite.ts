@@ -49,7 +49,9 @@ export class TokenSprite {
     // Active turn ring
     this.ring = new Graphics();
     this.ring.circle(cx, cy, tileSize * 0.46);
-    this.ring.stroke({ width: 2, color: 0xf1c40f, alpha: 0.85 });
+    this.ring.stroke({ width: 3, color: 0xf1c40f, alpha: 0.95 });
+    this.ring.circle(cx, cy, tileSize * 0.40);
+    this.ring.stroke({ width: 1, color: 0xffffff, alpha: 0.6 });
     this.ring.visible = false;
     this.container.addChild(this.ring);
 
@@ -65,19 +67,27 @@ export class TokenSprite {
     this.shadow.fill({ color: 0x000000, alpha: 0.45 });
     this.container.addChild(this.shadow);
 
+    // Body backing: a solid coloured disc so the token is always visible
+    const backing = new Graphics();
+    backing.circle(cx, cy, size * 0.42);
+    backing.fill({ color: baseColor });
+    backing.circle(cx, cy, size * 0.42);
+    backing.stroke({ width: 2, color: 0xffffff, alpha: 0.35 });
+    this.container.addChild(backing);
+
     // Body
     this.body = new Graphics();
     if (atlasTex) {
       const atlas = new Sprite(atlasTex);
-      atlas.width = size * 0.9;
-      atlas.height = size * 0.9;
+      atlas.width = size * 0.85;
+      atlas.height = size * 0.85;
       atlas.anchor.set(0.5);
       atlas.x = cx;
       atlas.y = cy;
       this.body.addChild(atlas);
       // Tint faint class colour around the edges for readability
       this.body.circle(cx, cy, size * 0.44);
-      this.body.stroke({ width: 2, color: baseColor, alpha: 0.65 });
+      this.body.stroke({ width: 2, color: 0xffffff, alpha: 0.5 });
     } else if (token.type === 'player') {
       // Hero: shield-shaped body
       this.body.roundRect(cx - size * 0.38, cy - size * 0.38, size * 0.76, size * 0.76, 8);

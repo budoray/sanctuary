@@ -638,12 +638,41 @@ button.danger:hover:not(:disabled) {
 }
 
 .tray-header {
-  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
   border-bottom: 1px solid var(--panel-border);
+}
+
+.tray-toggle {
+  padding: 2px 6px;
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.tray-toggle:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.dice-tray.collapsed .tray-controls,
+.dice-tray.collapsed .tray-history {
+  display: none;
+}
+
+.dice-tray.collapsed {
+  width: auto;
+  min-width: 120px;
 }
 
 .tray-controls {
@@ -1051,6 +1080,52 @@ button.danger:hover:not(:disabled) {
   font-size: 11px;
 }
 
+.units-panel {
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.units-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.units-tab {
+  flex: 1;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.units-tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.units-tab.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+  background: rgba(241, 196, 15, 0.06);
+}
+
+.party-roster,
+.monster-roster {
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 11px;
+  padding: 6px;
+}
+
 .player-stats .player-name {
   font-size: 13px;
   font-weight: bold;
@@ -1084,12 +1159,6 @@ button.danger:hover:not(:disabled) {
   display: inline-block;
   margin-right: 12px;
   color: var(--text);
-}
-
-.party-roster {
-  max-height: 140px;
-  overflow-y: auto;
-  font-size: 11px;
 }
 
 .party-row {
@@ -1149,12 +1218,6 @@ button.danger:hover:not(:disabled) {
   text-align: right;
   color: var(--muted);
   font-size: 10px;
-}
-
-.monster-roster {
-  max-height: 120px;
-  overflow-y: auto;
-  font-size: 11px;
 }
 
 .monster-roster .empty-roster {
@@ -1935,6 +1998,39 @@ button.danger:hover:not(:disabled) {
 
 .volume-control input[type='range'] {
   flex: 1;
+  accent-color: var(--accent);
+}
+
+.hud-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--panel-border);
+}
+
+.hud-footer-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-footer .icon-btn,
+.hud-footer .small {
+  padding: 6px 8px;
+  font-size: 12px;
+  min-width: 32px;
+}
+
+.hud-footer .icon-btn.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(241, 196, 15, 0.1);
+}
+
+.hud-volume {
+  width: 70px;
   accent-color: var(--accent);
 }
 

@@ -325,80 +325,102 @@ export class Game {
     this.statEl = el('div', { className: 'player-stats' });
     hud.appendChild(this.statEl);
 
-    this.partyEl = el('div', { className: 'party-roster' });
-    hud.appendChild(el('h2', {}, 'Party'));
-    hud.appendChild(this.partyEl);
+    const unitsPanel = el('div', { className: 'units-panel' });
+    const unitsHeader = el('div', { className: 'units-tabs' });
+    const partyTab = el('button', {
+      className: 'units-tab active',
+      onclick: () => this.setUnitsTab('party', partyTab, foesTab),
+    }, 'Party') as HTMLButtonElement;
+    const foesTab = el('button', {
+      className: 'units-tab',
+      onclick: () => this.setUnitsTab('foes', partyTab, foesTab),
+    }, 'Foes') as HTMLButtonElement;
+    unitsHeader.appendChild(partyTab);
+    unitsHeader.appendChild(foesTab);
+    unitsPanel.appendChild(unitsHeader);
 
-    this.rosterEl = el('div', { className: 'monster-roster' });
-    hud.appendChild(el('h2', {}, 'Foes'));
-    hud.appendChild(this.rosterEl);
+    this.partyEl = el('div', { className: 'party-roster' });
+    this.rosterEl = el('div', { className: 'monster-roster', style: 'display:none' });
+    unitsPanel.appendChild(this.partyEl);
+    unitsPanel.appendChild(this.rosterEl);
+    hud.appendChild(unitsPanel);
 
     this.logEl = el('div', { className: 'game-log' });
     hud.appendChild(el('h2', {}, 'Chronicle'));
     hud.appendChild(this.logEl);
 
+    this.dmToolsEl = this.buildDmTools();
+    this.dmToolsEl.style.display = 'none';
+    hud.appendChild(this.dmToolsEl);
+
+    const footer = el('div', { className: 'hud-footer' });
+
+    const audioGroup = el('div', { className: 'hud-footer-group' });
     const muteBtn = el('button', {
-      className: 'mute-btn',
+      className: 'mute-btn icon-btn',
+      title: 'Toggle mute',
       onclick: () => {
         this.ensureAudioStarted();
         const muted = this.audio.toggleMute();
-        muteBtn.textContent = muted ? 'Unmute' : 'Mute';
+        muteBtn.textContent = muted ? '🔇' : '🔊';
         muteBtn.classList.toggle('muted', muted);
       },
-    }, 'Mute') as HTMLButtonElement;
-    hud.appendChild(muteBtn);
+    }, '🔊') as HTMLButtonElement;
+    audioGroup.appendChild(muteBtn);
 
     const ambientBtn = el('button', {
-      className: 'ambient-btn',
+      className: 'ambient-btn icon-btn',
+      title: 'Toggle ambient sound',
       onclick: () => {
         this.ensureAudioStarted();
         if (this.audio.isAmbientActive()) {
           this.audio.stopAmbient();
-          ambientBtn.textContent = 'Ambient: Off';
+          ambientBtn.classList.remove('active');
         } else {
           this.audio.playAmbient(this.moduleId === 'sunken_crypt' ? 'cave' : 'dungeon');
-          ambientBtn.textContent = 'Ambient: On';
+          ambientBtn.classList.add('active');
         }
       },
-    }, 'Ambient: Off') as HTMLButtonElement;
-    hud.appendChild(ambientBtn);
+    }, '♫') as HTMLButtonElement;
+    audioGroup.appendChild(ambientBtn);
 
-    const volumeWrap = el('div', { className: 'volume-control' });
-    volumeWrap.appendChild(el('label', { htmlFor: 'music-volume' }, 'Music'));
     const volumeSlider = el('input', {
-      id: 'music-volume',
+      className: 'hud-volume',
       type: 'range',
       min: '0',
       max: '1',
       step: '0.05',
       value: String(this.audio.getMusicVolume()),
+      title: 'Music volume',
       oninput: (e: Event) => {
         const val = parseFloat((e.target as HTMLInputElement).value);
         this.audio.setMusicVolume(val);
       },
     }) as HTMLInputElement;
-    volumeWrap.appendChild(volumeSlider);
-    hud.appendChild(volumeWrap);
+    audioGroup.appendChild(volumeSlider);
+    footer.appendChild(audioGroup);
 
+    const actionGroup = el('div', { className: 'hud-footer-group' });
     const saveBtn = el('button', {
-      className: 'save-btn',
+      className: 'save-btn small',
+      title: 'Save progress',
       onclick: () => this.saveProgression(),
-    }, 'Save Progress') as HTMLButtonElement;
+    }, '💾') as HTMLButtonElement;
     this.saveBtn = saveBtn;
-    hud.appendChild(saveBtn);
+    actionGroup.appendChild(saveBtn);
 
     const journalBtn = el('button', {
-      className: 'journal-btn',
+      className: 'journal-btn small',
+      title: 'Journal',
       onclick: () => this.toggleJournal(),
-    }, 'Journal') as HTMLButtonElement;
-    hud.appendChild(journalBtn);
+    }, '📜') as HTMLButtonElement;
+    actionGroup.appendChild(journalBtn);
 
-    this.dmToolsEl = this.buildDmTools();
-    this.dmToolsEl.style.display = 'none';
-    hud.appendChild(this.dmToolsEl);
+    const exitBtn = el('button', { className: 'danger small', title: 'Leave session', onclick: () => this.leaveSession() }, '✕');
+    actionGroup.appendChild(exitBtn);
+    footer.appendChild(actionGroup);
 
-    const exitBtn = el('button', { className: 'danger', onclick: () => this.leaveSession() }, 'Leave');
-    hud.appendChild(exitBtn);
+    hud.appendChild(footer);
 
     return hud;
   }
@@ -1597,6 +1619,13 @@ export class Game {
       <div class="progression-text">Level ${p.level ?? 1} · XP ${p.xp ?? 0} · Gold ${p.gold ?? 0}</div>
     `;
     this.root.classList.toggle('low-hp', ratio <= 0.25 && p.hp > 0);
+  }
+
+  private setUnitsTab(tab: 'party' | 'foes', partyBtn: HTMLButtonElement, foesBtn: HTMLButtonElement) {
+    partyBtn.classList.toggle('active', tab === 'party');
+    foesBtn.classList.toggle('active', tab === 'foes');
+    this.partyEl.style.display = tab === 'party' ? 'block' : 'none';
+    this.rosterEl.style.display = tab === 'foes' ? 'block' : 'none';
   }
 
   private updatePartyRoster() {
