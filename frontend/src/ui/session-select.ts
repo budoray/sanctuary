@@ -5,32 +5,60 @@ export class SessionSelect {
   private root: HTMLElement;
   private onResume: (session: GameSession) => void;
   private onNew: () => void;
-  private listEl: HTMLElement;
+  private onBack?: () => void;
+  private gridEl: HTMLElement;
 
   constructor(
     container: HTMLElement,
     onResume: (session: GameSession) => void,
-    onNew: () => void
+    onNew: () => void,
+    onBack?: () => void
   ) {
-    this.root = el('div', { className: 'session-select' });
+    this.root = el('div', { className: 'adventure-manager' });
     this.onResume = onResume;
     this.onNew = onNew;
+    this.onBack = onBack;
 
-    const panel = el('div', { className: 'session-panel' });
-    panel.appendChild(el('h1', {}, 'Sanctuary'));
-    panel.appendChild(el('p', { className: 'subtitle' }, 'Resume an adventure, or begin anew.'));
+    const background = el('div', { className: 'adventure-manager-background' });
+    const vignette = el('div', { className: 'adventure-manager-vignette' });
 
-    this.listEl = el('ul', { className: 'session-list' });
-    panel.appendChild(this.listEl);
+    const shell = el('div', { className: 'adventure-manager-shell' });
+    shell.appendChild(this.buildHeader());
 
-    const actions = el('div', { className: 'session-actions' });
-    const newBtn = el('button', { onclick: () => this.onNew() }, 'New Adventurer');
-    actions.appendChild(newBtn);
-    panel.appendChild(actions);
+    this.gridEl = el('div', { className: 'sessions-grid' });
+    shell.appendChild(this.gridEl);
 
-    this.root.appendChild(panel);
+    shell.appendChild(this.buildFooter());
+
+    this.root.appendChild(background);
+    this.root.appendChild(vignette);
+    this.root.appendChild(shell);
     container.appendChild(this.root);
     this.load();
+  }
+
+  private buildHeader(): HTMLElement {
+    const header = el('header', { className: 'adventure-manager-header' });
+    const title = el('div', { className: 'adventure-manager-title' });
+    title.appendChild(el('h1', {}, 'Join / Resume'));
+    title.appendChild(el('p', {}, 'Pick up where you left off, or start a new adventurer.'));
+    header.appendChild(title);
+
+    const actions = el('div', { className: 'adventure-manager-actions' });
+    actions.appendChild(el('button', { className: 'adventure-manager-btn', onclick: () => this.onNew() }, '+ New Adventurer'));
+    if (this.onBack) {
+      actions.appendChild(el('button', { onclick: () => this.onBack!() }, '← Back'));
+    }
+    header.appendChild(actions);
+    return header;
+  }
+
+  private buildFooter(): HTMLElement {
+    const footer = el('footer', { className: 'adventure-manager-footer' });
+    if (this.onBack) {
+      footer.appendChild(el('button', { className: 'adventure-manager-back', onclick: () => this.onBack!() }, '← Back to Sanctuary'));
+    }
+    return footer;
   }
 
   async load() {
@@ -38,38 +66,44 @@ export class SessionSelect {
       const { sessions } = await listSessions();
       this.render(sessions);
     } catch (err: any) {
-      this.listEl.appendChild(el('li', { className: 'empty' }, err.message || 'Failed to load sessions.'));
+      clear(this.gridEl);
+      this.gridEl.appendChild(el('div', { className: 'sessions-empty error' }, err.message || 'Failed to load sessions.'));
     }
   }
 
   private render(sessions: { id: string; name: string; module_id: string; character_id: string; status: string; turn: number; phase: string }[]) {
-    clear(this.listEl);
+    clear(this.gridEl);
     if (sessions.length === 0) {
-      this.listEl.appendChild(el('li', { className: 'empty' }, 'No saved adventures.'));
+      const empty = el('div', { className: 'sessions-empty' });
+      empty.appendChild(el('h2', {}, 'No saved adventures'));
+      empty.appendChild(el('p', {}, 'Your active sessions will appear here. Create a hero to begin.'));
+      empty.appendChild(el('button', { className: 'enter', onclick: () => this.onNew() }, 'Create New Adventurer'));
+      this.gridEl.appendChild(empty);
       return;
     }
     sessions.forEach((s) => {
-      const info = el('div', { className: 'session-info' });
-      info.appendChild(el('strong', {}, s.name));
       const phaseText = s.phase === 'player' ? 'Your Move' : "DM's Move";
-      const statusClass = s.status === 'active' ? '' : ` ${s.status}`;
-      info.appendChild(el('span', {}, `Turn ${s.turn} · ${phaseText}`));
+      const statusLabel = s.status === 'active' ? 'Active' : 'Complete';
+      const statusClass = s.status === 'active' ? 'active' : 'complete';
 
-      const actions = el('div', { className: 'session-actions' });
-      const resumeBtn = el(
-        'button',
-        {
-          className: `enter${statusClass}`,
-          onclick: () => this.resume(s.id),
-        },
-        s.status === 'active' ? 'Resume' : 'View'
-      );
-      actions.appendChild(resumeBtn);
+      const card = el('div', { className: 'session-card' });
+      const header = el('div', { className: 'session-card-header' });
+      header.appendChild(el('span', { className: `session-status ${statusClass}` }, statusLabel));
+      header.appendChild(el('span', { className: 'session-turn' }, `Turn ${s.turn}`));
+      card.appendChild(header);
 
-      const item = el('li', {});
-      item.appendChild(info);
-      item.appendChild(actions);
-      this.listEl.appendChild(item);
+      const body = el('div', { className: 'session-card-body' });
+      body.appendChild(el('h3', {}, s.name));
+      body.appendChild(el('p', {}, `${phaseText} · ${s.module_id}`));
+      card.appendChild(body);
+
+      const actions = el('div', { className: 'session-card-actions' });
+      actions.appendChild(el('button', {
+        className: 'enter',
+        onclick: () => this.resume(s.id),
+      }, s.status === 'active' ? 'Resume' : 'View'));
+      card.appendChild(actions);
+      this.gridEl.appendChild(card);
     });
   }
 
@@ -78,7 +112,8 @@ export class SessionSelect {
       const { session } = await getSession(sessionId);
       this.onResume(session);
     } catch (err: any) {
-      this.listEl.appendChild(el('li', { className: 'empty error' }, err.message || 'Failed to resume session.'));
+      clear(this.gridEl);
+      this.gridEl.appendChild(el('div', { className: 'sessions-empty error' }, err.message || 'Failed to resume session.'));
     }
   }
 

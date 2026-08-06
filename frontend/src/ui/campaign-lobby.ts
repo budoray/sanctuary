@@ -16,42 +16,57 @@ export class CampaignLobby {
     onSelect: (campaign: Campaign) => void,
     onBack: () => void
   ) {
-    this.root = el('div', { className: 'session-select' });
+    this.root = el('div', { className: 'adventure-manager' });
     this.container = container;
     this.onSelect = onSelect;
     this.onBack = onBack;
 
-    const panel = el('div', { className: 'session-panel' });
-    panel.appendChild(el('h1', {}, 'Campaigns'));
-    panel.appendChild(el('p', { className: 'subtitle' }, 'Create a private campaign or join one by link and password.'));
+    const background = el('div', { className: 'adventure-manager-background' });
+    const vignette = el('div', { className: 'adventure-manager-vignette' });
 
+    const shell = el('div', { className: 'adventure-manager-shell' });
+    shell.appendChild(this.buildHeader());
+    shell.appendChild(this.buildForms());
+
+    const listHeader = el('div', { className: 'campaign-list-header' });
+    listHeader.appendChild(el('h2', {}, 'Your Campaigns'));
     this.adminBar = el('div', { className: 'admin-bar' });
     this.adminBar.style.display = 'none';
-    panel.appendChild(this.adminBar);
+    listHeader.appendChild(this.adminBar);
+    shell.appendChild(listHeader);
 
-    const createForm = this.buildCreateForm();
-    panel.appendChild(createForm);
+    this.listEl = el('div', { className: 'campaigns-grid' });
+    shell.appendChild(this.listEl);
 
-    const joinForm = this.buildJoinForm();
-    panel.appendChild(joinForm);
+    shell.appendChild(this.buildFooter());
 
-    this.listEl = el('ul', { className: 'session-list' });
-    panel.appendChild(el('h2', {}, 'Your Campaigns'));
-    panel.appendChild(this.listEl);
-
-    const backBtn = el('button', { className: 'enter', onclick: () => this.onBack() }, 'Back');
-    panel.appendChild(backBtn);
-
-    this.root.appendChild(panel);
+    this.root.appendChild(background);
+    this.root.appendChild(vignette);
+    this.root.appendChild(shell);
     container.appendChild(this.root);
     this.load();
   }
 
-  private buildCreateForm() {
-    const wrapper = el('div', { className: 'form-group' });
+  private buildHeader(): HTMLElement {
+    const header = el('header', { className: 'adventure-manager-header' });
+    const title = el('div', { className: 'adventure-manager-title' });
+    title.appendChild(el('h1', {}, 'Campaigns'));
+    title.appendChild(el('p', {}, 'Create a private campaign, join one by ID and password, or manage your existing campaigns.'));
+    header.appendChild(title);
+    header.appendChild(el('button', { className: 'adventure-manager-back', onclick: () => this.onBack() }, '← Back to Sanctuary'));
+    return header;
+  }
+
+  private buildForms(): HTMLElement {
+    const forms = el('div', { className: 'campaign-forms' });
+
+    const createCard = el('div', { className: 'campaign-form-card' });
+    createCard.appendChild(el('h3', {}, 'Create Campaign'));
+    createCard.appendChild(el('p', {}, 'Start a new campaign for your friends. Set a password to keep it private.'));
     const nameInput = el('input', { type: 'text', placeholder: 'Campaign name' }) as HTMLInputElement;
     const passInput = el('input', { type: 'text', placeholder: 'Share password' }) as HTMLInputElement;
-    const btn = el('button', {
+    const createBtn = el('button', {
+      className: 'enter',
       onclick: async () => {
         const name = nameInput.value.trim();
         const password = passInput.value.trim();
@@ -64,20 +79,21 @@ export class CampaignLobby {
         }
       },
     }, 'Create Campaign');
-    wrapper.appendChild(nameInput);
-    wrapper.appendChild(passInput);
-    wrapper.appendChild(btn);
-    return wrapper;
-  }
+    createCard.appendChild(nameInput);
+    createCard.appendChild(passInput);
+    createCard.appendChild(createBtn);
+    forms.appendChild(createCard);
 
-  private buildJoinForm() {
-    const wrapper = el('div', { className: 'form-group' });
+    const joinCard = el('div', { className: 'campaign-form-card' });
+    joinCard.appendChild(el('h3', {}, 'Join Campaign'));
+    joinCard.appendChild(el('p', {}, 'Enter the campaign ID and password shared by the DM.'));
     const idInput = el('input', { type: 'text', placeholder: 'Campaign ID' }) as HTMLInputElement;
-    const passInput = el('input', { type: 'text', placeholder: 'Password' }) as HTMLInputElement;
-    const btn = el('button', {
+    const joinPassInput = el('input', { type: 'text', placeholder: 'Password' }) as HTMLInputElement;
+    const joinBtn = el('button', {
+      className: 'enter',
       onclick: async () => {
         const id = idInput.value.trim();
-        const password = passInput.value.trim();
+        const password = joinPassInput.value.trim();
         if (!id || !password) return;
         try {
           await joinCampaign(id, password);
@@ -88,10 +104,18 @@ export class CampaignLobby {
         }
       },
     }, 'Join Campaign');
-    wrapper.appendChild(idInput);
-    wrapper.appendChild(passInput);
-    wrapper.appendChild(btn);
-    return wrapper;
+    joinCard.appendChild(idInput);
+    joinCard.appendChild(joinPassInput);
+    joinCard.appendChild(joinBtn);
+    forms.appendChild(joinCard);
+
+    return forms;
+  }
+
+  private buildFooter(): HTMLElement {
+    const footer = el('footer', { className: 'adventure-manager-footer' });
+    footer.appendChild(el('button', { className: 'adventure-manager-back', onclick: () => this.onBack() }, '← Back to Sanctuary'));
+    return footer;
   }
 
   async load() {
@@ -104,14 +128,15 @@ export class CampaignLobby {
       this.render(campaigns);
       this.renderAdminBar();
     } catch (err: any) {
-      this.listEl.appendChild(el('li', { className: 'empty' }, err.message || 'Failed to load campaigns.'));
+      clear(this.listEl);
+      this.listEl.appendChild(el('div', { className: 'campaigns-empty error' }, err.message || 'Failed to load campaigns.'));
     }
   }
 
   private renderAdminBar() {
     if (!this.adminBar || !this.user?.is_admin) return;
     clear(this.adminBar);
-    this.adminBar.style.display = 'block';
+    this.adminBar.style.display = 'flex';
     this.adminBar.appendChild(el('span', { className: 'admin-badge' }, 'Admin'));
     this.adminBar.appendChild(el('button', {
       onclick: () => this.showAdminPanel(),
@@ -128,24 +153,36 @@ export class CampaignLobby {
   private render(campaigns: Campaign[]) {
     clear(this.listEl);
     if (campaigns.length === 0) {
-      this.listEl.appendChild(el('li', { className: 'empty' }, 'No campaigns yet.'));
+      const empty = el('div', { className: 'campaigns-empty' });
+      empty.appendChild(el('h3', {}, 'No campaigns yet'));
+      empty.appendChild(el('p', {}, 'Create a campaign above or join an existing one to get started.'));
+      this.listEl.appendChild(empty);
       return;
     }
     campaigns.forEach((c) => {
-      const info = el('div', { className: 'session-info' });
-      info.appendChild(el('strong', {}, c.name));
       const total = c.module_ids.length;
       const cleared = (c.cleared_module_ids || []).length;
       const progressText = total > 0 ? `Progress ${cleared}/${total}` : 'No modules';
-      info.appendChild(el('span', {}, `${c.ruleset_id} · ${c.is_dm ? 'DM' : 'Player'} · ${progressText}`));
+
+      const card = el('div', { className: 'campaign-card', onclick: () => this.onSelect(c) });
+      const header = el('div', { className: 'campaign-card-header' });
+      header.appendChild(el('span', { className: 'campaign-ruleset' }, c.ruleset_id));
+      header.appendChild(el('span', { className: c.is_dm ? 'campaign-role dm' : 'campaign-role' }, c.is_dm ? 'DM' : 'Player'));
+      card.appendChild(header);
+
+      const body = el('div', { className: 'campaign-card-body' });
+      body.appendChild(el('h3', {}, c.name));
+      body.appendChild(el('p', {}, progressText));
       if (c.completed) {
-        info.appendChild(el('span', { className: 'campaign-completed' }, 'Completed'));
+        body.appendChild(el('span', { className: 'campaign-completed' }, 'Completed'));
       }
-      const idSpan = el('span', { className: 'session-id' }, c.id);
-      const item = el('li', { onclick: () => this.onSelect(c) });
-      item.appendChild(info);
-      item.appendChild(idSpan);
-      this.listEl.appendChild(item);
+      card.appendChild(body);
+
+      const footer = el('div', { className: 'campaign-card-footer' });
+      footer.appendChild(el('span', { className: 'campaign-id' }, c.id));
+      footer.appendChild(el('span', {}, 'Open →'));
+      card.appendChild(footer);
+      this.listEl.appendChild(card);
     });
   }
 

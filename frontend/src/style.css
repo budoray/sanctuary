@@ -1891,6 +1891,493 @@ button.danger:hover:not(:disabled) {
   accent-color: var(--accent);
 }
 
+/* Shared full-screen adventure manager (sessions / campaigns) */
+.adventure-manager {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.adventure-manager-background {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(192, 57, 43, 0.08) 0%, transparent 35%),
+    radial-gradient(circle at 85% 80%, rgba(52, 152, 219, 0.05) 0%, transparent 35%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.1) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  z-index: 0;
+}
+
+.adventure-manager-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.6) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.adventure-manager-shell {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 32px 16px;
+  gap: 16px;
+}
+
+.adventure-manager-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.adventure-manager-title h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 14px var(--accent-glow);
+}
+
+.adventure-manager-title p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.adventure-manager-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adventure-manager-btn {
+  padding: 10px 16px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.adventure-manager-back {
+  padding: 10px 18px;
+  font-size: 12px;
+}
+
+.adventure-manager-footer {
+  display: flex;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--panel-border);
+}
+
+.sessions-grid,
+.campaigns-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-rows: minmax(220px, 1fr);
+  gap: 16px;
+  padding-right: 4px;
+}
+
+.sessions-empty,
+.campaigns-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  color: var(--muted);
+  gap: 14px;
+  min-height: 220px;
+}
+
+.sessions-empty h2,
+.sessions-empty h3,
+.campaigns-empty h3 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.sessions-empty p,
+.campaigns-empty p {
+  margin: 0;
+  max-width: 360px;
+}
+
+.sessions-empty.error,
+.campaigns-empty.error {
+  color: var(--accent);
+}
+
+.session-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
+}
+
+.session-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 18px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.session-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.session-status {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+}
+
+.session-status.active {
+  background: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+}
+
+.session-status.complete {
+  background: rgba(189, 195, 199, 0.12);
+  color: #bdc3c7;
+}
+
+.session-turn {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.session-card-body h3 {
+  margin: 12px 0 6px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.session-card-body p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.session-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.session-card-actions select {
+  flex: 1;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 5px;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+}
+
+.session-card-actions select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.campaign-forms {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.campaign-form-card {
+  padding: 22px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.campaign-form-card h3 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.campaign-form-card p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.campaign-form-card input {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 5px;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.campaign-form-card input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.campaign-form-card button {
+  align-self: flex-start;
+}
+
+.campaign-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.campaign-list-header h2 {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.campaign-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
+}
+
+.campaign-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 18px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.campaign-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.campaign-ruleset {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+}
+
+.campaign-role {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--blue);
+}
+
+.campaign-role.dm {
+  color: var(--gold);
+}
+
+.campaign-card-body h3 {
+  margin: 12px 0 6px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.campaign-card-body p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.campaign-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.campaign-id {
+  font-family: monospace;
+  opacity: 0.7;
+}
+
+.campaign-detail-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+  min-height: 0;
+}
+
+.campaign-detail-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.campaign-detail-section h2 {
+  margin: 0 0 14px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.campaign-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.campaign-section-header h2 {
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+
+.campaign-sessions-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-auto-rows: minmax(220px, 1fr);
+  gap: 16px;
+  padding-right: 4px;
+}
+
+.members-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.member-info strong {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.member-role {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+}
+
+.member-controls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.member-controls button {
+  padding: 6px 10px;
+  font-size: 10px;
+}
+
+@media (max-width: 1100px) {
+  .campaign-forms,
+  .campaign-detail-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .adventure-manager-shell {
+    padding: 16px;
+  }
+  .adventure-manager-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .sessions-grid,
+  .campaigns-grid,
+  .campaign-sessions-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+  }
+}
+
 /* Sanctuary hub */
 .sanctuary-hub {
   position: absolute;
@@ -2203,15 +2690,13 @@ button.danger:hover:not(:disabled) {
 }
 
 .hub-realm-scroll {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
-  overflow-x: auto;
   padding-bottom: 8px;
 }
 
 .hub-realm-chip {
-  flex: 0 0 auto;
-  width: 220px;
   padding: 14px;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--panel-border);
@@ -2439,13 +2924,26 @@ button.danger:hover:not(:disabled) {
 }
 
 .characters-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   padding: 40px 20px;
   color: var(--muted);
+  gap: 16px;
+}
+
+.characters-empty h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text);
 }
 
 .characters-empty p {
-  margin: 0 0 16px;
+  margin: 0;
+  max-width: 260px;
 }
 
 .character-card {
@@ -2566,7 +3064,8 @@ button.danger:hover:not(:disabled) {
   flex: 1;
   overflow-y: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-rows: minmax(280px, 1fr);
   gap: 16px;
   padding-right: 4px;
 }
@@ -2596,7 +3095,9 @@ button.danger:hover:not(:disabled) {
 }
 
 .realms-section .module-mini-map {
-  max-height: 140px;
+  flex: 1;
+  min-height: 120px;
+  max-height: 220px;
   aspect-ratio: 1;
   margin: 0;
 }

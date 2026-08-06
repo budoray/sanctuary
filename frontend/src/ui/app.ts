@@ -127,7 +127,8 @@ export class SanctuaryApp {
     this.current = new SessionSelect(
       this.app,
       (session) => this.resumeGame(session),
-      () => this.showSelect()
+      () => this.showSelect(),
+      () => this.showHub()
     );
   }
 
