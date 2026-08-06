@@ -1,6 +1,13 @@
 import { Container, Graphics, Text } from 'pixi.js';
 import { Token } from '../net/api';
 
+interface Floater {
+  text: Text;
+  life: number;
+  maxLife: number;
+  vy: number;
+}
+
 const TOKEN_COLORS: Record<string, number> = {
   player: 0x3498db,
   fighter: 0x3498db,
@@ -21,6 +28,8 @@ export class TokenSprite {
   private hpFill: Graphics;
   private tileSize: number;
   private pulse = 0;
+  private ring: Graphics;
+  private floaters: Floater[] = [];
   targetX = 0;
   targetY = 0;
 
@@ -32,10 +41,18 @@ export class TokenSprite {
     this.targetX = this.container.x;
     this.targetY = this.container.y;
 
-    const pad = 3;
-    const size = tileSize - pad * 2;
     const cx = tileSize / 2;
     const cy = tileSize / 2;
+
+    // Active turn ring
+    this.ring = new Graphics();
+    this.ring.circle(cx, cy, tileSize * 0.46);
+    this.ring.stroke({ width: 2, color: 0xf1c40f, alpha: 0.85 });
+    this.ring.visible = false;
+    this.container.addChild(this.ring);
+
+    const pad = 3;
+    const size = tileSize - pad * 2;
     const baseColor = this.resolveColor(token);
 
     // Drop shadow
@@ -151,6 +168,26 @@ export class TokenSprite {
   setActive(active: boolean) {
     this.container.alpha = active ? 1 : 0.65;
     this.pulse = active ? 1 : 0;
+    this.ring.visible = active;
+  }
+
+  showFloat(text: string, color: number) {
+    const cx = this.tileSize / 2;
+    const floater = new Text({
+      text,
+      style: {
+        fontSize: 12,
+        fill: color,
+        fontWeight: 'bold',
+        align: 'center',
+        dropShadow: { color: '#000000', distance: 1, blur: 2, alpha: 0.8 },
+      },
+    });
+    floater.anchor.set(0.5, 1);
+    floater.x = cx;
+    floater.y = -4;
+    this.container.addChild(floater);
+    this.floaters.push({ text: floater, life: 40, maxLife: 40, vy: -0.6 });
   }
 
   tick(delta: number) {
@@ -159,6 +196,22 @@ export class TokenSprite {
       const s = 1 + Math.sin(this.pulse * 8) * 0.04;
       this.body.scale.set(s);
       this.detail.scale.set(s);
+      if (this.ring.visible) {
+        const rs = 1 + Math.sin(this.pulse * 8) * 0.08;
+        this.ring.scale.set(rs);
+        this.ring.alpha = 0.5 + Math.sin(this.pulse * 8) * 0.35;
+      }
+    }
+
+    for (let i = this.floaters.length - 1; i >= 0; i--) {
+      const f = this.floaters[i];
+      f.life -= delta;
+      f.text.y += f.vy * delta;
+      f.text.alpha = Math.max(0, f.life / f.maxLife);
+      if (f.life <= 0) {
+        f.text.destroy();
+        this.floaters.splice(i, 1);
+      }
     }
   }
 

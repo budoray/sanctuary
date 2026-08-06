@@ -48,6 +48,7 @@ export class Game {
   private timeoutFired = false;
   private tokenSprites: Map<string, TokenSprite> = new Map();
   private tileSprites: Graphics[][] = [];
+  private lastTokenHp: Map<string, number> = new Map();
   private shakeFrames = 0;
   private lastLogLength = 0;
   private particles: Particle[] = [];
@@ -447,9 +448,19 @@ export class Game {
         if (snap) sprite.snapToTarget();
       }
       sprite.setTarget(t.x, t.y);
+      const prevHp = this.lastTokenHp.get(t.id);
       sprite.updateHP(t.hp, t.max_hp);
+      if (prevHp !== undefined && t.hp !== prevHp) {
+        const delta = t.hp - prevHp;
+        sprite.showFloat(`${delta > 0 ? '+' : ''}${delta}`, delta < 0 ? 0xc0392b : 0x2ecc71);
+      }
       sprite.setActive(playerPhase && t.type === 'player');
     });
+
+    this.lastTokenHp.clear();
+    for (const t of tokens) {
+      if (t.alive !== false) this.lastTokenHp.set(t.id, t.hp);
+    }
 
     for (const [id, sprite] of this.tokenSprites) {
       if (!aliveIds.has(id)) {
