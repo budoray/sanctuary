@@ -112,7 +112,7 @@ async def create_session(
     mod = module.load(module_id)
     session_id = str(uuid.uuid4())[:8]
     state = await session_engine.new_game(
-        session_id, mod, char, turn_timer_seconds=turn_timer_seconds, character_id=character_id
+        session_id, mod, char, turn_timer_seconds=turn_timer_seconds, character_id=character_id, account_id=account_id
     )
     if campaign_id:
         state["campaign_id"] = campaign_id

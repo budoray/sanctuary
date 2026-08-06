@@ -10,6 +10,7 @@ type Screen = 'loading' | 'select' | 'create' | 'campaigns' | 'sessions' | 'game
 
 export class SanctuaryApp {
   private app: HTMLElement;
+  private userId: number | null = null;
   private current: CharacterCreator | CharacterSelect | CampaignLobby | SessionSelect | Game | null = null;
 
   constructor(app: HTMLElement) {
@@ -19,6 +20,7 @@ export class SanctuaryApp {
   async start() {
     try {
       const user = await whoami();
+      this.userId = user.user.id ?? null;
       document.body.dataset.user = user.user.name || 'player';
     } catch {
       return;
@@ -114,7 +116,8 @@ export class SanctuaryApp {
         module.map,
         session,
         () => this.showSessions(),
-        (characterId) => this.replayGame(characterId)
+        (characterId) => this.replayGame(characterId),
+        this.userId ?? undefined
       );
       this.current = game;
       await game.init();
@@ -141,7 +144,8 @@ export class SanctuaryApp {
         module.map,
         session,
         () => this.showSessions(),
-        (cid) => this.replayGame(cid)
+        (cid) => this.replayGame(cid),
+        this.userId ?? undefined
       );
       this.current = game;
       await game.init();
@@ -169,7 +173,8 @@ export class SanctuaryApp {
         module.map,
         session,
         () => this.showSessions(),
-        (characterId) => this.replayGame(characterId)
+        (characterId) => this.replayGame(characterId),
+        this.userId ?? undefined
       );
       this.current = game;
       await game.init();

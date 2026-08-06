@@ -59,6 +59,7 @@ async def new_game(
     seed: int | None = None,
     turn_timer_seconds: int = 0,
     character_id: str | None = None,
+    account_id: int | None = None,
 ) -> dict[str, Any]:
     """Create a fresh session state."""
     if seed is None:
@@ -101,6 +102,7 @@ async def new_game(
     return {
         "id": session_id,
         "module_id": module.id,
+        "account_id": account_id,
         "character_id": character_id,
         "version": 0,
         "turn": 1,
@@ -272,6 +274,7 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": state["id"],
         "module_id": state["module_id"],
+        "account_id": state.get("account_id"),
         "character_id": state.get("character_id"),
         "campaign_id": state.get("campaign_id"),
         "dm_account_id": state.get("dm_account_id"),

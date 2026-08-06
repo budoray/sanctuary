@@ -48,6 +48,7 @@ export class Game {
   private damageFlash: HTMLElement = document.createElement('div');
   private action: 'move' | 'attack' | null = null;
   private session: GameSession | null = null;
+  private userId: number | null = null;
   private onExit: () => void;
   private onReplay?: (characterId: string) => void;
   private canvasContainer: HTMLElement;
@@ -66,6 +67,7 @@ export class Game {
   private moveBtn!: HTMLButtonElement;
   private attackBtn!: HTMLButtonElement;
   private endBtn!: HTMLButtonElement;
+  private dmTurnBtn!: HTMLButtonElement;
   private socket: Socket | null = null;
 
   constructor(
@@ -74,11 +76,13 @@ export class Game {
     module: ModuleData,
     initialSession: GameSession,
     onExit: () => void,
-    onReplay?: (characterId: string) => void
+    onReplay?: (characterId: string) => void,
+    userId?: number
   ) {
     this.root = container;
     this.sessionId = sessionId;
     this.module = module;
+    this.userId = userId ?? null;
     this.onExit = onExit;
     this.onReplay = onReplay;
 
@@ -112,6 +116,20 @@ export class Game {
   }
 
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
+
+  private isCampaignSession() {
+    return !!this.session?.campaign_id;
+  }
+
+  private isDm() {
+    return this.isCampaignSession() && this.session?.dm_account_id === this.userId;
+  }
+
+  private isPlayer() {
+    if (!this.session) return false;
+    if (!this.session.campaign_id) return true;
+    return this.session.account_id === this.userId;
+  }
 
   async init() {
     this.app = new Application();
@@ -160,6 +178,13 @@ export class Game {
     actions.appendChild(this.attackBtn);
     actions.appendChild(this.endBtn);
     hud.appendChild(actions);
+
+    this.dmTurnBtn = el('button', {
+      className: 'dm-turn-btn',
+      onclick: () => this.runDmTurn(),
+    }, 'Run DM Turn') as HTMLButtonElement;
+    this.dmTurnBtn.style.display = 'none';
+    hud.appendChild(this.dmTurnBtn);
 
     this.statEl = el('div', { className: 'player-stats' });
     hud.appendChild(this.statEl);
@@ -305,7 +330,7 @@ export class Game {
       const { session } = await actInSession(this.sessionId, 'end_turn');
       this.action = null;
       this.update(session);
-      if (session.phase === 'dm') {
+      if (session.phase === 'dm' && !this.isCampaignSession()) {
         setTimeout(() => this.runDmTurn(), 600);
       }
     } catch (err: any) {
@@ -791,7 +816,11 @@ export class Game {
   }
 
   private updateActions() {
-    const canAct = !!this.session && this.session.status === 'active' && this.session.phase === 'player';
+    const canAct =
+      !!this.session &&
+      this.session.status === 'active' &&
+      this.session.phase === 'player' &&
+      this.isPlayer();
     this.moveBtn.disabled = !canAct;
     this.attackBtn.disabled = !canAct;
     this.endBtn.disabled = !canAct;
@@ -799,14 +828,27 @@ export class Game {
 
   private updateStatus() {
     if (!this.session) return;
-    const phaseText = this.session.phase === 'player' ? 'Your Move' : "DM's Move";
+    const isDmPhase = this.session.phase === 'dm';
+    const isCampaign = this.isCampaignSession();
+    let phaseText = this.session.phase === 'player' ? 'Your Move' : "DM's Move";
+    if (isCampaign && isDmPhase && this.isDm()) {
+      phaseText = "DM's Move · Run Turn";
+    } else if (isCampaign && isDmPhase) {
+      phaseText = "Waiting for DM";
+    }
     const actionText = this.action ? ` · ${this.action} mode` : '';
     this.statusEl.textContent = `Turn ${this.session.turn} · ${phaseText}${actionText}`;
+
+    const showDmBtn =
+      this.session.status === 'active' && isDmPhase && isCampaign && this.isDm();
+    this.dmTurnBtn.style.display = showDmBtn ? 'block' : 'none';
+
     this.dmOverlay.style.display =
-      this.session.status === 'active' && this.session.phase === 'dm' ? 'flex' : 'none';
+      this.session.status === 'active' && isDmPhase ? 'flex' : 'none';
     if (this.session.status !== 'active') {
       this.statusEl.textContent = `Game ${this.session.status.toUpperCase()}`;
       this.dmOverlay.style.display = 'none';
+      this.dmTurnBtn.style.display = 'none';
       this.showGameOver();
     }
   }

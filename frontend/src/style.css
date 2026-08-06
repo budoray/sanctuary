@@ -903,6 +903,21 @@ button.danger:hover:not(:disabled) {
   font-size: 11px;
 }
 
+.dm-turn-btn {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  background: rgba(192, 57, 43, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
+.dm-turn-btn:hover:not(:disabled) {
+  background: rgba(192, 57, 43, 0.3);
+}
+
 .game-log {
   flex: 1;
   overflow-y: auto;
