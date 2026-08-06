@@ -1,22 +1,19 @@
 name: Goblin
-frequency: uncommon
-no_encountered: 40d10
-size: small (4ft)
+frequency: common
+no_encountered: 2d4
+size: small (4ft tall)
 alignment: lawful evil
 move: 60ft
 armour_class: 6 [14]
-hit_dice: 1d8-1  hit points
-melee_attacks: 1d6 or by weapon
+hit_dice: '1-1'
+melee_attacks: 1 (weapon 1d6)
 senses: Infravision 60ft
-lair_chance: 40%
-intelligence: average (low) (8-10)
-morale: 50
-loot: Individual 2 each; in lair Hoard 3
-experience: 10 +1/hp
-description: Goblins are small evil creatures with a yellow-to-red or a green- ish-coloured skin tone. They typically wear leather armour, and  have an average lifespan of 50 years. They are subterranean,  and are only found on the surface when raiding or in the very  darkest of forests. Goblins have a deep hatred of gnomes and  dwarfs and will attack them on sight. Goblins are organised into war-bands, with the strongest rul - ing the war-band. The bands all owe fealty to the goblin king.  A goblin raiding party will be led by a captain and 4 sergeants,  each with 7 hp and who will fight as orcs (1 HD monsters). A goblin war party will be led by a sub-chief and personal guards  (2d4). They will fight as hobgoblins (each with 8 hp, AC 5 [15],  and doing 1d8 damage). There is a 1 in 4 chance that any war  party will be mounted on worgs. A goblin lair will be led by a chief and personal guards (2d4).  They will fight as gnolls (each with 12 hp, AC 4 [15], doing 2d4  damage). Worgs are often
-  used as guards of goblin lairs, and  sometimes a small band of bugbears will be found there as well. Goblins are good cavers and have a chance (25%) to note new  or unusual construction.
+lair_chance: 25%
+intelligence: average (8-10)
+morale: 7
+loot: Cache 1 (x5)
+experience: 10 +1 per hp
+description: Goblins are small, evil humanoids that dwell in caves and ruined structures. They are cowardly and prefer to attack with overwhelming numbers.
 abilities:
-- heading: Immunities and Resistances
-  text: 'Vulnerability to Light.  Goblins are subterranean creatures that  detest direct sunlight, and will fight at -1 if exposed to it. Unarmed Combat. Goblins can attack and be targeted with grap- pling or overbearing attacks although they seldom use this tac- tic. If not fended off, they score an unarmed hit with a 10+ on  1d20. Hit Mods: ATK/DEF +4/-2. Overbear Results Mods: ATK/ DEF -2/+2. Grappling Result Mods: ATK/DEF -2/+2.'
-- heading: Languages
-  text: Goblins speak kobold, orcish, hobgoblin, lawful evil, and their  own language. GOLEM A golem is a magically created monster. Of the four basic types,  three are created with earthen materials, while the flesh go - lem is created from human body parts. The creation process  requires powerful spells, rare components, and eldritch forces. The golems listed below are typically humanoid in shape. A golem has hit dice equal to its hit points divided by 4.5 round- ed up; thus, for example, a stone golem has 14 hit dice (60  hp/4.5). Magical creatures may strike a golem with effect if the crea - ture’s hit dice equal or exceed that of the golem. Unarmed Combat. Golems cannot be targeted with grappling or  overbearing attacks, and do not use such tactics.
+- heading: Combat
+  text: Goblins favour ambush tactics and flee when outmatched.

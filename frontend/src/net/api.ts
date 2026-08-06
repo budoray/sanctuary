@@ -98,31 +98,65 @@ export async function deleteCharacter(characterId: string) {
   return api(`/api/characters/${characterId}`, { method: 'DELETE' }) as Promise<{ deleted: boolean }>;
 }
 
-export async function createSession(characterId?: string) {
+export interface GameSession {
+  id: string;
+  module_id: string;
+  turn: number;
+  phase: 'player' | 'dm';
+  status: 'active' | 'won' | 'lost';
+  player: Token;
+  monsters: Token[];
+  log: string[];
+}
+
+export interface Token {
+  id: string;
+  name: string;
+  type: 'player' | 'monster';
+  x: number;
+  y: number;
+  hp: number;
+  max_hp: number;
+  ac: number;
+  color: string;
+  alive?: boolean;
+}
+
+export async function createSession(characterId: string, moduleId = 'sample_lair') {
   return api('/api/sessions', {
     method: 'POST',
-    body: JSON.stringify(characterId ? { character_id: characterId } : {}),
-  });
+    body: JSON.stringify({ character_id: characterId, module_id: moduleId }),
+  }) as Promise<{ session: GameSession }>;
 }
 
 export async function listSessions() {
-  return api('/api/sessions');
+  return api('/api/sessions') as Promise<{ sessions: { id: string; name: string; module_id: string; character_id: string; status: string; turn: number; phase: string }[] }>;
 }
 
 export async function getSession(sessionId: string) {
-  return api(`/api/sessions/${sessionId}`);
+  return api(`/api/sessions/${sessionId}`) as Promise<{ session: GameSession }>;
 }
 
-export async function moveToken(sessionId: string, tokenId: string, x: number, y: number) {
-  return api(`/api/sessions/${sessionId}/move`, {
-    method: 'POST',
-    body: JSON.stringify({ token_id: tokenId, x, y }),
-  });
+export async function getModule(moduleId: string) {
+  return api(`/api/modules/${moduleId}`) as Promise<{
+    module: {
+      id: string;
+      name: string;
+      ruleset: string;
+      description: string;
+      map: {
+        width: number;
+        height: number;
+        tile_size: number;
+        tiles: string[];
+      };
+    };
+  }>;
 }
 
-export async function attackToken(sessionId: string, tokenId: string, targetId: string) {
-  return api(`/api/sessions/${sessionId}/attack`, {
+export async function actInSession(sessionId: string, action: string, payload: Record<string, any> = {}) {
+  return api(`/api/sessions/${sessionId}/act`, {
     method: 'POST',
-    body: JSON.stringify({ token_id: tokenId, target_id: targetId }),
-  });
+    body: JSON.stringify({ action, ...payload }),
+  }) as Promise<{ session: GameSession }>;
 }
