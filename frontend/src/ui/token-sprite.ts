@@ -67,27 +67,35 @@ export class TokenSprite {
     this.shadow.fill({ color: 0x000000, alpha: 0.45 });
     this.container.addChild(this.shadow);
 
+    // Outer glow ring for visibility
+    const glow = new Graphics();
+    glow.circle(cx, cy, size * 0.50);
+    glow.fill({ color: baseColor, alpha: 0.25 });
+    glow.circle(cx, cy, size * 0.46);
+    glow.stroke({ width: 2, color: baseColor, alpha: 0.65 });
+    this.container.addChild(glow);
+
     // Body backing: a solid coloured disc so the token is always visible
     const backing = new Graphics();
-    backing.circle(cx, cy, size * 0.42);
+    backing.circle(cx, cy, size * 0.40);
     backing.fill({ color: baseColor });
-    backing.circle(cx, cy, size * 0.42);
-    backing.stroke({ width: 2, color: 0xffffff, alpha: 0.35 });
+    backing.circle(cx, cy, size * 0.40);
+    backing.stroke({ width: 2, color: 0xffffff, alpha: 0.55 });
     this.container.addChild(backing);
 
     // Body
     this.body = new Graphics();
     if (atlasTex) {
       const atlas = new Sprite(atlasTex);
-      atlas.width = size * 0.85;
-      atlas.height = size * 0.85;
+      atlas.width = size * 0.80;
+      atlas.height = size * 0.80;
       atlas.anchor.set(0.5);
       atlas.x = cx;
       atlas.y = cy;
       this.body.addChild(atlas);
       // Tint faint class colour around the edges for readability
-      this.body.circle(cx, cy, size * 0.44);
-      this.body.stroke({ width: 2, color: 0xffffff, alpha: 0.5 });
+      this.body.circle(cx, cy, size * 0.40);
+      this.body.stroke({ width: 2, color: 0xffffff, alpha: 0.4 });
     } else if (token.type === 'player') {
       // Hero: shield-shaped body
       this.body.roundRect(cx - size * 0.38, cy - size * 0.38, size * 0.76, size * 0.76, 8);

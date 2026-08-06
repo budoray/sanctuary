@@ -20,7 +20,15 @@ async function api(path: string, options: RequestInit = {}) {
   }
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    const err: ApiError = new Error(`API ${path} failed: ${res.status} ${body}`);
+    let detail = body;
+    try {
+      const parsed = JSON.parse(body);
+      if (parsed.detail) detail = parsed.detail;
+      else if (parsed.message) detail = parsed.message;
+    } catch {
+      // keep raw body
+    }
+    const err: ApiError = new Error(detail || `Request failed (${res.status})`);
     err.status = res.status;
     throw err;
   }
