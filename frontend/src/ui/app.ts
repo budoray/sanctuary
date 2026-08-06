@@ -1,18 +1,19 @@
 import { CampaignLobby } from './campaign-lobby';
 import { CampaignDetail } from './campaign-detail';
-import { Campaign, CharacterState, createSession, getModule, getSession, listSessions, whoami } from '../net/api';
+import { Campaign, CharacterState, createSession, getModule, getSession, whoami } from '../net/api';
 import { CharacterCreator } from './character-creator';
 import { CharacterSelect } from './character-select';
 import { Game } from './game';
+import { Hub } from './hub';
 import { SessionSelect } from './session-select';
 import { clear } from './utils';
 
-type Screen = 'loading' | 'select' | 'create' | 'campaigns' | 'sessions' | 'game';
+type Screen = 'loading' | 'hub' | 'select' | 'create' | 'campaigns' | 'sessions' | 'game';
 
 export class SanctuaryApp {
   private app: HTMLElement;
   private userId: number | null = null;
-  private current: CharacterCreator | CharacterSelect | CampaignLobby | CampaignDetail | SessionSelect | Game | null = null;
+  private current: CharacterCreator | CharacterSelect | CampaignLobby | CampaignDetail | SessionSelect | Game | Hub | null = null;
 
   constructor(app: HTMLElement) {
     this.app = app;
@@ -27,21 +28,24 @@ export class SanctuaryApp {
       return;
     }
 
-    try {
-      const { sessions } = await listSessions();
-      const active = sessions.filter((s) => s.status === 'active');
-      if (active.length > 0) {
-        this.showSessions();
-      } else {
-        this.showSelect();
-      }
-    } catch {
-      this.showSelect();
-    }
+    this.showHub();
   }
 
   private setScreen(name: Screen) {
     document.body.dataset.screen = name;
+  }
+
+  private showHub() {
+    this.setScreen('hub');
+    clear(this.app);
+    this.current?.destroy();
+    this.current = new Hub(
+      this.app,
+      () => this.showSelect(),
+      () => this.showSessions(),
+      () => this.showCampaigns(),
+      () => this.showSessions()
+    );
   }
 
   private showSelect() {
