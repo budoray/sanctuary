@@ -17,7 +17,7 @@ ENV_FILE="/opt/tenshin/sanctuary/.env"
 # Generate a URL-safe password if none provided.
 # Uses /dev/urandom and avoids shell-sensitive characters (: / ? # [ ] @ ! $ & ' ( ) * + , ; =)
 generate_password() {
-  tr -dc 'A-Za-z0-9_.~-' </dev/urandom | head -c 32
+  python3 -c "import secrets, string; chars=string.ascii_letters + string.digits + '_.~-'; print(''.join(secrets.choice(chars) for _ in range(32)))"
 }
 
 if [ -z "$DB_PASSWORD" ]; then
