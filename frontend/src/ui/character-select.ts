@@ -25,6 +25,8 @@ export class CharacterSelect {
   private moduleCardsEl!: HTMLElement;
   private moduleErrorEl!: HTMLElement;
   private progressEl!: HTMLElement;
+  private mainEl!: HTMLElement;
+  private detailEl!: HTMLElement;
   private modules: ModuleInfo[] = [];
   private selectedModuleId = 'sample_lair';
   private characters: CharacterState[] = [];
@@ -103,13 +105,13 @@ export class CharacterSelect {
   }
 
   private buildMain(): HTMLElement {
-    const main = el('main', { className: 'solo-hub-main' });
+    this.mainEl = el('main', { className: 'solo-hub-main' });
 
     const charactersSection = el('section', { className: 'solo-hub-section characters-section' });
     charactersSection.appendChild(el('h2', {}, 'Your Heroes'));
     this.charactersEl = el('div', { className: 'characters-grid' });
     charactersSection.appendChild(this.charactersEl);
-    main.appendChild(charactersSection);
+    this.mainEl.appendChild(charactersSection);
 
     const realmsSection = el('section', { className: 'solo-hub-section realms-section' });
     const realmsHeader = el('div', { className: 'realms-header' });
@@ -119,9 +121,12 @@ export class CharacterSelect {
     realmsSection.appendChild(realmsHeader);
     this.moduleCardsEl = el('div', { className: 'module-cards' });
     realmsSection.appendChild(this.moduleCardsEl);
-    main.appendChild(realmsSection);
+    this.mainEl.appendChild(realmsSection);
 
-    return main;
+    this.detailEl = el('section', { className: 'solo-hub-section realm-detail' });
+    this.mainEl.appendChild(this.detailEl);
+
+    return this.mainEl;
   }
 
   private buildFooter(): HTMLElement {
@@ -145,6 +150,7 @@ export class CharacterSelect {
       this.renderProgress(progress);
       this.renderModules();
       this.renderCharacters(characters);
+      this.renderDetail();
     } catch (err: any) {
       this.charactersEl.appendChild(el('div', { className: 'characters-empty' }, err.message || 'Failed to load heroes.'));
       this.moduleErrorEl.textContent = err.message || 'Failed to load realms.';
@@ -220,17 +226,76 @@ export class CharacterSelect {
     this.selectedModuleId = id;
     this.renderModules();
     this.renderCharacters(this.characters);
+    this.renderDetail();
+  }
+
+  private renderDetail() {
+    clear(this.detailEl);
+    const selected = this.modules.find((m) => m.id === this.selectedModuleId);
+    if (!selected) {
+      this.detailEl.style.display = 'none';
+      return;
+    }
+    this.detailEl.style.display = 'block';
+
+    const theme = selected.theme || 'dungeon';
+    const themeLabel = THEME_LABELS[theme] || theme;
+
+    const header = el('div', { className: 'realm-detail-header' });
+    header.appendChild(el('span', { className: `module-theme theme-${theme}` }, themeLabel));
+    header.appendChild(el('h2', {}, selected.name));
+    header.appendChild(el('span', { className: 'module-size' }, `${selected.width}×${selected.height}`));
+    this.detailEl.appendChild(header);
+
+    const body = el('div', { className: 'realm-detail-body' });
+    const desc = el('p', {}, selected.description || 'No description available.');
+    body.appendChild(desc);
+
+    const actions = el('div', { className: 'realm-detail-actions' });
+    if (this.characters.length === 0) {
+      actions.appendChild(el('button', { className: 'enter', onclick: () => this.onCreate() }, 'Create a Hero to Play'));
+    } else {
+      const first = this.characters[0];
+      actions.appendChild(el('button', {
+        className: 'enter',
+        onclick: () => this.onPlay(first, parseInt(this.timerInput.value, 10) || 0, selected.id),
+      }, `Play ${first.name}`));
+      if (this.characters.length > 1) {
+        const select = el('select', {}) as HTMLSelectElement;
+        this.characters.forEach((c) => {
+          const opt = document.createElement('option');
+          opt.value = c.id ?? '';
+          opt.textContent = c.name;
+          select.appendChild(opt);
+        });
+        actions.appendChild(select);
+        actions.appendChild(el('button', {
+          className: 'enter',
+          onclick: () => {
+            const c = this.characters.find((x) => x.id === select.value);
+            if (c) this.onPlay(c, parseInt(this.timerInput.value, 10) || 0, selected.id);
+          },
+        }, 'Play Selected'));
+      }
+    }
+    body.appendChild(actions);
+    this.detailEl.appendChild(body);
   }
 
   private renderCharacters(characters: CharacterState[]) {
     clear(this.charactersEl);
+    this.mainEl.classList.toggle('solo-hub-main--no-heroes', characters.length === 0);
+
     if (characters.length === 0) {
       const empty = el('div', { className: 'characters-empty' });
-      empty.appendChild(el('p', {}, 'No adventurers yet.'));
-      empty.appendChild(el('button', { onclick: () => this.onCreate() }, 'Create your first hero'));
+      empty.appendChild(el('div', { className: 'characters-empty-icon' }));
+      empty.appendChild(el('h3', {}, 'No heroes yet'));
+      empty.appendChild(el('p', {}, 'Create your first adventurer to enter the realms.'));
+      empty.appendChild(el('button', { className: 'enter', onclick: () => this.onCreate() }, 'Create Your First Hero'));
       this.charactersEl.appendChild(empty);
       return;
     }
+
     characters.forEach((c) => {
       const card = el('div', { className: 'character-card' });
 
