@@ -84,6 +84,48 @@ html, body, #app {
   50% { opacity: 0.7; }
 }
 
+.placeholder-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  background: radial-gradient(circle at center, #121418 0%, #050607 100%);
+}
+
+.placeholder-panel h1 {
+  margin: 0 0 12px;
+  font-size: 36px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+.placeholder-panel p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.placeholder-panel .muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.placeholder-panel .licence {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 #game-canvas {
   position: absolute;
   inset: 0;
