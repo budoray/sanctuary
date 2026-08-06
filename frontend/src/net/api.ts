@@ -108,6 +108,8 @@ export interface GameSession {
   turn: number;
   phase: 'player' | 'dm';
   status: 'active' | 'won' | 'lost';
+  players: Token[];
+  active_player_index: number;
   player: Token;
   monsters: Token[];
   log: string[];
@@ -127,6 +129,8 @@ export interface Token {
   color: string;
   alive?: boolean;
   classes?: string[];
+  account_id?: number;
+  character_id?: string;
 }
 
 export interface Campaign {

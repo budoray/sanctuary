@@ -79,7 +79,9 @@ async def new_game(
         "ac": character.armour_class,
         "color": "#3498db",
         "character_id": character_id,
+        "account_id": account_id,
     }
+    players = [player]
 
     monsters: list[dict[str, Any]] = []
     for spawn in module.monsters:
@@ -109,6 +111,8 @@ async def new_game(
         "phase": PHASE_PLAYER,
         "status": STATUS_ACTIVE,
         "seed": seed,
+        "players": players,
+        "active_player_index": 0,
         "player": player,
         "monsters": monsters,
         "log": [await narrator.narrate_opening(random.Random(seed))],
@@ -119,9 +123,13 @@ async def new_game(
 
 
 def _tokens(state: dict[str, Any]) -> list[dict[str, Any]]:
-    out = [state["player"]]
+    out = list(state["players"])
     out.extend(state["monsters"])
     return out
+
+
+def _active_player(state: dict[str, Any]) -> dict[str, Any]:
+    return state["players"][state.get("active_player_index", 0)]
 
 
 def _token_at(state: dict[str, Any], x: int, y: int) -> dict[str, Any] | None:
@@ -193,7 +201,7 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
     if action == "move":
         if state["phase"] != PHASE_PLAYER:
             raise ValueError("not the player's turn")
-        token = state["player"]
+        token = _active_player(state)
         await _move(state, token, int(kwargs["x"]), int(kwargs["y"]), module, d)
 
     elif action == "attack":
@@ -203,15 +211,21 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
         target = next((m for m in state["monsters"] if m["id"] == target_id), None)
         if target is None:
             raise ValueError("target not found")
-        await _attack(state, state["player"], target, d)
+        await _attack(state, _active_player(state), target, d)
         state["phase"] = PHASE_DM
         state["turn_deadline"] = None
 
     elif action == "end_turn":
         if state["phase"] != PHASE_PLAYER:
             raise ValueError("not the player's turn")
-        state["phase"] = PHASE_DM
-        state["turn_deadline"] = None
+        active = state.get("active_player_index", 0) + 1
+        if active >= len(state["players"]):
+            state["phase"] = PHASE_DM
+            state["turn_deadline"] = None
+            state["active_player_index"] = 0
+        else:
+            state["active_player_index"] = active
+        state["player"] = _active_player(state)
 
     elif action == "dm_turn":
         if state["phase"] != PHASE_DM:
@@ -219,6 +233,8 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
         await _run_dm_turn(state, module, d)
         state["turn"] += 1
         state["phase"] = PHASE_PLAYER
+        state["active_player_index"] = 0
+        state["player"] = _active_player(state)
         state["turn_deadline"] = _deadline(state["turn_timer_seconds"])
         state["log"].append(f"— Turn {state['turn']} —")
 
@@ -230,27 +246,34 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
     return state
 
 
+def _nearest_player(state: dict[str, Any], monster: dict[str, Any]) -> dict[str, Any]:
+    alive = [p for p in state["players"] if p.get("alive", True)]
+    if not alive:
+        return state["players"][0]
+    return min(alive, key=lambda p: abs(p["x"] - monster["x"]) + abs(p["y"] - monster["y"]))
+
+
 async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
-    player = state["player"]
     for monster in state["monsters"]:
         if not monster.get("alive", True):
             continue
         if state["status"] != STATUS_ACTIVE:
             break
+        target = _nearest_player(state, monster)
         # If adjacent, attack.
-        if _adjacent(monster, player):
-            await _attack(state, monster, player, d)
+        if _adjacent(monster, target):
+            await _attack(state, monster, target, d)
             continue
-        # Move one tile toward the player.
+        # Move one tile toward the target.
         dx = 0
-        if player["x"] > monster["x"]:
+        if target["x"] > monster["x"]:
             dx = 1
-        elif player["x"] < monster["x"]:
+        elif target["x"] < monster["x"]:
             dx = -1
         dy = 0
-        if player["y"] > monster["y"]:
+        if target["y"] > monster["y"]:
             dy = 1
-        elif player["y"] < monster["y"]:
+        elif target["y"] < monster["y"]:
             dy = -1
 
         # Try primary direction, then secondary.
@@ -265,12 +288,14 @@ async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
             line = await narrator.narrate_move(monster, random.Random(state["seed"] + state["version"]))
             if line:
                 state["log"].append(line)
-            if _adjacent(monster, player):
-                await _attack(state, monster, player, d)
+            if _adjacent(monster, target):
+                await _attack(state, monster, target, d)
 
 
 def view(state: dict[str, Any]) -> dict[str, Any]:
     """Return a client-safe view of the state."""
+    players = state.get("players", [])
+    active_index = state.get("active_player_index", 0)
     return {
         "id": state["id"],
         "module_id": state["module_id"],
@@ -281,7 +306,9 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "turn": state["turn"],
         "phase": state["phase"],
         "status": state["status"],
-        "player": state["player"],
+        "players": players,
+        "active_player_index": active_index,
+        "player": players[active_index] if players else state.get("player"),
         "monsters": state["monsters"],
         "log": state["log"],
         "turn_timer_seconds": state.get("turn_timer_seconds", 0),

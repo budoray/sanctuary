@@ -127,8 +127,12 @@ export class Game {
 
   private isPlayer() {
     if (!this.session) return false;
-    if (!this.session.campaign_id) return true;
-    return this.session.account_id === this.userId;
+    const active = this.session.player;
+    if (active && 'account_id' in active && active.account_id != null) {
+      return active.account_id === this.userId;
+    }
+    // Fallback for older solo sessions.
+    return !this.session.campaign_id || this.session.account_id === this.userId;
   }
 
   async init() {
