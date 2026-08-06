@@ -216,6 +216,7 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
         state["turn"] += 1
         state["phase"] = PHASE_PLAYER
         state["turn_deadline"] = _deadline(state["turn_timer_seconds"])
+        state["log"].append(f"— Turn {state['turn']} —")
 
     else:
         raise ValueError(f"unknown action: {action!r}")

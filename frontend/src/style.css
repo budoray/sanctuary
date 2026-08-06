@@ -985,6 +985,42 @@ button.danger:hover:not(:disabled) {
   color: var(--text);
 }
 
+.dm-overlay {
+  position: absolute;
+  inset: 0 300px 0 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(5, 6, 7, 0.55);
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  z-index: 5;
+  backdrop-filter: blur(1px);
+}
+
+.dm-overlay .dm-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--panel-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: dm-spin 1s linear infinite;
+}
+
+@keyframes dm-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 700px) {
+  .dm-overlay {
+    inset: 0 0 35vh 0;
+  }
+}
+
 .token-tooltip {
   position: absolute;
   z-index: 100;

@@ -41,6 +41,7 @@ export class Game {
   private statusEl: HTMLElement = document.createElement('div');
   private timerEl: HTMLElement = document.createElement('div');
   private statEl: HTMLElement = document.createElement('div');
+  private dmOverlay: HTMLElement = document.createElement('div');
   private action: 'move' | 'attack' | null = null;
   private session: GameSession | null = null;
   private onExit: () => void;
@@ -82,6 +83,11 @@ export class Game {
     this.tooltip = el('div', { className: 'token-tooltip' });
     this.tooltip.style.display = 'none';
     this.root.appendChild(this.tooltip);
+
+    this.dmOverlay = el('div', { className: 'dm-overlay' });
+    this.dmOverlay.innerHTML = '<div class="dm-spinner"></div><span>The DM ponders...</span>';
+    this.dmOverlay.style.display = 'none';
+    this.root.appendChild(this.dmOverlay);
 
     const trayAnchor = el('div', { className: 'tray-anchor' });
     this.root.appendChild(trayAnchor);
@@ -739,8 +745,11 @@ export class Game {
     const phaseText = this.session.phase === 'player' ? 'Your Move' : "DM's Move";
     const actionText = this.action ? ` · ${this.action} mode` : '';
     this.statusEl.textContent = `Turn ${this.session.turn} · ${phaseText}${actionText}`;
+    this.dmOverlay.style.display =
+      this.session.status === 'active' && this.session.phase === 'dm' ? 'flex' : 'none';
     if (this.session.status !== 'active') {
       this.statusEl.textContent = `Game ${this.session.status.toUpperCase()}`;
+      this.dmOverlay.style.display = 'none';
       this.showGameOver();
     }
   }
