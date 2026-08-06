@@ -1,19 +1,37 @@
 #!/usr/bin/env bash
-# One script to deploy or update Sanctuary on the DigitalOcean droplet.
-# Run as root. After the first run, every future deploy is just:
-#   bash /opt/tenshin/sanctuary/deploy/deploy.sh
+# One script to provision a fresh DigitalOcean droplet and deploy the entire
+# Tenshin platform (site + games). Run once as root on a new Ubuntu droplet,
+# then run again any time to pull updates and redeploy.
+#
+# Assumptions:
+#   - Ubuntu 22.04/24.04
+#   - Root access
+#   - tenshinarts.com and game subdomains point to this droplet
+#   - Game repos are accessible from the server
 set -euo pipefail
 
-NAME="sanctuary"
-DOMAIN="sanctuary.tenshinarts.com"
-PORT="9300"
-REPO="https://github.com/budoray/sanctuary.git"
-INSTALL_DIR="/opt/tenshin/${NAME}"
-SERVICE="tenshin-${NAME}"
-ENV_FILE="${INSTALL_DIR}/.env"
-SERVICE_FILE="/etc/systemd/system/${SERVICE}.service"
-CADDYFILE="/etc/caddy/Caddyfile"
+# ---------------------------------------------------------------------------
+# CONFIG
+# ---------------------------------------------------------------------------
+TENSHIN_DOMAIN="tenshinarts.com"
+PLATFORM_DIR="/opt/tenshin/site"
+SECRETS_FILE="${PLATFORM_DIR}/.env"
+SERVICE_USER="tenshin"
 
+# Games to deploy: name|repo|port|subdomain
+GAMES=(
+  "sanctuary|https://github.com/budoray/sanctuary.git|9300|sanctuary.tenshinarts.com"
+)
+
+# Optional: main Tensin site repo. Leave empty to serve a placeholder page.
+# TENSHIN_SITE_REPO="https://github.com/budoray/tenshinarts.com.git"
+TENSHIN_SITE_REPO=""
+TENSHIN_SITE_DIR="/opt/tenshin/site/web"
+TENSHIN_SITE_PORT="9000"
+
+# ---------------------------------------------------------------------------
+# HELPERS
+# ---------------------------------------------------------------------------
 require_root() {
   if [ "$(id -u)" -ne 0 ]; then
     echo "ERROR: run this script as root" >&2
@@ -21,199 +39,312 @@ require_root() {
   fi
 }
 
-# Write KEY="value" to .env, preserving any existing value unless overwrite=1.
+gen_password() {
+  tr -dc 'A-Za-z0-9_.~-' </dev/urandom | head -c 32
+}
+
+url_encode() {
+  python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1]))" "$1"
+}
+
 set_env() {
-  local key="$1"
-  local value="$2"
-  local overwrite="${3:-0}"
+  local file="$1"
+  local key="$2"
+  local value="$3"
+  local overwrite="${4:-0}"
 
-  if [ ! -f "$ENV_FILE" ]; then
-    mkdir -p "$(dirname "$ENV_FILE")"
-    touch "$ENV_FILE"
-  fi
+  mkdir -p "$(dirname "$file")"
+  touch "$file"
 
-  # Escape double quotes in value for the .env line.
   local escaped
   escaped=$(printf '%s' "$value" | sed 's/"/\\"/g')
 
-  if grep -q "^${key}=" "$ENV_FILE" 2>/dev/null; then
+  if grep -q "^${key}=" "$file" 2>/dev/null; then
     if [ "$overwrite" -eq 1 ]; then
-      sed -i "/^${key}=/c${key}=\"${escaped}\"" "$ENV_FILE"
+      sed -i "/^${key}=/c${key}=\"${escaped}\"" "$file"
     fi
   else
-    echo "${key}=\"${escaped}\"" >> "$ENV_FILE"
+    echo "${key}=\"${escaped}\"" >> "$file"
   fi
 }
 
-get_existing_secret() {
-  local secret=""
-  if [ -f "$SERVICE_FILE" ]; then
-    secret=$(grep -oP '^Environment=TENSHIN_SECRET=\K[^ ]+' "$SERVICE_FILE" 2>/dev/null || true)
+get_env() {
+  local file="$1"
+  local key="$2"
+  if [ -f "$file" ]; then
+    grep -oP "^${key}=\"?\\K[^\"]+" "$file" 2>/dev/null || true
   fi
-  if [ -z "$secret" ] && [ -f "$ENV_FILE" ]; then
-    secret=$(grep -oP '^TENSHIN_SECRET=\"?\K[^\"]+' "$ENV_FILE" 2>/dev/null || true)
-  fi
-  printf '%s' "$secret"
 }
 
-get_existing_database_url() {
-  local url=""
-  if [ -f "$ENV_FILE" ]; then
-    url=$(grep -oP '^DATABASE_URL=\"?\K[^\"]+' "$ENV_FILE" 2>/dev/null || true)
-  fi
-  printf '%s' "$url"
+# ---------------------------------------------------------------------------
+# SYSTEM
+# ---------------------------------------------------------------------------
+install_system_deps() {
+  echo "==> Updating packages"
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -qq
+  apt-get upgrade -y -qq
+
+  echo "==> Installing base dependencies"
+  apt-get install -y -qq git curl wget gnupg software-properties-common \
+    python3 python3-venv python3-pip python3-dev build-essential \
+    postgresql postgresql-contrib nodejs npm
+
+  echo "==> Installing Caddy"
+  apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https
+  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' 2>/dev/null | \
+    gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' 2>/dev/null | \
+    tee /etc/apt/sources.list.d/caddy-stable.list >/dev/null
+  apt-get update -qq
+  apt-get install -y -qq caddy
+
+  systemctl enable caddy
 }
 
-main() {
-  require_root
+create_service_user() {
+  if ! id -u "$SERVICE_USER" >/dev/null 2>&1; then
+    echo "==> Creating ${SERVICE_USER} user"
+    useradd -r -m -s /usr/sbin/nologin "$SERVICE_USER"
+  fi
+}
 
-  echo "==> Deploying ${NAME} (${DOMAIN})"
+# ---------------------------------------------------------------------------
+# PLATFORM SECRETS
+# ---------------------------------------------------------------------------
+setup_platform_secrets() {
+  echo "==> Setting up platform secrets"
+  mkdir -p "$PLATFORM_DIR"
 
-  # 1. Code
-  if [ ! -d "$INSTALL_DIR/.git" ]; then
-    echo "==> Cloning ${REPO} into ${INSTALL_DIR}"
-    mkdir -p "$(dirname "$INSTALL_DIR")"
-    git clone "$REPO" "$INSTALL_DIR"
+  local tenshin_secret
+  tenshin_secret=$(get_env "$SECRETS_FILE" "TENSHIN_SECRET")
+  if [ -z "$tenshin_secret" ]; then
+    tenshin_secret=$(gen_password)
+    set_env "$SECRETS_FILE" "TENSHIN_SECRET" "$tenshin_secret"
+    echo "    Generated TENSHIN_SECRET (save this if you need it): ${tenshin_secret}"
   fi
 
-  cd "$INSTALL_DIR"
-  echo "==> Pulling latest main"
+  chmod 600 "$SECRETS_FILE"
+  chown root:root "$SECRETS_FILE"
+}
+
+# ---------------------------------------------------------------------------
+# POSTGRESQL
+# ---------------------------------------------------------------------------
+setup_postgres() {
+  echo "==> Ensuring PostgreSQL is running"
+  systemctl enable postgresql
+  systemctl start postgresql
+
+  for entry in "${GAMES[@]}"; do
+    local name repo port domain
+    IFS='|' read -r name repo port domain <<< "$entry"
+
+    local db_name="${name}"
+    local db_user="${name}"
+    local db_pass
+    db_pass=$(get_env "$SECRETS_FILE" "${name^^}_DB_PASSWORD")
+    if [ -z "$db_pass" ]; then
+      db_pass=$(gen_password)
+      set_env "$SECRETS_FILE" "${name^^}_DB_PASSWORD" "$db_pass"
+    fi
+
+    local sql_pass
+    sql_pass="${db_pass//\'/\'\'}"
+    local url_pass
+    url_pass=$(url_encode "$db_pass")
+
+    echo "==> Ensuring PostgreSQL database/user for ${name}"
+    sudo -u postgres psql -c "CREATE USER ${db_user} WITH PASSWORD '${sql_pass}';" 2>/dev/null || true
+    sudo -u postgres psql -c "CREATE DATABASE ${db_name} OWNER ${db_user};" 2>/dev/null || true
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE ${db_name} TO ${db_user};" 2>/dev/null || true
+
+    set_env "$SECRETS_FILE" "${name^^}_DATABASE_URL" \
+      "postgresql+asyncpg://${db_user}:${url_pass}@127.0.0.1:5432/${db_name}"
+  done
+
+  chmod 600 "$SECRETS_FILE"
+}
+
+# ---------------------------------------------------------------------------
+# CADDY
+# ---------------------------------------------------------------------------
+setup_caddy() {
+  echo "==> Writing Caddyfile"
+
+  local caddyfile="/etc/caddy/Caddyfile"
+  if [ -f "$caddyfile" ]; then
+    cp "$caddyfile" "${caddyfile}.bak-$(date +%Y%m%d-%H%M%S)"
+  fi
+
+  python3 - "$caddyfile" "$TENSHIN_DOMAIN" "$TENSHIN_SITE_REPO" "$TENSHIN_SITE_DIR" "$TENSHIN_SITE_PORT" "${GAMES[@]}" <<'PY'
+import os, sys
+caddyfile = sys.argv[1]
+domain = sys.argv[2]
+site_repo = sys.argv[3]
+site_dir = sys.argv[4]
+site_port = sys.argv[5]
+games = sys.argv[6:]
+
+lines = [f"{domain} {{"]
+if site_repo and os.path.isdir(site_dir):
+    lines.append(f"    reverse_proxy 127.0.0.1:{site_port}")
+else:
+    lines.append('    respond "Tenshin Arts" 200')
+lines.extend(["}", ""])
+
+for entry in games:
+    name, repo, port, sub = entry.split("|")
+    lines.extend([f"{sub} {{", f"    reverse_proxy 127.0.0.1:{port}", "}", ""])
+
+with open(caddyfile, "w") as f:
+    f.write("\n".join(lines).rstrip() + "\n")
+PY
+
+  chown root:caddy "$caddyfile"
+  chmod 644 "$caddyfile"
+
+  systemctl reload caddy || systemctl start caddy
+}
+
+# ---------------------------------------------------------------------------
+# GAME DEPLOY
+# ---------------------------------------------------------------------------
+deploy_game() {
+  local name="$1"
+  local repo="$2"
+  local port="$3"
+  local domain="$4"
+
+  local install_dir="/opt/tenshin/${name}"
+  local service="tenshin-${name}"
+  local service_file="/etc/systemd/system/${service}.service"
+  local env_file="${install_dir}/.env"
+
+  echo "==> Deploying ${name} (${domain} -> 127.0.0.1:${port})"
+
+  # Code
+  if [ ! -d "${install_dir}/.git" ]; then
+    echo "    Cloning ${repo}"
+    mkdir -p "$(dirname "$install_dir")"
+    git clone "$repo" "$install_dir"
+  fi
+
+  cd "$install_dir"
   git fetch origin
   git reset --hard origin/main
 
-  # 2. Python environment
+  # Python
   if [ ! -d ".venv" ]; then
-    echo "==> Creating Python virtual environment"
     python3 -m venv .venv
   fi
-  echo "==> Installing / updating Python dependencies"
   .venv/bin/pip install -q --upgrade pip
   .venv/bin/pip install -q -r requirements.txt
 
-  # 3. Environment file
-  echo "==> Checking environment file"
-  mkdir -p "$(dirname "$ENV_FILE")"
-  touch "$ENV_FILE"
+  # Env
+  local tenshin_secret db_url
+  tenshin_secret=$(get_env "$SECRETS_FILE" "TENSHIN_SECRET")
+  db_url=$(get_env "$SECRETS_FILE" "${name^^}_DATABASE_URL")
 
-  local tenshin_secret
-  tenshin_secret=$(get_existing_secret)
-  if [ -z "$tenshin_secret" ] || [ "$tenshin_secret" = "SAME_SECRET_AS_THE_WEBSITE" ]; then
-    echo "ERROR: TENSHIN_SECRET is not set." >&2
-    echo "Add the shared Tenshin secret to ${ENV_FILE}:" >&2
-    echo '  TENSHIN_SECRET="your-secret-here"' >&2
-    exit 1
-  fi
-  set_env "TENSHIN_SECRET" "$tenshin_secret"
+  mkdir -p "$(dirname "$env_file")"
+  touch "$env_file"
+  set_env "$env_file" "APP_ENV" "production" 1
+  set_env "$env_file" "TENSHIN_SECRET" "$tenshin_secret" 1
+  set_env "$env_file" "TENSHIN_SITE_URL" "https://${TENSHIN_DOMAIN}" 1
+  set_env "$env_file" "DATABASE_URL" "$db_url" 1
+  set_env "$env_file" "OLLAMA_ENABLED" "true" 1
+  set_env "$env_file" "OLLAMA_HOST" "http://127.0.0.1:11434" 1
+  set_env "$env_file" "OLLAMA_MODEL" "llama3.2" 1
+  set_env "$env_file" "OLLAMA_TIMEOUT" "5.0" 1
 
-  local database_url
-  database_url=$(get_existing_database_url)
-  if [ -z "$database_url" ]; then
-    echo "WARNING: DATABASE_URL not set. Using SQLite for now." >&2
-    set_env "DATABASE_URL" "sqlite+aiosqlite://${INSTALL_DIR}/sanctuary.db"
-  else
-    set_env "DATABASE_URL" "$database_url"
-  fi
+  chown "${SERVICE_USER}:${SERVICE_USER}" "$env_file" 2>/dev/null || true
+  chmod 600 "$env_file"
 
-  set_env "APP_ENV" "production" 1
-  set_env "TENSHIN_SITE_URL" "https://tenshinarts.com" 1
-  set_env "OLLAMA_ENABLED" "true" 1
-  set_env "OLLAMA_HOST" "http://127.0.0.1:11434" 1
-  set_env "OLLAMA_MODEL" "llama3.2" 1
-  set_env "OLLAMA_TIMEOUT" "5.0" 1
-
-  chown tenshin:tenshin "$ENV_FILE" 2>/dev/null || true
-  chmod 600 "$ENV_FILE"
-
-  # 4. Frontend build (if Node is installed; otherwise rely on committed dist)
+  # Frontend
   if command -v npm >/dev/null 2>&1 && [ -f frontend/package.json ]; then
-    echo "==> Building frontend"
+    echo "    Building frontend"
     (cd frontend && npm ci && npm run build)
-  else
-    echo "==> Node not found; using committed frontend/dist"
   fi
 
-  # 5. Database migrations
-  echo "==> Running database migrations"
-  (cd backend && ../.venv/bin/alembic upgrade head)
-
-  # 6. Service user and service file
-  if ! id -u tenshin >/dev/null 2>&1; then
-    echo "==> Creating tenshin service user"
-    useradd -r -s /usr/sbin/nologin tenshin
+  # Migrations
+  if [ -d backend/alembic ]; then
+    echo "    Running migrations"
+    (cd backend && ../.venv/bin/alembic upgrade head)
   fi
 
-  echo "==> Installing systemd service"
-  cat > "$SERVICE_FILE" <<EOF
+  # Service
+  cat > "$service_file" <<EOF
 [Unit]
-Description=Sanctuary
+Description=${name}
 After=network.target
 
 [Service]
-WorkingDirectory=${INSTALL_DIR}
-Environment=TENSHIN_SITE_URL=https://tenshinarts.com
+WorkingDirectory=${install_dir}
+Environment=TENSHIN_SITE_URL=https://${TENSHIN_DOMAIN}
 Environment=OLLAMA_HOST=http://127.0.0.1:11434
 Environment=OLLAMA_MODEL=llama3.2
-EnvironmentFile=-${ENV_FILE}
-ExecStart=${INSTALL_DIR}/.venv/bin/python app.py
+EnvironmentFile=-${env_file}
+ExecStart=${install_dir}/.venv/bin/python app.py
 Restart=always
-User=tenshin
+User=${SERVICE_USER}
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-  chown root:root "$SERVICE_FILE"
-  chmod 644 "$SERVICE_FILE"
+  chown root:root "$service_file"
+  chmod 644 "$service_file"
+
   systemctl daemon-reload
-  systemctl enable "$SERVICE"
+  systemctl enable "$service"
+  systemctl reset-failed "$service" 2>/dev/null || true
+  systemctl restart "$service"
 
-  # 7. Start / restart
-  echo "==> Restarting ${SERVICE}"
-  systemctl reset-failed "$SERVICE" 2>/dev/null || true
-  systemctl restart "$SERVICE"
-
-  # 8. Health checks
-  echo "==> Waiting for service"
-  for i in {1..30}; do
-    if curl -fsS "http://127.0.0.1:${PORT}/health" >/dev/null 2>&1; then
+  # Health check
+  echo "    Waiting for ${name}"
+  for _ in {1..30}; do
+    local code
+    code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${port}/health" 2>/dev/null || echo "000")
+    if [ "$code" = "200" ] || [ "$code" = "303" ] || [ "$code" = "401" ]; then
+      echo "    health check localhost:${port} -> HTTP ${code}"
       break
     fi
     sleep 1
   done
 
-  echo "==> Local health check"
-  curl -fsS "http://127.0.0.1:${PORT}/health" || {
-    echo "!!! Local health check failed" >&2
-    journalctl -u "$SERVICE" --no-pager | tail -40
-    exit 1
-  }
-
-  echo "==> Public health check"
-  curl -fsS "https://${DOMAIN}/health" || {
-    echo "!!! Public health check failed (Caddy may still be loading)" >&2
-    exit 1
-  }
-
-  # 9. Caddy
-  if [ -f "$CADDYFILE" ]; then
-    if ! grep -q "^${DOMAIN} {" "$CADDYFILE"; then
-      echo "==> Adding ${DOMAIN} to ${CADDYFILE}"
-      cp "$CADDYFILE" "${CADDYFILE}.bak-$(date +%Y%m%d-%H%M%S)"
-      cat >> "$CADDYFILE" <<EOF
-
-${DOMAIN} {
-    reverse_proxy 127.0.0.1:${PORT}
+  local public_code
+  public_code=$(curl -s -o /dev/null -w "%{http_code}" "https://${domain}/health" 2>/dev/null || echo "000")
+  echo "    health check ${domain} -> HTTP ${public_code}"
 }
-EOF
-      systemctl reload caddy
-    else
-      echo "==> ${DOMAIN} already present in Caddyfile"
-    fi
-  else
-    echo "WARNING: ${CADDYFILE} not found; skipped Caddy update" >&2
-  fi
 
-  echo "==> ${NAME} deployed successfully"
+# ---------------------------------------------------------------------------
+# MAIN
+# ---------------------------------------------------------------------------
+main() {
+  require_root
+
+  echo "============================================"
+  echo " Tenshin Platform Provision + Deploy"
+  echo "============================================"
+
+  install_system_deps
+  create_service_user
+  setup_platform_secrets
+  setup_postgres
+
+  for entry in "${GAMES[@]}"; do
+    local name repo port domain
+    IFS='|' read -r name repo port domain <<< "$entry"
+    deploy_game "$name" "$repo" "$port" "$domain"
+  done
+
+  setup_caddy
+
+  echo "============================================"
+  echo " Done."
+  echo " Platform secrets: ${SECRETS_FILE}"
+  echo " Caddyfile: /etc/caddy/Caddyfile"
+  echo "============================================"
 }
 
 main "$@"
