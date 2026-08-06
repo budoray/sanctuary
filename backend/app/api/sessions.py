@@ -11,6 +11,7 @@ from backend.app.auth import require_account
 from backend.app.db import CampaignMemberRecord, CampaignRecord, CharacterRecord, SessionRecord, get_db
 from backend.app.engine import character as char_engine
 from backend.app.engine import module, session as session_engine
+from backend.app.socket_manager import socket_manager
 
 router = APIRouter(tags=["sessions"])
 
@@ -196,4 +197,14 @@ async def act_in_session(
     record.status = state["status"]
     await db.commit()
 
-    return {"session": session_engine.view(state)}
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update",
+            {"session": session_view},
+            room=session_id,
+        )
+    except Exception:
+        pass
+
+    return {"session": session_view}
