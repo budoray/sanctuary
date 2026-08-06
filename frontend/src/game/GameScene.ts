@@ -25,6 +25,7 @@ export class GameScene {
   private socket: Socket;
   private hud: HUD;
   private phase: string = 'player';
+  private turn: number = 1;
   private actionMode: 'move' | 'attack' | null = 'move';
   private character: CharacterInfo | null = null;
 
@@ -64,9 +65,10 @@ export class GameScene {
       }
       if (msg.type === 'dm_turn' && msg.entry) {
         this.hud.addLog(msg.entry.text);
+        this.turn = msg.entry.turn || this.turn + 1;
         if (msg.game_over) {
           this.phase = 'game_over';
-          this.hud.setTurn(msg.entry.turn, 'game over');
+          this.hud.setTurn(this.turn, 'game over');
           this.hud.setStatus('Game over.');
           this.updateActions();
           this.showGameOver(msg.entry.text);
@@ -75,7 +77,7 @@ export class GameScene {
         this.hud.setStatus("DM's turn complete. Your move.");
         this.phase = 'player';
         this.actionMode = 'move';
-        this.hud.setTurn(msg.entry.turn, 'player');
+        this.hud.setTurn(this.turn, 'player');
         this.updateActions();
         this.updateFog();
       }
@@ -106,9 +108,10 @@ export class GameScene {
     }
     this.sessionId = id;
     this.phase = state.phase || 'player';
+    this.turn = state.turn || 1;
     this.actionMode = this.phase === 'player' ? 'move' : null;
     this.hud.setSession(id);
-    this.hud.setTurn(state.turn, this.phase);
+    this.hud.setTurn(this.turn, this.phase);
     this.hud.setStatus(
       this.phase === 'player'
         ? 'Select a token, then click a tile to move.'
@@ -251,13 +254,19 @@ export class GameScene {
         return;
       }
 
-      const pos = e.global;
-      const tx = Math.floor(pos.x / this.map.tileSize);
-      const ty = Math.floor(pos.y / this.map.tileSize);
+      // Use canvas-relative CSS pixels so high-DPI / zoomed browsers still map
+      // clicks to the correct grid tile.
+      const rect = this.app.canvas.getBoundingClientRect();
+      const rawX = e.client.x - rect.left;
+      const rawY = e.client.y - rect.top;
+      const tx = Math.floor(rawX / this.map.tileSize);
+      const ty = Math.floor(rawY / this.map.tileSize);
+
+      const token = this.tokens.get(this.selectedTokenId);
+      console.debug('[Sanctuary] click', { rawX, rawY, tx, ty, token: token?.gridX, gridY: token?.gridY });
 
       if (tx < 0 || tx >= this.map.width || ty < 0 || ty >= this.map.height) return;
 
-      const token = this.tokens.get(this.selectedTokenId);
       if (!token) return;
 
       if (this.actionMode === 'attack') {
@@ -286,7 +295,7 @@ export class GameScene {
       this.map.highlightTile(tx, ty, 0x3498db);
       this.phase = 'dm';
       this.hud.setStatus("DM is thinking...");
-      this.hud.setTurn(0, 'dm');
+      this.hud.setTurn(this.turn, 'dm');
       this.updateActions();
       try {
         await moveToken(this.sessionId, this.selectedTokenId, tx, ty);
@@ -326,7 +335,7 @@ export class GameScene {
 
     this.phase = 'dm';
     this.hud.setStatus("DM is thinking...");
-    this.hud.setTurn(0, 'dm');
+    this.hud.setTurn(this.turn, 'dm');
     this.updateActions();
 
     try {

@@ -1,5 +1,6 @@
 """Session API."""
 import json
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -203,8 +204,16 @@ async def move_token(
         raise HTTPException(status_code=400, detail="Cannot move there")
 
     # Only allow one tile of movement per turn for now.
-    if abs(req.x - token.x) + abs(req.y - token.y) != 1:
-        raise HTTPException(status_code=400, detail="Must move to an adjacent tile")
+    dist = abs(req.x - token.x) + abs(req.y - token.y)
+    if dist != 1:
+        logging.warning(
+            "Move rejected: token %s at (%d,%d), target (%d,%d), distance %d",
+            token.id, token.x, token.y, req.x, req.y, dist,
+        )
+        raise HTTPException(
+            status_code=400,
+            detail=f"Must move to an adjacent tile (token at {token.x},{token.y}; target {req.x},{req.y}; distance {dist})",
+        )
 
     payload = {"token_id": req.token_id, "x": req.x, "y": req.y}
     session.apply("token_moved", payload)

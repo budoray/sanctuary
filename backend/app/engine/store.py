@@ -86,7 +86,7 @@ class EventStore:
         if record:
             record.version = version
             record.state = json.dumps(state)
-            record.updated_at = datetime.now(timezone.utc)
+            record.updated_at = _utc_now()
         else:
             record = SnapshotRecord(
                 session_id=session_id,
