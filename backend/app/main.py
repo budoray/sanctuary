@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from backend.app.api.characters import router as characters_router
 from backend.app.config import SETTINGS, ROOT
 from backend.app.db import Base, engine
 from backend.app.auth import require_account
@@ -17,8 +18,20 @@ FRONTEND_DIST = ROOT / "frontend" / "dist"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    from pathlib import Path
+
+    from alembic import command
+    from alembic.config import Config
+
+    app_dir = Path(__file__).resolve().parent
+    alembic_ini = app_dir.parent / "alembic.ini"
+    alembic_cfg = Config(str(alembic_ini))
+    alembic_cfg.set_main_option("script_location", str(alembic_ini.parent / "alembic"))
+    # Alembic's command.upgrade is synchronous and may start its own event loop,
+    # so run it in a worker thread to avoid "cannot be called from a running loop".
+    import asyncio
+
+    await asyncio.to_thread(command.upgrade, alembic_cfg, "head")
     yield
     await engine.dispose()
 
@@ -32,6 +45,8 @@ fastapi_app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+fastapi_app.include_router(characters_router, prefix="/api")
 
 
 @fastapi_app.get("/health")

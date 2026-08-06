@@ -1,4 +1,5 @@
 import './style.css';
+import { SanctuaryApp } from './ui/app';
 
 const app = document.getElementById('app');
 if (!app) {
@@ -12,20 +13,13 @@ function hideSplash() {
   setTimeout(() => splash.remove(), 600);
 }
 
-function showPlaceholder() {
-  const panel = document.createElement('div');
-  panel.className = 'placeholder-panel';
-  panel.innerHTML = `
-    <h1>Sanctuary</h1>
-    <p>The realm is being rebuilt from the ground up.</p>
-    <p class="muted">Top-down OSRIC tactical RPG · solo & party play · human or engine DM</p>
-    <footer class="licence">
-      Sanctuary is an independent product published under the OSRIC 3.0 Third-Party License
-      and is not affiliated with Mythmere Games LLC.
-    </footer>
-  `;
-  app!.appendChild(panel);
+async function boot() {
+  const sanctuary = new SanctuaryApp(app!);
+  try {
+    await sanctuary.start();
+  } finally {
+    hideSplash();
+  }
 }
 
-showPlaceholder();
-hideSplash();
+boot();
