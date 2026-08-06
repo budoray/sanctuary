@@ -942,6 +942,49 @@ button.danger:hover:not(:disabled) {
   text-shadow: 0 0 8px var(--accent-glow);
 }
 
+.player-stats {
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.player-stats .player-name {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.player-stats .player-class {
+  color: var(--muted);
+  margin-bottom: 8px;
+  text-transform: capitalize;
+}
+
+.player-stats .hp-bar {
+  height: 6px;
+  background: #1a1a1a;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.player-stats .hp-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.player-stats .hp-text,
+.player-stats .ac-text {
+  display: inline-block;
+  margin-right: 12px;
+  color: var(--text);
+}
+
 .token-tooltip {
   position: absolute;
   z-index: 100;

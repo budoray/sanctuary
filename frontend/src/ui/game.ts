@@ -40,6 +40,7 @@ export class Game {
   private logEl: HTMLElement = document.createElement('div');
   private statusEl: HTMLElement = document.createElement('div');
   private timerEl: HTMLElement = document.createElement('div');
+  private statEl: HTMLElement = document.createElement('div');
   private action: 'move' | 'attack' | null = null;
   private session: GameSession | null = null;
   private onExit: () => void;
@@ -134,6 +135,9 @@ export class Game {
     actions.appendChild(this.attackBtn);
     actions.appendChild(this.endBtn);
     hud.appendChild(actions);
+
+    this.statEl = el('div', { className: 'player-stats' });
+    hud.appendChild(this.statEl);
 
     this.logEl = el('div', { className: 'game-log' });
     hud.appendChild(el('h2', {}, 'Chronicle'));
@@ -513,6 +517,9 @@ export class Game {
       if (prevHp !== undefined && t.hp !== prevHp) {
         const delta = t.hp - prevHp;
         sprite.showFloat(`${delta > 0 ? '+' : ''}${delta}`, delta < 0 ? 0xc0392b : 0x2ecc71);
+        if (delta < 0) {
+          this.spawnBloodSplatter(sprite.container.x + TILE_SIZE / 2, sprite.container.y + TILE_SIZE / 2, Math.abs(delta));
+        }
       }
       sprite.setActive(playerPhase && t.type === 'player');
     });
@@ -535,6 +542,15 @@ export class Game {
       const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.5;
       const speed = 1 + Math.random() * 2;
       this.spawnParticle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, color, 30 + Math.random() * 20);
+    }
+  }
+
+  private spawnBloodSplatter(x: number, y: number, damage: number) {
+    const count = Math.min(20, 6 + damage * 2);
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.8 + Math.random() * 2.5;
+      this.spawnParticle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed, 0xc0392b, 25 + Math.random() * 20);
     }
   }
 
@@ -669,12 +685,27 @@ export class Game {
     this.highlightActionTiles();
     this.updateStatus();
     this.updateActions();
+    this.updateStats();
     this.updateTimer();
     this.renderLog();
 
     if (wasDm && session.phase === 'player' && playerHurt) {
       this.spawnMonsterAttackSlash();
     }
+  }
+
+  private updateStats() {
+    if (!this.session) return;
+    const p = this.session.player;
+    const ratio = Math.max(0, Math.min(1, p.hp / p.max_hp));
+    const hpColor = ratio > 0.5 ? '#2ecc71' : ratio > 0.25 ? '#f1c40f' : '#c0392b';
+    this.statEl.innerHTML = `
+      <div class="player-name">${p.name}</div>
+      <div class="player-class">${(p.classes || ['Adventurer']).join(' / ')}</div>
+      <div class="hp-bar"><span style="width:${Math.round(ratio * 100)}%; background:${hpColor};"></span></div>
+      <div class="hp-text">HP ${p.hp}/${p.max_hp}</div>
+      <div class="ac-text">AC ${p.ac}</div>
+    `;
   }
 
   private spawnMonsterAttackSlash() {
