@@ -43,6 +43,7 @@ export class Game {
   private statusEl: HTMLElement = document.createElement('div');
   private timerEl: HTMLElement = document.createElement('div');
   private statEl: HTMLElement = document.createElement('div');
+  private partyEl: HTMLElement = document.createElement('div');
   private rosterEl: HTMLElement = document.createElement('div');
   private dmOverlay: HTMLElement = document.createElement('div');
   private damageFlash: HTMLElement = document.createElement('div');
@@ -192,6 +193,10 @@ export class Game {
 
     this.statEl = el('div', { className: 'player-stats' });
     hud.appendChild(this.statEl);
+
+    this.partyEl = el('div', { className: 'party-roster' });
+    hud.appendChild(el('h2', {}, 'Party'));
+    hud.appendChild(this.partyEl);
 
     this.rosterEl = el('div', { className: 'monster-roster' });
     hud.appendChild(el('h2', {}, 'Foes'));
@@ -540,9 +545,9 @@ export class Game {
 
   private renderTokens(snap = false) {
     if (!this.session) return;
-    const tokens: Token[] = [...this.session.players, ...this.session.monsters];
+    const session = this.session;
+    const tokens: Token[] = [...session.players, ...session.monsters];
     const aliveIds = new Set<string>();
-    const playerPhase = this.session.phase === 'player';
 
     tokens.forEach((t) => {
       if (t.alive === false) {
@@ -584,7 +589,8 @@ export class Game {
           this.spawnBloodSplatter(sprite.container.x + TILE_SIZE / 2, sprite.container.y + TILE_SIZE / 2, Math.abs(delta));
         }
       }
-      sprite.setActive(playerPhase && t.type === 'player');
+      const isActivePlayer = t.type === 'player' && t.id === session.player.id && session.phase === 'player';
+      sprite.setActive(isActivePlayer);
     });
 
     this.lastTokenHp.clear();
@@ -749,6 +755,7 @@ export class Game {
     this.updateStatus();
     this.updateActions();
     this.updateStats();
+    this.updatePartyRoster();
     this.updateRoster();
     this.updateTimer();
     this.renderLog();
@@ -778,6 +785,24 @@ export class Game {
       <div class="hp-text">HP ${p.hp}/${p.max_hp}</div>
       <div class="ac-text">AC ${p.ac}</div>
     `;
+  }
+
+  private updatePartyRoster() {
+    if (!this.session) return;
+    clear(this.partyEl);
+    const activeId = this.session.phase === 'player' ? this.session.player?.id : null;
+    this.session.players.forEach((p) => {
+      const isActive = p.id === activeId;
+      const ratio = Math.max(0, Math.min(1, p.hp / p.max_hp));
+      const hpColor = ratio > 0.5 ? '#2ecc71' : ratio > 0.25 ? '#f1c40f' : '#c0392b';
+      const row = el('div', { className: `party-row${isActive ? ' active' : ''}` });
+      row.appendChild(el('span', { className: 'party-name' }, p.name));
+      const barWrap = el('div', { className: 'party-hp-bar' });
+      barWrap.innerHTML = `<span style="width:${Math.round(ratio * 100)}%; background:${hpColor};"></span>`;
+      row.appendChild(barWrap);
+      row.appendChild(el('span', { className: 'party-hp-text' }, `${p.hp}/${p.max_hp}`));
+      this.partyEl.appendChild(row);
+    });
   }
 
   private updateRoster() {

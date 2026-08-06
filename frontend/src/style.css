@@ -1023,6 +1023,62 @@ button.danger:hover:not(:disabled) {
   color: var(--text);
 }
 
+.party-roster {
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 11px;
+}
+
+.party-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.party-row.active {
+  border-color: var(--gold);
+  background: rgba(241, 196, 15, 0.08);
+}
+
+.party-row.active .party-name {
+  color: var(--gold);
+}
+
+.party-row .party-name {
+  flex: 0 0 80px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.party-row .party-hp-bar {
+  flex: 1;
+  height: 5px;
+  background: #1a1a1a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.party-row .party-hp-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.party-row .party-hp-text {
+  flex: 0 0 34px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 10px;
+}
+
 .monster-roster {
   max-height: 120px;
   overflow-y: auto;
