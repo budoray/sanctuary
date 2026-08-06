@@ -29,6 +29,7 @@ html, body, #app {
 #game-canvas {
   position: absolute;
   inset: 0;
+  z-index: 1;
 }
 
 #hud {
@@ -43,6 +44,7 @@ html, body, #app {
   pointer-events: auto;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
+  z-index: 10;
 }
 
 #hud header h1 {
@@ -176,6 +178,7 @@ html, body, #app {
   display: flex;
   gap: 10px;
   pointer-events: auto;
+  z-index: 10;
 }
 
 button {
