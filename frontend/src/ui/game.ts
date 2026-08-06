@@ -19,15 +19,16 @@ export class Game {
   private root: HTMLElement;
   private sessionId: string;
   private module: ModuleData;
-  private app: Application;
-  private mapContainer: Container;
-  private tokenContainer: Container;
+  private app: Application | null = null;
+  private mapContainer: Container = new Container();
+  private tokenContainer: Container = new Container();
   private ui: HTMLElement;
   private logEl: HTMLElement = document.createElement('div');
   private statusEl: HTMLElement = document.createElement('div');
   private action: 'move' | 'attack' | null = null;
   private session: GameSession | null = null;
   private onExit: () => void;
+  private canvasContainer: HTMLElement;
 
   constructor(
     container: HTMLElement,
@@ -42,21 +43,28 @@ export class Game {
     this.onExit = onExit;
 
     this.root.className = 'game-shell';
-    const canvasContainer = el('div', { className: 'game-canvas-container' });
+    this.canvasContainer = el('div', { className: 'game-canvas-container' });
     this.ui = this.buildUI();
-    this.root.appendChild(canvasContainer);
+    this.root.appendChild(this.canvasContainer);
     this.root.appendChild(this.ui);
 
     const trayAnchor = el('div', { className: 'tray-anchor' });
     this.root.appendChild(trayAnchor);
     new DiceTray(trayAnchor);
 
-    this.app = new Application({
-      resizeTo: canvasContainer,
+    this.update(initialSession);
+
+    window.addEventListener('resize', () => this.centerMap());
+  }
+
+  async init() {
+    this.app = new Application();
+    await this.app.init({
+      resizeTo: this.canvasContainer,
       backgroundColor: 0x050607,
       antialias: true,
     });
-    canvasContainer.appendChild(this.app.view as HTMLCanvasElement);
+    this.canvasContainer.appendChild(this.app.canvas as HTMLCanvasElement);
 
     this.mapContainer = new Container();
     this.tokenContainer = new Container();
@@ -64,9 +72,8 @@ export class Game {
     this.app.stage.addChild(this.tokenContainer);
 
     this.renderMap();
-    this.update(initialSession);
-
-    window.addEventListener('resize', () => this.centerMap());
+    this.renderTokens();
+    this.centerMap();
   }
 
   private buildUI() {
@@ -122,6 +129,7 @@ export class Game {
   }
 
   private renderMap() {
+    if (!this.app) return;
     this.mapContainer.removeChildren();
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || '';
@@ -146,6 +154,7 @@ export class Game {
   }
 
   private centerMap() {
+    if (!this.app) return;
     const mw = this.module.width * TILE_SIZE;
     const mh = this.module.height * TILE_SIZE;
     const cx = (this.app.screen.width - mw) / 2;
@@ -157,6 +166,7 @@ export class Game {
   }
 
   private renderTokens() {
+    if (!this.app) return;
     this.tokenContainer.removeChildren();
     if (!this.session) return;
     const tokens = [this.session.player, ...this.session.monsters];
@@ -244,7 +254,7 @@ export class Game {
   }
 
   destroy() {
-    this.app.destroy(true, { children: true });
+    this.app?.destroy(true, { children: true });
     clear(this.root);
   }
 }

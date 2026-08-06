@@ -85,13 +85,15 @@ export class SanctuaryApp {
       const { session } = await createSession(character.id, 'sample_lair', campaignId);
       const { module } = await getModule(session.module_id);
       this.setScreen('game');
-      this.current = new Game(
+      const game = new Game(
         this.app,
         session.id,
         module.map,
         session,
         () => this.showSelect()
       );
+      this.current = game;
+      await game.init();
     } catch (err: any) {
       this.setScreen('select');
       this.showSelect();
