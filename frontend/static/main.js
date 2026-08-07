@@ -111,6 +111,12 @@ async function createSession(characterId, moduleId = "sample_lair", campaignId, 
 async function listSessions() {
   return api("/api/sessions");
 }
+async function deleteSession(sessionId) {
+  return api(`/api/sessions/${sessionId}`, { method: "DELETE" });
+}
+async function deleteAllSessions() {
+  return api("/api/sessions", { method: "DELETE" });
+}
 async function getSession(sessionId) {
   return api(`/api/sessions/${sessionId}`);
 }
@@ -8661,11 +8667,22 @@ var SessionSelect = class {
     header.appendChild(title);
     const actions = el("div", { className: "adventure-manager-actions" });
     actions.appendChild(el("button", { className: "adventure-manager-btn", onclick: () => this.onNew() }, "+ New Adventurer"));
+    actions.appendChild(el("button", { className: "danger", onclick: () => this.onDeleteAll() }, "Delete All"));
     if (this.onBack) {
       actions.appendChild(el("button", { onclick: () => this.onBack() }, "\u2190 Back"));
     }
     header.appendChild(actions);
     return header;
+  }
+  async onDeleteAll() {
+    if (!confirm("Delete ALL your saved adventures? This cannot be undone.")) return;
+    try {
+      await deleteAllSessions();
+      this.load();
+    } catch (err) {
+      clear(this.gridEl);
+      this.gridEl.appendChild(el("div", { className: "sessions-empty error" }, err.message || "Failed to delete sessions."));
+    }
   }
   buildFooter() {
     const footer = el("footer", { className: "adventure-manager-footer" });
@@ -8711,9 +8728,23 @@ var SessionSelect = class {
         className: "enter",
         onclick: () => this.resume(s.id)
       }, s.status === "active" ? "Resume" : "View"));
+      actions.appendChild(el("button", {
+        className: "danger",
+        onclick: () => this.onDelete(s.id)
+      }, "Delete"));
       card.appendChild(actions);
       this.gridEl.appendChild(card);
     });
+  }
+  async onDelete(sessionId) {
+    if (!confirm("Delete this adventure? This cannot be undone.")) return;
+    try {
+      await deleteSession(sessionId);
+      this.load();
+    } catch (err) {
+      clear(this.gridEl);
+      this.gridEl.appendChild(el("div", { className: "sessions-empty error" }, err.message || "Failed to delete session."));
+    }
   }
   async resume(sessionId) {
     try {

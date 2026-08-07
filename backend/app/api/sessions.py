@@ -236,6 +236,30 @@ async def create_session(
     return {"session": session_engine.view(state)}
 
 
+@router.delete("/sessions")
+async def delete_all_sessions(
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord)
+        .where(
+            or_(
+                SessionRecord.account_id == account_id,
+                SessionRecord.campaign_id.in_(
+                    select(CampaignRecord.id).where(CampaignRecord.dm_account_id == account_id)
+                ),
+            )
+        )
+    )
+    records = result.scalars().all()
+    for record in records:
+        if record.account_id == account_id or await _is_campaign_dm(record, account_id, db):
+            await db.delete(record)
+    await db.commit()
+    return {"deleted": len(records)}
+
+
 @router.get("/sessions")
 async def list_sessions(
     db: AsyncSession = Depends(get_db),
@@ -613,6 +637,23 @@ async def join_session(
         pass
 
     return {"session": session_view}
+
+
+@router.delete("/sessions/{session_id}")
+async def delete_session(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(select(SessionRecord).where(SessionRecord.id == session_id))
+    record = result.scalar_one_or_none()
+    if not record or not await _can_access_session(record, account_id, db):
+        raise HTTPException(status_code=404, detail="Session not found")
+    if record.account_id != account_id and not await _is_campaign_dm(record, account_id, db):
+        raise HTTPException(status_code=403, detail="Only the session owner or DM can delete")
+    await db.delete(record)
+    await db.commit()
+    return {"deleted": True}
 
 
 @router.get("/account/progress")
