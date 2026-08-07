@@ -3344,6 +3344,7 @@ button.danger:hover:not(:disabled) {
   justify-content: center;
   pointer-events: auto;
   cursor: pointer;
+  transition: left 100ms ease-out, top 100ms ease-out;
 }
 .game-token .token-backing {
   position: absolute;
@@ -3369,8 +3370,8 @@ button.danger:hover:not(:disabled) {
 .game-token .token-image {
   position: relative;
   z-index: 1;
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
   image-rendering: pixelated;
   pointer-events: none;
@@ -3385,7 +3386,7 @@ button.danger:hover:not(:disabled) {
 }
 .game-token .token-hp-bar {
   position: absolute;
-  bottom: 3px;
+  bottom: -7px;
   left: 8px;
   right: 8px;
   height: 5px;
@@ -4017,8 +4018,8 @@ button.danger:hover:not(:disabled) {
   box-shadow: 0 0 14px rgba(241, 196, 15, 0.45);
 }
 .game-token .token-image {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.45));
 }
 .game-token .token-initial {
@@ -4042,8 +4043,8 @@ button.danger:hover:not(:disabled) {
     height: 40px;
   }
   .game-token .token-image {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
   .game-token .token-initial {
     width: 34px;
@@ -4053,7 +4054,7 @@ button.danger:hover:not(:disabled) {
   .game-token .token-hp-bar {
     left: 6px;
     right: 6px;
-    bottom: 2px;
+    bottom: -6px;
     height: 4px;
   }
 }

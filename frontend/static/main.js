@@ -9049,7 +9049,7 @@ var Game = class {
     }
   }
   async rest() {
-    if (!this.session || this.session.status !== "active" || this.inFlight) return;
+    if (this.observer || !this.session || this.session.status !== "active" || this.inFlight) return;
     this.lockInput();
     try {
       const { session } = await restInSession(this.sessionId);
@@ -9125,6 +9125,8 @@ var Game = class {
   }
   renderMap() {
     clear(this.mapContainer);
+    clear(this.tokenContainer);
+    this.tokenElements.clear();
     this.tileSprites = [];
     const themeId = this.module.theme ?? "";
     const theme = getTheme(themeId);
@@ -9310,50 +9312,80 @@ var Game = class {
     const session = this.session;
     const tokens = [...session.players, ...session.monsters];
     const activeId = session.phase === "player" ? session.player?.id : null;
-    clear(this.tokenContainer);
-    tokens.forEach((t) => {
-      if (t.alive === false) return;
+    const visible = [];
+    const visibleIds = new Set();
+    for (const t of tokens) {
+      if (t.alive === false) continue;
       const isPlayer = t.type === "player";
       const isVisible = isPlayer || this.isDm() || this.visited.has(`${t.x},${t.y}`);
-      if (!isVisible) return;
+      if (!isVisible) continue;
+      visible.push(t);
+      visibleIds.add(t.id);
+    }
+    for (const [id, el2] of this.tokenElements) {
+      if (!visibleIds.has(id)) {
+        el2.remove();
+        this.tokenElements.delete(id);
+      }
+    }
+    for (const t of visible) {
+      const isPlayer = t.type === "player";
       const isActive = t.id === activeId;
       const x = t.x * TILE_SIZE;
       const y = t.y * TILE_SIZE;
-      const tokenEl = el("div", {
-        className: `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}`,
-        style: `left:${x}px;top:${y}px;`,
-        onclick: () => this.onTokenClick(t),
-        onmouseenter: (e) => this.showTooltip(t, e.clientX, e.clientY),
-        onmousemove: (e) => this.moveTooltip(e.clientX, e.clientY),
-        onmouseleave: () => this.hideTooltip()
-      });
-      const backing = el("div", { className: "token-backing" });
-      tokenEl.appendChild(backing);
-      const tokenKey = isPlayer ? t.classes?.[0] ?? "hero" : t.monster ?? "";
-      const tokenUrl = tokenFrame(tokenKey);
-      if (tokenUrl) {
-        const img = el("img", {
-          className: "token-image",
-          src: tokenUrl,
-          alt: t.name,
-          onerror: () => {
-            img.style.display = "none";
-          }
+      let tokenEl = this.tokenElements.get(t.id);
+      if (!tokenEl) {
+        tokenEl = el("div", {
+          className: `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}`,
+          style: `left:${x}px;top:${y}px;`
         });
-        tokenEl.appendChild(img);
+        const backing = el("div", { className: "token-backing" });
+        tokenEl.appendChild(backing);
+        const tokenKey = isPlayer ? t.classes?.[0] ?? "hero" : t.monster ?? "";
+        const tokenUrl = tokenFrame(tokenKey);
+        if (tokenUrl) {
+          const img = el("img", {
+            className: "token-image",
+            src: tokenUrl,
+            alt: t.name,
+            onerror: () => {
+              img.style.display = "none";
+            }
+          });
+          tokenEl.appendChild(img);
+        } else {
+          const initial = (t.name || "?").charAt(0).toUpperCase();
+          tokenEl.appendChild(el("div", { className: "token-initial" }, initial));
+        }
+        const bar = el("div", { className: "token-hp-bar" });
+        const fill = el("div", { className: "token-hp-fill" });
+        bar.appendChild(fill);
+        tokenEl.appendChild(bar);
+        this.tokenContainer.appendChild(tokenEl);
+        this.tokenElements.set(t.id, tokenEl);
       } else {
-        const initial = (t.name || "?").charAt(0).toUpperCase();
-        tokenEl.appendChild(el("div", { className: "token-initial" }, initial));
+        tokenEl.className = `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}`;
+        if (_snap) {
+          tokenEl.style.transition = "none";
+        }
+        tokenEl.style.left = `${x}px`;
+        tokenEl.style.top = `${y}px`;
+        if (_snap) {
+          void tokenEl.offsetWidth;
+          tokenEl.style.transition = "";
+        }
+        const fill = tokenEl.querySelector(".token-hp-fill");
+        if (fill) {
+          const hpRatio = Math.max(0, Math.min(1, t.hp / t.max_hp));
+          fill.style.width = `${Math.round(hpRatio * 100)}%`;
+          fill.className = `token-hp-fill ${hpRatio > 0.5 ? "high" : hpRatio > 0.25 ? "medium" : "low"}`;
+        }
       }
-      const hpRatio = Math.max(0, Math.min(1, t.hp / t.max_hp));
-      const bar = el("div", { className: "token-hp-bar" });
-      const fill = el("div", { className: "token-hp-fill" });
-      fill.style.width = `${Math.round(hpRatio * 100)}%`;
-      fill.classList.add(hpRatio > 0.5 ? "high" : hpRatio > 0.25 ? "medium" : "low");
-      bar.appendChild(fill);
-      tokenEl.appendChild(bar);
-      this.tokenContainer.appendChild(tokenEl);
-    });
+      tokenEl.onclick = () => this.onTokenClick(t);
+      tokenEl.onmouseenter = (e) => this.showTooltip(t, e.clientX, e.clientY);
+      tokenEl.onmousemove = (e) => this.moveTooltip(e.clientX, e.clientY);
+      tokenEl.onmouseleave = () => this.hideTooltip();
+    }
     this.lastTokenHp.clear();
     for (const t of tokens) {
       if (t.alive !== false) this.lastTokenHp.set(t.id, t.hp);
