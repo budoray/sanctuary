@@ -8,7 +8,7 @@ import { connectSocket } from '../net/socket';
 import { DiceTray } from './dice-tray';
 import { el, clear } from './utils';
 import { AudioController } from './audio';
-import { getTheme, loadAtlas, tileFrame } from '../lib/tile-atlas';
+import { getTheme, loadAtlas, tileFrame, tokenFrame } from '../lib/tile-atlas';
 
 const TILE_SIZE = 40;
 
@@ -928,14 +928,15 @@ export class Game {
     if (!this.app) return;
     this.mapContainer.removeChildren();
     this.tileSprites = [];
-    const theme = getTheme(this.module.theme);
+    const themeId = this.module.theme ?? '';
+    const theme = getTheme(themeId);
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || '';
       const tileRow: Container[] = [];
       for (let x = 0; x < this.module.width; x++) {
         const tile = row[x] || '0';
         const c = new Container();
-        this.drawTile(c, tile, x, y, theme);
+        this.drawTile(c, tile, x, y, themeId, theme);
         c.x = x * TILE_SIZE;
         c.y = y * TILE_SIZE;
         c.eventMode = 'static';
@@ -948,8 +949,8 @@ export class Game {
     this.centerMap();
   }
 
-  private drawTile(c: Container, tile: string, x: number, y: number, theme: import('../lib/tile-atlas').TileTheme | null) {
-    const tex = theme ? tileFrame(theme, tile) : null;
+  private drawTile(c: Container, tile: string, x: number, y: number, themeId: string, theme: import('../lib/tile-atlas').TileTheme | null) {
+    const tex = theme ? tileFrame(themeId, theme, tile) : null;
     if (tex) {
       const s = new Sprite(tex);
       s.width = TILE_SIZE;
@@ -1230,15 +1231,28 @@ export class Game {
 
       this.tokenContainer.addChild(g);
 
-      // Initial label
-      const initial = (t.name || '?').charAt(0).toUpperCase();
-      const label = new Text(initial, {
-        fontSize: 16, fill: 0xffffff, fontWeight: 'bold', align: 'center',
-      });
-      label.anchor.set(0.5);
-      label.x = cx;
-      label.y = cy;
-      this.tokenContainer.addChild(label);
+      // Token sprite or initial fallback
+      const tokenKey = isPlayer ? (t.classes?.[0] ?? 'hero') : (t.monster ?? '');
+      const tokenTex = tokenFrame(tokenKey);
+      if (tokenTex) {
+        const sprite = new Sprite(tokenTex);
+        sprite.anchor.set(0.5);
+        sprite.x = cx;
+        sprite.y = cy;
+        const size = TILE_SIZE * 0.7;
+        sprite.width = size;
+        sprite.height = size;
+        this.tokenContainer.addChild(sprite);
+      } else {
+        const initial = (t.name || '?').charAt(0).toUpperCase();
+        const label = new Text(initial, {
+          fontSize: 16, fill: 0xffffff, fontWeight: 'bold', align: 'center',
+        });
+        label.anchor.set(0.5);
+        label.x = cx;
+        label.y = cy;
+        this.tokenContainer.addChild(label);
+      }
 
       // HP bar
       const hpRatio = Math.max(0, Math.min(1, t.hp / t.max_hp));
