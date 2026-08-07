@@ -3455,8 +3455,8 @@ button.danger:hover:not(:disabled) {
 }
 
 .game-tile {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -3505,8 +3505,8 @@ button.danger:hover:not(:disabled) {
 
 .game-token {
   position: absolute;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3516,24 +3516,18 @@ button.danger:hover:not(:disabled) {
 
 .game-token .token-backing {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 10px;
+  bottom: 6px;
   border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
   z-index: 0;
-}
-
-.game-token.player .token-backing {
-  background: #3498db;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 4px 8px rgba(0, 0, 0, 0.4);
-}
-
-.game-token.monster .token-backing {
-  background: #2ecc71;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 4px 8px rgba(0, 0, 0, 0.4);
+  filter: blur(1px);
 }
 
 .game-token.active .token-backing {
-  box-shadow: 0 0 0 4px #f1c40f, 0 0 12px rgba(241, 196, 15, 0.6), 0 4px 8px rgba(0, 0, 0, 0.4);
+  background: rgba(241, 196, 15, 0.45);
+  box-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
 }
 
 .game-token.down .token-backing::after {
@@ -3547,10 +3541,9 @@ button.danger:hover:not(:disabled) {
 .game-token .token-image {
   position: relative;
   z-index: 1;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
   image-rendering: pixelated;
   pointer-events: none;
 }
@@ -3558,7 +3551,7 @@ button.danger:hover:not(:disabled) {
 .game-token .token-initial {
   position: relative;
   z-index: 1;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   color: #ffffff;
   pointer-events: none;
@@ -3567,8 +3560,8 @@ button.danger:hover:not(:disabled) {
 .game-token .token-hp-bar {
   position: absolute;
   bottom: 2px;
-  left: 4px;
-  right: 4px;
+  left: 6px;
+  right: 6px;
   height: 4px;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 2px;
@@ -3589,8 +3582,8 @@ button.danger:hover:not(:disabled) {
 
 .slash-effect {
   position: absolute;
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   background:
     linear-gradient(45deg, transparent 46%, rgba(255, 255, 255, 0.95) 46%, rgba(255, 255, 255, 0.95) 54%, transparent 54%),
     linear-gradient(-45deg, transparent 46%, rgba(255, 255, 255, 0.95) 46%, rgba(255, 255, 255, 0.95) 54%, transparent 54%);
@@ -3609,10 +3602,10 @@ button.danger:hover:not(:disabled) {
 @media (max-width: 700px) {
   .game-token .token-backing {
     width: 28px;
-    height: 28px;
+    height: 8px;
   }
   .game-token .token-image {
-    width: 22px;
-    height: 22px;
+    width: 32px;
+    height: 32px;
   }
 }

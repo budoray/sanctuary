@@ -10,7 +10,7 @@ import { AudioController } from './audio';
 import { getTheme, loadAtlas, tileFrame, tokenFrame } from '../lib/tile-atlas';
 import { AutoPlayer } from './auto-player';
 
-const TILE_SIZE = 40;
+const TILE_SIZE = 48;
 
 function withTimeout<T>(promise: Promise<T>, ms: number, reason = 'Operation timed out'): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -1171,8 +1171,8 @@ export class Game {
     const cx = (fromX + toX) / 2 * TILE_SIZE + TILE_SIZE / 2;
     const cy = (fromY + toY) / 2 * TILE_SIZE + TILE_SIZE / 2;
     const slash = el('div', { className: 'slash-effect' });
-    slash.style.left = `${cx - 16}px`;
-    slash.style.top = `${cy - 16}px`;
+    slash.style.left = `${cx - 24}px`;
+    slash.style.top = `${cy - 24}px`;
     this.fxContainer.appendChild(slash);
     window.setTimeout(() => slash.remove(), 350);
   }
