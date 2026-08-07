@@ -1098,6 +1098,35 @@ var RoomEditor = class {
     if (this.entityFormTitle) this.entityFormTitle.remove();
     this.entityFormTitle = el("h4", {}, `Entity at ${x}, ${y}`);
     this.entityForm.insertBefore(this.entityFormTitle, this.entityForm.firstChild);
+    const existing = this.entities.find((e) => e.x === x && e.y === y);
+    this.entityTypeSelect.value = existing?.type || "monster";
+    this.renderEntityFields();
+    if (existing) {
+      if (existing.type === "monster") {
+        this.entityBestiarySelect.value = existing.key || "";
+        this.entityCountInput.value = String(existing.count || 1);
+        this.entityNameInput.value = existing.name || "";
+      } else if (existing.type === "trap") {
+        this.entityKeyInput.value = existing.key || "";
+        this.entityDamageInput.value = existing.damage || "";
+      } else if (existing.type === "treasure") {
+        this.entityValueInput.value = String(existing.value || 0);
+        this.entityItemSelect.value = existing.item_id || "";
+      } else if (existing.type === "item") {
+        this.entityItemSelect.value = existing.item_id || "";
+      } else if (existing.type === "event") {
+        this.entityMessageInput.value = existing.message || "";
+      }
+    } else {
+      this.entityKeyInput.value = "";
+      this.entityCountInput.value = "1";
+      this.entityDamageInput.value = "";
+      this.entityValueInput.value = "0";
+      this.entityMessageInput.value = "";
+      this.entityNameInput.value = "";
+      if (this.bestiary.length > 0) this.entityBestiarySelect.value = this.bestiary[0];
+      if (this.items.length > 0) this.entityItemSelect.value = this.items[0]?.id || "";
+    }
   }
   addEntity() {
     const type = this.entityTypeSelect.value;
@@ -1127,6 +1156,7 @@ var RoomEditor = class {
     } else if (type === "event") {
       entity = { ...base, message: this.entityMessageInput.value || "" };
     }
+    this.entities = this.entities.filter((e) => !(e.x === this.entityFormX && e.y === this.entityFormY));
     this.entities.push(entity);
     this.entityForm.style.display = "none";
     this.renderGrid();
@@ -1559,12 +1589,17 @@ var DungeonEditor = class {
     return footer;
   }
   async save() {
+    const order = this.dungeon.room_order || [];
+    const links = this.dungeon.links || [];
+    if (order.length > 1 && links.length === 0) {
+      if (!confirm("This dungeon has multiple rooms but no links. Players will be stuck in the first room. Save anyway?")) return;
+    }
     try {
       await updateDungeon(this.dungeon.id, {
         name: this.nameInput.value.trim() || this.dungeon.name,
         public: this.publicCheckbox.checked,
-        room_order: this.dungeon.room_order || [],
-        links: this.dungeon.links || [],
+        room_order: order,
+        links: links,
         start_room_id: this.startRoomSelect.value || null,
         start_x: parseInt(this.startXInput.value, 10) || 1,
         start_y: parseInt(this.startYInput.value, 10) || 1
@@ -2923,8 +2958,11 @@ var AdventureCreate = class {
   onBack;
   characters = [];
   modules = [];
+  dungeons = [];
   selectedCharacterId = "";
   selectedModuleId = "sample_lair";
+  selectedDungeonId = "";
+  source = "module";
   constructor(container, onCreate, onBack) {
     this.onCreate = onCreate;
     this.onBack = onBack;
@@ -2941,14 +2979,17 @@ var AdventureCreate = class {
   }
   async load() {
     try {
-      const [{ characters }, { modules }] = await Promise.all([
+      const [{ characters }, { modules }, { dungeons }] = await Promise.all([
         listCharacters(),
-        listModules()
+        listModules(),
+        listDungeons().catch(() => ({ dungeons: [] }))
       ]);
       this.characters = characters;
       this.modules = modules;
+      this.dungeons = dungeons;
       if (characters.length > 0) this.selectedCharacterId = characters[0].id;
       if (modules.length > 0) this.selectedModuleId = modules[0].id;
+      if (dungeons.length > 0) this.selectedDungeonId = dungeons[0].id;
       this.render();
     } catch (err) {
       clear(this.formEl);
@@ -2979,17 +3020,54 @@ var AdventureCreate = class {
     });
     this.formEl.appendChild(this.visibilitySelect);
 
-    this.formEl.appendChild(el("label", {}, "Room"));
-    const moduleSelect = el("select", {});
-    this.modules.forEach((m) => {
+    this.formEl.appendChild(el("label", {}, "Source"));
+    const sourceSelect = el("select", {});
+    const sources = [
+      { key: "module", label: "Built-in Room" },
+      { key: "dungeon", label: "Custom Dungeon" }
+    ];
+    sources.forEach((s) => {
       const opt = document.createElement("option");
-      opt.value = m.id;
-      opt.textContent = m.name;
-      if (m.id === this.selectedModuleId) opt.selected = true;
-      moduleSelect.appendChild(opt);
+      opt.value = s.key;
+      opt.textContent = s.label;
+      if (s.key === this.source) opt.selected = true;
+      sourceSelect.appendChild(opt);
     });
-    moduleSelect.onchange = () => this.selectedModuleId = moduleSelect.value;
-    this.formEl.appendChild(moduleSelect);
+    sourceSelect.onchange = () => {
+      this.source = sourceSelect.value;
+      this.render();
+    };
+    this.formEl.appendChild(sourceSelect);
+
+    if (this.source === "dungeon") {
+      this.formEl.appendChild(el("label", {}, "Dungeon"));
+      if (this.dungeons.length === 0) {
+        this.formEl.appendChild(el("div", { className: "empty" }, "No dungeons. Build one in the DM Workshop first."));
+      } else {
+        const dungeonSelect = el("select", {});
+        this.dungeons.forEach((d) => {
+          const opt = document.createElement("option");
+          opt.value = d.id;
+          opt.textContent = d.name;
+          if (d.id === this.selectedDungeonId) opt.selected = true;
+          dungeonSelect.appendChild(opt);
+        });
+        dungeonSelect.onchange = () => this.selectedDungeonId = dungeonSelect.value;
+        this.formEl.appendChild(dungeonSelect);
+      }
+    } else {
+      this.formEl.appendChild(el("label", {}, "Room"));
+      const moduleSelect = el("select", {});
+      this.modules.forEach((m) => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.textContent = m.name;
+        if (m.id === this.selectedModuleId) opt.selected = true;
+        moduleSelect.appendChild(opt);
+      });
+      moduleSelect.onchange = () => this.selectedModuleId = moduleSelect.value;
+      this.formEl.appendChild(moduleSelect);
+    }
 
     this.formEl.appendChild(el("label", {}, "Hero"));
     if (this.characters.length === 0) {
@@ -3023,11 +3101,20 @@ var AdventureCreate = class {
       alert("Select a hero first.");
       return;
     }
+    if (this.source === "dungeon" && this.dungeons.length === 0) {
+      alert("No dungeons available. Build one in the DM Workshop first.");
+      return;
+    }
     try {
-      const { session } = await createSession(this.selectedCharacterId, this.selectedModuleId, void 0, 0, {
-        visibility: this.visibilitySelect.value,
-        name: this.nameInput.value.trim()
-      });
+      let session;
+      if (this.source === "dungeon") {
+        ({ session } = await playDungeon(this.selectedDungeonId, this.selectedCharacterId, void 0, 0));
+      } else {
+        ({ session } = await createSession(this.selectedCharacterId, this.selectedModuleId, void 0, 0, {
+          visibility: this.visibilitySelect.value,
+          name: this.nameInput.value.trim()
+        }));
+      }
       this.onCreate(session);
     } catch (err) {
       alert(err.message || "Failed to create adventure");
@@ -8619,13 +8706,14 @@ var Hub = class {
   container;
   modules = [];
   progressEl;
-  constructor(container, onSolo, onJoin, onCampaigns, onResume, onCreateAdventure) {
+  constructor(container, onSolo, onJoin, onCampaigns, onResume, onCreateAdventure, onDmWorkshop) {
     this.root = el("div", { className: "sanctuary-hub" });
     this.onSolo = onSolo;
     this.onJoin = onJoin;
     this.onCampaigns = onCampaigns;
     this.onResume = onResume;
     this.onCreateAdventure = onCreateAdventure;
+    this.onDmWorkshop = onDmWorkshop;
     const background = el("div", { className: "hub-background" });
     const vignette = el("div", { className: "hub-vignette" });
     const particles = el("div", { className: "hub-particles" });
@@ -8690,10 +8778,18 @@ var Hub = class {
       "Create Campaign",
       () => this.onCampaigns()
     );
+    const dm = this.buildCard(
+      "dm",
+      "DM Workshop",
+      "Build rooms, link them into adventures, place monsters and treasure, then play-test or publish.",
+      "Open Workshop",
+      () => this.onDmWorkshop()
+    );
     grid.appendChild(solo);
     grid.appendChild(create);
     grid.appendChild(join);
     grid.appendChild(group);
+    grid.appendChild(dm);
     this.container.appendChild(grid);
     this.loadResumeHint();
   }
@@ -9101,7 +9197,8 @@ var SanctuaryApp = class {
       () => this.showSessions(),
       () => this.showCampaigns(),
       () => this.showSessions(),
-      () => this.showAdventureCreate()
+      () => this.showAdventureCreate(),
+      () => this.showDmWorkshop()
     );
   }
   showAdventureCreate() {
@@ -9124,7 +9221,8 @@ var SanctuaryApp = class {
       () => this.showCreate(),
       () => this.showCampaigns(),
       () => this.showSessions(),
-      () => this.showHub()
+      () => this.showHub(),
+      () => this.showDmWorkshop()
     );
   }
   showCreate() {
@@ -9177,7 +9275,8 @@ var SanctuaryApp = class {
       () => this.showCreate(),
       () => this.showCampaigns(),
       () => this.showSessions(),
-      () => this.showHub()
+      () => this.showHub(),
+      () => this.showDmWorkshop()
     );
   }
   showSessions() {
