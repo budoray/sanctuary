@@ -366,13 +366,33 @@ async def update_area(
     db: AsyncSession = Depends(get_db),
     account_id: int = Depends(require_account),
 ):
-    """Add or replace an area in the adventure."""
+    """Add or update an area in the adventure, including its tile grid and entities."""
     record = await _load_owned_adventure(module_id, account_id, db)
     doc = json.loads(record.data_json or "{}")
-    area = _set_area_id(dict(data))
+    incoming = dict(data)
     areas = doc.setdefault("areas", [])
-    for idx, existing in enumerate(areas):
-        if str(existing.get("id")) == str(area["id"]):
+
+    # Merge with the existing area so a partial save (e.g. just metadata)
+    # does not wipe the tile grid or entity placement.
+    existing = None
+    incoming_id = incoming.get("id")
+    if incoming_id is not None:
+        for a in areas:
+            if str(a.get("id")) == str(incoming_id):
+                existing = a
+                break
+
+    if existing is not None:
+        area = _set_area_id({**existing, **incoming})
+    else:
+        area = _set_area_id(incoming)
+
+    grid_errors = validate.validate_area_grid(area)
+    if grid_errors:
+        raise HTTPException(status_code=422, detail={"valid": False, "errors": grid_errors})
+
+    for idx, a in enumerate(areas):
+        if str(a.get("id")) == str(area["id"]):
             areas[idx] = area
             break
     else:

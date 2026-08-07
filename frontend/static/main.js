@@ -57,11 +57,18 @@ async function api(path, options = {}) {
     let detail = body;
     try {
       const parsed = JSON.parse(body);
-      if (parsed.detail) detail = parsed.detail;
-      else if (parsed.message) detail = parsed.message;
+      if (parsed.detail) {
+        if (Array.isArray(parsed.detail.errors)) {
+          detail = parsed.detail.errors.join("\n");
+        } else {
+          detail = parsed.detail;
+        }
+      } else if (parsed.message) {
+        detail = parsed.message;
+      }
     } catch {
     }
-    const err = new Error(detail || `Request failed (${res.status})`);
+    const err = new Error(typeof detail === "string" ? detail : `Request failed (${res.status})`);
     err.status = res.status;
     throw err;
   }
@@ -8293,11 +8300,14 @@ var Game = class {
   heartbeatInterval = null;
   moduleId;
   loadingOverlay;
-  zoom = 1.25;
+  zoom = 1;
   minZoom = 0.5;
   maxZoom = 3;
   zoomStep = 0.25;
   observer = false;
+  inFlight = false;
+  tokenElements = /* @__PURE__ */ new Map();
+  autoPlayer;
   zoomControls;
   zoomLevelEl;
   constructor(container, sessionId, module, initialSession, onExit, onReplay, userId) {
@@ -8342,6 +8352,7 @@ var Game = class {
     this.root.appendChild(this.loadingOverlay);
     this.zoomControls = this.buildZoomControls();
     this.canvasContainer.appendChild(this.zoomControls);
+    this.autoPlayer = new AutoPlayer(this);
     this.canvasContainer.addEventListener("wheel", (e) => {
       if (e.ctrlKey || e.metaKey || Math.abs(e.deltaY) > 0) {
         e.preventDefault();
@@ -8381,12 +8392,22 @@ var Game = class {
       this.action = null;
       this.dmAction = null;
       this.highlightActionTiles();
+      this.autoPlayer.start();
     } else {
       this.autoplayBtn.textContent = "\u25B6 Spectate";
       this.autoplayBtn.classList.remove("active");
+      this.autoPlayer.stop();
     }
     this.updateActions();
     this.updateStatus();
+  }
+  lockInput() {
+    this.inFlight = true;
+    this.updateActions();
+  }
+  unlockInput() {
+    this.inFlight = false;
+    this.updateActions();
   }
   isDm() {
     return this.isCampaignSession() && this.session?.dm_account_id === this.userId;
@@ -8897,7 +8918,7 @@ var Game = class {
   }
   onKeyDown(e) {
     this.ensureAudioStarted();
-    if (this.observer || !this.session || this.session.status !== "active" || this.session.phase !== "player") return;
+    if (this.observer || !this.session || this.session.status !== "active" || this.session.phase !== "player" || this.inFlight) return;
     switch (e.key.toLowerCase()) {
       case "escape":
         if (this.action) {
@@ -8950,21 +8971,38 @@ var Game = class {
     }
   }
   async tryMove(dx, dy) {
-    if (this.observer || !this.session || this.session.phase !== "player" || this.session.status !== "active") return;
+    if (this.observer || !this.session || this.session.phase !== "player" || this.session.status !== "active" || this.inFlight) return;
     if (this.action && this.action !== "move") return;
     const player = this.session.player;
     const x = player.x + dx;
     const y = player.y + dy;
+    const prevX = player.x;
+    const prevY = player.y;
+    const optimisticSession = this.session;
+    this.lockInput();
+    this.action = null;
+    player.x = x;
+    player.y = y;
+    this.renderTokens();
+    this.centerMap();
     try {
       const { session } = await actInSession(this.sessionId, "move", { x, y });
-      this.action = null;
       this.update(session);
     } catch (err) {
+      if (this.session === optimisticSession && this.session.player.x === x && this.session.player.y === y) {
+        this.session.player.x = prevX;
+        this.session.player.y = prevY;
+        this.renderTokens();
+        this.centerMap();
+      }
       this.log(err.message || "Move failed.");
+    } finally {
+      this.unlockInput();
     }
   }
   async endTurn() {
-    if (this.observer || !this.session || this.session.phase !== "player") return;
+    if (this.observer || !this.session || this.session.phase !== "player" || this.inFlight) return;
+    this.lockInput();
     try {
       const { session } = await actInSession(this.sessionId, "end_turn");
       this.action = null;
@@ -8974,10 +9012,13 @@ var Game = class {
       }
     } catch (err) {
       this.log(err.message || "End turn failed.");
+    } finally {
+      this.unlockInput();
     }
   }
   async usePotion() {
-    if (this.observer || !this.session || this.session.phase !== "player" || !this.isPlayer()) return;
+    if (this.observer || !this.session || this.session.phase !== "player" || !this.isPlayer() || this.inFlight) return;
+    this.lockInput();
     try {
       const { session } = await actInSession(this.sessionId, "use_potion");
       this.update(session);
@@ -8986,12 +9027,15 @@ var Game = class {
       }
     } catch (err) {
       this.log(err.message || "Potion failed.");
+    } finally {
+      this.unlockInput();
     }
   }
   async stabilize() {
-    if (this.observer || !this.session || this.session.phase !== "player" || !this.isPlayer()) return;
+    if (this.observer || !this.session || this.session.phase !== "player" || !this.isPlayer() || this.inFlight) return;
     const target = this.findAdjacentDownedAlly();
     if (!target) return;
+    this.lockInput();
     try {
       const { session } = await actInSession(this.sessionId, "stabilize", { target_id: target.id });
       this.update(session);
@@ -9000,15 +9044,20 @@ var Game = class {
       }
     } catch (err) {
       this.log(err.message || "Stabilize failed.");
+    } finally {
+      this.unlockInput();
     }
   }
   async rest() {
-    if (!this.session || this.session.status !== "active") return;
+    if (!this.session || this.session.status !== "active" || this.inFlight) return;
+    this.lockInput();
     try {
       const { session } = await restInSession(this.sessionId);
       this.update(session);
     } catch (err) {
       this.log(err.message || "Rest failed.");
+    } finally {
+      this.unlockInput();
     }
   }
   async saveProgression() {
@@ -9063,11 +9112,15 @@ var Game = class {
     return null;
   }
   async runDmTurn() {
+    if (this.inFlight) return;
+    this.lockInput();
     try {
       const { session } = await actInSession(this.sessionId, "dm_turn");
       this.update(session);
     } catch (err) {
       this.log(err.message || "DM turn failed.");
+    } finally {
+      this.unlockInput();
     }
   }
   renderMap() {
@@ -9316,7 +9369,7 @@ var Game = class {
     window.setTimeout(() => slash.remove(), 350);
   }
   async onTileClick(x, y) {
-    if (this.observer || !this.session || this.session.status !== "active") return;
+    if (this.observer || !this.session || this.session.status !== "active" || this.inFlight) return;
     if (this.dmAction && this.isDm()) {
       try {
         let response;
@@ -9344,16 +9397,32 @@ var Game = class {
     const player = this.session.player;
     const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
     if (dist !== 1) return;
+    const prevX = player.x;
+    const prevY = player.y;
+    const optimisticSession = this.session;
+    this.lockInput();
+    this.action = null;
+    player.x = x;
+    player.y = y;
+    this.renderTokens();
+    this.centerMap();
     try {
       const { session } = await actInSession(this.sessionId, "move", { x, y });
-      this.action = null;
       this.update(session);
     } catch (err) {
+      if (this.session === optimisticSession && this.session.player.x === x && this.session.player.y === y) {
+        this.session.player.x = prevX;
+        this.session.player.y = prevY;
+        this.renderTokens();
+        this.centerMap();
+      }
       this.log(err.message || "Move failed.");
+    } finally {
+      this.unlockInput();
     }
   }
   async onTokenClick(token) {
-    if (this.observer || !this.session || this.session.phase !== "player") return;
+    if (this.observer || !this.session || this.session.phase !== "player" || this.inFlight) return;
     if (token.type !== "monster") return;
     const player = this.session.player;
     const dist = Math.abs(player.x - token.x) + Math.abs(player.y - token.y);
@@ -9370,6 +9439,7 @@ var Game = class {
       const isAdjacent = Math.abs(player2.x - token.x) + Math.abs(player2.y - token.y) === 1;
       this.audio.swordHit();
       this.audio.combatSting();
+      this.lockInput();
       try {
         const { session } = await actInSession(this.sessionId, "attack", { target_id: token.id });
         this.action = null;
@@ -9382,12 +9452,15 @@ var Game = class {
         }
       } catch (err) {
         this.log(err.message || "Attack failed.");
+      } finally {
+        this.unlockInput();
       }
     } else if (this.action === "ranged") {
       if (token.type !== "monster") return;
       const player2 = this.session.player;
       this.audio.rangedShot();
       this.audio.combatSting();
+      this.lockInput();
       try {
         const { session } = await actInSession(this.sessionId, "ranged", { target_id: token.id });
         this.action = null;
@@ -9398,6 +9471,8 @@ var Game = class {
         }
       } catch (err) {
         this.log(err.message || "Ranged attack failed.");
+      } finally {
+        this.unlockInput();
       }
     } else if (this.action === "ability") {
       if (token.type !== "monster") return;
@@ -9410,6 +9485,7 @@ var Game = class {
         this.audio.swordHit();
       }
       this.audio.combatSting();
+      this.lockInput();
       try {
         const { session } = await actInSession(this.sessionId, "ability", { target_id: token.id });
         this.action = null;
@@ -9420,6 +9496,8 @@ var Game = class {
         }
       } catch (err) {
         this.log(err.message || "Ability failed.");
+      } finally {
+        this.unlockInput();
       }
     }
   }
@@ -9456,6 +9534,14 @@ var Game = class {
     this.updateRoster();
     this.updateTimer();
     this.renderLog();
+    if (session.status !== "active" && this.autoPlayer?.isRunning()) {
+      this.autoPlayer.stop();
+      this.observer = false;
+      this.root.classList.remove("observer");
+      this.autoplayBtn.textContent = "\u25B6 Spectate";
+      this.autoplayBtn.classList.remove("active");
+    }
+    this.autoPlayer?.onUpdate();
     if (prevStatus === "active" && session.status === "won") {
       this.audio.victory();
     } else if (prevStatus === "active" && session.status === "lost") {
@@ -9588,7 +9674,7 @@ var Game = class {
     }
   }
   updateActions() {
-    if (this.observer) {
+    if (this.observer || this.inFlight) {
       [this.moveBtn, this.attackBtn, this.rangedBtn, this.potionBtn, this.abilityBtn, this.endBtn, this.restBtn].forEach((b) => b.disabled = true);
       this.stabilizeBtn.style.display = "none";
       return;

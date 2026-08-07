@@ -21,6 +21,11 @@ from backend.app.engine.module import (
 # -----------------------------------------------------------------------------
 # S3 adventure validation
 # -----------------------------------------------------------------------------
+# Tile characters recognised by the DM Workshop grid editor and the tactical map.
+VALID_TILE_CHARS = set("01234567")
+VALID_ENTITY_TYPES = {"monster", "trap", "treasure", "item", "event"}
+
+
 def _collect_monster_refs(area: dict) -> set[str]:
     refs: set[str] = set()
     for field in ("monsters", "contents"):
@@ -38,6 +43,87 @@ def _collect_monster_refs(area: dict) -> set[str]:
         if isinstance(entry, dict) and isinstance(entry.get("guardian"), str):
             refs.add(entry["guardian"])
     return refs
+
+
+def validate_area_grid(area: dict) -> list[str]:
+    """Validate an area's tile grid and placed entities are coherent.
+
+    Returns a list of human-readable errors; an empty list means the area is
+    grid-consistent.
+    """
+    errors: list[str] = []
+    aid = area.get("id")
+    prefix = f"area {aid}: " if aid else "area: "
+
+    width = area.get("width")
+    height = area.get("height")
+    tiles = area.get("tiles")
+
+    # Grid is optional in the raw S3 format, but once supplied it must be
+    # internally consistent.
+    if width is not None or height is not None or tiles is not None:
+        if not isinstance(width, int) or not isinstance(height, int):
+            errors.append(f"{prefix}width and height must be integers")
+            return errors
+        if width < 1 or height < 1:
+            errors.append(f"{prefix}width and height must be positive")
+        if width > 64 or height > 64:
+            errors.append(f"{prefix}width and height may not exceed 64")
+
+        if not isinstance(tiles, list):
+            errors.append(f"{prefix}tiles must be a list of strings")
+            return errors
+        if len(tiles) != height:
+            errors.append(
+                f"{prefix}tile row count ({len(tiles)}) does not match height ({height})"
+            )
+        for row_idx, row in enumerate(tiles):
+            if not isinstance(row, str):
+                errors.append(f"{prefix}tile row {row_idx} is not a string")
+                continue
+            if len(row) != width:
+                errors.append(
+                    f"{prefix}tile row {row_idx} length ({len(row)}) does not match width ({width})"
+                )
+            invalid = set(row) - VALID_TILE_CHARS
+            if invalid:
+                errors.append(
+                    f"{prefix}tile row {row_idx} contains invalid characters: {sorted(invalid)}"
+                )
+
+    # Entities are optional, but if present they must sit inside the area.
+    entities = area.get("entities")
+    if entities is not None:
+        if not isinstance(entities, list):
+            errors.append(f"{prefix}entities must be a list")
+        else:
+            grid_w = width if isinstance(width, int) else 0
+            grid_h = height if isinstance(height, int) else 0
+            seen: set[tuple[int, int]] = set()
+            for idx, ent in enumerate(entities):
+                if not isinstance(ent, dict):
+                    errors.append(f"{prefix}entity {idx} is not an object")
+                    continue
+                ent_type = ent.get("type")
+                if ent_type not in VALID_ENTITY_TYPES:
+                    errors.append(
+                        f"{prefix}entity {idx} has invalid type {ent_type!r}"
+                    )
+                x = ent.get("x")
+                y = ent.get("y")
+                if not isinstance(x, int) or not isinstance(y, int):
+                    errors.append(f"{prefix}entity {idx} must have integer x and y")
+                    continue
+                if grid_w and grid_h and not (0 <= x < grid_w and 0 <= y < grid_h):
+                    errors.append(
+                        f"{prefix}entity {idx} at ({x},{y}) is outside the grid"
+                    )
+                if (x, y) in seen:
+                    errors.append(f"{prefix}entity {idx} overlaps another entity at ({x},{y})")
+                else:
+                    seen.add((x, y))
+
+    return errors
 
 
 def _resolve_start_area(doc: dict) -> str | int | None:
@@ -107,7 +193,11 @@ def validate_adventure(data: dict, check_reachability: bool = True) -> list[str]
         for aid in sorted(unreachable):
             errors.append(f"area {aid} is unreachable from start")
 
-    # 4. Discovery triggers recognised.
+    # 4. Area tile grids and entities are coherent.
+    for area in areas:
+        errors.extend(validate_area_grid(area))
+
+    # 5. Discovery triggers recognised.
     for area in areas:
         aid = area.get("id")
         for idx, disc in enumerate(area.get("discoveries", []) or []):
@@ -127,7 +217,7 @@ def validate_adventure(data: dict, check_reachability: bool = True) -> list[str]
                     f"area {aid}: discovery {idx} trigger has chance but no 'per' cadence"
                 )
 
-    # 5. Monster references resolve.
+    # 6. Monster references resolve.
     local_monster_ids = {m.get("id") for m in doc.get("monsters", []) or [] if isinstance(m, dict)}
     bestiary_ids = set(bestiary.base_ids())
     known_monsters = local_monster_ids | bestiary_ids
@@ -146,7 +236,7 @@ def validate_adventure(data: dict, check_reachability: bool = True) -> list[str]
             if ref and ref not in known_monsters:
                 errors.append(f"region {rid}: table entry {idx} monster {ref!r} not found")
 
-    # 6. Item references resolve (module-local items only; bestiary loot is open-ended).
+    # 7. Item references resolve (module-local items only; bestiary loot is open-ended).
     local_item_ids = {m.get("id") for m in doc.get("items", []) or [] if isinstance(m, dict)}
     for area in areas:
         aid = area.get("id")

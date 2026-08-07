@@ -169,3 +169,151 @@ async def test_adventure_owner_only(cleanup_workshop_adventures):
 
             other = await client.get(f"/api/modules/{adv_id}/areas", headers={"X-Tenshin-Dev-Account": "2"})
             assert other.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_save_area_grid_and_entities(cleanup_workshop_adventures):
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            resp = await client.post("/api/modules/adventures", json={"title": "Grid Test"})
+            assert resp.status_code == 200
+            adv_id = resp.json()["adventure"]["id"]
+            cleanup_workshop_adventures.add(adv_id)
+
+            area = {
+                "id": "hall",
+                "name": "Grand Hall",
+                "description": "A large hall.",
+                "width": 6,
+                "height": 5,
+                "tiles": ["111111", "100001", "100001", "100001", "111111"],
+                "start_x": 1,
+                "start_y": 1,
+                "entities": [
+                    {"type": "monster", "x": 2, "y": 2, "key": "goblin", "count": 2},
+                    {"type": "trap", "x": 4, "y": 2, "key": "spike", "damage": "1d6"},
+                    {"type": "treasure", "x": 3, "y": 3, "value": 25},
+                ],
+            }
+            post = await client.post(f"/api/modules/{adv_id}/areas", json=area)
+            assert post.status_code == 200
+
+            get = await client.get(f"/api/modules/{adv_id}/areas")
+            assert get.status_code == 200
+            saved = next(a for a in get.json()["areas"] if a["id"] == "hall")
+            assert saved["width"] == 6
+            assert saved["height"] == 5
+            assert saved["tiles"] == area["tiles"]
+            assert len(saved["entities"]) == 3
+
+
+@pytest.mark.asyncio
+async def test_save_area_grid_validation(cleanup_workshop_adventures):
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            resp = await client.post("/api/modules/adventures", json={"title": "Validation Test"})
+            assert resp.status_code == 200
+            adv_id = resp.json()["adventure"]["id"]
+            cleanup_workshop_adventures.add(adv_id)
+
+            # Bad tile character.
+            bad_tile = {
+                "id": "hall",
+                "name": "Hall",
+                "width": 4,
+                "height": 4,
+                "tiles": ["0000", "0090", "0000", "0000"],
+                "start_x": 1,
+                "start_y": 1,
+                "entities": [],
+            }
+            r = await client.post(f"/api/modules/{adv_id}/areas", json=bad_tile)
+            assert r.status_code == 422
+            assert any("invalid characters" in err for err in r.json()["detail"]["errors"])
+
+            # Mismatched row count.
+            bad_size = {
+                "id": "hall",
+                "name": "Hall",
+                "width": 4,
+                "height": 4,
+                "tiles": ["0000", "0000", "0000"],
+                "start_x": 1,
+                "start_y": 1,
+                "entities": [],
+            }
+            r = await client.post(f"/api/modules/{adv_id}/areas", json=bad_size)
+            assert r.status_code == 422
+            assert any("row count" in err for err in r.json()["detail"]["errors"])
+
+            # Entity out of bounds.
+            bad_entity = {
+                "id": "hall",
+                "name": "Hall",
+                "width": 4,
+                "height": 4,
+                "tiles": ["0000"] * 4,
+                "start_x": 1,
+                "start_y": 1,
+                "entities": [{"type": "monster", "x": 10, "y": 10, "key": "goblin"}],
+            }
+            r = await client.post(f"/api/modules/{adv_id}/areas", json=bad_entity)
+            assert r.status_code == 422
+            assert any("outside the grid" in err for err in r.json()["detail"]["errors"])
+
+            # Overlapping entities.
+            overlap = {
+                "id": "hall",
+                "name": "Hall",
+                "width": 4,
+                "height": 4,
+                "tiles": ["0000"] * 4,
+                "start_x": 1,
+                "start_y": 1,
+                "entities": [
+                    {"type": "monster", "x": 1, "y": 1, "key": "goblin"},
+                    {"type": "trap", "x": 1, "y": 1, "key": "spike"},
+                ],
+            }
+            r = await client.post(f"/api/modules/{adv_id}/areas", json=overlap)
+            assert r.status_code == 422
+            assert any("overlaps" in err for err in r.json()["detail"]["errors"])
+
+
+@pytest.mark.asyncio
+async def test_compile_adventure_with_entities(cleanup_workshop_adventures):
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            resp = await client.post("/api/modules/adventures", json={"title": "Entity Compile Test"})
+            assert resp.status_code == 200
+            adv_id = resp.json()["adventure"]["id"]
+            cleanup_workshop_adventures.add(adv_id)
+
+            await client.post(f"/api/modules/{adv_id}/areas", json={
+                "id": "hall",
+                "name": "Hall",
+                "width": 6,
+                "height": 6,
+                "tiles": ["111111", "100001", "100001", "100001", "100001", "111111"],
+                "start_x": 1,
+                "start_y": 1,
+                "entities": [
+                    {"type": "monster", "x": 2, "y": 2, "key": "goblin", "count": 1},
+                    {"type": "trap", "x": 4, "y": 2, "key": "spike", "damage": "1d6"},
+                    {"type": "treasure", "x": 3, "y": 3, "value": 10},
+                ],
+            })
+            await client.post(f"/api/modules/{adv_id}/areas/start/exits", json={
+                "to": "hall",
+                "kind": "passage",
+                "from_x": 7,
+                "from_y": 1,
+                "to_x": 1,
+                "to_y": 1,
+            })
+            comp = await client.post(f"/api/modules/{adv_id}/compile")
+            assert comp.status_code == 200
+            mod = comp.json()["module"]
+            assert mod["name"] == "Entity Compile Test"
+            assert mod["map"]["width"] > 0
+            assert mod["map"]["height"] > 0
