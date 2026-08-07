@@ -12,7 +12,7 @@ Environment=OLLAMA_MODEL=llama3.2
 # Persistent env (TENSHIN_SECRET, DATABASE_URL, OLLAMA_ENABLED, etc.) lives in
 # /opt/tenshin/sanctuary/.env so deploys never overwrite them.
 EnvironmentFile=-/opt/tenshin/sanctuary/.env
-ExecStart=/usr/bin/python3 -m uvicorn backend.app.main:app --host 127.0.0.1 --port 9300
+ExecStart=/opt/tenshin/sanctuary/.venv/bin/python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 9300
 Restart=always
 RestartSec=5
 User=tenshin

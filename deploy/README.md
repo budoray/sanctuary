@@ -31,8 +31,9 @@ Python updates, run database migrations, and restart the service.
 2. For each repo, runs `git pull --ff-only origin main` (or falls back to
    `git fetch && git reset --hard origin/main` if the branch diverged).
 3. For Sanctuary specifically:
-   - `pip install -r requirements.txt`
-   - `alembic upgrade head`
+   - Create/use the Python venv at `/opt/tenshin/sanctuary/.venv`
+   - `.venv/bin/pip install -r requirements.txt`
+   - `.venv/bin/python -m alembic upgrade head`
    - `systemctl restart tenshin-sanctuary`
 
 No frontend build is needed because `frontend/static/` is served directly.
@@ -76,7 +77,7 @@ systemctl reload caddy
 
 # Run migrations by hand
 cd /opt/tenshin/sanctuary/backend
-python3 -m alembic upgrade head
+/opt/tenshin/sanctuary/.venv/bin/python -m alembic upgrade head
 ```
 
 ## Log rotation
