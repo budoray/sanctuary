@@ -915,12 +915,6 @@ button.danger:hover:not(:disabled) {
   position: relative;
 }
 
-.game-canvas-container canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 /* Screen vignette and canvas atmosphere */
 .game-canvas-container::before {
   content: '';
@@ -940,7 +934,7 @@ button.danger:hover:not(:disabled) {
 }
 
 /* Low HP desaturation applied to the game shell */
-.game-shell.low-hp .game-canvas-container canvas {
+.game-shell.low-hp .game-canvas-container {
   filter: grayscale(0.45) contrast(1.05);
   transition: filter 0.4s ease;
 }
@@ -3428,5 +3422,178 @@ button.danger:hover:not(:disabled) {
   .realms-section .module-cards {
     grid-template-columns: 1fr;
     grid-auto-rows: auto;
+  }
+}
+
+/* DOM map renderer */
+.game-map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  z-index: 1;
+  image-rendering: pixelated;
+}
+
+.game-tile {
+  width: 40px;
+  height: 40px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.game-tile.tile-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.game-tile.tile-wall::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+
+.game-tile.tile-highlight-move {
+  box-shadow: inset 0 0 0 2px rgba(28, 31, 37, 0.85), inset 0 0 12px rgba(255, 255, 255, 0.12);
+}
+
+.game-tile.tile-highlight-range {
+  box-shadow: inset 0 0 0 2px rgba(42, 58, 26, 0.9), inset 0 0 14px rgba(46, 204, 113, 0.18);
+}
+
+.game-tokens {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.game-effects {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.game-token {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.game-token .token-backing {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.game-token.player .token-backing {
+  background: #3498db;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.game-token.monster .token-backing {
+  background: #2ecc71;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.game-token.active .token-backing {
+  box-shadow: 0 0 0 4px #f1c40f, 0 0 12px rgba(241, 196, 15, 0.6), 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.game-token.down .token-backing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.game-token .token-image {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.game-token .token-initial {
+  position: relative;
+  z-index: 1;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  pointer-events: none;
+}
+
+.game-token .token-hp-bar {
+  position: absolute;
+  bottom: 2px;
+  left: 4px;
+  right: 4px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 2px;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.game-token .token-hp-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.game-token .token-hp-fill.high { background: #2ecc71; }
+.game-token .token-hp-fill.medium { background: #f1c40f; }
+.game-token .token-hp-fill.low { background: #c0392b; }
+
+.slash-effect {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background:
+    linear-gradient(45deg, transparent 46%, rgba(255, 255, 255, 0.95) 46%, rgba(255, 255, 255, 0.95) 54%, transparent 54%),
+    linear-gradient(-45deg, transparent 46%, rgba(255, 255, 255, 0.95) 46%, rgba(255, 255, 255, 0.95) 54%, transparent 54%);
+  opacity: 0.9;
+  animation: slash-fade 0.35s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes slash-fade {
+  to {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+@media (max-width: 700px) {
+  .game-token .token-backing {
+    width: 28px;
+    height: 28px;
+  }
+  .game-token .token-image {
+    width: 22px;
+    height: 22px;
   }
 }

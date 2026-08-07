@@ -1,4 +1,3 @@
-import { Application, Assets, Container, Graphics, Sprite, Text } from 'pixi.js';
 import type { Socket } from 'socket.io-client';
 import {
   actInSession, advanceSession, dmMove, dmReveal, dmSpawn, GameSession,
@@ -21,17 +20,8 @@ function withTimeout<T>(promise: Promise<T>, ms: number, reason = 'Operation tim
   });
 }
 
-const WALL_BASE = 0x23262d;
-const WALL_TOP = 0x3a3f4a;
-const WALL_SHADOW = 0x15171c;
-const FLOOR_COLOR = 0x121418;
-const FLOOR_BORDER = 0x2c2f38;
-const FLOOR_HIGHLIGHT = 0x1c1f25;
-const FLOOR_RANGE_HIGHLIGHT = 0x2a3a1a;
 const VISION_RADIUS = 6;
 const RANGED_RANGE = 4;
-const TRAP_COLOR = 0x8b0000;
-const TRAP_HIGHLIGHT = 0xff4444;
 
 interface ModuleData {
   width: number;
@@ -41,22 +31,13 @@ interface ModuleData {
   theme?: string;
 }
 
-interface Particle {
-  gfx: Graphics;
-  vx: number;
-  vy: number;
-  life: number;
-  maxLife: number;
-}
-
 export class Game {
   private root: HTMLElement;
   private sessionId: string;
   private module: ModuleData;
-  private app: Application | null = null;
-  private mapContainer: Container = new Container();
-  private tokenContainer: Container = new Container();
-  private fxContainer: Container = new Container();
+  private mapContainer: HTMLElement;
+  private tokenContainer: HTMLElement;
+  private fxContainer: HTMLElement;
   private ui: HTMLElement;
   private logEl: HTMLElement = document.createElement('div');
   private statusEl: HTMLElement = document.createElement('div');
@@ -74,13 +55,11 @@ export class Game {
   private canvasContainer: HTMLElement;
   private timerInterval: number | null = null;
   private timeoutFired = false;
-  private tileSprites: Container[][] = [];
+  private tileSprites: HTMLElement[][] = [];
   private lastTokenHp: Map<string, number> = new Map();
   private shakeFrames = 0;
   private lastLogLength = 0;
   private lastBannerTurn = 0;
-  private particles: Particle[] = [];
-  private ambientTime = 0;
   private cameraX = 0;
   private cameraY = 0;
   private tooltip: HTMLElement;
@@ -132,6 +111,12 @@ export class Game {
 
     this.root.className = 'game-shell';
     this.canvasContainer = el('div', { className: 'game-canvas-container' });
+    this.mapContainer = el('div', { className: 'game-map' });
+    this.tokenContainer = el('div', { className: 'game-tokens' });
+    this.fxContainer = el('div', { className: 'game-effects' });
+    this.canvasContainer.appendChild(this.mapContainer);
+    this.canvasContainer.appendChild(this.tokenContainer);
+    this.canvasContainer.appendChild(this.fxContainer);
     this.ui = this.buildUI();
     this.chatPanel = this.buildChatPanel();
     this.presencePanel = this.buildPresencePanel();
@@ -219,30 +204,8 @@ export class Game {
     const releaseSafety = () => window.clearTimeout(safetyTimeout);
 
     try {
-      this.app = new Application();
-      this.setLoadingStatus('Opening the gate...');
-      await withTimeout(
-        this.app.init({
-          resizeTo: this.canvasContainer,
-          backgroundColor: 0x050607,
-          antialias: true,
-        }),
-        5000,
-        'Pixi renderer failed to start'
-      );
-      this.canvasContainer.appendChild(this.app.canvas as HTMLCanvasElement);
-
-      this.mapContainer = new Container();
-      this.tokenContainer = new Container();
-      this.fxContainer = new Container();
-      this.app.stage.addChild(this.mapContainer);
-      this.app.stage.addChild(this.tokenContainer);
-      this.app.stage.addChild(this.fxContainer);
-
       this.setLoadingStatus('Loading realm tiles...');
       try {
-        // Pixi Assets must be initialised before loading in some environments.
-        await withTimeout(Assets.init(), 3000, 'Pixi Assets init timed out');
         await withTimeout(loadAtlas(), 5000, 'Tile atlas load timed out');
       } catch (err: any) {
         // eslint-disable-next-line no-console
@@ -253,8 +216,6 @@ export class Game {
       this.renderMap();
       this.renderTokens(true);
       this.centerMap();
-
-      this.app.ticker.add((ticker) => this.onTick(ticker));
 
       this.setLoadingStatus('Joining the session...');
       this.socket = connectSocket();
@@ -925,84 +886,40 @@ export class Game {
   }
 
   private renderMap() {
-    if (!this.app) return;
-    this.mapContainer.removeChildren();
+    clear(this.mapContainer);
     this.tileSprites = [];
     const themeId = this.module.theme ?? '';
     const theme = getTheme(themeId);
+
+    const mapW = this.module.width * TILE_SIZE;
+    const mapH = this.module.height * TILE_SIZE;
+    this.mapContainer.style.width = `${mapW}px`;
+    this.mapContainer.style.height = `${mapH}px`;
+    this.mapContainer.style.gridTemplateColumns = `repeat(${this.module.width}, ${TILE_SIZE}px)`;
+    this.mapContainer.style.gridTemplateRows = `repeat(${this.module.height}, ${TILE_SIZE}px)`;
+    this.tokenContainer.style.width = `${mapW}px`;
+    this.tokenContainer.style.height = `${mapH}px`;
+    this.fxContainer.style.width = `${mapW}px`;
+    this.fxContainer.style.height = `${mapH}px`;
+
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || '';
-      const tileRow: Container[] = [];
+      const tileRow: HTMLElement[] = [];
       for (let x = 0; x < this.module.width; x++) {
         const tile = row[x] || '0';
-        const c = new Container();
-        this.drawTile(c, tile, x, y, themeId, theme);
-        c.x = x * TILE_SIZE;
-        c.y = y * TILE_SIZE;
-        c.eventMode = 'static';
-        c.on('pointerdown', () => this.onTileClick(x, y));
-        this.mapContainer.addChild(c);
-        tileRow.push(c);
+        const url = theme ? tileFrame(themeId, theme, tile) : null;
+        const kind = tile === '1' ? 'wall' : tile === '2' ? 'trap' : 'floor';
+        const tileEl = el('div', {
+          className: `game-tile tile-${kind}`,
+          style: url ? `background-image:url('${url}')` : undefined,
+          onclick: () => this.onTileClick(x, y),
+        });
+        this.mapContainer.appendChild(tileEl);
+        tileRow.push(tileEl);
       }
       this.tileSprites.push(tileRow);
     }
     this.centerMap();
-  }
-
-  private drawTile(c: Container, tile: string, x: number, y: number, themeId: string, theme: import('../lib/tile-atlas').TileTheme | null) {
-    const tex = theme ? tileFrame(themeId, theme, tile) : null;
-    if (tex) {
-      const s = new Sprite(tex);
-      s.width = TILE_SIZE;
-      s.height = TILE_SIZE;
-      c.addChild(s);
-      // Slight shading to keep lighting effects readable
-      const overlay = new Graphics();
-      overlay.rect(0, 0, TILE_SIZE, TILE_SIZE);
-      overlay.fill({ color: 0x000000, alpha: 0.12 });
-      c.addChild(overlay);
-    } else if (tile === '1') {
-      const g = new Graphics();
-      // Wall with depth
-      g.rect(0, 0, TILE_SIZE, TILE_SIZE);
-      g.fill({ color: WALL_SHADOW });
-      g.rect(2, 2, TILE_SIZE - 4, TILE_SIZE - 4);
-      g.fill({ color: WALL_BASE });
-      g.rect(4, 4, TILE_SIZE - 8, TILE_SIZE - 8);
-      g.fill({ color: WALL_TOP });
-      // Cracks / stone detail
-      g.rect(8, 10, 4, 12);
-      g.fill({ color: WALL_BASE, alpha: 0.5 });
-      g.rect(24, 20, 3, 8);
-      g.fill({ color: WALL_BASE, alpha: 0.4 });
-      c.addChild(g);
-    } else {
-      const g = new Graphics();
-      // Floor
-      g.rect(0, 0, TILE_SIZE, TILE_SIZE);
-      g.fill({ color: FLOOR_COLOR });
-      g.rect(0, 0, TILE_SIZE, TILE_SIZE);
-      g.stroke({ width: 1, color: FLOOR_BORDER });
-      // Subtle stone speckle
-      if ((x + y * 7) % 5 === 0) {
-        g.rect(TILE_SIZE * 0.3, TILE_SIZE * 0.4, 2, 2);
-        g.fill({ color: 0x2a2d35, alpha: 0.4 });
-      }
-      if ((x * 3 + y) % 7 === 0) {
-        g.rect(TILE_SIZE * 0.7, TILE_SIZE * 0.2, 2, 2);
-        g.fill({ color: 0x2a2d35, alpha: 0.3 });
-      }
-      if (tile === '2') {
-        // Trap tile: faint red speckle / spike hint
-        g.rect(TILE_SIZE * 0.25, TILE_SIZE * 0.25, 3, 3);
-        g.fill({ color: TRAP_HIGHLIGHT, alpha: 0.35 });
-        g.rect(TILE_SIZE * 0.65, TILE_SIZE * 0.55, 3, 3);
-        g.fill({ color: TRAP_HIGHLIGHT, alpha: 0.3 });
-        g.rect(TILE_SIZE * 0.45, TILE_SIZE * 0.65, 2, 2);
-        g.fill({ color: TRAP_COLOR, alpha: 0.4 });
-      }
-      c.addChild(g);
-    }
   }
 
   private hasLineOfSight(x0: number, y0: number, x1: number, y1: number): boolean {
@@ -1040,15 +957,15 @@ export class Game {
         const g = this.tileSprites[y]?.[x];
         if (!g) continue;
         const tile = row[x] || '0';
-        let highlight: number | null = null;
+        g.classList.remove('tile-highlight-move', 'tile-highlight-range');
         if (this.action === 'move' && tile !== '1') {
           const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
-          if (dist === 1) highlight = FLOOR_HIGHLIGHT;
+          if (dist === 1) g.classList.add('tile-highlight-move');
         }
         if (this.action === 'ranged' && tile !== '1') {
           const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
           if (dist > 0 && dist <= RANGED_RANGE && this.hasLineOfSight(player.x, player.y, x, y)) {
-            highlight = FLOOR_RANGE_HIGHLIGHT;
+            g.classList.add('tile-highlight-range');
           }
         }
         if (this.action === 'ability' && tile !== '1') {
@@ -1056,16 +973,15 @@ export class Game {
           const cls = (player.classes?.[0] ?? '').toLowerCase();
           const abilityRange = cls === 'magic-user' || cls === 'illusionist' ? 6 : cls === 'cleric' ? 4 : 1;
           if (dist > 0 && dist <= abilityRange && this.hasLineOfSight(player.x, player.y, x, y)) {
-            highlight = FLOOR_RANGE_HIGHLIGHT;
+            g.classList.add('tile-highlight-range');
           }
         }
-        g.tint = highlight ?? 0xffffff;
       }
     }
   }
 
   private updateLighting() {
-    if (!this.session || !this.app || this.tileSprites.length === 0) return;
+    if (!this.session || this.tileSprites.length === 0) return;
     const px = this.session.player.x;
     const py = this.session.player.y;
     for (let y = 0; y < this.module.height; y++) {
@@ -1091,62 +1007,36 @@ export class Game {
         } else {
           alpha = 0;
         }
-        this.tileSprites[y][x].alpha = alpha;
+        const el = this.tileSprites[y][x];
+        el.style.opacity = String(alpha);
+        el.classList.toggle('tile-hidden', alpha === 0);
       }
     }
   }
 
   private centerMap() {
-    if (!this.app) return;
     const target = this.playerPixelCenter();
     const mw = this.module.width * TILE_SIZE;
     const mh = this.module.height * TILE_SIZE;
+    const cw = this.canvasContainer.clientWidth;
+    const ch = this.canvasContainer.clientHeight;
 
     let baseX: number;
     let baseY: number;
-    if (mw <= this.app.screen.width && mh <= this.app.screen.height) {
-      baseX = (this.app.screen.width - mw) / 2;
-      baseY = (this.app.screen.height - mh) / 2;
+    if (mw <= cw && mh <= ch) {
+      baseX = (cw - mw) / 2;
+      baseY = (ch - mh) / 2;
     } else {
       const px = target ? target.x : mw / 2;
       const py = target ? target.y : mh / 2;
-      baseX = this.app.screen.width / 2 - px;
-      baseY = this.app.screen.height / 2 - py;
-      baseX = Math.min(0, Math.max(this.app.screen.width - mw, baseX));
-      baseY = Math.min(0, Math.max(this.app.screen.height - mh, baseY));
+      baseX = cw / 2 - px;
+      baseY = ch / 2 - py;
+      baseX = Math.min(0, Math.max(cw - mw, baseX));
+      baseY = Math.min(0, Math.max(ch - mh, baseY));
     }
 
     this.cameraX = baseX;
     this.cameraY = baseY;
-    this.applyMapPosition();
-  }
-
-  private updateCamera(dt: number) {
-    if (!this.app) return;
-    const target = this.playerPixelCenter();
-    const mw = this.module.width * TILE_SIZE;
-    const mh = this.module.height * TILE_SIZE;
-
-    let desiredX: number;
-    let desiredY: number;
-    if (mw <= this.app.screen.width && mh <= this.app.screen.height) {
-      desiredX = (this.app.screen.width - mw) / 2;
-      desiredY = (this.app.screen.height - mh) / 2;
-    } else {
-      const px = target ? target.x : mw / 2;
-      const py = target ? target.y : mh / 2;
-      desiredX = this.app.screen.width / 2 - px;
-      desiredY = this.app.screen.height / 2 - py;
-      desiredX = Math.min(0, Math.max(this.app.screen.width - mw, desiredX));
-      desiredY = Math.min(0, Math.max(this.app.screen.height - mh, desiredY));
-    }
-
-    const speed = 8;
-    const dtSec = dt / 60;
-    this.cameraX += (desiredX - this.cameraX) * (1 - Math.exp(-speed * dtSec));
-    this.cameraY += (desiredY - this.cameraY) * (1 - Math.exp(-speed * dtSec));
-    if (Math.abs(this.cameraX - desiredX) < 0.2) this.cameraX = desiredX;
-    if (Math.abs(this.cameraY - desiredY) < 0.2) this.cameraY = desiredY;
     this.applyMapPosition();
   }
 
@@ -1166,12 +1056,25 @@ export class Game {
       ox = (Math.random() - 0.5) * intensity;
       oy = (Math.random() - 0.5) * intensity;
     }
-    this.mapContainer.x = this.cameraX + ox;
-    this.mapContainer.y = this.cameraY + oy;
-    this.tokenContainer.x = this.cameraX + ox;
-    this.tokenContainer.y = this.cameraY + oy;
-    this.fxContainer.x = this.cameraX + ox;
-    this.fxContainer.y = this.cameraY + oy;
+    const transform = `translate(${this.cameraX + ox}px, ${this.cameraY + oy}px)`;
+    this.mapContainer.style.transform = transform;
+    this.tokenContainer.style.transform = transform;
+    this.fxContainer.style.transform = transform;
+  }
+
+  private shake(frames: number) {
+    this.shakeFrames = frames;
+    const step = () => {
+      if (this.shakeFrames <= 0) {
+        this.shakeFrames = 0;
+        this.applyMapPosition();
+        return;
+      }
+      this.applyMapPosition();
+      this.shakeFrames -= 1;
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   private renderTokens(_snap = false) {
@@ -1180,93 +1083,51 @@ export class Game {
     const tokens: Token[] = [...session.players, ...session.monsters];
     const activeId = session.phase === 'player' ? session.player?.id : null;
 
-    this.tokenContainer.removeChildren();
+    clear(this.tokenContainer);
 
     tokens.forEach((t) => {
       if (t.alive === false) return;
       const isPlayer = t.type === 'player';
       const isActive = t.id === activeId;
-      const color = isPlayer ? 0x3498db : 0x2ecc71;
       const x = t.x * TILE_SIZE;
       const y = t.y * TILE_SIZE;
-      const cx = x + TILE_SIZE / 2;
-      const cy = y + TILE_SIZE / 2;
-      const radius = TILE_SIZE * 0.38;
 
-      const g = new Graphics();
-      g.eventMode = 'static';
-      g.cursor = 'pointer';
-      g.on('pointerdown', () => this.onTokenClick(t));
-      g.on('pointerover', (e: any) => {
-        const rect = this.canvasContainer.getBoundingClientRect();
-        this.showTooltip(t, rect.left + e.global.x, rect.top + e.global.y);
+      const tokenEl = el('div', {
+        className: `game-token ${isPlayer ? 'player' : 'monster'}${isActive ? ' active' : ''}${t.down ? ' down' : ''}`,
+        style: `left:${x}px;top:${y}px;`,
+        onclick: () => this.onTokenClick(t),
+        onmouseenter: (e: MouseEvent) => this.showTooltip(t, e.clientX, e.clientY),
+        onmousemove: (e: MouseEvent) => this.moveTooltip(e.clientX, e.clientY),
+        onmouseleave: () => this.hideTooltip(),
       });
-      g.on('pointermove', (e: any) => {
-        const rect = this.canvasContainer.getBoundingClientRect();
-        this.moveTooltip(rect.left + e.global.x, rect.top + e.global.y);
-      });
-      g.on('pointerout', () => this.hideTooltip());
 
-      // Drop shadow
-      g.ellipse(cx, cy + 5, radius * 0.85, radius * 0.45);
-      g.fill({ color: 0x000000, alpha: 0.4 });
+      const backing = el('div', { className: 'token-backing' });
+      tokenEl.appendChild(backing);
 
-      // Active-player gold ring
-      if (isActive) {
-        g.circle(cx, cy, radius + 4);
-        g.fill({ color: 0xf1c40f, alpha: 0.95 });
-      }
-
-      // Token body
-      g.circle(cx, cy, radius);
-      g.fill({ color, alpha: 1 });
-      g.circle(cx, cy, radius);
-      g.stroke({ width: 2, color: 0xffffff, alpha: 0.9 });
-
-      // Downed overlay
-      if (t.down) {
-        g.circle(cx, cy, radius);
-        g.fill({ color: 0x000000, alpha: 0.5 });
-      }
-
-      this.tokenContainer.addChild(g);
-
-      // Token sprite or initial fallback
       const tokenKey = isPlayer ? (t.classes?.[0] ?? 'hero') : (t.monster ?? '');
-      const tokenTex = tokenFrame(tokenKey);
-      if (tokenTex) {
-        const sprite = new Sprite(tokenTex);
-        sprite.anchor.set(0.5);
-        sprite.x = cx;
-        sprite.y = cy;
-        const size = TILE_SIZE * 0.7;
-        sprite.width = size;
-        sprite.height = size;
-        this.tokenContainer.addChild(sprite);
+      const tokenUrl = tokenFrame(tokenKey);
+      if (tokenUrl) {
+        const img = el('img', {
+          className: 'token-image',
+          src: tokenUrl,
+          alt: t.name,
+          onerror: () => { img.style.display = 'none'; },
+        }) as HTMLImageElement;
+        tokenEl.appendChild(img);
       } else {
         const initial = (t.name || '?').charAt(0).toUpperCase();
-        const label = new Text(initial, {
-          fontSize: 16, fill: 0xffffff, fontWeight: 'bold', align: 'center',
-        });
-        label.anchor.set(0.5);
-        label.x = cx;
-        label.y = cy;
-        this.tokenContainer.addChild(label);
+        tokenEl.appendChild(el('div', { className: 'token-initial' }, initial));
       }
 
-      // HP bar
       const hpRatio = Math.max(0, Math.min(1, t.hp / t.max_hp));
-      const barW = TILE_SIZE - 8;
-      const barH = 4;
-      const barX = x + 4;
-      const barY = y + TILE_SIZE - 6;
-      const hpColor = hpRatio > 0.5 ? 0x2ecc71 : hpRatio > 0.25 ? 0xf1c40f : 0xc0392b;
-      const hpBar = new Graphics();
-      hpBar.rect(barX, barY, barW, barH);
-      hpBar.fill({ color: 0x000000, alpha: 0.7 });
-      hpBar.rect(barX, barY, barW * hpRatio, barH);
-      hpBar.fill({ color: hpColor, alpha: 1 });
-      this.tokenContainer.addChild(hpBar);
+      const bar = el('div', { className: 'token-hp-bar' });
+      const fill = el('div', { className: 'token-hp-fill' });
+      fill.style.width = `${Math.round(hpRatio * 100)}%`;
+      fill.classList.add(hpRatio > 0.5 ? 'high' : hpRatio > 0.25 ? 'medium' : 'low');
+      bar.appendChild(fill);
+      tokenEl.appendChild(bar);
+
+      this.tokenContainer.appendChild(tokenEl);
     });
 
     this.lastTokenHp.clear();
@@ -1276,161 +1137,13 @@ export class Game {
   }
 
   private spawnSlashEffect(fromX: number, fromY: number, toX: number, toY: number) {
-    const g = new Graphics();
     const cx = (fromX + toX) / 2 * TILE_SIZE + TILE_SIZE / 2;
     const cy = (fromY + toY) / 2 * TILE_SIZE + TILE_SIZE / 2;
-    g.moveTo(cx - 12, cy - 12);
-    g.lineTo(cx + 12, cy + 12);
-    g.stroke({ width: 3, color: 0xffffff, alpha: 0.9 });
-    g.moveTo(cx + 12, cy - 12);
-    g.lineTo(cx - 12, cy + 12);
-    g.stroke({ width: 3, color: 0xffffff, alpha: 0.9 });
-    this.fxContainer.addChild(g);
-    let life = 12;
-    const tick = () => {
-      life--;
-      g.alpha = life / 12;
-      if (life <= 0) {
-        g.destroy();
-        return;
-      }
-      requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }
-
-  private ambientEffectConfig() {
-    const theme = this.module.theme || 'dungeon';
-    switch (theme) {
-      case 'ice':
-        return {
-          count: 4,
-          color: 0xd6eaf8,
-          size: 1.1,
-          alpha: 0.7,
-          vx: () => (Math.random() - 0.5) * 0.2,
-          vy: () => 0.4 + Math.random() * 0.4,
-          life: 100 + Math.random() * 80,
-        };
-      case 'lava':
-        return {
-          count: 4,
-          color: Math.random() < 0.5 ? 0xff5500 : 0xffaa00,
-          size: 1.3,
-          alpha: 0.85,
-          vx: () => (Math.random() - 0.5) * 0.4,
-          vy: () => -0.5 - Math.random() * 0.5,
-          life: 70 + Math.random() * 60,
-        };
-      case 'forest':
-        return {
-          count: 2,
-          color: 0xa9dfbf,
-          size: 0.9,
-          alpha: 0.4,
-          vx: () => 0.2 + Math.random() * 0.3,
-          vy: () => 0.6 + Math.random() * 0.4,
-          life: 90 + Math.random() * 70,
-        };
-      case 'library':
-        return {
-          count: 2,
-          color: 0xf7dc6f,
-          size: 0.8,
-          alpha: 0.5,
-          vx: () => (Math.random() - 0.5) * 0.15,
-          vy: () => -0.2 - Math.random() * 0.2,
-          life: 140 + Math.random() * 100,
-        };
-      default:
-        return {
-          count: 3,
-          color: Math.random() < 0.25 ? 0xffaa44 : 0x9a9590,
-          size: Math.random() < 0.25 ? 1.2 : 0.8,
-          alpha: Math.random() < 0.25 ? 0.9 : 0.45,
-          vx: () => (Math.random() - 0.5) * 0.3,
-          vy: () => (Math.random() < 0.25 ? -0.3 - Math.random() * 0.4 : (Math.random() - 0.5) * 0.2),
-          life: 120 + Math.random() * 120,
-        };
-    }
-  }
-
-  private spawnAmbientParticles() {
-    if (!this.session || !this.app) return;
-    const px = this.session.player.x * TILE_SIZE + TILE_SIZE / 2;
-    const py = this.session.player.y * TILE_SIZE + TILE_SIZE / 2;
-    const radius = VISION_RADIUS * TILE_SIZE;
-    const cfg = this.ambientEffectConfig();
-    for (let i = 0; i < cfg.count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const dist = Math.random() * radius;
-      const x = px + Math.cos(angle) * dist;
-      const y = py + Math.sin(angle) * dist;
-      const g = new Graphics();
-      g.circle(0, 0, cfg.size);
-      g.fill({ color: cfg.color, alpha: cfg.alpha });
-      g.x = x;
-      g.y = y;
-      this.fxContainer.addChild(g);
-      this.particles.push({
-        gfx: g,
-        vx: cfg.vx(),
-        vy: cfg.vy(),
-        life: cfg.life,
-        maxLife: cfg.life,
-      });
-    }
-  }
-
-  private onTick(ticker: import('pixi.js').Ticker) {
-    const dt = ticker.deltaTime;
-    const dtSec = dt / 60;
-
-    // Ambient dust / torch sparks
-    if (this.session && this.session.status === 'active' && Math.random() < 0.08) {
-      this.spawnAmbientParticles();
-    }
-    if (this.shakeFrames > 0) {
-      this.shakeFrames -= dt;
-    }
-    this.updateCamera(dt);
-
-    // Particles
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const p = this.particles[i];
-      p.life -= dt;
-      p.gfx.x += p.vx;
-      p.gfx.y += p.vy;
-      p.gfx.alpha = Math.max(0, p.life / p.maxLife);
-      // Ambient motes keep drifting; combat particles decay quickly.
-      if (Math.abs(p.vx) > 1 || Math.abs(p.vy) > 1) {
-        p.vx *= 0.95;
-        p.vy *= 0.95;
-      }
-      if (p.life <= 0) {
-        p.gfx.destroy();
-        this.particles.splice(i, 1);
-      }
-    }
-
-    // Ambient torch flicker on tiles near player
-    this.ambientTime += dtSec;
-    if (this.session && this.app && this.ambientTime > 0.15) {
-      this.ambientTime = 0;
-      const px = this.session.player.x;
-      const py = this.session.player.y;
-      for (let y = Math.max(0, py - VISION_RADIUS); y <= Math.min(this.module.height - 1, py + VISION_RADIUS); y++) {
-        for (let x = Math.max(0, px - VISION_RADIUS); x <= Math.min(this.module.width - 1, px + VISION_RADIUS); x++) {
-          const g = this.tileSprites[y]?.[x];
-          if (!g) continue;
-          const dist = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
-          if (dist <= VISION_RADIUS && g.alpha > 0.3) {
-            const flicker = 0.97 + Math.random() * 0.06;
-            g.alpha = Math.min(1, g.alpha * flicker);
-          }
-        }
-      }
-    }
+    const slash = el('div', { className: 'slash-effect' });
+    slash.style.left = `${cx - 16}px`;
+    slash.style.top = `${cy - 16}px`;
+    this.fxContainer.appendChild(slash);
+    window.setTimeout(() => slash.remove(), 350);
   }
 
   private async onTileClick(x: number, y: number) {
@@ -1559,6 +1272,7 @@ export class Game {
     this.renderTokens();
     this.updateLighting();
     this.highlightActionTiles();
+    this.centerMap();
     this.updateStatus();
     this.updateActions();
     this.updateStats();
@@ -1705,7 +1419,7 @@ export class Game {
     }
     if (attacker) {
       this.spawnSlashEffect(attacker.x, attacker.y, player.x, player.y);
-      this.shakeFrames = 12;
+      this.shake(12);
     }
   }
 
@@ -1823,11 +1537,11 @@ export class Game {
       const newEntries = log.slice(this.lastLogLength);
       const combatKeywords = ['strike', 'blow', 'hit', 'miss', 'pain', 'weapon', 'crumple', 'fall', 'dies', 'bites', 'stinging'];
       if (newEntries.some((e) => combatKeywords.some((k) => e.toLowerCase().includes(k)))) {
-        this.shakeFrames = 12;
+        this.shake(12);
       }
       if (newEntries.some((e) => e.toLowerCase().includes('trap') || e.toLowerCase().includes('spike'))) {
         this.audio.trapTrigger();
-        this.shakeFrames = 20;
+        this.shake(20);
         this.triggerDamageFlash();
       }
       this.lastLogLength = log.length;
@@ -1869,7 +1583,6 @@ export class Game {
       this.socket.disconnect();
       this.socket = null;
     }
-    this.app?.destroy(true, { children: true });
     clear(this.root);
   }
 }

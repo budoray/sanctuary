@@ -1,17 +1,3 @@
-import { Assets, Rectangle, Sprite, Texture } from 'pixi.js';
-
-const SHEET_PATH = '/assets/kenney/roguelikeSheet_transparent.png';
-const TILE_WIDTH = 16;
-const TILE_HEIGHT = 16;
-const SPACING = 1;
-const COLUMNS = 57;
-const ROWS = 31;
-
-let baseTexture: Texture | null = null;
-let frameCache: Map<string, Texture> = new Map();
-const themeTextures: Map<string, Texture> = new Map();
-const tokenTextures: Map<string, Texture> = new Map();
-
 export interface TileTheme {
   name: string;
   floor: [number, number];
@@ -21,7 +7,7 @@ export interface TileTheme {
   water?: [number, number];
   lava?: [number, number];
   pit?: [number, number];
-  // Optional 32x32 custom art paths (falls back to Kenney sheet)
+  // Optional 32x32 custom art paths (preferred)
   images?: {
     floor?: string;
     wall?: string;
@@ -131,102 +117,41 @@ export function getTheme(id?: string): TileTheme | null {
   return THEMES[id] ?? null;
 }
 
-export async function loadAtlas(): Promise<Texture | null> {
-  if (baseTexture) return baseTexture;
-  try {
-    baseTexture = await Assets.load(SHEET_PATH);
-  } catch (err) {
-    console.warn('Failed to load tile atlas', err);
-  }
-
-  // Preload custom 32x32 theme tiles.
-  for (const [id, theme] of Object.entries(THEMES)) {
-    if (theme.images?.floor) {
-      try {
-        const tex = await Assets.load(theme.images.floor);
-        themeTextures.set(`${id}:floor`, tex);
-      } catch (err) {
-        console.warn(`Failed to load ${id} floor tile`, err);
-      }
-    }
-    if (theme.images?.wall) {
-      try {
-        const tex = await Assets.load(theme.images.wall);
-        themeTextures.set(`${id}:wall`, tex);
-      } catch (err) {
-        console.warn(`Failed to load ${id} wall tile`, err);
-      }
-    }
-    if (theme.images?.trap) {
-      try {
-        const tex = await Assets.load(theme.images.trap);
-        themeTextures.set(`${id}:trap`, tex);
-      } catch (err) {
-        console.warn(`Failed to load ${id} trap tile`, err);
-      }
-    }
-  }
-
-  // Preload custom token sprites.
-  for (const [key, path] of Object.entries(TOKEN_IMAGES)) {
-    if (tokenTextures.has(key)) continue;
-    try {
-      const tex = await Assets.load(path);
-      tokenTextures.set(key, tex);
-    } catch (err) {
-      console.warn(`Failed to load token sprite ${key}`, err);
-    }
-  }
-
-  return baseTexture;
-}
-
-export function frameAt(col: number, row: number): Texture | null {
-  if (!baseTexture) return null;
-  if (col < 0 || col >= COLUMNS || row < 0 || row >= ROWS) return null;
-  const key = `${col},${row}`;
-  if (frameCache.has(key)) return frameCache.get(key)!;
-
-  const x = col * (TILE_WIDTH + SPACING);
-  const y = row * (TILE_HEIGHT + SPACING);
-  const frame = new Texture({
-    source: baseTexture.source,
-    frame: new Rectangle(x, y, TILE_WIDTH, TILE_HEIGHT),
+function preloadImage(src: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = src;
   });
-  frameCache.set(key, frame);
-  return frame;
 }
 
-export function spriteFor(col: number, row: number, size = 40): Sprite | null {
-  const tex = frameAt(col, row);
-  if (!tex) return null;
-  const s = new Sprite(tex);
-  s.width = size;
-  s.height = size;
-  return s;
+export async function loadAtlas(): Promise<void> {
+  const urls = new Set<string>();
+  for (const theme of Object.values(THEMES)) {
+    if (theme.images?.floor) urls.add(theme.images.floor);
+    if (theme.images?.wall) urls.add(theme.images.wall);
+    if (theme.images?.trap) urls.add(theme.images.trap);
+  }
+  for (const path of Object.values(TOKEN_IMAGES)) {
+    urls.add(path);
+  }
+  await Promise.all([...urls].map(preloadImage));
 }
 
-export function tileFrame(themeId: string, theme: TileTheme, tile: string): Texture | null {
-  const override = theme.tiles?.[tile];
-  if (override) return frameAt(override[0], override[1]);
+export function tileFrame(_themeId: string, theme: TileTheme, tile: string): string | null {
   switch (tile) {
     case '0':
     case '3':
     case '4':
-    case '5': {
-      const custom = theme.images?.floor ? themeTextures.get(`${themeId}:floor`) : null;
-      return custom ?? frameAt(theme.floor[0], theme.floor[1]);
-    }
-    case '1': {
-      const custom = theme.images?.wall ? themeTextures.get(`${themeId}:wall`) : null;
-      return custom ?? frameAt(theme.wall[0], theme.wall[1]);
-    }
-    case '2': {
-      const custom = theme.images?.trap ? themeTextures.get(`${themeId}:trap`) : null;
-      return custom ?? frameAt(theme.trap?.[0] ?? theme.floor[0], theme.trap?.[1] ?? theme.floor[1]);
-    }
+    case '5':
+      return theme.images?.floor ?? null;
+    case '1':
+      return theme.images?.wall ?? null;
+    case '2':
+      return theme.images?.trap ?? null;
     default:
-      return frameAt(theme.floor[0], theme.floor[1]);
+      return theme.images?.floor ?? null;
   }
 }
 
@@ -267,20 +192,8 @@ export const TOKEN_SPRITES: Record<string, TokenAtlas> = {
   dragon: { col: 21, row: 9 },
 };
 
-export function tokenFrame(key?: string): Texture | null {
+export function tokenFrame(key?: string): string | null {
   if (!key) return null;
   const normalized = key.toLowerCase().replace(/[-\s]/g, '');
-  const imagePath = TOKEN_IMAGES[normalized];
-  if (imagePath) {
-    const tex = tokenTextures.get(normalized);
-    if (tex) return tex;
-  }
-  const entry = TOKEN_SPRITES[normalized];
-  if (!entry) return null;
-  return frameAt(entry.col, entry.row);
-}
-
-export function resetAtlas() {
-  baseTexture = null;
-  frameCache.clear();
+  return TOKEN_IMAGES[normalized] ?? null;
 }
