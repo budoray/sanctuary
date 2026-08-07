@@ -21,17 +21,19 @@ cat deploy-all.sh | ssh root@<your-droplet-ip> bash
 ```
 
 The script is idempotent: run it again any time to pull the latest code, install
-Python updates, and restart the service.
+Python updates, run database migrations, and restart the service.
 
 ## What the deploy script does
 
 `deploy-all.sh` performs the following steps on the server:
 
-1. `cd /opt/tenshin/sanctuary`
-2. `git fetch`
-3. `git reset --hard origin/main`
-4. `pip install -r requirements.txt`
-5. `systemctl restart tenshin-sanctuary`
+1. Iterates over every directory under `/opt/tenshin/` that is a git repository.
+2. For each repo, runs `git pull --ff-only origin main` (or falls back to
+   `git fetch && git reset --hard origin/main` if the branch diverged).
+3. For Sanctuary specifically:
+   - `pip install -r requirements.txt`
+   - `alembic upgrade head`
+   - `systemctl restart tenshin-sanctuary`
 
 No frontend build is needed because `frontend/static/` is served directly.
 
