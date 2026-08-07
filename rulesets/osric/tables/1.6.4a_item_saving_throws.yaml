@@ -1,0 +1,66 @@
+id: 1.6.4a
+name: ITEM SAVING THROWS
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- 'ITEM IS MOST LIKE: TYPE OF  DAMAGE'
+- ACID/
+- CORROSION
+- COLD
+- (MAGICAL)
+- CRUSHING
+- BLOW DISINTEGRATE FALL (EACH
+- 10FT)
+- FIRE
+- (MAGICAL)
+- FIRE
+- (NORMAL) LIGHTNING
+- Crystal/Glass 5 5 19 20 10 5 3 15
+- Leather 10 3 4 20 1 6 4 13
+- Metal 7 1 6 20 1 2 1 11
+- Paper 16 2 11 20 1 20 18 20
+- Pottery or Bone 10 3 17 20 5 6 3 5
+- Rope or cloth 12 1 10 20 1 15 10 14
+- Stone or gem 3 1 17 18 1 2 1 14
+- Wood 10 1 10 20 2 7 5 10
+- If the character falls, a separate saving throw is made for every
+- ten feet of the fall unless the character lands on something soft
+- (a pile of leaves, water), in which case only one saving throw is
+- required regardless of the length of the fall.
+- 1.6.5.  TURNING THE UNDEAD
+- Clerics can “turn” the undead, and certain kinds of lesser fiends.
+- For good and neutral clerics, this means causing them to retreat
+- and possibly even destroying them. For evil clerics this means
+- making them non-hostile, or even bringing them under the cler-
+- ic’s control; an evil cleric can command undead or lesser fiends
+- as servants or minions.
+- In combat situations, treat turning like casting a spell with a
+- “fast” casting time that takes effect in the same segment. In oth-
+- er words, if you decide to turn, you can’t attack or cast a spell in
+- the same round. Your turning attempt can’t be interrupted like
+- spells can.
+- You make a single die roll on a d20 when you make a turning
+- attempt.
+- The area of effect is a 180-degree arc, to a range of 100 feet,
+- as long as the undead creature can directly perceive the cler -
+- ic’s holy symbol, even if the creature isn’t actually looking at the
+- cleric. An intervening wall blocks the effect even for an incor -
+- poreal undead creature, because while it can probably perceive
+- the holy symbol through the wall, it doesn’t directly perceive it.
+- Only one turning attempt may be made in a single day against
+- any group of undead creatures who are within the area of ef -
+- fect. Thus, if you fail to affect some of the undead, you cannot
+- try again during that encounter. If some undead creatures were
+- outside the area of effect, you can try to affect those ones with
+- a second turning attempt.
+- Each type of undead creature in the area of effect might be af -
+- fected, as shown on Table 1.6.5a, below.
+- • If the result is “—“, you have no chance of turning this type
+- creature.
+- •  If the result is “T”, the creature is turned automatically.
+- • If the result is “D*”, you affect 1d6+6 of that type unless the
+- type is fiend or paladin, in which case you affect 1d2 of them.
+- If you are of good or neutral alignment, the creatures are
+- automatically destroyed (good and neutral clerics can’t turn
+- paladins). If you are of evil alignment, the creatures may be
+- controlled (unless it is a paladin, in which case the paladin is
+- merely turned).

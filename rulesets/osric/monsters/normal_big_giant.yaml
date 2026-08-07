@@ -1,0 +1,17 @@
+name: Normal Big Giant
+frequency: common rare very rare no.  encountered 2d6 2d6 1d6
+size: medium medium large
+alignment: neutral neutral neutral
+move: 120ft 120ft 180ft
+armour_class: 7 [13] 6 [14] 5 [15]
+hit_dice: 2 3 4
+melee_attacks: 1 bite (2d4) 1 bite (2d4+1) 1 bite (2d6)
+senses: Keen Keen Keen
+lair_chance: Nil Nil Nil
+intelligence: animal (1) animal (1) animal (1)
+morale: 55 60 65
+loot: Nil Nil Nil
+experience: 50 +2/hp 75 +3/hp 160 +6/hp
+description: 'Normal hyenas are medium-sized mammals, 4–5ft long and weighing up  to around 100 lbs. They are muzzle-snouted, fur-covered, four-legged and  long-tailed predators and scavengers that hunt in packs and live in dens in  sub-tropical grasslands, woodlands and waste-lands. Many find their haunt - ing, laugh-like bark unnerving and their tendency to raid shallow graves has  sometimes earned them an evil reputation. The jaws of a hyena are very powerful for their size. Unarmed Combat (Normal and Big):  Normal and Big Hyenas cannot be tar - geted with grappling or overbearing attacks, but they may overbear. If not  fended off, they score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF  +8/na. Overbear Results Mods: ATK/DEF +2/na. Grappling Result Mods: ATK/ DEF na/na. Unarmed Combat (Giant): Giant Hyenas cannot be targeted with grappling or  overbearing attacks, but they may overbear. If not fended off, they score an  unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +10/na. Overbear
+  Results  Mods: ATK/DEF +4/na.'
+abilities: []

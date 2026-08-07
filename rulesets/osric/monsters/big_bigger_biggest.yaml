@@ -1,0 +1,23 @@
+name: Big Bigger Biggest
+frequency: uncommon common very rare
+no_encountered: 5d6 2d12 1d4
+size: small small medium
+alignment: neutral neutral neutral
+move: 210ft 150ft 180ft
+armour_class: 9 [11] 9 [11] 5 [15]
+hit_dice: 1 hp 1 to 2 hp 3
+melee_attacks: 1 bite (poison only) 1 bite (poison only) 1 bite (1d3 piercing + poison)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft
+lair_chance: Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0)
+morale: N/A N/A N/A
+loot: Nil Nil Nil
+experience: 31 +1/hp 30 +1/hp 125 +3/hp
+description: Giant centipedes can be encountered in three sizes.
+abilities:
+- heading: Immunities and Resistances
+  text: Many-legged. This creature cannot be knocked prone, over - borne, or grappled.
+- heading: Special Features
+  text: Climber. This creature can move on walls and ceilings as if they  were floors.
+- heading: Special Attacks
+  text: Poison Bite (Big).  Weak venom (save at +4) that only does 4d4  damage if the saving throw fails. Poison Bite (Bigger). Weak venom (save at +4), but the venom is  lethal if the saving throw fails. Poison Bite (Biggest). Relatively powerful venom (no adjustment  to saving throw). Death is the result of a failed save, but a suc- cessful save still results in 1d8 acid damage.  Unarmed Combat.  Giant centipedes cannot be overborne or  grappled, and do not employ these tactics.  CHIMERA

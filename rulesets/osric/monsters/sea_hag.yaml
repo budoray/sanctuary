@@ -1,0 +1,19 @@
+name: Sea Hag
+frequency: rare
+no_encountered: 1d3
+size: medium
+alignment: chaotic evil
+move: 90ft; 150ft swimming
+armour_class: 7 [13]
+hit_dice: '3'
+melee_attacks: 2 claws (1d3+3) or 1 weapon  (+3 damage)
+senses: Infravision 60ft
+lair_chance: 50%
+intelligence: average (8-10)
+morale: 60
+loot: Hoard 3, Cache 11
+experience: 410 +2/hp
+description: Sea hags typically make their lairs beneath the ocean depths,  but they are occasionally found in large lakes or other signifi - cant bodies of water. Their true form is that of a decrepit old  woman, ravaged by time and repellent beyond reason, but they  generally use their magic to assume a much more pleasant vis- age. They have sharp claws and teeth, as well as an insatiable  appetite for flesh. Most sea hags are thought to be capable of  speaking a number of languages.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (50%).  Any magic spell or effect has a 50%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. SCORPION, GIANT

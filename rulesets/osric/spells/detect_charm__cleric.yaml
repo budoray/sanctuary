@@ -1,0 +1,14 @@
+name: Detect Charm
+slug: detect_charm
+reversible: true
+class: cleric
+level: 2
+school: Clerical Divination
+range: 30-ft
+duration: 1 turn
+area_of_effect: See below
+components: V,S
+casting_time: 1 round
+saving_throw: None
+text: This spell reveals to the cleric whether a creature is subject to a charm spell. The spell's magic can discern a charm (or lack thereof) on up to ten creatures. The reverse of the spell conceals the existence of a charm, but affects only one creature.
+source: wiki2_spells.txt

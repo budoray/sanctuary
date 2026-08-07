@@ -1,0 +1,23 @@
+name: Naga, Water
+frequency: very rare rare uncommon
+size: large (20ft long) large (15ft long) medium (10ft long)
+alignment: lawful good chaotic evil neutral
+move: 150ft 120ft 90ft swimming
+armour_class: 5 [15]
+hit_dice: 7 to 8
+melee_attacks: 1 bite (1d4)
+senses: Infravision 60ft, Detect  invisible 30% Infravision 60ft, Detect  invisible
+  5 to 15% Infravision 60ft
+lair_chance: 75% 60% 45%
+intelligence: exceptional (15-16) high (13-14) very (11-12)
+morale: 100 to 105 90 to 95 80 to 85
+loot: Hoard 8 Hoard 2, Cache 6 and 10 Hoard 4
+experience: 1,350 +10/hp
+description: 'WATER NAGA The water naga’s scales range from deep green to turquoise  and
+  its eye colour varies from light green to brilliant amber. It  dwells deep below
+  the surface of fresh water lakes ponds and  rivers. The water naga is typically
+  quite curious and harmless  unless provoked. Spells. The water naga casts arcane
+  spells as a 5th level mag - ic-user: • 1st level: 4 • 2nd level: 2 • 3rd level:
+  1 Poison Bite.  In addition to piercing damage, the naga’s bite is  poisonous. Anyone
+  hit by the naga’s bite must make a saving  throw vs. poison or die.'
+abilities: []

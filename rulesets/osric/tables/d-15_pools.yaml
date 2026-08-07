@@ -1,0 +1,10 @@
+id: d-15
+name: POOLS
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT
+- 1–12 No pool
+- 13–14 Pool
+- 15–16 Pool, monster
+- 17–19 Pool, monster, and treasure
+- '20 Magic pool, go to Table D-17: Magic Pools'

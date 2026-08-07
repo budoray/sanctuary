@@ -1,0 +1,23 @@
+name: Small Object Medium Object Large Object
+frequency: very rare very rare very rare
+no_encountered: 1 1 1
+size: small medium large
+alignment: neutral neutral neutral
+move: 90ft 60ft 30ft
+armour_class: Depends on material but for  example, 7 [13] if wood; 5 [15] if  stone; 4 [16] if metal Depends on material but for  example, 7 [13] if wood; 5 [15] if  stone; 4 [16] if metal Depends on material but for  example, 7 [13] if wood; 5 [15] if  stone; 4 [16] if metal
+hit_dice: 4 5 6
+melee_attacks: 1 slam (1d6 blunt) 1 slam (2d4 blunt) 1 slam (3d6 blunt)
+senses: Standard Standard Standard
+lair_chance: Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0)
+morale: N/A (fights to the death) N/A (fights to the death) N/A (fights to the death)
+loot: Nil Nil Nil
+experience: 105 +3/hp 155 +4/hp 230 +6/hp
+description: Animated objects are temporary creatures created by the level  6 Cleric spell animate object.
+abilities:
+- heading: Immunities and Resistances
+  text: Immunities. Animated objects are immune to blindness, psychic  damage, charm, domination, sleep, gases, poison, and disease.
+- heading: Special Attacks
+  text: Unarmed Combat.  Some animated objects might be able to  choose to overbear or grapple instead of making a regular me- lee attack. Because they vary in shape and size, pre-calculated  stats for unarmed attacks will vary.
+- heading: Languages
+  text: The animated object magically understands its creator’s spoken  commands, no matter what language its creator is speaking. It  doesn’t understand anyone else.

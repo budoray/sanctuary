@@ -1,0 +1,27 @@
+name: Boa Adder Cobra Amphisbaena
+frequency: uncommon uncommon rare very rare
+no_encountered: 1d2 1d6 1d4 1d3
+size: large large large medium (6ft long)
+alignment: neutral neutral neutral neutral
+move: 90ft 150ft 120ft 120ft
+armour_class: 5 [15] 5 [15] 5 [15] 3 [17]
+hit_dice: 6+1 4+2 4+2 6
+melee_attacks: 1 bite (1d4) and 1  constrict (2d4) 1 bite (1d4+poison) 1 bite (1d4+poison) 2 bites (1d4+ poison)
+senses: Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil
+intelligence: animal (1) animal (1) animal (1) animal (1)
+morale: 75 65 65 75
+loot: Nil Nil Nil Nil
+experience: 345 +8/hp 155 +4/hp 190 +4/hp 475 +6/hp
+description: 'All giant snakes are carnivorous and can be found in every type  of climate except for the coldest. Note: For giant sea snakes see  the listing for sea serpent. Unarmed Combat. Giant snakes cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics. GIANT BOA CONSTRICTORS'
+abilities:
+- heading: Special Attacks
+  text: Constrict. A boa constrictor will drop on its prey from above, coil- ing its long body around the chosen target victim and attack - ing by squeezing for 2d4 points of damage, inflicting automat- ic damage from the constriction (a to-hit roll is still required  for the bite). Attacks against a constricting snake have a 25%  chance to also damage the victim in the coils). GIANT ADDERS This is the common name for giant poisonous snakes and they  come in a variety of species.
+- heading: Special Attacks
+  text: Venomous Bite. The default poison for a giant adder is negated  by a saving throw, but causes death if the save is failed. Some  types of adders have a powerful poison which, even if saved  against, causes 3d6 points of damage to the victim. GIANT COBRAS These are hooded giant snakes with the ability to spit poison at  a single target up to 30ft distant.
+- heading: Special Attacks
+  text: 'Venomous Bite or Spit Venom. A successful to-hit roll on a bite or  spit (range 30ft) requires a saving throw vs. death or the victim  dies. AMPHISBAENA These are 6ft long snakes with a head at both ends of the body.  Both heads are capable of delivering a poisonous bite. Its meth- od of travel is as bizarre as the creature’s appearance: one head  of this unusual snake will grab the neck of the other, and the  creature then rolls like a hoop upon the ground.'
+- heading: Immunities and Resistances
+  text: Immune to Cold.  The amphisbaena is immune to cold damage,  though the sages are at a loss as to why this is so.
+- heading: Special Attacks
+  text: Venomous Bites. A successful to-hit roll on a bite attack requires  a saving throw vs. death or the victim dies.

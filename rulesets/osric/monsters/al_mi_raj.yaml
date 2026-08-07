@@ -1,0 +1,19 @@
+name: Al-Mi’raj
+frequency: very rare
+no_encountered: 2d10
+size: small
+alignment: neutral
+move: 180ft
+armour_class: 7 [13]
+hit_dice: '1'
+melee_attacks: 1 horn (1d4 piercing)
+senses: Standard
+lair_chance: 5%
+intelligence: animal (1)
+morale: 50
+loot: Nil
+experience: 5 +1/hp
+description: In medieval Arabic literature, Al-Mi’raj (or just Mi’Raj) are yellow  hares with black horns, like miniature unicorn horns. In OSRIC  they are fey creatures that live in temperate and subtropical  woodlands. Their horns are useful to alchemists, and some wiz- ards use wands made of Al-Mi’raj horns.
+abilities:
+- heading: Languages
+  text: None. ANIMATED OBJECT An animated object’s stats vary depending on its size. The GM will have to use their discretion for most of these; for example, some  very heavy creatures, such as human-sized stone statues, might be best treated as large creatures.

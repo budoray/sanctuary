@@ -1,0 +1,24 @@
+name: Crypt Thing
+frequency: very rare
+no_encountered: '1'
+size: medium
+alignment: neutral
+move: 120ft
+armour_class: 3 [17]
+hit_dice: '6'
+melee_attacks: 1 clawed hand (1d8 slashing)
+senses: Infravision 60ft
+lair_chance: 100%
+intelligence: very
+morale: 75
+loot: Cache 12
+experience: 160 +4/hp
+description: A crypt thing appears as a cloaked skeleton, but contrary to ap- pearances, is not undead and cannot be turned. They reside  in their lairs and never venture forth. A crypt thing will never  attack first, they will always let the party attack before they do.  If they are not molested they will leave the adventurers alone.  If they are attacked then they will respond by activating their  teleport ability.  A crypt thing can also defend itself with its clawlike hands.
+abilities:
+- heading: Immunities and Resistances
+  text: Cannot be Turned (Not Undead).  Despite appearances, crypt  things are not undead and thus cannot be turned. Immune to Mundane Weapons.  The crypt thing is immune to  piercing, blunt, and slashing damage, unless the weapon caus- ing that damage is magical.
+- heading: Special Features
+  text: 'Teleport Enemies.  Anyone attempting to attack a crypt thing  must (for the first attack only) make a saving throw vs spells or  instantly be teleported in a random direction. Each individual  who fails must roll d100. Those who roll 01–20 are teleported  from 100 to 1,000ft north. Those who roll 21–40 are teleported  100–1,000ft south. Those who roll 41–60 are teleported 100– 1,000ft east. Those who roll 61–80 are teleported 100–1,000ft  west. Those who roll 81–90 are teleported one dungeon level  up. Those who roll 91–00 are teleported one dungeon level  down. Those who make the saving throw can continue with their at - tack.  This is an advanced form of teleportation. Individuals will arrive  safely, not in solid areas like floors or walls. Unarmed Combat. Crypt things can be overborne or grappled,  although they do not use these tactics themselves. If not fend- ed off, they score an unarmed hit with a 2+ on 1d20. Hit Mods:  ATK/DEF +8/-8. Overbear Results Mods: ATK/DEF na/-1.
+    Grap - pling Result Mods: ATK/DEF na/+0.'
+- heading: Languages
+  text: Crypt things speak common. If questioned about the disappear- ance of any comrades, they will say they were disintegrated.

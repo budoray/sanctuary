@@ -1,0 +1,14 @@
+name: Plant Growth
+slug: plant_growth
+reversible: false
+class: druid
+level: 3
+school: Druidic Transmutation/Alteration
+range: 160ft
+duration: Permanent
+area_of_effect: 20-ft×20-ft square/caster level
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: By means of this spell, the druid causes plants and vines to grow with unbelievable speed, forming a tangled barrier of thick vegetation. The enchantment may be dispelled, or the plants cleared by normal means. Chopping a way through the barrier is possible, but movement is restricted to 10- ft/turn (20-ft for size L creatures).
+source: wiki2_spells.txt

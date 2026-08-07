@@ -1,0 +1,25 @@
+name: Boring Death Watch Rhinoceros Stag
+frequency: common very rare uncommon common
+no_encountered: 3d6 1 1d6 2d6
+size: large large large large
+alignment: neutral neutral neutral neutral
+move: 60ft 120ft 60ft 60ft
+armour_class: 3 [17] 3 [17] 2 [18] 3 [17]
+hit_dice: 5 9+1 12 7
+melee_attacks: 1 bite (5d4) 1 bite (3d4) 1 bite (2d8) and 1 horn  (3d8) 1 bite (4d4) and 2 horns  (1d10)
+senses: Standard Standard Standard Standard
+lair_chance: 40% 10% Nil Nil
+intelligence: non- (0) non- (0) non- (0) non- (0)
+morale: N/A N/A N/A N/A
+loot: Hoard 3, Cache 4, 5, and 6 Cache 4, 5, and 6 Nil Nil
+experience: 110 +4/hp 1,100 +12/hp 1,300 +6/hp 225 +8/hp
+description: GIANT BORING BEETLE Giant boring beetles may be found in enormous dead trees,  but are usually encountered in tunnel complexes where there  is sufficient rotting wood and moisture to support the fungal  cultures they eat. There are rumours that some have developed  a “hive-mind” similar to ants and when threatened they may dis- play surprising group intelligence in the defence of their home. GIANT DEATH WATCH BEETLE Giant Death Watch beetles live in temperate areas and some - times underground. They disguise themselves by sticking rub - bish, branches and detritus to their carapaces with their saliva.
+abilities:
+- heading: Immunities and Resistances
+  text: Many-legged. This creature cannot be knocked prone, over - borne, or grappled.
+- heading: Special Attacks
+  text: Death Vibration. These giant beetles are feared for making ter - rible, deadly bass vibrations by scraping their hind legs—when  a beetle does this, all within 30ft of the creature must save vs  death or die. Even those who pass their save take 4d6 hp dam - age. After using this special attack, the Death Watch beetle must  wait at least 12 turns before using it again. GIANT RHINOCEROS BEETLE Usually encountered in the tropics, these massive creatures  (roughly 12ft long, plus another 6ft of horn) live on the fruit and  vegetation they crush as they roam about.
+- heading: Immunities and Resistances
+  text: Many-legged. This creature cannot be knocked prone, over - borne, or grappled. GIANT STAG BEETLE Giant stag beetles live in woodlands near farmland, preferring  for food the young shoots of cultivated grains. For this reason,  they can often plague regions and even cause famine should  enough of them descend upon an area. They attack with a bite  and with their two horns.
+- heading: Immunities and Resistances
+  text: Many-legged. This creature cannot be knocked prone, over - borne, or grappled.

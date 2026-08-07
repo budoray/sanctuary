@@ -1,0 +1,64 @@
+id: 2.13.4a
+name: CHARGES IN A ROD, STAFF, OR WAND
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- DEVICE TYPE CHARGES
+- Wands 101–1d20
+- Rods 51–1d10
+- Staves 26–1d6
+- Unless noted otherwise, these devices require a command
+- word or magical phrase to trigger a magical effect. As such, the
+- spell silence and similar effects can prevent these devices’ use.
+- 2.13.4.1.  RODS
+- 'Absorption (any): This rod acts as a magnet, drawing spells into'
+- itself. The magic absorbed must be a single-target spell or a
+- ray directed at either the character possessing the rod or their
+- gear. The rod then nullifies the spell effects and stores their
+- potential until the wielder releases this energy in the form of
+- spells of their own. They can instantly detect the level of the
+- spell as the rod absorbs its energy. Absorption requires no ac-
+- tion on the part of the user if the rod is in hand at the time.
+- The player must keep a running total of absorbed (and used)
+- spell levels. The wielder of the rod can use captured spell en -
+- ergy to cast any spell they have prepared in 1 segment with -
+- out expending the preparation itself (i.e. still have the spell in
+- memory). The only restrictions are that the levels of spell en -
+- ergy stored in the rod must be equal to or greater than the
+- level of the spell the wielder wants to cast, that any material
+- components required for the spell be present, and that the rod
+- be in hand when casting.
+- A rod of absorption absorbs a maximum of 50 spell levels and
+- can thereafter only discharge any remaining potential it might
+- have. The rod cannot be recharged. The wielder knows the re-
+- maining absorbing potential of the rod and current amount of
+- stored energy.
+- 'Cancellation (any): This dreaded rod is a bane to magic items,'
+- for its touch drains an item of all magical properties. The item
+- touched must make a saving throw to prevent the rod from
+- draining it. Contact is made by making an attack roll. Upon
+- draining an item, the rod itself becomes brittle and cannot be
+- used again. Drained items are not restorable even by a wish.
+- See the table below for magic item saving throws against this
+- 'draining effect:'
+- ITEM TYPE SAVE
+- Potion 20
+- Ring 17
+- Rod 14
+- Scroll 19
+- Staff 13
+- Wand 15
+- Artifact 13
+- Armour and Shields 11 (8 if +5)
+- Sword 9 (7 if a holy sword)
+- Miscellaneous Magic 12
+- Miscellaneous Weapons* 10
+- '* Note that a single use of the rod of cancellation may drain many small'
+- magical items, if they are contained together. For example, a quiver of
+- magical crossbow bolts.
+- 'Captivation (CDIM): With the expenditure of 1 charge, all mon-'
+- sters and characters within a 20ft radius are charmed by the
+- wielder for 1 turn so long as they are at least minimally intelli -
+- gent. All charmed beings will hold nothing but respect and awe
+- for the wielder, and will seek to please him or her by doing
+- nearly anything short of harming themselves or violating their
+- alignment.

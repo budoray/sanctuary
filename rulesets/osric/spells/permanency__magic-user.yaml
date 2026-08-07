@@ -1,0 +1,14 @@
+name: Permanency
+slug: permanency
+reversible: false
+class: magic-user
+level: 8
+school: Arcane Transmutation/Alteration
+range: See below
+duration: Permanent
+area_of_effect: One object or creature
+components: V,S,M
+casting_time: 2 rounds
+saving_throw: None
+text: 'The permanency spell makes the temporary effects of other spells permanent. It is also used to lock the enchantments of a magic item permanently into the item. Certain spells can be made permanent upon the caster or another creature, and other spells can be made permanent only if cast upon an area or an object. Each use of this spell reduces the caster''s constitution by 1 point. Spells that can be made permanent upon a person or other creature include: comprehend languages, detect evil, detect invisibility, detect magic, infravision, protection from evil, protection from normal missiles, read magic, tongues and unseen servant. Only a magic user of higher level than the caster can dispel these spells. Spells that can be made permanent upon an area or object include: enlarge, fear, gust of wind, invisibility, magic mouth, prismatic sphere, stinking cloud, wall of fire, wall of force and web. These spells may be dispelled by any caster subject to the normal rules for dispel magic.'
+source: wiki2_spells.txt

@@ -1,0 +1,19 @@
+name: Titanothere
+frequency: rare
+no_encountered: 1d12
+size: huge
+alignment: neutral
+move: 120ft
+armour_class: 6 [14]
+hit_dice: '12'
+melee_attacks: 1 gore (4d4)
+senses: Standard
+lair_chance: Nil
+intelligence: semi- (2-4)
+morale: 105
+loot: Nil
+experience: 2,000 +16/hp
+description: A prehistoric ruminant, the titanothere (indricotherium) looks  rather like its contemporary descendant the rhinoceros. If  spooked, it will charge in an effort to trample. A 2 on the “Num- ber Encountered” roll means a mated pair; a 3 means a mated  pair with a juvenile.
+abilities:
+- heading: Special Attacks
+  text: Charge. If the titanothere charges into combat and hits, it inflicts  double damage. Trample. The titanothere gains an extra attack against crea - tures size Medium or smaller. The trample attack must roll to  hit, and inflicts 2d6 hit points of blunt damage. Creatures size  Large or larger cannot be attacked by trampling. Unarmed Combat. Titanotheres cannot be targeted with grap - pling or overbearing attacks, and do not use these tactics. TOAD, GIANT GIANT GIANT

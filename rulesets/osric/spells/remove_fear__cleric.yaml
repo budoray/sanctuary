@@ -1,0 +1,14 @@
+name: Remove Fear
+slug: remove_fear
+reversible: true
+class: cleric
+level: 1
+school: Clerical Abjuration
+range: Touch
+duration: See below
+area_of_effect: Creature touched
+components: V,S
+casting_time: 4 segments
+saving_throw: None
+text: This spell is a divine warding against fear, and it can also banish magical terror in someone already affected. In the latter case, the spell grants a second saving throw at a bonus of +1 per caster level. To a person not already affected by magical fear, the spell grants a bonus of +4 to fear saving throws for 1 turn.
+source: wiki2_spells.txt

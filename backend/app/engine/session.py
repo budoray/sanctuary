@@ -7,6 +7,7 @@ from __future__ import annotations
 import random
 from collections import deque
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
 
 from backend.app.engine import bestiary, items, validate
@@ -91,9 +92,14 @@ def _roll_hp(monster: dict, d: Dice) -> int:
     return max(1, total)
 
 
-def _spawn_token(spawn, state: dict[str, Any], d: Dice) -> dict[str, Any]:
+def _spawn_token(spawn, state: dict[str, Any], d: Dice,
+                 monsters_dir: Path | None = None) -> dict[str, Any]:
     """Create a live monster token from a MonsterSpawn."""
-    template = bestiary.load(spawn.monster)
+    if monsters_dir is None:
+        md = state.get("monsters_dir")
+        if md:
+            monsters_dir = Path(md)
+    template = bestiary.load(spawn.monster, monsters_dir=monsters_dir)
     token = {
         "id": spawn.id,
         "name": spawn.name,
@@ -192,6 +198,7 @@ async def new_game(
     account_id: int | None = None,
     mode: str = "campaign",
     dungeon_links: dict[str, Any] | None = None,
+    monsters_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Create a fresh session state."""
     if seed is None:
@@ -233,7 +240,7 @@ async def new_game(
 
     monsters: list[dict[str, Any]] = []
     for spawn in module.monsters:
-        monsters.append(_spawn_token(spawn, {}, d))
+        monsters.append(_spawn_token(spawn, {}, d, monsters_dir=monsters_dir))
 
     log = [
         await narrator.narrate_opening(random.Random(seed), module=module.name, mode=mode),
@@ -263,13 +270,18 @@ async def new_game(
         "turn_timer_seconds": max(0, turn_timer_seconds),
         "turn_deadline": _deadline(max(0, turn_timer_seconds)),
         "dm_acted_this_round": False,
+        "monsters_dir": str(monsters_dir) if monsters_dir else None,
     }
     if dungeon_links:
         state["dungeon_links"] = dungeon_links
     return state
 
 
-async def advance_module(state: dict[str, Any], next_module: Module) -> dict[str, Any]:
+async def advance_module(
+    state: dict[str, Any],
+    next_module: Module,
+    monsters_dir: Path | None = None,
+) -> dict[str, Any]:
     """Advance a won campaign session to the next module.
 
     Player tokens keep their HP, progression, inventory, and statuses.
@@ -287,7 +299,7 @@ async def advance_module(state: dict[str, Any], next_module: Module) -> dict[str
 
     monsters: list[dict[str, Any]] = []
     for spawn in next_module.monsters:
-        monsters.append(_spawn_token(spawn, state, d))
+        monsters.append(_spawn_token(spawn, state, d, monsters_dir=monsters_dir))
 
     state["module_id"] = next_module.id
     state["monsters"] = monsters
@@ -321,6 +333,7 @@ async def dm_spawn(
     x: int,
     y: int,
     token_id: str | None = None,
+    monsters_dir: Path | None = None,
 ) -> dict[str, Any]:
     """Spawn a named monster at x, y."""
     if state["status"] != STATUS_ACTIVE:
@@ -332,7 +345,7 @@ async def dm_spawn(
     if _token_at(state, x, y) is not None:
         raise ValueError("target tile is occupied")
 
-    template = bestiary.load(monster_name)
+    template = bestiary.load(monster_name, monsters_dir=monsters_dir)
     if token_id is None:
         token_id = _unique_monster_id(state, f"dm_{template['id']}")
     else:
@@ -347,7 +360,7 @@ async def dm_spawn(
         color="#e74c3c",
     )
     d = Dice(seed=state["seed"] + state["version"])
-    token = _spawn_token(spawn, state, d)
+    token = _spawn_token(spawn, state, d, monsters_dir=monsters_dir)
     state["monsters"].append(token)
     state["version"] += 1
     state["log"].append(f"The DM spawns {token['name']} at ({x}, {y}).")
@@ -1281,8 +1294,14 @@ def _nearest_player(state: dict[str, Any], monster: dict[str, Any]) -> dict[str,
     return min(alive, key=lambda p: abs(p["x"] - monster["x"]) + abs(p["y"] - monster["y"]))
 
 
-async def _spawn_arena_wave(state: dict[str, Any], module: Module, d: Dice) -> None:
+async def _spawn_arena_wave(
+    state: dict[str, Any], module: Module, d: Dice, monsters_dir: Path | None = None
+) -> None:
     """Spawn a scaled arena wave."""
+    if monsters_dir is None:
+        md = state.get("monsters_dir")
+        if md:
+            monsters_dir = Path(md)
     wave = state.get("wave", 1)
     rng = random.Random(state["seed"] + wave)
     player_level = max(p.get("level", 1) for p in state["players"])
@@ -1302,7 +1321,7 @@ async def _spawn_arena_wave(state: dict[str, Any], module: Module, d: Dice) -> N
         sy = rng.randint(1, module.map.height - 2)
         if not module.map.walkable(sx, sy) or _token_at(state, sx, sy) is not None:
             continue
-        template = bestiary.load(template_name)
+        template = bestiary.load(template_name, monsters_dir=monsters_dir)
         monster = {
             "id": f"arena_w{wave}_{spawned}",
             "name": template["name"],

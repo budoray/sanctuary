@@ -1,0 +1,23 @@
+name: Dragon, Brass
+frequency: uncommon
+no_encountered: 1d4
+size: varies by age
+alignment: chaotic good or chaotic neutral
+move: 120ft; 240ft flying (AA:II)
+armour_class: 3 [17]
+hit_dice: 6 to 8
+melee_attacks: 2 claws (1d4) and 1 bite (4d4)
+senses: Infravision 60ft, Detect invisibility by  age category
+lair_chance: 25%
+intelligence: high (13-14)
+morale: 75, 80, or 85 (by HD)
+loot: Hoard 8
+experience: Varies by hit dice and age
+description: The blue dragons of the desert must contend with their deadly  rivals, the brass dragons, who love the same arid caves. The  brass dragons are not the vicious killers that the blue dragons  are, although their good nature is sometimes overcome with  doses of greed and self-interest.
+abilities:
+- heading: Special Features
+  text: Sleeping Dragon.  A brass dragon encountered in its lair has a  50% chance to be sleeping when the adventurers approach. If  the dragon is asleep, there is a 1 in 6 chance that it will awaken  from the mere presence of adventurers. Dragons also some - times feign sleep. Spellcasting Dragon. Roughly 30% of brass dragons are spellcast- ers. If it can cast spells, it does so as a magic-user, half the  dragon’s age category in level (1-2=1, 3-4=2, etc.).
+- heading: Special Attacks
+  text: Breath Weapon. Brass dragon breath is either a cone of sleep-in- ducing gas (70ft×20ft), or a cloud of fear gas (40ft×50ft,×20ft),  at the dragon’s choice of how to breathe. The dragon may use  either breath weapon up to a total of three times per day.  A saving throw vs. dragon breath negates the effect of the  breath. Saves against a 6HD dragon’s breath are at a +2, but  they are made at -2 against that of an 8HD dragon. The dura - tion of the effect is 10 rounds.
+- heading: Languages
+  text: All dragons speak the draconic tongue, and there is a 30%  chance that a brass dragon will also be able to speak common.

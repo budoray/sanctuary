@@ -1,0 +1,14 @@
+name: Unseen Servant
+slug: unseen_servant
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Conjuration/Summoning
+range: Caster
+duration: 6 turns+1 turn/level
+area_of_effect: 30-ft radius around spell caster
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: By means of this spell, the caster summons a mindless magical force to perform simple tasks. The servant can fetch and carry things, open doors, hold chairs, clean, mend, etc. It will continue at its assigned task until it is given another command. An unseen servant cannot exert force of more than twenty lbs. Unseen servants can neither attack nor move beyond the spell's area of effect.
+source: wiki2_spells.txt

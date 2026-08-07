@@ -1,0 +1,14 @@
+name: Gust of Wind
+slug: gust_of_wind
+reversible: false
+class: magic-user
+level: 3
+school: Arcane Transmutation/Alteration
+range: '0'
+duration: 1 segment
+area_of_effect: 10-ft wide path, 10-ft long/level
+components: V,S,M
+casting_time: 3 segments
+saving_throw: None
+text: Hand outstretched in the final somatic gesture of this spell, the magic user summons forth a powerful blast of air, forceful enough to blow out unprotected flames smaller than a campfire. Flames the size of a campfire or greater will flare back as far as 1d6 feet, and even shielded flames have a high chance of being extinguished (5% per caster level). The wind is strong enough to hurl a small flying creature backwards by 1d6×10-ft, and will hold medium-sized creatures back from moving.
+source: wiki2_spells.txt

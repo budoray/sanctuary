@@ -1,0 +1,32 @@
+name: Elemental, Fire
+frequency: very rare very rare very rare very rare
+size: large large large large
+alignment: neutral neutral neutral neutral
+move: 120ft
+armour_class: 2 [18] 2 [18] 2 [18] 2 [18]
+hit_dice: 8, 12, or 16 8, 12, or 16 8, 12, or 16 8, 12, or 16
+melee_attacks: 1 strike (3d8)
+senses: Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil
+intelligence: low (5-7) low (5-7) low (5-7) low (5-7)
+morale: N/A N/A N/A N/A
+loot: Nil Nil Nil Nil
+experience: '8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp 8 HD: 900 +12/hp
+  12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp 8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16
+  HD: 3,650 +20/hp 8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp'
+description: FIRE ELEMENTALS Fire Elementals are creatures from the Elemental Plane
+  of Fire,  though they may sometimes be found elsewhere. When en - countered on the
+  Prime Material Plane, usually as a result of  summoning magic, they take the form
+  of a great flickering sheet  of flame, which occasionally seems to have a somewhat
+  human- oid shape.  Fire Elementals may not travel across or enter non-flammable  liquids;
+  they cannot, for instance, cross broad rivers without the  aid of a bridge or a
+  similar contrivance, though they can leap  narrow streams. Immune to Mundane and
+  +1 Weapons.  This creature is immune  to piercing, blunt, and slashing damage from
+  weapons and un- armed attacks, unless the weapon causing that damage has a  magical
+  bonus of +2 or more. Fists of Flame.  Those unlucky enough to be struck by the fiery  appendages
+  of these elementals not only suffer 3d8 points of  damage, but any combustible items
+  exposed will be set alight if  they fail a saving throw against magical fire, which
+  is subject to  a -2 penalty. Creatures capable of innately controlling or oth -
+  erwise making use of fire are somewhat resistant to the Fire  Elementals, taking
+  only 3d6 points of damage if struck by one.
+abilities: []

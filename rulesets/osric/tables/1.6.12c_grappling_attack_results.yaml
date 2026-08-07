@@ -1,0 +1,87 @@
+id: 1.6.12c
+name: GRAPPLING ATTACK RESULTS
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- 1D8 RESULT EFFECT OF ATTACK*
+- 1 or
+- lower
+- Awkward
+- Scuffling
+- 'Damage: Defender takes 1 hit point of temporary damage and no real damage'
+- 'Effect: This result alone does not put either combatant into the “grappling” condition. If the other'
+- combatant has a better hold already, both combatants are already considered to be grappling.
+- 2-4
+- Arm Grab (if this
+- is the controlling
+- hold)
+- Or
+- Elbow Bash (if it’s
+- the inferior hold)
+- 'Damage: Defender takes damage equal to the die roll (2, 3, or 4), 1 of which is real damage,'
+- and the rest of which is temporary damage. Both combatants are considered to be “grappling.”
+- If this is a higher roll than the opponent’s (or if it is the only successful unarmed attack thus far),
+- the attacker has an arm grab. If the opponent currently has a higher die roll, this indicates an
+- elbow bash.
+- 'Arm Grab Effect: After damage is inflicted, the attacker may attempt to disarm the defender, but'
+- if the defender is not disarmed, they are freed from the grapple and may act normally on their
+- next action. If the attacker does not choose to attempt a disarm, the Arm Grab is maintained and
+- the attacker can continue the hold. A disarming attempt requires the defender to make a saving
+- throw versus paralysis (any dexterity bonuses apply). If the saving throw fails, the defender is
+- disarmed.
+- 'Elbow Bash: The inferior hold inflicts damage and can be maintained each round, but does not'
+- have any other effect.
+- '5'
+- Waist Lock
+- (if this is the
+- controlling hold)
+- Or
+- Leg Hold (if it’s
+- the inferior hold)
+- 'Damage: Defender takes 5 points of damage (4 temporary, 1 real). Both combatants are'
+- considered to be “grappling.”
+- If this is a higher roll than the opponent’s (or if it is the only successful unarmed attack thus far),
+- the attacker has the defender in a waist lock. If the defender originally had a controlling hold but
+- with a lesser die roll, their hold shifts to the inferior hold (an arm grab becomes an elbow bash).
+- 'Waist Lock Effect: After damage is inflicted, the person with the other combatant in a waist'
+- lock can disengage and end the grapple if desired, even if prone. If they are prone and end the
+- grapple, they can also rise from prone at this point. Once disengaged, any further attempts
+- require going back to the fending-off stage.
+- 'Leg Hold: the inferior hold inflicts damage and can be maintained each round, but does not have'
+- any other effect.
+- '6'
+- Rear Choke
+- (if this is the
+- controlling hold)
+- Or
+- Head Butt (if it’s
+- the inferior hold)
+- 'Damage: Defender takes 6 points of damage (4 temporary, 2 real). Both combatants are'
+- considered to be “grappling.”
+- If this is a higher roll than the opponent’s (or if it is the only successful unarmed attack thus
+- far), the attacker has the defender in a choke hold from behind (Rear Choke). If the defender
+- originally had a controlling hold but with a lesser die roll, their hold shifts to the inferior hold (an
+- arm grab becomes an elbow bash).
+- 'Rear Choke Effect: An ally of the attacker can force-feed a substance to opponent if the ally is'
+- not in melee or unarmed combat. This is good for antidotes or potions, if you’re dealing with
+- your own party member. Anyone held in a rear choke cannot shout an alarm or cast spells.
+- 'Head Butt: The inferior hold inflicts damage and can be maintained each round, but does not'
+- have any other effect.
+- '7'
+- Arm Lock (if this
+- is the controlling
+- hold)
+- Or
+- Wicked Elbow
+- Bash (if it’s the
+- inferior hold)
+- 'Damage: Defender takes 7 damage (5 temporary, 2 real). Both combatants are considered to be'
+- “grappling.”
+- If this is a higher roll than the opponent’s (or if it is the only successful unarmed attack thus far),
+- the attacker has the defender in an arm lock. If the defender originally had a controlling hold but
+- with a lesser die roll, their hold shifts to the inferior hold (an arm grab becomes an elbow bash).
+- 'Arm Lock Effect: The attacker can use this hold to immediately bring the opponent to a prone'
+- position. The attacker can disengage and end the grapple if desired, even if prone. If they are
+- prone and end the grapple, they can also rise from prone at this point. If the attacker disengages,
+- any further attempts require going back to the fending-off stage.
+- 'Wicked Elbow Bash: The inferior hold inflicts damage and can be maintained each round, but'
+- does not have any other effect.

@@ -1,0 +1,46 @@
+id: 1.4.2.3b
+name: MELEE WEAPONS TABLE  1
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- WEAPON TYPE HANDS REQUIRED  DAMAGE VS
+- M AND SMALLER  DAMAGE VS L+ WEIGHT
+- (IN POUNDS) COST
+- Axe, battle 2, or 1 (STR 15+) 1d8 1d8 7 5 gp
+- Axe, hand 1 1d6 1d4 5 1 gp
+- Club 1 1d6 1d3 3 2 cp or found
+- Dagger 1 1d4 1d3 1 2 gp
+- Fist or kick 1 1d2 1d2 — —
+- Flail, heavy 2, or 1 (STR 14+) 1d6+1 2d4 10 3 gp
+- Flail, light 1 1d4+1 1d4+1 4 6 gp
+- Halberd 2 1d10 2d6 18 9 gp
+- Javelin† 1 1d6 1d4 2 5 sp
+- Lance‡ 1 2d4+1 3d6 15 6 gp
+- Mace, heavy 2, or 1 (STR 13+) 1d6+1 1d6 10 10 gp
+- Mace, light 1 1d4+1 1d4+1 5 4 gp
+- Morning star 2, or 1 (STR 16+) 2d4 1d6+1 12 5 gp
+- Pick, heavy 2, or 1 (STR 14+) 1d6+1 2d4 1 8 gp
+- Pick, light 1 1d4+1 1d4 4 5 gp
+- Pole arm† 2 1d6+1 1d10 8 6 gp
+- Spear 2 or 1 1d6 1d8 5 1 gp
+- Staff 2 1d6 1d6 5 Found
+- Sword, bastard/claymore 2, or 1 (STR 15+) 2d4 2d8 10 25 gp
+- Sword, broad 2, or 1 (STR 12+) 2d4 1d6+1 8 15 gp
+- Sword, long 1 1d8 1d12 7 15 gp
+- Sword, scimitar/cutlass 1 1d8 1d8 5 15 gp
+- Sword, short 1 1d6 1d8 3 8 gp
+- Sword, two-handed 2 1d10 3d6 25 30 gp
+- Torch§ 1 1d4 1d4 1 1 cp
+- Trident† 2, or 1 (STR 14+) 1d6+1 3d4 5 4 gp
+- Warhammer, heavy 2, or 1 (STR 15+) 1d6+1 1d6 10 7 gp
+- Warhammer, light 1 1d4+1 1d4 5 1 gp
+- † Long-hafted, pointed weapons, such as the spear, javelin, lance
+- (when used dismounted), pole arm, or trident, inflict double damage
+- when set to receive a charge if the foe actually charges. These may
+- be used as “reach” weapons to attack from the second rank of battle
+- (“through” an ally while protected from attacks by that same ally).
+- ‡ Lances inflict double damage when used by a character riding a
+- charging heavy warhorse or similar steed. If the attacker is mounted
+- on a normal riding or cavalry horse, your GM will likely reduce this
+- bonus.
+- § Torches burn for 6 turns. After 6 turns the torch is burnt out. A burnt
+- out torch isn’t useable as a weapon.

@@ -1,0 +1,19 @@
+name: Blindheim
+frequency: very rare
+no_encountered: 1d4
+size: small
+alignment: chaotic evil
+move: 90ft
+armour_class: 3 [17]
+hit_dice: 4+2
+melee_attacks: 1 bite (1d8 piercing)
+senses: Infravision 60ft
+lair_chance: 5%
+intelligence: semi- (2-4)
+morale: 70
+loot: Hoard 2
+experience: 110 +5/hp
+description: Blindheims are yellowish, frog-like monsters found in subterra- nean environments. They are usually bipedal, but move on all  fours in rough terrain.
+abilities:
+- heading: Special Attacks
+  text: 'Blinding Light. These yellowish, frog-like bipeds can project twin  beams of incredibly bright light from their eyes. Anyone who  comes within 30ft of the blindheim must save vs aimed magic  items or be temporarily blinded (for 1d8+12 turns). The saving  throw is at -3 if the approaching character has infravision. A  character who is not blinded may attack the blindheim at a  penalty of -2 “to hit” (if they are avoiding looking at the crea - ture) or as normal (if they are for some reason immune to  bright light). Unarmed Combat. Blindheims do not employ unarmed combat  but can be grappled or overborne. If not fended off, they score  an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +6/-6.  Overbear Results Mods: ATK/DEF -1/-1. Grappling Result Mods:  ATK/DEF -2/+2.'

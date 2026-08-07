@@ -1,0 +1,21 @@
+name: Sphinx, Andro-
+frequency: very rare
+no_encountered: '1'
+size: large (12ft long)
+alignment: neutral/neutral good
+move: 180ft; 240ft flying (AA:III)
+armour_class: -1 [21]
+hit_dice: '10'
+melee_attacks: 2 claws (2d6)
+senses: Infravision 60ft, Detect  invisible 5%
+lair_chance: 50%
+intelligence: very (11-12)
+morale: 95
+loot: Cache 7
+experience: 1,500 +4/hp
+description: The androsphinx is a winged lion with a human head, some - times with human head and torso (although the front arms are  lion-like in this case). Like their female counterparts, the andro- sphinx love intellectual pursuits and will often grant access to  areas they are set to guard or hoards they are watching (pro - viding doing so does not break a prior agreement or endanger  the androsphinx in any way). Androsphinxes may be “hired” (if  that is the right word) as guardians for a given treasure, place  or thing for a while; they are circumspect in their acceptance  of such duties and payment must be made in full or they will  unleash their wrath on their would-be employers upon comple- tion of the duties set.
+abilities:
+- heading: Special Features
+  text: Spell Use. An androsphynx casts spells as a 6th level cleric.
+- heading: Special Attacks
+  text: Roar. Androsphinx all have the ability to emit a deafening roar  that functions as a horn of blasting.

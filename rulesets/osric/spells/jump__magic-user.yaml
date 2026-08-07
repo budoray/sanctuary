@@ -1,0 +1,14 @@
+name: Jump
+slug: jump
+reversible: false
+class: magic-user
+level: 1
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: See below
+area_of_effect: One creature
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: This spell allows the subject to make one or more prodigious leaps, one additional leap for each three caster levels above 1. Thus, at a caster level of 4, the spell permits a second leap, with additional leaps at level 7, 10, 13, etc. The recipient of the spell may bound forward 30-ft, or may leap backward or straight up for a distance of 10-ft. The leap is almost perfectly straight, with no arc.
+source: wiki2_spells.txt

@@ -1,0 +1,23 @@
+name: Spiked Devil (least Devil; Spined Fiend)
+frequency: common
+no_encountered: 2d4 or 5d4
+size: small (4ft)
+alignment: lawful evil
+move: 60ft; 180ft flying (AA:IV)
+armour_class: 3 [17]
+hit_dice: 3+3
+melee_attacks: 1 weapon and/or 2 claws (1d4)
+senses: Infravision 60ft
+lair_chance: 10%
+intelligence: low (5-7)
+morale: 65
+loot: Nil
+experience: 240 +4/hp
+description: Spiked devils are small and weak compared to the other dev - ils, but are amongst the most commonly seen types. They have  scaly reddish skin and bat-like wings. A row of dark spines runs  from their forehead to the base of their tail. Both their hands  and feet have sharp claws. In melee, they usually attack with a trident, fork, or similar pole  arm. When flying and attacking a target on the ground, they can  also attack with their clawed feet. Spiked devils are typically used for herding assagim or lemures,  or serving as a messenger for more powerful devils. These devils rarely have any sort of treasure or possessions  beyond their weapon. Only when serving as a messenger are  they likely to possess something of value. In these cases, the  GM should decide what, if anything, the spiked devil is carrying.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (25%).  Any magic spell or effect has a 25%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: affect normal fires  (as the 1st level magic-user spell),  change self (as the 1st level illusionist spell), command (as the  1st level cleric spell), produce flame  (as the 2nd level druid  spell), and scare (as the 2nd level magic-user spell).  1/day: Attempt to summon a barbed devil (5% chance of suc - cess).'
+- heading: Special Attacks
+  text: 'Flying Attack. When flying, if attacking a target on the ground,  these devils can also attack with their clawed feet. Ranged Attack: Spines. The spiked devil’s spines burst into flame  when plucked from the devil’s back. If attacking from above,  these devils can also shoot up to 12 of their spines (1d4 dam - age, like a dart). In melee, should they choose to grapple, 1d4  of the spines will damage the opponent in addition to any  grappling damage. Unarmed Combat. Spiked devils can be targeted with grappling  or overbearing attacks, although they do not use these tactics.  If not fended off, they score an unarmed hit with a 2+ on 1d20.  Hit Mods: ATK/DEF +4/-4. Overbear Results Mods: ATK/DEF  -2/+2. Grappling Result Mods: ATK/DEF -2/+2.'

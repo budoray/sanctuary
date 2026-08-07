@@ -1,0 +1,14 @@
+name: Temporal Stasis
+slug: temporal_stasis
+reversible: true
+class: magic-user
+level: 9
+school: Arcane Transmutation/Alteration
+range: 10-ft
+duration: Permanent
+area_of_effect: One creature
+components: V,S,M
+casting_time: 9 segments
+saving_throw: None
+text: This spell places the victim into a magical sleep so deep that it is akin to suspended animation. The victim does not age or change in any way and does not need to breathe or eat. The sleep lasts until the victim is awakened by the use of dispel magic or the spell's reverse form.
+source: wiki2_spells.txt

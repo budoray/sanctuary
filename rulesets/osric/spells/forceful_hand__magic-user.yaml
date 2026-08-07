@@ -1,0 +1,14 @@
+name: Forceful Hand
+slug: forceful_hand
+reversible: false
+class: magic-user
+level: 6
+school: Arcane Evocation
+range: 10-ft/level
+duration: 1 round/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 6 segments
+saving_throw: None
+text: This spell creates a powerful, magical hand similar to that of the magic user spell interposing hand. Unlike the interposing hand, the forceful hand can push opponents or objects. The hand can move a creature weighing 500 lbs or less. It reduces the speed of a creature between 500 and 2,000 lbs to no greater than 10-ft/round, and it slows the movement of creatures heavier than 2,000 lbs but smaller than 8,000 lbs to one-half. As in the case of the interposing hand, the forceful hand has as many hit points as the caster.
+source: wiki2_spells.txt

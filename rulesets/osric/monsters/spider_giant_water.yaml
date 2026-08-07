@@ -1,0 +1,19 @@
+name: Spider, Giant Water
+frequency: common
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 140ft underwater
+armour_class: 7 [13]
+hit_dice: 3+3
+melee_attacks: 1 (1d4+1+poison)
+senses: Standard
+lair_chance: 40%
+intelligence: semi- (2-4)
+morale: 60
+loot: Individual 1-5, Cache 3
+experience: 200 +4/hp
+description: These are like their giant land-based cousins in most respects.  They differ in that they do not build webs; rather they build un- derwater lairs and carefully transfer air trapped in web-sacs to  the lairs (they do spin silk for this purpose and to cocoon their  prey). They can hide within and wait for unwary swimmers,  whereupon they will scuttle out and drag their prey down, poi - soning them, cocooning them, and removing them to their lair  to consume. As their lairs are air-filled, if the creature is slain, these plac - es may be used for one hour for creatures that require air to  breathe.
+abilities:
+- heading: Special Attacks
+  text: Venomous Bite. On a successful hit, the target of a giant water  spider’s bite must make a saving throw vs. death or die. Unarmed Combat. Giant spiders cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics.

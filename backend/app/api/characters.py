@@ -12,24 +12,36 @@ from backend.app.auth import require_account
 from backend.app.db import CharacterRecord, get_db
 from backend.app.engine import character as char_engine
 from backend.app.engine import items
-
-from backend.app.engine.character import ABILITIES, ANCESTRIES, CLASSES, GEN_MODES, arrangeable
+from backend.app.engine.character import arrangeable
+from backend.app.rulesets.loader import load_ruleset
 
 router = APIRouter(tags=["characters"])
 
 
-@router.get("/ruleset/osric/options")
-async def osric_options():
-    """Player-facing options for the OSRIC ruleset."""
+def _ruleset_options(ruleset_id: str):
+    """Player-facing options for a ruleset."""
+    ruleset = load_ruleset(ruleset_id)
     return {
-        "abilities": list(ABILITIES),
-        "ancestries": list(ANCESTRIES),
-        "classes": list(CLASSES),
+        "abilities": list(ruleset.abilities),
+        "ancestries": list(ruleset.ANCESTRIES),
+        "classes": list(ruleset.CLASSES),
         "modes": [
-            {"id": m, "roll": "3d6" if "hardest" in m or "difficult" in m else "4d6 drop lowest", "arrange": arrangeable(m)}
-            for m in GEN_MODES
+            {"id": m["value"], "roll": "3d6" if "hardest" in m["value"] or "difficult" in m["value"] else "4d6 drop lowest", "arrange": arrangeable(m["value"])}
+            for m in ruleset.gen_modes
         ],
     }
+
+
+@router.get("/ruleset/osric/options")
+async def osric_options():
+    """Backward-compatible alias for the OSRIC options."""
+    return _ruleset_options("osric")
+
+
+@router.get("/ruleset/{ruleset_id}/options")
+async def ruleset_options(ruleset_id: str):
+    """Player-facing options for the named ruleset."""
+    return _ruleset_options(ruleset_id)
 
 
 async def _serialize(character: char_engine.Character) -> dict[str, Any]:
@@ -84,6 +96,7 @@ async def preview_character(data: dict[str, Any]):
     name = data.get("name", "Hero")
     arrangement = data.get("arrangement")
     seed = data.get("seed")
+    ruleset_id = data.get("ruleset_id", "osric")
 
     if seed is None:
         import random
@@ -91,6 +104,7 @@ async def preview_character(data: dict[str, Any]):
         seed = random.randint(1, 1_000_000_000)
 
     try:
+        ruleset = load_ruleset(ruleset_id)
         char = char_engine.generate(
             seed=seed,
             mode=mode,
@@ -98,9 +112,12 @@ async def preview_character(data: dict[str, Any]):
             class_names=class_names,
             name=name,
             arrangement=arrangement,
+            ruleset=ruleset,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
     return {"character": await _serialize(char)}
 
@@ -117,6 +134,7 @@ async def create_character(
     name = data.get("name", "Hero")
     arrangement = data.get("arrangement")
     seed = data.get("seed")
+    ruleset_id = data.get("ruleset_id", "osric")
 
     if seed is None:
         import random
@@ -124,6 +142,7 @@ async def create_character(
         seed = random.randint(1, 1_000_000_000)
 
     try:
+        ruleset = load_ruleset(ruleset_id)
         char = char_engine.generate(
             seed=seed,
             mode=mode,
@@ -131,9 +150,12 @@ async def create_character(
             class_names=class_names,
             name=name,
             arrangement=arrangement,
+            ruleset=ruleset,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
     char_id = str(uuid.uuid4())[:8]
     state = await _character_state(char, char_id)
@@ -150,6 +172,7 @@ async def create_character(
         abilities=json.dumps({"scores": char.scores, "modifiers": char.modifiers}),
         saves=json.dumps(char.saves),
         seed=char.seed,
+        ruleset_id=ruleset_id,
         state=json.dumps(state),
     )
     db.add(record)

@@ -1,0 +1,14 @@
+name: Faerie Fire
+slug: faerie_fire
+reversible: false
+class: druid
+level: 1
+school: Druidic Transmutation/Alteration
+range: 80-ft
+duration: 4 rounds/caster level
+area_of_effect: 1 size M or 2 size S creatures/caster level
+components: V
+casting_time: 3 segments
+saving_throw: None
+text: The druid uses this spell to ignite a fiery-looking aura of bright light around his or her enemies. The aura is visible at a range of 80-ft if the observer stands in darkness, and at 40-ft if he or she stands near another light source. The light itself is harmless, but a creature limned with faerie fire is easier to hit; any attacks against it are made with a bonus of +2.
+source: wiki2_spells.txt

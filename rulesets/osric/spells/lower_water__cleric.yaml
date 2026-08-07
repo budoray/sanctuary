@@ -1,0 +1,14 @@
+name: Lower Water
+slug: lower_water
+reversible: true
+class: cleric
+level: 4
+school: Clerical Transmutation/Alteration
+range: 120-ft
+duration: 1 turn/caster level
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: With a majestic gesture, the cleric forces an area of water to sink downward by 5% of its original depth per caster level. Despite its name, the spell's power is not limited to water; it can affect other non-living fluid substances as well, including gases and materials slightly more viscous than water. The GM may adjust the amount by which the spell affects other substances based upon the difference of their material properties from those of water. The spell's area of effect is a square with sides measuring 10-ft per level of the cleric. For example, a cleric of 7th level can affect a square area up to 70-ft×70-ft. The reverse of the spell raises water in an area of effect similar to that of lower water, but not to the same degree of height, returning water to its natural level plus one foot per caster level.
+source: wiki2_spells.txt

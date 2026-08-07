@@ -1,0 +1,19 @@
+name: Animated Tome
+frequency: uncommon
+no_encountered: 1d6
+size: small
+alignment: neutral evil
+move: 30ft
+armour_class: 7 [13]
+hit_dice: '1-1'
+melee_attacks: 1 (paper cut 1d4)
+senses: blindsense 60ft
+lair_chance: 0%
+intelligence: non (0)
+morale: 12
+loot: none
+experience: 15 +1 per hp
+description: A flapping, fluttering volume whose pages have become biting blades. Animated by the Librarian's will, these books harry intruders until their bindings are broken.
+abilities:
+- heading: Swarm of Pages
+  text: Animated tomes attack in groups, darting at faces and limbs with paper-thin edges.

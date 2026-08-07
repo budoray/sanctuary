@@ -1,0 +1,21 @@
+name: Fungi, Violet
+frequency: rare
+no_encountered: 1d4
+size: small to medium
+alignment: neutral
+move: 10ft
+armour_class: 7 [13]
+hit_dice: '3'
+melee_attacks: 1d4 branches (special)
+senses: Standard
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 110 +2/hp
+description: Violet fungi look like shriekers and in fact the two are often  found growing together. The plants are usually 4ft to 7ft tall,  and each plant has 1d4 branches growing out of it. At 4ft tall,  the fungi will have 1ft branches. For every foot taller the fungi  grows, the branches grow a foot longer.
+abilities:
+- heading: Immunities and Resistances
+  text: Plant Immunities. This creature doesn’t need to eat, drink, sleep,  or breathe as an animal would. Magic can’t put it to sleep. Gas- es can’t harm it, and it is immune to poison and disease. It  does not rely upon sight, so it automatically detects invisible  opponents.
+- heading: Special Attacks
+  text: Spores. When the fungi detects movement nearby it will wave its  branches around, releasing its spores. Anyone within 4ft must  save vs poison or their exposed flesh will begin to rot within  1 round. Anyone who fails their save will die in 1d4+4 rounds  unless the rotting is stopped by a cure disease spell. G

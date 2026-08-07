@@ -34,6 +34,7 @@ class CharacterRecord(Base):
     abilities = Column(Text, default="{}")  # JSON scores + modifiers
     saves = Column(Text, default="{}")  # JSON saving throws
     seed = Column(Integer, default=0)
+    ruleset_id = Column(String, default="osric")
     state = Column(Text, default="{}")  # full serialized Character + log
     created_at = Column(DateTime, default=_utc_now)
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
@@ -52,6 +53,7 @@ class SessionRecord(Base):
     status = Column(String, default="active")
     visibility = Column(String, default="solo")  # solo, friends, public, invite
     invite_code = Column(String, nullable=True, index=True)
+    ruleset_id = Column(String, default="osric")
     state = Column(Text, default="{}")  # full session engine state
     created_at = Column(DateTime, default=_utc_now)
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
@@ -101,6 +103,19 @@ class CampaignRecord(Base):
     current_module_index = Column(Integer, default=0)
     password_hash = Column(String, nullable=False)
     dm_account_id = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=_utc_now)
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
+
+
+class CustomRulesetRecord(Base):
+    __tablename__ = "rulesets"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4())[:8])
+    account_id = Column(Integer, index=True, nullable=False)
+    base_ruleset_id = Column(String, nullable=False)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    overrides_json = Column(Text, default="{}")  # JSON overrides merged onto base manifest
     created_at = Column(DateTime, default=_utc_now)
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
 

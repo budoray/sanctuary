@@ -1,0 +1,36 @@
+name: Elemental, Earth
+frequency: very rare very rare very rare very rare
+size: large large large large
+alignment: neutral neutral neutral neutral
+move: 60ft
+armour_class: 2 [18] 2 [18] 2 [18] 2 [18]
+hit_dice: 8, 12, or 16 8, 12, or 16 8, 12, or 16 8, 12, or 16
+melee_attacks: 1 strike (4d8 or 4d6; see below)
+senses: Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil
+intelligence: low (5-7) low (5-7) low (5-7) low (5-7)
+morale: N/A N/A N/A N/A
+loot: Nil Nil Nil Nil
+experience: '8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp 8 HD: 900 +12/hp
+  12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp 8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16
+  HD: 3,650 +20/hp 8 HD: 900 +12/hp 12 HD: 2,000 +16/hp 16 HD: 3,650 +20/hp'
+description: EARTH ELEMENTALS Earth Elementals are creatures from the Elemental Plane
+  of  Earth, though they may sometimes be found elsewhere. When  encountered on the
+  Prime Material Plane, usually as a result of  summoning magic, they seem to be vaguely
+  humanoid mounds  of stone, earth, metal and crystal. Whilst they may have a dis
+  - cernible head and face, it is usually devoid of expression. Immune to Mundane
+  and +1 Weapons.  This creature is immune  to piercing, blunt, and slashing damage
+  from weapons and un- armed attacks, unless the weapon causing that damage has a  magical
+  bonus of +2 or more. Pass Through Stone.  Earth elementals pass through rock and  earth
+  without hindrance, as they do along the ground, but they  cannot travel through
+  the air nor in (or over) water unless they  remain in contact with the earth. Destroy
+  Structures.  The power of Earth Elementals against  ground-built structures and
+  fortifications is truly devastating;  they are capable of reducing small structures
+  to rubble in a  matter of minutes and even the largest will eventually collapse  if
+  the Elemental is free to work against it. If need be, this can  be measured as an
+  automatic 2d4 points of structural damage  (see “Strongholds”) per round. Earth
+  Contact. When an earth elemental attacks opponents who  are also in contact with
+  the earth, their great limbs strike for  4d8 points of damage; against foes who
+  are not in contact with  ground, the Earth Elemental strikes for only 4d6 points
+  of dam- age.
+abilities: []

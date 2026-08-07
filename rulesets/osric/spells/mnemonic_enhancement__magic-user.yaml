@@ -1,0 +1,14 @@
+name: Mnemonic Enhancement
+slug: mnemonic_enhancement
+reversible: false
+class: magic-user
+level: 4
+school: Arcane Transmutation/Alteration
+range: Caster
+duration: 24 hours
+area_of_effect: Caster
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: This spell enhances the magic user's precision of memory, allowing him or her to retain up to three additional spell levels in his or her mind (3 first level, 1 first and one second level, or 1 third level). The spell may be used for memorisation, or may be used to hold onto the memory of a spell just cast. The spell components are expensive, costing at least 100 gp, and might not be available in rural communities.
+source: wiki2_spells.txt

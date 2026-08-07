@@ -1,0 +1,36 @@
+name: Clay Golem Flesh Golem Iron Golem Stone Golem
+frequency: very rare very rare very rare very rare
+no_encountered: 1 1 1 1
+size: large (8ft) large (7.5ft) large (12ft) large (9.5ft)
+alignment: neutral neutral neutral neutral
+move: 70ft 80ft 60ft 60ft
+armour_class: 7 [13] 9 [11] 3 [17] 5 [15]
+hit_dice: 50 hp 40 hp 80 hp 60 hp
+melee_attacks: 1 (3d10) 2 fists (2d8) 1 fist 4d10 1 (3d8)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft Infravision 60ft
+lair_chance: Nil Nil Nil Nil
+intelligence: non- (0) semi- (2-4) non- (0) non- (0)
+morale: Special Special Special Special
+loot: Nil Nil Nil Nil
+experience: 2,800 2,180 8,550 4,040
+description: 'CLAY GOLEM A clay golem is a construct created through the following proce- dure: a lawful good cleric of at least 17th level (or a lower level  cleric of same alignment using a magical tome written for such  a process) creates a man–shaped figure out of clay and then un- dertakes an uninterrupted ritual involving material components  worth no less than 20,000 gp, vestments and ritual items worth  another 30,000 gp and the spells resurrection, animate object ,  commune, prayer and bless.'
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Non-Blunt and Mundane Weapons.  This creature is  immune to piercing and slashing damage from all weapons  (magical or not), and from blunt damage from non-magical  weapons. Unaffected by Most Spells. Clay golems are not affected by spells  other than move earth (6d6 damage), disintegrate (1d12 dam - age and slows the golem permanently as per the spell) and  earthquake (5d10 damage).
+- heading: Special Features
+  text: Loss of Control. A clay golem is under the direct command of its  creator. It stands a 1% cumulative chance of possession by a  spirit of chaotic evil alignment for each round the golem is in  combat. The creator can never regain control if the golem is  possessed. Once possessed, the golem will kill any nearby liv - ing thing starting with the closest creature and will haste itself  if it has not already done so. Healing-Resistant Damage. Damage inflicted by a clay golem can  only be healed by a cleric of 17th level or greater, although it  will heal naturally at the normal rate.
+- heading: Special Attacks
+  text: 'The clay golem attacks as an 11 hit dice monster. Haste. Once per day, provided it has been in combat for one  or more rounds, a clay golem can act as if hasted (duration: 3  combat rounds). This allows the golem to move and attack at  twice normal speed. A golem that loses control will immediate- ly haste itself if possible. FLESH GOLEM Flesh golems are constructs built from human body parts ...  basically, Frankenstein’s monster. A flesh golem follows simple  commands by its creator, and can be ordered (if serving as a  guard) to wait until a specific event takes place before undertak- ing a series of commands.  A flesh golem is extremely strong and can break down doors  and other wooden structures.  A flesh golem is created with a magical tome written for such  a process or by a magic-user (of at least 14th level) using the  following spells: wish, polymorph object, geas, strength, and pro- tection from normal missiles. One thousand gold pieces per hit  point of the golem must
+    be spent on material components, and  the entire creation process takes one month.'
+- heading: Immunities and Resistances
+  text: 'Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Immune to Most Spells. Cold- and fire-based spells do not dam - age the golem, but slow it to 50% speed for 2d6 combat rounds.  Electrical attacks heal damage the golem has sustained, at a  rate of 1 hit point restored per die of damage that would have  been inflicted (example: an 8 hit dice lightning bolt will restore 8  hit points of damage). Other spells have no effect at all.'
+- heading: Special Features
+  text: 'Loss of Control. For each melee round spent in combat, the flesh  golem stands a 1% cumulative chance of going berserk and  attacking all targets in sight. The golem’s creator can attempt  to reassert control at a chance of 10% per round (non-cumu - lative). IRON GOLEM An iron golem is created through use of a magical tome or by an  18th level or higher magic-user using the following spells: cloud  kill, wish, geas, and polymorph object . Creation time is three  months and material cost is 1,000 gp per hit point of the golem.  The magic-user can give the construct simple commands, and  it can be ordered (if serving as a guard) to wait until a specific  event takes place before undertaking a series of commands.'
+- heading: Immunities and Resistances
+  text: 'Immune to Mundane, +1, and +2 Weapons.  This creature is im - mune to piercing, blunt, and slashing damage from weapons  and unarmed attacks, unless the weapon causing that damage  has a magical bonus of +3 or more. Immune to Most Spells. Only electrical magical attacks can affect  it; such spells will slow the golem to one-half speed for 3 com- bat rounds. Fire attacks repair damage to the golem at a rate  of one hit point per die of spell damage (example: a 6 hit die  fireball repairs 6 hp of damage). Other spells have no effect at  all.'
+- heading: Special Attacks
+  text: 'Breath Weapon. In addition to its normal attacks, once every 7  combat rounds an iron golem may breathe poison gas directly  before it in a cloud of 10 cubicft. Anyone in the cloud must  make a saving throw vs. poison or die. STONE GOLEM A stone golem is created through use of a magical text or by a  16th or higher level magic-user using the following spells: geas,  slow, wish and polymorph object. Creation time is two months  and cost is 1,000 gp per hit point of the golem. The magic-user  can give the construct simple commands, and it can be ordered  (if serving as a guard) to wait until a specific event takes place  before undertaking a series of commands.'
+- heading: Immunities and Resistances
+  text: Immune to Mundane and +1 Weapons.  This creature is immune  to piercing, blunt, and slashing damage from weapons and un- armed attacks, unless the weapon causing that damage has a  magical bonus of +2 or more. Immune to Most Spells. A stone golem is invulnerable to most  magic. The only exceptions are rock to mud  (halves the go - lem’s attack and movement speed for 2d6 rounds), stone to  flesh (makes the golem susceptible to normal weapons for one  round), and mud to rock (acts as a heal spell on the monster).
+- heading: Special Features
+  text: Slow. A stone golem can cast a slow spell every other melee  round on all opponents within 10ft of its front side.

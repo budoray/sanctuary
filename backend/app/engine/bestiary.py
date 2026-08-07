@@ -1,6 +1,6 @@
 """Minimal monster loader for tactical combat.
 
-Loads `backend/app/data/monsters/*.yaml`. Only the fields needed for
+Loads `*.yaml` from a monsters directory. Only the fields needed for
 map/token combat are exposed: hp, ac, to-hit bonus, damage die.
 """
 import re
@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-_DIR = Path(__file__).resolve().parent.parent / "data" / "monsters"
+_DEFAULT_DIR = Path(__file__).resolve().parent.parent / "data" / "monsters"
 
 _HIT_DICE_RE = re.compile(r"^(\d+)(?:\s*-\s*1)?(?:\+\d+)?$")
 _AC_RE = re.compile(r"^(\d+)\s*\[\s*(\d+)\s*\]")
@@ -56,10 +56,11 @@ def _parse_damage(melee: str) -> str:
     return m.group(1) if m else "1d6"
 
 
-def load(name: str) -> dict:
+def load(name: str, monsters_dir: Path | None = None) -> dict:
     """Load a monster by name or slug."""
+    directory = monsters_dir or _DEFAULT_DIR
     slug = re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
-    path = _DIR / f"{slug}.yaml"
+    path = directory / f"{slug}.yaml"
     if not path.exists():
         raise KeyError(f"no monster {name!r} ({path})")
     doc = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -78,5 +79,6 @@ def load(name: str) -> dict:
     }
 
 
-def base_ids() -> list[str]:
-    return sorted(p.stem for p in _DIR.glob("*.yaml"))
+def base_ids(monsters_dir: Path | None = None) -> list[str]:
+    directory = monsters_dir or _DEFAULT_DIR
+    return sorted(p.stem for p in directory.glob("*.yaml"))

@@ -1,0 +1,26 @@
+name: Invisible Stalker
+frequency: very rare
+no_encountered: '1'
+size: large (8ft)
+alignment: neutral
+move: 120ft
+armour_class: 3 [17]
+hit_dice: '8'
+melee_attacks: 1 strike (2d8)
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: high (13-14)
+morale: N/A
+loot: Nil
+experience: 1,100 +10/hp
+description: A denizen of the Elemental Plane of Air, an invis - ible stalker encountered on the Prime Material  Plane has been conjured and bound to service by  a magic-user. The summoning magic-user retains  command of the creature until it either fulfils the  mission which it was summoned to perform or it  is killed. Invisible stalkers are useful, if dangerous, ser - vants. Once given a mission they will relentlessly  pursue their goal, motivated more by a dislike of  forced service and a desire to return to their home  plane than by any sense of devotion to their sum- moner. Invisible stalkers are faultless trackers  across any surface or distance and, if ordered to  kill their prey, will attack without checking morale  until either they or their target is dead. As implied  above, invisible stalkers are not willing servants  but will not normally begrudge performing a sim- ple task of short duration for the summoner. More complicated tasks or tasks of duration lon - ger than a week will
+  anger the invisible stalker  and may lead it to attempt to pervert the wording  of its commands without directly violating them.  If ordered to guard the summoner’s treasure  in perpetuity, for instance, the invisible stalker  might remove every last copper piece of the sum- moner’s treasure to a secret vault located within  the invisible stalker’s lair on the Elemental Plane  of Air, where the ‘stalker could easily keep watch  over it. If the GM feels the invisible stalker’s service too  onerous or complicated, assign a cumulative 1%  per day chance of the ‘stalker wearying of its task  and attempting to twist the meaning of its orders.  A clever summoner might be able to word their orders in such a way as to  make its meaning airtight and clear. In this case the ‘stalker must continue  to serve until its duties are discharged.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Invisible stalkers surprise on a 1–5 on 1d6.
+- heading: Immunities and Resistances
+  text: Magic Resistance (30%). Any magic spell or effect has a 30% chance (at cast- er level 11) to have no effect on this creature; but if it does, the magic  takes full effect.
+- heading: Special Features
+  text: Invisibility. While on the Prime Material Plane invisible stalkers can only be  viewed by magical means (e.g. gem of seeing, true seeing, detect invisibil- ity); otherwise anyone attacking an invisible stalker suffers a -2 penalty  “to hit”. An invisible stalker cannot be killed on this plane. Reducing it to  zero hit points merely banishes it back to its home plane for a period of  1 year plus 1 day. Unarmed Combat. Invisible stalkers cannot be targeted with grappling or  overbearing attacks, and do not use these tactics.
+- heading: Languages
+  text: Invisible stalkers can understand the common tongue of the Prime Ma - terial Plane, the language of the Elemental Plane of Air, and their own  language. They will speak no tongue but their own. JACKAL

@@ -1,0 +1,12 @@
+id: 2.2.5.3a
+name: DETERMINING LEVEL OF THIEF  FOLLOWERS
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- DIE ROLL (D100) THIEF LEVEL
+- 01-10 1
+- 11-20 2
+- 21-45 3
+- 46-65 4
+- 66-80 5
+- 81-90 6
+- 91-00 7

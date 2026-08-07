@@ -1,0 +1,17 @@
+name: Normal Hatchling Guard Warchief
+frequency: uncommon uncommon uncommon rare
+no_encountered: 1d100 x2 10d4 3d6 1
+size: medium small medium medium
+alignment: lawful evil lawful evil lawful evil lawful evil
+move: 120ft; 240ft swimming 120ft; 240ft swimming 120ft; 240ft swimming 120ft; 240ft swimming
+armour_class: 5 [15] 7 [13] 5 [15] 4 [16]
+hit_dice: 2+2 1 3+3 4+4
+melee_attacks: 1 (By weapon) 1 (1d4) 1 (By weapon) 1 (By weapon)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft Infravision 60ft
+lair_chance: 25% 100% 25% 25%
+intelligence: high (13-14) high (13-14) high (13-14) high (13-14)
+morale: 55 50 60 70
+loot: Individual 5 each; in lair,  Hoard 9, Cache 1, 2, 3  (x10), 10, 11 Nil Individual 5 each Individual 5 each
+experience: 30 +3/hp 10 +1/hp 50 +4/hp 100 +5/hp
+description: ''
+abilities: []

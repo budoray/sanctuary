@@ -1,0 +1,12 @@
+id: 2.2.7.1a
+name: WITCH-PRIEST ADVANCEMENT
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- LEVEL ADDITIONAL XP NEEDED ADDITIONAL HIT POINTS (D6) ADDITIONAL TO-HIT BONUS 1 2 3 4
+- 1 N/A 0 +0 1 — — —
+- 2 1,500 1 +1 2 — — —
+- 3 3,000 2 +2 2 1 — —
+- 4 6,000 3 +3 3 2 — —
+- 5 13,000 4 +4 3 3 1 —
+- 6 27,000 5 +5 3 3 2 —
+- 7* 55,000 6 +6 3 3 2 1

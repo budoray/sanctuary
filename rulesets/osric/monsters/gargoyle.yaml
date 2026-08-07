@@ -1,0 +1,19 @@
+name: Gargoyle
+frequency: uncommon
+no_encountered: 2d8
+size: medium
+alignment: chaotic evil
+move: 90ft; 150ft flying (AA:IV)
+armour_class: 5 [15]
+hit_dice: 4+4
+melee_attacks: 2 claws (1d3), 1 horn (1d4)  and 1 bite (1d6)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: low (5-7)
+morale: 70
+loot: Nil
+experience: 155 +4/hp
+description: Gargoyles are cruel creatures, 90% likely to attack any living  creature they encounter. They resemble statues of winged hu - manoids, and are almost indistinguishable from carved stone  until they move. They are usually encountered in ruins and un - derground caverns.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from weapons and unarmed  attacks, unless the weapon causing that damage has a magical  bonus of +1 or more. Unarmed Combat.  Gargoyles can attack and be targeted with  grappling or overbearing attacks. If not fended off, they score  an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +6/- 6. Overbear Results Mods: ATK/DEF +1/-1. Grappling Result  Mods: ATK/DEF +0/-0.'

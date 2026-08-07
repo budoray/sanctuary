@@ -1,0 +1,25 @@
+name: Ghoul
+frequency: uncommon
+no_encountered: 4d6
+size: medium
+alignment: chaotic evil
+move: 90ft
+armour_class: 6 [14]
+hit_dice: '2'
+melee_attacks: 1d3/1d3/1d6
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: low (5-7)
+morale: 55
+loot: Horde 2, Cache 6
+experience: 70 +2/hp
+description: Ghouls are undead creatures, possibly once human. Loping  through the darkness with their vague canine cast and long,  black, marrow-licking tongues, they haunt graves and ruins,  seeking the flesh of the dead and the living. Though their minds  are warped by the transformation, and their general intellect  stunted, they still retain a terrible cunning, and they attack in  fearless packs to good effect, bringing down the living to feast  on their remains. Any person killed by ghouls will eventually rise  as a ghoul unless the body is blessed. Such casualties can be  raised from the dead normally, as well, as long as it is done be - fore the ghoul transformation sets in. Protection from evil will keep these things at bay. Ghouls are also said to be able travel the lands of dreams, using  them as conduit to enter the waking world of men at various  graveyards, and escaping without a trace. Marine ghouls are  called “lacedons” and are sometimes found on ghost ships or  dwelling
+  in wrecks on the sea bed.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Ghouls are turned as type 3 Undead. Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease.
+- heading: Special Attacks
+  text: 'Paralysation. Any human or demi-human (except elves) hit by a  ghoul must make a saving throw vs. paralysis or be paralysed  for 3d4 turns. Unarmed Combat. Ghouls can attack and be targeted with grap- pling or overbearing attacks although they seldom use this tac- tic. If not fended off, they score an unarmed hit with a 2+ on  1d20. Hit Mods: ATK/DEF +6/-6. Overbear Results Mods: ATK/ DEF +0/+0. Grappling Result Mods: ATK/DEF +0/-0.'
+- heading: Languages
+  text: Ghouls, unlike most undead, have their own language which  they share with ghasts. Their voices are weird and eldritch,  sometimes described as “meeping” and “glibbering”. GIANTS Far from being mere brutes, giants’ cunning makes up for their  sometimes low intelligence. Giants can sometimes be persuad- ed, so long it is within their interests, to cooperate with other  beings of like alignment. Despite the diversity of giant types, these monsters share some  common characteristics. Giants are able to lift and throw large  rocks like a catapult, even at close range, with their immense  strength of 19–25. Immature giants function at a percentage of  that of adults. Giants’ great love of gold nearly matches their strength, and  they commonly carry 1,000–6,000 coins, usually gold, with them  when away from their cave dens. As if in defence of this trea - sure, they also commonly carry one or two rocks to use as con- venient weapons. Giants speak one language unique to their type, as well
+    as their  alignment language.

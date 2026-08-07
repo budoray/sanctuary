@@ -1,0 +1,23 @@
+name: Babbler
+frequency: very rare
+no_encountered: 1d4
+size: large
+alignment: chaotic evil
+move: 120ft
+armour_class: 6 [14]
+hit_dice: '5'
+melee_attacks: 2 claws (1d6 slashing), 1 bite (1d8  piercing)
+senses: Keen-eared (detect invisible 5%)
+lair_chance: 15%
+intelligence: average (8-10)
+morale: 70
+loot: Hoard 2
+experience: 100 +5/hp
+description: Babblers are intelligent, lizard-like creatures that resemble  a small allosaurus with long arms. They are usually found in  swamps, fens, and marshes. Babblers particularly like the taste  of human flesh. Babblers share their habitat with lizardfolk and may be distant- ly related to them. Some sages think they’re former lizardfolk  transformed by a curse. In any event, they are sometimes found  accompanying lizardfolk raiding parties, and sometimes found  eating lizardfolk. Since no one can understand the language of  babblers, there’s no way of knowing the motivations involved.
+abilities:
+- heading: Immunities and Resistances
+  text: Hold Breath.  This creature can go for up to an hour between  breaths.
+- heading: Special Features
+  text: 'Swamp Stealth. While motionless in marsh or swamp terrain, the  babbler has a 30% chance to become completely invisible, as  if hiding in shadows. Unarmed Combat. Babblers can choose to overbear instead of  making a regular melee attack, but cannot grapple or be grap- pled. If not fended off, they score an unarmed hit with a 2+ on  1d20. Hit Mods: ATK/DEF +8/-8. Overbear Results Mods: ATK/ DEF +2/-2. Grappling Result Mods: ATK/DEF -/-.'
+- heading: Languages
+  text: Babblers vocalise constantly, unless they’re asleep or hiding.  They emit a constant stream of noises that sound like language,  but magic doesn’t translate the sounds, and nobody has ever  learned their tongue. They never speak intelligibly. Babblers can  usually understand the languages of lizardfolk, although they  can’t speak it.

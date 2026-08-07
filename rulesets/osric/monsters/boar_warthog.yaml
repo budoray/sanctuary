@@ -1,0 +1,19 @@
+name: Boar, Warthog
+frequency: common
+no_encountered: 1d6
+size: small
+alignment: neutral
+move: 120ft
+armour_class: 7 [13]
+hit_dice: '3'
+melee_attacks: 2 (2d4/2d4)
+senses: Standard
+lair_chance: 20%
+intelligence: animal (1)
+morale: 60
+loot: Nil
+experience: 50 +2/hp
+description: Tropical relatives of the common boar, warthogs will only attack  if threatened or cornered. If more than two are indicated, they  will consist of a mated pair and young. Young warthogs have 2 hit  dice rather than 3, but are otherwise the same as adults.
+abilities:
+- heading: Special Features
+  text: Die Hard. All warthogs will fight for 1–2 rounds below 0 hit points,  or to -6 hp. Unarmed Combat. Warthogs cannot be overborne or grappled,  and do not employ these tactics.

@@ -1,0 +1,19 @@
+name: Centaur
+frequency: rare
+no_encountered: 4d6
+size: large
+alignment: neutral good or chaotic good
+move: 180ft
+armour_class: 5 [15] or 4 [16]
+hit_dice: '4'
+melee_attacks: 2 hooves (1d6) and weapon
+senses: Standard
+lair_chance: 5%
+intelligence: average (8-10)
+morale: 65
+loot: Individual 4 and Cache 3 each; Hoard  4, 9, and Cache 6 in lair
+experience: 75 +3/hp
+description: 'Centaurs have the body of a horse, but have the upper torso,  arms and head of a human in place of the horse’s neck and head.  Antipathetic toward humans, yet friendly toward elves and their  kin, centaurs prefer unfrequented glades, pastures and wood - lands. A centaur band is armed with: 50% hardwood clubs (2d4  damage), 25% composite and/or longbows with the remaining  centaurs armed with lance and shield (thus, AC 4 [16])—this last  group being the leaders. All centaurs are capable of attacking  with melee weapons and two hoof attacks each melee round. If upon rare occasion encountered in their lair, there will be an  additional 3d6 (total 7d6 encountered) fighting centaurs, with  5d6 young. Non-fighting (young) centaurs possess only 1d3 hit   points.'
+abilities:
+- heading: Special Attacks
+  text: 'Ranged Attack. Centaurs may use ranged weapons as humans  can. Unarmed Combat. Centaurs cannot be overborne or grappled,  but they may overbear. If not fended off, they score an un - armed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +10/na. Over- bear Results Mods: ATK/DEF +5/na. Grappling Result Mods:  ATK/DEF na/na. CENTIPEDE, GIANT'

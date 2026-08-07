@@ -1,0 +1,19 @@
+name: Skeleton
+frequency: rare
+no_encountered: 3d10
+size: medium
+alignment: neutral
+move: 120ft
+armour_class: 7 [13]
+hit_dice: '1'
+melee_attacks: 1 (1d6)
+senses: Standard
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 15 +1/hp
+description: Skeletons are the animated bones of humans and the like, es - sentially mindless undead creatures. They are created by an evil  (or neutral at best) magic-user or cleric, only obeying the simple  commands of their animator, which is often limited by the spell  itself to a score of words. Some sages warn, though, that mere  proximity to great evil can animate the dead, resulting in armies  of these horrors springing to unlife in forgotten catacombs and  foul dungeons. Though given no commands, they seek out the  living and attempt to force them into the ranks of the dead. No matter how a skeleton attacks, whether with a rusty blade,  a stone, or its own former femur, it always deals 1d6 damage.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Turned as Undead. Skeletons are turned as type 1 Undead. Undeath. This creature is immune to cold, and to all mind con - trol (including charm) and hold spells. It cannot be affected by  sleep, gases, poison, or disease. Resistant to Slashing and Piercing Damage.  Skeletons take only  half damage from slashing and piercing damage. They take full  damage from blunt weapons. Unarmed Combat. Skeletons do not engage in grappling or over- bearing attacks. They can be targeted this way, but do not  suffer any temporary damage inflicted. If not fended off, they  score an unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF  +8/-8. Overbear Results Mods: ATK/DEF +0/-0. Grappling Result  Mods: ATK/DEF +0/-0.'

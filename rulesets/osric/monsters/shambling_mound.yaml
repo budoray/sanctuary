@@ -1,0 +1,21 @@
+name: Shambling Mound
+frequency: rare
+no_encountered: 1d3
+size: large
+alignment: neutral
+move: 60ft
+armour_class: 0 [20]
+hit_dice: 8 to 11
+melee_attacks: 2 strikes (2d8 blunt)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: low (5-7)
+morale: By HD
+loot: Hoard 2, Cache 6 and 10
+experience: Variable according to hit dice
+description: Shambling mounds are intelligent plants that appear to be  walking piles of rotting vegetation. They dwell deep under - ground and in swamps, wherever there is ample moisture and  decay. Shambling mounds will eat anything organic. They feed  by wrapping their roots around prey they have killed, absorbing  the nutrients as the material rots.
+abilities:
+- heading: Immunities and Resistances
+  text: Resistant to Weapons.  Weapons inflict only half damage to a  shambling mound. Electricity Causes Growth. If a shambling mound is “damaged” by  electricity, it gains a hit die. Immune to Fire.  Shambling mounds are perpetually damp and  immune to fire damage. Resistant to Cold. Cold-based attacks do no damage if the crea - ture makes a saving throw, half if it fails the save. Vulnerability to Plant-Attacking Spells. Shambling mounds are  considered plants for all spells that affect plants (such as plant  control or charm plant).
+- heading: Special Attacks
+  text: Suffocation. If both arms strike the same target within the same  round, that target has become tangled up inside the creature.  The victim will be smothered in 2d4 rounds unless the monster  can be killed. Anyone entangled can continue to attack, but at  -4 to hit and damage. Unarmed Combat. Shambling mounds cannot effectively be tar- geted with grappling or overbearing attacks, and do not use  these tactics. SHARK

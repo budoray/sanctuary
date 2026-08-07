@@ -1,0 +1,14 @@
+name: Find the Path
+slug: find_the_path
+reversible: true
+class: cleric
+level: 6
+school: Clerical Divination
+range: Touch
+duration: 1 turn/level
+area_of_effect: Creature touched
+components: V,S,M
+casting_time: 3 rounds
+saving_throw: None
+text: This spell imbues one creature with an uncanny sense for the shortest route into or out of a chosen locale. The spell imparts only a visceral intuition of the right direction and shortest distance, so it is impossible to use the spell either to circumvent dangers or to draw a map. This spell may be used to escape from a maze spell (q.v.) in one round and will continue to function thereafter. The spell's reverse makes a creature unable to make any significant movement beyond aimless wandering.
+source: wiki2_spells.txt

@@ -1,0 +1,23 @@
+name: Jackalwere
+frequency: rare
+no_encountered: 1d4
+size: medium (small)
+alignment: chaotic evil
+move: 120ft
+armour_class: 4 [16]
+hit_dice: '4'
+melee_attacks: 2d8 or by weapon
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: very (11-12)
+morale: 65
+loot: Hoard 3
+experience: 75 +4/hp
+description: A jackalwere is a malevolent beast that can assume  human form (and hence is not a lycanthrope, since  lycanthropes are humans who can assume animal  form). They will mingle with people, choosing easy tar- gets to victimise. Living for the thrill of murder, many  times they will consume the remains of their prey. Of- ten they steal their victims’ possessions, assume their  identities, and go on to the next town. In human form  a jackalwere will most often attack with a weapon. Jackalweres  sometimes prefer the company of normal jackals and can be  found living among them from time to time.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Non-Iron Mundane Weapons.  The jackalwere is im - mune to piercing, blunt, and slashing damage from weapons,  unless the weapon causing that damage has a magical bonus  of +1 or more, or is made of unsmelted cold iron (most metal  weapons are steel rather than unsmelted iron).
+- heading: Special Features
+  text: Shapeshifter. A jackalwere can shift at will into the form of a hu- man or back into its jackal form. Shifting does not affect the  creature’s hit points or armour class, or cure the creature of  any damage.
+- heading: Special Attacks
+  text: 'Sleep Gaze. Any creature meeting the gaze of a jackalwere must  successfully save vs spells or fall into a magical sleep (save  each time the gaze is met). This applies to anyone who is gen - erally in front of the creature and not using an indirect method  of sight such as a mirror. Attacking the creature by looking at a  reflection incurs a to-hit penalty of -2. Attacking blindly incurs  a to-hit penalty of -4. Unarmed Combat. In human form a jackalwere can make grap - pling or overbearing attacks. If not fended off, they score an  unarmed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +6/-10.  Overbear Results Mods: ATK/DEF +1/-1. Grappling Result  Mods: ATK/DEF +0/+0.'

@@ -1,0 +1,14 @@
+name: Deafness
+slug: deafness
+reversible: false
+class: illusionist
+level: 2
+school: Phantasmal Illusion
+range: 60-ft
+duration: Permanent
+area_of_effect: One creature
+components: V,S,M
+casting_time: 2 segments
+saving_throw: Negates
+text: This spell is similar to the illusionist's blindness spell, but causes deafness. The effect is permanent until removed by dispel magic, though it can be removed by the caster at any time.
+source: wiki2_spells.txt

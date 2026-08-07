@@ -1,0 +1,23 @@
+name: Troll, Giant Two–headed
+frequency: very rare
+no_encountered: 1d3
+size: large (10ft tall)
+alignment: chaotic evil
+move: 120ft
+armour_class: 4 [16]
+hit_dice: '10'
+melee_attacks: 2 claws (1d6) and 2 bites (1d10)
+senses: Infravision 60ft
+lair_chance: 35%
+intelligence: average (8-10)
+morale: 95
+loot: Hoard 4, Cache 3
+experience: 1,750 +15/hp
+description: Giant two-headed trolls are the vicious offspring of trolls and et- tins. In appearance they look most like trolls, though they have  two heads like an ettin and prefer wearing filthy animal skins  as ettins do. Giant two–headed trolls are nocturnal and prefer  underground dwellings such as dungeons or caverns. In combat the giant two–headed troll can direct claw attacks at  two different opponents, but both bite attacks must be directed  at the same opponent.
+abilities:
+- heading: Surprise and Initiative
+  text: Alert. Giant two-headed trolls can only be surprised on a die roll  of 1 (on a 1d6).
+- heading: Immunities and Resistances
+  text: Effect of Regeneration.  Giant two-headed trolls regenerate all  damage except fire damage and corrosive damage (acid) while  they are alive. Unlike true trolls, they do not regenerate once  killed. It is thus possible to kill these creatures without using  acid or fire, but the creature will be regenerating damage up  until the point it dies.
+- heading: Special Features
+  text: Regeneration. Giant trolls regenerate 1 hit point per round (ex - cept acid and fire damage) but unlike their smaller cousins,  they are not capable of rebonding severed limbs, and severed  limbs will not attack independently. Unarmed Combat. Giant two-headed trolls cannot be targeted  with overbearing or grappling attacks, and do not use these  tactics.

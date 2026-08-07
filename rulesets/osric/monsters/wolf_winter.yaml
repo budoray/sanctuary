@@ -1,0 +1,23 @@
+name: Wolf, Winter
+frequency: very rare
+no_encountered: 2d4
+size: large
+alignment: neutral evil
+move: 180ft
+armour_class: 5 [15]
+hit_dice: '6'
+melee_attacks: 1 bite (2d4)
+senses: Keen
+lair_chance: 10%
+intelligence: average (8-10)
+morale: 75
+loot: Hoard 9
+experience: 245 +5/hp
+description: The winter wolf is a large, intelligent, and bad-tempered pred - ator which is found only in the cold wastes. Its coat is typically  silver or ivory in colour, and its eyes are ice blue. Their coats are worth 5,000 gold pieces.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Immune to Cold. The wolf is immune to cold attacks. Vulnerability to Fire.  Winter wolves take an extra point of dam - age on each die rolled for a fire-based attack (example: a 5HD  fireball inflicts +5 fire damage, which is also regardless of the  wolf’s saving throw).'
+- heading: Special Attacks
+  text: 'Breathe Frost.  In addition to its bite, once every 10 rounds a  winter wolf can breathe cold on all creatures within 10ft of its  mouth. This icy breath causes 6d4 points of damage to the vic- tim (half damage with a successful save vs. breath weapon). Unarmed Combat. Winter wolves cannot be targeted with grap - pling or overbearing attacks. They may choose to overbear. If  not fended off, they score an unarmed hit with a 2+ on 1d20.  Hit Mods: ATK/DEF +10/na. Overbear Results Mods: ATK/DEF  +5/na.'
+- heading: Languages
+  text: Winter wolves speak their own language, and are also able to  talk to worgs. WOLVERINE

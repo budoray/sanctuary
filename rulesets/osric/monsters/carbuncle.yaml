@@ -1,0 +1,19 @@
+name: Carbuncle
+frequency: rare
+no_encountered: '1'
+size: small
+alignment: chaotic neutral
+move: 30ft
+armour_class: 2 [18]
+hit_dice: '1'
+melee_attacks: None
+senses: Standard
+lair_chance: 10%
+intelligence: average (8-10)
+morale: 50
+loot: See below
+experience: 5 +1/hp
+description: Carbuncles are adorable minor agents of Chaos. They seem to  be curious little animals like armadillos, and they feed on leaves  and small insects. Set in the carbuncle’s head above its eyes is a  large ruby (randomly-determined value of at least 500 gp). If the  beast dies, any ruby attached to it shatters and cannot be re - constituted—but it can voluntarily give up its gem, in which case  the gem will re-grow over a period of several months (re-roll the  gem’s value each time it re-grows). The carbuncle will not nor - mally give up its gem unless charmed or otherwise enchanted.
+abilities:
+- heading: Languages
+  text: Carbuncles are empathic and communicate via a minor form  of telepathy. They will approach and seek to join a party of hu - mans or demi-humans and then try to spread discord by means  of lies, bearing false witness, or betraying the party’s presence  to nearby monsters.

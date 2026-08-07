@@ -1,0 +1,5 @@
+name: Talisman of the Sphere
+classes: IM
+description: This item is only usable by arcane or phantasmal spell casters. Any character unable to cast arcane or phantasmal spells cannot use the talisman and, in fact, will take 5d6 points of damage if they attempt to pick it up. The talisman, consisting of a braided gold and adamantine cable forming a loop closed by an adamantine handle, allows a magic user to exert greater control over a sphere of annihilation (see above) by increasing the character’s modifier on the control check (double intelligence bonus and character level). A character using the talisman to exert influence on a sphere of annihilation need only check for maintaining control every other round after initial control is established. If the wielder fails to establish initial control or subsequently loses control, the sphere will move toward him or her at a rate of 10ft per round. Though spells such as dispel magic are ineffective against a sphere of annihilation, these spells function normally when used on the talisman
+  of the sphere—which counts as 20th level for the purposes of dispel magic attempts.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

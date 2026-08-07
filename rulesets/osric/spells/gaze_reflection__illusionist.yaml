@@ -1,0 +1,14 @@
+name: Gaze Reflection
+slug: gaze_reflection
+reversible: false
+class: illusionist
+level: 1
+school: Phantasmal Transmutation/Alteration
+range: '0'
+duration: 1 round
+area_of_effect: Air in front of caster
+components: V,S
+casting_time: 1 segment
+saving_throw: None
+text: The air immediately in front of the caster takes on a mirror's ability to reflect gaze attacks back upon the attacker. The area does not create a reflective surface to normal sight, and it can be seen through by the caster and by other observers, except those using gaze attacks.
+source: wiki2_spells.txt

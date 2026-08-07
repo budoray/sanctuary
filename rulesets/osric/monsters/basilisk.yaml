@@ -1,0 +1,21 @@
+name: Basilisk
+frequency: rare
+no_encountered: 1d4
+size: medium
+alignment: neutral
+move: 60ft
+armour_class: 4 [16]
+hit_dice: '6'
+melee_attacks: 1 bite (1d10 piercing)
+senses: Infravision 60ft
+lair_chance: 40%
+intelligence: animal (1)
+morale: 75
+loot: Hoard 6
+experience: 1,000 +8/hp
+description: The basilisk is an eight-legged, reptilian creature with baleful  eyes and a deadly gaze.
+abilities:
+- heading: Immunities and Resistances
+  text: Reflected Gaze.  The basilisk is vulnerable to its own reflected  gaze. If confronted with a reflective surface, it must make a  saving throw vs petrifaction (with a bonus of +4) or be turned  to stone.
+- heading: Special Features
+  text: Petrifying Gaze. Any creature meeting the gaze of a basilisk must  successfully save vs petrifaction or instantly be turned to stone  (save each time the gaze is met). The gaze effects of the basilisk  extend into both the astral and ethereal planes. This applies  to anyone who is generally in front of the basilisk, and not us - ing an indirect method of sight such as a mirror. Attacking the  creature by looking at a reflection incurs a to-hit penalty of -2.  Attacking blindly incurs a to-hit penalty of -4. Unarmed Combat.  Basilisks cannot be overborne or grappled,  and do not employ these tactics. BAT

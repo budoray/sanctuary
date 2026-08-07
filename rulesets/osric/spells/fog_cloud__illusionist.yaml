@@ -1,0 +1,14 @@
+name: Fog Cloud
+slug: fog_cloud
+reversible: false
+class: illusionist
+level: 2
+school: Phantasmal Transmutation/Alteration
+range: 10-ft
+duration: 4 rounds+1 round/level
+area_of_effect: 40-ft×20-ft×20-ft cloud
+components: V,S
+casting_time: 2 segments
+saving_throw: None
+text: This spell creates a roiling mass of gas and vapour, similar in appearance to a cloudkill spell. The fog cloud moves away from the caster at 10-ft/round. Vision into the fog is limited to 2-ft.
+source: wiki2_spells.txt

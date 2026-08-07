@@ -1,0 +1,14 @@
+name: Animate Dead
+slug: animate_dead
+reversible: false
+class: magic-user
+level: 5
+school: Arcane Necromancy
+range: 10-ft
+duration: Permanent
+area_of_effect: See below
+components: V,S,M
+casting_time: 5 rounds
+saving_throw: None
+text: By casting this spell, the caster calls the bones or bodies of dead humans or humanoids to rise and become lesser undead (skeletons or zombies). The undead will obey their creator's simple commands, following him or her, or perhaps guarding a location he or she designates against any creature (or not guarding it against certain creatures) that might enter. The spell's effects are permanent, but can be dispelled by the use of dispel magic. Use of this spell is inherently not in accordance with the good alignments and is seldom used by good characters unless there is pressing need. Moreover, casting the spell in the confines of a city may subject the caster to inquiry by secular and religious authorities alike. A caster may animate one zombie or skeleton per caster level.
+source: wiki2_spells.txt

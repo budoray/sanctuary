@@ -1,0 +1,14 @@
+name: Wind Walk
+slug: wind_walk
+reversible: false
+class: cleric
+level: 7
+school: Clerical Transmutation/Alteration
+range: Caster
+duration: 6 turns/caster level
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: Upon completing the wording of this spell, the caster's body becomes insubstantial, resembling the misty substance of water vapour. Indeed, if the caster wears white garments, he or she is likely (80% chance) to be mistaken for a cloud of vapour or steam. Carried upon a magical wind controlled by the caster, the wind walker(s) may travel as rapidly as 600-ft per turn or as slowly as 60-ft per turn. The caster may carry another person for every 8 caster levels, transforming them into cloudlike wind walkers by his touch. The spell ends when the cleric cancels it or the duration expires.
+source: wiki2_spells.txt

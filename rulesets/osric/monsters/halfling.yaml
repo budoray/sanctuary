@@ -1,0 +1,23 @@
+name: Halfling
+frequency: rare
+no_encountered: 30d10
+size: small
+alignment: lawful good
+move: 90ft
+armour_class: 7 [13]
+hit_dice: 1d6 hp
+melee_attacks: 1d6 or by weapon
+senses: Standard
+lair_chance: 70%
+intelligence: very (11-12)
+morale: 50
+loot: Individual 2 each; in lair Hoard  2
+experience: 5 +1/hp
+description: Halflings as an ancestry value hard work and simple living. Their  settlements are as likely to contain small cottages as they are to  have underground dwellings. They tend to keep to themselves. When encountered in groups there will likely be a leader, usu - ally a 2nd level fighter, for every 30 individuals. In groups con - taining over 90 individuals there will likely be a 3rd level fighter  as well. In groups containing more than 150 halflings there will  usually be a 4th level fighter in addition to the 3rd and 2nd level  fighters. There is a 10% chance per level that higher level hal- flings may have magic armour and/or weapons. If the halflings are encountered in their homes (lair) they will  have 1d4 dogs acting as guards. Their lifespan averages about 150 years.
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Halflings are very quiet  and unobtrusive, surprising  enemies on a roll of 1–4 on  a d6. Immunities and  Resistances Magic and Poison Save.   Halfling NPCs make saving  throws with a +4 against magic  and poison.
+- heading: Special Attacks
+  text: 'Ranged Attack Bonus. Halflings are +3 “to hit” with bow or sling,  and almost all halflings are equipped with some sort of missile  weapon. Unarmed Combat. Halflings can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with an  8+ on 1d20. Hit Mods: ATK/DEF +6/-4. Overbear Results Mods:  ATK/DEF -2/+2. Grappling Result Mods: ATK/DEF -2/+2.'
+- heading: Languages
+  text: Halflings speak their own language and will also be able to  speak common, gnome, goblin, and orc.

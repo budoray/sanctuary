@@ -1,0 +1,23 @@
+name: Lizard Man
+frequency: rare
+no_encountered: 10d4
+size: medium (7ft tall)
+alignment: neutral
+move: 60ft; 120ft swimming
+armour_class: 5 [15] or 4 [16] with shield
+hit_dice: 2+1
+melee_attacks: 2 claws (1d2) and 1 bite (1d8)  or by weapon
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: low (average)
+morale: 55
+loot: Hoard 4
+experience: 20 +2/hp
+description: Lizardmen are bipedal reptile-people. Their hides are tough and  leathery, and are coloured in many different shades of green.  They have cold black eyes, and hard nails on their fingers. Some  have a bony ridge along their backs. Lizard men often make their homes in underwater caves that  contain air. They are semi-aquatic and require air to breathe.  They are excellent swimmers, and will eat most anything,  though they prefer human meat to all others. Some communities of lizardmen are more civilized than others.  These make their homes in crude villages and use shields for  protection. These lizard men tribes also make use of barbed  darts and javelins as missile weapons. For the most part, these  lizardmen still hunt and eat humans.
+abilities:
+- heading: Immunities and Resistances
+  text: Hold Breath.  This creature can go for up to an hour between  breaths.
+- heading: Special Attacks
+  text: 'Ranged Attack. Advanced lizardmen can use missile weapons as  humans do. Unarmed Combat. Lizardmen can be targeted with grappling or  overbearing attacks. If not fended off, they score an unarmed  hit with a 2+ on 1d20. Hit Mods: ATK/DEF +4/-4. Overbear Re - sults Mods: ATK/DEF +0/-0. Grappling Result Mods: ATK/DEF  +0/+0.'
+- heading: Languages
+  text: Lizard men speak their own tongue, and a few (10%) can also  speak common.

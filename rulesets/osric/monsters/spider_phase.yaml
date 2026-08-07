@@ -1,0 +1,21 @@
+name: Spider, Phase
+frequency: very rare
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 60ft; 120ft in web
+armour_class: 7 [13]
+hit_dice: 5+5
+melee_attacks: 1 bite (1d4+1 + poison)
+senses: Infravision 60ft
+lair_chance: 75%
+intelligence: low (5-7)
+morale: 75
+loot: Hoard 5
+experience: 700 +6/hp
+description: The phase spider is so named because it is able to shift itself  subtly in and out of reality during combat. If struck by a phase  door spell, the phase spider must remain in phase for eight  rounds. Becoming ethereal through magic or other means  puts attackers in phase with the creature and they may strike  at it with no disadvantage. The webs of this creature are highly  sought after for the construction of bags of holding, etc.
+abilities:
+- heading: Special Features
+  text: Shift Phase. A phase spider can shift in phase or out of phase, at  will on its initiative segment, without using an action. Once the  spider has changed phase, it cannot change phase again until  its next initiative. While out of phase, the spider is considered  to be ethereal.
+- heading: Special Attacks
+  text: Venomous Bite. On a successful hit, the target of a phase spider’s  bite must make a saving throw vs. death or die. The saving  throw is made with a penalty of -2 to the roll (the venom is  exceedingly deadly). Unarmed Combat. Giant spiders cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics.

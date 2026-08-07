@@ -1,0 +1,32 @@
+name: Fire Giant Monitor Cave
+frequency: very rare uncommon rare uncommon
+no_encountered: 1d4 2d6 1d6 1d6
+size: huge (30ft long) large (20ft long) huge (40ft long) large (20ft long)
+alignment: neutral neutral neutral neutral
+move: 90ft 150ft 60ft 120ft
+armour_class: 3 [17] 5 [15] 5 [15] 5 [15]
+hit_dice: 10 3+1 8 6
+melee_attacks: 2 claws (1d8) and 1 bite  (2d8) 1 bite (1d8+1) 2 claws (2d6) and 1 bite  (3d6) 1 bite (2d6)
+senses: Infravision 60ft Infravision 60ft Standard Infravision 60ft
+lair_chance: 40% Nil 80% 20%
+intelligence: animal (1) non- (0) non- (0) non- (0)
+morale: 95 N/A N/A N/A
+loot: Hoard 2, Cache 3 (X10),  Cache 5 and 6 Nil Individual 1-5, Cache 3,  plus 10% chance of 2  magic items Cache 1, 2, and Cache  3 (x5)
+experience: 1,500 +14/hp 120 +4/hp 925 +10/hp 375 +6/hp
+description: FIRE LIZARDS Fire lizards are also known as “false dragons” and are thought  to be an evolutionary dead-end of the dragon family tree. These  giant lizards have a tough scaled hide very similar to a dragon  but lacking the long life, wings, and horns of their fire-breath - ing cousins. Colouration tends to be a rather neutral grey with  patches of a dark brownish red on the dorsal surface, and a  lighter red on the ventral surface. Fire lizards darken in colour  as they age. Curiously, red dragons avoid confrontation with  fire lizards and will not even lair in the same area fire lizards  frequent. False dragons are normally slow-moving creatures and spend  50% their time sleeping in their subterranean lairs. When they  emerge every two weeks or so to feed, however, they are ag - gressive foes. Fire lizards have an affinity for shiny objects and their lairs tend  be littered with coins and gems. A lair also has a 15% chance of  containing 1d6 eggs, but the fire lizard is largely
+  indifferent as to  their fate. The first hatchling will generally eat the others as they  emerge. A fire lizard egg can fetch as much as 5,000gp from an  interested party.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Fire. Fire lizards are immune to fire damage.
+- heading: Special Attacks
+  text: 'Breath Weapon. Fire lizards can exhale a cone-shaped blast of  flame 10ft wide at the terminus with a range of 150ft, causing  2d6 points of fire damage. A saving throw vs breath weapons  is allowed for half damage. Breathing fire takes up the lizard’s  action for that round, but the breath weapon can be used as  often as the lizard chooses. Unarmed Combat. Fire Lizards cannot be targeted with grappling  or overbearing attacks; they may, occasionally, overbear. If not  fended off, they score an unarmed hit with a 2+ on 1d20. Hit  Mods: ATK/DEF +6/na. Overbear Results Mods: ATK/DEF +10/ na. GIANT LIZARDS Giant Lizards dwell in marshy or swampy areas, but can also be  found underground. Other than their size, they are unremark - able beasts.'
+- heading: Special Attacks
+  text: Powerful Bite. On a to-hit roll of 20+ (including a modified 20),  a giant lizard has grabbed its opponent firmly in its powerful  jaws and will cause double damage that round. MONITOR LIZARDS Monitor Lizards are aggressive carnivores found in warm re - gions. Their colouration tends toward dark grey and black and  they have longer snouts and longer, sharper teeth than other  types of giant lizards.
+- heading: Surprise and Initiative
+  text: Monitor lizards move slowly, but can lunge suddenly, surprising  their prey on a 1-4 on 1d6.
+- heading: Special Attacks
+  text: Bite. On a to-hit roll of 20+ (including a modified 20), in addition  to ordinary damage, the monitor has seized its opponent in  its toothy maw and the unfortunate victim is subjected to an  automatic hit in the following round. Unarmed Combat. Giant monitor lizards cannot be targeted with  grappling or overbearing attacks, and do not use these tactics. CAVE LIZARDS Cave Lizards dwell in underground settings such as caverns and  dungeons.
+- heading: Special Features
+  text: Climber. This creature can move on walls and ceilings as if they  were floors.
+- heading: Special Attacks
+  text: Powerful Bite. On a natural to-hit roll of 20, the cave lizard’s jaws  have clamped onto its prey, causing double damage on that  attack. Unarmed Combat.  Giant cave lizards cannot be targeted with  grappling or overbearing attacks, and do not use these tactics.

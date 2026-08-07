@@ -1,0 +1,21 @@
+name: Mounted Nomads
+frequency: uncommon
+no_encountered: 30d10
+size: medium
+alignment: neutral
+move: 120ft
+armour_class: 7 [13]
+hit_dice: 1d6 hp
+melee_attacks: By weapon
+senses: Standard
+lair_chance: 15%
+intelligence: average (8-10)
+morale: 50
+loot: Individual 3 each; in lair Cache 12
+experience: Varies
+description: 'Nomads are mounted clans that live on steppes, plains or in  desert climes. They live by hunting and gathering and are close- ly tied to their native climate. Nomads will always be led by high- er level fighters as follows: • If under 150 nomads: (1) 8th level fighter, (1) 6th level fighter,  and 12 guards (2nd level fighters) • Between 150–250 nomads: (1) 9th level fighter, (1) 7th level  fighter, and guards (2nd level fighters) • Over 250 nomads: (1) 10th level fighter, (1) 8th level fighter,  and guards (2nd level fighters) There is a 15% chance per 50 nomads that a cleric will be pres - ent. The cleric will be of 4th to 7th level (determined by 1d4).  There is also a 15% chance per 50 nomads that a magic-user (of  5th to 8th level, also determined by 1d4) will be present.  In addition to the above, there will always be (2) 3rd level clerics  and (1) 4th level magic-user present. Nomads will always be mounted on either light or medium war- horses.'
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Mounted nomads surprise on 1–4 on a d6.
+- heading: Special Attacks
+  text: 'Unarmed Combat.  Mounted nomads can make grappling or  overbearing attacks but only if unmounted. If not fended off,  they score an unarmed hit with an 8+ on 1d20. Hit Mods: ATK/ DEF +8/-6. Overbear Results Mods: ATK/DEF +0/+0. Grappling  Result Mods: ATK/DEF +0/+0.'

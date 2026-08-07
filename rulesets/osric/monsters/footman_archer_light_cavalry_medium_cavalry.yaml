@@ -1,0 +1,19 @@
+name: Footman Archer Light Cavalry Medium Cavalry
+frequency: common common common common
+no_encountered: 50% of base number 20% of base number 20% of base number 10% of base number
+size: medium medium medium medium
+alignment: neutral (chaotic evil) neutral (chaotic evil) neutral (chaotic evil) neutral (chaotic evil)
+move: 120ft 120ft 240ft (mounted) 240ft (mounted)
+armour_class: 7 [13] 7 [13] 7 [13] 4 [15]
+hit_dice: 1d6 hp 1d6 hp 1d6 hp 1d6 hp
+melee_attacks: 1 sword (1d8) Longbow (1d6) or  dagger (1d4) 1 spear (1d6) 1 sword (1d8)
+senses: Standard Standard Standard Standard
+lair_chance: 20% 20% 20% 20%
+intelligence: average (8-10) to very  (11-12) average (8-10) to very  (11-12) average (8-10) to very  (11-12) average (8-10) to very  (11-12)
+morale: 50 (60) 50 (60) 50 (60) 50 (60)
+loot: Individual 4 each; in lair,  Hoard 1 Individual 4 each; in lair,  Hoard 1 Individual 4 each; in lair,  Hoard 1 Individual 4 each; in lair,  Hoard 1
+experience: 5 +1/hp 5 +1/hp 10 +1/hp 10 +1/hp
+description: 'Bandits are found in almost any locale, for wherever there is a  civilisation there will be those who prey upon the weak. There  will always be higher level fighters found with large groups of  bandits. Consult the chart below to determine the exact num - ber and level. Bandits are generally of neutral alignment, and  brigands are generally chaotic evil. The base number of bandits in a lair is 20d10. Half of these will  be footmen, 20% will be archers, 20% will be light cavalry, and  10% will be medium cavalry, as shown in the stats. Leaders are in addition to the base number: • For every 20 bandits: 1 additional 3rd level fighter  • For every 30 bandits: 1 additional 4th level fighter  • For every 40 bandits: 1 additional 5th level fighter  • For every 50 bandits: 1 additional 6th level fighter Commander. Bandits will always be led by a high level fighter (8th  to 10th level), 6 guards (2nd level), and a lieutenant (7th level).  These members are in addition to those described
+  above. The  level of the commander is determined as follows: • Under 100 bandits: 8th level fighter • 100 to 150 bandits: 9th level fighter • Over 150 bandits: 10th level fighter Other Leaders • There is a 25% chance per 50 bandits of a magic-user being  present with the group. If there is a magic-user present they  will be 7th to 10th level (determined by 1d4 roll). • There is a 15% chance per 50 bandits of a cleric being present  with the group, if a cleric is present they will be 5th or 6th  level and they will be accompanied by an assistant of 3rd or  4th level. Brigand: Brigands are a chaotic evil lot; otherwise they conform  to the rules for bandits above. However they fight more fiercely  in battle, and have higher morale (the number in parentheses  is for brigands). Unarmed Combat. Bandits can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with an  8+ on 1d20. Hit Mods: ATK/DEF +8/-6. Overbear Results Mods:  ATK/DEF +0/+0. Grappling Result
+  Mods: ATK/DEF +0/+0.'
+abilities: []

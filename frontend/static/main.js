@@ -73,8 +73,8 @@ async function whoami() {
 async function getAppConfig() {
   return api("/api/config");
 }
-async function getRulesetOptions() {
-  return api("/api/ruleset/osric/options");
+async function getRulesetOptions(rulesetId = "osric") {
+  return api(`/api/ruleset/${rulesetId}/options`);
 }
 async function previewCharacter(character) {
   return api("/api/characters/preview", {
@@ -129,17 +129,42 @@ async function joinCampaign(campaignId, password) {
     body: JSON.stringify({ password })
   });
 }
+async function listRulesets() {
+  return api("/api/rulesets");
+}
+async function getRuleset(rulesetId) {
+  return api(`/api/rulesets/${rulesetId}`);
+}
+async function createRuleset(ruleset) {
+  return api("/api/rulesets", {
+    method: "POST",
+    body: JSON.stringify(ruleset)
+  });
+}
+async function updateRuleset(rulesetId, data) {
+  return api(`/api/rulesets/${rulesetId}`, {
+    method: "PUT",
+    body: JSON.stringify(data)
+  });
+}
+async function deleteRuleset(rulesetId) {
+  return api(`/api/rulesets/${rulesetId}`, { method: "DELETE" });
+}
 async function createSession(characterId, moduleId = "sample_lair", campaignId, turnTimerSeconds = 0, options = {}) {
+  const payload = {
+    character_id: characterId,
+    module_id: moduleId,
+    campaign_id: campaignId,
+    turn_timer_seconds: turnTimerSeconds,
+    visibility: options.visibility || "solo",
+    name: options.name || ""
+  };
+  if (options.ruleset_id) {
+    payload.ruleset_id = options.ruleset_id;
+  }
   return api("/api/sessions", {
     method: "POST",
-    body: JSON.stringify({
-      character_id: characterId,
-      module_id: moduleId,
-      campaign_id: campaignId,
-      turn_timer_seconds: turnTimerSeconds,
-      visibility: options.visibility || "solo",
-      name: options.name || ""
-    })
+    body: JSON.stringify(payload)
   });
 }
 async function listSessions() {
@@ -587,9 +612,12 @@ var DmWorkshop = class {
   tabContent;
   roomsTab;
   dungeonsTab;
+  rulesetsTab;
   rooms = [];
   dungeons = [];
   characters = [];
+  rulesets = [];
+  rulesetManager = null;
   constructor(container, onPlayDungeon, onBack) {
     this.container = container;
     this.onPlayDungeon = onPlayDungeon;
@@ -601,12 +629,15 @@ var DmWorkshop = class {
     const tabs = el("div", { className: "admin-tabs workshop-tabs" });
     tabs.appendChild(this.tabButton("Rooms", "rooms"));
     tabs.appendChild(this.tabButton("Dungeons", "dungeons"));
+    tabs.appendChild(this.tabButton("Rulesets", "rulesets"));
     panel.appendChild(tabs);
     this.tabContent = el("div", { className: "workshop-tab-content" });
     this.roomsTab = el("div", { className: "workshop-tab" });
     this.dungeonsTab = el("div", { className: "workshop-tab" });
+    this.rulesetsTab = el("div", { className: "workshop-tab" });
     this.tabContent.appendChild(this.roomsTab);
     this.tabContent.appendChild(this.dungeonsTab);
+    this.tabContent.appendChild(this.rulesetsTab);
     panel.appendChild(this.tabContent);
     panel.appendChild(el("button", { className: "enter workshop-back", onclick: () => this.onBack() }, "\u2190 Back"));
     this.root.appendChild(panel);
@@ -624,9 +655,13 @@ var DmWorkshop = class {
   switchTab(tab) {
     this.roomsTab.style.display = tab === "rooms" ? "block" : "none";
     this.dungeonsTab.style.display = tab === "dungeons" ? "block" : "none";
+    this.rulesetsTab.style.display = tab === "rulesets" ? "block" : "none";
     this.root.querySelectorAll(".workshop-tab-btn").forEach((b) => {
       b.classList.toggle("active", b.getAttribute("data-tab") === tab);
     });
+    if (tab === "rulesets" && !this.rulesetManager) {
+      this.renderRulesets();
+    }
   }
   async load() {
     try {
@@ -644,6 +679,16 @@ var DmWorkshop = class {
       clear(this.roomsTab);
       this.roomsTab.appendChild(el("div", { className: "empty error" }, err.message || "Failed to load workshop data."));
     }
+  }
+  renderRulesets() {
+    if (this.rulesetManager) {
+      this.rulesetManager.destroy();
+    }
+    clear(this.rulesetsTab);
+    this.rulesetManager = new RulesetManager(this.rulesetsTab, () => {
+      this.rulesetManager = null;
+      this.renderRulesets();
+    });
   }
   renderRooms() {
     clear(this.roomsTab);
@@ -820,6 +865,193 @@ var DmWorkshop = class {
     picker.appendChild(panel);
     this.container.appendChild(picker);
     this.root = picker;
+  }
+  destroy() {
+    if (this.rulesetManager) {
+      this.rulesetManager.destroy();
+    }
+    this.root.remove();
+  }
+};
+var RulesetManager = class {
+  root;
+  container;
+  rulesets = [];
+  onChange;
+  listEl;
+  constructor(container, onChange) {
+    this.container = container;
+    this.onChange = onChange;
+    this.root = el("div", { className: "ruleset-manager" });
+    const header = el("div", { className: "workshop-section-header" });
+    header.appendChild(el("h2", {}, "Rulesets"));
+    header.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.createNew()
+    }, "+ New Ruleset"));
+    this.root.appendChild(header);
+    this.listEl = el("div", { className: "ruleset-list" });
+    this.root.appendChild(this.listEl);
+    container.appendChild(this.root);
+    this.load();
+  }
+  async load() {
+    try {
+      const { rulesets } = await listRulesets();
+      this.rulesets = rulesets;
+      this.render();
+    } catch (err) {
+      clear(this.listEl);
+      this.listEl.appendChild(el("div", { className: "empty error" }, err.message || "Failed to load rulesets."));
+    }
+  }
+  render() {
+    clear(this.listEl);
+    if (this.rulesets.length === 0) {
+      this.listEl.appendChild(el("div", { className: "empty" }, "No rulesets found."));
+      return;
+    }
+    this.rulesets.forEach((r) => {
+      const card = el("div", { className: "ruleset-card" });
+      const info = el("div", { className: "ruleset-info" });
+      info.appendChild(el("strong", {}, r.name));
+      info.appendChild(el("span", {}, r.id + (r.is_builtin ? " · built-in" : ` · based on ${r.base_ruleset_id || "osric"}`)));
+      if (r.description) {
+        info.appendChild(el("p", {}, r.description));
+      }
+      card.appendChild(info);
+      const controls = el("div", { className: "workshop-item-controls" });
+      if (r.is_builtin) {
+        controls.appendChild(el("button", {
+          className: "solo-hub-btn",
+          onclick: () => this.fork(r)
+        }, "Fork"));
+      } else {
+        controls.appendChild(el("button", {
+          className: "solo-hub-btn",
+          onclick: () => this.edit(r)
+        }, "Edit"));
+        controls.appendChild(el("button", {
+          className: "danger",
+          onclick: () => this.deleteRuleset(r)
+        }, "Delete"));
+      }
+      card.appendChild(controls);
+      this.listEl.appendChild(card);
+    });
+  }
+  async createNew() {
+    try {
+      const { ruleset } = await createRuleset({
+        base_ruleset_id: "osric",
+        name: "Custom OSRIC",
+        description: "",
+        overrides: {}
+      });
+      this.edit(ruleset);
+    } catch (err) {
+      alert(err.message || "Failed to create ruleset");
+    }
+  }
+  async fork(ruleset) {
+    try {
+      const { ruleset: forked } = await createRuleset({
+        base_ruleset_id: ruleset.id,
+        name: `Custom ${ruleset.name}`,
+        description: ruleset.description || "",
+        overrides: {}
+      });
+      this.edit(forked);
+    } catch (err) {
+      alert(err.message || "Failed to fork ruleset");
+    }
+  }
+  edit(ruleset) {
+    this.destroy();
+    new RulesetEditor(this.container, ruleset, () => this.onChange(), () => this.onChange());
+  }
+  async deleteRuleset(ruleset) {
+    if (!confirm(`Delete ruleset "${ruleset.name}"?`)) return;
+    try {
+      await deleteRuleset(ruleset.id);
+      this.onChange();
+    } catch (err) {
+      alert(err.message || "Delete failed");
+    }
+  }
+  destroy() {
+    this.root.remove();
+  }
+};
+var RulesetEditor = class {
+  root;
+  container;
+  ruleset;
+  onSave;
+  onBack;
+  nameInput;
+  descriptionInput;
+  overridesInput;
+  constructor(container, ruleset, onSave, onBack) {
+    this.container = container;
+    this.ruleset = ruleset;
+    this.onSave = onSave;
+    this.onBack = onBack;
+    this.root = el("div", { className: "ruleset-editor" });
+    const panel = el("div", { className: "session-panel editor-panel" });
+    panel.appendChild(el("h1", {}, `Edit Ruleset: ${ruleset.name}`));
+    panel.appendChild(this.buildForm());
+    panel.appendChild(this.buildFooter());
+    this.root.appendChild(panel);
+    container.appendChild(this.root);
+  }
+  buildForm() {
+    const form = el("div", { className: "ruleset-form" });
+    this.nameInput = el("input", { type: "text", value: this.ruleset.name || "" });
+    this.descriptionInput = el("input", { type: "text", value: this.ruleset.description || "" });
+    form.appendChild(el("label", {}, "Name"));
+    form.appendChild(this.nameInput);
+    form.appendChild(el("label", {}, "Description"));
+    form.appendChild(this.descriptionInput);
+    const overridesGroup = el("div", { className: "ruleset-overrides" });
+    overridesGroup.appendChild(el("label", {}, "Overrides (JSON)"));
+    this.overridesInput = el("textarea", {
+      rows: "16",
+      spellcheck: "false"
+    }, JSON.stringify(this.ruleset.overrides || {}, null, 2));
+    overridesGroup.appendChild(this.overridesInput);
+    form.appendChild(overridesGroup);
+    return form;
+  }
+  buildFooter() {
+    const footer = el("div", { className: "editor-footer" });
+    footer.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.save()
+    }, "Save"));
+    footer.appendChild(el("button", {
+      onclick: () => this.onBack()
+    }, "Back"));
+    return footer;
+  }
+  async save() {
+    let overrides;
+    try {
+      overrides = JSON.parse(this.overridesInput.value);
+    } catch (err) {
+      alert("Invalid overrides JSON: " + (err?.message || err));
+      return;
+    }
+    try {
+      await updateRuleset(this.ruleset.id, {
+        name: this.nameInput.value.trim() || this.ruleset.name,
+        description: this.descriptionInput.value.trim(),
+        overrides: overrides || {}
+      });
+      this.onSave();
+    } catch (err) {
+      alert(err.message || "Save failed");
+    }
   }
   destroy() {
     this.root.remove();
@@ -1217,6 +1449,7 @@ var DungeonEditor = class {
   startRoomSelect;
   startXInput;
   startYInput;
+  rulesetSelect;
   sourceRoomId;
   targetRoomId;
   sourcePoint;
@@ -1247,6 +1480,27 @@ var DungeonEditor = class {
     this.renderLinks();
     this.renderSourceGrid();
     this.renderTargetGrid();
+    this.loadRulesets();
+  }
+  async loadRulesets() {
+    try {
+      const { rulesets } = await listRulesets();
+      clear(this.rulesetSelect);
+      const currentId = this.dungeon.ruleset_id || "osric";
+      rulesets.forEach((r) => {
+        const opt = document.createElement("option");
+        opt.value = r.id;
+        opt.textContent = `${r.name}${r.is_builtin ? " (built-in)" : ""}`;
+        if (r.id === currentId) opt.selected = true;
+        this.rulesetSelect.appendChild(opt);
+      });
+    } catch (err) {
+      clear(this.rulesetSelect);
+      const opt = document.createElement("option");
+      opt.value = this.dungeon.ruleset_id || "osric";
+      opt.textContent = "Rulesets unavailable";
+      this.rulesetSelect.appendChild(opt);
+    }
   }
   buildForm() {
     const form = el("div", { className: "editor-form" });
@@ -1258,6 +1512,9 @@ var DungeonEditor = class {
     pubLabel.appendChild(this.publicCheckbox);
     pubLabel.appendChild(document.createTextNode(" Public"));
     form.appendChild(pubLabel);
+    this.rulesetSelect = el("select", {});
+    form.appendChild(el("label", {}, "Ruleset"));
+    form.appendChild(this.rulesetSelect);
     return form;
   }
   buildRoomPool() {
@@ -1598,6 +1855,7 @@ var DungeonEditor = class {
       await updateDungeon(this.dungeon.id, {
         name: this.nameInput.value.trim() || this.dungeon.name,
         public: this.publicCheckbox.checked,
+        ruleset_id: this.rulesetSelect.value || "osric",
         room_order: order,
         links: links,
         start_room_id: this.startRoomSelect.value || null,
@@ -2136,7 +2394,9 @@ var CharacterCreator = class {
   preview = null;
   arrangement;
   seed;
+  selectedRulesetId = "osric";
   nameInput;
+  rulesetSelect;
   ancestrySelect;
   modeSelect;
   classContainer;
@@ -2153,6 +2413,8 @@ var CharacterCreator = class {
     panel.appendChild(el("p", { className: "subtitle" }, "Forge your adventurer"));
     this.messageEl = el("div", { className: "creator-message" });
     panel.appendChild(this.messageEl);
+    this.rulesetSelect = el("select", { onchange: () => this.changeRuleset() });
+    panel.appendChild(this.formGroup("Ruleset", this.rulesetSelect));
     this.nameInput = el("input", { type: "text", value: "Hero", maxlength: "24" });
     panel.appendChild(this.formGroup("Name", this.nameInput));
     this.ancestrySelect = el("select", { onchange: () => this.updateClassChoices() });
@@ -2175,7 +2437,37 @@ var CharacterCreator = class {
     this.root.appendChild(trayAnchor);
     new DiceTray(trayAnchor);
     container.appendChild(this.root);
+    this.loadRulesets();
     this.loadOptions();
+  }
+  async loadRulesets() {
+    try {
+      const { rulesets } = await listRulesets();
+      clear(this.rulesetSelect);
+      rulesets.forEach((r) => {
+        const opt = document.createElement("option");
+        opt.value = r.id;
+        opt.textContent = `${r.name}${r.is_builtin ? " (built-in)" : ""}`;
+        if (r.id === this.selectedRulesetId) opt.selected = true;
+        this.rulesetSelect.appendChild(opt);
+      });
+    } catch (err) {
+      clear(this.rulesetSelect);
+      const opt = document.createElement("option");
+      opt.value = "osric";
+      opt.textContent = "OSRIC";
+      this.rulesetSelect.appendChild(opt);
+    }
+  }
+  async changeRuleset() {
+    this.selectedRulesetId = this.rulesetSelect.value || "osric";
+    this.preview = null;
+    this.seed = void 0;
+    this.arrangement = void 0;
+    clear(this.previewPanel);
+    clear(this.arrangeContainer);
+    this.saveButton.disabled = true;
+    await this.loadOptions();
   }
   formGroup(label, control) {
     const group = el("div", { className: "form-group" });
@@ -2185,7 +2477,7 @@ var CharacterCreator = class {
   }
   async loadOptions() {
     try {
-      this.options = await getRulesetOptions();
+      this.options = await getRulesetOptions(this.selectedRulesetId);
       this.populateControls();
     } catch (err) {
       this.showMessage("Could not load ruleset options.", true);
@@ -2263,7 +2555,8 @@ var CharacterCreator = class {
       classes: this.selectedClasses(),
       name: this.nameInput.value.trim() || "Hero",
       seed: this.seed ?? seededRandomSeed(),
-      arrangement: this.arrangement
+      arrangement: this.arrangement,
+      ruleset_id: this.selectedRulesetId
     };
   }
   renderPreview() {
@@ -2959,9 +3252,11 @@ var AdventureCreate = class {
   characters = [];
   modules = [];
   dungeons = [];
+  rulesets = [];
   selectedCharacterId = "";
   selectedModuleId = "sample_lair";
   selectedDungeonId = "";
+  selectedRulesetId = "osric";
   source = "module";
   constructor(container, onCreate, onBack) {
     this.onCreate = onCreate;
@@ -2979,14 +3274,16 @@ var AdventureCreate = class {
   }
   async load() {
     try {
-      const [{ characters }, { modules }, { dungeons }] = await Promise.all([
+      const [{ characters }, { modules }, { dungeons }, { rulesets }] = await Promise.all([
         listCharacters(),
         listModules(),
-        listDungeons().catch(() => ({ dungeons: [] }))
+        listDungeons().catch(() => ({ dungeons: [] })),
+        listRulesets().catch(() => ({ rulesets: [] }))
       ]);
       this.characters = characters;
       this.modules = modules;
       this.dungeons = dungeons;
+      this.rulesets = rulesets;
       if (characters.length > 0) this.selectedCharacterId = characters[0].id;
       if (modules.length > 0) this.selectedModuleId = modules[0].id;
       if (dungeons.length > 0) this.selectedDungeonId = dungeons[0].id;
@@ -3052,9 +3349,15 @@ var AdventureCreate = class {
           if (d.id === this.selectedDungeonId) opt.selected = true;
           dungeonSelect.appendChild(opt);
         });
-        dungeonSelect.onchange = () => this.selectedDungeonId = dungeonSelect.value;
+        dungeonSelect.onchange = () => {
+          this.selectedDungeonId = dungeonSelect.value;
+          this.updateDungeonRulesetDisplay();
+        };
         this.formEl.appendChild(dungeonSelect);
       }
+      this.formEl.appendChild(el("label", {}, "Ruleset"));
+      this.dungeonRulesetDisplay = el("div", { className: "ruleset-display" }, this.dungeonRulesetName());
+      this.formEl.appendChild(this.dungeonRulesetDisplay);
     } else {
       this.formEl.appendChild(el("label", {}, "Room"));
       const moduleSelect = el("select", {});
@@ -3067,6 +3370,22 @@ var AdventureCreate = class {
       });
       moduleSelect.onchange = () => this.selectedModuleId = moduleSelect.value;
       this.formEl.appendChild(moduleSelect);
+
+      this.formEl.appendChild(el("label", {}, "Ruleset"));
+      if (this.rulesets.length === 0) {
+        this.formEl.appendChild(el("div", { className: "empty" }, "No rulesets available."));
+      } else {
+        const rulesetSelect = el("select", {});
+        this.rulesets.forEach((r) => {
+          const opt = document.createElement("option");
+          opt.value = r.id;
+          opt.textContent = `${r.name}${r.is_builtin ? " (built-in)" : ""}`;
+          if (r.id === this.selectedRulesetId) opt.selected = true;
+          rulesetSelect.appendChild(opt);
+        });
+        rulesetSelect.onchange = () => this.selectedRulesetId = rulesetSelect.value;
+        this.formEl.appendChild(rulesetSelect);
+      }
     }
 
     this.formEl.appendChild(el("label", {}, "Hero"));
@@ -3083,6 +3402,17 @@ var AdventureCreate = class {
       });
       charSelect.onchange = () => this.selectedCharacterId = charSelect.value;
       this.formEl.appendChild(charSelect);
+    }
+  }
+  dungeonRulesetName() {
+    const dungeon = this.dungeons.find((d) => d.id === this.selectedDungeonId);
+    const id = dungeon?.ruleset_id || "osric";
+    const ruleset = this.rulesets.find((r) => r.id === id);
+    return ruleset ? `${ruleset.name} (${id})` : id;
+  }
+  updateDungeonRulesetDisplay() {
+    if (this.dungeonRulesetDisplay) {
+      this.dungeonRulesetDisplay.textContent = this.dungeonRulesetName();
     }
   }
   buildFooter() {
@@ -3112,7 +3442,8 @@ var AdventureCreate = class {
       } else {
         ({ session } = await createSession(this.selectedCharacterId, this.selectedModuleId, void 0, 0, {
           visibility: this.visibilitySelect.value,
-          name: this.nameInput.value.trim()
+          name: this.nameInput.value.trim(),
+          ruleset_id: this.selectedRulesetId
         }));
       }
       this.onCreate(session);

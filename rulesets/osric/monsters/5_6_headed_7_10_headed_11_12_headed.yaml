@@ -1,0 +1,17 @@
+name: 5-6 Headed 7-10 Headed 11-12 Headed
+frequency: uncommon uncommon uncommon
+no_encountered: 1 1 1
+size: large large huge
+alignment: neutral neutral neutral
+move: 90ft 90ft 90ft
+armour_class: 5 [15] 5 [15] 5 [15]
+hit_dice: 5 or 6 7-10 11-12
+melee_attacks: 1 bite per head (1d6) 1 bite per head (1d8) 1 bite per head (1d10)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft
+lair_chance: 20% 20% 20%
+intelligence: semi- (2-4) semi- (2-4) semi- (2-4)
+morale: 70 or 75 80, 85, 90, or 95 100 or 105
+loot: Hoard 2 Hoard 2 Hoard 2
+experience: See below See below See below
+description: 'A hydra is a multi-headed reptilian monster that lives in damp,  dark places like swamps, bogs, or marshes. Sometimes they are  found underground if the lair is sufficiently dank and wet. Hydras have reptilian bodies, four legs, a tail and 1d8+4 heads.  Each head counts as 1 hit die and has 8 full hit points, so a 10  headed hydra will have 10 hit dice and 80 hp. Each head can  attack independently or up to four heads can attack a single tar- get. The damage a hydra does is based on the number of heads.  The colouration of a hydra ranges from light brown to an almost  blackish brown with a yellow or tan underbelly. Their eyes range  from yellow to orange. Experience point value: 5 heads: 165 +5/hp 6 heads: 250 +6/hp 7 heads: 400 +8/hp 8 heads: 650 +10/hp 9 heads: 1000 +12/hp 10 heads: 1500 +14/hp 11 heads: 2150 +16/hp 12 heads: 2850 +16/hp Unarmed Combat. Hydrae cannot be targeted with grappling or  overbearing attacks, and do not use these tactics. HYENA'
+abilities: []

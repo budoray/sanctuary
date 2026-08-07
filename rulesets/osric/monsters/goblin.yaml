@@ -1,0 +1,19 @@
+name: Goblin
+frequency: common
+no_encountered: 2d4
+size: small (4ft tall)
+alignment: lawful evil
+move: 60ft
+armour_class: 6 [14]
+hit_dice: '1-1'
+melee_attacks: 1 (weapon 1d6)
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: average (8-10)
+morale: 7
+loot: Cache 1 (x5)
+experience: 10 +1 per hp
+description: Goblins are small, evil humanoids that dwell in caves and ruined structures. They are cowardly and prefer to attack with overwhelming numbers.
+abilities:
+- heading: Combat
+  text: Goblins favour ambush tactics and flee when outmatched.

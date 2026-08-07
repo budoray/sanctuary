@@ -1,0 +1,4 @@
+name: Amulet of Natural Armour
+classes: any
+description: A magical amulet granting the wearer +1 to +4 to AC (roll 1d4 to determine the bonus). Determine gold piece value according to AC bonus; +1 = 2,000gp, +2 = 8,000gp, +3 = 18,000gp, +4 = 32,000gp.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

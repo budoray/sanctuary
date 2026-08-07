@@ -1,0 +1,4 @@
+name: Cloak of Resistance
+classes: any
+description: 'This cloak grants a bonus on all saving throws. When it is first put on, roll d100 to determine its effect: D100 EFFECT VALUE (GP) 01–50 +1 to all saves 1,000 51–75 +2 to all saves 4,000 76–90 +3 to all saves 9,000 91-99 +4 to all saves 16,000 00 +5 to all saves 25,000'
+source: OSRIC_3.0_Gamemaster_Guide.pdf

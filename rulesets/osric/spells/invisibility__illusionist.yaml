@@ -1,0 +1,14 @@
+name: Invisibility
+slug: invisibility
+reversible: false
+class: illusionist
+level: 2
+school: Phantasmal Illusion
+range: Touch
+duration: See below
+area_of_effect: One creature
+components: V,S
+casting_time: 2 segments
+saving_throw: None
+text: When the words of this spell are completed, the recipient and all he or she carries fade from sight, becoming invisible. Even infravision cannot detect an invisible creature. The spell remains in effect until the invisible creature attacks someone, the caster ends the spell, or the magic is dispelled. Note that the spell does not make the recipient any more quiet than normal, nor does it eliminate scents. The invisible person can see him- or herself, but the caster (unless they are one and the same) cannot. The spell cannot be cast upon an unwilling subject.
+source: wiki2_spells.txt

@@ -1,0 +1,14 @@
+name: Fear
+slug: fear
+reversible: false
+class: illusionist
+level: 3
+school: Phantasmal Illusion
+range: '0'
+duration: See below
+area_of_effect: 5-ft×30-ft×60-ft cone
+components: V,S
+casting_time: 3 segments
+saving_throw: Negates
+text: This spell causes utter panic in the creatures exposed to the cone-shaped emanation of phantasmal terror the caster hurls forth. If any creature, of any level or hit dice, fails its saving throw against the spell, it will bolt away from the caster as fast as possible for as many rounds as the caster's level. There is a base 60% chance for a creature to drop whatever it is holding (immediately upon failing the saving throw), reduced by 5% per HD or level of the panicked creature.
+source: wiki2_spells.txt

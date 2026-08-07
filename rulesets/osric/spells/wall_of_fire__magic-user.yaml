@@ -1,0 +1,14 @@
+name: Wall of Fire
+slug: wall_of_fire
+reversible: false
+class: magic-user
+level: 4
+school: Arcane Evocation
+range: 60-ft
+duration: See below
+area_of_effect: See below
+components: V,S,M
+casting_time: 4 segments
+saving_throw: None
+text: A magic user's wall of fire does base damage of 2d6 hit points plus 1 hp/level. If the wall is configured as a ring its radius will be 10-ft+3-ft/level. In all other respects, the spell resembles the druidic spell wall of fire.
+source: wiki2_spells.txt

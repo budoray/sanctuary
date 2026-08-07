@@ -1,0 +1,20 @@
+name: Triton
+frequency: rare
+no_encountered: 10d6 (10–60)
+size: medium
+alignment: neutral good
+move: 150ft; 150ft swimming
+armour_class: 4 [15]
+hit_dice: '3'
+melee_attacks: 1 (weapon)
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: high+ (13-14+)
+morale: 60
+loot: Hoard 3, Cache 4, 5, 6, 10
+experience: Warrior 110 +2/hp  Leader (4HD) 145 +3/hp  Leader (5HD) 190 +4/hp  Leader (6HD) 280 +6/hp  Leader (9HD) 1,000 +12/hp
+description: 'Tritons resemble humans, but have two fish-like tails instead of  legs. These aquatic creatures can live in any depth of water, and  are found in the elemental plane of water as well as in the prime  material plane. Groups of tritons are composed as follows: • 90% chance to be mounted on hippocampi (65%) or giant sea  horses (35%) • Per 10 tritons, 1 leader with 4-6 hit dice (1d3+3) • Per 10 tritons, 10% chance of 1d4 tritons with magic-user abil- ity of level 1d6. • Per 20 tritons, 1 leader with 7-8 hit dice (1d2+6) • Any number of tritons over 50, 1 leader with 9 hit dice • A triton leader (9 HD) will carry a shell horn with the following  abilities: • Summon allies: 5d4 hippocampi, 5d6 giant sea horses, or 1d10  sea lions (depending upon how blown) • Disperse sea animals:  all sea creatures of animal intelligence  must save vs spells at -5 or flee for 3d6 turns Tritons are civilised, dwelling in castles beneath the waves (80%  chance) or elaborate caverns of their own excavation
+  (20%  chance). These lairs contain additional tritons: • 60 normal triton warriors plus leaders as described above • 1 magic-user level 1d2+6 • 1 cleric level 1d4+7 • 4  clerics level 1d4+5'
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (90%).  Any magic spell or effect has a 90%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Unarmed Combat.  Tritons cannot be effectively targeted with  grappling or overbearing attacks, and do not use these tactics.

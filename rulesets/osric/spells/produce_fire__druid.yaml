@@ -1,0 +1,14 @@
+name: Produce Fire
+slug: produce_fire
+reversible: true
+class: druid
+level: 4
+school: Druidic Transmutation/Alteration
+range: 40-ft
+duration: 1 round
+area_of_effect: 60-ft radius
+components: V,S,M
+casting_time: 6 segments
+saving_throw: See below
+text: This spell instantly creates a normal fire within its area of effect, a blazing conflagration lasting only one minute (1 round) but causing 1d4 hit points of damage to any creature in the area and igniting all combustible material (subject, of course, to an item saving throw against normal fire). The reverse of the spell extinguishes all normal fires within the area of effect.
+source: wiki2_spells.txt

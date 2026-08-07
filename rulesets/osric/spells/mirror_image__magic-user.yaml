@@ -1,0 +1,14 @@
+name: Mirror Image
+slug: mirror_image
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Illusion/Phantasm
+range: Caster
+duration: 2 rounds/level
+area_of_effect: 6-ft radius
+components: V,S
+casting_time: 2 segments
+saving_throw: None
+text: The mirror image spell creates 1d4 phantasmal images of the magic user, all mirroring his or her actions. The spell's 6-ft radius also becomes slightly blurred to sight, like the reflection of a slightly distorted mirror. The combination of these two magical phenomena makes it impossible to distinguish the images from the caster without aid of a magical nature, such as true seeing. When an opponent makes a successful hit against one of the images, the image breaks up and disappears (the others remain). If an opponent attempts to attack a magic user obscured by this spell, it is randomly determined whether the “to hit” roll is directed toward the person or one of the images. At the end of the spell's duration, the images fade from sight.
+source: wiki2_spells.txt

@@ -1,0 +1,17 @@
+name: Vulchling
+frequency: rare
+no_encountered: 2d8
+size: medium
+alignment: chaotic evil
+move: 60ft; 30ft flying (AA:IV)
+armour_class: 7 [12]
+hit_dice: '1'
+melee_attacks: 1 bite (1d4+1) or 2 claws (1d4)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: low (5-7)
+morale: 50
+loot: Individual 1, 2, 3, 4 each
+experience: 10 +1/hp
+description: Vulchlings are a type of intelligent bird that resemble a vulture,  but with facial features that look rather like a human with a  beak. Vulchlings are weak fliers, tending to swoop upon their  prey with 2 claw attacks, then fighting on the ground (where  they can only bite). Vulchlings can be found in desolate areas or underground, and  they have been known to ally themselves with harpies or Class  A demons. Vulchlings are attracted to shiny objects and a care - ful search of their nest usually yields a few coins. Unarmed Combat. Vulchlings cannot be targeted with overbear- ing or grappling attacks, and do not use these tactics.
+abilities: []

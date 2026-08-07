@@ -1,0 +1,30 @@
+id: 2.8.1d
+name: URBAN PROFESSIONS SUB-TABLE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 PROFESSION
+- 01-04  Alchemist
+- 05-08  Armourer
+- 09-10 Assassin
+- 11-14 Bandit
+- 15-20  Blacksmith
+- 21-24 City Guard
+- 25-26 City Official
+- 27-30 City Watch
+- 31-34 Cleric
+- D100 PROFESSION
+- 35 Druid
+- 36-37  Engineer
+- 38-42  Fighter
+- 43-44 Illusionist
+- 45-48  Jeweller ( Gemcutter),
+- 49-55 Labourer
+- 56-59 Magic-user
+- 60-65 Mercenary
+- 66-75 Merchant
+- 76-79 Noble**
+- 80-83  Sage
+- 84-90  Scribe
+- 91-92 Spy
+- 93-98 Thief
+- 99-00  Weaponer

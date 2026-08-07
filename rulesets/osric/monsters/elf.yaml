@@ -1,0 +1,28 @@
+name: Elf
+frequency: uncommon
+no_encountered: 20d10
+size: medium
+alignment: chaotic good
+move: 120ft
+armour_class: 5 [15]
+hit_dice: 1+1
+melee_attacks: By weapon
+senses: Infravision 60ft
+lair_chance: 10%
+intelligence: high (13-14)
+morale: 50
+loot: Individual 5 each; lair Hoard 7,  Cache 5, 6
+experience: 30 +1/hp
+description: 'Sometimes elves live in a complex civilisation, other times they  are found living in wild bands. While there are several different  types of elves, most do share the following traits: Elves live in a rather loose society where independent clans  pledge their support to a central ruler. They will likely place their  homes in a secluded thicket or meadow. When encountered in groups of 20 or more there will likely be  a fighter of 2nd level or better. If there are 40 or more then  there will probably be a 2nd level fighter / 2nd level magic-user  or better in the group. If there are 100 or more elves then the  leader is likely to be a 4th level fighter / 8th level magic-user with  2 additional 4th level fighters / 5th level magic-users, and a 4th  level fighter / 4th level magic-user / 4th level cleric.  Typically elves will wear scale, ring, or chain armour and shield.  They will be usually armed with spears, swords, and bows. High- er level fighter / magic-users and fighter
+  / magic-user / clerics  have a 10% chance per level per class to possess some sort of  usable magic item.'
+abilities:
+- heading: Surprise and Initiative
+  text: Surprise. Elves have the ability to move quietly when in natural  surroundings, and are able to surprise on a roll of 1–4 on a d6  in a normal, unexpected encounter.  Undetectable in Certain Surroundings. Elves are able to blend into  foliage and become virtually invisible, so long as they do not at- tack. In forested terrain, this allows for undetectable ambush - es with one round of automatic surprise.
+- heading: Immunities and Resistances
+  text: Resistance to Sleep and Charm.  Elves have a 90% resistance to  sleep and charm effects.
+- heading: Special Features
+  text: Ancestral Features. Elves have the same ancestral features as a  player character elf.
+- heading: Special Attacks
+  text: 'Melee Attack. Elves attack with a +1 “to hit” with longswords. Ranged Attack. When using any pulled bow elves receive a +1 to  their attack roll. Unarmed Combat. For an elf wearing chainmail: If not fended off,  they score an unarmed hit with a 14+ on 1d20. Hit Mods: ATK/ DEF +6/-4. Overbear Results Mods: ATK/DEF +0/-0. Grappling  Result Mods: ATK/DEF +0/+0.'
+- heading: Languages
+  text: Elves have their own language, and can also speak common,  goblin, orc, hobgoblin, gnoll, halfling, and gnome.

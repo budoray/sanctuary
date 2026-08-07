@@ -4,17 +4,24 @@ The extractor is dumb on purpose: it stores each table's lines as printed.
 Interpretation lives here, so one table's quirks cannot break another's.
 """
 import re
-from functools import lru_cache
 from pathlib import Path
 
 import yaml
 
-_DIR = Path(__file__).resolve().parent.parent / "data" / "tables"
+_DEFAULT_DIR = Path(__file__).resolve().parent.parent / "data" / "tables"
 _DASH = re.compile(r"[–—-]")
 
+# Per-directory caches: directory -> (index_cache, load_cache).
+_DIR_CACHE: dict[Path, tuple[dict[str, tuple[Path, ...]], dict[str, dict]]] = {}
 
-@lru_cache(maxsize=None)
-def _index() -> dict[str, tuple[Path, ...]]:
+
+def _cache(directory: Path) -> tuple[dict[str, tuple[Path, ...]], dict[str, dict]]:
+    if directory not in _DIR_CACHE:
+        _DIR_CACHE[directory] = ({}, {})
+    return _DIR_CACHE[directory]
+
+
+def _index(directory: Path) -> dict[str, tuple[Path, ...]]:
     """id -> every file carrying it, in filename order.
 
     19 ids have MORE THAN ONE file - a table split across pages keeps its id
@@ -22,40 +29,51 @@ def _index() -> dict[str, tuple[Path, ...]]:
     has four, 1.4.2.3a has three). Mapping id -> a single Path silently keeps
     whichever file globbed last and discards 26 tables.
     """
-    out: dict[str, list[Path]] = {}
-    for p in sorted(_DIR.glob("*.yaml")):
-        out.setdefault(p.name.split("_", 1)[0], []).append(p)
-    return {k: tuple(v) for k, v in out.items()}
+    index_cache, _ = _cache(directory)
+    if index_cache:
+        return index_cache
+    for p in sorted(directory.glob("*.yaml")):
+        index_cache.setdefault(p.name.split("_", 1)[0], []).append(p)
+    for k in list(index_cache):
+        index_cache[k] = tuple(index_cache[k])
+    return index_cache
 
 
 def _read(path: Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 
 
-def parts(table_id: str) -> list[dict]:
+def parts(table_id: str, tables_dir: Path | None = None) -> list[dict]:
     """Every document carrying `table_id`, in order. Use this for a table the
     book split across pages."""
-    paths = _index().get(table_id.lower())
+    directory = tables_dir or _DEFAULT_DIR
+    paths = _index(directory).get(table_id.lower())
     if not paths:
-        raise KeyError(f"no table {table_id!r} in {_DIR}")
+        raise KeyError(f"no table {table_id!r} in {directory}")
     return [_read(p) for p in paths]
 
 
-@lru_cache(maxsize=None)
-def load(table_id: str) -> dict:
+def load(table_id: str, tables_dir: Path | None = None) -> dict:
     """The single document for a table, keyed by its OSRIC number.
 
     Raises when the id covers several files rather than picking one - a caller
     that wants a split table must say so by calling `parts()`.
     """
-    paths = _index().get(table_id.lower())
+    directory = tables_dir or _DEFAULT_DIR
+    index_cache, load_cache = _cache(directory)
+    table_id_lower = table_id.lower()
+    if table_id_lower in load_cache:
+        return load_cache[table_id_lower]
+    paths = _index(directory).get(table_id_lower)
     if not paths:
-        raise KeyError(f"no table {table_id!r} in {_DIR}")
+        raise KeyError(f"no table {table_id!r} in {directory}")
     if len(paths) > 1:
         names = ", ".join(p.name for p in paths)
         raise LookupError(
             f"table {table_id!r} spans {len(paths)} files ({names}); call parts()")
-    return _read(paths[0])
+    doc = _read(paths[0])
+    load_cache[table_id_lower] = doc
+    return doc
 
 
 # A to-hit table's armour-class header is 21 fields wide (AC 10 down to -10).
@@ -89,13 +107,13 @@ def _is_ac_header(fields: list[str]) -> bool:
     return all(a > b for a, b in zip(nums, nums[1:]))
 
 
-def rows(table_id: str) -> list[list[str]]:
+def rows(table_id: str, tables_dir: Path | None = None) -> list[list[str]]:
     """Data rows, whitespace-split. Lines that do not begin with a number,
     range or `<` are treated as wrapped headers and dropped, as are a
     leaked section heading (`_SECTION_HEADING`) and the armour-class header
     some to-hit tables repeat as data-shaped text (`_is_ac_header`)."""
     out = []
-    for line in load(table_id)["lines"]:
+    for line in load(table_id, tables_dir=tables_dir)["lines"]:
         if not re.match(r"^\s*[<\d]", line):
             continue
         if _SECTION_HEADING.match(line.strip()):
@@ -159,9 +177,9 @@ def in_range(spec: str, value: float) -> bool:
     return nums[0] <= value <= nums[-1]
 
 
-def ability_row(table_id: str, score: float) -> list[str]:
+def ability_row(table_id: str, score: float, tables_dir: Path | None = None) -> list[str]:
     """The row of an ability table whose first cell covers `score`."""
-    for row in rows(table_id):
+    for row in rows(table_id, tables_dir=tables_dir):
         if row and in_range(row[0], score):
             return row
     raise LookupError(f"no row in {table_id} covers {score}")

@@ -1,0 +1,26 @@
+name: Lycanthrope, Weretiger
+frequency: rare rare uncommon very rare common no.  encountered 1d4 2d4 4d6 1d6 3d6
+size: large large small to medium large medium
+alignment: chaotic good neutral lawful evil neutral chaotic evil
+move: 90ft 120ft 120ft 120ft 150ft
+armour_class: 3 [17]
+hit_dice: 6+2
+melee_attacks: 2 claws (1d4) and 1 bite (1d12)
+senses: Infravision 60ft Infravision 60ft Infravision 60ft Infravision 60ft Infravision
+  60ft
+lair_chance: 10% 20% 30% 15% 25%
+intelligence: exceptional (15-16) average (8-10) very (11-12) average (8-10) average
+  (8-10)
+morale: 85 70 60 75 70
+loot: Cache 4, 6, 10 Hoard 2, Cache 5 Hoard 3 Hoard 4, Cache 3  (x5) Hoard 2
+experience: 500 +8/hp
+description: WERETIGER Weretigers are usually found in the same climates as tigers,
+  and  occasionally live with normal tigers (5%). All normal cats are 75%  likely
+  to be friendly to a weretiger due to the lycanthrope’s abil- ity to speak with them.
+  Immune to Non-Silver Mundane Weapons.  This creature is im - mune to piercing, blunt,
+  and slashing damage from weapons  and unarmed attacks, unless the weapon causing
+  that damage  has a magical bonus of +1 or more, or is made of silver. Lycanthropy.
+  See general description for all lycanthropes (shape- shifting and transmission).
+  Rake. The weretiger gains an extra two rear leg raking claw at - tacks (1d4+1 each)
+  if they successfully hit with both clawing  attacks in melee.
+abilities: []

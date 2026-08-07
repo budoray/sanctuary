@@ -1,0 +1,14 @@
+name: Colour Spray
+slug: colour_spray
+reversible: false
+class: illusionist
+level: 1
+school: Phantasmal Transmutation/Alteration
+range: '0'
+duration: 1 segment
+area_of_effect: Cone, 5-ft wide at origin, 45% arc, 10-ft/level long
+components: V,S,M
+casting_time: 1 segment
+saving_throw: See below
+text: The caster fans out his or her fingers, and a sheet of unearthly-coloured light springs forth. 1d6 creatures caught within the light may be affected, and the spell can only affect 1 hit die of creatures per caster level. Creatures with HD equal to or less than the caster's are rendered unconscious by the burst of colours. If the creature's hit dice exceed the caster's by 1-2, the creature is blinded for 1d4 rounds. If the creature has 3+ hit dice in excess of the caster's, it is merely stunned for 2d4 segments. Any creature with hit dice exceeding the caster's (and creatures or 6+ HD regardless of the caster's level) are entitled to a saving throw.
+source: wiki2_spells.txt

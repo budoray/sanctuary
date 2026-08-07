@@ -8,12 +8,13 @@ from sqlalchemy import and_, exists, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.auth import require_account
-from backend.app.db import CampaignMemberRecord, CampaignRecord, CharacterRecord, FriendRecord, SessionRecord, get_db, record_event
+from backend.app.db import CampaignMemberRecord, CampaignRecord, CharacterRecord, DungeonRecord, FriendRecord, RoomRecord, SessionRecord, get_db, record_event
 from backend.app.dependencies import limit_actions
 import random
 
 from backend.app.engine import character as char_engine
 from backend.app.engine import dungeon_compiler, items, module, session as session_engine
+from backend.app.api.rulesets import resolve_ruleset
 from backend.app.socket_manager import presence_tracker, socket_manager
 
 router = APIRouter(tags=["sessions"])
@@ -211,10 +212,41 @@ async def create_session(
         equipment=char_state.get("equipment", {}),
     )
 
-    mod = module.load(module_id)
+    if module_id.startswith("dungeon:"):
+        dungeon_id = module_id.split(":", 1)[1]
+        result = await db.execute(select(DungeonRecord).where(DungeonRecord.id == dungeon_id))
+        dungeon = result.scalar_one_or_none()
+        if not dungeon:
+            raise HTTPException(status_code=404, detail="Dungeon not found")
+        order = list(dict.fromkeys(json.loads(dungeon.room_order or "[]")))
+        result = await db.execute(select(RoomRecord).where(RoomRecord.id.in_(order)))
+        rooms = {r.id: r for r in result.scalars().all()}
+        ordered = [rooms[r_id] for r_id in order if r_id in rooms]
+        if not ordered:
+            raise HTTPException(status_code=400, detail="Dungeon has no rooms")
+        mod, dungeon_links = dungeon_compiler.compile(dungeon, ordered)
+        ruleset_id = dungeon.ruleset_id or "osric"
+    else:
+        mod = module.load(module_id)
+        dungeon_links = None
+        ruleset_id = mod.ruleset
+
+    if campaign_id:
+        ruleset_id = campaign.ruleset_id or ruleset_id
+
+    ruleset = await resolve_ruleset(ruleset_id, account_id=account_id, db=db)
+    monsters_dir = ruleset.content_path("monsters")
+
     session_id = str(uuid.uuid4())[:8]
     state = await session_engine.new_game(
-        session_id, mod, char, turn_timer_seconds=turn_timer_seconds, character_id=character_id, account_id=account_id
+        session_id,
+        mod,
+        char,
+        turn_timer_seconds=turn_timer_seconds,
+        character_id=character_id,
+        account_id=account_id,
+        dungeon_links=dungeon_links,
+        monsters_dir=monsters_dir,
     )
     if campaign_id:
         state["campaign_id"] = campaign_id
@@ -230,6 +262,7 @@ async def create_session(
         status=state["status"],
         visibility=visibility,
         invite_code=invite_code,
+        ruleset_id=ruleset_id,
         state=json.dumps(state),
     )
     db.add(session_record)
@@ -596,7 +629,10 @@ async def advance_session(
 
     state = json.loads(record.state)
     next_module = module.load(next_module_id)
-    state = await session_engine.advance_module(state, next_module)
+    ruleset_id = campaign.ruleset_id or next_module.ruleset or "osric"
+    ruleset = await resolve_ruleset(ruleset_id, account_id=account_id, db=db)
+    monsters_dir = ruleset.content_path("monsters")
+    state = await session_engine.advance_module(state, next_module, monsters_dir=monsters_dir)
 
     # Update campaign progress: mark current module cleared and move index forward.
     cleared = json.loads(campaign.cleared_module_ids or "[]")

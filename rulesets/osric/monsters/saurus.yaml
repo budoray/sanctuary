@@ -1,0 +1,16 @@
+name: Saurus
+frequency: uncommon uncommon uncommon uncommon uncommon uncommon no.  encountered 2d10 2d12 5d8 4d8 3d10 6d10
+size: large large large large large large
+alignment: neutral neutral neutral neutral neutral neutral
+move: 150ft 150ft 150ft 150ft 150ft 150ft
+armour_class: 7 [13] 6 [14] 7 [13] 7 [13] 6 [14] 9 [11]
+hit_dice: 15 12 9 8 10 4
+melee_attacks: 1 (2d8) 1 (1d12) 1 (1d6) 1 (1d8) 1 (1d10) 1 (1d6)
+senses: Standard Standard Standard Standard Standard Standard
+lair_chance: Nil Nil Nil Nil Nil Nil
+intelligence: non- (0) non- (0) non- (0) non- (0) non- (0) non- (0)
+morale: N/A N/A N/A N/A N/A N/A
+loot: Nil Nil Nil Nil Nil Nil
+experience: 2,000 +16/hp 1,200 +16/hp 750 +10/hp 500 +10/hp 1,500 +14/hp 75 +4/hp
+description: 'Herbivores who foraged on all fours and ran on hind legs, there  are two main families of the duck–billed dinosaurs known as  hadrosaurids: hadrosaurines and lambeosaurines. In game  terms there is no difference. Some could be interpreted as  Semi-amphibious swamp or wetland dwellers, in which case  they should have a swimming move, but many, perhaps all, are  fully terrestrial. Trachodon and Anatosaurs are now–supersed - ed names for kinds of hadrosaurid. Edmontosaurus: Cretaceous herbivore, formerly “anatosaurus”.  Charonosaurus: Cretaceous herbivore. Shantungosaurus: Creta- ceous herbivore. Saurolophus: Cretaceous herbivore. Hypacro- saurus: Cretaceous herbivore. Telmatosaurus: Smaller Creta - ceous herbivore. SAUROPODS'
+abilities: []

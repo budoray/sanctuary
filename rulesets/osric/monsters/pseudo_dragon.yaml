@@ -1,0 +1,23 @@
+name: Pseudo-Dragon
+frequency: very rare
+no_encountered: '1'
+size: small (18-in)
+alignment: neutral good
+move: 60ft; 240ft flying (AA:V)
+armour_class: 2 [18]
+hit_dice: '2'
+melee_attacks: 1 bite (1d3) and 1 sting  (poison)
+senses: Infravision 60ft (and sees  invisibility)
+lair_chance: 5%
+intelligence: average (8-10)
+morale: 55
+loot: Cache 3 (x10)
+experience: 200 +2/hp
+description: Pseudo-dragons are tiny dragons, dark red in colour, lacking  the breath weapon of their large cousins but carrying a deadly  sting in their tails. They are not generally counted among the  true dragons. Pseudo-dragons can be be found in almost every  climate save the very hottest and coldest, and prefer snug lairs  such as small caves or hollow trees. Pseudo-dragons are highly-prized familiars, and in some cases  they will use their abilities on behalf of an ordinary companion  of good alignment.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (35%).  Any magic spell or effect has a 35%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. This magic resistance  may also be extended to any ally in physical contact with the  pseudo dragon, if the pseudo dragon desires. See Invisible.  Pseudo dragons can see invisible creatures and  objects.
+- heading: Special Features
+  text: Chameleon. Pseudo-dragons can change their normal dark red  colouration to match their surroundings. Any person not able  to see invisible creatures must roll 1d100, and on a roll of 01- 80, the pseudo dragon is treated as being invisible to that per- son. Limited telepathy.  Pseudo-dragons are also able to communi - cate everything they see and hear to a companion, via a limited  form of telepathy at distances of up to 240ft.
+- heading: Special Attacks
+  text: Poison Sting. The pseudo-dragon has a poison sting on its tail.  Tail attacks have a +4 to-hit bonus but do not inflict damage.  Any creature stung must save vs poison or fall into a death-like  trance for 1d6 days. On the last day of the trance there is a  25% chance the victim will actually die, but if they survive, they  awaken normally. Unarmed Combat. Pseudo-dragons cannot effectively be target- ed with grappling or overbearing attacks, and do not use these  tactics.

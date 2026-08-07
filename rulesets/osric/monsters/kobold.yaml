@@ -1,0 +1,23 @@
+name: Kobold
+frequency: uncommon
+no_encountered: 40d10
+size: small (3ft)
+alignment: lawful evil
+move: 60ft
+armour_class: 7 [13]
+hit_dice: 1d4 hp
+melee_attacks: 1d4 or by weapon
+senses: Infravision 60ft
+lair_chance: 40%
+intelligence: average or low (8-10)
+morale: 45
+loot: Individual 1 each; in lair Cache  1 and 3
+experience: 5 +1/hp
+description: Kobolds stand 3ft tall and are vaguely reptilian in appearance,  with scaly skin, small horns, short, snaky tails and red eyes. The  weakest of humanoids, physically, kobolds live in a hierarchical  society of tribes and clans. They tend to make their lairs in dark  places such as caves or deep forests.  Kobold raiding parties are led by a sergeant and 2 assistants,  who fight as goblins. Lairs are ruled by a chief and 5d4 bodyguards (all fight as gob - lins).  Kobolds often (75%) use wild boars or giant weasels (the small- sized variety) to guard their lairs.
+abilities:
+- heading: Immunities and Resistances
+  text: Vulnerability to Sunlight. Kobolds detest direct sunlight and fight  at -1 if they are exposed to it.
+- heading: Special Attacks
+  text: 'Ranged Attack (Slings).  Kobolds often employ slings as missile  weapons (1d4 blunt damage), 35ft range increment (-2 at 36ft,  -4 at 71ft). Unarmed Combat.  Kobolds can be targeted with grappling or  overbearing attacks. If not fended off, they score an unarmed  hit with an 8+ on 1d20. Hit Mods: ATK/DEF +4/-2. Overbear Re- sults Mods: ATK/DEF -2/+2. Grappling Result Mods: ATK/DEF  -2/+2.'
+- heading: Languages
+  text: These creatures speak lawful evil and their own tongue. Some  also speak goblin.

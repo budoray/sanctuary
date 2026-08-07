@@ -6,21 +6,25 @@ slot machine.
 """
 import re
 from dataclasses import dataclass, field
-from functools import lru_cache
 from pathlib import Path
-
-import yaml
 
 from backend.app.engine import tables
 from backend.app.engine.dice import Dice
+from backend.app.rulesets.base import Ruleset
+from backend.app.rulesets.loader import load_ruleset
 
-ABILITIES = ("strength", "dexterity", "constitution",
-             "intelligence", "wisdom", "charisma")
+# Default ruleset for backward-compatible module-level constants and for any
+# function called without an explicit ruleset argument.
+_DEFAULT_RULESET = load_ruleset("osric")
+
+ABILITIES = _DEFAULT_RULESET.ABILITIES
+GEN_MODES = _DEFAULT_RULESET.GEN_MODES
+ANCESTRIES = _DEFAULT_RULESET.ANCESTRIES
+CLASSES = _DEFAULT_RULESET.CLASSES
+EXCEPTIONAL_CLASSES = _DEFAULT_RULESET.EXCEPTIONAL_CLASSES
 
 # OSRIC 3.0 names four generation modes. This is a player-facing choice,
 # not a configuration value.
-GEN_MODES = ("hardest", "difficult", "normal", "flexible")
-
 _MODE_EXPR = {
     "hardest": "3d6",     # 3d6 in order
     "difficult": "3d6",   # 3d6, arrange to taste
@@ -30,21 +34,38 @@ _MODE_EXPR = {
 _ARRANGEABLE = {"difficult", "flexible"}
 
 
+# Caches for ruleset content keyed by ruleset id, since Ruleset instances are
+# not hashable (they carry dictionaries).
+_ANCESTRIES_CACHE: dict[str, dict] = {}
+_CLASSES_CACHE: dict[str, dict] = {}
+
+
+def _ruleset(ruleset: Ruleset | None) -> Ruleset:
+    return ruleset or _DEFAULT_RULESET
+
+
+def _tables_dir(ruleset: Ruleset | None) -> Path | None:
+    return _ruleset(ruleset).content_path("tables")
+
+
 def arrangeable(mode: str) -> bool:
     """May the player rearrange the rolled scores across abilities?"""
     return mode in _ARRANGEABLE
 
 
-def roll_abilities(d: Dice, mode: str) -> dict[str, int]:
+def roll_abilities(d: Dice, mode: str, ruleset: Ruleset | None = None) -> dict[str, int]:
     """Roll the six ability scores. Arrange modes return them in roll order;
     rearranging is the player's move, made later against this result."""
-    if mode not in GEN_MODES:
+    rs = _ruleset(ruleset)
+    modes = tuple(m["value"] for m in rs.gen_modes)
+    if mode not in modes:
         raise ValueError(f"unknown generation mode: {mode!r}")
     expr = _MODE_EXPR[mode]
-    return {name: d.roll(expr, reason=name).total for name in ABILITIES}
+    return {name: d.roll(expr, reason=name).total for name in rs.abilities}
 
 
-def apply_arrangement(rolled: dict, arrangement: dict | None, mode: str) -> dict:
+def apply_arrangement(rolled: dict, arrangement: dict | None, mode: str,
+                      ruleset: Ruleset | None = None) -> dict:
     """The player's chosen assignment of the six already-rolled values to the
     six abilities - `difficult` and `flexible` exist precisely so a player
     can do this. No dice are rolled here; this only reorders what
@@ -56,16 +77,17 @@ def apply_arrangement(rolled: dict, arrangement: dict | None, mode: str) -> dict
     once and use exactly the multiset of values `rolled` produced - not a
     substitute value from thin air.
     """
+    abilities = _ruleset(ruleset).abilities
     if arrangement is None:
         return rolled
     if not arrangeable(mode):
         raise ValueError(
             f"{mode} mode does not allow rearranging ability scores - only "
             f"{'/'.join(sorted(_ARRANGEABLE))} do")
-    if set(arrangement) != set(ABILITIES):
+    if set(arrangement) != set(abilities):
         raise ValueError(
             f"arrangement must assign every ability exactly once: "
-            f"got {sorted(arrangement)}, need {sorted(ABILITIES)}")
+            f"got {sorted(arrangement)}, need {sorted(abilities)}")
     if sorted(arrangement.values()) != sorted(rolled.values()):
         raise ValueError(
             f"arrangement must be a permutation of the rolled scores "
@@ -73,18 +95,16 @@ def apply_arrangement(rolled: dict, arrangement: dict | None, mode: str) -> dict
     return dict(arrangement)
 
 
-# Only these classes roll percentile strength. For everyone else an 18 is an 18.
-EXCEPTIONAL_CLASSES = ("fighter", "paladin", "ranger")
-
-
-def roll_exceptional_strength(d: Dice, score: int, cls: str) -> float:
+def roll_exceptional_strength(d: Dice, score: int, cls: str,
+                              ruleset: Ruleset | None = None) -> float:
     """Percentile strength for an eligible 18.
 
     Returns 18.01-18.99 as a decimal, or 19.0 on a percentile roll of 00 (100).
     Returns `score` unchanged when the character is not eligible - and rolls no
     dice at all in that case, so the log stays honest.
     """
-    if score != 18 or cls not in EXCEPTIONAL_CLASSES:
+    exceptional_classes = _ruleset(ruleset).EXCEPTIONAL_CLASSES
+    if score != 18 or cls not in exceptional_classes:
         return score
     pct = d.roll("1d100", reason="exceptional strength", kind="chargen").total
     if pct >= 100:
@@ -92,20 +112,16 @@ def roll_exceptional_strength(d: Dice, score: int, cls: str) -> float:
     return round(18 + pct / 100, 2)
 
 
-_DATA = Path(__file__).resolve().parent.parent / "data"
+def _ancestries(ruleset: Ruleset | None = None) -> dict:
+    rs = _ruleset(ruleset)
+    if rs.id not in _ANCESTRIES_CACHE:
+        _ANCESTRIES_CACHE[rs.id] = rs.load_yaml("ancestries")
+    return _ANCESTRIES_CACHE[rs.id]
 
 
-@lru_cache(maxsize=1)
-def _ancestries() -> dict:
-    return yaml.safe_load((_DATA / "ancestries.yaml").read_text(encoding="utf-8"))
-
-
-ANCESTRIES = ("dwarf", "elf", "gnome", "half-elf", "halfling", "half-orc", "human")
-
-
-def ancestry(name: str) -> dict:
+def ancestry(name: str, ruleset: Ruleset | None = None) -> dict:
     """OSRIC 3.0 §1.2.1-1.2.7: one ancestry's adjustments, limits and class access."""
-    a = _ancestries().get(name)
+    a = _ancestries(ruleset).get(name)
     if a is None:
         raise KeyError(f"unknown ancestry: {name!r}")
     return a
@@ -117,7 +133,7 @@ def ancestry(name: str) -> dict:
 _DEFAULT_ABILITY_MIN, _DEFAULT_ABILITY_MAX = 3, 18
 
 
-def apply_ancestry(scores: dict, name: str) -> dict:
+def apply_ancestry(scores: dict, name: str, ruleset: Ruleset | None = None) -> dict:
     """Ancestral adjustments applied to a copy of `scores`, then clamped to
     Table 1.2.0A's ceiling for each ability: "After making these
     modifications, your scores must fall within the required limitations of
@@ -130,7 +146,7 @@ def apply_ancestry(scores: dict, name: str) -> dict:
     it never raises one that ends up too low, so there is no floor clamp
     here - a score that lands below the ancestry's minimum fails ancestry
     eligibility instead (see meets_ancestry_minimums)."""
-    a = ancestry(name)
+    a = ancestry(name, ruleset)
     out = dict(scores)
     for k, delta in a["ability_adjustments"].items():
         out[k] = out.get(k, 0) + delta
@@ -139,13 +155,14 @@ def apply_ancestry(scores: dict, name: str) -> dict:
     return out
 
 
-def meets_ancestry_minimums(scores: dict, name: str) -> bool:
+def meets_ancestry_minimums(scores: dict, name: str, ruleset: Ruleset | None = None) -> bool:
     """Table 1.2.0A minimums and maximums, checked AFTER ancestral
     adjustments. Every ability defaults to the universal 3-18 range unless
     the ancestry lists its own bound - the same defaults apply_ancestry
     clamps against, so the two agree on what "too high" means."""
-    a = ancestry(name)
-    for k in ABILITIES:
+    a = ancestry(name, ruleset)
+    abilities = _ruleset(ruleset).abilities
+    for k in abilities:
         v = scores.get(k, 0)
         if v < a["minimums"].get(k, _DEFAULT_ABILITY_MIN):
             return False
@@ -154,41 +171,41 @@ def meets_ancestry_minimums(scores: dict, name: str) -> bool:
     return True
 
 
-@lru_cache(maxsize=1)
-def _classes() -> dict:
-    return yaml.safe_load((_DATA / "classes.yaml").read_text(encoding="utf-8"))
+def _classes(ruleset: Ruleset | None = None) -> dict:
+    rs = _ruleset(ruleset)
+    if rs.id not in _CLASSES_CACHE:
+        _CLASSES_CACHE[rs.id] = rs.load_yaml("classes")
+    return _CLASSES_CACHE[rs.id]
 
 
-CLASSES = ("assassin", "cleric", "druid", "fighter", "illusionist",
-           "magic-user", "monk", "paladin", "ranger", "thief")
-
-
-def game_class(name: str) -> dict:
+def game_class(name: str, ruleset: Ruleset | None = None) -> dict:
     """OSRIC 3.0 §1.3.1-1.3.10: one class's requirements, hit die and tables."""
-    c = _classes().get(name)
+    c = _classes(ruleset).get(name)
     if c is None:
         raise KeyError(f"unknown class: {name!r}")
     return c
 
 
-def eligible_classes(scores: dict, ancestry_name: str) -> list[str]:
+def eligible_classes(scores: dict, ancestry_name: str, ruleset: Ruleset | None = None) -> list[str]:
     """Classes this character may take: allowed by ancestry AND meeting the
     class's own ability minimums."""
-    allowed = set(ancestry(ancestry_name)["allowed_classes"])
+    rs = _ruleset(ruleset)
+    allowed = set(ancestry(ancestry_name, rs)["allowed_classes"])
     out = []
-    for name in CLASSES:
+    for name in tuple(_classes(rs).keys()):
         if name not in allowed:
             continue
-        if any(scores.get(k, 0) < v for k, v in game_class(name)["minimums"].items()):
+        if any(scores.get(k, 0) < v for k, v in game_class(name, rs)["minimums"].items()):
             continue
         out.append(name)
     return out
 
 
-def roll_hit_points(d: Dice, cls: str, level: int, con_bonus: int) -> int:
+def roll_hit_points(d: Dice, cls: str, level: int, con_bonus: int,
+                    ruleset: Ruleset | None = None) -> int:
     """Hit points for `level` levels of `cls`.
 
-    Past the level where hit dice stop (per class - see data/classes.yaml),
+    Past the level where hit dice stop (per class - see classes.yaml),
     the class gains flat hit points instead of rolling, and Constitution
     adjustments no longer apply - every class's own table footnote says so
     explicitly.
@@ -201,7 +218,7 @@ def roll_hit_points(d: Dice, cls: str, level: int, con_bonus: int) -> int:
     Constitution event in the book's own wording, so a ranger's 1st level
     floors at 2hp (one per die), not 1.
     """
-    c = game_class(cls)
+    c = game_class(cls, ruleset)
     die = c["hit_die"]
     stop = c["hit_dice_stop_level"]
     total = 0
@@ -231,13 +248,13 @@ def _int(cell: str) -> int:
     return int(str(cell).replace("+", "").replace("−", "-"))
 
 
-def ability_modifiers(scores: dict) -> dict:
+def ability_modifiers(scores: dict, ruleset: Ruleset | None = None) -> dict:
     """Combat-relevant modifiers derived from Table 1.1.2A (Strength).
 
     Strength-only for now - Dexterity (AC/missile) and Constitution (hp)
     modifiers arrive in a later chapter.
     """
-    strength_row = tables.ability_row("1.1.2a", scores["strength"])
+    strength_row = tables.ability_row("1.1.2a", scores["strength"], tables_dir=_tables_dir(ruleset))
     return {
         "hit": _int(strength_row[1]),
         "damage": _int(strength_row[2]),
@@ -249,8 +266,7 @@ _CON_ROW = re.compile(r"^(\d+)\s+([+-]?\d+)(.*)$")
 _CON_EXCEPTIONAL = re.compile(r"\(\+(\d+)\s+for\s+fighters")
 
 
-@lru_cache(maxsize=1)
-def _constitution_rows() -> list[str]:
+def _constitution_rows(ruleset: Ruleset | None = None) -> list[str]:
     """Table 1.1.4A's data rows, wrapped continuation lines re-joined.
 
     Row 19's text wraps onto a second physical line ("and rangers) 100 99")
@@ -260,7 +276,7 @@ def _constitution_rows() -> list[str]:
     silently lost. Re-joined by hand here rather than teaching the generic
     parser a one-table special case.
     """
-    lines = tables.load("1.1.4a")["lines"][1:]  # drop the header line
+    lines = tables.load("1.1.4a", tables_dir=_tables_dir(ruleset))["lines"][1:]  # drop the header line
     merged: list[str] = []
     for line in lines:
         if re.match(r"^\s*\d", line):
@@ -270,7 +286,7 @@ def _constitution_rows() -> list[str]:
     return merged
 
 
-def constitution_hp_bonus(score: float, cls: str) -> int:
+def constitution_hp_bonus(score: float, cls: str, ruleset: Ruleset | None = None) -> int:
     """Table 1.1.4A's Constitution hit-point modifier for `score`.
 
     Fighters, paladins and rangers get a BETTER bonus at 17+ - the table
@@ -279,11 +295,12 @@ def constitution_hp_bonus(score: float, cls: str) -> int:
     honoured for EXCEPTIONAL_CLASSES; every other class uses the base
     figure that appears before the parenthesis.
     """
-    for line in _constitution_rows():
+    exceptional_classes = _ruleset(ruleset).EXCEPTIONAL_CLASSES
+    for line in _constitution_rows(ruleset):
         m = _CON_ROW.match(line)
         if int(m.group(1)) != int(score):
             continue
-        if cls in EXCEPTIONAL_CLASSES:
+        if cls in exceptional_classes:
             exc = _CON_EXCEPTIONAL.search(m.group(3))
             if exc:
                 return int(exc.group(1))
@@ -296,10 +313,10 @@ def constitution_hp_bonus(score: float, cls: str) -> int:
 # number of words - "0" for scores 6-14, "+3 to initiative segment" at the
 # extremes - so the AC adjustment can only be found counting from the END:
 # ..., ac_adjustment, [bracketed alternate], agility_save_modifier).
-def dexterity_ac_adjustment(score: float) -> int:
+def dexterity_ac_adjustment(score: float, ruleset: Ruleset | None = None) -> int:
     """Table 1.1.3A's Dexterity defensive AC adjustment (descending AC:
     negative is better)."""
-    for row in tables.rows("1.1.3a"):
+    for row in tables.rows("1.1.3a", tables_dir=_tables_dir(ruleset)):
         if int(row[0]) == int(score):
             return _int(row[-3])
     raise LookupError(f"no Dexterity AC adjustment row for score {score}")
@@ -309,8 +326,7 @@ _ARMOUR_ROW = re.compile(
     r"^([A-Za-z][A-Za-z,\s]*?)\s+\S+\s+\S+\s+([+-]?\d+)\s*\[[+-]?\d+\]\*{0,2}\s")
 
 
-@lru_cache(maxsize=1)
-def _armour_ac_by_name() -> dict[str, int]:
+def _armour_ac_by_name(ruleset: Ruleset | None = None) -> dict[str, int]:
     """Table 1.4.2.G's ARMOUR TYPE -> descending base AC.
 
     Every armour row's name leads with a letter, not a digit, so
@@ -321,7 +337,7 @@ def _armour_ac_by_name() -> dict[str, int]:
     no bracket either and are skipped the same way.
     """
     out = {}
-    for line in tables.load("1.4.2.g")["lines"]:
+    for line in tables.load("1.4.2.g", tables_dir=_tables_dir(ruleset))["lines"]:
         m = _ARMOUR_ROW.match(line.strip())
         if m:
             out[m.group(1).strip().lower()] = int(m.group(2))
@@ -342,27 +358,28 @@ SHIELD_AC_BONUS = 1
 _AC_MIN, _AC_MAX = -10, 10
 
 
-def armour_class(dex_score: float, armour: str | None = None, shield: bool = False) -> int:
+def armour_class(dex_score: float, armour: str | None = None, shield: bool = False,
+                 ruleset: Ruleset | None = None) -> int:
     """Descending AC (lower is better) from armour, shield and the
     Dexterity defensive adjustment (Table 1.1.3A). `armour=None` is
     unarmoured (base 10, per the table's own "NO ARMOUR ... AC 10" note)."""
-    base = 10 if armour is None else _armour_ac_by_name()[armour.lower()]
+    base = 10 if armour is None else _armour_ac_by_name(ruleset)[armour.lower()]
     if shield:
         base -= SHIELD_AC_BONUS
-    ac = base + dexterity_ac_adjustment(dex_score)
+    ac = base + dexterity_ac_adjustment(dex_score, ruleset)
     return max(_AC_MIN, min(_AC_MAX, ac))
 
 
-def saving_throws(cls: str, level: int) -> dict:
+def saving_throws(cls: str, level: int, ruleset: Ruleset | None = None) -> dict:
     """The five saving-throw targets for a class at a level."""
-    table_id = game_class(cls)["saving_throw_table"]
-    for row in tables.rows(table_id):
+    table_id = game_class(cls, ruleset)["saving_throw_table"]
+    for row in tables.rows(table_id, tables_dir=_tables_dir(ruleset)):
         if tables.in_range(row[0], level) and len(row) >= 6:
             return dict(zip(SAVE_CATEGORIES, (_int(c) for c in row[1:6])))
     raise LookupError(f"no saving-throw row for {cls} level {level}")
 
 
-def to_hit_target(cls: str, level: int, armour_class: int) -> int:
+def to_hit_target(cls: str, level: int, armour_class: int, ruleset: Ruleset | None = None) -> int:
     """The d20 result needed to hit `armour_class`.
 
     A natural 1 is NOT an automatic miss and a natural 20 is NOT an automatic
@@ -370,9 +387,9 @@ def to_hit_target(cls: str, level: int, armour_class: int) -> int:
     only; rolling and comparing against it belongs to whoever resolves an
     attack.
     """
-    table_id = game_class(cls)["to_hit_table"]
+    table_id = game_class(cls, ruleset)["to_hit_table"]
     col = _AC_COLUMNS.index(int(armour_class))
-    for row in tables.rows(table_id):
+    for row in tables.rows(table_id, tables_dir=_tables_dir(ruleset)):
         if tables.in_range(row[0], level):
             return _int(row[1 + col])
     raise LookupError(f"no to-hit row for {cls} level {level}")
@@ -404,31 +421,31 @@ class Character:
     equipment: dict = field(default_factory=dict, compare=False)
 
 
-def is_legal_multiclass(ancestry_name: str, class_names) -> bool:
+def is_legal_multiclass(ancestry_name: str, class_names, ruleset: Ruleset | None = None) -> bool:
     """One class is always legal if the ancestry allows it. More than one must
     appear in that ancestry's own multiclass_combinations (OSRIC 3.0
     SS1.3.11) - humans have none (dual-classing, SS1.3.12, is a different
     mechanism entirely and not covered here)."""
     names = list(class_names)
-    allowed = set(ancestry(ancestry_name)["allowed_classes"])
+    allowed = set(ancestry(ancestry_name, ruleset)["allowed_classes"])
     if not set(names) <= allowed:
         return False
     if len(names) == 1:
         return True
-    combos = [sorted(c) for c in ancestry(ancestry_name).get("multiclass_combinations", [])]
+    combos = [sorted(c) for c in ancestry(ancestry_name, ruleset).get("multiclass_combinations", [])]
     return sorted(names) in combos
 
 
-def _multiclass_saves(class_names, level: int = 1) -> dict:
+def _multiclass_saves(class_names, level: int = 1, ruleset: Ruleset | None = None) -> dict:
     """SS1.3.11 "Attacks and Saving Throws": a multi-classed character may
     use whichever of their classes' tables is best in each category - so the
     saves are the best (lowest) target per category across all classes, not
     just the first-listed one."""
-    all_saves = [saving_throws(c, level) for c in class_names]
+    all_saves = [saving_throws(c, level, ruleset) for c in class_names]
     return {cat: min(s[cat] for s in all_saves) for cat in SAVE_CATEGORIES}
 
 
-def _multiclass_hit_points(d: Dice, class_names, scores: dict) -> int:
+def _multiclass_hit_points(d: Dice, class_names, scores: dict, ruleset: Ruleset | None = None) -> int:
     """SS1.3.11 "Gaining Hit Points": "you calculate your new hp by rolling
     the right dice for your class, applying your constitution modifier if
     any, and THEN DIVIDING BY THE NUMBER OF CLASSES YOU HAVE. Drop any
@@ -461,14 +478,15 @@ def _multiclass_hit_points(d: Dice, class_names, scores: dict) -> int:
     n = len(class_names)
     total = 0
     for cls in class_names:
-        con_bonus = constitution_hp_bonus(scores["constitution"], cls)
-        class_roll = roll_hit_points(d, cls, 1, con_bonus)
+        con_bonus = constitution_hp_bonus(scores["constitution"], cls, ruleset)
+        class_roll = roll_hit_points(d, cls, 1, con_bonus, ruleset)
         total += max(1, class_roll // n)
     return total
 
 
 def generate(seed: int, mode: str, ancestry_name: str, class_names,
-             name: str = "", arrangement: dict | None = None) -> Character:
+             name: str = "", arrangement: dict | None = None,
+             ruleset: Ruleset | None = None) -> Character:
     """Roll a complete first-level character. Fully reproducible from
     (seed, mode, ancestry, classes, arrangement).
 
@@ -478,21 +496,22 @@ def generate(seed: int, mode: str, ancestry_name: str, class_names,
     log is identical with or without an arrangement, only which ability
     each already-rolled value lands on changes.
     """
+    rs = _ruleset(ruleset)
     class_names = tuple(class_names)
-    if not is_legal_multiclass(ancestry_name, class_names):
+    if not is_legal_multiclass(ancestry_name, class_names, rs):
         raise ValueError(
             f"{ancestry_name} may not be {'/'.join(class_names)}")
 
     d = Dice(seed=seed)
-    rolled = roll_abilities(d, mode)
-    arranged = apply_arrangement(rolled, arrangement, mode)
-    scores = apply_ancestry(arranged, ancestry_name)
+    rolled = roll_abilities(d, mode, rs)
+    arranged = apply_arrangement(rolled, arrangement, mode, rs)
+    scores = apply_ancestry(arranged, ancestry_name, rs)
 
     # Table 1.2.0A's own title is "Required Ability Scores AFTER ANCESTRAL
     # BONUSES" - checked here, immediately after apply_ancestry, and before
     # exceptional Strength (which only ever raises an 18, never lowers a
     # score below a floor).
-    if not meets_ancestry_minimums(scores, ancestry_name):
+    if not meets_ancestry_minimums(scores, ancestry_name, rs):
         raise ValueError(
             f"{ancestry_name} ability scores do not meet Table 1.2.0A after "
             f"ancestral bonuses: {scores}")
@@ -502,9 +521,10 @@ def generate(seed: int, mode: str, ancestry_name: str, class_names,
     # one. Rolled exactly once against the pre-resolution score - feeding
     # roll_exceptional_strength its own output would silently re-roll an
     # already-settled Strength.
+    exceptional_classes = rs.EXCEPTIONAL_CLASSES
     exceptional_cls = next(
-        (c for c in class_names if c in EXCEPTIONAL_CLASSES), class_names[0])
-    scores["strength"] = roll_exceptional_strength(d, scores["strength"], exceptional_cls)
+        (c for c in class_names if c in exceptional_classes), class_names[0])
+    scores["strength"] = roll_exceptional_strength(d, scores["strength"], exceptional_cls, rs)
 
     # Each class's own §1.3.N.1 "Minimum Scores", checked against the final
     # (post-exceptional-Strength) scores. is_legal_multiclass already
@@ -512,19 +532,19 @@ def generate(seed: int, mode: str, ancestry_name: str, class_names,
     # missing from eligible_classes here can only be a failed ability
     # minimum - eligible_classes is the same function tests/test_character.py
     # already exercises for this, wired onto the generation path for real.
-    eligible = eligible_classes(scores, ancestry_name)
+    eligible = eligible_classes(scores, ancestry_name, rs)
     for cls in class_names:
         if cls not in eligible:
             short = {
                 ability: threshold
-                for ability, threshold in game_class(cls)["minimums"].items()
+                for ability, threshold in game_class(cls, rs)["minimums"].items()
                 if scores.get(ability, 0) < threshold
             }
             raise ValueError(
                 f"{ancestry_name} does not meet {cls}'s ability minimums: {short}")
 
-    mods = ability_modifiers(scores)
-    hit_points = _multiclass_hit_points(d, class_names, scores)
+    mods = ability_modifiers(scores, rs)
+    hit_points = _multiclass_hit_points(d, class_names, scores, rs)
 
     return Character(
         name=name,
@@ -537,8 +557,8 @@ def generate(seed: int, mode: str, ancestry_name: str, class_names,
         # character starts unarmoured, unshielded: base AC 10 adjusted only
         # by Dexterity (Table 1.1.3A). Passing real armour/shield choices
         # in is exactly what armour_class() is for once equipment lands.
-        armour_class=armour_class(scores["dexterity"]),
-        saves=_multiclass_saves(class_names, 1),
+        armour_class=armour_class(scores["dexterity"], ruleset=rs),
+        saves=_multiclass_saves(class_names, 1, rs),
         modifiers=mods,
         seed=seed,
         log=d.log,

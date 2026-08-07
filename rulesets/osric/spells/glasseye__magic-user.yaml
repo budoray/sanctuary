@@ -1,0 +1,14 @@
+name: Glasseye
+slug: glasseye
+reversible: false
+class: magic-user
+level: 6
+school: Arcane Transmutation/Alteration
+range: Touch
+duration: 1 round/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: This spell causes opaque materials to become transparent, either to the caster alone or to anyone, at the caster's option. The dimensions of the transparent area are 3-ft×2-ft, and the depth depends upon the nature of the substance being made transparent. Lead and gold, being the base and pure metals respectively, are not affected by the spell at all. Only four inches of any other metal can be made transparent, but stone can be seen through to a distance of 6-ft, and wood to a distance of 20- ft.
+source: wiki2_spells.txt

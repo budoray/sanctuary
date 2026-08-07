@@ -1,0 +1,14 @@
+name: Part Water
+slug: part_water
+reversible: false
+class: magic-user
+level: 6
+school: Arcane Transmutation/Alteration
+range: 10-ft/level
+duration: 5 rounds/level
+area_of_effect: See below
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: This spell causes water to draw apart, forming a trench. The depth and length of the water displacement is determined by the caster's level. For each caster level, they may displace an area of water 30-ft deep and 20-ft wide. The spell can affect other liquids besides water, but the more different the physical properties of the other liquid, the less the caster may be capable of displacing.
+source: wiki2_spells.txt

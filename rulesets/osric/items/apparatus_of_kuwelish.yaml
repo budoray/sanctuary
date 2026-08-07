@@ -1,0 +1,5 @@
+name: Apparatus of Kuwelish
+classes: any
+description: This device appears to be a large iron barrel. A secret compartment at one end contains 10 levers, each of which controls a different aspect of the apparatus:. 1. Extend/retract legs and tail 2. Uncover/cover forward porthole 3. Uncover/cover side portholes 4. Extend/retract pincers and feelers 5. Snap pincers 6. Move forward/reverse 7. Move left/right 8. Open/close “eyes” that shine with continual light 9. Raise/sink 10. Open/close hatch The apparatus moves at 30ft per round forward and 60ft per round in reverse. The pincers snap for 2d6 damage each, attacking as a 4HD monster but treating all AC as 0 [20] (modified by dexterity adjustments, if any). They can be extended to a maximum of 4ft from the barrel. The apparatus itself has an AC of 0 [20] and can sustain 100 hit points of damage before leaking and 200 hp of damage before collapsing entirely. It can dive to a maximum depth of 900ft and can hold 2 medium– sized creatures for 2–5 hours before needing to replenish its
+  air supply.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

@@ -1,0 +1,14 @@
+name: Dancing Lights
+slug: dancing_lights
+reversible: false
+class: illusionist
+level: 1
+school: Phantasmal Transmutation/Alteration
+range: 40-ft+10-ft/level
+duration: 2 rounds/level
+area_of_effect: 60-ft radius globe
+components: V,S,M
+casting_time: 1 segment
+saving_throw: None
+text: This spell creates small lights at a chosen distance, under the caster's control. It may create 1-4 (at his or her option) torch-like lights, 1-4 (at his or her option) spherical lights, or a single, faintly human- like glow. The lights move at the caster's mental command, without any particular concentration required. If the caster allows the lights to move beyond the spell's range, the lights will disappear and the spell will end.
+source: wiki2_spells.txt

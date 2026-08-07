@@ -1,0 +1,5 @@
+name: Fire
+classes: DM
+description: 'A wand of fire produces several spell-like effects, and may only produce one effect per round. The following effects require the expenditure of 1 charge: burning hands shoots forth a triangular cone of fire 12ft long with a 10ft ending width. It takes 1 segment for this effect to manifest, and it lasts but a moment. Any being within this area of effect suffers 6 hp damage. Pyrotechnics may also be produced from the wand, and take 2 segments to appear. This effect exactly mimics the spell of the same name. The wand of fire may produce the following effects with the expenditure of 2 charges: a fireball may be shot from the wand, performing exactly as the spell of the same name, as if cast from a 6th level character. It deals 6d6 hp damage to all within the area of effect (save vs wands for half damage). Any result of 1 on a damage die is treated as a 2. A wall of fire may be produced in 3 segments, like the spell of the same name cast from a 6th level character. The wall may
+  be formed into a 22ft diameter circle surrounding the wand wielder. This wand is rechargeable.'
+source: OSRIC_3.0_Gamemaster_Guide.pdf

@@ -1,0 +1,14 @@
+name: Cone of Cold
+slug: cone_of_cold
+reversible: false
+class: magic-user
+level: 5
+school: Arcane Evocation
+range: '0'
+duration: Instantaneous
+area_of_effect: Cone 5-ft long per level, 1-ft radius at base per level
+components: V,S,M
+casting_time: 5 segments
+saving_throw: Half
+text: A cone of cold is a blast of magical cold originating from the caster's outstretched hand. The cone inflicts 1d4+1 hit points per level of the caster. All unprotected items in the area of effect may be destroyed if they fail item saving throws.
+source: wiki2_spells.txt

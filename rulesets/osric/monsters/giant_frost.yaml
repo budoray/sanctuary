@@ -1,0 +1,21 @@
+name: Giant, Frost
+frequency: rare
+no_encountered: 1d8
+size: large (15ft)
+alignment: chaotic evil
+move: 120ft
+armour_class: 4 [16]
+hit_dice: 10 (+1d4 hp)
+melee_attacks: 1 weapon (4d6)
+senses: Infravision 60ft, Sixth sense 5%
+lair_chance: 30%
+intelligence: low up to average (5-10)
+morale: 100
+loot: Hoard 5
+experience: 1,820 +14/hp
+description: Frost giants have the overall appearance of giant, muscled bar- barians. They have light yellow or blue eyes, with white hair that  can likewise be tinged with yellow or blue. These giants get their  name from their love of the cold. They often live within frosty  caverns, but also have a propensity to take up residence in cas- tles, as do some of their other giant kin.  Winter wolves often share residence with frost giants (50%  chance, 1d12 in number). When encountering more than 4 frost  giants, the first six giants are adults, and additional individuals  will be immature (treat as hill giants or ogres).
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Cold. Frost giants are completely immune to ill effects  from cold, including the bone–chilling breath of white dragons.
+- heading: Special Attacks
+  text: Ranged Attack (Thrown Rocks).  Frost giants can cause 2d10 hit  points in damage by throwing large rocks from between 10ft  to 200ft. Likewise, they can catch rocks tossed at them with a  40% probability. Unarmed Combat.  Frost giants cannot be targeted with grap - pling or overbearing attacks, and do not use such tactics.

@@ -1,0 +1,14 @@
+name: Pyrotechnics
+slug: pyrotechnics
+reversible: false
+class: magic-user
+level: 2
+school: Arcane Transmutation/Alteration
+range: 120-ft
+duration: See below
+area_of_effect: See below
+components: V,S
+casting_time: 2 segments
+saving_throw: None
+text: With any exceptions noted above, this spell is identical to the druidic spell pyrotechnics.
+source: wiki2_spells.txt

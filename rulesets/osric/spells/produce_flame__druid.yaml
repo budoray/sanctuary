@@ -1,0 +1,14 @@
+name: Produce Flame
+slug: produce_flame
+reversible: false
+class: druid
+level: 2
+school: Druidic Transmutation/Alteration
+range: '0'
+duration: 2 rounds/caster level
+area_of_effect: See below
+components: V,S,M
+casting_time: 4 segments
+saving_throw: See below
+text: On casting this spell, the druid's hand ignites with an eldritch fire that causes no harm to the druid but is otherwise equivalent to the flame of a torch. It can be used to set fires and may also be thrown as a missile. The throwing range of the flame is 40-ft, and when the flame hits an object it will explode, igniting all combustible material in a radius of 15-ft. (Materials are entitled to saving throws against normal fire.) The druid may banish the magical flame at will, but fires set by it must be extinguished by normal means.
+source: wiki2_spells.txt

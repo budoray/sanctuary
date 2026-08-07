@@ -1,0 +1,19 @@
+name: Pilgrim
+frequency: uncommon
+no_encountered: 10d10
+size: medium
+alignment: see below
+move: 120ft
+armour_class: 8 [12]
+hit_dice: 1d6 hp
+melee_attacks: Staff (1d6)
+senses: Standard
+lair_chance: 100%
+intelligence: very (11-12) to high (13-14)
+morale: 50
+loot: Individual 1 each
+experience: 5 +1/hp
+description: 'Pilgrims are groups of religious followers making their way to  some holy site. They can be encountered almost anywhere.  There will always be higher level character types with groups  of pilgrims: these higher-level types are the actual threat and  carry the lion’s share of the treasure. The “pilgrim” described in  the stats above is almost a noncombatant, but the higher-level  defenders can make attacking a pilgrimage quite dangerous! Clerics: There will always be clerics with pilgrims, but if the  group is neutral these clerics will be druids. • 1d6 2nd level  clerics • 1d4 4th level  clerics • 1d2 6th level  clerics • 1 8th level cleric with 2 assistants (3rd and 5th level) Fighters: There is a 10% chance per every 10 pilgrims that there  will be 1d10 fighters present (roll 1d8 to determine the levels of  the fighters). If the group is lawful good, some of these fighters  may be replaced by paladins. If the group is chaotic good, some  of these fighters may be replaced
+  by rangers. Thieves: There is a 10% chance per every 10 pilgrim that there  will be 1d6 thieves present (roll 1d6+1 to determine the levels  of the thieves). If the group is evil, some of these thieves may be  replaced by assassins. Magic-Users: There is a 5% chance per every 10 pilgrims that  there will be a magic-user present (level 1d4+5). Alignment is determined for the entire group (with little vari - ation) by rolling d100 with the likelihood of each alignment as  follows: D100 ALIGNMENT 01–34 Lawful good 35–55 Chaotic good 56–66 Neutral 65–80 Chaotic evil 81–00 Lawful evil Most of the time (75%) pilgrims will be travel without mounts.  However if they are mounted, all members of the group will be  mounted. There is a chance (5%) that a holy item will be with the pilgrims.  If so, it will be hidden and carefully guarded. Unarmed Combat. Pilgrims can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with an  6+ on 1d20. Hit Mods: ATK/DEF +8/-6. Overbear
+  Results Mods:  ATK/DEF +0/+0. Grappling Result Mods: ATK/DEF +0/+0. MERCHANT Base number encountered: 1d6x50'
+abilities: []

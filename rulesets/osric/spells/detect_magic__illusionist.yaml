@@ -1,0 +1,14 @@
+name: Detect Magic
+slug: detect_magic
+reversible: false
+class: illusionist
+level: 2
+school: Phantasmal Divination
+range: Caster
+duration: 2 rounds/level
+area_of_effect: Path 10-ft wide, 60-ft long
+components: V,S
+casting_time: 2 segments
+saving_throw: None
+text: 'Detect magic creates a tunnel of magical vision in a path 10-ft wide and 60-ft long, in which the caster sees the aura of any magic item as a glowing blue nimbus. The spell''s effect is blocked by solid wood 3-ft thick, by stone 1-ft thick, and by solid metal 1 inch thick. The caster can only scan a 60° arc during the course of a round: turning more quickly does not allow magic auras enough time to form in their vision.'
+source: wiki2_spells.txt

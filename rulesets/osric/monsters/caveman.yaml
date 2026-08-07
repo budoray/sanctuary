@@ -1,0 +1,19 @@
+name: Caveman
+frequency: rare
+no_encountered: 10d10
+size: medium
+alignment: neutral
+move: 120ft
+armour_class: 8 [12]
+hit_dice: '2'
+melee_attacks: 1 club or spear (1d6)
+senses: Standard
+lair_chance: 40%
+intelligence: low (5-7)
+morale: 40
+loot: See below
+experience: 20 +2/hp
+description: Cavemen are humans living beyond the reach of normal civilisa- tion, with stone-age technology. Hunting parties of cavemen (10  or more) are led by a 3rd level fighter. In their lair, in addition  to the number of cavemen determined there will be a chief (5th  level fighter) and 1d4 guards (4th level fighters). There is always  a 10% chance (per every 10 cavemen) that a 3rd level cleric will  be present. Cavemen typically dwell in caves and cavern systems. Their trea- sure will consist of ivory tusks, gold nuggets, or uncut gems (5%  chance per 10 cavemen present). If one is present, it will be the  only treasure there. The value of each is 1,000 gp per ivory tusk  (2d6 tusks), 5 gp gold nuggets (2d4×10), and 10 gp gems (1d100).
+abilities:
+- heading: Special Attacks
+  text: 'Strength Bonus. Cavemen add +1 to damage rolls due to their  great strength. Unarmed Combat. Cavemen can make grappling or overbearing  attacks. If not fended off, they score an unarmed hit with an  6+ on 1d20. Hit Mods: ATK/DEF +8/-6. Overbear Results Mods:  ATK/DEF +0/+0. Grappling Result Mods: ATK/DEF +0/+0.'

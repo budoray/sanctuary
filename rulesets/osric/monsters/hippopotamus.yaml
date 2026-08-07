@@ -1,0 +1,19 @@
+name: Hippopotamus
+frequency: uncommon
+no_encountered: 2d6
+size: large
+alignment: neutral
+move: 90ft; 120ft swimming
+armour_class: 6 [14]
+hit_dice: '8'
+melee_attacks: 1 bite (3d6 or 2d6 piercing)
+senses: Standard
+lair_chance: Nil
+intelligence: animal (1)
+morale: 85
+loot: Nil
+experience: 600 +12/hp
+description: 'Hippopotami, or “hippos”, are large semi-aquatic mammals  that spend most of their time in the water. They are herbivores  but they are quite aggressive in defending their territory and  their great size makes them dangerous opponents. This is com- pounded by the fact that, in spite of the bulky appearance, they  can run faster than a human on dry land. Hippos can’t float,  though they can propel themselves to the surface of the water  for a breath of air, and they can stay submerged for 15 minutes  at a time. A herd will have one bull for every four hippos present. In com- bat, a bull bites for 3d6 damage and cows bite for 2d6. A boat  passing over a hippo has a 50% of having the animal surface  under the craft, tipping it over. Unarmed Combat. Hippopotami cannot be targeted with grap - pling or overbearing attacks, and do not use such tactics. HUMANS Normal humans (non-adventuring types) will usually have 1d6  hit points. In any encounter with groups of humans, there will  always
+  be higher level characters as leaders (the number will be  given under each entry). It’s worth noting that these entries are also groups that aren’t  unique to humankind. A caravan of dwarf merchants or elven  mounted nomads are absolutely possible, and any caravan  might be accompanied by a dwarf or elf. You, as the GM, can de- cide to modify any randomly occurring results on the encounter  tables to reflect the campaign. All higher level clerics and fighters will be mounted on medi - um warhorses. For each level a leader type has, there is a 5%  chance of possessing a magic item in each of the categories be- low. For each “Y” in the following table, roll for an item of that  type. If the result is undesirable, one re-roll is allowed.  FIGHTER MAGIC-USER CLERIC THIEF Armour Y N Y Y Shield Y N Y N  Sword Y N N Y Misc. Weapon Y N Y* Y  Potion Y N Y Y Scroll N Y Y N  Ring N Y N Y Wand/Staff/ Rod N Y N* N Misc. Magic N Y Y Y *If no weapon (or an edged weapon is rolled), roll again on Wand/
+  Staff/Rod (if not usable by a cleric then there is none present). BANDIT (BRIGAND) Base number encountered: 20d10'
+abilities: []

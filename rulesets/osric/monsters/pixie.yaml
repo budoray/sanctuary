@@ -1,0 +1,25 @@
+name: Pixie
+frequency: very rare
+no_encountered: 5d4
+size: tiny (2ft)
+alignment: neutral
+move: 60ft; 120ft flying (AA:V)
+armour_class: 5 [15]
+hit_dice: 1d4hp
+melee_attacks: 1 dagger (1d4) or short bow  (special)
+senses: Infravision 60ft
+lair_chance: 5%
+intelligence: exceptional (15-16)
+morale: 50
+loot: Cache 4, 5, 6, 10
+experience: 50 +1/hp
+description: Pixies are a type of troublesome fey creatures who enjoy play - ing tricks and generally annoying anyone who passes through  their territory. They like to dwell in secluded forests. Unlike  many fey, pixies to not capture humans, but they put intruders  to sleep, remove their memory, and move them away. Repeat  trespassers may be killed.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (25%).  Any magic spell or effect has a 25%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect.
+- heading: Special Features
+  text: 'Invisibility. Pixies are normally invisible and can stay invisible  even when they attack. Unless the pixie turns visible, or they  are otherwise detected, opponents roll “to hit” at -4. Spell-Like Abilities. At Will: Pixies can make themselves visible or polymorph  themselves at will. They are also able to create illusions with  both sight and sound that do not have to be controlled. The  illusion lasts until it is touched or dispelled, but they do not  cause damage.  1/day: Dispel magic (as 8th level caster), dancing lights, and ESP.'
+- heading: Special Attacks
+  text: Ranged Attack (Magic Arrows).  Their bows shoot three different  kinds of arrows at +4 to hit. The first type of arrow is a standard  type that causes 1d4+1 points of damage. The second type of  arrow causes sleep for 1d6 hours unless the target saves vs  magic. The third type of arrow causes total amnesia if the tar - get fails their save vs magic. The only way to regain memory is  to receive an exorcism. A pixie’s touch causes confusion in anyone who fails their save  vs magic. The confusion will last until they receive a remove  curse. Unarmed Combat. Pixies cannot meaningfully be attacked in this  way, and they don’t use this sort of tactic.
+- heading: Languages
+  text: Pixies speak their own language, the language of the fey, and  common.

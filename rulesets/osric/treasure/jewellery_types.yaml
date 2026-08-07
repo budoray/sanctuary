@@ -1,0 +1,58 @@
+id: 2.12.5a
+name: JEWELLERY TYPE AND VALUE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+note: >
+  Supplements data/tables/2.12.5a_jewellery_type_and_value.yaml, whose
+  extraction only kept the table's first page (Amulet through Chain, d100
+  01-25) - the book's own continuation caption ("TABLE 2.12.5A ... CONTINUED")
+  prints AFTER its rows rather than before them, so tools/extract.py's
+  page-break rule (a table block closes at "=== PAGE ===") drops rows 26-100
+  as ownerless prose. Do not hand-edit data/tables/ to fix that - it is
+  someone else's extractor and out of this chapter's file scope. This file
+  transcribes the full d100 form roll (2.12.5a) directly from the source so
+  jewellery() has the whole range; the composition dice per tier (Silver
+  1d10x100gp, Silver&Gold 2d6x100gp, Gold 3d6x100gp, Silver&Gems 5d6x100gp,
+  Gold&Gems 2d4x1000gp, Exceptional 2d6x1000gp) are fixed for every row and
+  live in sanctuary/treasure.py as TIER_DICE, matching the table's own header.
+  Each row's `tiers` list is the d10 breakpoint (or null if that tier is out
+  of reach for this form) for [silver, silver_gold, gold, silver_gems,
+  gold_gems, exceptional], in that order. The book prints its last range as
+  "98-00" (d100's own zero-means-100 convention); this file spells that
+  endpoint "100" instead, since sanctuary.tables.in_range has no way to read
+  a range that wraps through 00.
+
+rows:
+  - {range: "01-03", item: Amulet, tiers: ["1-4", "5-7", "8-9", "10", null, null]}
+  - {range: "04", item: Anklet, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "05-07", item: Arm-ring, tiers: ["1-4", "5-6", "7-8", "9", "10", null]}
+  - {range: "08-10", item: Belt, tiers: ["1-4", "5-6", "7-8", "9-10", null, null]}
+  - {range: "11-12", item: Box, tiers: ["1-4", "5-7", "8-9", "10", null, null]}
+  - {range: "13-17", item: Bracelet, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "18-20", item: Brooch, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "21-23", item: Buckle, tiers: ["1-4", "5-7", "8-9", "10", null, null]}
+  - {range: "24-25", item: Chain, tiers: ["1-4", "5-7", "8-9", "10", null, null]}
+  - {range: "26-27", item: Chalice, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "28-30", item: Choker, tiers: ["1-4", "5-7", "8-9", "10", null, null]}
+  - {range: "31-32", item: Clasp, tiers: ["1-4", "5-6", "7-8", "9-10", null, null]}
+  - {range: "33-35", item: Comb, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "36-37", item: Coronet, tiers: ["1", "2", "3-4", "5-8", "9", "10"]}
+  - {range: "38", item: Crown, tiers: ["1", "2", "3", "4", "5-7", "8-10"]}
+  - {range: "39-40", item: Diadem, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "41-46", item: Earring, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "47-49", item: Goblet, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "50-51", item: Idol, tiers: ["1-2", "3-4", "5-7", "8-9", "10", null]}
+  - {range: "52-54", item: Knife, tiers: ["1-4", "5-7", "8-9", "10", null, null]}
+  - {range: "55-58", item: Locket, tiers: ["1-3", "4-5", "6-7", "8-9", "10", null]}
+  - {range: "59-60", item: Medal, tiers: ["1-4", "5-7", "8-10", null, null, null]}
+  - {range: "61-64", item: Medallion, tiers: ["1-3", "4-6", "7-9", "10", null, null]}
+  - {range: "65-69", item: Necklace, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "70-73", item: Pendant, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "74-77", item: Pin, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "78", item: Orb, tiers: ["1", "2", "3", "4-5", "6-8", "9-10"]}
+  - {range: "79-87", item: Ring, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "88", item: Sceptre, tiers: ["1", "2", "3", "4-5", "6-8", "9-10"]}
+  - {range: "89-92", item: Seal, tiers: ["1-4", "5-7", "8-9", "10", null, null]}
+  - {range: "93-94", item: Statuette, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "95", item: Tiara, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "96-97", item: Toe-ring, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}
+  - {range: "98-100", item: Weapon-hilt, tiers: ["1-3", "4-6", "7-8", "9", "10", null]}

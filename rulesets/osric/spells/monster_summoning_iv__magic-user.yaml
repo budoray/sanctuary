@@ -1,0 +1,14 @@
+name: Monster Summoning IV
+slug: monster_summoning_iv
+reversible: false
+class: magic-user
+level: 6
+school: Arcane Conjuration/Summoning
+range: 60-ft
+duration: 5 rounds+1/level
+area_of_effect: Summoned creatures
+components: V,S,M
+casting_time: 6 segments
+saving_throw: None
+text: 'This spell functions in the same manner as monster summoning I, but calls 1d4 creatures as determined on the following table: Monster Summoning IV Results (magic user level 6) d10 Monster Summoned 1 Blink dog 2 Gargoyle 3 Ghast 4 Hell hound 5 Hydra, five headed 6 Lycanthrope, werewolf 7 Owlbear 8 Shadow 9 Snake, giant constrictor 10 Grey ooze'
+source: wiki2_spells.txt

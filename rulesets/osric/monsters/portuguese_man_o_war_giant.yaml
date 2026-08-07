@@ -1,0 +1,21 @@
+name: Portuguese Man O’ War, Giant
+frequency: uncommon
+no_encountered: 1d10
+size: variable
+alignment: neutral
+move: 10ft swimming
+armour_class: 9 [11]
+hit_dice: 1 to 4
+melee_attacks: 1 (1d10 poison damage + paralysis)
+senses: Standard
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: '1 HD: 45 +1/hp 2 HD: 80 +2/hp 3 HD: 110 +3/hp 4 HD: 150 +4/hp'
+description: 'The giant Portuguese man o’war is a translucent jellyfish found  in warm salt water, where it floats on the surface, trailing its  poisonous tentacles below. The size is determined by hit dice:  the body will be 2-1/2ft in diameter for every HD. The 1 and 2HD  varieties are size small, the 3HD variety is size medium, and the  4HD variety is size large.'
+abilities:
+- heading: Special Features
+  text: Transparent. Roll d100 for anyone fighting the jellyfish; if the re- sult is 01-89, the jellyfish is treated as being invisible to that  person.
+- heading: Special Attacks
+  text: Paralysing Sting.  In addition to the base 1d10 poison damage  from the sting, anyone hit by the jellyfish must make a sav - ing throw vs. paralysis or be paralysed for 3d6 turns. Only a  person immune to poison can avoid the base 1d10 points of  poison damage. Paralysed creatures are drawn up to the body  of the jellyfish and consumed in 3d4 turns.

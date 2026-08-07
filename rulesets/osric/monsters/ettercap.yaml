@@ -1,0 +1,21 @@
+name: Ettercap
+frequency: rare
+no_encountered: 1d2
+size: medium
+alignment: neutral evil
+move: 120ft
+armour_class: 6
+hit_dice: 5+1
+melee_attacks: 3 (1d4/1d4/1d8)
+senses: Infravision 60ft
+lair_chance: 30%
+intelligence: semi- (2-4)
+morale: 70
+loot: Nil
+experience: 150 +5/hp
+description: Ettercaps appear to be humanoid  arachnids. An ettercap will use its  silk to prepare traps around its lair,  such as webs and tripwires, and  may use a silk-based weapon  such as a lasso or garrotte. Et - tercaps can communicate with  spiders of all types, and they  are often found working to - gether with giant spiders.
+abilities:
+- heading: Special Features
+  text: Webs. Ettercaps can spin silk  from their short, stubby tails  like a giant spider does.  These are used to create  traps around the lair, or  to snare passers-by in  ambushes.
+- heading: Special Attacks
+  text: 'Poison Bite. The ettercap’s bite is venomous. Anyone bitten must  make a saving throw vs. poison or die. Unarmed Combat. Ettercaps can be targeted with grappling or  overbearing attacks, although they don’t use these tactics. If  not fended off, they score an unarmed hit with a 2+ on 1d20.  Hit Mods: ATK/DEF +8/-8. Overbear Results Mods: ATK/DEF  +1/-1. Grappling Result Mods: ATK/DEF +0/-0.'

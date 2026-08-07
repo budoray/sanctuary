@@ -1,0 +1,14 @@
+name: Animate Object
+slug: animate_object
+reversible: false
+class: cleric
+level: 6
+school: Clerical Transmutation/Alteration
+range: 30-ft
+duration: 1 round/caster level
+area_of_effect: 1 cubic-ft/caster level
+components: V,S
+casting_time: 9 segments
+saving_throw: None
+text: 'By means of this spell, the cleric “brings to life” an inanimate object, allowing it to move and follow the cleric''s simple commands. The GM will determine an object''s speed and combat specifics. An object''s mode of locomotion will determine its speed: rocking (a pedestal or bookshelf) at 10-ft/round, slithering (rope, carpet) at 10-30-ft per round, walking (statue, table) at 40-ft to 80-ft/round, scampering (footstool) at 120-ft/round. The object''s mode of attack (binding, striking, falling upon) and damage must be adjudicated by the GM''s common sense, although as a guideline, an item of approximately human weight will be able to strike for 2d4 hit points of damage.'
+source: wiki2_spells.txt

@@ -1,0 +1,29 @@
+id: 1.6.12b
+name: OVERBEARING ATTACK RESULTS
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- RESULT (D6) EFFECT*
+- '1 or lower Total Failure: Attacker falls to ground and is prone, but the target is still standing. This effect is not followed up'
+- with a second move. Both attacker and defender are in melee combat, but neither is considered to be grappling.
+- '2'
+- 'Partial Failure:  Attacker falls to ground clutching target’s feet, and is prone. The attacker can choose to'
+- automatically maintain this grip, in which case the defender loses any dexterity bonuses and movement is
+- reduced by 30. However, the attacker is considered to be grappling while doing so, and the defender is not.
+- Therefore, in future rounds, the defender may attack as per normal melee combat (with bonuses against a prone
+- opponent). This effect is not followed up with a second attack.
+- 3-4
+- 'Partial Success:  Target is “staggered” and “overborne”, but not knocked prone. The attacker can follow up'
+- immediately in the same round with a second “move”, which can be a melee or brawling attack, or can be
+- an immediate roll on the grappling results table (no unarmed attack roll is necessary). Neither combatant is
+- considered to be grappling at this point.
+- 5-6
+- 'Success: Target is knocked prone and is considered “overborne”, and the attacker can follow up immediately in the'
+- same round with a second “move”, which can be a melee or brawling attack, or can be an immediate roll on the grappling
+- results table (no unarmed attack roll is necessary). Neither combatant is considered to be grappling at this point.
+- Damage is equal to die roll (1 real, the rest temporary).
+- 7+
+- 'Total Success: Target is knocked prone (effective movement rate of 0), is overborne, and may take no action in'
+- the following round. The attacker can follow up immediately in the same round with a second “move”, which can
+- be a melee or brawling attack, or can be an immediate roll on the grappling results table (no unarmed attack roll is
+- necessary, and the result is made with a +2 bonus). Neither combatant is considered to be grappling at this point.
+- Damage is equal to die roll (2 real, the rest temporary)

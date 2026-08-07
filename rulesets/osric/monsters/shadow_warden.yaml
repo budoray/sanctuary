@@ -1,0 +1,19 @@
+name: Shadow Warden
+frequency: unique
+no_encountered: 1
+size: large
+alignment: lawful evil
+move: 90ft
+armour_class: 3 [17]
+hit_dice: '4+2'
+melee_attacks: 1 (greatsword 1d10+2)
+senses: Darkvision 120ft
+lair_chance: 100%
+intelligence: high (13-14)
+morale: 12
+loot: Special
+experience: 400 +3/hp
+description: A hulking warden of shadow bound to the keep's cursed heart. Its blade drinks light, and its presence deepens the gloom around it.
+abilities:
+- heading: Phase Transition
+  text: When wounded, the Shadow Warden rallies shadow-stuff to its aid and strikes with renewed fury.

@@ -1,0 +1,14 @@
+name: Change Self
+slug: change_self
+reversible: false
+class: illusionist
+level: 1
+school: Phantasmal Illusion
+range: Caster
+duration: 2d6 rounds+2rounds/level
+area_of_effect: Caster
+components: V,S
+casting_time: 1 segment
+saving_throw: None
+text: By means of this spell, the illusionist changes his or her appearance into any bipedal humanoid form (although size and weight can only be altered by one foot and 50 lbs, respectively). The illusionist's face, of course, may be changed as desired, including alterations to make him or her appear identical to an existing person.
+source: wiki2_spells.txt

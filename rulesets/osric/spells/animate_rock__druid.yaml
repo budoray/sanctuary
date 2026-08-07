@@ -1,0 +1,14 @@
+name: Animate Rock
+slug: animate_rock
+reversible: false
+class: druid
+level: 7
+school: Druidic Transmutation/Alteration
+range: 40-ft
+duration: 1 round/caster level
+area_of_effect: 2-ft cube/caster level
+components: V,S,M
+casting_time: 9 segments
+saving_throw: None
+text: This spell allows the druid to animate and command a stone object in the same way that a cleric commands an animated object with the animate object spell. The object to be animated cannot be part of a larger stone structure.
+source: wiki2_spells.txt

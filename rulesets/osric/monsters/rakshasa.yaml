@@ -1,0 +1,21 @@
+name: Rakshasa
+frequency: very rare
+no_encountered: 1d4
+size: medium
+alignment: lawful evil
+move: 150ft
+armour_class: -4 [24]
+hit_dice: '7'
+melee_attacks: 2 claws (1d3 slashing) and 1  bite (1d4+1 piercing)
+senses: Infravision 60ft
+lair_chance: 25%
+intelligence: very (11-12)
+morale: 80
+loot: Hoard 6
+experience: 1,000 +8/hp
+description: 'Rakshasas are evil spirits embodied in flesh. Their main diet is  humans, although they do not need to eat often. They hunt by  deception: when first encountered, a rakshasa will use its ESP  to gain an image of someone the victim trusts, then use illusion  to assume that form. Once the victim lets their guard down the  rakshasa will reveal its true self and attack.'
+abilities:
+- heading: Immunities and Resistances
+  text: Level-Based Magic Resistance. Rakshasas are only affected by 8th  level spells and higher.  Immune to Mundane Weapons. This creature is immune to pierc- ing, blunt, and slashing damage from mundane weapons. Resistant to +1 and +2 Weapons.  The rakshasa takes only half  damage from magic weapons unless the weapon is +3 or bet - ter. Vulnerability. A crossbow bolt blessed by a cleric kills a rakshasa  instantly if it hits.
+- heading: Special Features
+  text: ESP. A rakshasa can use ESP (as per the spell) at will. Spells. Rakshasas have the spellcasting abilities of a level 5 mag- ic-user and a 1st level cleric. Unarmed Combat. Rakshasas cannot effectively be targeted with  grappling or overbearing attacks (immune to mundane weap - ons), and do not use these tactics. RAT, GIANT

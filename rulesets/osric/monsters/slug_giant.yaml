@@ -1,0 +1,23 @@
+name: Slug, Giant
+frequency: uncommon
+no_encountered: '1'
+size: large
+alignment: neutral
+move: 60ft
+armour_class: 8 [12]
+hit_dice: '12'
+melee_attacks: 1 bite (1d12)
+senses: Infravision 60ft
+lair_chance: Nil
+intelligence: non- (0)
+morale: N/A
+loot: Nil
+experience: 2,000 +16/hp
+description: Giant slugs live in dungeons and other underground complexes  where they can avoid sunlight. Since these creatures are bone - less, they can squeeze through narrow openings and navigate  around most obstructions.
+abilities:
+- heading: Immunities and Resistances
+  text: Immune to Non-Magical Blunt Weapons.  Because of the slug’s  flexible body, non-magical blunt weapons do not inflict dam - age against them.
+- heading: Special Features
+  text: Compressible. This creature can fit through a gap one foot wide.  It isn’t affected by being prone.
+- heading: Special Attacks
+  text: Spit Acid. Giant slugs have a nasty bite, but their most effective  weapon is their ability to spit acid up to 100ft away. The first  shot is almost always a miss (only 10% chance to hit), but this  attack serves to approximate distance. After the first shot the  chance hitting is base 100%, going down 10% for every 10ft  distance from the giant slug; thus at 20ft away the chance to  hit is 80%, at 70ft away 30%, etc. On a successful hit using this  percentage, the acid inflicts 4d8 points of corrosion damage  on an individual target unless the target makes a saving throw,  in which case the damage is halved. Items exposed to the acid  must also make an item saving throw on Table 1.6.4a in the  Player Guide. Unarmed Combat.  Giant slugs cannot effectively be targeted  with grappling or overbearing attacks, and do not use these  tactics. SNAKE, GIANT

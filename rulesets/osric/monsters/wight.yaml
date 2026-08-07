@@ -1,0 +1,21 @@
+name: Wight
+frequency: uncommon
+no_encountered: 2d8
+size: medium
+alignment: lawful evil
+move: 120ft
+armour_class: 5 [15]
+hit_dice: 4+3
+melee_attacks: 1 claw (1d4+level drain)
+senses: Infravision 60ft
+lair_chance: 70%
+intelligence: average (8-10)
+morale: 70
+loot: Hoard 2
+experience: 590 +4/hp
+description: Wights are undead corpses, risen with a twisted intelligence. Al- though they are not damaged by sunlight, they loathe the rays  of the sun and do not emerge by choice from their barrows and  lairs during daylight. A human killed by a wight becomes a wight  under the control of its maker.
+abilities:
+- heading: Immunities and Resistances
+  text: Turned as Undead. Wights are turned as type 5 Undead. Immune to Mundane Non-Silver Weapons. The wight is immune to  piercing, blunt, or cutting damage, unless the weapon causing  that damage is magical or silver.  Immune (Cold). Wights are immune to cold damage. Undeath. This creature is immune to all mind control (including  charm) and hold spells. It cannot be affected by sleep, gases,  poison, or disease. Vulnerability to Raise Dead. Wights are destroyed if targeted with  a raise dead spell.
+- heading: Special Attacks
+  text: Level Drain. The undead power of wights is linked to the nega - tive material plane, and thus they permanently drain a level of  experience from victims when they score a hit in combat. Unarmed Combat. Wights cannot be targeted with overbearing  or grappling attacks, and do not use these tactics.

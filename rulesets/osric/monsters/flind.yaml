@@ -1,0 +1,21 @@
+name: Flind
+frequency: rare
+no_encountered: 2d12
+size: medium (6.5ft)
+alignment: chaotic evil
+move: 120ft
+armour_class: 5 [15]
+hit_dice: 2+3
+melee_attacks: 2d4 or by weapon
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: average (8-10)
+morale: 55
+loot: Hoard 1
+experience: 40 +4/hp
+description: 'Flinds are close relatives of, and to a degree resemble, gnolls.  Flinds stand 6.5ft tall, with powerful limbs and a leonine head.  Both flinds and gnolls regard flinds as a majestic, superior form  of gnoll. Groups of gnolls are often led by one or more flinds,  and the gnolls will obey any order given by a flind without ques- tion. A gnoll defending its flind leader will not check for morale  unless the flind is killed.  If 20 or more flinds are encountered, there will be a leader type  with 3+3 hit dice, a strength of 18 (+1 “to hit” and +2 damage).  Leader type flinds always wield a disarming weapon in combat. Regarding Player Character Use of Flindish Disarming Bars:   The wielder must be medium-sized or larger, and possess min - imum ability scores of 13 in both strength and dexterity. The  disarm function can only be used by PCs who select the flindbar  as a weapon of proficiency.'
+abilities:
+- heading: Special Attacks
+  text: 'Strength. Flinds attack with a +1 to-hit bonus due to strength. Disarm. There is a 25% chance that any particular flind wields a  disarming weapon, a pair of iron bars linked by a short piece  of chain. A flind wielding one of these weapons can make two  attacks per round for 1d4 hp bludgeoning damage. For every  hit, the victim must save vs aimed magic items or be disarmed. Unarmed Combat. Flinds can attack and be targeted with grap - pling or overbearing attacks although they seldom use this tac- tic. If not fended off, they score an unarmed hit with a 12+ on  1d20. Hit Mods: ATK/DEF +8/-4. Overbear Results Mods: ATK/ DEF +2/-2. Grappling Result Mods: ATK/DEF +2/-2.'
+- heading: Languages
+  text: Flinds share a common language with gnolls and can also speak  bugbear, hobgoblin, ogrish, and orcish. They are generally on  friendly terms with these humanoid ancestries and will work  with them as need arises. For unknown reasons, flinds do not  like, and will not cooperate with, trolls.

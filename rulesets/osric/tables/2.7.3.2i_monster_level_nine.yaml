@@ -1,0 +1,31 @@
+id: 2.7.3.2i
+name: MONSTER LEVEL NINE
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D100 MONSTER
+- ENCOUNTERED LAIR WANDERING
+- 01–07 Trapper 1 1
+- 08–11 Devil, Pit Fiend 1 1
+- 12–25 Otyugh, Greater 1 1
+- 26–40  NPC Party—see Sub-
+- table varies varies
+- 41–55 Class B Demon 1d3 1
+- 56–70 Hydra, 12-heads 1 1
+- 71–80 Dragon—see Sub-table 1 or 2 1
+- 81–89 Purple Worm 1d2 1
+- 90–93 Aluu-demon 1 1
+- 94–96 Roper 1d4 1
+- 97–00 Golem, Iron 1 1
+- MONSTER LEVEL NINE—DRAGON SUB–TABLE
+- D100 TYPE  AGE HIT POINTS PER HD
+- 01–12 2× Black Ancient+Old 8+6
+- 13–25 Blue Ancient 8
+- 26–30 2× Brass Ancient+Old 8+6
+- 31–35 Bronze Ancient 8
+- 36–45 Copper Ancient 8
+- 46–50 Gold Ancient 8
+- 51–60 Green Ancient 8
+- 61–80 Red Ancient 8
+- 81–85 Silver Ancient 8
+- 86–00 2× White Ancient+Very
+- Old 8+7

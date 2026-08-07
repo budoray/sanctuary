@@ -1,0 +1,19 @@
+name: Whale
+frequency: common
+no_encountered: 1d8
+size: huge
+alignment: neutral
+move: 180ft to 240ft swimming
+armour_class: 4 [16]
+hit_dice: 12 to 36
+melee_attacks: 1 bite or 1 tail. 5–15 d4 (bite),  1–5 d8 (tail)
+senses: Standard
+lair_chance: Nil
+intelligence: low (5-7)
+morale: Varies by HD
+loot: See below
+experience: Varies according to hit dice
+description: 'As reflected in the statistics above, there is considerable varia - tion between different species of whales and their relative sizes.  The swallow whole ability of a purple worm may be used for  larger whales, if desired, rather than the automatic spit-out de- scribed here. Treasure: Whale ambergris from a single whale is worth  1d20×1,000 gp if properly collected. Whale meat is worth 100  gp per hit die of the whale. Additionally, there is a 1% chance  each of finding cp, sp, ep, pp, gems, jewellery, and magic  items within the stomach of a whale. Coins found will number  1d3×1,000 of the types found, gems and jewellery will number  1d20 if found, and magic items will number 1d4.'
+abilities:
+- heading: Special Attacks
+  text: Swallow Whole.  Whales can swallow their prey (or attackers)  whole. Digestive juices from the whale cause 1 hit point of  damage per turn, and the whale will disgorge prey that attack  from the inside, but it may choose to do so in deep water.

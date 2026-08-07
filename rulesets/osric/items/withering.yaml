@@ -1,0 +1,4 @@
+name: Withering
+classes: CDIM
+description: A staff of withering acts as a +1 weapon that deals 1d4+1 hit points of damage. In addition, if the wielder chooses to spend 2 charges on a hit, the victim will age 10 years. Spending 3 charges requires the victim to instead save vs magic, or a limb withers into a desiccated, worthless member. The specific limb struck is determined randomly. Note that effects from the staff are stacked, such that a victim hit with the staff when 3 charges are spent will have a limb wither and they will age as well.
+source: OSRIC_3.0_Gamemaster_Guide.pdf

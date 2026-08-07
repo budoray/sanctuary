@@ -1,0 +1,17 @@
+id: 2.13.1a
+name: DETERMINING TYPE OF MAGIC ITEM
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT
+- '01–03 Armour or Shield. Proceed to Table 2.13.1B:'
+- Armour and Shield Type
+- 04–06 Miscellaneous Magic. Proceed to Table 2.13.P
+- '07–09 Miscellaneous Weapons. Proceed to Table 2.13.D:'
+- Miscellaneous Weapons Type
+- '10–13 Potions. Proceed to Table 2.13.1F:  Potion'
+- Properties
+- '14 Rings. Proceed to Table 2.13.G:  Ring Properties'
+- 15  Rods,  Staves and  Wands. Proceed to Table
+- '2.13.1H:  Rods,  Staves and  Wands Properties'
+- '16–18  Scrolls. Proceed to Table 2.13.1I: Scroll Type'
+- 19–20 Swords. Proceed to Tables 2.13.1L and M

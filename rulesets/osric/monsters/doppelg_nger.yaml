@@ -1,0 +1,21 @@
+name: Doppelgänger
+frequency: very rare
+no_encountered: 3d4
+size: medium
+alignment: neutral
+move: 90ft
+armour_class: 5 [15]
+hit_dice: '4'
+melee_attacks: 1 bite (1d12)
+senses: Infravision 60ft
+lair_chance: 20%
+intelligence: very (11-12)
+morale: 65
+loot: Horde 5
+experience: 285 +3/hp
+description: Doppelgängers are strange beings that are able to take on the  forms of those they encounter, including the appearance of  equipment and any clothing the victim is wearing. In its natural  form, a doppelgänger is a 5ft to 6ft tall humanoid, slender with  gangly limbs and half-formed features. Its flesh is pale and hair- less, and its large, bulging eyes are yellow with slitted pupils.  The creature will assume its natural form upon death. Doppelgängers make excellent use of their natural mimicry to  stage ambushes, bait traps, and infiltrate society. Their classic  tactic in a dungeon is to take the form of a member of an adven- turing party, dispatch them, and take their place amongst the  group until a good time presents itself to kill them or rob them. Initiative and Surprise Stealth. Doppelgangers surprise with a roll of 1–4 on 1d6.
+abilities:
+- heading: Immunities and Resistances
+  text: Immunities. Doppelgangers are immune to the effects of charm  and sleep spells. Improved Saving Throw.  Doppelgängers make saving throws as  a 10HD monster.
+- heading: Special Features
+  text: 'ESP. Doppelgangers can use ESP (as per the spell) at will. Natural Disguise.  A doppelgänger can assume any humanoid  form between 4ft to 8ft tall, but the creature must first see the  victim to be copied. Any doppelgänger’s attempt at physical  disguise is only faulty 10% of the time, and its knowledge of the  victim is facilitated by the doppelgänger’s innate ESP ability. Unarmed Combat.  Doppelgangers can be targeted with grap - pling or overbearing attacks, and under some circumstances  they may use these tactics. If not fended off, they score an un- armed hit with a 2+ on 1d20. Hit Mods: ATK/DEF +6/-6. Over - bear Results Mods: ATK/DEF +0/-0. Grappling Result Mods:  ATK/DEF +0/-0.'

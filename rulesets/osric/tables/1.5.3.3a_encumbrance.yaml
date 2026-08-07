@@ -1,0 +1,62 @@
+id: 1.5.3.3a
+name: ENCUMBRANCE
+source: OSRIC-3.0-Player-Guide-FINAL.v.7.pdf
+lines:
+- WEIGHT CARRIED MAX.  MOVEMENT  SURPRISE MODIFIER
+- Unencumbered Full  Movement +1 (for armour lighter than chain mail only)
+- 1 to 40 lbs over  Encumbrance Three Quarter  Movement Normal bonuses apply
+- 41-80 lbs over  Encumbrance Half  Movement No normal bonuses apply (but penalties do)
+- 81-120 lbs over  Encumbrance Quarter  Movement No normal bonuses apply (but penalties do); -1 extra
+- penalty
+- 121+ lbs over  Encumbrance Cannot Move Cannot Move
+- Outdoors
+- Given that an outdoor setting is more open and better lit than
+- a dungeon, you can use a formula for determining whether a
+- pursuit is successful. This can be used regardless of whether it’s
+- the characters who are trying to escape, or monsters that are
+- trying to escape.
+- 'Base chance to escape pursuit per hour: 80%'
+- 'Modifiers:'
+- 'Slowest moving creature is in the pursuing group: +10%'
+- Slowest members of both groups have the same movement
+- 'rate: +0%'
+- 'Slowest moving creature is in the pursued group: -10%'
+- 'Terrain is plains, desert, or water: -50%'
+- 'Terrain is rough, hills, or marsh: +10%'
+- 'Terrain is forest or mountain: +30%'
+- 'Fleeing group is fewer than 6 creatures: +10%'
+- 'Fleeing group is 12-50 creatures: -20%'
+- 'Fleeing group is more than 50 creatures: -50%'
+- 'Pursuing group is fewer than 12 creatures: -20%'
+- 'Pursuing group includes a flying creature: -20%'
+- 'Daylight: -30%'
+- 'Twilight: -10%'
+- 'Night: +25%'
+- If the chance of escape is 0% or the pursuers manage to catch
+- up based on the relative movement rates, then combat takes
+- place.
+- If the pursuers haven’t caught up, then roll 1d100 and compare
+- the number to base chance to escape, as modified. If the d100
+- roll is lower than or equal to the chance to escape, then the trail
+- is lost and the fleeing group has managed to escape.
+- It might appear that a faster group should get more than a 10%
+- modifier, or that a flying creature should automatically prevent
+- a slower group from escaping. This method takes into account,
+- though, that fleeing groups can hide from a flying creature, and
+- that a slower group can still catch up with a faster group if the
+- faster group takes a harder path up a hillside by accident.
+- 1.5.3.3.  ENCUMBRANCE AND
+- BASE  MOVEMENT RATE
+- You are going to be tempted to carry lots of equipment, but the
+- weight can slow you down. Also, treasure is heavy, so you need
+- to leave room for the treasure you bring back!
+- If you are carrying more than your encumbered weight (see Ta-
+- ble 1.1.2a Strength), your movement rate is reduced and you
+- are more likely to be surprised in combat (see Section 1.6.1.1 for
+- details on Surprise). The effect on movement rate and surprise
+- are shown on Table 1.5.3.3a, below.
+- Keep in mind that armour sets a maximum movement rate
+- (the movement cap shown in Table 1.4.2.3g) independent of
+- all weight calculations (due to bulkiness). Thus, armour sets a
+- maximum movement rate and also affects the total weight a
+- character carries.

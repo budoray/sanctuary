@@ -16,6 +16,11 @@ from functools import lru_cache
 
 from backend.app.engine import character
 from backend.app.engine import tables
+from backend.app.rulesets.loader import load_ruleset
+
+# Phase 1: a single default ruleset. Future phases may fetch this per-session.
+_RULESET = load_ruleset("osric")
+_TABLES_DIR = _RULESET.content_path("tables")
 
 # Mirrors character._AC_COLUMNS (a to-hit table's columns, AC 10 down to
 # -10) - duplicated rather than reached across the module boundary as a
@@ -64,7 +69,7 @@ def monster_to_hit_target(hit_dice, armour_class: int) -> int:
     """
     n, bonus = _hd_base_and_bonus(hit_dice)
     col = _AC_COLUMNS.index(int(armour_class))
-    for row in tables.rows("2.1.2a"):
+    for row in tables.rows("2.1.2a", tables_dir=_TABLES_DIR):
         label = row[0]
         if label == "<1-1":
             hit = n < 0.5
@@ -98,7 +103,7 @@ def monster_saving_throw(hit_dice, category: str, non_intelligent: bool = False)
     value = n + 1 if bonus else n
     table_id = "2.1.3b" if non_intelligent else "2.1.3a"
     idx = character.SAVE_CATEGORIES.index(category)
-    for row in tables.rows(table_id):
+    for row in tables.rows(table_id, tables_dir=_TABLES_DIR):
         if tables.in_range(row[0], value):
             return _int(row[1 + idx])
     raise LookupError(f"no {table_id} row for hit dice {hit_dice!r}")
@@ -215,7 +220,7 @@ _ITEM_SAVE_ROW = re.compile(r"^([A-Za-z][A-Za-z/ ]*?)\s+((?:\d+\s+){7}\d+)$")
 @lru_cache(maxsize=1)
 def _item_save_table() -> dict:
     out = {}
-    for line in tables.load("1.6.4a")["lines"]:
+    for line in tables.load("1.6.4a", tables_dir=_TABLES_DIR)["lines"]:
         m = _ITEM_SAVE_ROW.match(line.strip())
         if m:
             nums = [int(x) for x in m.group(2).split()]
@@ -256,7 +261,7 @@ UNDEAD_TYPES = tuple(range(1, 14))  # Table 1.6.5A: Type 1 (skeleton) .. 13 (fie
 @lru_cache(maxsize=1)
 def _turn_undead_rows() -> dict:
     out = {}
-    for line in tables.load("1.6.5a")["lines"]:
+    for line in tables.load("1.6.5a", tables_dir=_TABLES_DIR)["lines"]:
         m = _TURN_ROW.match(line.strip())
         if not m:
             continue
@@ -426,7 +431,7 @@ def _encumbrance_bands() -> tuple:
     # table's own baseline (0 extra lbs, full movement) rather than a
     # figure this needs to read out of the corpus.
     bands = [(0.0, 1.0)]
-    for row in tables.rows("1.5.3.3a"):
+    for row in tables.rows("1.5.3.3a", tables_dir=_TABLES_DIR):
         bands.append((_row_weight_cap(row), _row_movement_fraction(row)))
     return tuple(sorted(bands))
 

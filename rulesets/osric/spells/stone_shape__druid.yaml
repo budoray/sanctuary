@@ -1,0 +1,14 @@
+name: Stone Shape
+slug: stone_shape
+reversible: false
+class: druid
+level: 3
+school: Druidic Transmutation/Alteration
+range: Touch
+duration: Instantaneous
+area_of_effect: 3 cubic-ft+1/caster level
+components: V,S,M
+casting_time: 1 round
+saving_throw: None
+text: The caster moulds stone by the power of his or her will, shaping it into whatever object or form he or she desires, from a weapon to a sculpture to an ornate stone footstool. Whether used to decorate a building with gargoyles or to make an escape hole from a stone prison, this spell is extremely versatile and useful.
+source: wiki2_spells.txt

@@ -1,0 +1,21 @@
+name: Class B Demon (hezrou)
+frequency: common
+no_encountered: 1d3 or 1d6 (in the Abyss)
+size: large (8ft)
+alignment: chaotic evil
+move: 60ft; 120ft hopping
+armour_class: -2 [22]
+hit_dice: '9'
+melee_attacks: 2 claws (1d3) and 1 bite (4d4)
+senses: Infravision 120ft
+lair_chance: 10%
+intelligence: low (5-7)
+morale: 90
+loot: Hoard 3
+experience: 2,000 +12/hp
+description: Slightly shorter than the vrock, the hezrou resemble loathsome  toads with humanoid arms. They are vulnerable to normal me - lee and missile weapons. Hezrou and vrock will gladly fight each other without hesitation,  and they both share a love of human flesh.
+abilities:
+- heading: Immunities and Resistances
+  text: 'Magic Resistance (55%).  Any magic spell or effect has a 55%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Damage Resistances (all half damage): Cold, Electricity, Fire, Poi- son (including gases).'
+- heading: Special Features
+  text: 'Spell-Like Abilities. At Will: Darkness, 15ft radius, cause fear (as the 4th level mag- ic-user spell), levitate (as the 2nd level magic-user spell), detect  invisibility (objects only, otherwise as per the 2nd level mag - ic-user spell), telekinesis (as per the 5th level magic-user spell,  up to 300 lbs), or gate (as the 9th level magic-user spell) an - other hezrou (20% chance of success). Unarmed Combat. Hezrou-type demons can make grappling or  overbearing attacks. If not fended off, they score an unarmed  hit with a 2+ on 1d20. Hit Mods: ATK/DEF +8/-8. Overbear Re - sults Mods: ATK/DEF +4/-4. Grappling Result Mods: ATK/DEF  +2/-2.'

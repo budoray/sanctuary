@@ -1,0 +1,23 @@
+name: Night Hag
+frequency: very rare
+no_encountered: 1d2
+size: medium
+alignment: neutral evil
+move: 90ft
+armour_class: 10 [10]
+hit_dice: '8'
+melee_attacks: 1 (2d6)
+senses: Infravision 60ft, Detect  invisible 5%
+lair_chance: Nil
+intelligence: exceptional (15-16)
+morale: 85
+loot: See below
+experience: 1,850 +10/hp
+description: Night hags are not creatures of the material plane of existence  (and are thus affected by protection from evil), being native to  the neutral evil plane of Hades. They resemble hideous wom - en with clawed hands and feet. Night hags hunt in the material  planes. This “hunt” is to slay evil people, whose souls are carried  back to Hades by the hag, where the soul will form into a lar - val fiend—a valuable commodity in the demonic and diabolical  planes. If success seems likely, they will also attack any good-aligned  creature.  A night hag carries a special periapt forged in Hades, allowing  her to astrally project her body at will. Upon losing the periapt,  she can still depart the plane she is in at the time. This periapt  gives the possessor +2 on all saving throws, and cures diseases  the possessor contracts. With each use by a good creature, the  periapt decays; after ten uses, it vanishes.
+abilities:
+- heading: Immunities and Resistances
+  text: Magic Resistance (65%).  Any magic spell or effect has a 65%  chance (at caster level 11) to have no effect on this creature;  but if it does, the magic takes full effect. Immunities. Night hags are immune to charm, fear, sleep, and  cold- or fire-based spells.  Immune to Non-Silver Mundane, +1, and +2 Weapons.  This crea - ture is immune to piercing, blunt, and slashing damage from  weapons and unarmed attacks, unless the weapon causing  that damage has a magical bonus of +3 or more, or is made  of silver.
+- heading: Special Features
+  text: 'Know Alignment. A night hag knows the alignment of any crea - ture it sees. Gate. A night hag can try to gate in an ally (50% chance of suc - cess), summoning a barbed devil or class A demon (equal  chance of one or the other). The expected reward is one of the  hag’s larval fiends, so hags tend not to gate in allies unless they  are in dire danger. Spell-Like Abilities. At Will: polymorph self, enter/exit ethereal plane (see Section  1.6.10.6: Ethereal in the Player Guide). 3/day: magic missile (2d8 damage), ray of enfeeblement'
+- heading: Special Attacks
+  text: 'Sleep and Dream-Ride. Finding a victim, a night hag casts a sleep  spell that affects humans (up to 12th level) who fail a saving  throw vs magic, then strangles the sleeper. If the spell fails, she  returns nightly while ethereal and enters the victim’s dreams,  making them ethereal. Each ride until dawn by the hag (who  cannot be unseated from the unfortunate’s back) permanently  drains a point of constitution. When all points are drained, the  victim dies and the night hag carries the soul to Hades. Unarmed Combat. Night hags can be targeted with grappling or  overbearing attacks. If not fended off, they score an unarmed  hit with a 2+ on 1d20. Hit Mods: ATK/DEF +6/-6. Overbear Re - sults Mods: ATK/DEF +1/-1. Grappling Result Mods: ATK/DEF  +0/-0.'

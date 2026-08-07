@@ -1,0 +1,26 @@
+name: Orc
+frequency: common
+no_encountered: 30d10
+size: medium (6ft tall)
+alignment: lawful evil
+move: 90ft
+armour_class: 6 [14]
+hit_dice: '1'
+melee_attacks: 1 weapon
+senses: Infravision 60ft
+lair_chance: 35%
+intelligence: average or low (5-10)
+morale: 50
+loot: Individual 3 each; in lair Hoard  3, Cache 1, 3 (x10), and 5
+experience: 10 +1 per hp
+description: Orcs are subterranean humanoid creatures, with a snout and  small tusks like a wild boar. Virtually all orcs are of lawful evil  alignment (see Group Alignment for Monsters). This is a rein - carnating-spirit species whose form attracts lawful evil spirits  for reincarnation just as the elvish form attracts chaotic good  spirits. Despite the predilection for evil-aligned spirits to inhabit  orcs, there are a few orcs who are not of evil alignment, because  the life-activating spirit changed alignment before or after re - birth into an orcish body. These are never found with other  orcs, however, because if detected they are usually immediate- ly killed in the lawful and evil society of orcs—the inability to  communicate in the group’s alignment tongue makes detection  almost inevitable. The ”lawful” aspect of orcish alignment is fairly specific. First,  orcs are fanatically loyal to a particular horde, “horde” being a  concept which is abstract enough to gain the “lawful” descrip
+  - tor. Second, they consider a strong leadership hierarchy to be  absolutely necessary. Third, they consider orcs (as a species and  more specifically their own horde) to be the supreme natural  rulers of everything they survey. If it were not for these three  points, orcs could easily be seen as chaotic. They do not form  wider nations even among orcs, they have no respect for learn- ing or non-warrior technology, and they destroy civilisations  they conquer rather than assimilating them. They are “lawful”  only within the framework of orcish species-superiority. Pow - erful non-orcish creatures (such as an ogre mage or dragon)  can easily take control of orcs as long as they keep an orcish  horde-chieftain in place as a puppet. Orcs love to follow tyran - nical leaders as long as they are promised plunder, and as long  as they seem to have authority themselves (every orc needs  someone to bully). The moment they lose fear of a non-orcish  supreme leader, though, they will riot or depart
+  seeking plun - der, often replacing whatever horde leader allowed them to be  “deceived” by the deal they were offered. Orcs are fiercely loyal to a single horde, and these hordes are in  fierce, often-violent competition. They will only unite with other  hordes if there is an external force strong enough to be able to  control the horde chieftains. Orcs are skilled miners and cavers. They have the ability to note  new or unusual constructions underground 35% of the time,  and to spot sloping passages 25% of the time. Most orcish lairs will be found underground, and those found  above ground will consist of simple huts, typically with some  kind of defence (ditch, moat, crude walls, etc.). Above-ground  orcs prefer to sleep during the day and roam by night. Leaders Wandering orcish war–parties are led by a captain and the cap- tain’s personal guards (3d6). These orcs fight as 2 HD creatures.  They have AC 4 [16], 11 hp, and inflict +1 damage. Orc chiefs will always be encountered in a
+  lair. The chief and the  chief’s personal guards (of which there are 5d6) fight as 3 HD  monsters. They have AC 4 [16], 15 hp, and inflict 2d4 damage.
+abilities:
+- heading: Immunities and Resistances
+  text: Vulnerability to Sunlight. Orcs fight at -1 to hit when they are in  direct sunlight.
+- heading: Special Attacks
+  text: 'Ranged Weapons. Orcs can use ranged weapons. Usually 25% of  an orcish group will have short bows or crossbows. Unarmed Combat. Orcs can engage in grappling or overbearing  attacks. If not fended off, they score an unarmed hit with a  10+ on 1d20. Hit Mods: ATK/DEF +6/-4. Overbear Results Mods:  ATK/DEF +0/-0. Grappling Result Mods: ATK/DEF +0/-0.'
+- heading: Languages
+  text: Orcs speak goblin and hobgoblin in addition to their own foul  tongue.

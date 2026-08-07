@@ -1,0 +1,14 @@
+name: Feign Death
+slug: feign_death
+reversible: false
+class: magic-user
+level: 3
+school: Arcane Necromancy
+range: Touch
+duration: 6 rounds+1 round/level
+area_of_effect: One creature
+components: V,S
+casting_time: 1 segment
+saving_throw: None; willing recipient only
+text: This spell magically slows the recipient's metabolism into a state so close to death that it is impossible to distinguish the enspelled person from a corpse by any means other than magical. The recipient can hear, smell, and think; the senses of touch and sight no longer function. Damage caused to the pseudo-corpse is reduced by one half, and the spell's recipient will not even know that the damage has been caused–potentially a dangerous situation. A person under the influence of this spell is not subject to level draining by the undead and will not be affected by poisons until the spell wears off or is otherwise removed; the caster can remove the catalepsy at will, and the spell is subject to being dispelled.
+source: wiki2_spells.txt

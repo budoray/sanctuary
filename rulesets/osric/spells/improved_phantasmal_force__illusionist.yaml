@@ -1,0 +1,14 @@
+name: Improved Phantasmal Force
+slug: improved_phantasmal_force
+reversible: false
+class: illusionist
+level: 2
+school: Phantasmal Illusion
+range: 60-ft+10/level
+duration: See below
+area_of_effect: 40×40-ft square+10-ft square/level
+components: V,S,M
+casting_time: 2 segments
+saving_throw: See below
+text: This spell produces a phantasm as described in the phantasmal force spell description. This more powerful evocation of phantasmal magic allows the caster to weave vague sounds into the illusion and to maintain the illusion even if moving at up to half his or her normal movement rate. Speech cannot be created, but clanking noises, rumblings, and other such sounds can be incorporated into the illusion. The spell also allows the illusionist to force the illusion to remain in existence for up to two rounds after he or she ceases to concentrate upon it.
+source: wiki2_spells.txt

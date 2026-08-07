@@ -10,6 +10,7 @@ from backend.app.auth import require_account
 from backend.app.db import CharacterRecord, DungeonRecord, RoomRecord, SessionRecord, get_db, record_event
 from backend.app.engine import character as char_engine
 from backend.app.engine import dungeon_compiler, session as session_engine
+from backend.app.api.rulesets import resolve_ruleset
 from backend.app.socket_manager import socket_manager
 
 router = APIRouter(tags=["dungeons"])
@@ -219,6 +220,9 @@ async def play_dungeon(
     )
 
     mod, links = dungeon_compiler.compile(record, rooms)
+    ruleset_id = record.ruleset_id or "osric"
+    ruleset = await resolve_ruleset(ruleset_id, account_id=account_id, db=db)
+    monsters_dir = ruleset.content_path("monsters")
     session_id = dungeon_compiler.generate_id()
     state = await session_engine.new_game(
         session_id,
@@ -229,6 +233,7 @@ async def play_dungeon(
         account_id=account_id,
         mode="dungeon",
         dungeon_links=links,
+        monsters_dir=monsters_dir,
     )
     state["dungeon_id"] = dungeon_id
     if campaign_id:
@@ -243,6 +248,7 @@ async def play_dungeon(
         character_id=character_id,
         name=f"{char.name} in {record.name}",
         status=state["status"],
+        ruleset_id=ruleset_id,
         state=json.dumps(state),
     )
     db.add(session_record)

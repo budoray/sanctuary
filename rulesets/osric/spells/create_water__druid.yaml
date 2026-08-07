@@ -1,0 +1,14 @@
+name: Create Water
+slug: create_water
+reversible: false
+class: druid
+level: 2
+school: Druidic Transmutation/Alteration
+range: 10-ft
+duration: Instantaneous (permanent)
+area_of_effect: Up to 1 cubic foot/caster level
+components: V,S
+casting_time: 1 turn
+saving_throw: None
+text: This spell creates potable water, four gallons per level of the caster. The water may be created in a receptacle or in thin air (whence it will, of course, fall). Water cannot be created inside a creature, nor can it be created in any place the caster cannot see. Note however that the druidic spell has no reverse version; the druid may create, but not destroy, water.
+source: wiki2_spells.txt

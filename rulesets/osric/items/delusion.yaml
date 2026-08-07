@@ -1,0 +1,4 @@
+name: Delusion
+classes: any
+description: 'This potion convinces the drinker that the potion is of another type. If more than one person tastes this potion, there is a 90% chance they all will believe the potion to be of the same type. An example of how the potion might operate: if it mimics a potion of clairaudience, it might convince the drinker there are sounds in the distance that do not truly exist.'
+source: OSRIC_3.0_Gamemaster_Guide.pdf

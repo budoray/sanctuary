@@ -1,0 +1,14 @@
+name: Spectral Force
+slug: spectral_force
+reversible: false
+class: illusionist
+level: 3
+school: Phantasmal Illusion
+range: 60-ft+10-ft/level
+duration: See below
+area_of_effect: 40-ft×40-ft square+10-ft×10-ft square/level
+components: V,S,M
+casting_time: 3 segments
+saving_throw: See below
+text: This spell functions in the same manner as improved phantasmal force, but it is a more powerful evocation of the same magic. The illusionist can include sounds, smells, and heat (or cold) into the illusion, making it very believable. The spectral force can linger for 3 rounds after the illusionist ceases to concentrate upon it.
+source: wiki2_spells.txt

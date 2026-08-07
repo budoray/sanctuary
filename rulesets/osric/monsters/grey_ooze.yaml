@@ -1,0 +1,23 @@
+name: Grey Ooze
+frequency: rare
+no_encountered: 1d3
+size: medium to large
+alignment: neutral
+move: 10ft
+armour_class: 8 [12]
+hit_dice: 3+3
+melee_attacks: 1 pseudopod (2d8)
+senses: See below
+lair_chance: Nil
+intelligence: animal (1)
+morale: N/A
+loot: Nil
+experience: 75 +3/hp
+description: Grey ooze is indistinguishable from wet stone until it attacks. It  will form tentacles that lash out at any who pass. Grey ooze also  takes full damage from normal weapons, but if the weapon is  made of metal it too will begin to dissolve. As it matures grey ooze gets larger. Specimens over 20 HP can  be as large as 36 square feet. While they cover a huge area, they  are never more than a few inches deep. At larger sizes they be- gin to form a kind of consciousness.
+abilities:
+- heading: Immunities and Resistances
+  text: Ooze Senses. This creature cannot be knocked prone, and is not  affected by lack of light, invisible opponents, gases, or other  circumstances that would not affect an ooze. Immunities. Grey ooze is not affected by fire or cold damage.
+- heading: Special Features
+  text: 'Corrosive Properties.  Any metal weapon that hits a grey ooze  must make a saving throw (target number: 7) or be destroyed  by the ooze’s acidic properties. Magical weapons have a bonus  to the saving throw of one higher than the weapon’s to-hit bo- nus (see PG Section 6.4, Item Saving Throws).'
+- heading: Special Attacks
+  text: 'Corrosive Pseudopods. Grey ooze is corrosive. If the ooze hits an  opponent wearing metal armour, the armour will come apart  and become useless unless it makes a saving throw vs. acid  (target number: 7). The acid will eat through chain mail in 1  round, and requires 2 rounds to eat through plate. See Play - er Guide Section 1.6.4, Item Saving Throws. The acid does not  damage wood, leather, or stone. Unarmed Combat. Grey oozes cannot be targeted with grappling  or overbearing attacks, and do not use such tactics.'

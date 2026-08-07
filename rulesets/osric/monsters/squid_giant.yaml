@@ -1,0 +1,21 @@
+name: Squid, Giant
+frequency: rare
+no_encountered: '1'
+size: huge
+alignment: neutral
+move: 180ft swimming
+armour_class: 3 [17] / 7 [13]
+hit_dice: '12'
+melee_attacks: 8 tentacles (1d6) and 1 bite  (5d4)
+senses: Standard
+lair_chance: 40%
+intelligence: non- (0)
+morale: N/A
+loot: Hoard 1
+experience: 2,000 +16/hp
+description: These monsters live deep within the oceans at depths few can  reach. Occasionally they will surface to attack a passing ship.  When these squid attack, they will attach themselves with two  of their ten tentacles to the ship. This leaves the other eight ten- tacles free to go after the crew. When the squid has picked the  ship clean it will crush the hull and drag the wreckage to its lair. If the squid loses more than 3 arms it will release the ship and  flee. As it does the monster will release ink in the water leaving  a cloud 60ft deep by 80ft wide.
+abilities:
+- heading: Special Features
+  text: Sectioned Armour Class. A giant squid’s body is protected by a  tough shell (AC 3 [17]), but its tentacles and head are more  vulnerable (AC 7 [13]).
+- heading: Special Attacks
+  text: 'Tentacle. Each tentacle hits for 1d6 damage. With each success- ful hit it grabs its victim and holds it. In addition to biting one  held victim, with each successive round the tentacle does an  additional 2d6 crushing damage until the victim is dead. It  takes one round to eat its dead victim, then the tentacle is free  to attack a new target. The only way to get a squid to release  its victim is to sever the tentacle by causing 10 hp of slashing  damage to it (this only damages the tentacle, not the squid). When the tentacle hits, roll 1d100 to determine how well it is  holding the victim. 01-25: Both arms are held and the victim cannot attack. 26-75: One limb is held and the victim can attack with a -3  penalty.  76-00: Both arms are free and the victim can attack with only  a -1 penalty.'

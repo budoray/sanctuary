@@ -1,0 +1,74 @@
+id: 2.13.1f
+name: POTION PROPERTIES
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- D20 RESULT VALUE
+- (GP)
+- '01 Roll 1d100: (01–50): Animal Control;'
+- '(51–00): Clairaudience'
+- '400'
+- '400'
+- '02 Roll 1d100: (01–50): Clairvoyance;'
+- '(51–00): Climbing'
+- '500'
+- '500'
+- '03 Roll 1d100: (01–50): Cursed; (51–00):'
+- Delusion
+- —
+- '150'
+- '04 Roll 1d100: (01–65): Diminution;'
+- '(66–00): Dragon Control'
+- '500'
+- see entry
+- 05 ESP 850
+- '06 Roll 1d100: (01–35): Extra–Healing;'
+- '(36–00): Fire Resistance'
+- '800'
+- '400'
+- '07 Roll 1d100: (01–50): Flying; (51–00):'
+- Gaseous Form
+- '750'
+- '400'
+- '08 Roll 1d100: (01–50): Giant Control;'
+- '(51–00): Giant Strength'
+- see entry
+- see entry
+- 09 Growth 300
+- 10 Healing 400
+- '11 Roll 1d100: (01–50): Heroism;'
+- '(51–00): Human Control'
+- '500'
+- '900'
+- '12 Roll 1d100: (01–50):  Invisibility;'
+- '(51–00): Invulnerability'
+- '500'
+- '500'
+- '13 Roll 1d100: (01–50): Levitation;'
+- '(51–00): Longevity'
+- '400'
+- 1,000
+- '14'
+- 'Roll 1d100: (01–50): Oil of'
+- 'etherealness; (51–00): Oil of'
+- Slipperiness
+- 1,500
+- '750'
+- '15 Roll 1d100: (01–50): Philtre of Love;'
+- '(51–00): Philtre of Persuasiveness'
+- '300'
+- '850'
+- '16 Roll 1d100: (01–65): Plant Control;'
+- '(66–00): Polymorph'
+- '300'
+- '350'
+- '17 Roll 1d100: (01–50): Speed; (51–00):'
+- Super–Heroism
+- '450'
+- '750'
+- 18 Sweet Water 250
+- '19 Roll 1d100: (01–75): Treasure'
+- 'Finding; (76–00): Undead Control'
+- 2,000
+- 2,500
+- 20 Water Breathing 900
+- 'For descriptions of potions, turn to Section 2.13.2: Potions.'

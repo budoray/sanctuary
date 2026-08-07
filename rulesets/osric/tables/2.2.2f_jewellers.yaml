@@ -1,0 +1,15 @@
+id: 2.2.2f
+name: JEWELLERS
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- DIE ROLL SKILL LEVEL
+- 01-20 Mediocre. On a d100 roll of 01-90, the jeweller increases the value of the raw materials by 10%. On a 91-00 there is
+- no increase in value, but the jeweller must still be paid.
+- 21-50 Acceptable. On a d100 roll of 01-50, the jeweller increases the value of the raw materials by 20%. On a result of 51-
+- 00, the increase is 10%.
+- 51-75 Highly Skilled. On a d100 roll of 01-60, the jeweller increases the value of the raw materials by 30%. On a result of
+- 61-00, the increase is 10%.
+- 76-90 Superbly Skilled. On a d100 roll of 01-70, the jeweller increases the value of the raw materials by 40%. On a result
+- of 71-00, the increase is 10%.
+- 91-00 Gifted. On a d100 roll of 01-60, the jeweller increases the value of the raw materials by 40%. On a result of 61-00,
+- the increase is 20%.

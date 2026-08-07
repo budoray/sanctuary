@@ -1,0 +1,14 @@
+name: Shadow Door
+slug: shadow_door
+reversible: false
+class: illusionist
+level: 5
+school: Phantasmal Illusion
+range: 10-ft
+duration: 1 round/level
+area_of_effect: Magic door
+components: S
+casting_time: 2 segments
+saving_throw: None
+text: With a mystical gesture, the illusionist creates an illusory door (either in a wall or free-standing). If the illusionist steps through, he or she disappears from sight and may go where he or she pleases. If anyone else opens the door, they will perceive a small empty room. The caster's invisibility after passing through the shadow door is particularly powerful and cannot be seen by use of detect invisibility, although he or she can be seen with more powerful divination magic.
+source: wiki2_spells.txt

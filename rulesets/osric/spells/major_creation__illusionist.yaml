@@ -1,0 +1,14 @@
+name: Major Creation
+slug: major_creation
+reversible: false
+class: illusionist
+level: 5
+school: Phantasmal Transmutation/Alteration
+range: 10-ft
+duration: 6 turns/level
+area_of_effect: 1 cubic-ft/level
+components: V,S,M
+casting_time: 1 turn
+saving_throw: None
+text: This spell is simply a more powerful version of minor creation, allowing the caster to create objects of mineral as well as of vegetable origin.
+source: wiki2_spells.txt

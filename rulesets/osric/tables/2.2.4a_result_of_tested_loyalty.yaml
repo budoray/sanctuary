@@ -1,0 +1,14 @@
+id: 2.2.4a
+name: RESULT OF TESTED LOYALTY
+source: OSRIC_3.0_Gamemaster_Guide.pdf
+lines:
+- ADJUSTED
+- LOYALTY SCORE LOYALTY
+- '< 01 None: Could desert or worse at any time.'
+- '01–25 Disloyal: Will seek personal gain at all times.'
+- '26–50 Somewhat Loyal: Will serve, but exploit any advantage to'
+- the full.
+- '51–75 Fairly Loyal: Will perform routine tasks most of the time.'
+- '76–100 Loyal: Will attempt to serve, even in difficult situations.'
+- '> 100 Fanatical: Will serve unquestioningly and fight to the'
+- death
