@@ -2596,45 +2596,45 @@ button.danger:hover:not(:disabled) {
 .hub-resume-link:hover {
   color: #f4d03f;
 }
-.hub-realm {
+.hub-room {
   background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   padding: 20px;
 }
-.hub-realm-header {
+.hub-room-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
 }
-.hub-realm-header h3 {
+.hub-room-header h3 {
   margin: 0;
   font-size: 13px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
 }
-.hub-realm-count {
+.hub-room-count {
   font-size: 11px;
   color: var(--muted);
   background: rgba(255, 255, 255, 0.05);
   padding: 4px 10px;
   border-radius: 4px;
 }
-.hub-realm-empty {
+.hub-room-empty {
   text-align: center;
   color: var(--muted);
   font-size: 12px;
   padding: 20px;
 }
-.hub-realm-scroll {
+.hub-room-scroll {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
   padding-bottom: 8px;
 }
-.hub-realm-chip {
+.hub-room-chip {
   padding: 14px;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--panel-border);
@@ -2644,11 +2644,11 @@ button.danger:hover:not(:disabled) {
   gap: 10px;
   transition: border-color 0.15s, transform 0.1s;
 }
-.hub-realm-chip:hover {
+.hub-room-chip:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
 }
-.hub-realm-map {
+.hub-room-map {
   display: grid;
   gap: 1px;
   aspect-ratio: 1;
@@ -2658,16 +2658,16 @@ button.danger:hover:not(:disabled) {
   border-radius: 6px;
   padding: 4px;
 }
-.hub-realm-meta {
+.hub-room-meta {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.hub-realm-chip strong {
+.hub-room-chip strong {
   font-size: 14px;
   color: var(--text);
 }
-.hub-realm-theme {
+.hub-room-theme {
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -2676,7 +2676,7 @@ button.danger:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.08);
   align-self: flex-start;
 }
-.hub-realm-size {
+.hub-room-size {
   font-size: 10px;
   color: var(--muted);
 }
@@ -2834,7 +2834,7 @@ button.danger:hover:not(:disabled) {
   padding: 18px;
   overflow: hidden;
 }
-.realm-detail {
+.room-detail {
   grid-column: 1 / -1;
   display: none;
   flex-direction: row;
@@ -2842,36 +2842,36 @@ button.danger:hover:not(:disabled) {
   gap: 24px;
   padding: 18px 22px;
 }
-.realm-detail-header {
+.room-detail-header {
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 220px;
 }
-.realm-detail-header h2 {
+.room-detail-header h2 {
   margin: 0;
   font-size: 20px;
   color: var(--text);
 }
-.realm-detail-body {
+.room-detail-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-.realm-detail-body p {
+.room-detail-body p {
   margin: 0;
   font-size: 13px;
   line-height: 1.6;
   color: var(--muted);
 }
-.realm-detail-actions {
+.room-detail-actions {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
-.realm-detail-actions select {
+.room-detail-actions select {
   padding: 8px 10px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--panel-border);
@@ -2880,7 +2880,7 @@ button.danger:hover:not(:disabled) {
   font: inherit;
   font-size: 12px;
 }
-.realm-detail-actions select:focus {
+.room-detail-actions select:focus {
   outline: none;
   border-color: var(--accent);
 }
@@ -3025,19 +3025,19 @@ button.danger:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--text);
 }
-.realms-header {
+.rooms-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 14px;
 }
-.realms-header h2 {
+.rooms-header h2 {
   margin: 0;
   border: none;
   padding: 0;
 }
-.realms-section .module-cards {
+.rooms-section .module-cards {
   flex: 1;
   overflow-y: auto;
   display: grid;
@@ -3046,7 +3046,7 @@ button.danger:hover:not(:disabled) {
   gap: 16px;
   padding-right: 4px;
 }
-.realms-section .module-card {
+.rooms-section .module-card {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -3060,40 +3060,40 @@ button.danger:hover:not(:disabled) {
     box-shadow 0.15s,
     transform 0.05s;
 }
-.realms-section .module-card:hover {
+.rooms-section .module-card:hover {
   border-color: var(--accent);
   box-shadow: 0 0 18px var(--accent-glow);
   transform: translateY(-2px);
 }
-.realms-section .module-card.selected {
+.rooms-section .module-card.selected {
   border-color: var(--gold);
   background: rgba(241, 196, 15, 0.08);
   box-shadow: 0 0 18px rgba(241, 196, 15, 0.18);
 }
-.realms-section .module-mini-map {
+.rooms-section .module-mini-map {
   flex: 1;
   min-height: 120px;
   max-height: 220px;
   aspect-ratio: 1;
   margin: 0;
 }
-.realms-section .module-card-body {
+.rooms-section .module-card-body {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-.realms-section .module-card-header {
+.rooms-section .module-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
-.realms-section .module-card h3 {
+.rooms-section .module-card h3 {
   margin: 0;
   font-size: 16px;
   color: var(--text);
 }
-.realms-section .module-desc {
+.rooms-section .module-desc {
   margin: 0;
   font-size: 11px;
   line-height: 1.45;
@@ -3134,7 +3134,7 @@ button.danger:hover:not(:disabled) {
   .character-card {
     flex: 1 1 280px;
   }
-  .realm-detail {
+  .room-detail {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -3162,7 +3162,7 @@ button.danger:hover:not(:disabled) {
   .solo-hub-section {
     padding: 14px;
   }
-  .realms-section .module-cards {
+  .rooms-section .module-cards {
     grid-template-columns: 1fr;
     grid-auto-rows: auto;
   }

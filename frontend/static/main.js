@@ -2592,7 +2592,7 @@ var CharacterSelect = class {
     const header = el("header", { className: "solo-hub-header" });
     const titleBlock = el("div", { className: "solo-hub-title" });
     titleBlock.appendChild(el("h1", {}, "Solo Adventure"));
-    titleBlock.appendChild(el("p", {}, "Choose a hero and a realm to begin your delve."));
+    titleBlock.appendChild(el("p", {}, "Choose a hero and a room to begin your delve."));
     header.appendChild(titleBlock);
     this.progressEl = el("div", { className: "account-progress" });
     header.appendChild(this.progressEl);
@@ -2631,16 +2631,16 @@ var CharacterSelect = class {
     this.charactersEl = el("div", { className: "characters-grid" });
     charactersSection.appendChild(this.charactersEl);
     this.mainEl.appendChild(charactersSection);
-    const realmsSection = el("section", { className: "solo-hub-section realms-section" });
-    const realmsHeader = el("div", { className: "realms-header" });
-    realmsHeader.appendChild(el("h2", {}, "Realms"));
+    const roomsSection = el("section", { className: "solo-hub-section rooms-section" });
+    const roomsHeader = el("div", { className: "rooms-header" });
+    roomsHeader.appendChild(el("h2", {}, "Rooms"));
     this.moduleErrorEl = el("div", { className: "module-select-error" });
-    realmsHeader.appendChild(this.moduleErrorEl);
-    realmsSection.appendChild(realmsHeader);
+    roomsHeader.appendChild(this.moduleErrorEl);
+    roomsSection.appendChild(roomsHeader);
     this.moduleCardsEl = el("div", { className: "module-cards" });
-    realmsSection.appendChild(this.moduleCardsEl);
-    this.mainEl.appendChild(realmsSection);
-    this.detailEl = el("section", { className: "solo-hub-section realm-detail" });
+    roomsSection.appendChild(this.moduleCardsEl);
+    this.mainEl.appendChild(roomsSection);
+    this.detailEl = el("section", { className: "solo-hub-section room-detail" });
     this.mainEl.appendChild(this.detailEl);
     return this.mainEl;
   }
@@ -2649,7 +2649,7 @@ var CharacterSelect = class {
     if (this.onBack) {
       footer.appendChild(el("button", { className: "solo-hub-back", onclick: () => this.onBack() }, "\u2190 Back to Sanctuary"));
     }
-    footer.appendChild(el("span", { className: "solo-hub-hint" }, "Tip: click a realm to select it, then Play a hero."));
+    footer.appendChild(el("span", { className: "solo-hub-hint" }, "Tip: click a room to select it, then Play a hero."));
     return footer;
   }
   async load() {
@@ -2667,7 +2667,7 @@ var CharacterSelect = class {
       this.renderDetail();
     } catch (err) {
       this.charactersEl.appendChild(el("div", { className: "characters-empty" }, err.message || "Failed to load heroes."));
-      this.moduleErrorEl.textContent = err.message || "Failed to load realms.";
+      this.moduleErrorEl.textContent = err.message || "Failed to load rooms.";
     }
   }
   renderProgress(progress) {
@@ -2693,7 +2693,7 @@ var CharacterSelect = class {
     clear(this.moduleCardsEl);
     clear(this.moduleErrorEl);
     if (this.modules.length === 0) {
-      this.moduleErrorEl.textContent = "No realms available.";
+      this.moduleErrorEl.textContent = "No rooms available.";
       return;
     }
     this.modules.forEach((m) => {
@@ -2748,15 +2748,15 @@ var CharacterSelect = class {
     this.detailEl.style.display = "block";
     const theme = selected.theme || "dungeon";
     const themeLabel = THEME_LABELS[theme] || theme;
-    const header = el("div", { className: "realm-detail-header" });
+    const header = el("div", { className: "room-detail-header" });
     header.appendChild(el("span", { className: `module-theme theme-${theme}` }, themeLabel));
     header.appendChild(el("h2", {}, selected.name));
     header.appendChild(el("span", { className: "module-size" }, `${selected.width}\xD7${selected.height}`));
     this.detailEl.appendChild(header);
-    const body = el("div", { className: "realm-detail-body" });
+    const body = el("div", { className: "room-detail-body" });
     const desc = el("p", {}, selected.description || "No description available.");
     body.appendChild(desc);
-    const actions = el("div", { className: "realm-detail-actions" });
+    const actions = el("div", { className: "room-detail-actions" });
     if (this.characters.length === 0) {
       actions.appendChild(el("button", { className: "enter", onclick: () => this.onCreate() }, "Create a Hero to Play"));
     } else {
@@ -2793,7 +2793,7 @@ var CharacterSelect = class {
       const empty2 = el("div", { className: "characters-empty" });
       empty2.appendChild(el("div", { className: "characters-empty-icon" }));
       empty2.appendChild(el("h3", {}, "No heroes yet"));
-      empty2.appendChild(el("p", {}, "Create your first adventurer to enter the realms."));
+      empty2.appendChild(el("p", {}, "Create your first adventurer to enter the rooms."));
       empty2.appendChild(el("button", { className: "enter", onclick: () => this.onCreate() }, "Create Your First Hero"));
       this.charactersEl.appendChild(empty2);
       return;
@@ -7079,7 +7079,7 @@ var Game = class {
     this.root.appendChild(trayAnchor);
     new DiceTray(trayAnchor);
     this.loadingOverlay = el("div", { className: "game-loading" });
-    this.loadingOverlay.innerHTML = '<div class="game-loading-spinner"></div><span>Entering the realm...</span>';
+    this.loadingOverlay.innerHTML = '<div class="game-loading-spinner"></div><span>Entering the room...</span>';
     this.root.appendChild(this.loadingOverlay);
     this.autoPlayer = new AutoPlayer(this);
     this.update(initialSession);
@@ -7138,11 +7138,11 @@ var Game = class {
   async init() {
     const safetyTimeout = window.setTimeout(() => {
       console.error("Game init safety timeout fired.");
-      this.showInitFailure("The realm is taking too long to answer.");
+      this.showInitFailure("The room is taking too long to answer.");
     }, 12e3);
     const releaseSafety = () => window.clearTimeout(safetyTimeout);
     try {
-      this.setLoadingStatus("Loading realm tiles...");
+      this.setLoadingStatus("Loading room tiles...");
       try {
         await withTimeout(loadAtlas(), 5e3, "Tile atlas load timed out");
       } catch (err) {
@@ -7179,7 +7179,7 @@ var Game = class {
     } catch (err) {
       releaseSafety();
       console.error("Failed to initialize game:", err);
-      this.showInitFailure(err?.message || "Failed to enter the realm.");
+      this.showInitFailure(err?.message || "Failed to enter the room.");
       throw err;
     }
     releaseSafety();
@@ -8470,7 +8470,7 @@ var Hub = class {
     this.container.appendChild(this.progressEl);
     this.renderHeader();
     this.renderActions();
-    this.renderRealm();
+    this.renderRoom();
     this.root.appendChild(background);
     this.root.appendChild(vignette);
     this.root.appendChild(particles);
@@ -8493,7 +8493,7 @@ var Hub = class {
     const solo = this.buildCard(
       "solo",
       "Solo Adventure",
-      "Forge a hero and delve into any realm alone. Your torch, your choices, your fate.",
+      "Forge a hero and delve into any room alone. Your torch, your choices, your fate.",
       "Begin Solo",
       () => this.onSolo()
     );
@@ -8555,7 +8555,7 @@ var Hub = class {
       ]);
       this.modules = modules;
       this.renderProgress(progress);
-      this.renderRealm();
+      this.renderRoom();
     } catch {
     }
   }
@@ -8578,37 +8578,37 @@ var Hub = class {
       this.progressEl.appendChild(el("span", {}, `${label} ${value2}`));
     });
   }
-  renderRealm() {
-    const existing = this.container.querySelector(".hub-realm");
+  renderRoom() {
+    const existing = this.container.querySelector(".hub-room");
     if (existing) existing.remove();
-    const realm = el("div", { className: "hub-realm" });
-    const header = el("div", { className: "hub-realm-header" });
-    header.appendChild(el("h3", {}, "Realms"));
-    header.appendChild(el("span", { className: "hub-realm-count" }, `${this.modules.length} available`));
-    realm.appendChild(header);
+    const room = el("div", { className: "hub-room" });
+    const header = el("div", { className: "hub-room-header" });
+    header.appendChild(el("h3", {}, "Rooms"));
+    header.appendChild(el("span", { className: "hub-room-count" }, `${this.modules.length} available`));
+    room.appendChild(header);
     if (this.modules.length === 0) {
-      realm.appendChild(el("p", { className: "hub-realm-empty" }, "Loading realms..."));
+      room.appendChild(el("p", { className: "hub-room-empty" }, "Loading rooms..."));
     } else {
-      const scroll = el("div", { className: "hub-realm-scroll" });
+      const scroll = el("div", { className: "hub-room-scroll" });
       this.modules.forEach((m) => {
-        const chip = el("div", { className: "hub-realm-chip" });
+        const chip = el("div", { className: "hub-room-chip" });
         const preview = this.buildMiniMap(m);
         if (preview) chip.appendChild(preview);
-        const meta = el("div", { className: "hub-realm-meta" });
+        const meta = el("div", { className: "hub-room-meta" });
         const theme = m.theme || "dungeon";
-        meta.appendChild(el("span", { className: `hub-realm-theme theme-${theme}` }, THEME_LABELS2[theme] || theme));
+        meta.appendChild(el("span", { className: `hub-room-theme theme-${theme}` }, THEME_LABELS2[theme] || theme));
         meta.appendChild(el("strong", {}, m.name));
-        meta.appendChild(el("span", { className: "hub-realm-size" }, `${m.width}\xD7${m.height}`));
+        meta.appendChild(el("span", { className: "hub-room-size" }, `${m.width}\xD7${m.height}`));
         chip.appendChild(meta);
         scroll.appendChild(chip);
       });
-      realm.appendChild(scroll);
+      room.appendChild(scroll);
     }
-    this.container.appendChild(realm);
+    this.container.appendChild(room);
   }
   buildMiniMap(m) {
     if (!m.tiles || m.tiles.length === 0) return null;
-    const wrap = el("div", { className: "hub-realm-map" });
+    const wrap = el("div", { className: "hub-room-map" });
     const maxRows = Math.min(m.height, 12);
     const maxCols = Math.min(m.width, 18);
     wrap.style.gridTemplateRows = `repeat(${maxRows}, 1fr)`;
