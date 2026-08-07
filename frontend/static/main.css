@@ -3176,8 +3176,8 @@ button.danger:hover:not(:disabled) {
   image-rendering: pixelated;
 }
 .game-tile {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -3219,8 +3219,8 @@ button.danger:hover:not(:disabled) {
 }
 .game-token {
   position: absolute;
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3229,9 +3229,9 @@ button.danger:hover:not(:disabled) {
 }
 .game-token .token-backing {
   position: absolute;
-  width: 36px;
-  height: 10px;
-  bottom: 6px;
+  width: 48px;
+  height: 14px;
+  bottom: 8px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.35);
   z-index: 0;
@@ -3251,8 +3251,8 @@ button.danger:hover:not(:disabled) {
 .game-token .token-image {
   position: relative;
   z-index: 1;
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   image-rendering: pixelated;
   pointer-events: none;
@@ -3260,17 +3260,17 @@ button.danger:hover:not(:disabled) {
 .game-token .token-initial {
   position: relative;
   z-index: 1;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: bold;
   color: #ffffff;
   pointer-events: none;
 }
 .game-token .token-hp-bar {
   position: absolute;
-  bottom: 2px;
-  left: 6px;
-  right: 6px;
-  height: 4px;
+  bottom: 3px;
+  left: 8px;
+  right: 8px;
+  height: 5px;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 2px;
   overflow: hidden;
@@ -3293,8 +3293,8 @@ button.danger:hover:not(:disabled) {
 }
 .slash-effect {
   position: absolute;
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   background:
     linear-gradient(
       45deg,
@@ -3320,11 +3320,11 @@ button.danger:hover:not(:disabled) {
 }
 @media (max-width: 700px) {
   .game-token .token-backing {
-    width: 28px;
-    height: 8px;
+    width: 36px;
+    height: 10px;
   }
   .game-token .token-image {
-    width: 32px;
-    height: 32px;
+    width: 42px;
+    height: 42px;
   }
 }

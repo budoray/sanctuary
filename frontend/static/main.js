@@ -5887,7 +5887,7 @@ var AutoPlayer = class {
 };
 
 // src/ui/game.ts
-var TILE_SIZE = 48;
+var TILE_SIZE = 64;
 function withTimeout(promise, ms, reason = "Operation timed out") {
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => reject(new Error(reason)), ms);
@@ -6936,8 +6936,8 @@ var Game = class {
     const cx = (fromX + toX) / 2 * TILE_SIZE + TILE_SIZE / 2;
     const cy = (fromY + toY) / 2 * TILE_SIZE + TILE_SIZE / 2;
     const slash = el("div", { className: "slash-effect" });
-    slash.style.left = `${cx - 24}px`;
-    slash.style.top = `${cy - 24}px`;
+    slash.style.left = `${cx - TILE_SIZE / 2}px`;
+    slash.style.top = `${cy - TILE_SIZE / 2}px`;
     this.fxContainer.appendChild(slash);
     window.setTimeout(() => slash.remove(), 350);
   }
