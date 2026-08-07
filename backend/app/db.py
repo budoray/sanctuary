@@ -50,6 +50,8 @@ class SessionRecord(Base):
     character_id = Column(String, nullable=False)
     name = Column(String, nullable=False, default="Adventure")
     status = Column(String, default="active")
+    visibility = Column(String, default="solo")  # solo, friends, public, invite
+    invite_code = Column(String, nullable=True, index=True)
     state = Column(Text, default="{}")  # full session engine state
     created_at = Column(DateTime, default=_utc_now)
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)

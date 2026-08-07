@@ -2115,6 +2115,91 @@ button.danger:hover:not(:disabled) {
   outline: none;
   border-color: var(--accent);
 }
+.session-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 8px;
+}
+.session-tab {
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.session-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent);
+}
+.session-tab.active {
+  background: rgba(192, 57, 43, 0.15);
+  border-color: var(--accent);
+  color: var(--text);
+}
+.invite-code {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background: rgba(241, 196, 15, 0.1);
+  border: 1px solid rgba(241, 196, 15, 0.3);
+  border-radius: 4px;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  font-family: monospace;
+}
+.adventure-create {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at center,
+      #121418 0%,
+      #050607 100%);
+  z-index: 100;
+  overflow-y: auto;
+  padding: 24px;
+}
+.adventure-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.adventure-create-form label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.adventure-create-form input,
+.adventure-create-form select {
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+.adventure-create-form input:focus,
+.adventure-create-form select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.visibility-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .campaign-forms {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2496,7 +2581,7 @@ button.danger:hover:not(:disabled) {
 }
 .hub-actions {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 28px;
 }
 .hub-card {
@@ -2564,6 +2649,9 @@ button.danger:hover:not(:disabled) {
 }
 .hub-card-group .hub-card-icon::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c0392b'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
+}
+.hub-card-create .hub-card-icon::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c0392b'%3E%3Cpath d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'/%3E%3C/svg%3E");
 }
 .hub-card-body {
   display: flex;

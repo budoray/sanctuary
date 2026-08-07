@@ -4,11 +4,11 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import exists, or_, select
+from sqlalchemy import and_, exists, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.auth import require_account
-from backend.app.db import CampaignMemberRecord, CampaignRecord, CharacterRecord, SessionRecord, get_db, record_event
+from backend.app.db import CampaignMemberRecord, CampaignRecord, CharacterRecord, FriendRecord, SessionRecord, get_db, record_event
 from backend.app.dependencies import limit_actions
 import random
 
@@ -153,6 +153,13 @@ async def create_session(
     module_id = data.get("module_id", DEFAULT_MODULE)
     campaign_id = data.get("campaign_id")
     turn_timer_seconds = int(data.get("turn_timer_seconds", 0) or 0)
+    visibility = data.get("visibility", "solo")
+    if visibility not in ("solo", "friends", "public", "invite"):
+        visibility = "solo"
+    name = data.get("name", "").strip()
+    invite_code = None
+    if visibility in ("invite", "public", "friends"):
+        invite_code = str(uuid.uuid4())[:6].upper()
 
     result = await db.execute(
         select(CharacterRecord).where(
@@ -219,8 +226,10 @@ async def create_session(
         campaign_id=campaign_id,
         module_id=module_id,
         character_id=character_id,
-        name=f"{char.name} in {mod.name}",
+        name=name or f"{char.name} in {mod.name}",
         status=state["status"],
+        visibility=visibility,
+        invite_code=invite_code,
         state=json.dumps(state),
     )
     db.add(session_record)
@@ -295,11 +304,112 @@ async def list_sessions(
             "name": r.name,
             "module_id": r.module_id,
             "character_id": r.character_id,
+            "account_id": r.account_id,
             "status": r.status,
+            "visibility": r.visibility,
+            "invite_code": r.invite_code,
             "turn": state.get("turn", 1),
             "phase": state.get("phase", "player"),
         })
     return {"sessions": sessions}
+
+
+@router.get("/sessions/joinable")
+async def list_joinable_sessions(
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    """Return public sessions and friend-only sessions owned by accepted friends."""
+    friend_ids = (
+        select(
+            FriendRecord.friend_account_id.label("fid")
+        )
+        .where(
+            FriendRecord.account_id == account_id,
+            FriendRecord.status == "accepted",
+        )
+        .union(
+            select(FriendRecord.account_id.label("fid")).where(
+                FriendRecord.friend_account_id == account_id,
+                FriendRecord.status == "accepted",
+            )
+        )
+        .scalar_subquery()
+    )
+    result = await db.execute(
+        select(SessionRecord)
+        .where(
+            SessionRecord.status == "active",
+            SessionRecord.account_id != account_id,
+            or_(
+                SessionRecord.visibility == "public",
+                and_(
+                    SessionRecord.visibility == "friends",
+                    SessionRecord.account_id.in_(friend_ids),
+                ),
+            ),
+        )
+        .order_by(SessionRecord.updated_at.desc())
+    )
+    records = result.scalars().all()
+    sessions = []
+    for r in records:
+        try:
+            state = json.loads(r.state)
+        except Exception:
+            state = {"status": r.status}
+        sessions.append({
+            "id": r.id,
+            "name": r.name,
+            "module_id": r.module_id,
+            "account_id": r.account_id,
+            "status": r.status,
+            "visibility": r.visibility,
+            "turn": state.get("turn", 1),
+            "phase": state.get("phase", "player"),
+        })
+    return {"sessions": sessions}
+
+
+@router.post("/sessions/join-by-code")
+async def join_session_by_code(
+    data: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    code = (data.get("code") or "").upper().strip()
+    character_id = data.get("character_id")
+    if not code:
+        raise HTTPException(status_code=400, detail="Invite code required")
+    result = await db.execute(
+        select(SessionRecord).where(
+            SessionRecord.invite_code == code,
+            SessionRecord.status == "active",
+        )
+    )
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="Adventure not found")
+    if record.visibility == "friends":
+        friend = await db.execute(
+            select(FriendRecord).where(
+                or_(
+                    and_(
+                        FriendRecord.account_id == account_id,
+                        FriendRecord.friend_account_id == record.account_id,
+                        FriendRecord.status == "accepted",
+                    ),
+                    and_(
+                        FriendRecord.account_id == record.account_id,
+                        FriendRecord.friend_account_id == account_id,
+                        FriendRecord.status == "accepted",
+                    ),
+                )
+            )
+        )
+        if not friend.scalar_one_or_none():
+            raise HTTPException(status_code=403, detail="Adventure is friends-only")
+    return await _join_existing_session(record, character_id, account_id, db)
 
 
 @router.get("/sessions/active")
@@ -567,30 +677,20 @@ async def rest_in_session(
     return {"session": session_view}
 
 
-@router.post("/sessions/{session_id}/join")
-async def join_session(
-    session_id: str,
-    data: dict[str, Any],
-    db: AsyncSession = Depends(get_db),
-    account_id: int = Depends(require_account),
-):
-    result = await db.execute(
-        select(SessionRecord).where(SessionRecord.id == session_id)
-    )
-    record = result.scalar_one_or_none()
-    if not record or not await _can_access_session(record, account_id, db):
-        raise HTTPException(status_code=404, detail="Session not found")
-    if not record.campaign_id:
-        raise HTTPException(status_code=400, detail="Only campaign sessions can be joined")
-
-    character_id = data.get("character_id")
-    result = await db.execute(
+async def _join_existing_session(
+    record: SessionRecord,
+    character_id: Any,
+    account_id: int,
+    db: AsyncSession,
+) -> dict[str, Any]:
+    """Add a player's character to an existing session."""
+    char_result = await db.execute(
         select(CharacterRecord).where(
             CharacterRecord.id == character_id,
             CharacterRecord.account_id == account_id,
         )
     )
-    char_record = result.scalar_one_or_none()
+    char_record = char_result.scalar_one_or_none()
     if not char_record:
         raise HTTPException(status_code=404, detail="Character not found")
 
@@ -631,12 +731,36 @@ async def join_session(
         await socket_manager.emit(
             "session_update",
             {"session": session_view},
-            room=session_id,
+            room=record.id,
         )
     except Exception:
         pass
 
     return {"session": session_view}
+
+
+@router.post("/sessions/{session_id}/join")
+async def join_session(
+    session_id: str,
+    data: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord).where(SessionRecord.id == session_id)
+    )
+    record = result.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if record.status != "active":
+        raise HTTPException(status_code=400, detail="Session is not active")
+    if record.account_id == account_id:
+        raise HTTPException(status_code=400, detail="You own this session")
+    if record.campaign_id and not await _can_access_session(record, account_id, db):
+        raise HTTPException(status_code=404, detail="Session not found")
+    if not record.campaign_id and record.visibility not in ("public", "friends", "invite"):
+        raise HTTPException(status_code=400, detail="Session is not joinable")
+    return await _join_existing_session(record, data.get("character_id"), account_id, db)
 
 
 @router.delete("/sessions/{session_id}")

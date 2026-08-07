@@ -129,19 +129,30 @@ async function joinCampaign(campaignId, password) {
     body: JSON.stringify({ password })
   });
 }
-async function createSession(characterId, moduleId = "sample_lair", campaignId, turnTimerSeconds = 0) {
+async function createSession(characterId, moduleId = "sample_lair", campaignId, turnTimerSeconds = 0, options = {}) {
   return api("/api/sessions", {
     method: "POST",
     body: JSON.stringify({
       character_id: characterId,
       module_id: moduleId,
       campaign_id: campaignId,
-      turn_timer_seconds: turnTimerSeconds
+      turn_timer_seconds: turnTimerSeconds,
+      visibility: options.visibility || "solo",
+      name: options.name || ""
     })
   });
 }
 async function listSessions() {
   return api("/api/sessions");
+}
+async function listJoinableSessions() {
+  return api("/api/sessions/joinable");
+}
+async function joinSessionByCode(code, characterId) {
+  return api("/api/sessions/join-by-code", {
+    method: "POST",
+    body: JSON.stringify({ code, character_id: characterId })
+  });
 }
 async function deleteSession(sessionId) {
   return api(`/api/sessions/${sessionId}`, { method: "DELETE" });
@@ -2899,6 +2910,128 @@ var CharacterSelect = class {
   }
   titleCase(str) {
     return str.replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+  destroy() {
+    this.root.remove();
+  }
+};
+
+// src/ui/adventure-create.ts
+var AdventureCreate = class {
+  root;
+  onCreate;
+  onBack;
+  characters = [];
+  modules = [];
+  selectedCharacterId = "";
+  selectedModuleId = "sample_lair";
+  constructor(container, onCreate, onBack) {
+    this.onCreate = onCreate;
+    this.onBack = onBack;
+    this.root = el("div", { className: "adventure-create" });
+    const panel = el("div", { className: "session-panel adventure-create-panel" });
+    panel.appendChild(el("h1", {}, "Create Adventure"));
+    panel.appendChild(el("p", { className: "subtitle" }, "Choose a hero, a room, and who can join."));
+    this.formEl = el("div", { className: "adventure-create-form" });
+    panel.appendChild(this.formEl);
+    panel.appendChild(this.buildFooter());
+    this.root.appendChild(panel);
+    container.appendChild(this.root);
+    this.load();
+  }
+  async load() {
+    try {
+      const [{ characters }, { modules }] = await Promise.all([
+        listCharacters(),
+        listModules()
+      ]);
+      this.characters = characters;
+      this.modules = modules;
+      if (characters.length > 0) this.selectedCharacterId = characters[0].id;
+      if (modules.length > 0) this.selectedModuleId = modules[0].id;
+      this.render();
+    } catch (err) {
+      clear(this.formEl);
+      this.formEl.appendChild(el("div", { className: "empty error" }, err.message || "Failed to load data."));
+    }
+  }
+  render() {
+    clear(this.formEl);
+    this.formEl.appendChild(el("label", {}, "Adventure Name"));
+    this.nameInput = el("input", { type: "text", placeholder: "e.g. Goblin Lair Run" });
+    this.formEl.appendChild(this.nameInput);
+
+    this.formEl.appendChild(el("label", {}, "Visibility"));
+    const visibilityWrap = el("div", { className: "visibility-options" });
+    const visibilities = [
+      { key: "solo", label: "Solo", desc: "Only you" },
+      { key: "friends", label: "Friends", desc: "Friends can join" },
+      { key: "public", label: "Public", desc: "Anyone can join" },
+      { key: "invite", label: "Invite Only", desc: "Code required" }
+    ];
+    this.visibilitySelect = el("select", {});
+    visibilities.forEach((v) => {
+      const opt = document.createElement("option");
+      opt.value = v.key;
+      opt.textContent = `${v.label} — ${v.desc}`;
+      if (v.key === "friends") opt.selected = true;
+      this.visibilitySelect.appendChild(opt);
+    });
+    this.formEl.appendChild(this.visibilitySelect);
+
+    this.formEl.appendChild(el("label", {}, "Room"));
+    const moduleSelect = el("select", {});
+    this.modules.forEach((m) => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = m.name;
+      if (m.id === this.selectedModuleId) opt.selected = true;
+      moduleSelect.appendChild(opt);
+    });
+    moduleSelect.onchange = () => this.selectedModuleId = moduleSelect.value;
+    this.formEl.appendChild(moduleSelect);
+
+    this.formEl.appendChild(el("label", {}, "Hero"));
+    if (this.characters.length === 0) {
+      this.formEl.appendChild(el("div", { className: "empty" }, "No heroes. Create one first."));
+    } else {
+      const charSelect = el("select", {});
+      this.characters.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = c.name;
+        if (c.id === this.selectedCharacterId) opt.selected = true;
+        charSelect.appendChild(opt);
+      });
+      charSelect.onchange = () => this.selectedCharacterId = charSelect.value;
+      this.formEl.appendChild(charSelect);
+    }
+  }
+  buildFooter() {
+    const footer = el("div", { className: "editor-footer" });
+    footer.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.doCreate()
+    }, "Create Adventure"));
+    footer.appendChild(el("button", {
+      onclick: () => this.onBack()
+    }, "\u2190 Back"));
+    return footer;
+  }
+  async doCreate() {
+    if (!this.selectedCharacterId) {
+      alert("Select a hero first.");
+      return;
+    }
+    try {
+      const { session } = await createSession(this.selectedCharacterId, this.selectedModuleId, void 0, 0, {
+        visibility: this.visibilitySelect.value,
+        name: this.nameInput.value.trim()
+      });
+      this.onCreate(session);
+    } catch (err) {
+      alert(err.message || "Failed to create adventure");
+    }
   }
   destroy() {
     this.root.remove();
@@ -8486,12 +8619,13 @@ var Hub = class {
   container;
   modules = [];
   progressEl;
-  constructor(container, onSolo, onJoin, onCampaigns, onResume) {
+  constructor(container, onSolo, onJoin, onCampaigns, onResume, onCreateAdventure) {
     this.root = el("div", { className: "sanctuary-hub" });
     this.onSolo = onSolo;
     this.onJoin = onJoin;
     this.onCampaigns = onCampaigns;
     this.onResume = onResume;
+    this.onCreateAdventure = onCreateAdventure;
     const background = el("div", { className: "hub-background" });
     const vignette = el("div", { className: "hub-vignette" });
     const particles = el("div", { className: "hub-particles" });
@@ -8535,10 +8669,17 @@ var Hub = class {
       "Begin Solo",
       () => this.onSolo()
     );
+    const create = this.buildCard(
+      "create",
+      "Create Adventure",
+      "Start a solo or co-op room with your hero, then invite friends or keep it private.",
+      "Create Adventure",
+      () => this.onCreateAdventure()
+    );
     const join = this.buildCard(
       "join",
       "Join Adventure",
-      "Resume a saved session or join an active campaign already in progress with friends.",
+      "Resume a saved session or join an active adventure already in progress with friends.",
       "Join / Resume",
       () => this.onJoin()
     );
@@ -8550,6 +8691,7 @@ var Hub = class {
       () => this.onCampaigns()
     );
     grid.appendChild(solo);
+    grid.appendChild(create);
     grid.appendChild(join);
     grid.appendChild(group);
     this.container.appendChild(grid);
@@ -8670,18 +8812,24 @@ var Hub = class {
 var SessionSelect = class {
   root;
   onResume;
+  onJoin;
   onNew;
   onBack;
   gridEl;
-  constructor(container, onResume, onNew, onBack) {
+  tabContent;
+  activeTab = "yours";
+  characters = [];
+  constructor(container, onResume, onJoin, onNew, onBack) {
     this.root = el("div", { className: "adventure-manager" });
     this.onResume = onResume;
+    this.onJoin = onJoin;
     this.onNew = onNew;
     this.onBack = onBack;
     const background = el("div", { className: "adventure-manager-background" });
     const vignette = el("div", { className: "adventure-manager-vignette" });
     const shell = el("div", { className: "adventure-manager-shell" });
     shell.appendChild(this.buildHeader());
+    shell.appendChild(this.buildTabs());
     this.gridEl = el("div", { className: "sessions-grid" });
     shell.appendChild(this.gridEl);
     shell.appendChild(this.buildFooter());
@@ -8689,16 +8837,17 @@ var SessionSelect = class {
     this.root.appendChild(vignette);
     this.root.appendChild(shell);
     container.appendChild(this.root);
-    this.load();
+    this.loadCharacters();
+    this.loadTab();
   }
   buildHeader() {
     const header = el("header", { className: "adventure-manager-header" });
     const title = el("div", { className: "adventure-manager-title" });
-    title.appendChild(el("h1", {}, "Join / Resume"));
-    title.appendChild(el("p", {}, "Pick up where you left off, or start a new adventurer."));
+    title.appendChild(el("h1", {}, "Join Adventure"));
+    title.appendChild(el("p", {}, "Resume yours, join a friend's, or enter an invite code."));
     header.appendChild(title);
     const actions = el("div", { className: "adventure-manager-actions" });
-    actions.appendChild(el("button", { className: "adventure-manager-btn", onclick: () => this.onNew() }, "+ New Adventurer"));
+    actions.appendChild(el("button", { className: "adventure-manager-btn", onclick: () => this.onNew() }, "+ New Hero"));
     actions.appendChild(el("button", { className: "danger", onclick: () => this.onDeleteAll() }, "Delete All"));
     if (this.onBack) {
       actions.appendChild(el("button", { onclick: () => this.onBack() }, "\u2190 Back"));
@@ -8710,52 +8859,140 @@ var SessionSelect = class {
     if (!confirm("Delete ALL your saved adventures? This cannot be undone.")) return;
     try {
       await deleteAllSessions();
-      this.load();
+      this.loadTab();
     } catch (err) {
       clear(this.gridEl);
       this.gridEl.appendChild(el("div", { className: "sessions-empty error" }, err.message || "Failed to delete sessions."));
     }
   }
-  buildFooter() {
-    const footer = el("footer", { className: "adventure-manager-footer" });
-    if (this.onBack) {
-      footer.appendChild(el("button", { className: "adventure-manager-back", onclick: () => this.onBack() }, "\u2190 Back to Sanctuary"));
-    }
-    return footer;
+  buildTabs() {
+    const tabs = el("div", { className: "session-tabs" });
+    const items = [
+      { key: "yours", label: "Your Adventures" },
+      { key: "joinable", label: "Joinable" },
+      { key: "code", label: "Join by Code" }
+    ];
+    items.forEach((item) => {
+      const btn = el("button", {
+        className: `session-tab${item.key === this.activeTab ? " active" : ""}`,
+        onclick: () => this.switchTab(item.key)
+      }, item.label);
+      tabs.appendChild(btn);
+    });
+    return tabs;
   }
-  async load() {
+  switchTab(tab) {
+    this.activeTab = tab;
+    this.root.querySelectorAll(".session-tab").forEach((b) => {
+      b.classList.toggle("active", b.textContent === (tab === "yours" ? "Your Adventures" : tab === "joinable" ? "Joinable" : "Join by Code"));
+    });
+    this.loadTab();
+  }
+  async loadCharacters() {
     try {
-      const { sessions } = await listSessions();
-      this.render(sessions);
-    } catch (err) {
-      clear(this.gridEl);
-      this.gridEl.appendChild(el("div", { className: "sessions-empty error" }, err.message || "Failed to load sessions."));
+      const { characters } = await listCharacters();
+      this.characters = characters;
+    } catch {
+      this.characters = [];
     }
   }
-  render(sessions) {
+  async loadTab() {
     clear(this.gridEl);
+    if (this.activeTab === "yours") {
+      try {
+        const { sessions } = await listSessions();
+        this.renderYours(sessions);
+      } catch (err) {
+        this.gridEl.appendChild(el("div", { className: "sessions-empty error" }, err.message || "Failed to load sessions."));
+      }
+    } else if (this.activeTab === "joinable") {
+      try {
+        const { sessions } = await listJoinableSessions();
+        this.renderJoinable(sessions);
+      } catch (err) {
+        this.gridEl.appendChild(el("div", { className: "sessions-empty error" }, err.message || "Failed to load adventures."));
+      }
+    } else if (this.activeTab === "code") {
+      this.renderCodeForm();
+    }
+  }
+  renderYours(sessions) {
     if (sessions.length === 0) {
       const empty2 = el("div", { className: "sessions-empty" });
       empty2.appendChild(el("h2", {}, "No saved adventures"));
-      empty2.appendChild(el("p", {}, "Your active sessions will appear here. Create a hero to begin."));
-      empty2.appendChild(el("button", { className: "enter", onclick: () => this.onNew() }, "Create New Adventurer"));
+      empty2.appendChild(el("p", {}, "Create a solo or co-op adventure from the Sanctuary hub."));
       this.gridEl.appendChild(empty2);
       return;
     }
-    sessions.forEach((s) => {
-      const phaseText = s.phase === "player" ? "Your Move" : "DM's Move";
-      const statusLabel = s.status === "active" ? "Active" : "Complete";
-      const statusClass = s.status === "active" ? "active" : "complete";
-      const card = el("div", { className: "session-card" });
-      const header = el("div", { className: "session-card-header" });
-      header.appendChild(el("span", { className: `session-status ${statusClass}` }, statusLabel));
-      header.appendChild(el("span", { className: "session-turn" }, `Turn ${s.turn}`));
-      card.appendChild(header);
-      const body = el("div", { className: "session-card-body" });
-      body.appendChild(el("h3", {}, s.name));
-      body.appendChild(el("p", {}, `${phaseText} \xB7 ${s.module_id}`));
-      card.appendChild(body);
-      const actions = el("div", { className: "session-card-actions" });
+    sessions.forEach((s) => this.renderSessionCard(s, true));
+  }
+  renderJoinable(sessions) {
+    if (sessions.length === 0) {
+      const empty2 = el("div", { className: "sessions-empty" });
+      empty2.appendChild(el("h2", {}, "No adventures to join"));
+      empty2.appendChild(el("p", {}, "No public or friend adventures are active right now."));
+      this.gridEl.appendChild(empty2);
+      return;
+    }
+    sessions.forEach((s) => this.renderSessionCard(s, false));
+  }
+  renderCodeForm() {
+    const form = el("div", { className: "sessions-empty" });
+    form.appendChild(el("h2", {}, "Join by Invite Code"));
+    form.appendChild(el("p", {}, "Enter the code shared by the host."));
+    const codeInput = el("input", { type: "text", placeholder: "ABC123", style: "text-transform: uppercase;" });
+    const charSelect = el("select", {});
+    if (this.characters.length === 0) {
+      charSelect.appendChild(el("option", {}, "No heroes"));
+      charSelect.disabled = true;
+    } else {
+      this.characters.forEach((c) => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = c.name;
+        charSelect.appendChild(opt);
+      });
+    }
+    const joinBtn = el("button", {
+      className: "enter",
+      disabled: this.characters.length === 0,
+      onclick: async () => {
+        const code = codeInput.value.trim().toUpperCase();
+        if (!code) return;
+        joinBtn.disabled = true;
+        try {
+          const { session } = await joinSessionByCode(code, charSelect.value);
+          this.onJoin(session);
+        } catch (err) {
+          alert(err.message || "Failed to join adventure");
+          joinBtn.disabled = false;
+        }
+      }
+    }, "Join");
+    form.appendChild(codeInput);
+    form.appendChild(el("label", {}, "Hero"));
+    form.appendChild(charSelect);
+    form.appendChild(joinBtn);
+    this.gridEl.appendChild(form);
+  }
+  renderSessionCard(s, isOwner) {
+    const phaseText = s.phase === "player" ? "Your Move" : "DM's Move";
+    const statusLabel = s.status === "active" ? "Active" : "Complete";
+    const statusClass = s.status === "active" ? "active" : "complete";
+    const card = el("div", { className: "session-card" });
+    const header = el("div", { className: "session-card-header" });
+    header.appendChild(el("span", { className: `session-status ${statusClass}` }, statusLabel));
+    header.appendChild(el("span", { className: "session-turn" }, `Turn ${s.turn}`));
+    card.appendChild(header);
+    const body = el("div", { className: "session-card-body" });
+    body.appendChild(el("h3", {}, s.name));
+    body.appendChild(el("p", {}, `${phaseText} \xB7 ${s.module_id}${s.visibility ? ` \xB7 ${s.visibility}` : ""}`));
+    if (s.invite_code) {
+      body.appendChild(el("p", { className: "invite-code" }, `Code: ${s.invite_code}`));
+    }
+    card.appendChild(body);
+    const actions = el("div", { className: "session-card-actions" });
+    if (isOwner) {
       actions.appendChild(el("button", {
         className: "enter",
         onclick: () => this.resume(s.id)
@@ -8764,15 +9001,20 @@ var SessionSelect = class {
         className: "danger",
         onclick: () => this.onDelete(s.id)
       }, "Delete"));
-      card.appendChild(actions);
-      this.gridEl.appendChild(card);
-    });
+    } else {
+      actions.appendChild(el("button", {
+        className: "enter",
+        onclick: () => this.joinById(s.id)
+      }, "Join"));
+    }
+    card.appendChild(actions);
+    this.gridEl.appendChild(card);
   }
   async onDelete(sessionId) {
     if (!confirm("Delete this adventure? This cannot be undone.")) return;
     try {
       await deleteSession(sessionId);
-      this.load();
+      this.loadTab();
     } catch (err) {
       clear(this.gridEl);
       this.gridEl.appendChild(el("div", { className: "sessions-empty error" }, err.message || "Failed to delete session."));
@@ -8786,6 +9028,42 @@ var SessionSelect = class {
       clear(this.gridEl);
       this.gridEl.appendChild(el("div", { className: "sessions-empty error" }, err.message || "Failed to resume session."));
     }
+  }
+  async joinById(sessionId) {
+    if (this.characters.length === 0) {
+      alert("Create a hero first.");
+      return;
+    }
+    const charSelect = el("select", {});
+    this.characters.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c.id;
+      opt.textContent = c.name;
+      charSelect.appendChild(opt);
+    });
+    const charId = prompt("Join with which hero? (enter hero name)");
+    if (!charId) return;
+    const character = this.characters.find((c) => c.name.toLowerCase() === charId.toLowerCase());
+    if (!character) {
+      alert("Hero not found.");
+      return;
+    }
+    try {
+      const { session } = await api(`/api/sessions/${sessionId}/join`, {
+        method: "POST",
+        body: JSON.stringify({ character_id: character.id })
+      });
+      this.onJoin(session);
+    } catch (err) {
+      alert(err.message || "Failed to join adventure");
+    }
+  }
+  buildFooter() {
+    const footer = el("footer", { className: "adventure-manager-footer" });
+    if (this.onBack) {
+      footer.appendChild(el("button", { className: "adventure-manager-back", onclick: () => this.onBack() }, "\u2190 Back to Sanctuary"));
+    }
+    return footer;
   }
   destroy() {
     this.root.remove();
@@ -8823,8 +9101,17 @@ var SanctuaryApp = class {
       () => this.showSessions(),
       () => this.showCampaigns(),
       () => this.showSessions(),
-      null,
-      () => this.showDmWorkshop()
+      () => this.showAdventureCreate()
+    );
+  }
+  showAdventureCreate() {
+    this.setScreen("adventure-create");
+    clear(this.app);
+    this.current?.destroy();
+    this.current = new AdventureCreate(
+      this.app,
+      (session) => this.resumeGame(session),
+      () => this.showHub()
     );
   }
   showSelect() {
@@ -8899,6 +9186,7 @@ var SanctuaryApp = class {
     this.current?.destroy();
     this.current = new SessionSelect(
       this.app,
+      (session) => this.resumeGame(session),
       (session) => this.resumeGame(session),
       () => this.showSelect(),
       () => this.showHub()
