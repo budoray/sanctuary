@@ -1,4 +1,4 @@
-"""Room editor API: CRUD for 16x16 dungeon rooms."""
+"""Room editor API: CRUD for variable-sized dungeon rooms."""
 import json
 from typing import Any
 
@@ -11,11 +11,31 @@ from backend.app.db import RoomRecord, get_db
 
 router = APIRouter(tags=["rooms"])
 
-DEFAULT_TILES = [["1"] * 16 for _ in range(16)]
-# carve a small starting chamber
-for y in range(6, 10):
-    for x in range(6, 10):
-        DEFAULT_TILES[y][x] = "0"
+MIN_SIZE = 4
+MAX_SIZE = 64
+
+
+def _default_tiles(width: int = 16, height: int = 16) -> list[list[str]]:
+    tiles = [["1"] * width for _ in range(height)]
+    cx, cy = width // 2, height // 2
+    for y in range(cy - 1, cy + 2):
+        for x in range(cx - 1, cx + 2):
+            if 0 <= y < height and 0 <= x < width:
+                tiles[y][x] = "0"
+    return tiles
+
+
+def _validate_tiles(tiles: Any) -> tuple[list[list[str]], int, int]:
+    if not isinstance(tiles, list) or not tiles:
+        raise HTTPException(status_code=400, detail="tiles must be a non-empty list of rows")
+    height = len(tiles)
+    width = len(tiles[0]) if height else 0
+    if height < MIN_SIZE or width < MIN_SIZE or height > MAX_SIZE or width > MAX_SIZE:
+        raise HTTPException(status_code=400, detail=f"room must be between {MIN_SIZE}x{MIN_SIZE} and {MAX_SIZE}x{MAX_SIZE}")
+    if any(len(row) != width for row in tiles):
+        raise HTTPException(status_code=400, detail="all tile rows must have the same width")
+    normalized = [[str(cell) for cell in row] for row in tiles]
+    return normalized, width, height
 
 
 def _room_response(record: RoomRecord) -> dict[str, Any]:
@@ -23,6 +43,8 @@ def _room_response(record: RoomRecord) -> dict[str, Any]:
         "id": record.id,
         "name": record.name,
         "theme": record.theme or "dungeon",
+        "width": record.width or 16,
+        "height": record.height or 16,
         "tiles": json.loads(record.tiles or "[]"),
         "entities": json.loads(record.entities or "[]"),
         "created_at": record.created_at.isoformat() if record.created_at else None,
@@ -51,9 +73,15 @@ async def create_room(
 ):
     name = data.get("name", "New Room").strip() or "New Room"
     theme = data.get("theme", "dungeon")
+    width = int(data.get("width", 16))
+    height = int(data.get("height", 16))
     tiles = data.get("tiles")
-    if not isinstance(tiles, list) or len(tiles) != 16 or any(len(row) != 16 for row in tiles):
-        tiles = DEFAULT_TILES
+    if isinstance(tiles, list) and tiles:
+        tiles, width, height = _validate_tiles(tiles)
+    else:
+        width = max(MIN_SIZE, min(MAX_SIZE, width))
+        height = max(MIN_SIZE, min(MAX_SIZE, height))
+        tiles = _default_tiles(width, height)
     entities = data.get("entities", [])
     if not isinstance(entities, list):
         entities = []
@@ -62,6 +90,8 @@ async def create_room(
         account_id=account_id,
         name=name,
         theme=theme,
+        width=width,
+        height=height,
         tiles=json.dumps(tiles),
         entities=json.dumps(entities),
     )
@@ -101,11 +131,16 @@ async def update_room(
     if "theme" in data:
         record.theme = data["theme"]
     if "tiles" in data:
-        tiles = data["tiles"]
-        if isinstance(tiles, list) and len(tiles) == 16 and all(len(row) == 16 for row in tiles):
-            record.tiles = json.dumps(tiles)
-        else:
-            raise HTTPException(status_code=400, detail="tiles must be a 16x16 grid")
+        tiles, width, height = _validate_tiles(data["tiles"])
+        record.tiles = json.dumps(tiles)
+        record.width = width
+        record.height = height
+    if "width" in data and "height" in data and "tiles" not in data:
+        width = max(MIN_SIZE, min(MAX_SIZE, int(data["width"])))
+        height = max(MIN_SIZE, min(MAX_SIZE, int(data["height"])))
+        record.width = width
+        record.height = height
+        record.tiles = json.dumps(_default_tiles(width, height))
     if "entities" in data:
         entities = data["entities"]
         if not isinstance(entities, list):

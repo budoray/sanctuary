@@ -62,7 +62,9 @@ class RoomRecord(Base):
     account_id = Column(Integer, index=True, nullable=False)
     name = Column(String, nullable=False)
     theme = Column(String, default="dungeon")
-    tiles = Column(Text, default="[]")  # JSON 16x16 grid
+    width = Column(Integer, default=16)
+    height = Column(Integer, default=16)
+    tiles = Column(Text, default="[]")  # JSON grid
     entities = Column(Text, default="[]")  # JSON list of placed entities
     created_at = Column(DateTime, default=_utc_now)
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)

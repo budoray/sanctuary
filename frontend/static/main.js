@@ -811,7 +811,9 @@ var RoomEditor = class {
     this.room = room;
     this.onSave = onSave;
     this.onBack = onBack;
-    this.tiles = this.ensureTiles(room.tiles);
+    this.width = Math.max(4, Math.min(64, room.width || 16));
+    this.height = Math.max(4, Math.min(64, room.height || 16));
+    this.tiles = this.ensureTiles(room.tiles, this.width, this.height);
     this.entities = (room.entities || []).slice();
     this.root = el("div", { className: "room-editor" });
     const panel = el("div", { className: "session-panel editor-panel" });
@@ -827,8 +829,12 @@ var RoomEditor = class {
     container.appendChild(this.root);
     this.loadRefs();
   }
-  ensureTiles(tiles) {
-    return Array.from({ length: 16 }, (_, y) => Array.from({ length: 16 }, (_, x) => tiles?.[y]?.[x] != null ? String(tiles[y][x]) : "1"));
+  ensureTiles(tiles, width, height) {
+    const w = Math.max(4, Math.min(64, width || 16));
+    const h = Math.max(4, Math.min(64, height || 16));
+    return Array.from({ length: h }, (_, y) =>
+      Array.from({ length: w }, (_, x) => tiles?.[y]?.[x] != null ? String(tiles[y][x]) : "1")
+    );
   }
   async loadRefs() {
     try {
@@ -873,6 +879,16 @@ var RoomEditor = class {
     form.appendChild(this.nameInput);
     form.appendChild(el("label", {}, "Theme"));
     form.appendChild(this.themeSelect);
+    this.widthInput = el("input", { type: "number", value: String(this.width), min: "4", max: "64" });
+    this.heightInput = el("input", { type: "number", value: String(this.height), min: "4", max: "64" });
+    form.appendChild(el("label", {}, "Width"));
+    form.appendChild(this.widthInput);
+    form.appendChild(el("label", {}, "Height"));
+    form.appendChild(this.heightInput);
+    form.appendChild(el("button", {
+      className: "solo-hub-btn",
+      onclick: () => this.resizeGrid()
+    }, "Resize Grid"));
     return form;
   }
   buildToolbar() {
@@ -920,11 +936,24 @@ var RoomEditor = class {
     this.renderGrid();
     return this.gridEl;
   }
+  resizeGrid() {
+    const newW = Math.max(4, Math.min(64, parseInt(this.widthInput.value, 10) || 16));
+    const newH = Math.max(4, Math.min(64, parseInt(this.heightInput.value, 10) || 16));
+    const old = this.tiles;
+    this.tiles = Array.from({ length: newH }, (_, y) =>
+      Array.from({ length: newW }, (_, x) => old[y]?.[x] != null ? old[y][x] : "1")
+    );
+    this.width = newW;
+    this.height = newH;
+    this.widthInput.value = String(newW);
+    this.heightInput.value = String(newH);
+    this.renderGrid();
+  }
   renderGrid() {
     clear(this.gridEl);
-    this.gridEl.style.gridTemplateColumns = `repeat(16, 24px)`;
-    for (let y = 0; y < 16; y++) {
-      for (let x = 0; x < 16; x++) {
+    this.gridEl.style.gridTemplateColumns = `repeat(${this.width}, 24px)`;
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
         const tile = this.tiles[y][x];
         const entity = this.entities.find((e) => e.x === x && e.y === y);
         const cell = el("div", {
@@ -1075,6 +1104,8 @@ var RoomEditor = class {
       await updateRoom(this.room.id, {
         name: this.nameInput.value.trim() || this.room.name,
         theme: this.themeSelect.value,
+        width: this.width,
+        height: this.height,
         tiles: this.tiles,
         entities: this.entities
       });
@@ -1259,10 +1290,13 @@ var DungeonEditor = class {
     const section = el("div", { className: "workshop-section" });
     section.appendChild(el("h2", {}, "Start Position"));
     const form = el("div", { className: "editor-form inline" });
-    this.startRoomSelect = el("select", {});
+    this.startRoomSelect = el("select", {
+      onchange: () => this.updateStartBounds()
+    });
     this.startXInput = el("input", { type: "number", min: 1, max: 14, value: this.dungeon.start_x ?? 8 });
     this.startYInput = el("input", { type: "number", min: 1, max: 14, value: this.dungeon.start_y ?? 8 });
     this.updateStartRoomOptions();
+    this.updateStartBounds();
     form.appendChild(el("label", {}, "Start Room"));
     form.appendChild(this.startRoomSelect);
     form.appendChild(el("label", {}, "X"));
@@ -1271,6 +1305,18 @@ var DungeonEditor = class {
     form.appendChild(this.startYInput);
     section.appendChild(form);
     return section;
+  }
+  updateStartBounds() {
+    const roomId = this.startRoomSelect.value;
+    const room = this.rooms.find((r) => r.id === roomId);
+    const w = Math.max(4, Math.min(64, room?.width || 16));
+    const h = Math.max(4, Math.min(64, room?.height || 16));
+    this.startXInput.max = String(Math.max(1, w - 2));
+    this.startYInput.max = String(Math.max(1, h - 2));
+    const x = Math.max(1, Math.min(parseInt(this.startXInput.value, 10) || 1, w - 2));
+    const y = Math.max(1, Math.min(parseInt(this.startYInput.value, 10) || 1, h - 2));
+    this.startXInput.value = String(x);
+    this.startYInput.value = String(y);
   }
   updateStartRoomOptions() {
     clear(this.startRoomSelect);
@@ -1292,6 +1338,7 @@ var DungeonEditor = class {
   }
   renderStartRoom() {
     this.updateStartRoomOptions();
+    this.updateStartBounds();
   }
   buildLinkEditor() {
     const section = el("div", { className: "workshop-section link-editor" });
@@ -1383,10 +1430,12 @@ var DungeonEditor = class {
   }
   buildMiniGrid(room, selectedPoint, onClick) {
     const grid = el("div", { className: "room-grid link-grid" });
-    grid.style.gridTemplateColumns = `repeat(16, 16px)`;
+    const w = Math.max(4, Math.min(64, room.width || 16));
+    const h = Math.max(4, Math.min(64, room.height || 16));
+    grid.style.gridTemplateColumns = `repeat(${w}, 16px)`;
     const tiles = room.tiles || [];
-    for (let y = 0; y < 16; y++) {
-      for (let x = 0; x < 16; x++) {
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
         const tile = tiles[y]?.[x] ?? "1";
         const isSelected = selectedPoint && selectedPoint.x === x && selectedPoint.y === y;
         const cell = el("div", {

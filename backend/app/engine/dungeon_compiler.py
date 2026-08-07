@@ -9,7 +9,6 @@ from backend.app.db import DungeonRecord, RoomRecord
 from backend.app.engine import items
 from backend.app.engine.module import Event, Map, Module, MonsterSpawn
 
-ROOM_SIZE = 16
 SEPARATOR = 1  # wall column between rooms
 
 
@@ -17,9 +16,14 @@ def generate_id() -> str:
     return str(uuid.uuid4())[:8]
 
 
-def _room_offset(room_index: int) -> tuple[int, int]:
-    x = room_index * (ROOM_SIZE + SEPARATOR)
-    return x, 0
+def _room_size(room: RoomRecord) -> tuple[int, int]:
+    tiles = json.loads(room.tiles or "[]")
+    height = len(tiles)
+    width = len(tiles[0]) if height else 0
+    if width == 0 or height == 0:
+        width = room.width or 16
+        height = room.height or 16
+    return width, height
 
 
 def compile(record: DungeonRecord, rooms: list[RoomRecord]) -> Module:
@@ -32,21 +36,24 @@ def compile(record: DungeonRecord, rooms: list[RoomRecord]) -> Module:
     if not ordered:
         raise ValueError("dungeon has no valid rooms")
 
-    room_count = len(ordered)
-    width = room_count * ROOM_SIZE + (room_count - 1) * SEPARATOR
-    height = ROOM_SIZE
-    tiles = [["1"] * width for _ in range(height)]
+    sizes = [_room_size(r) for r in ordered]
+    total_width = sum(w for w, _ in sizes) + (len(ordered) - 1) * SEPARATOR
+    total_height = max(h for _, h in sizes)
+    tiles = [["1"] * total_width for _ in range(total_height)]
 
     offsets: dict[str, tuple[int, int]] = {}
+    x_offset = 0
     for idx, room in enumerate(ordered):
-        ox, oy = _room_offset(idx)
+        rw, rh = sizes[idx]
+        ox, oy = x_offset, 0
         offsets[room.id] = (ox, oy)
         room_tiles = json.loads(room.tiles or "[]")
-        if len(room_tiles) != ROOM_SIZE or any(len(row) != ROOM_SIZE for row in room_tiles):
-            room_tiles = [["1"] * ROOM_SIZE for _ in range(ROOM_SIZE)]
-        for y in range(ROOM_SIZE):
-            for x in range(ROOM_SIZE):
+        if len(room_tiles) != rh or any(len(row) != rw for row in room_tiles):
+            room_tiles = [["1"] * rw for _ in range(rh)]
+        for y in range(rh):
+            for x in range(rw):
                 tiles[oy + y][ox + x] = room_tiles[y][x]
+        x_offset += rw + SEPARATOR
 
     links = json.loads(record.links or "[]")
 
@@ -54,13 +61,16 @@ def compile(record: DungeonRecord, rooms: list[RoomRecord]) -> Module:
     monsters: list[MonsterSpawn] = []
     events: list[Event] = []
     entity_index = 0
-    for room in ordered:
+    for idx, room in enumerate(ordered):
         ox, oy = offsets[room.id]
+        rw, rh = sizes[idx]
         room_entities = json.loads(room.entities or "[]")
         for ent in room_entities:
             ent_type = ent.get("type")
             ex = int(ent.get("x", 0))
             ey = int(ent.get("y", 0))
+            if ex < 0 or ex >= rw or ey < 0 or ey >= rh:
+                continue
             gx, gy = ox + ex, oy + ey
             entity_index += 1
             if ent_type == "monster":
@@ -152,8 +162,8 @@ def compile(record: DungeonRecord, rooms: list[RoomRecord]) -> Module:
     player_start = (sox + start_x, soy + start_y)
 
     map_ = Map(
-        width=width,
-        height=height,
+        width=total_width,
+        height=total_height,
         tile_size=64,
         tiles=["".join(row) for row in tiles],
         theme=ordered[0].theme or "dungeon",
