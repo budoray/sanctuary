@@ -5739,7 +5739,7 @@ var AutoPlayer = class {
     return this.running;
   }
   onUpdate() {
-    if (!this.running || this.pending) return;
+    if (!this.running) return;
     window.setTimeout(() => this.tick(), 600);
   }
   async tick() {
