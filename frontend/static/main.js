@@ -5740,13 +5740,26 @@ var AutoPlayer = class {
   }
   onUpdate() {
     if (!this.running || this.pending) return;
-    window.setTimeout(() => this.tick(), 350);
+    window.setTimeout(() => this.tick(), 600);
   }
   async tick() {
     if (!this.running || this.pending) return;
     const session = this.game.getSession();
     const mod = this.game.getModule();
-    if (!session || !mod || session.status !== "active" || session.phase !== "player") return;
+    if (!session || !mod || session.status !== "active") {
+      this.stop();
+      return;
+    }
+    if (session.phase === "dm" && !session.campaign_id) {
+      this.pending = true;
+      try {
+        await this.game.runDmTurn();
+      } finally {
+        this.pending = false;
+      }
+      return;
+    }
+    if (session.phase !== "player") return;
     const player = session.player;
     if (!player || player.down || player.alive === false) {
       this.stop();
@@ -6031,11 +6044,11 @@ var Game = class {
   toggleAutoplay() {
     if (this.autoPlayer.isRunning()) {
       this.autoPlayer.stop();
-      this.autoplayBtn.textContent = "\u25B6 Auto";
+      this.autoplayBtn.textContent = "\u25B6 Observer";
       this.autoplayBtn.classList.remove("active");
     } else {
       this.autoPlayer.start();
-      this.autoplayBtn.textContent = "\u23F8 Auto";
+      this.autoplayBtn.textContent = "\u23F8 Observer";
       this.autoplayBtn.classList.add("active");
     }
   }
@@ -6171,7 +6184,7 @@ var Game = class {
     this.autoplayBtn = el("button", {
       className: "autoplay-btn small",
       onclick: () => this.toggleAutoplay()
-    }, "\u25B6 Auto");
+    }, "\u25B6 Observer");
     this.autoplayBtn.style.display = "none";
     hud.appendChild(this.autoplayBtn);
     this.statEl = el("div", { className: "player-stats" });
