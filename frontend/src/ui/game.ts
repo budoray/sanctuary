@@ -1172,7 +1172,13 @@ export class Game {
       return;
     }
 
-    if (this.session.phase !== 'player' || this.action !== 'move') return;
+    if (this.session.phase !== 'player') return;
+    if (this.action && this.action !== 'move') return;
+
+    const player = this.session.player;
+    const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
+    if (dist !== 1) return;
+
     try {
       const { session } = await actInSession(this.sessionId, 'move', { x, y });
       this.action = null;
@@ -1184,6 +1190,18 @@ export class Game {
 
   private async onTokenClick(token: Token) {
     if (!this.session || this.session.phase !== 'player') return;
+    if (token.type !== 'monster') return;
+
+    const player = this.session.player;
+    const dist = Math.abs(player.x - token.x) + Math.abs(player.y - token.y);
+    if (!this.action) {
+      if (dist === 1) {
+        this.action = 'attack';
+      } else if (dist <= RANGED_RANGE && this.hasLineOfSight(player.x, player.y, token.x, token.y)) {
+        this.action = 'ranged';
+      }
+    }
+
     if (this.action === 'attack') {
       if (token.type !== 'monster') return;
       const player = this.session.player;

@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     sanctuary_admin_ids: str | None = None
     ollama_host: str = "http://127.0.0.1:11434"
     ollama_model: str = "llama3.2"
-    ollama_enabled: bool = True
+    ollama_enabled: bool = False
     ollama_timeout: float = 5.0
     pixellab_host: str | None = None
     pixellab_key: str | None = None

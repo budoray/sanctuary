@@ -259,10 +259,6 @@ deploy_game() {
   set_env "$env_file" "TENSHIN_SECRET" "$tenshin_secret" 1
   set_env "$env_file" "TENSHIN_SITE_URL" "https://${TENSHIN_DOMAIN}" 1
   set_env "$env_file" "DATABASE_URL" "$db_url" 1
-  set_env "$env_file" "OLLAMA_ENABLED" "true" 1
-  set_env "$env_file" "OLLAMA_HOST" "http://127.0.0.1:11434" 1
-  set_env "$env_file" "OLLAMA_MODEL" "llama3.2" 1
-  set_env "$env_file" "OLLAMA_TIMEOUT" "5.0" 1
 
   chown "${SERVICE_USER}:${SERVICE_USER}" "$env_file" 2>/dev/null || true
   chmod 600 "$env_file"
@@ -292,8 +288,6 @@ After=network.target
 [Service]
 WorkingDirectory=${install_dir}
 Environment=TENSHIN_SITE_URL=https://${TENSHIN_DOMAIN}
-Environment=OLLAMA_HOST=http://127.0.0.1:11434
-Environment=OLLAMA_MODEL=llama3.2
 EnvironmentFile=-${env_file}
 ExecStart=${install_dir}/.venv/bin/python app.py
 Restart=always
