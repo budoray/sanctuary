@@ -63,6 +63,9 @@ echo "==> [sanctuary] Running database migrations"
 cd "${SANCTUARY_DIR}/backend"
 "${VENV_DIR}/bin/python" -m alembic upgrade head
 
+echo "==> [sanctuary] Reloading systemd unit"
+systemctl daemon-reload
+
 echo "==> [sanctuary] Restarting tenshin-sanctuary"
 systemctl restart tenshin-sanctuary
 
