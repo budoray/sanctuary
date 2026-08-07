@@ -264,8 +264,8 @@ deploy_game() {
   chmod 600 "$env_file"
 
   # Frontend
-  if [ -d frontend/dist ]; then
-    echo "    Using committed frontend/dist"
+  if [ -d frontend/static ]; then
+    echo "    Using committed frontend/static"
   elif command -v npm >/dev/null 2>&1 && [ -f frontend/package.json ]; then
     echo "    Building frontend"
     if [ -f frontend/package-lock.json ]; then

@@ -11,7 +11,7 @@ from pathlib import Path
 import uvicorn
 
 ROOT = Path(__file__).resolve().parent
-FRONTEND_DIST = ROOT / "frontend" / "dist"
+FRONTEND_DIST = ROOT / "frontend" / "static"
 
 
 def main() -> None:
@@ -20,7 +20,7 @@ def main() -> None:
     reload = os.environ.get("RELOAD", "0") == "1"
 
     if not FRONTEND_DIST.exists() and not reload:
-        print(f"WARNING: {FRONTEND_DIST} not found. Run 'npm run build' in frontend/.", file=sys.stderr)
+        print(f"WARNING: {FRONTEND_DIST} not found. Build or copy the frontend static files.", file=sys.stderr)
 
     uvicorn.run(
         "backend.app.main:app",

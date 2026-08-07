@@ -24,7 +24,7 @@ import httpx
 from backend.app.socket_manager import socket_app
 from backend.app.tenshin_gate import name_from_cookie_header
 
-FRONTEND_DIST = ROOT / "frontend" / "dist"
+FRONTEND_DIST = ROOT / "frontend" / "static"
 
 
 @asynccontextmanager
