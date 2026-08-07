@@ -7,6 +7,32 @@ var __export = (target, all) => {
 // src/net/api.ts
 var API_BASE = "";
 var SITE_URL = "https://tenshinarts.com";
+function showAuthPrompt() {
+  if (document.getElementById("tenshin-auth-prompt")) return;
+  const overlay = document.createElement("div");
+  overlay.id = "tenshin-auth-prompt";
+  overlay.className = "auth-prompt-overlay";
+  const box = document.createElement("div");
+  box.className = "auth-prompt-box";
+  box.innerHTML = `<h2>Sign in required</h2><p>Sanctuary uses your Tenshin Arts account. If you are already signed in on tenshinarts.com, third-party cookies may be blocked.</p>`;
+  const signIn = document.createElement("button");
+  signIn.className = "enter";
+  signIn.textContent = "Sign in at Tenshin Arts";
+  signIn.onclick = () => {
+    const next = encodeURIComponent(window.location.href);
+    window.location.href = `${SITE_URL}/?next=${next}`;
+  };
+  const retry = document.createElement("button");
+  retry.textContent = "Retry";
+  retry.onclick = () => {
+    overlay.remove();
+    window.location.reload();
+  };
+  box.appendChild(signIn);
+  box.appendChild(retry);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
 async function api(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json", ...options.headers },
@@ -14,12 +40,18 @@ async function api(path, options = {}) {
     ...options
   });
   if (res.status === 401) {
-    const next = encodeURIComponent(window.location.href);
-    window.location.href = `${SITE_URL}/?next=${next}`;
+    if (sessionStorage.getItem("tenshin_auth_redirect")) {
+      showAuthPrompt();
+    } else {
+      sessionStorage.setItem("tenshin_auth_redirect", "1");
+      const next = encodeURIComponent(window.location.href);
+      window.location.href = `${SITE_URL}/?next=${next}`;
+    }
     const err = new Error("Not authenticated");
     err.status = 401;
     throw err;
   }
+  sessionStorage.removeItem("tenshin_auth_redirect");
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     let detail = body;

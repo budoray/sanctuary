@@ -51,6 +51,33 @@ body,
   visibility: hidden;
   pointer-events: none;
 }
+.auth-prompt-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 6, 7, 0.92);
+  z-index: 2000;
+}
+.auth-prompt-box {
+  max-width: 420px;
+  padding: 2rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  text-align: center;
+}
+.auth-prompt-box h2 {
+  margin-top: 0;
+}
+.auth-prompt-box p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+.auth-prompt-box button {
+  margin: 0.5rem;
+}
 .splash-content {
   text-align: center;
   color: var(--text);
