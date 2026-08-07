@@ -5,6 +5,8 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.requests import Request as StarletteRequest
 from starlette.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -193,31 +195,25 @@ async def licence():
     }
 
 
-FRONTEND_ASSETS = FRONTEND_DIST / "assets"
-FRONTEND_PORTRAITS = FRONTEND_DIST / "portraits"
-FRONTEND_INDEX = FRONTEND_DIST / "index.html"
+if FRONTEND_DIST.exists():
+    fastapi_app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")
 
-if FRONTEND_ASSETS.exists():
-    fastapi_app.mount("/assets", StaticFiles(directory=FRONTEND_ASSETS), name="assets")
-if FRONTEND_PORTRAITS.exists():
-    fastapi_app.mount("/portraits", StaticFiles(directory=FRONTEND_PORTRAITS), name="portraits")
 
-if FRONTEND_INDEX.exists():
-    @fastapi_app.get("/{full_path:path}")
-    async def serve_frontend(full_path: str, request: Request):
-        from fastapi.responses import FileResponse
+class SharedSessionCookieMiddleware(BaseHTTPMiddleware):
+    """Re-issue a host-only session cookie with the parent domain so subdomains share it."""
 
-        response = FileResponse(FRONTEND_INDEX)
-        token = request.cookies.get(COOKIE_NAME)
-        if token and account_from_cookie_header(request.headers.get("cookie", "")) is not None:
-            upgraded = _upgrade_session_cookie(token)
-            if upgraded:
-                response.headers["Set-Cookie"] = upgraded
+    async def dispatch(self, request: StarletteRequest, call_next: RequestResponseEndpoint):
+        response = await call_next(request)
+        if response.status_code == 200 and "text/html" in response.headers.get("content-type", ""):
+            token = request.cookies.get(COOKIE_NAME)
+            if token and account_from_cookie_header(request.headers.get("cookie", "")) is not None:
+                upgraded = _upgrade_session_cookie(token)
+                if upgraded:
+                    response.headers["Set-Cookie"] = upgraded
         return response
-else:
-    @fastapi_app.get("/{full_path:path}")
-    async def serve_backend_only(full_path: str):
-        return {"status": "backend only", "path": full_path}
+
+
+fastapi_app.add_middleware(SharedSessionCookieMiddleware)
 
 
 class SocketIOMiddleware:
