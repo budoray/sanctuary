@@ -1148,6 +1148,12 @@ async def _start_round(state: dict[str, Any], module: Module, d: Dice) -> None:
     If the DM wins initiative, the DM acts immediately before control returns
     to the players. Otherwise the players act first.
     """
+    _check_loss(state)
+    if state["status"] != STATUS_ACTIVE:
+        state["phase"] = PHASE_DM
+        state["turn_deadline"] = None
+        return
+
     player_init = d.roll("1d6", reason="player initiative", kind="initiative").total
     dm_init = d.roll("1d6", reason="DM initiative", kind="initiative").total
     state["turn"] += 1
@@ -1162,6 +1168,7 @@ async def _start_round(state: dict[str, Any], module: Module, d: Dice) -> None:
     if dm_init > player_init:
         state["log"].append("The DM seizes the initiative!")
         await _run_dm_turn(state, module, d)
+        _check_loss(state)
         state["dm_acted_this_round"] = True
     else:
         state["log"].append("The players act first!")
@@ -1378,6 +1385,8 @@ async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
         )
         if summary:
             state["log"].append(summary)
+
+    _check_loss(state)
 
     # In arena mode, spawn the next wave if all monsters are dead.
     if state.get("mode") == "arena" and state["status"] == STATUS_ACTIVE:
