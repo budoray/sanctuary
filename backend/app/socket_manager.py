@@ -1,4 +1,6 @@
 """Socket.IO manager for real-time game state."""
+import json
+
 import socketio
 
 from backend.app.config import SETTINGS
@@ -194,6 +196,84 @@ async def connect(sid, environ, auth=None):
     )
 
 
+async def _set_player_ai_controlled(session_id: str, account_id: int) -> None:
+    """Mark a disconnected player's token as AI-controlled and advance if it's their turn."""
+    from sqlalchemy import select
+
+    from backend.app.api.sessions import _load_session_module, _persist_instance_state
+    from backend.app.db import AsyncSessionLocal, SessionRecord
+    from backend.app.engine import session as session_engine
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(SessionRecord).where(SessionRecord.id == session_id)
+        )
+        record = result.scalar_one_or_none()
+        if not record or record.status != "active":
+            return
+        state = json.loads(record.state)
+        player = next(
+            (p for p in state.get("players", []) if p.get("account_id") == account_id),
+            None,
+        )
+        if player is None:
+            return
+        player["ai_controlled"] = True
+        state["version"] += 1
+
+        active_index = state.get("active_player_index", 0)
+        if active_index < len(state.get("players", [])):
+            active = state["players"][active_index]
+            if active.get("account_id") == account_id and state.get("phase") == "player":
+                mod = await _load_session_module(record, db)
+                state = await session_engine.run_ai_players(state, mod)
+
+        _persist_instance_state(record, state)
+        await db.commit()
+        session_view = session_engine.view(state)
+        try:
+            await socket_manager.emit(
+                "session_update", {"session": session_view}, room=session_id
+            )
+        except Exception:
+            pass
+
+
+async def _set_player_human_controlled(session_id: str, account_id: int) -> None:
+    """Mark a rejoined player's token as human-controlled."""
+    from sqlalchemy import select
+
+    from backend.app.api.sessions import _persist_instance_state
+    from backend.app.db import AsyncSessionLocal, SessionRecord
+    from backend.app.engine import session as session_engine
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(SessionRecord).where(SessionRecord.id == session_id)
+        )
+        record = result.scalar_one_or_none()
+        if not record or record.status != "active":
+            return
+        state = json.loads(record.state)
+        player = next(
+            (p for p in state.get("players", []) if p.get("account_id") == account_id),
+            None,
+        )
+        if player is None or not player.get("ai_controlled"):
+            return
+        player["ai_controlled"] = False
+        state["version"] += 1
+        _persist_instance_state(record, state)
+        await db.commit()
+        session_view = session_engine.view(state)
+        try:
+            await socket_manager.emit(
+                "session_update", {"session": session_view}, room=session_id
+            )
+        except Exception:
+            pass
+
+
 @socket_manager.event
 async def disconnect(sid):
     sess = await socket_manager.get_session(sid)
@@ -207,6 +287,8 @@ async def disconnect(sid):
             presence_tracker._payload(session_id, occupants),
             room=session_id,
         )
+        if account_id is not None:
+            await _set_player_ai_controlled(session_id, account_id)
 
 
 @socket_manager.event
@@ -232,6 +314,8 @@ async def join_session(sid, data):
         presence_tracker._payload(session_id, occupants),
         room=session_id,
     )
+    if account_id is not None:
+        await _set_player_human_controlled(session_id, account_id)
 
 
 @socket_manager.event

@@ -1,40 +1,43 @@
 # Sanctuary Deployment
 
-This folder contains the scripts used to deploy Sanctuary to a fresh Ubuntu server.
+This folder contains the scripts used to deploy Sanctuary to an Ubuntu server.
+Sanctuary is now a plain Python/FastAPI application with a static frontend; no
+Node.js, npm, or frontend build step is required.
 
 ## One-command deploy
 
-From your local machine, SSH into the target server as root and run:
+From your local machine, SSH into the target server as root and run the
+canonical deploy script at the repository root:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/budoray/sanctuary/main/deploy/deploy.sh | bash
+ssh root@<your-droplet-ip> 'bash /opt/tenshin/sanctuary/deploy-all.sh'
 ```
 
-Or, if you already have the repo cloned locally and want to run the bundled script:
+Or, if you already have the repo cloned locally and want to pipe the bundled
+script:
 
 ```bash
-cat deploy/deploy.sh | ssh root@<your-droplet-ip> bash
+cat deploy-all.sh | ssh root@<your-droplet-ip> bash
 ```
 
 The script is idempotent: run it again any time to pull the latest code, install
-updates, run migrations, rebuild the frontend, and restart services.
+Python updates, and restart the service.
 
 ## What the deploy script does
 
-1. Installs system dependencies (git, Python, Node.js, PostgreSQL, Caddy).
-2. Creates the `tenshin` service user.
-3. Generates and stores platform secrets in `/opt/tenshin/site/.env`.
-4. Creates a PostgreSQL database and user for Sanctuary.
-5. Pulls the latest Sanctuary code, installs Python requirements, builds the
-   frontend, and runs Alembic migrations.
-6. Writes and reloads `/etc/systemd/system/tenshin-sanctuary.service`.
-7. Writes and reloads `/etc/caddy/Caddyfile`.
-8. Performs health checks against `/health` and the public domain.
+`deploy-all.sh` performs the following steps on the server:
+
+1. `cd /opt/tenshin/sanctuary`
+2. `git fetch`
+3. `git reset --hard origin/main`
+4. `pip install -r requirements.txt`
+5. `systemctl restart tenshin-sanctuary`
+
+No frontend build is needed because `frontend/static/` is served directly.
 
 ## Environment variable checklist
 
-Sanctuary reads these variables from `/opt/tenshin/sanctuary/.env` (written by
-`deploy.sh`). Review them after the first deploy:
+Sanctuary reads these variables from `/opt/tenshin/sanctuary/.env`:
 
 | Variable | Required? | Purpose |
 |----------|-----------|---------|
@@ -70,8 +73,8 @@ systemctl restart tenshin-sanctuary
 systemctl reload caddy
 
 # Run migrations by hand
-cd /opt/tenshin/sanctuary
-.venv/bin/alembic upgrade head
+cd /opt/tenshin/sanctuary/backend
+python3 -m alembic upgrade head
 ```
 
 ## Log rotation

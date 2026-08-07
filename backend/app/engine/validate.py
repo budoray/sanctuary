@@ -1,13 +1,178 @@
-"""Server-side validation helpers for session actions.
+"""Server-side validation helpers for session actions and S3 adventures.
 
 These guards run before any state change in ``session.act`` so malformed or
 out-of-order client requests raise ``ValueError`` early.
 """
 from __future__ import annotations
 
+from collections import deque
 from typing import Any
 
-from backend.app.engine.module import Module
+from pydantic import ValidationError
+
+from backend.app.engine import bestiary
+from backend.app.engine.module import (
+    RECOGNISED_TRIGGER_ACTIONS,
+    AdventureData,
+    Module,
+)
+
+
+# -----------------------------------------------------------------------------
+# S3 adventure validation
+# -----------------------------------------------------------------------------
+def _collect_monster_refs(area: dict) -> set[str]:
+    refs: set[str] = set()
+    for field in ("monsters", "contents"):
+        for entry in area.get(field, []) or []:
+            if isinstance(entry, str):
+                refs.add(entry)
+            elif isinstance(entry, dict):
+                if "monster" in entry:
+                    refs.add(entry["monster"])
+                # treasure or contents may reference a monster as guardian
+                for key in ("guardian", "wanders"):
+                    if key in entry and isinstance(entry[key], str):
+                        refs.add(entry[key])
+    for entry in area.get("treasure", []) or []:
+        if isinstance(entry, dict) and isinstance(entry.get("guardian"), str):
+            refs.add(entry["guardian"])
+    return refs
+
+
+def _resolve_start_area(doc: dict) -> str | int | None:
+    areas = doc.get("areas") or []
+    if not areas:
+        return None
+    area_ids = {a.get("id") for a in areas if isinstance(a, dict)}
+    start = doc.get("module", {}).get("start")
+    if start in area_ids:
+        return start
+    # If start is prose, look for an explicit "start" area id, else first area.
+    if "start" in area_ids:
+        return "start"
+    return areas[0].get("id")
+
+
+def validate_adventure(data: dict, check_reachability: bool = True) -> list[str]:
+    """Validate an S3 adventure document.
+
+    Returns a list of human-readable errors; an empty list means the document
+    is structurally and semantically valid.
+    """
+    errors: list[str] = []
+    if not isinstance(data, dict):
+        return ["adventure document must be a mapping"]
+
+    # 1. Structural validation via Pydantic.
+    try:
+        adventure = AdventureData.model_validate(data)
+    except ValidationError as exc:
+        for err in exc.errors():
+            loc = ".".join(str(p) for p in err.get("loc", []))
+            errors.append(f"{loc}: {err.get('msg', 'invalid value')}")
+        return errors
+
+    doc = data
+    module_meta = doc.get("module", {})
+    areas = doc.get("areas") or []
+    area_ids = {str(a.get("id")) for a in areas if isinstance(a, dict)}
+
+    # 2. Required module fields.
+    if not module_meta.get("title"):
+        errors.append("module.title is required")
+    if not module_meta.get("start"):
+        errors.append("module.start is required")
+    if not areas:
+        errors.append("at least one area is required")
+
+    # 3. Exit targets exist and area reachability.
+    start_id = _resolve_start_area(doc)
+    if start_id is not None and str(start_id) not in area_ids:
+        errors.append(f"start area {start_id!r} does not exist")
+
+    for area in areas:
+        aid = area.get("id")
+        for idx, ex in enumerate(area.get("exits", []) or []):
+            target = ex.get("to")
+            if target is None:
+                errors.append(f"area {aid}: exit {idx} is missing 'to'")
+                continue
+            if str(target) not in area_ids:
+                errors.append(f"area {aid}: exit to {target!r} does not exist")
+
+    if check_reachability and start_id is not None and area_ids:
+        reachable = _reachable_area_ids(str(start_id), areas)
+        unreachable = area_ids - reachable
+        for aid in sorted(unreachable):
+            errors.append(f"area {aid} is unreachable from start")
+
+    # 4. Discovery triggers recognised.
+    for area in areas:
+        aid = area.get("id")
+        for idx, disc in enumerate(area.get("discoveries", []) or []):
+            trigger = disc.get("trigger") if isinstance(disc, dict) else None
+            if not isinstance(trigger, dict):
+                errors.append(f"area {aid}: discovery {idx} is missing trigger")
+                continue
+            action = trigger.get("action")
+            if not action:
+                errors.append(f"area {aid}: discovery {idx} trigger is missing action")
+            elif action not in RECOGNISED_TRIGGER_ACTIONS:
+                errors.append(
+                    f"area {aid}: discovery {idx} trigger action {action!r} is not recognised"
+                )
+            if trigger.get("chance") and not trigger.get("per"):
+                errors.append(
+                    f"area {aid}: discovery {idx} trigger has chance but no 'per' cadence"
+                )
+
+    # 5. Monster references resolve.
+    local_monster_ids = {m.get("id") for m in doc.get("monsters", []) or [] if isinstance(m, dict)}
+    bestiary_ids = set(bestiary.base_ids())
+    known_monsters = local_monster_ids | bestiary_ids
+
+    for area in areas:
+        aid = area.get("id")
+        for ref in _collect_monster_refs(area):
+            if ref not in known_monsters:
+                errors.append(f"area {aid}: monster reference {ref!r} not found")
+
+    for region in doc.get("regions", []) or []:
+        rid = region.get("id")
+        table = region.get("table") or {}
+        for idx, entry in enumerate(table.get("entries", []) or []):
+            ref = entry.get("monster") if isinstance(entry, dict) else None
+            if ref and ref not in known_monsters:
+                errors.append(f"region {rid}: table entry {idx} monster {ref!r} not found")
+
+    # 6. Item references resolve (module-local items only; bestiary loot is open-ended).
+    local_item_ids = {m.get("id") for m in doc.get("items", []) or [] if isinstance(m, dict)}
+    for area in areas:
+        aid = area.get("id")
+        for entry in area.get("treasure", []) or []:
+            if isinstance(entry, dict):
+                item_ref = entry.get("item") or entry.get("item_id")
+                if item_ref and item_ref not in local_item_ids:
+                    errors.append(f"area {aid}: item reference {item_ref!r} not found")
+
+    return errors
+
+
+def _reachable_area_ids(start_id: str, areas: list[dict]) -> set[str]:
+    graph = {str(a.get("id")): a for a in areas if isinstance(a, dict)}
+    seen: set[str] = set()
+    queue: deque[str] = deque([start_id])
+    while queue:
+        current = queue.popleft()
+        if current in seen or current not in graph:
+            continue
+        seen.add(current)
+        for ex in graph[current].get("exits", []) or []:
+            target = str(ex.get("to")) if isinstance(ex, dict) else None
+            if target and target not in seen:
+                queue.append(target)
+    return seen
 
 
 def _active_token(state: dict[str, Any]) -> dict[str, Any]:

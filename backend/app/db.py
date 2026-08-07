@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -44,19 +44,27 @@ class SessionRecord(Base):
     __tablename__ = "sessions"
 
     id = Column(String, primary_key=True)
-    account_id = Column(Integer, index=True, nullable=False)
+    account_id = Column(Integer, index=True, nullable=False)  # instance owner
     campaign_id = Column(String, index=True, nullable=True)
     dungeon_id = Column(String, index=True, nullable=True)
     module_id = Column(String, nullable=False)
+    adventure_id = Column(String, index=True, nullable=True)  # S3 adventure id if applicable
     character_id = Column(String, nullable=False)
     name = Column(String, nullable=False, default="Adventure")
-    status = Column(String, default="active")
-    visibility = Column(String, default="solo")  # solo, friends, public, invite
+    status = Column(String, default="active")  # active, paused, won, lost
+    visibility = Column(String, default="solo")  # solo, co-op, friends, public, private, invite
     invite_code = Column(String, nullable=True, index=True)
     ruleset_id = Column(String, default="osric")
+    dm_account_id = Column(Integer, index=True, nullable=True)  # human DM, null = AI DM
+    ai_dm_enabled = Column(Boolean, default=True, nullable=False)
     state = Column(Text, default="{}")  # full session engine state
+    state_version = Column(Integer, default=0, nullable=False)  # optimistic locking
     created_at = Column(DateTime, default=_utc_now)
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
+    last_active_at = Column(DateTime, nullable=True)
+    saved_at = Column(DateTime, nullable=True)
+
+    __mapper_args__ = {"version_id_col": state_version, "version_id_generator": False}
 
 
 class RoomRecord(Base):
@@ -107,6 +115,25 @@ class CampaignRecord(Base):
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
 
 
+class AdventureRecord(Base):
+    __tablename__ = "adventures"
+
+    id = Column(String, primary_key=True)
+    account_id = Column(Integer, index=True, nullable=False)
+    title = Column(String, nullable=False)
+    ruleset_id = Column(String, default="osric")
+    data_json = Column(Text, default="{}")  # full S3 adventure document
+    status = Column(String, default="draft")  # draft, published, archived
+    visibility = Column(String, default="private")  # private, public, unlisted
+    rating_sum = Column(Integer, default=0)
+    rating_count = Column(Integer, default=0)
+    download_count = Column(Integer, default=0)
+    tags = Column(Text, default="[]")  # JSON list
+    parent_id = Column(String, nullable=True, index=True)
+    created_at = Column(DateTime, default=_utc_now)
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
+
+
 class CustomRulesetRecord(Base):
     __tablename__ = "rulesets"
 
@@ -116,6 +143,13 @@ class CustomRulesetRecord(Base):
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
     overrides_json = Column(Text, default="{}")  # JSON overrides merged onto base manifest
+    status = Column(String, default="draft")  # draft, published, archived
+    visibility = Column(String, default="private")  # private, public, unlisted
+    rating_sum = Column(Integer, default=0)
+    rating_count = Column(Integer, default=0)
+    download_count = Column(Integer, default=0)
+    tags = Column(Text, default="[]")  # JSON list
+    parent_id = Column(String, nullable=True, index=True)
     created_at = Column(DateTime, default=_utc_now)
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
 

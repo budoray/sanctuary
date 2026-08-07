@@ -4,14 +4,15 @@ The state is a plain dict so it serialises cleanly to JSON and the DB.
 """
 from __future__ import annotations
 
-import random
+import secrets
 from collections import deque
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from backend.app.engine import bestiary, items, validate
-from backend.app.engine.character import Character
+from backend.app.engine import bestiary, items, resolve, validate
+from backend.app.engine.ai_dm import AIDM, AIDMCallbacks
+from backend.app.engine.character import Character, to_hit_target
 from backend.app.engine.dice import Dice, Roll
 from backend.app.engine.module import Module, MonsterSpawn
 from backend.app.engine.narrator import Narrator
@@ -74,6 +75,130 @@ def _xp_value(monster_name: str) -> int:
     return MONSTER_XP.get(monster_name.lower().split()[0], 50)
 
 
+def _character_for_token(token: dict[str, Any]) -> Character:
+    """Reconstruct a minimal Character from a player token for OSRIC helpers."""
+    return Character(
+        name=token.get("name", ""),
+        ancestry=token.get("ancestry", "human"),
+        classes=tuple(token.get("classes", [])),
+        levels=token.get("levels", {}),
+        scores=token.get("scores", {}),
+        hit_points=token.get("max_hp", token.get("hp", 1)),
+        armour_class=token.get("ac", 10),
+        saves=token.get("saves", {}),
+        modifiers=token.get("modifiers", {}),
+        seed=token.get("seed", 0),
+        log=tuple(),
+    )
+
+
+def _player_to_hit_target(token: dict[str, Any], target_ac: int) -> int:
+    """Best class to-hit target for a player token, with AC extrapolation.
+
+    OSRIC tables span AC 10 to -10. For absurd test ACs outside that span we
+    extrapolate from the nearest table edge so the engine still resolves.
+    """
+    classes = token.get("classes", [])
+    levels = token.get("levels", {})
+    if not classes:
+        return 20
+
+    def _target_at(ac: int) -> int:
+        return min(to_hit_target(c, levels.get(c, 1), ac) for c in classes)
+
+    if target_ac > 10:
+        return _target_at(10) - (target_ac - 10)
+    if target_ac < -10:
+        return _target_at(-10) + (-10 - target_ac)
+    return _target_at(target_ac)
+
+
+def _monster_to_hit_target(token: dict[str, Any], target_ac: int) -> int:
+    """HD-based to-hit target for a monster token, with AC extrapolation."""
+    hd = token.get("hit_dice", "1")
+    if target_ac > 10:
+        base = resolve.monster_to_hit_target(hd, 10)
+        return base - (target_ac - 10)
+    if target_ac < -10:
+        base = resolve.monster_to_hit_target(hd, -10)
+        return base + (-10 - target_ac)
+    return resolve.monster_to_hit_target(hd, target_ac)
+
+
+def _target_number(attacker: dict[str, Any], target_ac: int) -> int:
+    if attacker["type"] == "player":
+        return _player_to_hit_target(attacker, target_ac)
+    return _monster_to_hit_target(attacker, target_ac)
+
+
+def _attacker_to_hit_bonus(token: dict[str, Any]) -> int:
+    """Sum magic/situational and (for players) Strength to-hit modifiers."""
+    bonus = token.get("to_hit", 0)
+    if token["type"] == "player":
+        bonus += token.get("modifiers", {}).get("hit", 0)
+    return bonus
+
+
+def _attacker_damage_bonus(token: dict[str, Any]) -> int:
+    """Sum magic/situational and (for players) Strength damage modifiers."""
+    bonus = token.get("damage_bonus", 0)
+    if token["type"] == "player":
+        bonus += token.get("modifiers", {}).get("damage", 0)
+    return bonus
+
+
+def saving_throw(d: Dice, subject: dict[str, Any], category: str,
+                 natural_20_auto_succeeds: bool = False) -> resolve.SaveResult:
+    """Resolve a saving throw for a player or monster token."""
+    if subject["type"] == "player":
+        return resolve.saving_throw(d, _character_for_token(subject), category,
+                                    natural_20_auto_succeeds=natural_20_auto_succeeds)
+    hd = subject.get("hit_dice", "1")
+    return resolve.saving_throw(d, hd, category, natural_20_auto_succeeds=natural_20_auto_succeeds)
+
+
+def _hd_base(hit_dice: str) -> float:
+    """Base hit-dice count for morale calculations."""
+    return resolve._hd_base_and_bonus(hit_dice)[0]
+
+
+async def _check_morale(state: dict[str, Any], monster: dict[str, Any]) -> None:
+    """Roll morale when a monster first drops to 50% HP or below."""
+    if not monster.get("alive", True):
+        return
+    max_hp = monster.get("max_hp", max(monster["hp"], 1))
+    if max_hp <= 0:
+        return
+    if monster.get("morale_checked_50"):
+        return
+    if monster["hp"] > max_hp / 2:
+        return
+    monster["morale_checked_50"] = True
+    d = Dice(seed=state["seed"] + state["version"] + sum(ord(c) for c in monster["id"]))
+    result = resolve.morale(d, _hd_base(monster.get("hit_dice", "1")))
+    state["log"].append(
+        f"{monster['name']} checks morale: {result.outcome} "
+        f"(base {result.base}%, rolled {result.roll})."
+    )
+    state["rolls"].extend(_roll_to_dict(r) for r in d.log)
+
+
+async def _morale_for_leader_death(state: dict[str, Any], leader: dict[str, Any]) -> None:
+    """Roll morale for surviving monsters when a boss/leader dies."""
+    if not leader.get("boss"):
+        return
+    for monster in state["monsters"]:
+        if monster is leader or not monster.get("alive", True):
+            continue
+        d = Dice(seed=state["seed"] + state["version"] + sum(ord(c) for c in monster["id"]))
+        result = resolve.morale(d, _hd_base(monster.get("hit_dice", "1")))
+        state["log"].append(
+            f"{monster['name']} sees {leader['name']} fall and checks morale: "
+            f"{result.outcome} (base {result.base}%, rolled {result.roll})."
+        )
+        state["rolls"].extend(_roll_to_dict(r) for r in d.log)
+
+
 def _hit_die_for_class(class_name: str) -> str:
     cls = class_name.lower()
     if cls == "fighter":
@@ -111,6 +236,7 @@ def _spawn_token(spawn, state: dict[str, Any], d: Dice,
         "max_hp": _roll_hp(template, d),
         "ac": template["ac"],
         "damage": template["damage"],
+        "hit_dice": template.get("hit_dice", "1"),
         "to_hit": 0,
         "color": spawn.color,
         "alive": True,
@@ -137,24 +263,30 @@ def _grant_rewards(state: dict[str, Any], monster: dict[str, Any]) -> None:
         drop_chance = 0.10
         if monster.get("boss"):
             drop_chance = 0.75
-        rng = random.Random(state["seed"] + state["version"] + sum(ord(c) for c in player["id"]))
-        if rng.random() < drop_chance:
-            loot = items.generate_loot(level=player.get("level", 1), rng=rng)
+        d = Dice(seed=state["seed"] + state["version"] + sum(ord(c) for c in player["id"]))
+        drop_roll = d.roll("1d100", reason=f"{player['name']} loot drop", kind="loot").total
+        if drop_roll <= int(drop_chance * 100):
+            loot = items.generate_loot(level=player.get("level", 1), d=d)
             player.setdefault("session_loot", []).append(loot)
             state["log"].append(f"{player['name']} loots {loot['name']} from {monster['name']}.")
+        state["rolls"].extend(_roll_to_dict(r) for r in d.log)
 
         while player["xp"] >= player.get("level", 1) * 100:
             player["level"] = player.get("level", 1) + 1
             cls = player["classes"][0] if player.get("classes") else ""
+            if cls and "levels" in player:
+                player["levels"][cls] = player["levels"].get(cls, 1) + 1
             die = _hit_die_for_class(cls)
             id_seed = sum(ord(c) for c in player["id"])
-            roll = Dice(seed=state["seed"] + state["version"] + id_seed).roll(
+            level_d = Dice(seed=state["seed"] + state["version"] + id_seed)
+            roll = level_d.roll(
                 die, reason=f"{player['name']} level-up hp", kind="progression"
             )
             hp_gain = max(1, roll.total)
             player["hp"] = player.get("hp", 0) + hp_gain
             player["max_hp"] = player.get("max_hp", player["hp"]) + hp_gain
             state["log"].append(f"{player['name']} reaches level {player['level']}! (+{hp_gain} HP)")
+            state["rolls"].extend(_roll_to_dict(r) for r in level_d.log)
 
 
 def _deadline(seconds: int) -> str | None:
@@ -202,7 +334,8 @@ async def new_game(
 ) -> dict[str, Any]:
     """Create a fresh session state."""
     if seed is None:
-        seed = random.randint(1, 1_000_000_000)
+        seed_d = Dice(seed=secrets.randbelow(1_000_000_000) + 1)
+        seed = seed_d.randint(1, 1_000_000_000)
     d = Dice(seed=seed)
 
     px, py = module.player_start
@@ -211,6 +344,12 @@ async def new_game(
         "name": character.name,
         "type": "player",
         "classes": list(character.classes),
+        "levels": dict(character.levels),
+        "scores": dict(character.scores),
+        "modifiers": dict(character.modifiers),
+        "saves": dict(character.saves),
+        "ancestry": character.ancestry,
+        "seed": character.seed,
         "x": px,
         "y": py,
         "hp": character.hit_points,
@@ -225,6 +364,7 @@ async def new_game(
         "level": getattr(character, "level", 1),
         "gold": getattr(character, "gold", 0),
         "session_loot": [],
+        "ai_controlled": False,
     }
     items.apply_gear(
         {"equipment": getattr(character, "equipment", {}), "inventory": list(getattr(character, "inventory", ()))},
@@ -242,12 +382,13 @@ async def new_game(
     for spawn in module.monsters:
         monsters.append(_spawn_token(spawn, {}, d, monsters_dir=monsters_dir))
 
+    nd = Dice(seed=seed)
     log = [
-        await narrator.narrate_opening(random.Random(seed), module=module.name, mode=mode),
-        await narrator.narrate_room(module.name, room_type=None, rng=random.Random(seed + 1)),
+        await narrator.narrate_opening(nd, module=module.name, mode=mode),
+        await narrator.narrate_room(module.name, room_type=None, rng=nd),
     ]
     if mode == "arena":
-        log.append(await narrator.narrate_banter("arena", rng=random.Random(seed + 2)))
+        log.append(await narrator.narrate_banter("arena", rng=nd))
 
     state = {
         "id": session_id,
@@ -266,10 +407,11 @@ async def new_game(
         "player": player,
         "monsters": monsters,
         "log": log,
-        "rolls": [_roll_to_dict(r) for r in d.log],
+        "rolls": [_roll_to_dict(r) for r in d.log] + [_roll_to_dict(r) for r in nd.log],
         "turn_timer_seconds": max(0, turn_timer_seconds),
         "turn_deadline": _deadline(max(0, turn_timer_seconds)),
         "dm_acted_this_round": False,
+        "ai_dm_enabled": True,
         "monsters_dir": str(monsters_dir) if monsters_dir else None,
     }
     if dungeon_links:
@@ -454,6 +596,49 @@ def _tokens(state: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
+def _ai_dm_enabled(state: dict[str, Any]) -> bool:
+    """True when the AI DM should resolve monster turns automatically.
+
+    When a human DM is assigned, the AI is disabled so the human DM can
+    control monster turns.  The flag is still toggled independently and
+    applies when no human DM is present.
+    """
+    if state.get("dm_account_id") is not None:
+        return False
+    return state.get("ai_dm_enabled", True)
+
+
+class _AIDMCallbacks:
+    """Bridge the AI policy to the session engine's action helpers."""
+
+    def __init__(self, state: dict[str, Any], module: Module, d: Dice, nd: Dice):
+        self.state = state
+        self.module = module
+        self.d = d
+        self.nd = nd
+
+    async def attack(self, attacker: dict[str, Any], target: dict[str, Any]) -> None:
+        await _attack(self.state, attacker, target, self.d)
+
+    async def ranged_attack(self, attacker: dict[str, Any], target: dict[str, Any]) -> None:
+        await _ranged_attack(self.state, attacker, target, self.module, self.d)
+
+    async def move(self, token: dict[str, Any], x: int, y: int) -> None:
+        await _move(self.state, token, x, y, self.module, self.d)
+
+    def line_of_sight(self, x0: int, y0: int, x1: int, y1: int) -> bool:
+        return _line_of_sight(self.state, self.module, x0, y0, x1, y1)
+
+    def has_cover(self, target: dict[str, Any]) -> bool:
+        return _has_cover(self.state, self.module, target)
+
+    def is_flanking(self, attacker: dict[str, Any], target: dict[str, Any]) -> bool:
+        return _is_flanking(self.state, attacker, target)
+
+    def token_at(self, x: int, y: int) -> dict[str, Any] | None:
+        return _token_at(self.state, x, y)
+
+
 def _active_player(state: dict[str, Any]) -> dict[str, Any]:
     return state["players"][state.get("active_player_index", 0)]
 
@@ -517,6 +702,12 @@ async def add_player(
         "name": character.name,
         "type": "player",
         "classes": list(character.classes),
+        "levels": dict(character.levels),
+        "scores": dict(character.scores),
+        "modifiers": dict(character.modifiers),
+        "saves": dict(character.saves),
+        "ancestry": character.ancestry,
+        "seed": character.seed,
         "x": x,
         "y": y,
         "hp": character.hit_points,
@@ -532,6 +723,7 @@ async def add_player(
         "level": getattr(character, "level", 1),
         "gold": getattr(character, "gold", 0),
         "session_loot": [],
+        "ai_controlled": False,
     }
     items.apply_gear(
         {"equipment": getattr(character, "equipment", {}), "inventory": list(getattr(character, "inventory", ()))},
@@ -571,7 +763,8 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
         raise ValueError("must move to an adjacent tile")
     token["x"] = x
     token["y"] = y
-    line = await narrator.narrate_move(token, random.Random(state["seed"] + state["version"]))
+    nd = Dice(seed=state["seed"] + state["version"])
+    line = await narrator.narrate_move(token, nd)
     if line:
         state["log"].append(line)
 
@@ -581,6 +774,13 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
         if trigger_roll == 1:
             damage_roll = d.roll("1d6", reason="trap damage", kind="trap")
             damage = max(1, damage_roll.total)
+            # Physical traps allow a save vs. aimed magic items for half damage.
+            save = saving_throw(d, token, "aimed_magic_items")
+            if save.success:
+                damage = max(1, damage // 2)
+                save_msg = f" {token['name']} saves for half damage."
+            else:
+                save_msg = ""
             token["hp"] -= damage
             if token["type"] == "player":
                 if token["hp"] <= -11:
@@ -594,9 +794,10 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
             trap_line = await narrator.narrate_trap(
                 "a hidden trap",
                 triggered=True,
-                rng=random.Random(state["seed"] + state["version"]),
+                rng=nd,
             )
-            state["log"].append(f"{trap_line} {token['name']} suffers {damage} damage.")
+            state["log"].append(f"{trap_line} {token['name']} suffers {damage} damage.{save_msg}")
+    state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
     # Theme-aware hazard tiles: 3 and 4.
     tile = module.map.tiles[y][x] if module.map.in_bounds(x, y) else "0"
@@ -625,13 +826,14 @@ async def _apply_hazard(state: dict[str, Any], token: dict[str, Any], tile: str,
     """Apply theme-aware hazard damage or effects to a token on a hazard tile."""
     hazards = THEME_HAZARDS.get(theme, THEME_HAZARDS["dungeon"])
     name, expr = hazards[tile]
+    nd = Dice(seed=state["seed"] + state["version"])
 
     if expr == "slip":
         # Ice: chance to slide one tile in a random direction.
         slip_roll = d.roll("1d6", reason="ice slip", kind="hazard").total
         if slip_roll <= 2 and module is not None:
-            dx = random.choice([-1, 0, 1])
-            dy = random.choice([-1, 0, 1])
+            dx = d.choice([-1, 0, 1], reason="ice slip dx", kind="hazard")
+            dy = d.choice([-1, 0, 1], reason="ice slip dy", kind="hazard")
             nx, ny = token["x"] + dx, token["y"] + dy
             if module.map.in_bounds(nx, ny) and module.map.walkable(nx, ny) and _token_at(state, nx, ny) is None:
                 token["x"] = nx
@@ -639,19 +841,21 @@ async def _apply_hazard(state: dict[str, Any], token: dict[str, Any], tile: str,
                 state["log"].append(f"{token['name']} slips on the ice and slides.")
             else:
                 state["log"].append(f"{token['name']} slips on the ice but catches themself.")
+        state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
         return
 
     if expr == "cover":
         # Forest brush: grant temporary cover status.
         token.setdefault("statuses", []).append({"type": "cover", "duration": 1})
         state["log"].append(f"{token['name']} takes cover in the brush.")
+        state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
         return
 
     damage_roll = d.roll(expr, reason=f"{name} damage", kind="hazard")
     damage = max(1, damage_roll.total)
     token["hp"] -= damage
     hazard_line = await narrator.narrate_hazard(
-        name, token.get("name", "someone"), rng=random.Random(state["seed"] + state["version"])
+        name, token.get("name", "someone"), rng=nd
     )
     state["log"].append(f"{hazard_line} {token['name']} suffers {damage} damage.")
     if token["type"] == "player":
@@ -669,6 +873,7 @@ async def _apply_hazard(state: dict[str, Any], token: dict[str, Any], tile: str,
             token["hp"] = 0
             _grant_rewards(state, token)
             _check_victory(state)
+    state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
 
 def _trigger_event(state: dict[str, Any], module: Module, x: int, y: int) -> None:
@@ -789,7 +994,8 @@ def _is_flanking(state: dict[str, Any], attacker: dict[str, Any], target: dict[s
         return False
     opposite_x = target["x"] - dx
     opposite_y = target["y"] - dy
-    for token in state["players"]:
+    allies = state["monsters"] if attacker["type"] == "monster" else state["players"]
+    for token in allies:
         if (
             token.get("alive", True)
             and not token.get("down", False)
@@ -863,21 +1069,22 @@ async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[
     if not target.get("alive", True):
         raise ValueError("target is already dead")
 
-    roll = d.roll("1d20", reason=f"{attacker['name']} attacks {target['name']}", kind="combat").total
-    to_hit = attacker.get("to_hit", 0)
+    to_hit = _attacker_to_hit_bonus(attacker)
     if attacker["type"] == "player" and _is_flanking(state, attacker, target):
         to_hit += 2
-    needed = 20 - target["ac"] + to_hit  # descending AC: lower AC needs higher roll
+    needed = _target_number(attacker, target["ac"])
+    roll_obj = d.roll("1d20", reason=f"{attacker['name']} attacks {target['name']}", kind="combat")
+    roll = roll_obj.total + to_hit
     hit = roll >= needed
     fatal = False
     if hit:
         damage_expr = attacker.get("damage", "1d6")
-        damage_bonus = attacker.get("damage_bonus", 0)
-        if damage_bonus:
-            damage_expr = f"{damage_expr}+{damage_bonus}"
-        dmg_roll = d.roll(damage_expr, reason="damage", kind="combat")
+        damage_bonus = _attacker_damage_bonus(attacker)
+        dmg_roll = d.roll(damage_expr, mods=damage_bonus, reason="damage", kind="combat")
         damage = max(1, dmg_roll.total)
         target["hp"] -= damage
+        if target["type"] == "monster":
+            target["last_wounded_by"] = attacker["id"]
         if target["type"] == "player":
             if target["hp"] <= -11:  # below -10
                 fatal = True
@@ -890,20 +1097,24 @@ async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[
                 target["down"] = True
         else:
             await _check_boss_phase(state, target)
+            await _check_morale(state, target)
             if target["hp"] <= 0:
                 fatal = True
                 target["alive"] = False
                 _grant_rewards(state, target)
                 _check_victory(state)
+                if target.get("boss"):
+                    await _morale_for_leader_death(state, target)
 
+    nd = Dice(seed=state["seed"] + state["version"])
     lines = await narrator.narrate_attack(
-        attacker, target, hit, fatal,
-        random.Random(state["seed"] + state["version"])
+        attacker, target, hit, fatal, nd
     )
     state["log"].extend(lines)
 
     if state["status"] == STATUS_WON:
-        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
+        state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
+    state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
 
 async def _ranged_attack(
@@ -923,22 +1134,22 @@ async def _ranged_attack(
     if not _line_of_sight(state, module, attacker["x"], attacker["y"], target["x"], target["y"]):
         raise ValueError("no line of sight")
 
-    roll = d.roll("1d20", reason=f"{attacker['name']} shoots {target['name']}", kind="combat").total
-    to_hit = attacker.get("to_hit", 0)
-    effective_ac = target["ac"]
+    to_hit = _attacker_to_hit_bonus(attacker)
     if _has_cover(state, module, target):
-        effective_ac -= 2  # descending AC: lower is better
-    needed = 20 - effective_ac + to_hit
+        to_hit -= 2  # descending AC: cover is harder to hit
+    needed = _target_number(attacker, target["ac"])
+    roll_obj = d.roll("1d20", reason=f"{attacker['name']} shoots {target['name']}", kind="combat")
+    roll = roll_obj.total + to_hit
     hit = roll >= needed
     fatal = False
     if hit:
         dmg_expr = attacker.get("ranged_damage", "1d6")
-        damage_bonus = attacker.get("damage_bonus", 0)
-        if damage_bonus:
-            dmg_expr = f"{dmg_expr}+{damage_bonus}"
-        dmg_roll = d.roll(dmg_expr, reason="ranged damage", kind="combat")
+        damage_bonus = _attacker_damage_bonus(attacker)
+        dmg_roll = d.roll(dmg_expr, mods=damage_bonus, reason="ranged damage", kind="combat")
         damage = max(1, dmg_roll.total)
         target["hp"] -= damage
+        if target["type"] == "monster":
+            target["last_wounded_by"] = attacker["id"]
         if target["type"] == "player":
             if target["hp"] <= -11:
                 fatal = True
@@ -951,20 +1162,24 @@ async def _ranged_attack(
                 target["down"] = True
         else:
             await _check_boss_phase(state, target)
+            await _check_morale(state, target)
             if target["hp"] <= 0:
                 fatal = True
                 target["alive"] = False
                 _grant_rewards(state, target)
                 _check_victory(state)
+                if target.get("boss"):
+                    await _morale_for_leader_death(state, target)
 
+    nd = Dice(seed=state["seed"] + state["version"])
     lines = await narrator.narrate_ranged_attack(
-        attacker, target, hit, fatal,
-        random.Random(state["seed"] + state["version"])
+        attacker, target, hit, fatal, nd
     )
     state["log"].extend(lines)
 
     if state["status"] == STATUS_WON:
-        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
+        state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
+    state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
 
 async def _use_potion(state: dict[str, Any], token: dict[str, Any], d: Dice) -> None:
@@ -1005,6 +1220,7 @@ async def _ability(state: dict[str, Any], token: dict[str, Any], target_id: str,
         raise ValueError("target not found")
     if not target.get("alive", True):
         raise ValueError("target is already dead")
+    nd = Dice(seed=state["seed"] + state["version"])
 
     if cls == "fighter":
         if not _adjacent(token, target):
@@ -1035,7 +1251,7 @@ async def _ability(state: dict[str, Any], token: dict[str, Any], target_id: str,
                 _grant_rewards(state, target)
                 _check_victory(state)
                 if state["status"] == STATUS_WON:
-                    state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
+                    state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
         else:
             state["log"].append(f"{token['name']} attempts to turn the undead, but it holds fast.")
     elif cls in ("magic-user", "illusionist"):
@@ -1055,9 +1271,10 @@ async def _ability(state: dict[str, Any], token: dict[str, Any], target_id: str,
             _grant_rewards(state, target)
             _check_victory(state)
             if state["status"] == STATUS_WON:
-                state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
+                state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
     else:
         raise ValueError(f"no special ability for class {cls!r}")
+    state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
 
 async def _resolve_aoe(
@@ -1072,6 +1289,7 @@ async def _resolve_aoe(
     cls = token.get("classes", [""])[0].lower()
     if cls not in ("magic-user", "illusionist", "cleric"):
         raise ValueError("this class cannot use area abilities")
+    nd = Dice(seed=state["seed"] + state["version"])
     dist = _ranged_distance(token, {"x": center_x, "y": center_y})
     if dist > 6:
         raise ValueError("center is out of range")
@@ -1105,7 +1323,8 @@ async def _resolve_aoe(
             _check_victory(state)
     state["log"].append(f"{token['name']} unleashes an area burst for {total_damage} total damage.")
     if state["status"] == STATUS_WON:
-        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
+        state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
+    state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
 
 async def _attack_with_bonuses(
@@ -1117,22 +1336,23 @@ async def _attack_with_bonuses(
     damage_bonus: int,
     reason: str,
 ) -> None:
-    roll = d.roll("1d20", reason=f"{attacker['name']} {reason} {target['name']}", kind="combat").total
-    to_hit = attacker.get("to_hit", 0) + to_hit_bonus
+    nd = Dice(seed=state["seed"] + state["version"])
+    to_hit = _attacker_to_hit_bonus(attacker) + to_hit_bonus
     if attacker["type"] == "player" and _is_flanking(state, attacker, target):
         to_hit += 2
-    needed = 20 - target["ac"] + to_hit
+    needed = _target_number(attacker, target["ac"])
+    roll_obj = d.roll("1d20", reason=f"{attacker['name']} {reason} {target['name']}", kind="combat")
+    roll = roll_obj.total + to_hit
     hit = roll >= needed
     fatal = False
     if hit:
         damage_expr = attacker.get("damage", "1d6")
-        base_bonus = attacker.get("damage_bonus", 0)
-        total_bonus = base_bonus + damage_bonus
-        if total_bonus:
-            damage_expr = f"{damage_expr}+{total_bonus}"
-        dmg_roll = d.roll(damage_expr, reason=f"{reason} damage", kind="combat")
+        total_bonus = _attacker_damage_bonus(attacker) + damage_bonus
+        dmg_roll = d.roll(damage_expr, mods=total_bonus, reason=f"{reason} damage", kind="combat")
         damage = max(1, dmg_roll.total)
         target["hp"] -= damage
+        if target["type"] == "monster":
+            target["last_wounded_by"] = attacker["id"]
         if target["type"] == "player":
             if target["hp"] <= -11:
                 fatal = True
@@ -1145,14 +1365,18 @@ async def _attack_with_bonuses(
                 target["down"] = True
         else:
             await _check_boss_phase(state, target)
+            await _check_morale(state, target)
             if target["hp"] <= 0:
                 fatal = True
                 target["alive"] = False
                 _grant_rewards(state, target)
                 _check_victory(state)
+                if target.get("boss"):
+                    await _morale_for_leader_death(state, target)
     state["log"].append(f"{attacker['name']} uses {reason} and {'hits' if hit else 'misses'} {target['name']}{' for ' + str(max(0, attacker.get('damage_bonus', 0) + damage_bonus)) + ' bonus damage' if hit else ''}.")
     if state["status"] == STATUS_WON:
-        state["log"].append(await narrator.narrate_victory(random.Random(state["seed"] + state["version"]), module=state.get("module_id")))
+        state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
+    state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
 
 async def _start_round(state: dict[str, Any], module: Module, d: Dice) -> None:
@@ -1187,6 +1411,154 @@ async def _start_round(state: dict[str, Any], module: Module, d: Dice) -> None:
         state["log"].append("The players act first!")
 
 
+def _step_toward(
+    state: dict[str, Any],
+    module: Module,
+    start: tuple[int, int],
+    goal: tuple[int, int],
+) -> tuple[int, int] | None:
+    """Return one deterministic step from ``start`` toward ``goal``.
+
+    Prefers closing the larger axis first, then falls back to the other
+    axis and finally to any free adjacent tile.
+    """
+    sx, sy = start
+    gx, gy = goal
+    dx = gx - sx
+    dy = gy - sy
+    candidates: list[tuple[int, int]] = []
+    if dx > 0:
+        candidates.append((1, 0))
+    elif dx < 0:
+        candidates.append((-1, 0))
+    if dy > 0:
+        candidates.append((0, 1))
+    elif dy < 0:
+        candidates.append((0, -1))
+    for cdx, cdy in candidates:
+        nx, ny = sx + cdx, sy + cdy
+        if (
+            module.map.in_bounds(nx, ny)
+            and module.map.walkable(nx, ny)
+            and _token_at(state, nx, ny) is None
+        ):
+            return nx, ny
+    for cdx, cdy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+        if (cdx, cdy) in candidates:
+            continue
+        nx, ny = sx + cdx, sy + cdy
+        if (
+            module.map.in_bounds(nx, ny)
+            and module.map.walkable(nx, ny)
+            and _token_at(state, nx, ny) is None
+        ):
+            return nx, ny
+    return None
+
+
+async def _advance_active_player(
+    state: dict[str, Any], module: Module, d: Dice
+) -> None:
+    """Move the active-player pointer forward, running the DM turn when needed."""
+    active = state.get("active_player_index", 0) + 1
+    if active >= len(state["players"]):
+        state["phase"] = PHASE_DM
+        state["turn_deadline"] = None
+        state["active_player_index"] = 0
+        if _ai_dm_enabled(state):
+            _tick_statuses(state)
+            if not state.get("dm_acted_this_round", False):
+                await _run_dm_turn(state, module, d)
+            await _start_round(state, module, d)
+    else:
+        state["active_player_index"] = active
+    if state["players"]:
+        state["player"] = _active_player(state)
+
+
+async def _ai_player_turn(
+    state: dict[str, Any], module: Module, d: Dice
+) -> None:
+    """Resolve one AI-controlled player turn automatically."""
+    player = _active_player(state)
+    state["version"] += 1
+
+    if not player.get("alive", True) or player.get("down", False):
+        state["log"].append(f"{player['name']} is unable to act.")
+        await _advance_active_player(state, module, d)
+        return
+
+    # Use a potion when badly wounded.
+    max_hp = player.get("max_hp", player.get("hp", 1))
+    if max_hp and player.get("hp", max_hp) <= max_hp * 0.25:
+        inventory = player.get("inventory", [])
+        has_potion = any(
+            i.get("slot") == "consumable" or i.get("type") == "potion"
+            for i in inventory
+        )
+        if has_potion:
+            await _use_potion(state, player, d)
+            await _advance_active_player(state, module, d)
+            return
+
+    # Find the nearest living monster.
+    targets = [m for m in state.get("monsters", []) if m.get("alive", True)]
+    if not targets:
+        state["log"].append(f"{player['name']} waits; no enemies in sight.")
+        await _advance_active_player(state, module, d)
+        return
+
+    target = min(
+        targets,
+        key=lambda m: abs(m["x"] - player["x"]) + abs(m["y"] - player["y"]),
+    )
+
+    if _adjacent(player, target):
+        await _attack(state, player, target, d)
+        await _advance_active_player(state, module, d)
+        return
+
+    if (
+        _ranged_distance(player, target) <= RANGED_RANGE
+        and _line_of_sight(state, module, player["x"], player["y"], target["x"], target["y"])
+    ):
+        await _ranged_attack(state, player, target, module, d)
+        await _advance_active_player(state, module, d)
+        return
+
+    step = _step_toward(state, module, (player["x"], player["y"]), (target["x"], target["y"]))
+    if step:
+        await _move(state, player, step[0], step[1], module, d)
+    else:
+        state["log"].append(f"{player['name']} is blocked and holds.")
+    await _advance_active_player(state, module, d)
+
+
+async def _auto_resolve_ai_players(
+    state: dict[str, Any], module: Module, d: Dice
+) -> None:
+    """Act for every AI-controlled player until a human player's turn arrives."""
+    while (
+        state["phase"] == PHASE_PLAYER
+        and state["status"] == STATUS_ACTIVE
+        and state["players"]
+    ):
+        player = _active_player(state)
+        if not player.get("ai_controlled"):
+            break
+        await _ai_player_turn(state, module, d)
+
+
+async def run_ai_players(
+    state: dict[str, Any], module: Module
+) -> dict[str, Any]:
+    """Public helper to resolve any pending AI player turns outside ``act``."""
+    d = Dice(seed=state["seed"] + state["turn"] * 1000 + state["version"])
+    await _auto_resolve_ai_players(state, module, d)
+    state["rolls"].extend(_roll_to_dict(r) for r in d.log)
+    return state
+
+
 async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any) -> dict[str, Any]:
     """Perform one player or DM action and return the updated state."""
     d = Dice(seed=state["seed"] + state["turn"] * 1000 + state["version"])
@@ -1198,6 +1570,7 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
         if not state.get("dm_acted_this_round", False):
             await _run_dm_turn(state, module, d)
         await _start_round(state, module, d)
+        await _auto_resolve_ai_players(state, module, d)
 
     else:
         if state["phase"] != PHASE_PLAYER:
@@ -1270,14 +1643,18 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
             state["turn_deadline"] = None
 
         elif action == "end_turn":
-            active = active_index + 1
-            if active >= len(state["players"]):
-                state["phase"] = PHASE_DM
-                state["turn_deadline"] = None
-                state["active_player_index"] = 0
-            else:
-                state["active_player_index"] = active
-            state["player"] = _active_player(state)
+            await _advance_active_player(state, module, d)
+            await _auto_resolve_ai_players(state, module, d)
+
+        elif action == "toggle_ai_dm":
+            account_id = kwargs.get("account_id")
+            if account_id is None:
+                raise ValueError("account_id is required")
+            if account_id != state.get("account_id") and account_id != state.get("dm_account_id"):
+                raise ValueError("not authorized")
+            enabled = not state.get("ai_dm_enabled", True)
+            state["ai_dm_enabled"] = enabled
+            state["log"].append(f"AI DM {'enabled' if enabled else 'disabled'}.")
 
         else:
             raise ValueError(f"unknown action: {action!r}")
@@ -1303,10 +1680,10 @@ async def _spawn_arena_wave(
         if md:
             monsters_dir = Path(md)
     wave = state.get("wave", 1)
-    rng = random.Random(state["seed"] + wave)
+    wave_d = Dice(seed=state["seed"] + wave)
     player_level = max(p.get("level", 1) for p in state["players"])
     count = min(2 + wave, 6)
-    template_name = rng.choice(ARENA_BASE_WAVE_TEMPLATES)
+    template_name = wave_d.choice(ARENA_BASE_WAVE_TEMPLATES, reason="arena wave template", kind="arena")
 
     # Scale up monster HP and damage for later waves.
     hp_bonus = wave - 1
@@ -1317,8 +1694,8 @@ async def _spawn_arena_wave(
     for _ in range(count * 2):
         if spawned >= count:
             break
-        sx = rng.randint(1, module.map.width - 2)
-        sy = rng.randint(1, module.map.height - 2)
+        sx = wave_d.randint(1, module.map.width - 2, reason="arena spawn x", kind="arena")
+        sy = wave_d.randint(1, module.map.height - 2, reason="arena spawn y", kind="arena")
         if not module.map.walkable(sx, sy) or _token_at(state, sx, sy) is not None:
             continue
         template = bestiary.load(template_name, monsters_dir=monsters_dir)
@@ -1332,6 +1709,7 @@ async def _spawn_arena_wave(
             "max_hp": max(1, _roll_hp(template, d) + hp_bonus),
             "ac": max(0, template["ac"] - wave // 5),
             "damage": template["damage"],
+            "hit_dice": template.get("hit_dice", "1"),
             "to_hit": to_hit_bonus,
             "color": "#e74c3c",
             "alive": True,
@@ -1343,12 +1721,14 @@ async def _spawn_arena_wave(
         spawned += 1
 
     state["log"].append(f"Wave {wave} enters the arena!")
-    banter = await narrator.narrate_banter("arena", rng=rng)
+    banter = await narrator.narrate_banter("arena", rng=wave_d)
     if banter:
         state["log"].append(banter)
+    state["rolls"].extend(_roll_to_dict(r) for r in wave_d.log)
 
 
 async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
+    nd = Dice(seed=state["seed"] + state["version"])
     # Hazard tiles damage tokens that end their turn standing on them.
     hazards = THEME_HAZARDS.get(module.map.theme, THEME_HAZARDS["dungeon"])
     for token in _tokens(state):
@@ -1358,54 +1738,17 @@ async def _run_dm_turn(state: dict[str, Any], module: Module, d: Dice) -> None:
         if tile in hazards:
             await _apply_hazard(state, token, tile, module.map.theme, d, module)
 
-    events: list[str] = []
-    for monster in state["monsters"]:
-        if not monster.get("alive", True):
-            continue
-        if state["status"] != STATUS_ACTIVE:
-            break
-        target = _nearest_player(state, monster)
-        # If adjacent, attack.
-        if _adjacent(monster, target):
-            events.append(f"{monster['name']} attacks {target['name']}.")
-            await _attack(state, monster, target, d)
-            continue
-        # Move one tile toward the target.
-        dx = 0
-        if target["x"] > monster["x"]:
-            dx = 1
-        elif target["x"] < monster["x"]:
-            dx = -1
-        dy = 0
-        if target["y"] > monster["y"]:
-            dy = 1
-        elif target["y"] < monster["y"]:
-            dy = -1
-
-        # Try primary direction, then secondary.
-        moved = False
-        for tx, ty in [(monster["x"] + dx, monster["y"] + dy), (monster["x"] + dx, monster["y"]), (monster["x"], monster["y"] + dy)]:
-            if module.map.walkable(tx, ty) and _token_at(state, tx, ty) is None:
-                monster["x"] = tx
-                monster["y"] = ty
-                moved = True
-                break
-        if moved:
-            events.append(f"{monster['name']} moves toward {target['name']}.")
-            line = await narrator.narrate_move(monster, random.Random(state["seed"] + state["version"]))
-            if line:
-                state["log"].append(line)
-            if _adjacent(monster, target):
-                await _attack(state, monster, target, d)
+    callbacks = _AIDMCallbacks(state, module, d, nd)
+    ai = AIDM(state, module, d, callbacks)
+    events = await ai.take_turn()
 
     if events:
-        summary = await narrator.narrate_dm_turn(
-            events, random.Random(state["seed"] + state["version"])
-        )
+        summary = await narrator.narrate_dm_turn(events, nd)
         if summary:
             state["log"].append(summary)
 
     _check_loss(state)
+    state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
     # In arena mode, spawn the next wave if all monsters are dead.
     if state.get("mode") == "arena" and state["status"] == STATUS_ACTIVE:
@@ -1449,4 +1792,5 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "turn_timer_seconds": state.get("turn_timer_seconds", 0),
         "turn_deadline": state.get("turn_deadline"),
         "dm_revealed": list(state.get("dm_revealed", [])),
+        "ai_dm_enabled": _ai_dm_enabled(state),
     }

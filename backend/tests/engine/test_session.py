@@ -76,6 +76,7 @@ async def test_player_attack_goblin(sample_module, hero):
 
 async def test_dm_turn_advances_turn(sample_module, hero):
     st = await session.new_game("s1", sample_module, hero, seed=42)
+    st["ai_dm_enabled"] = False
     st = await session.act(st, sample_module, "end_turn")
     assert st["phase"] == "dm"
     st = await session.act(st, sample_module, "dm_turn")
@@ -91,6 +92,7 @@ async def test_new_game_with_timer(sample_module, hero):
 
 async def test_timer_deadline_resets_after_dm_turn(sample_module, hero):
     st = await session.new_game("s1", sample_module, hero, seed=42, turn_timer_seconds=30)
+    st["ai_dm_enabled"] = False
     st = await session.act(st, sample_module, "end_turn")
     assert st["turn_deadline"] is None
     st = await session.act(st, sample_module, "dm_turn")
@@ -376,6 +378,7 @@ async def test_status_ticks_apply_damage_and_expire(sample_module, hero):
 
 async def test_dm_turn_rolls_initiative_and_may_act_first(sample_module, hero):
     st = await session.new_game("s1", sample_module, hero, seed=42)
+    st["ai_dm_enabled"] = False
     st = await session.act(st, sample_module, "end_turn")
     assert st["phase"] == session.PHASE_DM
     st = await session.act(st, sample_module, "dm_turn")
@@ -460,3 +463,85 @@ async def test_validator_rejects_attack_on_non_adjacent_target(sample_module, he
     st["monsters"][0]["y"] = 10
     with pytest.raises(ValueError, match="adjacent"):
         validate.validate_attack_target(st, st["monsters"][0]["id"])
+
+
+def _player_token(**overrides):
+    """Build a minimal player token for target-number tests."""
+    token = {
+        "type": "player",
+        "classes": ["fighter"],
+        "levels": {"fighter": 1},
+        "scores": {"strength": 10, "dexterity": 10, "constitution": 10,
+                   "intelligence": 10, "wisdom": 10, "charisma": 10},
+        "modifiers": {"hit": 0, "damage": 0, "encumbrance_lbs": 0},
+        "saves": {"aimed_magic_items": 14, "breath_weapons": 17,
+                  "death_paralysis_poison": 12, "petrifaction_polymorph": 15, "spells": 16},
+        "damage": "1d8",
+        "ranged_damage": "1d6",
+        "to_hit": 0,
+        "damage_bonus": 0,
+    }
+    token.update(overrides)
+    return token
+
+
+async def test_strong_fighter_hits_more_often_than_weak_fighter():
+    target_ac = 5
+    strong = _player_token(modifiers={"hit": 2, "damage": 2, "encumbrance_lbs": 0})
+    weak = _player_token(modifiers={"hit": -1, "damage": -1, "encumbrance_lbs": 0})
+    # The class table target is the same; the Strength bonus is applied to the roll.
+    assert session._attacker_to_hit_bonus(strong) > session._attacker_to_hit_bonus(weak)
+    target = session._player_to_hit_target(strong, target_ac)
+    raw_roll = target - 1  # a roll that would miss without modifiers
+    assert raw_roll + session._attacker_to_hit_bonus(strong) >= target
+    assert raw_roll + session._attacker_to_hit_bonus(weak) < target
+
+
+async def test_strong_fighter_deals_more_damage():
+    strong = _player_token(modifiers={"hit": 2, "damage": 2, "encumbrance_lbs": 0})
+    weak = _player_token(modifiers={"hit": -1, "damage": -1, "encumbrance_lbs": 0})
+    assert session._attacker_damage_bonus(strong) > session._attacker_damage_bonus(weak)
+
+
+async def test_monster_hd_based_to_hit_favours_higher_hd():
+    weak = {"type": "monster", "hit_dice": "1-1"}
+    strong = {"type": "monster", "hit_dice": "4"}
+    target_ac = 5
+    weak_target = session._monster_to_hit_target(weak, target_ac)
+    strong_target = session._monster_to_hit_target(strong, target_ac)
+    assert strong_target < weak_target
+
+
+async def test_saving_throw_succeeds_on_high_roll(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    # Give the hero an impossible-to-fail save target for this test.
+    st["player"]["saves"]["aimed_magic_items"] = 1
+    d = session.Dice(seed=42)
+    result = session.saving_throw(d, st["player"], "aimed_magic_items")
+    assert result.success is True
+
+
+async def test_trap_allows_save_for_half_damage(hero):
+    base_module = module.load("sample_lair")
+    trap_module = _module_with_trap(base_module)
+    st = await session.new_game("trap_test", trap_module, hero, seed=1)
+    # Seed 1 happens to trigger the trap (1 in 6); the player may save for half.
+    px, py = st["player"]["x"], st["player"]["y"]
+    st = await session.act(st, trap_module, "move", x=px + 1, y=py)
+    assert st["player"]["x"] == px + 1
+    assert any("suffers" in entry and "damage" in entry for entry in st["log"])
+
+
+async def test_morale_check_triggered_at_half_hp(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    goblin = st["monsters"][0]
+    goblin["x"] = st["player"]["x"] + 1
+    goblin["y"] = st["player"]["y"]
+    goblin["max_hp"] = 10
+    goblin["hp"] = 10
+    goblin["ac"] = 30  # guaranteed player hit
+    st["player"]["damage"] = "1d6+10"
+    st["player"]["damage_bonus"] = 10
+    await session._attack(st, st["player"], goblin, session.Dice(seed=42))
+    assert goblin["hp"] <= 5
+    assert any("checks morale" in entry for entry in st["log"])

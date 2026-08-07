@@ -1,5 +1,6 @@
 """Character API."""
 import json
+import secrets
 import uuid
 from typing import Any
 
@@ -13,6 +14,7 @@ from backend.app.db import CharacterRecord, get_db
 from backend.app.engine import character as char_engine
 from backend.app.engine import items
 from backend.app.engine.character import arrangeable
+from backend.app.engine.dice import Dice
 from backend.app.rulesets.loader import load_ruleset
 
 router = APIRouter(tags=["characters"])
@@ -99,9 +101,8 @@ async def preview_character(data: dict[str, Any]):
     ruleset_id = data.get("ruleset_id", "osric")
 
     if seed is None:
-        import random
-
-        seed = random.randint(1, 1_000_000_000)
+        d = Dice(seed=secrets.randbelow(1_000_000_000) + 1)
+        seed = d.randint(1, 1_000_000_000)
 
     try:
         ruleset = load_ruleset(ruleset_id)
@@ -137,9 +138,8 @@ async def create_character(
     ruleset_id = data.get("ruleset_id", "osric")
 
     if seed is None:
-        import random
-
-        seed = random.randint(1, 1_000_000_000)
+        d = Dice(seed=secrets.randbelow(1_000_000_000) + 1)
+        seed = d.randint(1, 1_000_000_000)
 
     try:
         ruleset = load_ruleset(ruleset_id)

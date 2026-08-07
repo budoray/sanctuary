@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.auth import require_account
 from backend.app.db import CharacterRecord, SessionRecord, get_db
 from backend.app.engine import items
-from backend.app.api.sessions import _can_access_session
+from backend.app.api.sessions import _can_access_session, _persist_character_state, _persist_instance_state
 
 router = APIRouter(tags=["progression"])
 
@@ -53,18 +53,7 @@ async def save_progression(
             continue
 
         char_state = json.loads(char_record.state)
-        char_state["level"] = player.get("level", char_state.get("level", 1))
-        char_state["xp"] = player.get("xp", char_state.get("xp", 0))
-        char_state["gold"] = player.get("gold", char_state.get("gold", 0))
-        char_state["hit_points"] = player.get("hp", char_state.get("hit_points", 0))
-        char_state["max_hp"] = player.get("max_hp", char_state.get("max_hp", char_state["hit_points"]))
-        char_state.setdefault("inventory", [])
-        char_state.setdefault("equipment", {})
-
-        for loot in player.get("session_loot", []):
-            items.add_item(char_state, loot)
-            state["log"].append(f"{player['name']} stashes {loot['name']}.")
-        player["session_loot"] = []
+        _persist_character_state(char_state, player, state)
 
         char_record.state = json.dumps(char_state)
         char_record.level = char_state["level"]
@@ -72,7 +61,7 @@ async def save_progression(
         char_record.max_hp = char_state["max_hp"]
         updated_character_ids.append(char_id)
 
-    record.state = json.dumps(state)
+    _persist_instance_state(record, state, saved=True)
     await db.commit()
 
     return {"saved": True, "character_ids": updated_character_ids}

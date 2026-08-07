@@ -345,6 +345,48 @@ async function playDungeon(dungeonId, characterId, campaignId, turnTimerSeconds 
     })
   });
 }
+async function listAdventures() {
+  return api("/api/modules/adventures");
+}
+async function createAdventure(adventure) {
+  return api("/api/modules/adventures", {
+    method: "POST",
+    body: JSON.stringify(adventure)
+  });
+}
+async function getAdventure(adventureId) {
+  return api(`/api/modules/${adventureId}/format`);
+}
+async function updateArea(adventureId, area) {
+  return api(`/api/modules/${adventureId}/areas`, {
+    method: "POST",
+    body: JSON.stringify(area)
+  });
+}
+async function listAreas(adventureId) {
+  return api(`/api/modules/${adventureId}/areas`);
+}
+async function addExit(adventureId, areaId, exitData) {
+  return api(`/api/modules/${adventureId}/areas/${areaId}/exits`, {
+    method: "POST",
+    body: JSON.stringify(exitData)
+  });
+}
+async function addContent(adventureId, areaId, content) {
+  return api(`/api/modules/${adventureId}/areas/${areaId}/contents`, {
+    method: "POST",
+    body: JSON.stringify(content)
+  });
+}
+async function compileAdventure(adventureId) {
+  return api(`/api/modules/${adventureId}/compile`, { method: "POST" });
+}
+async function updateAdventure(adventureId, data) {
+  return api(`/api/modules/${adventureId}`, {
+    method: "PUT",
+    body: JSON.stringify(data)
+  });
+}
 
 // src/ui/utils.ts
 function el(tag, attrs = {}, ...children) {
@@ -600,6 +642,517 @@ var AdminPanel = class {
   }
 };
 
+// src/ui/adventure-editor.ts
+var ADVENTURE_TILES = {
+  "0": { label: "Floor" },
+  "1": { label: "Wall" },
+  "2": { label: "Door" },
+  "3": { label: "Water" },
+  "4": { label: "Trap" },
+  "5": { label: "Stairs Down" },
+  "6": { label: "Stairs Up" },
+  "7": { label: "Empty" }
+};
+function _parseTiles(tiles, width, height) {
+  const h = height || (tiles ? tiles.length : 8);
+  const w = width || (tiles && tiles[0] ? tiles[0].length : 8);
+  const out = [];
+  for (let y = 0; y < h; y++) {
+    const row = [];
+    for (let x = 0; x < w; x++) {
+      const t = tiles && tiles[y] ? tiles[y][x] : "0";
+      row.push(t === "0" || t === "1" || t === "2" || t === "3" || t === "4" || t === "5" || t === "6" || t === "7" ? t : "0");
+    }
+    out.push(row);
+  }
+  return { width: w, height: h, tiles: out };
+}
+function _tilesToStrings(grid) {
+  return grid.map((row) => row.join(""));
+}
+var AreaEditor = class {
+  root;
+  container;
+  area;
+  areaIds;
+  onSave;
+  onBack;
+  width;
+  height;
+  tiles;
+  activeTile = "0";
+  activeTool = null;
+  gridEl;
+  nameInput;
+  descriptionInput;
+  widthInput;
+  heightInput;
+  targetSelect;
+  targetXInput;
+  targetYInput;
+  kindSelect;
+  constructor(container, area, areaIds, onSave, onBack) {
+    this.container = container;
+    this.area = JSON.parse(JSON.stringify(area));
+    this.areaIds = areaIds;
+    this.onSave = onSave;
+    this.onBack = onBack;
+    const parsed = _parseTiles(this.area.tiles, this.area.width, this.area.height);
+    this.width = parsed.width;
+    this.height = parsed.height;
+    this.tiles = parsed.tiles;
+    this.root = el("div", { className: "area-editor" });
+    const panel = el("div", { className: "session-panel editor-panel" });
+    panel.appendChild(el("h1", {}, `Edit Area: ${this.area.name || this.area.id}`));
+    panel.appendChild(this.buildForm());
+    panel.appendChild(this.buildToolbar());
+    panel.appendChild(this.buildGrid());
+    panel.appendChild(this.buildEntityToolbar());
+    panel.appendChild(this.buildEntityList());
+    panel.appendChild(this.buildExitEditor());
+    panel.appendChild(this.buildFooter());
+    this.root.appendChild(panel);
+    container.appendChild(this.root);
+  }
+  buildForm() {
+    const form = el("div", { className: "editor-form" });
+    this.nameInput = el("input", { type: "text", value: this.area.name || "" });
+    this.descriptionInput = el("input", { type: "text", value: this.area.description || "" });
+    this.widthInput = el("input", { type: "number", value: String(this.width), min: "4", max: "32" });
+    this.heightInput = el("input", { type: "number", value: String(this.height), min: "4", max: "32" });
+    form.appendChild(el("label", {}, "Name"));
+    form.appendChild(this.nameInput);
+    form.appendChild(el("label", {}, "Description"));
+    form.appendChild(this.descriptionInput);
+    form.appendChild(el("label", {}, "Width"));
+    form.appendChild(this.widthInput);
+    form.appendChild(el("label", {}, "Height"));
+    form.appendChild(this.heightInput);
+    form.appendChild(el("button", {
+      className: "solo-hub-btn",
+      onclick: () => this.resizeGrid()
+    }, "Resize Grid"));
+    return form;
+  }
+  buildToolbar() {
+    const toolbar = el("div", { className: "editor-toolbar" });
+    const palette = el("div", { className: "tile-palette" });
+    Object.entries(ADVENTURE_TILES).forEach(([key, t]) => {
+      const btn = el("button", {
+        className: `palette-btn palette-${key}${key === this.activeTile ? " active" : ""}`,
+        onclick: () => this.selectTile(key)
+      }, t.label);
+      palette.appendChild(btn);
+    });
+    toolbar.appendChild(palette);
+    return toolbar;
+  }
+  selectTile(key) {
+    this.activeTile = key;
+    this.activeTool = null;
+    this.root.querySelectorAll(".palette-btn").forEach((b) => {
+      b.classList.toggle("active", b.classList.contains(`palette-${this.activeTile}`));
+    });
+    this.root.querySelectorAll(".entity-tool-btn").forEach((b) => b.classList.remove("active"));
+  }
+  buildGrid() {
+    this.gridEl = el("div", { className: "room-grid adventure-grid" });
+    this.renderGrid();
+    return this.gridEl;
+  }
+  resizeGrid() {
+    const newW = Math.max(4, Math.min(32, parseInt(this.widthInput.value, 10) || 8));
+    const newH = Math.max(4, Math.min(32, parseInt(this.heightInput.value, 10) || 8));
+    const old = this.tiles;
+    this.tiles = Array.from({ length: newH }, (_, y) =>
+      Array.from({ length: newW }, (_, x) => old[y]?.[x] != null ? old[y][x] : "0")
+    );
+    this.width = newW;
+    this.height = newH;
+    this.widthInput.value = String(newW);
+    this.heightInput.value = String(newH);
+    this.renderGrid();
+  }
+  renderGrid() {
+    clear(this.gridEl);
+    this.gridEl.style.gridTemplateColumns = `repeat(${this.width}, 24px)`;
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const tile = this.tiles[y][x];
+        const hasEntity = (this.area.entities || []).some((e) => e.x === x && e.y === y);
+        const cell = el("div", {
+          className: `room-grid-cell tile-${tile}${hasEntity ? " has-entity" : ""}`,
+          onclick: () => this.onCellClick(x, y)
+        });
+        if (hasEntity) {
+          const ent = (this.area.entities || []).find((e) => e.x === x && e.y === y);
+          cell.appendChild(el("span", { className: "entity-marker" }, ent.type[0].toUpperCase()));
+          cell.title = `${ent.type}: ${ent.key || ent.item_id || ent.value || ""}`;
+        }
+        this.gridEl.appendChild(cell);
+      }
+    }
+  }
+  onCellClick(x, y) {
+    if (this.activeTool) {
+      this.addEntity(x, y, this.activeTool);
+      return;
+    }
+    this.tiles[y][x] = this.activeTile;
+    this.renderGrid();
+  }
+  buildEntityToolbar() {
+    const wrap = el("div", { className: "editor-toolbar" });
+    wrap.appendChild(el("span", {}, "Place:"));
+    ["monster", "trap", "treasure"].forEach((type) => {
+      wrap.appendChild(el("button", {
+        className: "entity-tool-btn",
+        onclick: () => this.selectEntityTool(type)
+      }, type[0].toUpperCase() + type.slice(1)));
+    });
+    return wrap;
+  }
+  selectEntityTool(type) {
+    this.activeTool = type;
+    this.root.querySelectorAll(".entity-tool-btn").forEach((b) => {
+      b.classList.toggle("active", b.textContent.toLowerCase().includes(type));
+    });
+  }
+  addEntity(x, y, type) {
+    this.area.entities = (this.area.entities || []).filter((e) => !(e.x === x && e.y === y));
+    let entity = { type, x, y };
+    if (type === "monster") entity = { ...entity, key: "goblin", count: 1 };
+    else if (type === "trap") entity = { ...entity, key: "spike", damage: "1d6" };
+    else if (type === "treasure") entity = { ...entity, value: 10 };
+    this.area.entities.push(entity);
+    this.activeTool = null;
+    this.root.querySelectorAll(".entity-tool-btn").forEach((b) => b.classList.remove("active"));
+    this.renderGrid();
+    this.renderEntityList();
+  }
+  buildEntityList() {
+    this.entityListEl = el("div", { className: "entity-list" });
+    this.renderEntityList();
+    return this.entityListEl;
+  }
+  renderEntityList() {
+    clear(this.entityListEl);
+    const ents = this.area.entities || [];
+    if (ents.length === 0) {
+      this.entityListEl.appendChild(el("div", { className: "empty" }, "No placed monsters/traps/treasure."));
+      return;
+    }
+    const list = el("ul", { className: "links-list" });
+    ents.forEach((e, idx) => {
+      const text = `${e.type} at (${e.x},${e.y}) ${e.key || e.value || ""}`;
+      const row = el("li", {});
+      row.appendChild(el("span", { className: "link-text" }, text));
+      row.appendChild(el("button", {
+        className: "danger",
+        onclick: () => {
+          this.area.entities.splice(idx, 1);
+          this.renderGrid();
+          this.renderEntityList();
+        }
+      }, "Remove"));
+      list.appendChild(row);
+    });
+    this.entityListEl.appendChild(list);
+  }
+  buildExitEditor() {
+    const section = el("div", { className: "workshop-section" });
+    section.appendChild(el("h2", {}, "Exits"));
+    const controls = el("div", { className: "editor-form inline" });
+    this.targetSelect = el("select", {});
+    this.areaIds.forEach((id) => {
+      if (id === this.area.id) return;
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = id;
+      this.targetSelect.appendChild(opt);
+    });
+    this.targetXInput = el("input", { type: "number", value: "1", min: "0", max: "31" });
+    this.targetYInput = el("input", { type: "number", value: "1", min: "0", max: "31" });
+    this.kindSelect = el("select", {});
+    ["passage", "stairs", "teleport"].forEach((k) => {
+      const opt = document.createElement("option");
+      opt.value = k;
+      opt.textContent = k;
+      this.kindSelect.appendChild(opt);
+    });
+    controls.appendChild(el("label", {}, "To Area"));
+    controls.appendChild(this.targetSelect);
+    controls.appendChild(el("label", {}, "Target X"));
+    controls.appendChild(this.targetXInput);
+    controls.appendChild(el("label", {}, "Target Y"));
+    controls.appendChild(this.targetYInput);
+    controls.appendChild(el("label", {}, "Kind"));
+    controls.appendChild(this.kindSelect);
+    controls.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.addExit()
+    }, "Add Exit"));
+    section.appendChild(controls);
+    this.exitsListEl = el("ul", { className: "session-list links-list" });
+    section.appendChild(this.exitsListEl);
+    this.renderExits();
+    return section;
+  }
+  addExit() {
+    const exitData = {
+      to: this.targetSelect.value,
+      kind: this.kindSelect.value,
+      to_x: parseInt(this.targetXInput.value, 10) || 0,
+      to_y: parseInt(this.targetYInput.value, 10) || 0
+    };
+    this.area.exits = this.area.exits || [];
+    this.area.exits.push(exitData);
+    this.renderExits();
+  }
+  renderExits() {
+    clear(this.exitsListEl);
+    const exits = this.area.exits || [];
+    if (exits.length === 0) {
+      this.exitsListEl.appendChild(el("li", { className: "empty" }, "No exits yet."));
+      return;
+    }
+    exits.forEach((ex, idx) => {
+      const text = `to ${ex.to} (${ex.to_x || 0},${ex.to_y || 0}) [${ex.kind}]`;
+      const row = el("li", {});
+      row.appendChild(el("span", { className: "link-text" }, text));
+      row.appendChild(el("button", {
+        className: "danger",
+        onclick: () => {
+          this.area.exits.splice(idx, 1);
+          this.renderExits();
+        }
+      }, "Delete"));
+      this.exitsListEl.appendChild(row);
+    });
+  }
+  buildFooter() {
+    const footer = el("div", { className: "editor-footer" });
+    footer.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.save()
+    }, "Save Area"));
+    footer.appendChild(el("button", {
+      className: "danger",
+      onclick: () => this.onBack()
+    }, "Back"));
+    return footer;
+  }
+  save() {
+    this.area.name = this.nameInput.value.trim() || this.area.name;
+    this.area.description = this.descriptionInput.value.trim();
+    this.area.width = this.width;
+    this.area.height = this.height;
+    this.area.tiles = _tilesToStrings(this.tiles);
+    this.area.start_x = this.area.start_x ?? 1;
+    this.area.start_y = this.area.start_y ?? 1;
+    this.onSave(this.area);
+  }
+  destroy() {
+    this.root.remove();
+  }
+};
+var AdventureEditor = class {
+  root;
+  container;
+  adventureId;
+  doc;
+  areas;
+  onBack;
+  onPlayAdventure;
+  areaListEl;
+  editorContainer;
+  currentAreaEditor = null;
+  titleInput;
+  constructor(container, adventureId, onBack, onPlayAdventure) {
+    this.container = container;
+    this.adventureId = adventureId;
+    this.onBack = onBack;
+    this.onPlayAdventure = onPlayAdventure;
+    this.root = el("div", { className: "adventure-editor" });
+    const panel = el("div", { className: "session-panel editor-panel adventure-editor-panel" });
+    panel.appendChild(el("h1", {}, "Edit Adventure"));
+    panel.appendChild(this.buildHeader());
+    const body = el("div", { className: "adventure-editor-body" });
+    this.areaListEl = el("div", { className: "adventure-area-list" });
+    this.editorContainer = el("div", { className: "adventure-area-editor" });
+    body.appendChild(this.areaListEl);
+    body.appendChild(this.editorContainer);
+    panel.appendChild(body);
+    panel.appendChild(this.buildFooter());
+    this.root.appendChild(panel);
+    container.appendChild(this.root);
+    this.load();
+  }
+  buildHeader() {
+    const header = el("div", { className: "editor-form inline" });
+    this.titleInput = el("input", { type: "text", value: "" });
+    header.appendChild(el("label", {}, "Title"));
+    header.appendChild(this.titleInput);
+    header.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.saveTitle()
+    }, "Save Title"));
+    return header;
+  }
+  async load() {
+    try {
+      const { data } = await getAdventure(this.adventureId);
+      this.doc = data;
+      this.areas = data.areas || [];
+      this.titleInput.value = (data.module && data.module.title) || "";
+      this.renderAreaList();
+      if (this.areas.length && !this.currentAreaEditor) {
+        this.selectArea(this.areas[0]);
+      }
+    } catch (err) {
+      alert(err.message || "Failed to load adventure");
+    }
+  }
+  renderAreaList() {
+    clear(this.areaListEl);
+    this.areaListEl.appendChild(el("h2", {}, "Areas"));
+    const newBtn = el("button", {
+      className: "enter",
+      onclick: () => this.newArea()
+    }, "+ New Area");
+    this.areaListEl.appendChild(newBtn);
+    if (!this.areas.length) {
+      this.areaListEl.appendChild(el("div", { className: "empty" }, "No areas yet."));
+      return;
+    }
+    const list = el("ul", { className: "session-list workshop-list" });
+    this.areas.forEach((area) => {
+      const row = el("li", {
+        onclick: () => this.selectArea(area)
+      });
+      const info = el("div", { className: "session-info" });
+      info.appendChild(el("strong", {}, area.name || area.id));
+      info.appendChild(el("span", {}, `${(area.width || 0)}x${(area.height || 0)}`));
+      row.appendChild(info);
+      list.appendChild(row);
+    });
+    this.areaListEl.appendChild(list);
+  }
+  async newArea() {
+    const id = `area_${Math.floor(Math.random() * 1e6)}`;
+    const area = {
+      id,
+      name: "New Area",
+      description: "",
+      width: 8,
+      height: 8,
+      tiles: Array.from({ length: 8 }, () => "00000000"),
+      start_x: 1,
+      start_y: 1,
+      entities: [],
+      exits: [],
+      contents: [],
+      monsters: [],
+      treasure: [],
+      discoveries: []
+    };
+    try {
+      const { areas } = await updateArea(this.adventureId, area);
+      this.areas = areas;
+      this.renderAreaList();
+      this.selectArea(this.areas.find((a) => a.id === id) || area);
+    } catch (err) {
+      alert(err.message || "Failed to add area");
+    }
+  }
+  selectArea(area) {
+    if (this.currentAreaEditor) {
+      this.currentAreaEditor.destroy();
+    }
+    clear(this.editorContainer);
+    this.currentAreaEditor = new AreaEditor(
+      this.editorContainer,
+      area,
+      this.areas.map((a) => a.id),
+      (updated) => this.saveArea(updated),
+      () => this.onBack()
+    );
+    this.renderAreaList();
+  }
+  async saveArea(updated) {
+    try {
+      const { areas } = await updateArea(this.adventureId, updated);
+      this.areas = areas;
+      const next = areas.find((a) => String(a.id) === String(updated.id));
+      if (this.currentAreaEditor) {
+        this.currentAreaEditor.destroy();
+      }
+      clear(this.editorContainer);
+      if (next) {
+        this.currentAreaEditor = new AreaEditor(
+          this.editorContainer,
+          next,
+          this.areas.map((a) => a.id),
+          (updated2) => this.saveArea(updated2),
+          () => this.onBack()
+        );
+      }
+      this.renderAreaList();
+    } catch (err) {
+      alert(err.message || "Failed to save area");
+    }
+  }
+  async saveTitle() {
+    const title = this.titleInput.value.trim();
+    if (!title) return;
+    try {
+      await updateAdventure(this.adventureId, { title });
+    } catch (err) {
+      alert(err.message || "Failed to save title");
+    }
+  }
+  buildFooter() {
+    const footer = el("div", { className: "editor-footer" });
+    footer.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.playTest()
+    }, "Play Test"));
+    footer.appendChild(el("button", {
+      className: "solo-hub-btn",
+      onclick: () => this.publish()
+    }, "Publish"));
+    footer.appendChild(el("button", {
+      className: "danger",
+      onclick: () => this.onBack()
+    }, "Back"));
+    return footer;
+  }
+  async playTest() {
+    try {
+      const { characters } = await listCharacters();
+      if (!characters.length) {
+        alert("Create a hero first.");
+        return;
+      }
+      this.onPlayAdventure(this.adventureId, characters[0].id);
+    } catch (err) {
+      alert(err.message || "Failed to start playtest");
+    }
+  }
+  async publish() {
+    try {
+      await compileAdventure(this.adventureId);
+      alert("Adventure is valid and published.");
+    } catch (err) {
+      alert(err.message || "Publish failed");
+    }
+  }
+  destroy() {
+    if (this.currentAreaEditor) this.currentAreaEditor.destroy();
+    this.root.remove();
+  }
+};
+
 // src/ui/dm-workshop.ts
 function defaultTiles() {
   return Array.from({ length: 16 }, (_, y) => Array.from({ length: 16 }, (_, x) => y >= 6 && y <= 9 && x >= 6 && x <= 9 ? "0" : "1"));
@@ -608,35 +1161,42 @@ var DmWorkshop = class {
   root;
   container;
   onPlayDungeon;
+  onPlayAdventure;
   onBack;
   tabContent;
   roomsTab;
   dungeonsTab;
   rulesetsTab;
+  adventuresTab;
   rooms = [];
   dungeons = [];
+  adventures = [];
   characters = [];
   rulesets = [];
   rulesetManager = null;
-  constructor(container, onPlayDungeon, onBack) {
+  constructor(container, onPlayDungeon, onPlayAdventure, onBack) {
     this.container = container;
     this.onPlayDungeon = onPlayDungeon;
+    this.onPlayAdventure = onPlayAdventure;
     this.onBack = onBack;
     this.root = el("div", { className: "dm-workshop" });
     const panel = el("div", { className: "session-panel workshop-panel" });
     panel.appendChild(el("h1", {}, "DM Workshop"));
-    panel.appendChild(el("p", { className: "subtitle" }, "Build rooms, link them into dungeons, and play-test them."));
+    panel.appendChild(el("p", { className: "subtitle" }, "Build rooms, link them into dungeons, craft S3 adventures, and play-test them."));
     const tabs = el("div", { className: "admin-tabs workshop-tabs" });
     tabs.appendChild(this.tabButton("Rooms", "rooms"));
     tabs.appendChild(this.tabButton("Dungeons", "dungeons"));
+    tabs.appendChild(this.tabButton("Adventures", "adventures"));
     tabs.appendChild(this.tabButton("Rulesets", "rulesets"));
     panel.appendChild(tabs);
     this.tabContent = el("div", { className: "workshop-tab-content" });
     this.roomsTab = el("div", { className: "workshop-tab" });
     this.dungeonsTab = el("div", { className: "workshop-tab" });
     this.rulesetsTab = el("div", { className: "workshop-tab" });
+    this.adventuresTab = el("div", { className: "workshop-tab" });
     this.tabContent.appendChild(this.roomsTab);
     this.tabContent.appendChild(this.dungeonsTab);
+    this.tabContent.appendChild(this.adventuresTab);
     this.tabContent.appendChild(this.rulesetsTab);
     panel.appendChild(this.tabContent);
     panel.appendChild(el("button", { className: "enter workshop-back", onclick: () => this.onBack() }, "\u2190 Back"));
@@ -656,6 +1216,7 @@ var DmWorkshop = class {
     this.roomsTab.style.display = tab === "rooms" ? "block" : "none";
     this.dungeonsTab.style.display = tab === "dungeons" ? "block" : "none";
     this.rulesetsTab.style.display = tab === "rulesets" ? "block" : "none";
+    this.adventuresTab.style.display = tab === "adventures" ? "block" : "none";
     this.root.querySelectorAll(".workshop-tab-btn").forEach((b) => {
       b.classList.toggle("active", b.getAttribute("data-tab") === tab);
     });
@@ -665,16 +1226,19 @@ var DmWorkshop = class {
   }
   async load() {
     try {
-      const [{ rooms }, { dungeons }, { characters }] = await Promise.all([
+      const [{ rooms }, { dungeons }, { adventures }, { characters }] = await Promise.all([
         listRooms(),
         listDungeons(),
+        listAdventures(),
         listCharacters()
       ]);
       this.rooms = rooms;
       this.dungeons = dungeons;
+      this.adventures = adventures;
       this.characters = characters;
       this.renderRooms();
       this.renderDungeons();
+      this.renderAdventures();
     } catch (err) {
       clear(this.roomsTab);
       this.roomsTab.appendChild(el("div", { className: "empty error" }, err.message || "Failed to load workshop data."));
@@ -754,6 +1318,103 @@ var DmWorkshop = class {
     } catch (err) {
       alert(err.message || "Delete failed");
     }
+  }
+  renderAdventures() {
+    clear(this.adventuresTab);
+    const header = el("div", { className: "workshop-section-header" });
+    header.appendChild(el("h2", {}, "S3 Adventures"));
+    header.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.newAdventure()
+    }, "+ New Adventure"));
+    this.adventuresTab.appendChild(header);
+    if (this.adventures.length === 0) {
+      this.adventuresTab.appendChild(el("div", { className: "empty" }, "No adventures yet. Create one to get started."));
+      return;
+    }
+    const list = el("ul", { className: "session-list workshop-list" });
+    this.adventures.forEach((adv) => {
+      const info = el("div", { className: "session-info" });
+      info.appendChild(el("strong", {}, adv.title));
+      info.appendChild(el("span", {}, `${(adv.data.areas || []).length} areas · ${adv.ruleset_id || "osric"}`));
+      const controls = el("div", { className: "workshop-item-controls" });
+      controls.appendChild(el("button", {
+        className: "solo-hub-btn",
+        onclick: () => this.editAdventure(adv)
+      }, "Edit"));
+      controls.appendChild(el("button", {
+        className: "enter",
+        onclick: () => this.openCharacterPickerForAdventure(adv.id)
+      }, "Play Test"));
+      const row = el("li", {});
+      row.appendChild(info);
+      row.appendChild(controls);
+      list.appendChild(row);
+    });
+    this.adventuresTab.appendChild(list);
+  }
+  async newAdventure() {
+    try {
+      const { adventure } = await createAdventure({ title: "New Adventure", ruleset_id: "osric" });
+      this.editAdventure(adventure);
+    } catch (err) {
+      alert(err.message || "Failed to create adventure");
+    }
+  }
+  editAdventure(adventure) {
+    this.destroy();
+    const editor = new AdventureEditor(this.container, adventure.id, () => {
+      editor.destroy();
+      this.root = el("div", { className: "dm-workshop" });
+      this.container.appendChild(this.root);
+      this.load();
+    }, (adventureId, characterId) => {
+      editor.destroy();
+      if (characterId) {
+        this.onPlayAdventure(adventureId, characterId);
+      } else {
+        this.openCharacterPickerForAdventure(adventureId);
+      }
+    });
+  }
+  openCharacterPickerForAdventure(adventureId) {
+    this.destroy();
+    const picker = el("div", { className: "dm-workshop" });
+    const panel = el("div", { className: "session-panel workshop-panel" });
+    panel.appendChild(el("h1", {}, "Play Test Adventure"));
+    panel.appendChild(el("p", { className: "subtitle" }, "Choose a hero to test this adventure."));
+    const list = el("div", { className: "characters-grid" });
+    if (this.characters.length === 0) {
+      list.appendChild(el("div", { className: "empty" }, "No heroes available. Create one first."));
+    } else {
+      this.characters.forEach((c) => {
+        const card = el("div", {
+          className: "character-card",
+          onclick: () => {
+            picker.remove();
+            this.onPlayAdventure(adventureId, c.id);
+          }
+        });
+        const portraitUrl = c.portrait_url || `/portraits/${(c.classes?.[0] || "generic").toLowerCase().replace(/\s+/g, "-")}.png`;
+        card.appendChild(el("img", { className: "character-portrait", src: portraitUrl, alt: c.name }));
+        card.appendChild(el("h3", {}, c.name));
+        card.appendChild(el("p", {}, (c.classes || []).join(" / ")));
+        list.appendChild(card);
+      });
+    }
+    panel.appendChild(list);
+    panel.appendChild(el("button", {
+      className: "enter workshop-back",
+      onclick: () => {
+        picker.remove();
+        this.root = el("div", { className: "dm-workshop" });
+        this.container.appendChild(this.root);
+        this.load();
+      }
+    }, "\u2190 Back"));
+    picker.appendChild(panel);
+    this.container.appendChild(picker);
+    this.root = picker;
   }
   renderDungeons() {
     clear(this.dungeonsTab);
@@ -7611,7 +8272,6 @@ var Game = class {
   saveBtn;
   dmTurnBtn;
   autoplayBtn;
-  autoPlayer;
   dmToolsEl = document.createElement("div");
   dmMonsterSelect = document.createElement("select");
   dmTokenSelect = document.createElement("select");
@@ -7630,6 +8290,13 @@ var Game = class {
   heartbeatInterval = null;
   moduleId;
   loadingOverlay;
+  zoom = 1.25;
+  minZoom = 0.5;
+  maxZoom = 3;
+  zoomStep = 0.25;
+  observer = false;
+  zoomControls;
+  zoomLevelEl;
   constructor(container, sessionId, module, initialSession, onExit, onReplay, userId) {
     this.root = container;
     this.sessionId = sessionId;
@@ -7670,7 +8337,15 @@ var Game = class {
     this.loadingOverlay = el("div", { className: "game-loading" });
     this.loadingOverlay.innerHTML = '<div class="game-loading-spinner"></div><span>Entering the room...</span>';
     this.root.appendChild(this.loadingOverlay);
-    this.autoPlayer = new AutoPlayer(this);
+    this.zoomControls = this.buildZoomControls();
+    this.canvasContainer.appendChild(this.zoomControls);
+    this.canvasContainer.addEventListener("wheel", (e) => {
+      if (e.ctrlKey || e.metaKey || Math.abs(e.deltaY) > 0) {
+        e.preventDefault();
+        const delta = Math.sign(e.deltaY) * -this.zoomStep;
+        this.setZoom(this.zoom + delta);
+      }
+    }, { passive: false });
     this.update(initialSession);
     window.addEventListener("resize", () => this.centerMap());
     this.keydownHandler = (e) => this.onKeyDown(e);
@@ -7694,16 +8369,21 @@ var Game = class {
   getModule() {
     return this.module;
   }
-  toggleAutoplay() {
-    if (this.autoPlayer.isRunning()) {
-      this.autoPlayer.stop();
-      this.autoplayBtn.textContent = "\u25B6 Observer";
-      this.autoplayBtn.classList.remove("active");
-    } else {
-      this.autoPlayer.start();
-      this.autoplayBtn.textContent = "\u23F8 Observer";
+  toggleObserver() {
+    this.observer = !this.observer;
+    this.root.classList.toggle("observer", this.observer);
+    if (this.observer) {
+      this.autoplayBtn.textContent = "\u23F8 Observing";
       this.autoplayBtn.classList.add("active");
+      this.action = null;
+      this.dmAction = null;
+      this.highlightActionTiles();
+    } else {
+      this.autoplayBtn.textContent = "\u25B6 Spectate";
+      this.autoplayBtn.classList.remove("active");
     }
+    this.updateActions();
+    this.updateStatus();
   }
   isDm() {
     return this.isCampaignSession() && this.session?.dm_account_id === this.userId;
@@ -7718,11 +8398,31 @@ var Game = class {
     return !this.session.campaign_id || this.session.account_id === this.userId;
   }
   setLoadingStatus(text) {
+    setSplashStatus(text);
     const span = this.loadingOverlay.querySelector("span");
     if (span) {
       span.textContent = text;
       span.getBoundingClientRect();
     }
+  }
+  buildZoomControls() {
+    const wrap = el("div", { className: "zoom-controls" });
+    const out = el("button", { title: "Zoom out", onclick: () => this.setZoom(this.zoom - this.zoomStep) }, "−");
+    this.zoomLevelEl = el("span", { className: "zoom-level" }, `${Math.round(this.zoom * 100)}%`);
+    const inn = el("button", { title: "Zoom in", onclick: () => this.setZoom(this.zoom + this.zoomStep) }, "+");
+    const reset = el("button", { title: "Reset zoom", onclick: () => this.setZoom(1.25) }, "↺");
+    wrap.appendChild(out);
+    wrap.appendChild(this.zoomLevelEl);
+    wrap.appendChild(inn);
+    wrap.appendChild(reset);
+    return wrap;
+  }
+  setZoom(value) {
+    let next = Math.max(this.minZoom, Math.min(this.maxZoom, Number(value) || 1));
+    next = Math.round(next / 0.05) * 0.05;
+    this.zoom = next;
+    if (this.zoomLevelEl) this.zoomLevelEl.textContent = `${Math.round(this.zoom * 100)}%`;
+    this.centerMap();
   }
   async init() {
     const safetyTimeout = window.setTimeout(() => {
@@ -7836,8 +8536,8 @@ var Game = class {
     hud.appendChild(this.dmTurnBtn);
     this.autoplayBtn = el("button", {
       className: "autoplay-btn small",
-      onclick: () => this.toggleAutoplay()
-    }, "\u25B6 Observer");
+      onclick: () => this.toggleObserver()
+    }, "\u25B6 Spectate");
     this.autoplayBtn.style.display = "none";
     hud.appendChild(this.autoplayBtn);
     this.statEl = el("div", { className: "player-stats" });
@@ -8145,6 +8845,7 @@ var Game = class {
     this.root.appendChild(overlay);
   }
   setAction(action) {
+    if (this.observer) return;
     this.action = this.action === action ? null : action;
     this.updateStatus();
     this.highlightActionTiles();
@@ -8193,7 +8894,7 @@ var Game = class {
   }
   onKeyDown(e) {
     this.ensureAudioStarted();
-    if (!this.session || this.session.status !== "active" || this.session.phase !== "player") return;
+    if (this.observer || !this.session || this.session.status !== "active" || this.session.phase !== "player") return;
     switch (e.key.toLowerCase()) {
       case "escape":
         if (this.action) {
@@ -8246,7 +8947,7 @@ var Game = class {
     }
   }
   async tryMove(dx, dy) {
-    if (!this.session || this.session.phase !== "player" || this.session.status !== "active") return;
+    if (this.observer || !this.session || this.session.phase !== "player" || this.session.status !== "active") return;
     if (this.action && this.action !== "move") return;
     const player = this.session.player;
     const x = player.x + dx;
@@ -8260,7 +8961,7 @@ var Game = class {
     }
   }
   async endTurn() {
-    if (!this.session || this.session.phase !== "player") return;
+    if (this.observer || !this.session || this.session.phase !== "player") return;
     try {
       const { session } = await actInSession(this.sessionId, "end_turn");
       this.action = null;
@@ -8273,7 +8974,7 @@ var Game = class {
     }
   }
   async usePotion() {
-    if (!this.session || this.session.phase !== "player" || !this.isPlayer()) return;
+    if (this.observer || !this.session || this.session.phase !== "player" || !this.isPlayer()) return;
     try {
       const { session } = await actInSession(this.sessionId, "use_potion");
       this.update(session);
@@ -8285,7 +8986,7 @@ var Game = class {
     }
   }
   async stabilize() {
-    if (!this.session || this.session.phase !== "player" || !this.isPlayer()) return;
+    if (this.observer || !this.session || this.session.phase !== "player" || !this.isPlayer()) return;
     const target = this.findAdjacentDownedAlly();
     if (!target) return;
     try {
@@ -8493,20 +9194,22 @@ var Game = class {
     const target = this.playerPixelCenter();
     const mw = this.module.width * TILE_SIZE;
     const mh = this.module.height * TILE_SIZE;
+    const smw = mw * this.zoom;
+    const smh = mh * this.zoom;
     const cw = this.canvasContainer.clientWidth;
     const ch = this.canvasContainer.clientHeight;
     let baseX;
     let baseY;
-    if (mw <= cw && mh <= ch) {
-      baseX = (cw - mw) / 2;
-      baseY = (ch - mh) / 2;
+    if (smw <= cw && smh <= ch) {
+      baseX = (cw - smw) / 2;
+      baseY = (ch - smh) / 2;
     } else {
       const px = target ? target.x : mw / 2;
       const py = target ? target.y : mh / 2;
-      baseX = cw / 2 - px;
-      baseY = ch / 2 - py;
-      baseX = Math.min(0, Math.max(cw - mw, baseX));
-      baseY = Math.min(0, Math.max(ch - mh, baseY));
+      baseX = cw / 2 - px * this.zoom;
+      baseY = ch / 2 - py * this.zoom;
+      baseX = Math.min(0, Math.max(cw - smw, baseX));
+      baseY = Math.min(0, Math.max(ch - smh, baseY));
     }
     this.cameraX = baseX;
     this.cameraY = baseY;
@@ -8527,7 +9230,7 @@ var Game = class {
       ox = (Math.random() - 0.5) * intensity;
       oy = (Math.random() - 0.5) * intensity;
     }
-    const transform = `translate(${this.cameraX + ox}px, ${this.cameraY + oy}px)`;
+    const transform = `translate(${this.cameraX + ox}px, ${this.cameraY + oy}px) scale(${this.zoom})`;
     this.mapContainer.style.transform = transform;
     this.tokenContainer.style.transform = transform;
     this.fxContainer.style.transform = transform;
@@ -8610,7 +9313,7 @@ var Game = class {
     window.setTimeout(() => slash.remove(), 350);
   }
   async onTileClick(x, y) {
-    if (!this.session || this.session.status !== "active") return;
+    if (this.observer || !this.session || this.session.status !== "active") return;
     if (this.dmAction && this.isDm()) {
       try {
         let response;
@@ -8647,7 +9350,7 @@ var Game = class {
     }
   }
   async onTokenClick(token) {
-    if (!this.session || this.session.phase !== "player") return;
+    if (this.observer || !this.session || this.session.phase !== "player") return;
     if (token.type !== "monster") return;
     const player = this.session.player;
     const dist = Math.abs(player.x - token.x) + Math.abs(player.y - token.y);
@@ -8724,9 +9427,8 @@ var Game = class {
     const prevStatus = prevSession?.status;
     const prevPlayerPos = prevSession ? `${prevSession.player.x},${prevSession.player.y}` : "";
     this.session = session;
-    const canAutoplay = !this.isCampaignSession() && session.status === "active";
-    this.autoplayBtn.style.display = canAutoplay ? "inline-block" : "none";
-    this.autoPlayer.onUpdate();
+    const canObserve = session.status === "active" && !this.isDm();
+    this.autoplayBtn.style.display = canObserve ? "inline-block" : "none";
     session.dm_revealed?.forEach((key) => this.visited.add(key));
     if (!prevSession) {
       if (session.mode === "arena") {
@@ -8883,6 +9585,11 @@ var Game = class {
     }
   }
   updateActions() {
+    if (this.observer) {
+      [this.moveBtn, this.attackBtn, this.rangedBtn, this.potionBtn, this.abilityBtn, this.endBtn, this.restBtn].forEach((b) => b.disabled = true);
+      this.stabilizeBtn.style.display = "none";
+      return;
+    }
     const player = this.session?.player;
     const isActiveUser = !!this.session && this.session.status === "active" && this.session.phase === "player" && (player && "account_id" in player && player.account_id != null && player.account_id === this.userId || (!this.session.campaign_id || this.session.account_id === this.userId));
     const canAct = isActiveUser && !player?.down;
@@ -8903,6 +9610,7 @@ var Game = class {
     const isDmPhase = this.session.phase === "dm";
     const isCampaign = this.isCampaignSession();
     let phaseText = this.session.phase === "player" ? "Your Move" : "DM's Move";
+    if (this.observer) phaseText = "Observing";
     if (isCampaign && isDmPhase && this.isDm()) {
       phaseText = "DM's Move \xB7 Run Turn";
     } else if (isCampaign && isDmPhase) {
@@ -9510,7 +10218,8 @@ var SanctuaryApp = class {
       const user = await whoami();
       this.userId = user.user.id ?? null;
       document.body.dataset.user = user.user.name || "player";
-    } catch {
+    } catch (err) {
+      if (err?.status === 401) throw err;
       return;
     }
     this.showHub();
@@ -9629,8 +10338,34 @@ var SanctuaryApp = class {
     this.current = new DmWorkshop(
       this.app,
       (dungeonId, characterId) => this.enterDungeon(dungeonId, characterId),
+      (adventureId, characterId) => this.enterAdventure(adventureId, characterId),
       () => this.showHub()
     );
+  }
+  async enterAdventure(adventureId, characterId) {
+    this.setScreen("loading");
+    clear(this.app);
+    this.current?.destroy();
+    try {
+      const { session } = await createSession(characterId, adventureId, void 0, 0);
+      const { module } = await getModule(session.module_id);
+      this.setScreen("game");
+      const game = new Game(
+        this.app,
+        session.id,
+        module.map,
+        session,
+        () => this.showSessions(),
+        (cid) => this.replayGame(cid),
+        this.userId ?? void 0
+      );
+      this.current = game;
+      await game.init();
+    } catch (err) {
+      this.setScreen("dm-workshop");
+      this.showDmWorkshop();
+      console.error("Failed to enter adventure:", err);
+    }
   }
   async enterDungeon(dungeonId, characterId, campaignId) {
     this.setScreen("loading");
@@ -9745,12 +10480,52 @@ function hideSplash() {
   splash.classList.add("hidden");
   setTimeout(() => splash.remove(), 600);
 }
+function setSplashStatus(text) {
+  const status = document.getElementById("splash-status");
+  if (status) status.textContent = text;
+}
+function setSplashError(message, onRetry) {
+  const spinner = document.getElementById("splash-spinner");
+  const errorBox = document.getElementById("splash-error");
+  const errorMsg = document.getElementById("splash-error-message");
+  const retryBtn = document.getElementById("splash-retry");
+  if (spinner) spinner.style.display = "none";
+  if (errorBox) errorBox.style.display = "block";
+  if (errorMsg) errorMsg.textContent = message;
+  if (retryBtn) {
+    retryBtn.onclick = () => {
+      if (typeof onRetry === "function") onRetry();
+      else window.location.reload();
+    };
+  }
+}
+let __bootTimeout = null;
+function clearBootTimeout() {
+  if (__bootTimeout) {
+    window.clearTimeout(__bootTimeout);
+    __bootTimeout = null;
+  }
+}
 async function boot() {
+  setSplashStatus("Initializing...");
+  __bootTimeout = window.setTimeout(() => {
+    setSplashError("Loading is taking longer than expected. The server may be unreachable.", () => window.location.reload());
+  }, 1e4);
   const sanctuary = new SanctuaryApp(app);
   try {
+    setSplashStatus("Checking identity...");
     await sanctuary.start();
-  } finally {
+    clearBootTimeout();
+    setSplashStatus("Ready.");
     hideSplash();
+  } catch (err) {
+    clearBootTimeout();
+    console.error("Boot failed:", err);
+    if (err?.status === 401) {
+      setSplashStatus("Redirecting to sign-in...");
+      return;
+    }
+    setSplashError(err?.message || "Failed to start Sanctuary.", () => window.location.reload());
   }
 }
 boot();

@@ -10,8 +10,12 @@
     <div id="splash">
       <div class="splash-content">
         <h1>Sanctuary</h1>
-        <p>Entering the room...</p>
-        <div class="splash-spinner"></div>
+        <p id="splash-status">Entering the room...</p>
+        <div class="splash-spinner" id="splash-spinner"></div>
+        <div class="splash-error" id="splash-error" style="display: none;">
+          <p id="splash-error-message"></p>
+          <button id="splash-retry" class="splash-retry">Retry</button>
+        </div>
       </div>
     </div>
     <div id="app"></div>

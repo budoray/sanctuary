@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Sanctuary production launcher.
 
-Serves the built Vite frontend as static files and runs the FastAPI backend
+Serves the static frontend from frontend/static and runs the FastAPI backend
 on the same port. Caddy proxies sanctuary.tenshinarts.com here.
 """
 import os

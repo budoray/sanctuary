@@ -85,3 +85,29 @@ class Dice:
         )
         self._log.append(roll)
         return roll
+
+    def randint(self, a: int, b: int, reason: str = "", **tags) -> int:
+        """Return a uniform integer in ``[a, b]`` and log it as ``1d(b-a+1)``.
+
+        This is the deterministic replacement for ``random.randint``.
+        """
+        a = int(a)
+        b = int(b)
+        if a > b:
+            raise ValueError(f"randint(a, b) requires a <= b, got {a} and {b}")
+        if a == b:
+            return a
+        faces = b - a + 1
+        roll = self.roll(f"1d{faces}", reason=reason, **tags)
+        return roll.total + a - 1
+
+    def choice(self, items, reason: str = "", **tags):
+        """Return a deterministically chosen element and log the index roll.
+
+        This is the deterministic replacement for ``random.choice``.
+        """
+        seq = list(items)
+        if not seq:
+            raise IndexError("Cannot choose from an empty sequence")
+        index = self.randint(0, len(seq) - 1, reason=reason, **tags)
+        return seq[index]

@@ -71,6 +71,8 @@ async def lifespan(app: FastAPI):
     from alembic import command
     from alembic.config import Config
 
+    from backend.app.instance_manager import start as start_instance_loop, stop as stop_instance_loop
+
     app_dir = Path(__file__).resolve().parent
     alembic_ini = app_dir.parent / "alembic.ini"
     alembic_cfg = Config(str(alembic_ini))
@@ -80,8 +82,14 @@ async def lifespan(app: FastAPI):
     import asyncio
 
     await asyncio.to_thread(command.upgrade, alembic_cfg, "head")
-    yield
-    await engine.dispose()
+
+    # Resume the AI DM loop for active instances. This is a no-op in test runs.
+    start_instance_loop()
+    try:
+        yield
+    finally:
+        await stop_instance_loop()
+        await engine.dispose()
 
 
 fastapi_app = FastAPI(title="Sanctuary", lifespan=lifespan)

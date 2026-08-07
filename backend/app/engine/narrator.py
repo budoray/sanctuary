@@ -6,11 +6,11 @@ The ``Narrator`` tries a local Ollama model first for vivid, varied
 """
 from __future__ import annotations
 
-import random
 from typing import Any, Awaitable, Callable
 
 from backend.app.ai import ollama
 from backend.app.config import SETTINGS, Settings
+from backend.app.engine.dice import Dice
 
 _OPENING = [
     "The dungeon is silent, save for dripping water.",
@@ -152,14 +152,18 @@ _SYSTEM = (
 )
 
 
-def _pick(pool: list[str], rng: random.Random) -> str:
-    return rng.choice(pool)
+def _pick(pool: list[str], rng: Dice | None) -> str:
+    if not pool:
+        raise IndexError("cannot pick from an empty narration pool")
+    if rng is None:
+        return pool[0]
+    return rng.choice(pool, reason="narration", kind="narration")
 
 
-def _template_move(token: dict[str, Any], rng: random.Random | None) -> str | None:
+def _template_move(token: dict[str, Any], rng: Dice | None) -> str | None:
     if token.get("type") == "player":
-        return _pick(_MOVE_SELF, rng or random.Random())
-    return _pick(_MOVE_ENEMY, rng or random.Random()).format(name=token["name"])
+        return _pick(_MOVE_SELF, rng)
+    return _pick(_MOVE_ENEMY, rng).format(name=token["name"])
 
 
 def _template_attack(
@@ -167,9 +171,8 @@ def _template_attack(
     target: dict[str, Any],
     hit: bool,
     fatal: bool,
-    rng: random.Random | None,
+    rng: Dice | None,
 ) -> list[str]:
-    rng = rng or random.Random()
     out: list[str] = []
     if attacker.get("type") == "player":
         if hit:
@@ -195,9 +198,8 @@ def _template_ranged_attack(
     target: dict[str, Any],
     hit: bool,
     fatal: bool,
-    rng: random.Random | None,
+    rng: Dice | None,
 ) -> list[str]:
-    rng = rng or random.Random()
     out: list[str] = []
     if attacker.get("type") == "player":
         if hit:
@@ -258,7 +260,7 @@ class Narrator:
         return f"{' ; '.join(summaries)}." if summaries else ""
 
     async def narrate_opening(
-        self, rng: random.Random | None = None, module: str = "", mode: str = "campaign"
+        self, rng: Dice | None = None, module: str = "", mode: str = "campaign"
     ) -> str:
         mode_hint = "an arena pit" if mode == "arena" else "a torch-lit dungeon"
         quest_hook = f"in '{module}'" if module else "where danger waits"
@@ -267,11 +269,11 @@ class Narrator:
             f"{quest_hook}. Mention a rumour or goal in one sentence. Keep it under 35 words."
         )
         return (await self._ollama(prompt)) or _pick(
-            _OPENING, rng or random.Random()
+            _OPENING, rng
         )
 
     async def narrate_room(
-        self, module_name: str, room_type: str | None = None, rng: random.Random | None = None
+        self, module_name: str, room_type: str | None = None, rng: Dice | None = None
     ) -> str:
         """Describe a room or area when the party first enters it."""
         kind = room_type or "chamber"
@@ -279,10 +281,10 @@ class Narrator:
             f"Describe the adventurers entering a {kind} in '{module_name}' "
             "in one vivid sentence. Mention the atmosphere and any obvious threat. Keep it under 25 words."
         )
-        return (await self._ollama(prompt)) or _pick(_ROOM, rng or random.Random())
+        return (await self._ollama(prompt)) or _pick(_ROOM, rng)
 
     async def narrate_trap(
-        self, name: str, triggered: bool = True, rng: random.Random | None = None
+        self, name: str, triggered: bool = True, rng: Dice | None = None
     ) -> str:
         """Describe a trap being discovered or triggered."""
         prompt = (
@@ -290,10 +292,10 @@ class Narrator:
             "in one vivid sentence. Keep it under 25 words."
         )
         pool = _TRAP_TRIGGERED if triggered else _TRAP_DISCOVERED
-        return (await self._ollama(prompt)) or _pick(pool, rng or random.Random())
+        return (await self._ollama(prompt)) or _pick(pool, rng)
 
     async def narrate_move(
-        self, token: dict[str, Any], rng: random.Random | None = None
+        self, token: dict[str, Any], rng: Dice | None = None
     ) -> str | None:
         if token.get("type") == "player":
             prompt = "Describe the adventurer moving cautiously across damp stone in one vivid sentence."
@@ -310,7 +312,7 @@ class Narrator:
         target: dict[str, Any],
         hit: bool,
         fatal: bool,
-        rng: random.Random | None = None,
+        rng: Dice | None = None,
     ) -> list[str]:
         attacker_name = attacker.get("name", "the attacker")
         target_name = target.get("name", "the target")
@@ -339,7 +341,7 @@ class Narrator:
         target: dict[str, Any],
         hit: bool,
         fatal: bool,
-        rng: random.Random | None = None,
+        rng: Dice | None = None,
     ) -> list[str]:
         attacker_name = attacker.get("name", "the attacker")
         target_name = target.get("name", "the target")
@@ -363,7 +365,7 @@ class Narrator:
         return _template_ranged_attack(attacker, target, hit, fatal, rng)
 
     async def narrate_victory(
-        self, rng: random.Random | None = None, module: str = ""
+        self, rng: Dice | None = None, module: str = ""
     ) -> str:
         hook = f" in {module}" if module else ""
         prompt = (
@@ -371,24 +373,24 @@ class Narrator:
             f"fight{hook} and hint at what might come next in one sentence."
         )
         return (await self._ollama(prompt)) or _pick(
-            _VICTORY, rng or random.Random()
+            _VICTORY, rng
         )
 
     async def narrate_banter(
-        self, room_type: str | None = None, rng: random.Random | None = None
+        self, room_type: str | None = None, rng: Dice | None = None
     ) -> str:
         """Arena crowd or environmental commentary."""
         prompt = (
             "Describe the reaction of an unseen arena crowd or the environment "
             "in one terse sentence. Keep it under 20 words."
         )
-        return (await self._ollama(prompt)) or _pick(_BANTER, rng or random.Random())
+        return (await self._ollama(prompt)) or _pick(_BANTER, rng)
 
     async def narrate_hazard(
         self,
         hazard_name: str,
         victim_name: str,
-        rng: random.Random | None = None,
+        rng: Dice | None = None,
     ) -> str:
         """Describe a hazard hurting someone."""
         prompt = (
@@ -405,10 +407,10 @@ class Narrator:
             pool = _HAZARD_SPIKES
         else:
             pool = _HAZARD_GENERIC
-        return _pick(pool, rng or random.Random()).format(name=victim_name)
+        return _pick(pool, rng).format(name=victim_name)
 
     async def narrate_phase_transition(
-        self, boss_name: str, phase: dict[str, Any], rng: random.Random | None = None
+        self, boss_name: str, phase: dict[str, Any], rng: Dice | None = None
     ) -> str:
         """Describe a boss entering a new combat phase."""
         prompt = (
@@ -416,11 +418,11 @@ class Narrator:
             "in one vivid sentence. Keep it under 25 words."
         )
         return (await self._ollama(prompt)) or _pick(
-            _PHASE, rng or random.Random()
+            _PHASE, rng
         ).format(name=boss_name)
 
     async def narrate_dm_turn(
-        self, events: list[str], rng: random.Random | None = None
+        self, events: list[str], rng: Dice | None = None
     ) -> str | None:
         """Summarise a full DM turn in one or two sentences."""
         if not events:

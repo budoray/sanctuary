@@ -5,9 +5,10 @@ character enters a session so the token reflects the gear they are wearing.
 """
 from __future__ import annotations
 
-import random
 import uuid
 from typing import Any
+
+from backend.app.engine.dice import Dice
 
 
 LOOT_TABLE: dict[str, dict[str, Any]] = {
@@ -92,14 +93,14 @@ LOOT_TABLE: dict[str, dict[str, Any]] = {
 }
 
 
-def generate_loot(level: int = 1, rng: random.Random | None = None) -> dict[str, Any]:
+def generate_loot(level: int = 1, d: Dice | None = None) -> dict[str, Any]:
     """Return one random loot item instance, with mild level scaling.
 
     Higher levels slightly favour non-consumable gear and may add a small
     damage or AC bonus to ordinary items.
     """
-    rng = rng or random.Random()
-    item_id = rng.choice(list(LOOT_TABLE.keys()))
+    d = d or Dice(seed=0)
+    item_id = d.choice(list(LOOT_TABLE.keys()), reason="loot table", kind="loot")
     template = LOOT_TABLE[item_id]
     item = {
         "instance_id": str(uuid.uuid4())[:8],
