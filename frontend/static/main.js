@@ -1181,7 +1181,10 @@ var DmWorkshop = class {
     this.onBack = onBack;
     this.root = el("div", { className: "dm-workshop" });
     const panel = el("div", { className: "session-panel workshop-panel" });
-    panel.appendChild(el("h1", {}, "DM Workshop"));
+    const header = el("div", { className: "workshop-header" });
+    header.appendChild(el("button", { className: "workshop-header-back", onclick: () => this.onBack() }, "\u2190 Back"));
+    header.appendChild(el("h1", {}, "DM Workshop"));
+    panel.appendChild(header);
     panel.appendChild(el("p", { className: "subtitle" }, "Build rooms, link them into dungeons, craft S3 adventures, and play-test them."));
     const tabs = el("div", { className: "admin-tabs workshop-tabs" });
     tabs.appendChild(this.tabButton("Rooms", "rooms"));

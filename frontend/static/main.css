@@ -3523,6 +3523,33 @@ button.danger:hover:not(:disabled) {
 .workshop-back {
   margin-top: 8px;
 }
+.workshop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+.workshop-header h1 {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+.workshop-header-back {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--muted);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+}
+.workshop-header-back:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(192, 57, 43, 0.1);
+}
 .workshop-list {
   max-height: min(50vh, 420px);
 }
