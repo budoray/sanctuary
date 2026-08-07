@@ -1004,6 +1004,25 @@ button.danger:hover:not(:disabled) {
   background: rgba(192, 57, 43, 0.3);
 }
 
+.autoplay-btn {
+  width: 100%;
+  padding: 8px 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  background: rgba(241, 196, 15, 0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.autoplay-btn.active {
+  background: rgba(241, 196, 15, 0.35);
+  box-shadow: 0 0 10px rgba(241, 196, 15, 0.25);
+}
+
+.autoplay-btn:hover:not(:disabled) {
+  background: rgba(241, 196, 15, 0.25);
+}
+
 .game-log {
   flex: 1;
   overflow-y: auto;

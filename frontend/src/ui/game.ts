@@ -8,6 +8,7 @@ import { DiceTray } from './dice-tray';
 import { el, clear } from './utils';
 import { AudioController } from './audio';
 import { getTheme, loadAtlas, tileFrame, tokenFrame } from '../lib/tile-atlas';
+import { AutoPlayer } from './auto-player';
 
 const TILE_SIZE = 40;
 
@@ -73,6 +74,8 @@ export class Game {
   private endBtn!: HTMLButtonElement;
   private saveBtn!: HTMLButtonElement;
   private dmTurnBtn!: HTMLButtonElement;
+  private autoplayBtn!: HTMLButtonElement;
+  private autoPlayer: AutoPlayer;
   private dmToolsEl: HTMLElement = document.createElement('div');
   private dmMonsterSelect: HTMLSelectElement = document.createElement('select');
   private dmTokenSelect: HTMLSelectElement = document.createElement('select');
@@ -148,6 +151,7 @@ export class Game {
     this.loadingOverlay.innerHTML = '<div class="game-loading-spinner"></div><span>Entering the realm...</span>';
     this.root.appendChild(this.loadingOverlay);
 
+    this.autoPlayer = new AutoPlayer(this);
     this.update(initialSession);
 
     window.addEventListener('resize', () => this.centerMap());
@@ -167,6 +171,26 @@ export class Game {
 
   private isCampaignSession() {
     return !!this.session?.campaign_id;
+  }
+
+  getSession(): GameSession | null {
+    return this.session;
+  }
+
+  getModule(): ModuleData {
+    return this.module;
+  }
+
+  private toggleAutoplay() {
+    if (this.autoPlayer.isRunning()) {
+      this.autoPlayer.stop();
+      this.autoplayBtn.textContent = '▶ Auto';
+      this.autoplayBtn.classList.remove('active');
+    } else {
+      this.autoPlayer.start();
+      this.autoplayBtn.textContent = '⏸ Auto';
+      this.autoplayBtn.classList.add('active');
+    }
   }
 
   private isDm() {
@@ -294,6 +318,13 @@ export class Game {
     }, 'Run DM Turn') as HTMLButtonElement;
     this.dmTurnBtn.style.display = 'none';
     hud.appendChild(this.dmTurnBtn);
+
+    this.autoplayBtn = el('button', {
+      className: 'autoplay-btn small',
+      onclick: () => this.toggleAutoplay(),
+    }, '▶ Auto') as HTMLButtonElement;
+    this.autoplayBtn.style.display = 'none';
+    hud.appendChild(this.autoplayBtn);
 
     this.statEl = el('div', { className: 'player-stats' });
     hud.appendChild(this.statEl);
@@ -1262,7 +1293,7 @@ export class Game {
     }
   }
 
-  private update(session: GameSession) {
+  update(session: GameSession) {
     const prevSession = this.session;
     const wasDm = prevSession?.phase === 'dm';
     const playerHurt = prevSession ? session.player.hp < prevSession.player.hp : false;
@@ -1270,6 +1301,12 @@ export class Game {
     const prevPlayerPos = prevSession ? `${prevSession.player.x},${prevSession.player.y}` : '';
 
     this.session = session;
+
+    // Show autoplay only for solo (non-campaign) active sessions.
+    const canAutoplay = !this.isCampaignSession() && session.status === 'active';
+    this.autoplayBtn.style.display = canAutoplay ? 'inline-block' : 'none';
+
+    this.autoPlayer.onUpdate();
 
     // Merge DM-revealed fog into the local visited set.
     session.dm_revealed?.forEach((key) => this.visited.add(key));
