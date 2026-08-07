@@ -1,8 +1,10 @@
 """Sanctuary FastAPI entry point."""
 from contextlib import asynccontextmanager
+from http.cookies import SimpleCookie
 from pathlib import Path
+from urllib.parse import urlparse
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from starlette.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -22,9 +24,39 @@ from backend.app.auth import is_admin, require_account, require_admin
 import httpx
 
 from backend.app.socket_manager import socket_app
-from backend.app.tenshin_gate import name_from_cookie_header
+from backend.app.tenshin_gate import COOKIE_NAME, MAX_AGE, account_from_cookie_header, name_from_cookie_header
 
 FRONTEND_DIST = ROOT / "frontend" / "static"
+
+
+def _shared_cookie_domain() -> str | None:
+    """Return the parent domain to use for the shared session cookie.
+
+    A cookie set with Domain=tenshinarts.com is sent to tenshinarts.com and all
+    subdomains (e.g. sanctuary.tenshinarts.com). Localhost is skipped.
+    """
+    hostname = urlparse(SETTINGS.tenshin_site_url).hostname or ""
+    if not hostname or "." not in hostname:
+        return None
+    return hostname.lstrip("www.")
+
+
+def _upgrade_session_cookie(token: str) -> str | None:
+    """Rebuild the session cookie with a shared parent-domain so subdomains see it."""
+    domain = _shared_cookie_domain()
+    if not domain:
+        return None
+    jar = SimpleCookie()
+    jar[COOKIE_NAME] = token
+    m = jar[COOKIE_NAME]
+    m["domain"] = domain
+    m["path"] = "/"
+    m["max-age"] = str(MAX_AGE)
+    m["httponly"] = True
+    m["samesite"] = "Lax"
+    if SETTINGS.tenshin_site_url.startswith("https"):
+        m["secure"] = True
+    return m.OutputString()
 
 
 @asynccontextmanager
@@ -131,8 +163,17 @@ async def app_config():
 
 
 @fastapi_app.get("/api/whoami")
-async def whoami(request: Request, account_id: int = Depends(require_account)):
+async def whoami(
+    request: Request,
+    response: Response,
+    account_id: int = Depends(require_account),
+):
     name = name_from_cookie_header(request.headers.get("cookie", ""))
+    token = request.cookies.get(COOKIE_NAME)
+    if token:
+        upgraded = _upgrade_session_cookie(token)
+        if upgraded:
+            response.headers["Set-Cookie"] = upgraded
     return {"user": {"id": account_id, "name": name or "player", "is_admin": is_admin(account_id, request.headers.get("cookie", ""))}}
 
 
@@ -163,10 +204,16 @@ if FRONTEND_PORTRAITS.exists():
 
 if FRONTEND_INDEX.exists():
     @fastapi_app.get("/{full_path:path}")
-    async def serve_frontend(full_path: str):
+    async def serve_frontend(full_path: str, request: Request):
         from fastapi.responses import FileResponse
 
-        return FileResponse(FRONTEND_INDEX)
+        response = FileResponse(FRONTEND_INDEX)
+        token = request.cookies.get(COOKIE_NAME)
+        if token and account_from_cookie_header(request.headers.get("cookie", "")) is not None:
+            upgraded = _upgrade_session_cookie(token)
+            if upgraded:
+                response.headers["Set-Cookie"] = upgraded
+        return response
 else:
     @fastapi_app.get("/{full_path:path}")
     async def serve_backend_only(full_path: str):
