@@ -13,12 +13,33 @@ from backend.app.dependencies import limit_actions
 import random
 
 from backend.app.engine import character as char_engine
-from backend.app.engine import items, module, session as session_engine
+from backend.app.engine import dungeon_compiler, items, module, session as session_engine
 from backend.app.socket_manager import presence_tracker, socket_manager
 
 router = APIRouter(tags=["sessions"])
 
 DEFAULT_MODULE = "sample_lair"
+
+
+async def _load_session_module(record: SessionRecord, db: AsyncSession) -> module.Module:
+    """Load a Module for a session, handling built-in modules and compiled dungeons."""
+    if record.module_id.startswith("dungeon:"):
+        from backend.app.db import DungeonRecord, RoomRecord
+
+        dungeon_id = record.module_id.split(":", 1)[1]
+        result = await db.execute(select(DungeonRecord).where(DungeonRecord.id == dungeon_id))
+        dungeon = result.scalar_one_or_none()
+        if not dungeon:
+            raise HTTPException(status_code=404, detail="Dungeon not found")
+        order = list(dict.fromkeys(json.loads(dungeon.room_order or "[]")))
+        result = await db.execute(select(RoomRecord).where(RoomRecord.id.in_(order)))
+        rooms = {r.id: r for r in result.scalars().all()}
+        ordered = [rooms[r_id] for r_id in order if r_id in rooms]
+        if not ordered:
+            raise HTTPException(status_code=400, detail="Dungeon has no rooms")
+        mod, _links = dungeon_compiler.compile(dungeon, ordered)
+        return mod
+    return module.load(record.module_id)
 
 
 async def _can_access_session(
@@ -326,7 +347,7 @@ async def act_in_session(
 
     state = json.loads(record.state)
     prev_state = json.loads(record.state)
-    mod = module.load(record.module_id)
+    mod = await _load_session_module(record, db)
 
     action = data.get("action")
     if action == "dm_turn" and record.campaign_id and not await _is_campaign_dm(record, account_id, db):
@@ -570,7 +591,7 @@ async def join_session(
     )
 
     state = json.loads(record.state)
-    mod = module.load(record.module_id)
+    mod = await _load_session_module(record, db)
     try:
         await session_engine.add_player(state, mod, char, character_id, account_id)
     except ValueError as e:

@@ -16,8 +16,10 @@ from backend.app.api.arena import router as arena_router
 from backend.app.api.campaigns import router as campaigns_router
 from backend.app.api.characters import router as characters_router
 from backend.app.api.dm import router as dm_router
+from backend.app.api.dungeons import router as dungeons_router
 from backend.app.api.modules import router as modules_router
 from backend.app.api.progression import router as progression_router
+from backend.app.api.rooms import router as rooms_router
 from backend.app.api.sessions import router as sessions_router
 from backend.app.api.social import router as social_router
 from backend.app.config import SETTINGS, ROOT
@@ -95,8 +97,10 @@ fastapi_app.include_router(admin_router, prefix="/api")
 fastapi_app.include_router(characters_router, prefix="/api")
 fastapi_app.include_router(campaigns_router, prefix="/api")
 fastapi_app.include_router(dm_router, prefix="/api")
+fastapi_app.include_router(dungeons_router, prefix="/api")
 fastapi_app.include_router(modules_router, prefix="/api")
 fastapi_app.include_router(progression_router, prefix="/api")
+fastapi_app.include_router(rooms_router, prefix="/api")
 fastapi_app.include_router(sessions_router, prefix="/api")
 fastapi_app.include_router(social_router, prefix="/api")
 fastapi_app.include_router(arena_router, prefix="/api")

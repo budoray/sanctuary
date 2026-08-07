@@ -191,6 +191,7 @@ async def new_game(
     character_id: str | None = None,
     account_id: int | None = None,
     mode: str = "campaign",
+    dungeon_links: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create a fresh session state."""
     if seed is None:
@@ -241,7 +242,7 @@ async def new_game(
     if mode == "arena":
         log.append(await narrator.narrate_banter("arena", rng=random.Random(seed + 2)))
 
-    return {
+    state = {
         "id": session_id,
         "module_id": module.id,
         "account_id": account_id,
@@ -263,6 +264,9 @@ async def new_game(
         "turn_deadline": _deadline(max(0, turn_timer_seconds)),
         "dm_acted_this_round": False,
     }
+    if dungeon_links:
+        state["dungeon_links"] = dungeon_links
+    return state
 
 
 async def advance_module(state: dict[str, Any], next_module: Module) -> dict[str, Any]:
@@ -590,6 +594,18 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
     # Event/branch tile: 5.
     if tile == TILE_EVENT:
         _trigger_event(state, module, x, y)
+
+    # Dungeon room transitions (user-built dungeons).
+    links = state.get("dungeon_links") or getattr(module, "dungeon_links", None)
+    if links:
+        transition = links.get(f"{x},{y}")
+        if transition:
+            token["x"] = transition["x"]
+            token["y"] = transition["y"]
+            kind = transition.get("kind", "passage")
+            state["log"].append(
+                f"{token['name']} takes the {kind} to another area."
+            )
 
 
 async def _apply_hazard(state: dict[str, Any], token: dict[str, Any], tile: str, theme: str | None, d: Dice, module: Module | None = None) -> None:
@@ -1387,6 +1403,7 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": state["id"],
         "module_id": state["module_id"],
+        "dungeon_id": state.get("dungeon_id"),
         "account_id": state.get("account_id"),
         "character_id": state.get("character_id"),
         "campaign_id": state.get("campaign_id"),

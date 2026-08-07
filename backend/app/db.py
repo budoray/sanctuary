@@ -45,11 +45,42 @@ class SessionRecord(Base):
     id = Column(String, primary_key=True)
     account_id = Column(Integer, index=True, nullable=False)
     campaign_id = Column(String, index=True, nullable=True)
+    dungeon_id = Column(String, index=True, nullable=True)
     module_id = Column(String, nullable=False)
     character_id = Column(String, nullable=False)
     name = Column(String, nullable=False, default="Adventure")
     status = Column(String, default="active")
     state = Column(Text, default="{}")  # full session engine state
+    created_at = Column(DateTime, default=_utc_now)
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
+
+
+class RoomRecord(Base):
+    __tablename__ = "rooms"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4())[:8])
+    account_id = Column(Integer, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    theme = Column(String, default="dungeon")
+    tiles = Column(Text, default="[]")  # JSON 16x16 grid
+    entities = Column(Text, default="[]")  # JSON list of placed entities
+    created_at = Column(DateTime, default=_utc_now)
+    updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
+
+
+class DungeonRecord(Base):
+    __tablename__ = "dungeons"
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4())[:8])
+    account_id = Column(Integer, index=True, nullable=False)
+    name = Column(String, nullable=False)
+    ruleset_id = Column(String, default="osric")
+    public = Column(Integer, default=0)  # 0 private, 1 public
+    room_order = Column(Text, default="[]")  # JSON list of room ids
+    links = Column(Text, default="[]")  # JSON list of transitions
+    start_room_id = Column(String, nullable=True)
+    start_x = Column(Integer, default=1)
+    start_y = Column(Integer, default=1)
     created_at = Column(DateTime, default=_utc_now)
     updated_at = Column(DateTime, default=_utc_now, onupdate=_utc_now)
 

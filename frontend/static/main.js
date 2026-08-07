@@ -213,6 +213,64 @@ async function dmReveal(sessionId, payload) {
 async function getAccountProgress() {
   return api("/api/account/progress");
 }
+async function listItems() {
+  return api("/api/items");
+}
+async function listBestiary() {
+  return api("/api/bestiary");
+}
+async function listRooms() {
+  return api("/api/rooms");
+}
+async function createRoom(room) {
+  return api("/api/rooms", {
+    method: "POST",
+    body: JSON.stringify(room)
+  });
+}
+async function getRoom(roomId) {
+  return api(`/api/rooms/${roomId}`);
+}
+async function updateRoom(roomId, room) {
+  return api(`/api/rooms/${roomId}`, {
+    method: "PUT",
+    body: JSON.stringify(room)
+  });
+}
+async function deleteRoom(roomId) {
+  return api(`/api/rooms/${roomId}`, { method: "DELETE" });
+}
+async function listDungeons() {
+  return api("/api/dungeons");
+}
+async function createDungeon(dungeon) {
+  return api("/api/dungeons", {
+    method: "POST",
+    body: JSON.stringify(dungeon)
+  });
+}
+async function getDungeon(dungeonId) {
+  return api(`/api/dungeons/${dungeonId}`);
+}
+async function updateDungeon(dungeonId, dungeon) {
+  return api(`/api/dungeons/${dungeonId}`, {
+    method: "PUT",
+    body: JSON.stringify(dungeon)
+  });
+}
+async function deleteDungeon(dungeonId) {
+  return api(`/api/dungeons/${dungeonId}`, { method: "DELETE" });
+}
+async function playDungeon(dungeonId, characterId, campaignId, turnTimerSeconds = 0) {
+  return api(`/api/dungeons/${dungeonId}/play`, {
+    method: "POST",
+    body: JSON.stringify({
+      character_id: characterId,
+      campaign_id: campaignId,
+      turn_timer_seconds: turnTimerSeconds
+    })
+  });
+}
 
 // src/ui/utils.ts
 function el(tag, attrs = {}, ...children) {
@@ -462,6 +520,961 @@ var AdminPanel = class {
       list.appendChild(row);
     });
     this.sessionsEl.appendChild(list);
+  }
+  destroy() {
+    this.root.remove();
+  }
+};
+
+// src/ui/dm-workshop.ts
+function defaultTiles() {
+  return Array.from({ length: 16 }, (_, y) => Array.from({ length: 16 }, (_, x) => y >= 6 && y <= 9 && x >= 6 && x <= 9 ? "0" : "1"));
+}
+var DmWorkshop = class {
+  root;
+  container;
+  onPlayDungeon;
+  onBack;
+  tabContent;
+  roomsTab;
+  dungeonsTab;
+  rooms = [];
+  dungeons = [];
+  characters = [];
+  constructor(container, onPlayDungeon, onBack) {
+    this.container = container;
+    this.onPlayDungeon = onPlayDungeon;
+    this.onBack = onBack;
+    this.root = el("div", { className: "dm-workshop" });
+    const panel = el("div", { className: "session-panel workshop-panel" });
+    panel.appendChild(el("h1", {}, "DM Workshop"));
+    panel.appendChild(el("p", { className: "subtitle" }, "Build rooms, link them into dungeons, and play-test them."));
+    const tabs = el("div", { className: "admin-tabs workshop-tabs" });
+    tabs.appendChild(this.tabButton("Rooms", "rooms"));
+    tabs.appendChild(this.tabButton("Dungeons", "dungeons"));
+    panel.appendChild(tabs);
+    this.tabContent = el("div", { className: "workshop-tab-content" });
+    this.roomsTab = el("div", { className: "workshop-tab" });
+    this.dungeonsTab = el("div", { className: "workshop-tab" });
+    this.tabContent.appendChild(this.roomsTab);
+    this.tabContent.appendChild(this.dungeonsTab);
+    panel.appendChild(this.tabContent);
+    panel.appendChild(el("button", { className: "enter workshop-back", onclick: () => this.onBack() }, "\u2190 Back"));
+    this.root.appendChild(panel);
+    container.appendChild(this.root);
+    this.switchTab("rooms");
+    this.load();
+  }
+  tabButton(label, tab) {
+    return el("button", {
+      className: "admin-tab workshop-tab-btn",
+      "data-tab": tab,
+      onclick: () => this.switchTab(tab)
+    }, label);
+  }
+  switchTab(tab) {
+    this.roomsTab.style.display = tab === "rooms" ? "block" : "none";
+    this.dungeonsTab.style.display = tab === "dungeons" ? "block" : "none";
+    this.root.querySelectorAll(".workshop-tab-btn").forEach((b) => {
+      b.classList.toggle("active", b.getAttribute("data-tab") === tab);
+    });
+  }
+  async load() {
+    try {
+      const [{ rooms }, { dungeons }, { characters }] = await Promise.all([
+        listRooms(),
+        listDungeons(),
+        listCharacters()
+      ]);
+      this.rooms = rooms;
+      this.dungeons = dungeons;
+      this.characters = characters;
+      this.renderRooms();
+      this.renderDungeons();
+    } catch (err) {
+      clear(this.roomsTab);
+      this.roomsTab.appendChild(el("div", { className: "empty error" }, err.message || "Failed to load workshop data."));
+    }
+  }
+  renderRooms() {
+    clear(this.roomsTab);
+    const header = el("div", { className: "workshop-section-header" });
+    header.appendChild(el("h2", {}, "Rooms"));
+    header.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.newRoom()
+    }, "+ New Room"));
+    this.roomsTab.appendChild(header);
+    if (this.rooms.length === 0) {
+      this.roomsTab.appendChild(el("div", { className: "empty" }, "No rooms yet. Create one to get started."));
+      return;
+    }
+    const list = el("ul", { className: "session-list workshop-list" });
+    this.rooms.forEach((room) => {
+      const info = el("div", { className: "session-info" });
+      info.appendChild(el("strong", {}, room.name));
+      info.appendChild(el("span", {}, `Theme: ${THEME_LABELS[room.theme] || room.theme || "dungeon"}`));
+      const controls = el("div", { className: "workshop-item-controls" });
+      controls.appendChild(el("button", {
+        className: "solo-hub-btn",
+        onclick: () => this.editRoom(room)
+      }, "Edit"));
+      controls.appendChild(el("button", {
+        className: "danger",
+        onclick: () => this.deleteRoom(room)
+      }, "Delete"));
+      const row = el("li", {});
+      row.appendChild(info);
+      row.appendChild(controls);
+      list.appendChild(row);
+    });
+    this.roomsTab.appendChild(list);
+  }
+  async newRoom() {
+    try {
+      const { room } = await createRoom({
+        name: "New Room",
+        theme: "dungeon",
+        tiles: defaultTiles(),
+        entities: []
+      });
+      this.editRoom(room);
+    } catch (err) {
+      alert(err.message || "Failed to create room");
+    }
+  }
+  editRoom(room) {
+    this.destroy();
+    const editor = new RoomEditor(this.container, room, () => {
+      editor.destroy();
+      this.root = el("div", { className: "dm-workshop" });
+      this.container.appendChild(this.root);
+      this.load();
+    }, () => this.onBack());
+  }
+  async deleteRoom(room) {
+    if (!confirm(`Delete room "${room.name}"?`)) return;
+    try {
+      await deleteRoom(room.id);
+      this.load();
+    } catch (err) {
+      alert(err.message || "Delete failed");
+    }
+  }
+  renderDungeons() {
+    clear(this.dungeonsTab);
+    const header = el("div", { className: "workshop-section-header" });
+    header.appendChild(el("h2", {}, "Dungeons"));
+    header.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.newDungeon()
+    }, "+ New Dungeon"));
+    this.dungeonsTab.appendChild(header);
+    if (this.dungeons.length === 0) {
+      this.dungeonsTab.appendChild(el("div", { className: "empty" }, "No dungeons yet. Create one to get started."));
+      return;
+    }
+    const list = el("ul", { className: "session-list workshop-list" });
+    this.dungeons.forEach((dungeon) => {
+      const info = el("div", { className: "session-info" });
+      info.appendChild(el("strong", {}, dungeon.name));
+      info.appendChild(el("span", {}, `${dungeon.public ? "Public" : "Private"} \xB7 ${(dungeon.room_order || []).length} rooms`));
+      const controls = el("div", { className: "workshop-item-controls" });
+      controls.appendChild(el("button", {
+        className: "solo-hub-btn",
+        onclick: () => this.editDungeon(dungeon)
+      }, "Edit"));
+      controls.appendChild(el("button", {
+        className: "danger",
+        onclick: () => this.deleteDungeon(dungeon)
+      }, "Delete"));
+      controls.appendChild(el("button", {
+        className: "enter",
+        onclick: () => this.openCharacterPicker(dungeon)
+      }, "Play Test"));
+      const row = el("li", {});
+      row.appendChild(info);
+      row.appendChild(controls);
+      list.appendChild(row);
+    });
+    this.dungeonsTab.appendChild(list);
+  }
+  async newDungeon() {
+    try {
+      const { dungeon } = await createDungeon({
+        name: "New Dungeon",
+        room_order: [],
+        links: []
+      });
+      this.editDungeon(dungeon);
+    } catch (err) {
+      alert(err.message || "Failed to create dungeon");
+    }
+  }
+  editDungeon(dungeon) {
+    this.destroy();
+    const editor = new DungeonEditor(this.container, dungeon, this.rooms, () => {
+      editor.destroy();
+      this.root = el("div", { className: "dm-workshop" });
+      this.container.appendChild(this.root);
+      this.load();
+    }, () => this.onBack(), (dungeonId) => {
+      editor.destroy();
+      const d = this.dungeons.find((x) => x.id === dungeonId) || { id: dungeonId, name: "Dungeon" };
+      this.openCharacterPicker(d);
+    });
+  }
+  async deleteDungeon(dungeon) {
+    if (!confirm(`Delete dungeon "${dungeon.name}"?`)) return;
+    try {
+      await deleteDungeon(dungeon.id);
+      this.load();
+    } catch (err) {
+      alert(err.message || "Delete failed");
+    }
+  }
+  openCharacterPicker(dungeon) {
+    this.destroy();
+    const picker = el("div", { className: "dm-workshop" });
+    const panel = el("div", { className: "session-panel workshop-panel" });
+    panel.appendChild(el("h1", {}, "Play Test"));
+    panel.appendChild(el("p", { className: "subtitle" }, `Choose a hero to test "${dungeon.name}".`));
+    const list = el("div", { className: "characters-grid" });
+    if (this.characters.length === 0) {
+      list.appendChild(el("div", { className: "empty" }, "No heroes available. Create one first."));
+    } else {
+      this.characters.forEach((c) => {
+        const card = el("div", {
+          className: "character-card",
+          onclick: () => {
+            picker.remove();
+            this.onPlayDungeon(dungeon.id, c.id);
+          }
+        });
+        const portraitUrl = c.portrait_url || `/portraits/${(c.classes?.[0] || "generic").toLowerCase().replace(/\s+/g, "-")}.png`;
+        card.appendChild(el("img", { className: "character-portrait", src: portraitUrl, alt: c.name }));
+        card.appendChild(el("h3", {}, c.name));
+        card.appendChild(el("p", {}, (c.classes || []).join(" / ")));
+        list.appendChild(card);
+      });
+    }
+    panel.appendChild(list);
+    panel.appendChild(el("button", {
+      className: "enter workshop-back",
+      onclick: () => {
+        picker.remove();
+        this.root = el("div", { className: "dm-workshop" });
+        this.container.appendChild(this.root);
+        this.load();
+      }
+    }, "\u2190 Back"));
+    picker.appendChild(panel);
+    this.container.appendChild(picker);
+    this.root = picker;
+  }
+  destroy() {
+    this.root.remove();
+  }
+};
+var RoomEditor = class {
+  root;
+  container;
+  room;
+  onSave;
+  onBack;
+  nameInput;
+  themeSelect;
+  gridEl;
+  entityMode = false;
+  activeTile = "0";
+  tiles = [];
+  entities = [];
+  entityForm;
+  entityFormTitle;
+  entityFormX = 0;
+  entityFormY = 0;
+  entityTypeSelect;
+  entityKeyInput;
+  entityCountInput;
+  entityDamageInput;
+  entityValueInput;
+  entityItemSelect;
+  entityMessageInput;
+  entityNameInput;
+  entityBestiarySelect;
+  entityFieldsEl;
+  modeToggleBtn;
+  items = [];
+  bestiary = [];
+  constructor(container, room, onSave, onBack) {
+    this.container = container;
+    this.room = room;
+    this.onSave = onSave;
+    this.onBack = onBack;
+    this.tiles = this.ensureTiles(room.tiles);
+    this.entities = (room.entities || []).slice();
+    this.root = el("div", { className: "room-editor" });
+    const panel = el("div", { className: "session-panel editor-panel" });
+    panel.appendChild(el("h1", {}, `Edit Room: ${room.name}`));
+    panel.appendChild(this.buildForm());
+    panel.appendChild(this.buildToolbar());
+    panel.appendChild(this.buildGrid());
+    this.entityForm = this.buildEntityForm();
+    this.entityForm.style.display = "none";
+    panel.appendChild(this.entityForm);
+    panel.appendChild(this.buildFooter());
+    this.root.appendChild(panel);
+    container.appendChild(this.root);
+    this.loadRefs();
+  }
+  ensureTiles(tiles) {
+    return Array.from({ length: 16 }, (_, y) => Array.from({ length: 16 }, (_, x) => tiles?.[y]?.[x] != null ? String(tiles[y][x]) : "1"));
+  }
+  async loadRefs() {
+    try {
+      const [{ items }, { monsters }] = await Promise.all([
+        listItems().catch(() => ({ items: [] })),
+        listBestiary().catch(() => ({ monsters: [] }))
+      ]);
+      this.items = items || [];
+      this.bestiary = monsters || [];
+      clear(this.entityItemSelect);
+      this.items.forEach((i) => {
+        const opt = document.createElement("option");
+        opt.value = i.id;
+        opt.textContent = i.name || i.id;
+        this.entityItemSelect.appendChild(opt);
+      });
+      clear(this.entityBestiarySelect);
+      this.bestiary.forEach((b) => {
+        const opt = document.createElement("option");
+        opt.value = b;
+        opt.textContent = b;
+        this.entityBestiarySelect.appendChild(opt);
+      });
+    } catch (err) {
+      this.items = [];
+      this.bestiary = [];
+    }
+  }
+  buildForm() {
+    const form = el("div", { className: "editor-form" });
+    this.nameInput = el("input", { type: "text", value: this.room.name || "New Room" });
+    this.themeSelect = el("select", {});
+    const themes = ["cave", "dungeon", "library", "ice", "lava", "forest", "tomb", "sewer"];
+    themes.forEach((t) => {
+      const opt = document.createElement("option");
+      opt.value = t;
+      opt.textContent = THEME_LABELS[t] || t;
+      if (t === (this.room.theme || "dungeon")) opt.selected = true;
+      this.themeSelect.appendChild(opt);
+    });
+    form.appendChild(el("label", {}, "Name"));
+    form.appendChild(this.nameInput);
+    form.appendChild(el("label", {}, "Theme"));
+    form.appendChild(this.themeSelect);
+    return form;
+  }
+  buildToolbar() {
+    const toolbar = el("div", { className: "editor-toolbar" });
+    const palette = el("div", { className: "tile-palette" });
+    const tiles = [
+      { key: "0", label: "Floor" },
+      { key: "1", label: "Wall" },
+      { key: "2", label: "Difficult" },
+      { key: "3", label: "Hazard 1" },
+      { key: "4", label: "Hazard 2" },
+      { key: "5", label: "Event" }
+    ];
+    tiles.forEach((t) => {
+      const btn = el("button", {
+        className: `palette-btn palette-${t.key}${t.key === this.activeTile ? " active" : ""}`,
+        onclick: () => this.selectTile(t.key)
+      }, t.label);
+      palette.appendChild(btn);
+    });
+    toolbar.appendChild(palette);
+    this.modeToggleBtn = el("button", {
+      className: "entity-toggle",
+      onclick: () => this.toggleEntityMode()
+    }, "Entity Mode: Off");
+    toolbar.appendChild(this.modeToggleBtn);
+    return toolbar;
+  }
+  selectTile(key) {
+    this.activeTile = key;
+    this.entityMode = false;
+    this.modeToggleBtn.textContent = "Entity Mode: Off";
+    this.entityForm.style.display = "none";
+    this.root.querySelectorAll(".palette-btn").forEach((b) => {
+      b.classList.toggle("active", b.classList.contains(`palette-${this.activeTile}`));
+    });
+  }
+  toggleEntityMode() {
+    this.entityMode = !this.entityMode;
+    this.modeToggleBtn.textContent = `Entity Mode: ${this.entityMode ? "On" : "Off"}`;
+    this.entityForm.style.display = "none";
+  }
+  buildGrid() {
+    this.gridEl = el("div", { className: "room-grid" });
+    this.renderGrid();
+    return this.gridEl;
+  }
+  renderGrid() {
+    clear(this.gridEl);
+    this.gridEl.style.gridTemplateColumns = `repeat(16, 24px)`;
+    for (let y = 0; y < 16; y++) {
+      for (let x = 0; x < 16; x++) {
+        const tile = this.tiles[y][x];
+        const entity = this.entities.find((e) => e.x === x && e.y === y);
+        const cell = el("div", {
+          className: `room-grid-cell tile-${tile}${entity ? " has-entity" : ""}`,
+          onclick: () => this.onCellClick(x, y)
+        });
+        if (entity) {
+          cell.appendChild(el("span", { className: "entity-marker" }, entity.type[0].toUpperCase()));
+          cell.title = `${entity.type}: ${entity.name || entity.key || entity.message || ""}`;
+        }
+        this.gridEl.appendChild(cell);
+      }
+    }
+  }
+  onCellClick(x, y) {
+    if (this.entityMode) {
+      this.entityFormX = x;
+      this.entityFormY = y;
+      this.showEntityForm(x, y);
+      return;
+    }
+    this.tiles[y][x] = this.activeTile;
+    this.renderGrid();
+  }
+  buildEntityForm() {
+    const form = el("div", { className: "entity-form" });
+    this.entityTypeSelect = el("select", {});
+    ["monster", "trap", "treasure", "item", "event"].forEach((t) => {
+      const opt = document.createElement("option");
+      opt.value = t;
+      opt.textContent = t;
+      this.entityTypeSelect.appendChild(opt);
+    });
+    this.entityKeyInput = el("input", { type: "text", placeholder: "key / label" });
+    this.entityCountInput = el("input", { type: "number", placeholder: "count", value: "1" });
+    this.entityDamageInput = el("input", { type: "text", placeholder: "damage e.g. 1d6" });
+    this.entityValueInput = el("input", { type: "number", placeholder: "gold value", value: "0" });
+    this.entityItemSelect = el("select", {});
+    this.entityMessageInput = el("input", { type: "text", placeholder: "message" });
+    this.entityNameInput = el("input", { type: "text", placeholder: "custom name" });
+    this.entityBestiarySelect = el("select", {});
+    this.entityFieldsEl = el("div", { className: "entity-fields" });
+    this.entityTypeSelect.onchange = () => this.renderEntityFields();
+    form.appendChild(el("label", {}, "Entity Type"));
+    form.appendChild(this.entityTypeSelect);
+    form.appendChild(this.entityFieldsEl);
+    form.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.addEntity()
+    }, "Add Entity"));
+    form.appendChild(el("button", {
+      className: "danger",
+      onclick: () => this.removeEntity()
+    }, "Remove Entity"));
+    form.appendChild(el("button", {
+      onclick: () => {
+        this.entityForm.style.display = "none";
+      }
+    }, "Cancel"));
+    this.renderEntityFields();
+    return form;
+  }
+  renderEntityFields() {
+    clear(this.entityFieldsEl);
+    const type = this.entityTypeSelect.value;
+    if (type === "monster") {
+      this.entityFieldsEl.appendChild(el("label", {}, "Bestiary"));
+      this.entityFieldsEl.appendChild(this.entityBestiarySelect);
+      this.entityFieldsEl.appendChild(el("label", {}, "Count"));
+      this.entityFieldsEl.appendChild(this.entityCountInput);
+      this.entityFieldsEl.appendChild(el("label", {}, "Name (optional)"));
+      this.entityFieldsEl.appendChild(this.entityNameInput);
+    } else if (type === "trap") {
+      this.entityFieldsEl.appendChild(el("label", {}, "Label"));
+      this.entityFieldsEl.appendChild(this.entityKeyInput);
+      this.entityFieldsEl.appendChild(el("label", {}, "Damage"));
+      this.entityFieldsEl.appendChild(this.entityDamageInput);
+    } else if (type === "treasure") {
+      this.entityFieldsEl.appendChild(el("label", {}, "Gold"));
+      this.entityFieldsEl.appendChild(this.entityValueInput);
+      this.entityFieldsEl.appendChild(el("label", {}, "Item (optional)"));
+      this.entityFieldsEl.appendChild(this.entityItemSelect);
+    } else if (type === "item") {
+      this.entityFieldsEl.appendChild(el("label", {}, "Item"));
+      this.entityFieldsEl.appendChild(this.entityItemSelect);
+    } else if (type === "event") {
+      this.entityFieldsEl.appendChild(el("label", {}, "Message"));
+      this.entityFieldsEl.appendChild(this.entityMessageInput);
+    }
+  }
+  showEntityForm(x, y) {
+    this.entityForm.style.display = "block";
+    if (this.entityFormTitle) this.entityFormTitle.remove();
+    this.entityFormTitle = el("h4", {}, `Entity at ${x}, ${y}`);
+    this.entityForm.insertBefore(this.entityFormTitle, this.entityForm.firstChild);
+  }
+  addEntity() {
+    const type = this.entityTypeSelect.value;
+    const base = { type, x: this.entityFormX, y: this.entityFormY };
+    let entity;
+    if (type === "monster") {
+      entity = {
+        ...base,
+        key: this.entityBestiarySelect.value || this.entityKeyInput.value || "goblin",
+        count: parseInt(this.entityCountInput.value, 10) || 1,
+        name: this.entityNameInput.value || void 0
+      };
+    } else if (type === "trap") {
+      entity = {
+        ...base,
+        key: this.entityKeyInput.value || "trap",
+        damage: this.entityDamageInput.value || "1d6"
+      };
+    } else if (type === "treasure") {
+      entity = {
+        ...base,
+        value: parseInt(this.entityValueInput.value, 10) || 0,
+        item_id: this.entityItemSelect.value || void 0
+      };
+    } else if (type === "item") {
+      entity = { ...base, item_id: this.entityItemSelect.value };
+    } else if (type === "event") {
+      entity = { ...base, message: this.entityMessageInput.value || "" };
+    }
+    this.entities.push(entity);
+    this.entityForm.style.display = "none";
+    this.renderGrid();
+  }
+  removeEntity() {
+    this.entities = this.entities.filter((e) => !(e.x === this.entityFormX && e.y === this.entityFormY));
+    this.entityForm.style.display = "none";
+    this.renderGrid();
+  }
+  buildFooter() {
+    const footer = el("div", { className: "editor-footer" });
+    footer.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.save()
+    }, "Save"));
+    footer.appendChild(el("button", {
+      className: "danger",
+      onclick: () => this.onBack()
+    }, "Back"));
+    return footer;
+  }
+  async save() {
+    try {
+      await updateRoom(this.room.id, {
+        name: this.nameInput.value.trim() || this.room.name,
+        theme: this.themeSelect.value,
+        tiles: this.tiles,
+        entities: this.entities
+      });
+      this.onSave();
+    } catch (err) {
+      alert(err.message || "Save failed");
+    }
+  }
+  destroy() {
+    this.root.remove();
+  }
+};
+var DungeonEditor = class {
+  root;
+  container;
+  dungeon;
+  rooms;
+  onSave;
+  onBack;
+  onPlayTest;
+  nameInput;
+  publicCheckbox;
+  roomOrderEl;
+  linksEl;
+  linkSourceSelect;
+  linkTargetSelect;
+  linkKindSelect;
+  sourceGridEl;
+  targetGridEl;
+  startRoomSelect;
+  startXInput;
+  startYInput;
+  sourceRoomId;
+  targetRoomId;
+  sourcePoint;
+  targetPoint;
+  constructor(container, dungeon, rooms, onSave, onBack, onPlayTest) {
+    this.container = container;
+    this.dungeon = dungeon;
+    this.rooms = rooms;
+    this.onSave = onSave;
+    this.onBack = onBack;
+    this.onPlayTest = onPlayTest;
+    this.sourceRoomId = dungeon.start_room_id || dungeon.room_order?.[0] || null;
+    this.targetRoomId = dungeon.room_order?.[0] || null;
+    this.sourcePoint = null;
+    this.targetPoint = null;
+    this.root = el("div", { className: "dungeon-editor" });
+    const panel = el("div", { className: "session-panel editor-panel" });
+    panel.appendChild(el("h1", {}, `Edit Dungeon: ${dungeon.name}`));
+    panel.appendChild(this.buildForm());
+    panel.appendChild(this.buildRoomPool());
+    panel.appendChild(this.buildRoomOrder());
+    panel.appendChild(this.buildStartRoom());
+    panel.appendChild(this.buildLinkEditor());
+    panel.appendChild(this.buildFooter());
+    this.root.appendChild(panel);
+    container.appendChild(this.root);
+    this.renderRoomOrder();
+    this.renderLinks();
+    this.renderSourceGrid();
+    this.renderTargetGrid();
+  }
+  buildForm() {
+    const form = el("div", { className: "editor-form" });
+    this.nameInput = el("input", { type: "text", value: this.dungeon.name || "New Dungeon" });
+    this.publicCheckbox = el("input", { type: "checkbox", checked: !!this.dungeon.public });
+    form.appendChild(el("label", {}, "Name"));
+    form.appendChild(this.nameInput);
+    const pubLabel = el("label", { className: "checkbox-label" });
+    pubLabel.appendChild(this.publicCheckbox);
+    pubLabel.appendChild(document.createTextNode(" Public"));
+    form.appendChild(pubLabel);
+    return form;
+  }
+  buildRoomPool() {
+    const section = el("div", { className: "workshop-section" });
+    section.appendChild(el("h2", {}, "Available Rooms"));
+    if (this.rooms.length === 0) {
+      section.appendChild(el("div", { className: "empty" }, "No rooms available. Create rooms first."));
+      return section;
+    }
+    const grid = el("div", { className: "room-pool-grid" });
+    this.rooms.forEach((room) => {
+      const card = el("div", { className: "room-thumb" });
+      card.appendChild(el("strong", {}, room.name));
+      card.appendChild(el("span", {}, THEME_LABELS[room.theme] || room.theme || "dungeon"));
+      card.appendChild(el("button", {
+        className: "enter",
+        onclick: () => this.addRoom(room.id)
+      }, "Add"));
+      grid.appendChild(card);
+    });
+    section.appendChild(grid);
+    return section;
+  }
+  addRoom(roomId) {
+    const order = this.dungeon.room_order || [];
+    if (order.includes(roomId)) return;
+    order.push(roomId);
+    this.dungeon.room_order = order;
+    if (!this.dungeon.start_room_id) {
+      this.dungeon.start_room_id = roomId;
+    }
+    if (!this.sourceRoomId) this.sourceRoomId = roomId;
+    if (!this.targetRoomId) this.targetRoomId = roomId;
+    this.renderRoomOrder();
+    this.renderStartRoom();
+    this.updateLinkSelects();
+    this.renderSourceGrid();
+    this.renderTargetGrid();
+  }
+  buildRoomOrder() {
+    const section = el("div", { className: "workshop-section" });
+    section.appendChild(el("h2", {}, "Room Order"));
+    this.roomOrderEl = el("ul", { className: "session-list order-list" });
+    section.appendChild(this.roomOrderEl);
+    return section;
+  }
+  renderRoomOrder() {
+    clear(this.roomOrderEl);
+    const order = this.dungeon.room_order || [];
+    if (order.length === 0) {
+      this.roomOrderEl.appendChild(el("li", { className: "empty" }, "No rooms added."));
+      return;
+    }
+    order.forEach((roomId, index) => {
+      const room = this.rooms.find((r) => r.id === roomId);
+      const name = room ? room.name : roomId;
+      const row = el("li", {});
+      const info = el("div", { className: "session-info" });
+      info.appendChild(el("strong", {}, `${index + 1}. ${name}`));
+      row.appendChild(info);
+      const controls = el("div", { className: "workshop-item-controls" });
+      controls.appendChild(el("button", {
+        disabled: index === 0,
+        onclick: () => this.moveRoom(index, -1)
+      }, "\u2191"));
+      controls.appendChild(el("button", {
+        disabled: index === order.length - 1,
+        onclick: () => this.moveRoom(index, 1)
+      }, "\u2193"));
+      controls.appendChild(el("button", {
+        className: "danger",
+        onclick: () => this.removeRoom(index)
+      }, "Remove"));
+      row.appendChild(controls);
+      this.roomOrderEl.appendChild(row);
+    });
+  }
+  moveRoom(index, delta) {
+    const order = this.dungeon.room_order || [];
+    const newIndex = index + delta;
+    if (newIndex < 0 || newIndex >= order.length) return;
+    [order[index], order[newIndex]] = [order[newIndex], order[index]];
+    this.renderRoomOrder();
+  }
+  removeRoom(index) {
+    const order = this.dungeon.room_order || [];
+    const removed = order.splice(index, 1)[0];
+    if (this.dungeon.start_room_id === removed) {
+      this.dungeon.start_room_id = order[0] || null;
+    }
+    if (this.sourceRoomId === removed) {
+      this.sourceRoomId = order[0] || null;
+      this.sourcePoint = null;
+    }
+    if (this.targetRoomId === removed) {
+      this.targetRoomId = order[0] || null;
+      this.targetPoint = null;
+    }
+    this.dungeon.links = (this.dungeon.links || []).filter(
+      (l) => l.source_room_id !== removed && l.target_room_id !== removed
+    );
+    this.renderRoomOrder();
+    this.renderStartRoom();
+    this.updateLinkSelects();
+    this.renderSourceGrid();
+    this.renderTargetGrid();
+  }
+  buildStartRoom() {
+    const section = el("div", { className: "workshop-section" });
+    section.appendChild(el("h2", {}, "Start Position"));
+    const form = el("div", { className: "editor-form inline" });
+    this.startRoomSelect = el("select", {});
+    this.startXInput = el("input", { type: "number", min: 1, max: 14, value: this.dungeon.start_x ?? 8 });
+    this.startYInput = el("input", { type: "number", min: 1, max: 14, value: this.dungeon.start_y ?? 8 });
+    this.updateStartRoomOptions();
+    form.appendChild(el("label", {}, "Start Room"));
+    form.appendChild(this.startRoomSelect);
+    form.appendChild(el("label", {}, "X"));
+    form.appendChild(this.startXInput);
+    form.appendChild(el("label", {}, "Y"));
+    form.appendChild(this.startYInput);
+    section.appendChild(form);
+    return section;
+  }
+  updateStartRoomOptions() {
+    clear(this.startRoomSelect);
+    const order = this.dungeon.room_order || [];
+    if (order.length === 0) {
+      const opt = document.createElement("option");
+      opt.textContent = "No rooms";
+      this.startRoomSelect.appendChild(opt);
+      return;
+    }
+    order.forEach((roomId) => {
+      const room = this.rooms.find((r) => r.id === roomId);
+      const opt = document.createElement("option");
+      opt.value = roomId;
+      opt.textContent = room ? room.name : roomId;
+      if (roomId === this.dungeon.start_room_id) opt.selected = true;
+      this.startRoomSelect.appendChild(opt);
+    });
+  }
+  renderStartRoom() {
+    this.updateStartRoomOptions();
+  }
+  buildLinkEditor() {
+    const section = el("div", { className: "workshop-section link-editor" });
+    section.appendChild(el("h2", {}, "Links"));
+    const controls = el("div", { className: "link-controls" });
+    this.linkSourceSelect = el("select", {
+      onchange: () => {
+        this.sourceRoomId = this.linkSourceSelect.value;
+        this.sourcePoint = null;
+        this.renderSourceGrid();
+      }
+    });
+    this.linkTargetSelect = el("select", {
+      onchange: () => {
+        this.targetRoomId = this.linkTargetSelect.value;
+        this.targetPoint = null;
+        this.renderTargetGrid();
+      }
+    });
+    this.linkKindSelect = el("select", {});
+    ["passage", "stairs", "teleport"].forEach((k) => {
+      const opt = document.createElement("option");
+      opt.value = k;
+      opt.textContent = k;
+      this.linkKindSelect.appendChild(opt);
+    });
+    controls.appendChild(el("label", {}, "Source"));
+    controls.appendChild(this.linkSourceSelect);
+    controls.appendChild(el("label", {}, "Target"));
+    controls.appendChild(this.linkTargetSelect);
+    controls.appendChild(el("label", {}, "Kind"));
+    controls.appendChild(this.linkKindSelect);
+    controls.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.addLink()
+    }, "Add Link"));
+    section.appendChild(controls);
+    const grids = el("div", { className: "link-grids" });
+    this.sourceGridEl = el("div", { className: "link-grid-wrap" });
+    this.targetGridEl = el("div", { className: "link-grid-wrap" });
+    grids.appendChild(this.sourceGridEl);
+    grids.appendChild(this.targetGridEl);
+    section.appendChild(grids);
+    this.linksEl = el("ul", { className: "session-list links-list" });
+    section.appendChild(this.linksEl);
+    this.updateLinkSelects();
+    return section;
+  }
+  updateLinkSelects() {
+    clear(this.linkSourceSelect);
+    clear(this.linkTargetSelect);
+    const order = this.dungeon.room_order || [];
+    order.forEach((roomId) => {
+      const room = this.rooms.find((r) => r.id === roomId);
+      const name = room ? room.name : roomId;
+      const srcOpt = document.createElement("option");
+      srcOpt.value = roomId;
+      srcOpt.textContent = name;
+      if (roomId === this.sourceRoomId) srcOpt.selected = true;
+      this.linkSourceSelect.appendChild(srcOpt);
+      const tgtOpt = document.createElement("option");
+      tgtOpt.value = roomId;
+      tgtOpt.textContent = name;
+      if (roomId === this.targetRoomId) tgtOpt.selected = true;
+      this.linkTargetSelect.appendChild(tgtOpt);
+    });
+  }
+  renderSourceGrid() {
+    clear(this.sourceGridEl);
+    const room = this.rooms.find((r) => r.id === this.sourceRoomId);
+    this.sourceGridEl.appendChild(el("h3", {}, `Source: ${room ? room.name : "None"}`));
+    if (!room) return;
+    const grid = this.buildMiniGrid(room, this.sourcePoint, (x, y) => {
+      this.sourcePoint = { x, y };
+      this.renderSourceGrid();
+    });
+    this.sourceGridEl.appendChild(grid);
+  }
+  renderTargetGrid() {
+    clear(this.targetGridEl);
+    const room = this.rooms.find((r) => r.id === this.targetRoomId);
+    this.targetGridEl.appendChild(el("h3", {}, `Target: ${room ? room.name : "None"}`));
+    if (!room) return;
+    const grid = this.buildMiniGrid(room, this.targetPoint, (x, y) => {
+      this.targetPoint = { x, y };
+      this.renderTargetGrid();
+    });
+    this.targetGridEl.appendChild(grid);
+  }
+  buildMiniGrid(room, selectedPoint, onClick) {
+    const grid = el("div", { className: "room-grid link-grid" });
+    grid.style.gridTemplateColumns = `repeat(16, 16px)`;
+    const tiles = room.tiles || [];
+    for (let y = 0; y < 16; y++) {
+      for (let x = 0; x < 16; x++) {
+        const tile = tiles[y]?.[x] ?? "1";
+        const isSelected = selectedPoint && selectedPoint.x === x && selectedPoint.y === y;
+        const cell = el("div", {
+          className: `room-grid-cell tile-${tile}${isSelected ? " selected" : ""}`,
+          onclick: () => onClick(x, y)
+        });
+        grid.appendChild(cell);
+      }
+    }
+    return grid;
+  }
+  addLink() {
+    if (!this.sourceRoomId || !this.targetRoomId || !this.sourcePoint || !this.targetPoint) {
+      alert("Select source room, target room, and both link points.");
+      return;
+    }
+    const link = {
+      source_room_id: this.sourceRoomId,
+      source_x: this.sourcePoint.x,
+      source_y: this.sourcePoint.y,
+      target_room_id: this.targetRoomId,
+      target_x: this.targetPoint.x,
+      target_y: this.targetPoint.y,
+      kind: this.linkKindSelect.value
+    };
+    this.dungeon.links = this.dungeon.links || [];
+    this.dungeon.links.push(link);
+    this.sourcePoint = null;
+    this.targetPoint = null;
+    this.renderSourceGrid();
+    this.renderTargetGrid();
+    this.renderLinks();
+  }
+  deleteLink(index) {
+    this.dungeon.links.splice(index, 1);
+    this.renderLinks();
+  }
+  renderLinks() {
+    clear(this.linksEl);
+    const links = this.dungeon.links || [];
+    if (links.length === 0) {
+      this.linksEl.appendChild(el("li", { className: "empty" }, "No links yet."));
+      return;
+    }
+    links.forEach((link, index) => {
+      const src = this.rooms.find((r) => r.id === link.source_room_id);
+      const tgt = this.rooms.find((r) => r.id === link.target_room_id);
+      const text = `${src ? src.name : link.source_room_id} (${link.source_x},${link.source_y}) \u2192 ${tgt ? tgt.name : link.target_room_id} (${link.target_x},${link.target_y}) [${link.kind}]`;
+      const row = el("li", {});
+      row.appendChild(el("span", { className: "link-text" }, text));
+      row.appendChild(el("button", {
+        className: "danger",
+        onclick: () => this.deleteLink(index)
+      }, "Delete"));
+      this.linksEl.appendChild(row);
+    });
+  }
+  buildFooter() {
+    const footer = el("div", { className: "editor-footer" });
+    footer.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.save()
+    }, "Save"));
+    footer.appendChild(el("button", {
+      className: "enter",
+      onclick: () => this.onPlayTest(this.dungeon.id)
+    }, "Play Test"));
+    footer.appendChild(el("button", {
+      className: "danger",
+      onclick: () => this.onBack()
+    }, "Back"));
+    return footer;
+  }
+  async save() {
+    try {
+      await updateDungeon(this.dungeon.id, {
+        name: this.nameInput.value.trim() || this.dungeon.name,
+        public: this.publicCheckbox.checked,
+        room_order: this.dungeon.room_order || [],
+        links: this.dungeon.links || [],
+        start_room_id: this.startRoomSelect.value || null,
+        start_x: parseInt(this.startXInput.value, 10) || 1,
+        start_y: parseInt(this.startYInput.value, 10) || 1
+      });
+      this.onSave();
+    } catch (err) {
+      alert(err.message || "Save failed");
+    }
   }
   destroy() {
     this.root.remove();
@@ -1506,13 +2519,14 @@ var CharacterSelect = class {
   modules = [];
   selectedModuleId = "sample_lair";
   characters = [];
-  constructor(container, onPlay, onCreate, onCampaigns, onSessions, onBack) {
+  constructor(container, onPlay, onCreate, onCampaigns, onSessions, onBack, onDmWorkshop) {
     this.root = el("div", { className: "solo-hub" });
     this.onPlay = onPlay;
     this.onCreate = onCreate;
     this.onCampaigns = onCampaigns;
     this.onSessions = onSessions;
     this.onBack = onBack;
+    this.onDmWorkshop = onDmWorkshop;
     const background = el("div", { className: "solo-hub-background" });
     const vignette = el("div", { className: "solo-hub-vignette" });
     const shell = el("div", { className: "solo-hub-shell" });
@@ -1553,6 +2567,7 @@ var CharacterSelect = class {
     const actionGroup = el("div", { className: "solo-hub-actions" });
     actionGroup.appendChild(el("button", { className: "solo-hub-btn", onclick: () => this.onCreate() }, "+ New Hero"));
     actionGroup.appendChild(el("button", { className: "solo-hub-btn", onclick: () => this.onCampaigns() }, "Campaigns"));
+    actionGroup.appendChild(el("button", { className: "solo-hub-btn", onclick: () => this.onDmWorkshop() }, "DM Workshop"));
     if (this.onSessions) {
       actionGroup.appendChild(el("button", { className: "solo-hub-btn", onclick: () => this.onSessions() }, "Saved"));
     }
@@ -7695,7 +8710,9 @@ var SanctuaryApp = class {
       () => this.showSelect(),
       () => this.showSessions(),
       () => this.showCampaigns(),
-      () => this.showSessions()
+      () => this.showSessions(),
+      null,
+      () => this.showDmWorkshop()
     );
   }
   showSelect() {
@@ -7774,6 +8791,41 @@ var SanctuaryApp = class {
       () => this.showSelect(),
       () => this.showHub()
     );
+  }
+  showDmWorkshop() {
+    this.setScreen("dm-workshop");
+    clear(this.app);
+    this.current?.destroy();
+    this.current = new DmWorkshop(
+      this.app,
+      (dungeonId, characterId) => this.enterDungeon(dungeonId, characterId),
+      () => this.showHub()
+    );
+  }
+  async enterDungeon(dungeonId, characterId, campaignId) {
+    this.setScreen("loading");
+    clear(this.app);
+    this.current?.destroy();
+    try {
+      const { session } = await playDungeon(dungeonId, characterId, campaignId, 0);
+      const { module } = await getModule(session.module_id);
+      this.setScreen("game");
+      const game = new Game(
+        this.app,
+        session.id,
+        module.map,
+        session,
+        () => this.showSessions(),
+        (cid) => this.replayGame(cid),
+        this.userId ?? void 0
+      );
+      this.current = game;
+      await game.init();
+    } catch (err) {
+      this.setScreen("dm-workshop");
+      this.showDmWorkshop();
+      console.error("Failed to enter dungeon:", err);
+    }
   }
   async resumeGame(session) {
     this.setScreen("loading");

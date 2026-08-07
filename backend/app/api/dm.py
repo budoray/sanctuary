@@ -8,12 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.auth import require_account
 from backend.app.db import SessionRecord, get_db
-from backend.app.engine import module
 from backend.app.engine import session as session_engine
 from backend.app.socket_manager import socket_manager
 
 # Import access helpers from the sessions router to keep campaign/DM rules consistent.
-from backend.app.api.sessions import _can_access_session, _emit_session_events, _is_campaign_dm
+from backend.app.api.sessions import _can_access_session, _emit_session_events, _is_campaign_dm, _load_session_module
 
 router = APIRouter(tags=["dm"])
 
@@ -45,7 +44,7 @@ async def dm_spawn(
     record = await _load_session_dm_only(session_id, account_id, db)
     state = json.loads(record.state)
     prev_state = json.loads(record.state)
-    mod = module.load(record.module_id)
+    mod = await _load_session_module(record, db)
 
     try:
         await session_engine.dm_spawn(
@@ -84,7 +83,7 @@ async def dm_move(
     record = await _load_session_dm_only(session_id, account_id, db)
     state = json.loads(record.state)
     prev_state = json.loads(record.state)
-    mod = module.load(record.module_id)
+    mod = await _load_session_module(record, db)
 
     try:
         await session_engine.dm_move(
@@ -149,7 +148,7 @@ async def dm_reveal(
     record = await _load_session_dm_only(session_id, account_id, db)
     state = json.loads(record.state)
     prev_state = json.loads(record.state)
-    mod = module.load(record.module_id)
+    mod = await _load_session_module(record, db)
 
     try:
         await session_engine.dm_reveal(
