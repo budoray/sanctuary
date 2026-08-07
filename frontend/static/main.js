@@ -6902,6 +6902,8 @@ var Game = class {
     tokens.forEach((t) => {
       if (t.alive === false) return;
       const isPlayer = t.type === "player";
+      const isVisible = isPlayer || this.isDm() || this.visited.has(`${t.x},${t.y}`);
+      if (!isVisible) return;
       const isActive = t.id === activeId;
       const x = t.x * TILE_SIZE;
       const y = t.y * TILE_SIZE;
