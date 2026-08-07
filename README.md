@@ -5,7 +5,7 @@ A web-based tabletop game platform: solo adventures, AI-DM'd campaigns, and huma
 ## Stack
 
 - **Backend:** Python 3.12+, FastAPI, SQLAlchemy 2.0 async, python-socketio
-- **Frontend:** Vite + TypeScript + PixiJS v8
+- **Frontend:** Plain HTML + CSS + JavaScript (static files in `frontend/static`)
 - **Persistence:** SQLite for local dev, PostgreSQL for production
 - **Real-time:** WebSockets (Redis adapter optional for scaling)
 - **Rulesets:** YAML manifest + Python adapter (OSRIC ships first)
@@ -13,28 +13,15 @@ A web-based tabletop game platform: solo adventures, AI-DM'd campaigns, and huma
 ## Run locally
 
 ```bash
-# Backend
 python -m venv .venv
 .venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 python app.py
-
-# Frontend (new terminal)
-cd frontend
-npm install
-npm run dev
 ```
 
-The backend runs on `http://127.0.0.1:9300` and the Vite dev server on `http://localhost:5173`.
+Open `http://127.0.0.1:9300`. The static frontend is served from `frontend/static`.
 
-## Production build
-
-```bash
-cd frontend
-npm run build
-cd ..
-python app.py
-```
+To change the UI, edit the files in `frontend/static` directly and reload the browser.
 
 ## Tests
 

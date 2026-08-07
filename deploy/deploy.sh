@@ -263,17 +263,12 @@ deploy_game() {
   chown "${SERVICE_USER}:${SERVICE_USER}" "$env_file" 2>/dev/null || true
   chmod 600 "$env_file"
 
-  # Frontend
+  # Frontend (plain HTML/CSS/JS; no build step)
   if [ -d frontend/static ]; then
     echo "    Using committed frontend/static"
-  elif command -v npm >/dev/null 2>&1 && [ -f frontend/package.json ]; then
-    echo "    Building frontend"
-    if [ -f frontend/package-lock.json ]; then
-      (cd frontend && npm ci && npm run build)
-    else
-      (cd frontend && npm install && npm run build)
-    fi
   fi
+  # Clean up old Vite/TypeScript artifacts if they still exist on the server.
+  rm -rf frontend/dist frontend/node_modules frontend/package.json frontend/package-lock.json frontend/vite.config.ts frontend/tsconfig.json frontend/public frontend/src 2>/dev/null || true
 
   # Migrations
   if [ -d backend/alembic ]; then
