@@ -413,6 +413,7 @@ async def new_game(
         "dm_acted_this_round": False,
         "ai_dm_enabled": True,
         "monsters_dir": str(monsters_dir) if monsters_dir else None,
+        "props": [],
     }
     if dungeon_links:
         state["dungeon_links"] = dungeon_links
@@ -454,6 +455,7 @@ async def advance_module(
     state["version"] += 1
     state["rolls"].extend(_roll_to_dict(r) for r in d.log)
     state["log"].append(f"— The party journeys to {next_module.name} —")
+    state["props"] = []
     state["player"] = _active_player(state)
     return state
 
@@ -476,6 +478,7 @@ async def dm_spawn(
     y: int,
     token_id: str | None = None,
     monsters_dir: Path | None = None,
+    scale: float | None = None,
 ) -> dict[str, Any]:
     """Spawn a named monster at x, y."""
     if state["status"] != STATUS_ACTIVE:
@@ -503,6 +506,12 @@ async def dm_spawn(
     )
     d = Dice(seed=state["seed"] + state["version"])
     token = _spawn_token(spawn, state, d, monsters_dir=monsters_dir)
+    scale_factor = float(scale) if scale else 1.0
+    if scale_factor != 1.0:
+        token["max_hp"] = max(1, round(token["max_hp"] * scale_factor))
+        token["hp"] = max(1, min(token["hp"], token["max_hp"]) if token["hp"] > token["max_hp"] else round(token["hp"] * scale_factor))
+        token["damage_bonus"] = token.get("damage_bonus", 0) + round((scale_factor - 1) * 2)
+        token["name"] = f"{token['name']} (x{scale_factor:g})"
     state["monsters"].append(token)
     state["version"] += 1
     state["log"].append(f"The DM spawns {token['name']} at ({x}, {y}).")
@@ -588,6 +597,53 @@ async def dm_reveal(
                     revealed.add(f"{tx},{ty}")
     state["version"] += 1
     state["log"].append(f"The DM reveals the fog around ({x}, {y}).")
+
+
+_PROP_TYPES = {"barrel", "rubble", "torch"}
+
+
+async def dm_prop(
+    state: dict[str, Any],
+    module: Module,
+    prop_type: str,
+    x: int,
+    y: int,
+    variant: str | None = None,
+) -> dict[str, Any]:
+    """Place or remove a decorative environment prop."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    if not module.map.in_bounds(x, y):
+        raise ValueError("target is out of bounds")
+
+    props = state.setdefault("props", [])
+
+    if prop_type == "clear":
+        before = len(props)
+        props[:] = [p for p in props if not (p.get("x") == x and p.get("y") == y)]
+        if len(props) == before:
+            raise ValueError("no prop at target tile")
+        state["version"] += 1
+        state["log"].append(f"The DM clears props at ({x}, {y}).")
+        return {"cleared": True, "x": x, "y": y}
+
+    if prop_type not in _PROP_TYPES:
+        raise ValueError(f"unknown prop type: {prop_type}")
+    if not module.map.walkable(x, y):
+        raise ValueError("target tile is blocked")
+
+    prop_id = f"prop_{len(props)}_{x}_{y}"
+    prop = {
+        "id": prop_id,
+        "type": prop_type,
+        "x": int(x),
+        "y": int(y),
+        "variant": variant or "",
+    }
+    props.append(prop)
+    state["version"] += 1
+    state["log"].append(f"The DM places a {prop_type} at ({x}, {y}).")
+    return prop
 
 
 def _tokens(state: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1793,4 +1849,5 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "turn_deadline": state.get("turn_deadline"),
         "dm_revealed": list(state.get("dm_revealed", [])),
         "ai_dm_enabled": _ai_dm_enabled(state),
+        "props": state.get("props", []),
     }

@@ -374,3 +374,62 @@ async def test_advance_campaign_session_to_next_module():
             get_resp = await client.get(f"/api/sessions/{session_id}")
             assert get_resp.status_code == 200
             assert get_resp.json()["session"]["module_id"] == "sunken_crypt"
+
+
+@pytest.mark.asyncio
+async def test_dm_spawn_and_prop_endpoints():
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            campaign_resp = await client.post("/api/campaigns", json={
+                "name": "DM Tools",
+                "password": "secret",
+                "module_ids": ["sample_lair"],
+            })
+            assert campaign_resp.status_code == 200
+            campaign_id = campaign_resp.json()["campaign"]["id"]
+
+            char_resp = await client.post("/api/characters", json={
+                "mode": "normal",
+                "ancestry": "human",
+                "classes": ["fighter"],
+                "name": "DmTester",
+                "seed": 1,
+            })
+            assert char_resp.status_code == 200
+            char_id = char_resp.json()["character"]["id"]
+
+            session_resp = await client.post("/api/sessions", json={
+                "character_id": char_id,
+                "campaign_id": campaign_id,
+                "module_id": "sample_lair",
+            })
+            assert session_resp.status_code == 200
+            session_id = session_resp.json()["session"]["id"]
+            player = session_resp.json()["session"]["player"]
+
+            spawn_resp = await client.post(f"/api/sessions/{session_id}/dm/spawn", json={
+                "name": "goblin",
+                "x": player["x"] + 1,
+                "y": player["y"],
+                "scale": 2,
+            })
+            assert spawn_resp.status_code == 200
+            spawned = spawn_resp.json()["session"]["monsters"][-1]
+            assert spawned["max_hp"] >= 2
+            assert "x2" in spawned["name"]
+
+            prop_resp = await client.post(f"/api/sessions/{session_id}/dm/prop", json={
+                "type": "torch",
+                "x": player["x"] + 2,
+                "y": player["y"],
+            })
+            assert prop_resp.status_code == 200
+            assert prop_resp.json()["session"]["props"][0]["type"] == "torch"
+
+            clear_resp = await client.post(f"/api/sessions/{session_id}/dm/prop", json={
+                "type": "clear",
+                "x": player["x"] + 2,
+                "y": player["y"],
+            })
+            assert clear_resp.status_code == 200
+            assert len(clear_resp.json()["session"]["props"]) == 0

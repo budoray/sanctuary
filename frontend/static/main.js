@@ -291,6 +291,18 @@ async function dmReveal(sessionId, payload) {
     body: JSON.stringify(payload)
   });
 }
+async function dmProp(sessionId, payload) {
+  return api(`/api/sessions/${sessionId}/dm/prop`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+async function dmDamage(sessionId, payload) {
+  return api(`/api/sessions/${sessionId}/dm/damage`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
 async function getAccountProgress() {
   return api("/api/account/progress");
 }
@@ -2719,6 +2731,8 @@ var CampaignDetail = class {
   membersEl;
   characters = [];
   members = [];
+  modules = [];
+  journeyEl;
   constructor(container, campaign, onStartNew, onJoinSession, onBack) {
     this.root = el("div", { className: "adventure-manager" });
     this.campaign = campaign;
@@ -2748,6 +2762,11 @@ var CampaignDetail = class {
     this.membersEl = el("div", { className: "members-list" });
     membersSection.appendChild(this.membersEl);
     main.appendChild(membersSection);
+    const journeySection = el("section", { className: "campaign-detail-section campaign-journey-section" });
+    journeySection.appendChild(el("h2", {}, "Journey"));
+    this.journeyEl = el("div", { className: "campaign-journey-map" });
+    journeySection.appendChild(this.journeyEl);
+    main.appendChild(journeySection);
     shell.appendChild(main);
     shell.appendChild(this.buildFooter());
     this.root.appendChild(background);
@@ -2776,15 +2795,18 @@ var CampaignDetail = class {
   }
   async load() {
     try {
-      const [{ sessions }, { characters }, { members }] = await Promise.all([
+      const [{ sessions }, { characters }, { members }, { modules }] = await Promise.all([
         listCampaignSessions(this.campaign.id),
         listCharacters(),
-        getCampaignMembers(this.campaign.id)
+        getCampaignMembers(this.campaign.id),
+        listModules().catch(() => ({ modules: [] }))
       ]);
       this.characters = characters;
       this.members = members;
+      this.modules = modules || [];
       this.render(sessions);
       this.renderMembers();
+      this.renderJourneyMap();
     } catch (err) {
       clear(this.sessionsEl);
       this.sessionsEl.appendChild(el("div", { className: "campaigns-empty error" }, err.message || "Failed to load sessions."));
@@ -2918,6 +2940,66 @@ var CampaignDetail = class {
       this.membersEl.appendChild(row);
     });
   }
+  renderJourneyMap() {
+    if (!this.journeyEl) return;
+    clear(this.journeyEl);
+    const ids = this.campaign.module_ids || [];
+    const cleared = new Set(this.campaign.cleared_module_ids || []);
+    if (ids.length === 0) {
+      this.journeyEl.appendChild(el("div", { className: "campaigns-empty" }, "No modules in this campaign yet."));
+      return;
+    }
+    const mapById = new Map(this.modules.map((m) => [m.id, m]));
+    const wrapper = el("div", { className: "journey-nodes" });
+    ids.forEach((id, index) => {
+      const mod = mapById.get(id) || { id, name: id, theme: "dungeon" };
+      const isCleared = cleared.has(id);
+      const isCurrent = index === (this.campaign.current_module_index || 0) && !this.campaign.completed;
+      const node = el("div", { className: `journey-node${isCleared ? " cleared" : ""}${isCurrent ? " current" : ""}` });
+      const badge = el("div", { className: "journey-node-badge" });
+      badge.textContent = isCleared ? "\u2713" : isCurrent ? "\u25C9" : String(index + 1);
+      node.appendChild(badge);
+      node.appendChild(el("span", { className: "journey-node-name" }, mod.name || id));
+      node.appendChild(el("span", { className: `journey-node-theme theme-${mod.theme || "dungeon"}` }, THEME_LABELS[mod.theme] || mod.theme || "Dungeon"));
+      wrapper.appendChild(node);
+    });
+    this.journeyEl.appendChild(wrapper);
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "journey-path");
+    svg.setAttribute("preserveAspectRatio", "none");
+    this.journeyEl.appendChild(svg);
+    requestAnimationFrame(() => this.drawJourneyPath(svg, wrapper, ids.length, cleared.size));
+  }
+  drawJourneyPath(svg, wrapper, count, clearedCount) {
+    if (!svg || !wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    const width = rect.width;
+    const height = 24;
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.style.width = `${width}px`;
+    svg.style.height = `${height}px`;
+    clear(svg);
+    if (count < 2) return;
+    const nodes = wrapper.querySelectorAll(".journey-node");
+    const points = [];
+    nodes.forEach((n) => {
+      const r = n.getBoundingClientRect();
+      points.push({ x: r.left - rect.left + r.width / 2, y: height / 2 });
+    });
+    const fullPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    const clearedPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+    fullPath.setAttribute("d", d);
+    fullPath.setAttribute("class", "journey-trail");
+    const clearedUpTo = Math.min(clearedCount, count - 1);
+    if (clearedUpTo > 0) {
+      const cd = points.slice(0, clearedUpTo + 1).map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+      clearedPath.setAttribute("d", cd);
+      clearedPath.setAttribute("class", "journey-trail-cleared");
+    }
+    svg.appendChild(fullPath);
+    if (clearedPath.getAttribute("d")) svg.appendChild(clearedPath);
+  }
   destroy() {
     this.root.remove();
   }
@@ -2940,8 +3022,9 @@ var DiceTray = class {
   rolls = [];
   onRoll;
   collapsed = true;
-  constructor(container, onRoll) {
+  constructor(container, onRoll, audio = null) {
     this.onRoll = onRoll;
+    this.audio = audio;
     this.root = el("div", { className: "dice-tray collapsed" });
     const header = el("div", { className: "tray-header" });
     const title = el("span", {}, "Dice Tray");
@@ -2957,8 +3040,24 @@ var DiceTray = class {
     this.root.appendChild(header);
     this.root.appendChild(this.controls);
     this.root.appendChild(this.history);
+    this.roller = this.buildRoller();
+    this.root.appendChild(this.roller);
     container.appendChild(this.root);
     this.renderHistory();
+  }
+  buildRoller() {
+    const roller = el("div", { className: "die-roller" });
+    const label = el("div", { className: "die-roller-label" }, "Rolling...");
+    const cube = el("div", { className: "die-cube" });
+    const face = el("div", { className: "die-face" }, "?");
+    const glow = el("div", { className: "die-result-glow" });
+    cube.appendChild(face);
+    cube.appendChild(glow);
+    const result = el("div", { className: "die-roller-result" }, "");
+    roller.appendChild(label);
+    roller.appendChild(cube);
+    roller.appendChild(result);
+    return roller;
   }
   toggle() {
     this.collapsed = !this.collapsed;
@@ -3001,6 +3100,9 @@ var DiceTray = class {
     return controls;
   }
   async roll(expr) {
+    const faces = this.extractFaces(expr);
+    this.audio?.diceRoll();
+    this.showRoller(faces);
     let total;
     try {
       if (this.onRoll) {
@@ -3009,10 +3111,58 @@ var DiceTray = class {
         total = this.evaluateLocal(expr);
       }
     } catch (err) {
+      this.hideRoller();
       this.addHistory({ expr, total: NaN, timestamp: /* @__PURE__ */ new Date() });
       return;
     }
-    this.addHistory({ expr, total, timestamp: /* @__PURE__ */ new Date() });
+    const isCritical = faces === 20 && total === 20;
+    const isFumble = faces === 20 && total === 1;
+    this.revealRoller(total, isCritical, isFumble);
+    window.setTimeout(() => this.hideRoller(), 1400);
+    this.addHistory({ expr, total, timestamp: /* @__PURE__ */ new Date(), critical: isCritical, fumble: isFumble });
+  }
+  extractFaces(expr) {
+    const normalized = expr.replace(/\s/g, "").toLowerCase();
+    const match = normalized.match(/(\d+)d(\d+)/);
+    return match ? parseInt(match[2], 10) : 20;
+  }
+  showRoller(faces) {
+    if (this.collapsed) this.toggle();
+    const face = this.roller.querySelector(".die-face");
+    const glow = this.roller.querySelector(".die-result-glow");
+    const result = this.roller.querySelector(".die-roller-result");
+    const cube = this.roller.querySelector(".die-cube");
+    if (face) {
+      face.textContent = "?";
+      face.classList.remove("is-critical", "is-fumble");
+    }
+    if (glow) glow.style.background = "transparent";
+    if (result) result.textContent = "";
+    if (cube) {
+      cube.style.animation = "none";
+      void cube.offsetWidth;
+      cube.style.animation = "die-tumble 0.85s ease-out forwards";
+    }
+    this.roller.classList.add("visible");
+  }
+  revealRoller(total, isCritical, isFumble) {
+    const face = this.roller.querySelector(".die-face");
+    const glow = this.roller.querySelector(".die-result-glow");
+    const result = this.roller.querySelector(".die-roller-result");
+    if (face) {
+      face.textContent = String(total);
+      face.classList.toggle("is-critical", isCritical);
+      face.classList.toggle("is-fumble", isFumble);
+    }
+    if (glow) {
+      glow.style.background = isCritical ? "rgba(241, 196, 15, 0.4)" : isFumble ? "rgba(192, 57, 43, 0.4)" : "rgba(52, 152, 219, 0.3)";
+    }
+    if (result) {
+      result.textContent = isCritical ? "CRITICAL!" : isFumble ? "FUMBLE!" : `Rolled ${total}`;
+    }
+  }
+  hideRoller() {
+    this.roller.classList.remove("visible");
   }
   evaluateLocal(expr) {
     const normalized = expr.replace(/\s/g, "").toLowerCase();
@@ -3046,9 +3196,10 @@ var DiceTray = class {
     }
     this.rolls.forEach((r) => {
       const value2 = Number.isNaN(r.total) ? "?" : String(r.total);
+      const totalClass = r.critical ? "tray-total tray-roll-critical" : r.fumble ? "tray-total tray-roll-fumble" : "tray-total";
       const item = el("div", { className: "tray-roll" });
       item.appendChild(el("span", { className: "tray-expr" }, r.expr));
-      item.appendChild(el("span", { className: "tray-total" }, value2));
+      item.appendChild(el("span", { className: totalClass }, value2));
       this.history.appendChild(item);
     });
   }
@@ -7823,8 +7974,40 @@ var AudioController = class {
     this.playNoise(0.18, 800, 0.25);
     this.tone(120, 0.12, "sawtooth", 0.08);
   }
+  abilitySound(cls = "") {
+    const c = cls.toLowerCase();
+    if (c === "cleric" || c === "paladin") {
+      this.tone(880, 0.25, "sine", 0.12, 1760);
+      window.setTimeout(() => this.tone(1100, 0.35, "sine", 0.1, 880), 60);
+    } else if (c === "druid" || c === "ranger") {
+      this.tone(440, 0.3, "triangle", 0.12, 660);
+      window.setTimeout(() => this.tone(550, 0.25, "triangle", 0.1, 330), 80);
+    } else if (c === "illusionist" || c === "assassin") {
+      this.tone(220, 0.28, "sawtooth", 0.12, 110);
+      this.playNoise(0.18, 400, 0.2);
+    } else {
+      this.tone(660, 0.22, "square", 0.12, 1320);
+      window.setTimeout(() => this.tone(880, 0.2, "square", 0.08, 440), 80);
+    }
+  }
   rangedShot() {
     this.tone(1200, 0.22, "square", 0.12, 400);
+  }
+  arrowHit() {
+    this.playNoise(0.12, 1200, 0.18);
+    this.tone(400, 0.08, "sawtooth", 0.08);
+  }
+  monsterHit() {
+    this.playNoise(0.2, 500, 0.22);
+    this.tone(90, 0.18, "sawtooth", 0.12);
+  }
+  spellHit() {
+    this.playNoise(0.14, 900, 0.18);
+    this.tone(1320, 0.12, "sine", 0.1, 660);
+  }
+  healSound() {
+    this.tone(523.25, 0.18, "sine", 0.1, 1046.5);
+    window.setTimeout(() => this.tone(659.25, 0.25, "sine", 0.1, 523.25), 80);
   }
   footstep() {
     this.playNoise(0.06, 250, 0.08);
@@ -7832,6 +8015,33 @@ var AudioController = class {
   trapTrigger() {
     this.playNoise(0.25, 600, 0.25);
     this.tone(150, 0.2, "sawtooth", 0.12);
+  }
+  diceRoll() {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const noise = ctx.createBufferSource();
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.35, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.max(0, 1 - i / data.length);
+    }
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 900;
+    filter.Q.value = 1.2;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start(now);
+    noise.stop(now + 0.35);
+    for (let i = 0; i < 4; i++) {
+      this.tone(600 + i * 150, 0.04, "sine", 0.03, 1200 + i * 200, 0.04 + i * 0.03);
+    }
   }
   playAmbient(type) {
     this.ambientType = type;
@@ -7860,18 +8070,29 @@ var AudioController = class {
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     src.loop = true;
+    const ambientProfiles = {
+      cave: { freq: 180, lfo: 0.12, lfoGain: 30 },
+      dungeon: { freq: 260, lfo: 0.2, lfoGain: 45 },
+      forest: { freq: 320, lfo: 0.15, lfoGain: 25 },
+      ice: { freq: 220, lfo: 0.08, lfoGain: 20 },
+      lava: { freq: 140, lfo: 0.25, lfoGain: 50 },
+      tomb: { freq: 200, lfo: 0.1, lfoGain: 35 },
+      sewer: { freq: 120, lfo: 0.18, lfoGain: 40 },
+      library: { freq: 300, lfo: 0.22, lfoGain: 30 }
+    };
+    const profile = ambientProfiles[type] || ambientProfiles.dungeon;
     const filter = ctx.createBiquadFilter();
     filter.type = "lowpass";
-    filter.frequency.value = type === "cave" ? 180 : 260;
+    filter.frequency.value = profile.freq;
     filter.Q.value = 0.7;
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(this.musicVolume, ctx.currentTime + 1.5);
     const lfo = ctx.createOscillator();
     lfo.type = "sine";
-    lfo.frequency.value = type === "cave" ? 0.12 : 0.2;
+    lfo.frequency.value = profile.lfo;
     const lfoGain = ctx.createGain();
-    lfoGain.gain.value = type === "cave" ? 30 : 45;
+    lfoGain.gain.value = profile.lfoGain;
     lfo.connect(lfoGain);
     lfoGain.connect(filter.frequency);
     lfo.start();
@@ -7969,25 +8190,42 @@ var THEMES = {
 };
 var TOKEN_IMAGES = {
   hero: "/assets/tokens/hero.png",
-  fighter: "/assets/tokens/hero.png",
-  cleric: "/assets/tokens/hero.png",
-  magicuser: "/assets/tokens/hero.png",
-  illusionist: "/assets/tokens/hero.png",
-  thief: "/assets/tokens/hero.png",
-  ranger: "/assets/tokens/hero.png",
-  paladin: "/assets/tokens/hero.png",
-  druid: "/assets/tokens/hero.png",
-  assassin: "/assets/tokens/hero.png",
-  monk: "/assets/tokens/hero.png",
+  fighter: "/assets/tokens/fighter.png",
+  cleric: "/assets/tokens/cleric.png",
+  magicuser: "/assets/tokens/magicuser.png",
+  illusionist: "/assets/tokens/illusionist.png",
+  thief: "/assets/tokens/thief.png",
+  ranger: "/assets/tokens/ranger.png",
+  paladin: "/assets/tokens/paladin.png",
+  druid: "/assets/tokens/druid.png",
+  assassin: "/assets/tokens/assassin.png",
+  monk: "/assets/tokens/monk.png",
   goblin: "/assets/tokens/goblin.png",
+  cavegoblin: "/assets/tokens/cave_goblin.png",
+  forestgoblin: "/assets/tokens/forest_goblin.png",
+  sewergoblin: "/assets/tokens/sewer_goblin.png",
+  lavagoblin: "/assets/tokens/lava_goblin.png",
   orc: "/assets/tokens/orc.png",
+  caveorc: "/assets/tokens/cave_orc.png",
+  forestorc: "/assets/tokens/forest_orc.png",
+  sewerorc: "/assets/tokens/sewer_orc.png",
+  lavaorc: "/assets/tokens/lava_orc.png",
   skeleton: "/assets/tokens/skeleton.png",
   zombie: "/assets/tokens/zombie.png",
   ghoul: "/assets/tokens/ghoul.png",
+  drownedghoul: "/assets/tokens/drowned_ghoul.png",
+  emberghoul: "/assets/tokens/ember_ghoul.png",
+  wolf: "/assets/tokens/wolf.png",
+  icewolf: "/assets/tokens/ice_wolf.png",
   shadow_imp: "/assets/tokens/shadow_imp.png",
   librarian: "/assets/tokens/librarian.png",
   animated_book: "/assets/tokens/animated_book.png",
   shadow_warden: "/assets/tokens/shadow_warden.png",
+  briarback: "/assets/tokens/briarback.png",
+  tomb_warden: "/assets/tokens/tomb_warden.png",
+  brine_hulk: "/assets/tokens/brine_hulk.png",
+  cinder_champion: "/assets/tokens/cinder_champion.png",
+  frost_alpha: "/assets/tokens/frost_alpha.png",
   wolf: "/assets/tokens/wolf.png",
   bear: "/assets/tokens/bear.png",
   spider: "/assets/tokens/spider.png",
@@ -7996,7 +8234,10 @@ var TOKEN_IMAGES = {
   rat: "/assets/tokens/rat.png",
   slime: "/assets/tokens/slime.png",
   demon: "/assets/tokens/demon.png",
-  dragon: "/assets/tokens/dragon.png"
+  dragon: "/assets/tokens/dragon.png",
+  barrel: "/assets/tokens/barrel.png",
+  rubble: "/assets/tokens/rubble.png",
+  torch: "/assets/tokens/torch.png"
 };
 function getTheme(id) {
   if (!id) return null;
@@ -8037,9 +8278,13 @@ function tileFrame(_themeId, theme, tile) {
       return theme.images?.floor ?? null;
   }
 }
-function tokenFrame(key) {
+function tokenFrame(key, themeId) {
   if (!key) return null;
   const normalized = key.toLowerCase().replace(/[-\s]/g, "");
+  if (themeId) {
+    const themed = `${themeId.toLowerCase().replace(/[-\s]/g, "")}${normalized}`;
+    if (TOKEN_IMAGES[themed]) return TOKEN_IMAGES[themed];
+  }
   return TOKEN_IMAGES[normalized] ?? null;
 }
 
@@ -8238,6 +8483,7 @@ function withTimeout(promise, ms, reason = "Operation timed out") {
   });
 }
 var VISION_RADIUS = 6;
+var TORCH_LIGHT_RADIUS = 3.5;
 var RANGED_RANGE2 = 4;
 var Game = class {
   root;
@@ -8268,9 +8514,12 @@ var Game = class {
   shakeFrames = 0;
   lastLogLength = 0;
   lastBannerTurn = 0;
+  lastWaveBanner = 0;
   cameraX = 0;
   cameraY = 0;
   tooltip;
+  timerTextEl;
+  timerBarEl;
   moveBtn;
   attackBtn;
   rangedBtn;
@@ -8285,7 +8534,15 @@ var Game = class {
   dmToolsEl = document.createElement("div");
   dmMonsterSelect = document.createElement("select");
   dmTokenSelect = document.createElement("select");
+  dmPropSelect = document.createElement("select");
+  dmScaleSelect = document.createElement("select");
   dmAction = null;
+  propContainer = document.createElement("div");
+  propElements = /* @__PURE__ */ new Map();
+  inspectorPanel = null;
+  inspectorTarget = null;
+  lastRevealHover = 0;
+  shiftKey = false;
   socket = null;
   visited = /* @__PURE__ */ new Set();
   audio = new AudioController();
@@ -8300,13 +8557,16 @@ var Game = class {
   heartbeatInterval = null;
   moduleId;
   loadingOverlay;
+  minimapVisible = true;
   zoom = 1;
   minZoom = 0.5;
   maxZoom = 3;
   zoomStep = 0.25;
   observer = false;
   inFlight = false;
+  hoverTile = null;
   tokenElements = /* @__PURE__ */ new Map();
+  dyingTokens = /* @__PURE__ */ new Set();
   autoPlayer;
   zoomControls;
   zoomLevelEl;
@@ -8322,10 +8582,20 @@ var Game = class {
     this.canvasContainer = el("div", { className: "game-canvas-container" });
     this.mapContainer = el("div", { className: "game-map" });
     this.tokenContainer = el("div", { className: "game-tokens" });
+    this.propContainer = el("div", { className: "game-props" });
     this.fxContainer = el("div", { className: "game-effects" });
+    this.hazardContainer = el("div", { className: "hazard-effects" });
+    this.weatherContainer = el("div", { className: "weather-effects" });
+    this.ambientContainer = el("div", { className: "ambient-particles" });
     this.canvasContainer.appendChild(this.mapContainer);
+    this.canvasContainer.appendChild(this.propContainer);
     this.canvasContainer.appendChild(this.tokenContainer);
     this.canvasContainer.appendChild(this.fxContainer);
+    this.canvasContainer.appendChild(this.hazardContainer);
+    this.canvasContainer.appendChild(this.weatherContainer);
+    this.canvasContainer.appendChild(this.ambientContainer);
+    this.lightingOverlay = el("div", { className: "lighting-overlay" });
+    this.canvasContainer.appendChild(this.lightingOverlay);
     this.ui = this.buildUI();
     this.chatPanel = this.buildChatPanel();
     this.presencePanel = this.buildPresencePanel();
@@ -8342,11 +8612,13 @@ var Game = class {
     this.root.appendChild(this.dmOverlay);
     this.damageFlash = el("div", { className: "damage-flash" });
     this.root.appendChild(this.damageFlash);
+    this.critFlash = el("div", { className: "crit-flash" });
+    this.root.appendChild(this.critFlash);
     const scanlines = el("div", { className: "scanlines" });
     this.root.appendChild(scanlines);
     const trayAnchor = el("div", { className: "tray-anchor" });
     this.root.appendChild(trayAnchor);
-    new DiceTray(trayAnchor);
+    new DiceTray(trayAnchor, null, this.audio);
     this.loadingOverlay = el("div", { className: "game-loading" });
     this.loadingOverlay.innerHTML = '<div class="game-loading-spinner"></div><span>Entering the room...</span>';
     this.root.appendChild(this.loadingOverlay);
@@ -8364,6 +8636,10 @@ var Game = class {
     window.addEventListener("resize", () => this.centerMap());
     this.keydownHandler = (e) => this.onKeyDown(e);
     window.addEventListener("keydown", this.keydownHandler);
+    this.keyupHandler = (e) => {
+      if (e.key === "Shift") this.shiftKey = false;
+    };
+    window.addEventListener("keyup", this.keyupHandler);
     this.beforeUnloadHandler = () => {
       if (this.session && this.session.status !== "won") {
         this.saveProgression().catch(() => {
@@ -8373,6 +8649,7 @@ var Game = class {
     window.addEventListener("beforeunload", this.beforeUnloadHandler);
   }
   keydownHandler = null;
+  keyupHandler = null;
   beforeUnloadHandler = null;
   isCampaignSession() {
     return !!this.session?.campaign_id;
@@ -8496,6 +8773,7 @@ var Game = class {
       throw err;
     }
     releaseSafety();
+    await this.playEntrySequence();
     this.loadingOverlay.remove();
   }
   showInitFailure(message) {
@@ -8503,13 +8781,52 @@ var Game = class {
     const btn = this.loadingOverlay.querySelector("button");
     if (btn) btn.onclick = () => this.onExit();
   }
+  async playEntrySequence() {
+    const themeLabel = THEME_LABELS[this.module.theme] || this.module.theme || "Dungeon";
+    const title = this.module.name || "The Dungeon";
+    this.loadingOverlay.classList.add("game-entry");
+    this.loadingOverlay.innerHTML = `
+      <div class="game-entry-card">
+        <span class="game-entry-eyebrow">${themeLabel}</span>
+        <h2 class="game-entry-title">${title}</h2>
+        <div class="game-entry-line"></div>
+        <span class="game-entry-hint">Press any key to enter</span>
+      </div>
+    `;
+    const waitForInput = () => new Promise((resolve) => {
+      const handler = () => {
+        window.removeEventListener("keydown", handler);
+        window.removeEventListener("mousedown", handler);
+        resolve();
+      };
+      window.addEventListener("keydown", handler);
+      window.addEventListener("mousedown", handler);
+      window.setTimeout(() => {
+        window.removeEventListener("keydown", handler);
+        window.removeEventListener("mousedown", handler);
+        resolve();
+      }, 2500);
+    });
+    await waitForInput();
+    this.loadingOverlay.classList.add("game-entry-fade");
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
+  }
   buildUI() {
     const hud = el("div", { className: "game-hud" });
     hud.appendChild(el("h1", {}, "Sanctuary"));
     this.statusEl = el("div", { className: "game-status" }, "Turn 1 \xB7 Your Move");
     hud.appendChild(this.statusEl);
     this.timerEl = el("div", { className: "game-timer" });
+    this.timerTextEl = el("span", { className: "game-timer-text" });
+    this.timerBarEl = el("div", { className: "game-timer-bar" });
+    this.timerEl.appendChild(this.timerTextEl);
+    this.timerEl.appendChild(this.timerBarEl);
     hud.appendChild(this.timerEl);
+    this.turnOrderEl = el("div", { className: "turn-order-bar" });
+    hud.appendChild(this.turnOrderEl);
+    this.minimapEl = el("div", { className: "minimap" });
+    this.minimapEl.style.display = "none";
+    hud.appendChild(this.minimapEl);
     const actions = el("div", { className: "game-actions" });
     this.moveBtn = el("button", { onclick: () => {
       this.ensureAudioStarted();
@@ -8612,7 +8929,7 @@ var Game = class {
           this.audio.stopAmbient();
           ambientBtn.classList.remove("active");
         } else {
-          this.audio.playAmbient(this.moduleId === "sunken_crypt" ? "cave" : "dungeon");
+          this.audio.playAmbient(this.module.theme || "dungeon");
           ambientBtn.classList.add("active");
         }
       }
@@ -8647,6 +8964,12 @@ var Game = class {
       onclick: () => this.toggleJournal()
     }, "\u{1F4DC}");
     actionGroup.appendChild(journalBtn);
+    const minimapBtn = el("button", {
+      className: "minimap-btn small",
+      title: "Toggle minimap",
+      onclick: () => this.toggleMinimap()
+    }, "\u{1F5FA}");
+    actionGroup.appendChild(minimapBtn);
     const exitBtn = el("button", { className: "danger small", title: "Leave session", onclick: () => this.leaveSession() }, "\u2715");
     actionGroup.appendChild(exitBtn);
     footer.appendChild(actionGroup);
@@ -8730,6 +9053,27 @@ var Game = class {
     this.journalPanel.style.display = this.journalOpen ? "flex" : "none";
     if (this.journalOpen) this.updateJournal();
   }
+  toggleMinimap() {
+    this.minimapVisible = !this.minimapVisible;
+    this.minimapEl.style.display = this.minimapVisible ? "block" : "none";
+    if (this.minimapVisible) this.updateMinimap();
+  }
+  async revealAllFog() {
+    if (!this.session || !this.isDm()) return;
+    this.lockInput();
+    try {
+      const cx = Math.floor(this.module.width / 2);
+      const cy = Math.floor(this.module.height / 2);
+      const radius = Math.max(this.module.width, this.module.height);
+      const { session } = await dmReveal(this.sessionId, { x: cx, y: cy, radius });
+      this.update(session);
+      this.log("The DM reveals the entire map.");
+    } catch (err) {
+      this.log(err.message || "Reveal all failed.");
+    } finally {
+      this.unlockInput();
+    }
+  }
   updateJournal() {
     if (!this.journalPanel || !this.session) return;
     const moduleName = this.journalPanel.querySelector(".journal-module");
@@ -8764,6 +9108,72 @@ var Game = class {
           chronicleList.appendChild(row);
         });
       }
+    }
+  }
+  openInspector(token) {
+    this.inspectorTarget = token;
+    if (!this.inspectorPanel) {
+      this.inspectorPanel = this.buildInspectorPanel();
+      this.root.appendChild(this.inspectorPanel);
+    }
+    this.inspectorPanel.style.display = "flex";
+    this.updateInspector();
+  }
+  buildInspectorPanel() {
+    const panel = el("div", { className: "inspector-overlay" });
+    const card = el("div", { className: "inspector-card" });
+    const header = el("div", { className: "inspector-header" });
+    header.appendChild(el("h2", {}, "Token Inspector"));
+    header.appendChild(el("button", { className: "inspector-close", onclick: () => this.closeInspector() }, "\xD7"));
+    card.appendChild(header);
+    const body = el("div", { className: "inspector-body" });
+    body.appendChild(el("div", { className: "inspector-stats" }));
+    const dmgRow = el("div", { className: "inspector-actions" });
+    const dmgInput = el("input", { type: "number", className: "inspector-dmg", value: "5", min: "0" });
+    dmgRow.appendChild(dmgInput);
+    dmgRow.appendChild(el("button", { onclick: () => this.applyInspectorDamage(parseInt(dmgInput.value || "0", 10)) }, "Damage"));
+    dmgRow.appendChild(el("button", { onclick: () => this.applyInspectorDamage(-parseInt(dmgInput.value || "0", 10)) }, "Heal"));
+    body.appendChild(dmgRow);
+    card.appendChild(body);
+    panel.appendChild(card);
+    panel.addEventListener("click", (e) => {
+      if (e.target === panel) this.closeInspector();
+    });
+    return panel;
+  }
+  closeInspector() {
+    if (this.inspectorPanel) this.inspectorPanel.style.display = "none";
+    this.inspectorTarget = null;
+  }
+  updateInspector() {
+    if (!this.inspectorPanel || !this.inspectorTarget || !this.session) return;
+    const stats = this.inspectorPanel.querySelector(".inspector-stats");
+    const t = this.inspectorTarget;
+    const tokens = [...this.session.players, ...this.session.monsters];
+    const current = tokens.find((x) => x.id === t.id);
+    if (!current) {
+      this.closeInspector();
+      return;
+    }
+    this.inspectorTarget = current;
+    clear(stats);
+    stats.appendChild(el("div", { className: "inspector-name" }, current.name));
+    stats.appendChild(el("div", {}, `HP ${current.hp}/${current.max_hp}`));
+    stats.appendChild(el("div", {}, `AC ${current.ac}`));
+    stats.appendChild(el("div", {}, `Type ${current.type}`));
+    stats.appendChild(el("div", {}, `Position (${current.x}, ${current.y})`));
+  }
+  async applyInspectorDamage(amount) {
+    if (!this.inspectorTarget || !this.session || this.inFlight) return;
+    this.lockInput();
+    try {
+      const { session } = await dmDamage(this.sessionId, { token_id: this.inspectorTarget.id, amount });
+      this.update(session);
+      this.updateInspector();
+    } catch (err) {
+      this.log(err.message || "Inspector damage failed.");
+    } finally {
+      this.unlockInput();
     }
   }
   updatePresence(present) {
@@ -8846,27 +9256,65 @@ var Game = class {
     const overlay = el("div", { className: "game-over-overlay" });
     const panel = el("div", { className: "game-over-panel" });
     const won = this.session.status === "won";
-    panel.appendChild(el("h1", {}, won ? "Victory" : "Defeat"));
+    panel.appendChild(el("h1", { className: won ? "won" : "lost" }, won ? "Victory" : "Defeat"));
+    const stats = this.computeEndgameStats();
+    const statsGrid = el("div", { className: "game-over-stats" });
+    statsGrid.appendChild(el("div", {}, el("strong", {}, `${stats.turns}`), el("span", {}, "Turns")));
+    statsGrid.appendChild(el("div", {}, el("strong", {}, `${stats.slain}`), el("span", {}, "Foes Slain")));
+    statsGrid.appendChild(el("div", {}, el("strong", {}, `${stats.damageDealt}`), el("span", {}, "Damage Dealt")));
+    statsGrid.appendChild(el("div", {}, el("strong", {}, `${stats.damageTaken}`), el("span", {}, "Damage Taken")));
+    panel.appendChild(statsGrid);
     if (won) {
       const living = this.session.players.filter((p) => p.alive !== false);
       const totalXp = living.reduce((sum, p) => sum + (p.xp ?? 0), 0);
       const totalGold = living.reduce((sum, p) => sum + (p.gold ?? 0), 0);
       panel.appendChild(el("p", { className: "message" }, `The lair is quiet. Party gains ${totalXp} XP and ${totalGold} gold.`));
+      const roster = el("div", { className: "game-over-roster" });
+      this.session.players.forEach((p) => {
+        const row = el("div", { className: "game-over-roster-row" });
+        row.appendChild(el("span", {}, `${p.name} • Lv${p.level ?? 1}`));
+        row.appendChild(el("span", {}, `HP ${p.hp}/${p.max_hp} • XP ${p.xp ?? 0} • G ${p.gold ?? 0}`));
+        roster.appendChild(row);
+      });
+      panel.appendChild(roster);
     } else {
       panel.appendChild(el("p", { className: "message" }, "Your light fades in the dark. The dungeon claims another."));
+      const fallen = el("div", { className: "game-over-roster" });
+      this.session.players.filter((p) => p.alive === false || p.down).forEach((p) => {
+        const row = el("div", { className: "game-over-roster-row fallen" });
+        row.appendChild(el("span", {}, p.name));
+        row.appendChild(el("span", {}, `Fell at turn ${this.session.turn}`));
+        fallen.appendChild(row);
+      });
+      if (fallen.childElementCount > 0) panel.appendChild(fallen);
     }
+    const actions = el("div", { className: "game-over-actions" });
     const isCampaign = this.isCampaignSession();
     if (isCampaign && won) {
-      const journey = el("button", { className: "enter", onclick: () => this.journeyOn() }, "Journey On");
-      panel.appendChild(journey);
+      actions.appendChild(el("button", { className: "enter", onclick: () => this.journeyOn() }, "Journey On"));
     } else if (this.onReplay && this.session.character_id) {
-      const replay = el("button", { className: "enter", onclick: () => this.onReplay(this.session.character_id) }, "Play Again");
-      panel.appendChild(replay);
+      actions.appendChild(el("button", { className: "enter", onclick: () => this.onReplay(this.session.character_id) }, "Play Again"));
     }
-    const leave = el("button", { onclick: () => this.onExit() }, "Return to Sanctuary");
-    panel.appendChild(leave);
+    actions.appendChild(el("button", { onclick: () => this.onExit() }, "Return to Sanctuary"));
+    panel.appendChild(actions);
     overlay.appendChild(panel);
     this.root.appendChild(overlay);
+  }
+  computeEndgameStats() {
+    const session = this.session;
+    const turns = session.turn ?? 0;
+    const slain = (session.monsters || []).filter((m) => m.alive === false).length;
+    let damageDealt = 0;
+    let damageTaken = 0;
+    const dmgRe = /for (\d+) damage/gi;
+    const sufferRe = /suffers (\d+) damage/gi;
+    (session.log || []).forEach((line) => {
+      if (typeof line !== "string") return;
+      let m;
+      while ((m = dmgRe.exec(line)) !== null) damageDealt += parseInt(m[1], 10);
+      while ((m = sufferRe.exec(line)) !== null) damageTaken += parseInt(m[1], 10);
+    });
+    return { turns, slain, damageDealt, damageTaken };
   }
   setAction(action) {
     if (this.observer) return;
@@ -8890,16 +9338,39 @@ var Game = class {
       this.dmMonsterSelect.appendChild(opt);
     });
     spawnWrap.appendChild(this.dmMonsterSelect);
+    this.dmScaleSelect = el("select", { title: "Spawn scale" });
+    [["0.5x", 0.5], ["1x", 1], ["1.5x", 1.5], ["2x", 2]].forEach(([label, val]) => {
+      const opt = document.createElement("option");
+      opt.value = String(val);
+      opt.textContent = label;
+      if (val === 1) opt.selected = true;
+      this.dmScaleSelect.appendChild(opt);
+    });
+    spawnWrap.appendChild(this.dmScaleSelect);
     spawnWrap.appendChild(el("button", { onclick: () => this.setDmAction("spawn") }, "Spawn"));
     panel.appendChild(spawnWrap);
+    const propWrap = el("div", { className: "dm-tool-row" });
+    this.dmPropSelect = el("select", {});
+    ["barrel", "rubble", "torch", "clear"].forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p;
+      opt.textContent = p;
+      this.dmPropSelect.appendChild(opt);
+    });
+    propWrap.appendChild(this.dmPropSelect);
+    propWrap.appendChild(el("button", { onclick: () => this.setDmAction("prop") }, "Place Prop"));
+    panel.appendChild(propWrap);
     const moveWrap = el("div", { className: "dm-tool-row" });
     this.dmTokenSelect = el("select", {});
     moveWrap.appendChild(this.dmTokenSelect);
     moveWrap.appendChild(el("button", { onclick: () => this.setDmAction("move") }, "Move"));
     panel.appendChild(moveWrap);
-    panel.appendChild(
-      el("button", { onclick: () => this.setDmAction("reveal") }, "Reveal Fog")
-    );
+    const toolWrap = el("div", { className: "dm-tool-row dm-tool-actions" });
+    toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("reveal") }, "Reveal Fog"));
+    toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("encounter") }, "Spawn Group"));
+    toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("inspect") }, "Inspect Token"));
+    toolWrap.appendChild(el("button", { onclick: () => this.revealAllFog() }, "Reveal All"));
+    panel.appendChild(toolWrap);
     return panel;
   }
   updateDmTools() {
@@ -8918,6 +9389,7 @@ var Game = class {
   }
   onKeyDown(e) {
     this.ensureAudioStarted();
+    if (e.key === "Shift") this.shiftKey = true;
     if (this.observer || !this.session || this.session.status !== "active" || this.session.phase !== "player" || this.inFlight) return;
     switch (e.key.toLowerCase()) {
       case "escape":
@@ -9126,7 +9598,9 @@ var Game = class {
   renderMap() {
     clear(this.mapContainer);
     clear(this.tokenContainer);
+    clear(this.propContainer);
     this.tokenElements.clear();
+    this.propElements.clear();
     this.tileSprites = [];
     const themeId = this.module.theme ?? "";
     const theme = getTheme(themeId);
@@ -9136,10 +9610,16 @@ var Game = class {
     this.mapContainer.style.height = `${mapH}px`;
     this.mapContainer.style.gridTemplateColumns = `repeat(${this.module.width}, ${TILE_SIZE}px)`;
     this.mapContainer.style.gridTemplateRows = `repeat(${this.module.height}, ${TILE_SIZE}px)`;
+    this.propContainer.style.width = `${mapW}px`;
+    this.propContainer.style.height = `${mapH}px`;
     this.tokenContainer.style.width = `${mapW}px`;
     this.tokenContainer.style.height = `${mapH}px`;
     this.fxContainer.style.width = `${mapW}px`;
     this.fxContainer.style.height = `${mapH}px`;
+    this.hazardContainer.style.width = `${mapW}px`;
+    this.hazardContainer.style.height = `${mapH}px`;
+    this.weatherContainer.style.width = `${mapW}px`;
+    this.weatherContainer.style.height = `${mapH}px`;
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || "";
       const tileRow = [];
@@ -9147,17 +9627,66 @@ var Game = class {
         const tile = row[x] || "0";
         const url2 = theme ? tileFrame(themeId, theme, tile) : null;
         const kind = tile === "1" ? "wall" : tile === "2" ? "trap" : "floor";
+        let decalClass = "";
+        if (kind === "floor") {
+          const hash = (x * 73856093 ^ y * 19349663) % 100;
+          if (hash >= 0 && hash < 8) decalClass = " tile-decal-1";
+          else if (hash >= 8 && hash < 14) decalClass = " tile-decal-2";
+          else if (hash >= 14 && hash < 18) decalClass = " tile-decal-3";
+          else if (hash >= 18 && hash < 21) decalClass = " tile-decal-4";
+        }
         const tileEl = el("div", {
-          className: `game-tile tile-${kind}`,
+          className: `game-tile tile-${kind}${decalClass}`,
           style: url2 ? `background-image:url('${url2}')` : void 0,
-          onclick: () => this.onTileClick(x, y)
+          onclick: () => this.onTileClick(x, y),
+          onmouseenter: () => this.onTileHover(x, y),
+          onmouseleave: () => this.onTileHover(null, null)
         });
         this.mapContainer.appendChild(tileEl);
         tileRow.push(tileEl);
       }
       this.tileSprites.push(tileRow);
     }
+    this.renderProps();
     this.centerMap();
+    this.startAmbientParticles();
+    this.startHazardEffects();
+    this.startWeatherEffects();
+  }
+  renderProps() {
+    if (!this.session) return;
+    const props = this.session.props || [];
+    const visibleIds = new Set();
+    for (const p of props) {
+      visibleIds.add(p.id);
+      const isVisible = this.isDm() || this.visited.has(`${p.x},${p.y}`);
+      if (!isVisible) continue;
+      let el2 = this.propElements.get(p.id);
+      if (!el2) {
+        const url2 = tokenFrame(p.type);
+        el2 = el("div", {
+          className: `game-prop prop-${p.type}`,
+          style: `left:${p.x * TILE_SIZE}px;top:${p.y * TILE_SIZE}px;`
+        });
+        if (url2) {
+          const img = el("img", { src: url2, alt: p.type, onerror: () => { img.style.display = "none"; } });
+          el2.appendChild(img);
+        }
+        if (p.type === "torch") {
+          el2.classList.add("prop-torch-lit");
+        }
+        this.propContainer.appendChild(el2);
+        this.propElements.set(p.id, el2);
+      }
+      el2.style.left = `${p.x * TILE_SIZE}px`;
+      el2.style.top = `${p.y * TILE_SIZE}px`;
+    }
+    for (const [id, el2] of this.propElements) {
+      if (!visibleIds.has(id)) {
+        el2.remove();
+        this.propElements.delete(id);
+      }
+    }
   }
   hasLineOfSight(x0, y0, x1, y1) {
     let dx = Math.abs(x1 - x0);
@@ -9186,6 +9715,7 @@ var Game = class {
   }
   highlightActionTiles() {
     if (!this.session) return;
+    this.clearHoverHighlights();
     const player = this.session.player;
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || "";
@@ -9193,7 +9723,7 @@ var Game = class {
         const g = this.tileSprites[y]?.[x];
         if (!g) continue;
         const tile = row[x] || "0";
-        g.classList.remove("tile-highlight-move", "tile-highlight-range");
+        g.classList.remove("tile-highlight-move", "tile-highlight-range", "tile-highlight-path", "tile-highlight-aoe", "tile-highlight-target");
         if (this.action === "move" && tile !== "1") {
           const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
           if (dist === 1) g.classList.add("tile-highlight-move");
@@ -9215,10 +9745,204 @@ var Game = class {
       }
     }
   }
+  onTileHover(x, y) {
+    if (this.observer || !this.session || this.session.status !== "active" || this.inFlight) {
+      this.hoverTile = null;
+      return;
+    }
+    const isDmHover = this.isDm() && this.dmAction && ["reveal", "prop", "inspect"].includes(this.dmAction);
+    if (!isDmHover && this.session.phase !== "player") {
+      this.hoverTile = null;
+      return;
+    }
+    this.hoverTile = x != null && y != null ? { x, y } : null;
+    this.updateHoverHighlights();
+    if (this.isDm() && this.dmAction === "reveal" && x != null && y != null) {
+      const now = Date.now();
+      if (now - this.lastRevealHover > 120) {
+        this.lastRevealHover = now;
+        dmReveal(this.sessionId, { x, y, radius: 1 }).then(({ session }) => {
+          this.visited = new Set([...this.visited, ...(session.dm_revealed || [])]);
+          this.update(session);
+        }).catch(() => {});
+      }
+    }
+  }
+  clearHoverHighlights() {
+    for (let y = 0; y < this.module.height; y++) {
+      for (let x = 0; x < this.module.width; x++) {
+        const g = this.tileSprites[y]?.[x];
+        if (g) g.classList.remove("tile-highlight-path", "tile-highlight-aoe", "tile-highlight-target");
+      }
+    }
+    this.tokenElements.forEach((el2) => el2.classList.remove("token-highlight-target"));
+  }
+  updateHoverHighlights() {
+    this.clearHoverHighlights();
+    if (!this.hoverTile || !this.action || !this.session) return;
+    const player = this.session.player;
+    const hx = this.hoverTile.x;
+    const hy = this.hoverTile.y;
+    if (this.action === "move") {
+      const dist = Math.abs(hx - player.x) + Math.abs(hy - player.y);
+      if (dist > 0 && dist <= 1) {
+        const g = this.tileSprites[hy]?.[hx];
+        if (g) g.classList.add("tile-highlight-path");
+      }
+    } else if (this.action === "ability") {
+      const cls = (player.classes?.[0] ?? "").toLowerCase();
+      const abilityRange = cls === "magic-user" || cls === "illusionist" ? 6 : cls === "cleric" ? 4 : 1;
+      const dist = Math.abs(hx - player.x) + Math.abs(hy - player.y);
+      if (dist > 0 && dist <= abilityRange && this.hasLineOfSight(player.x, player.y, hx, hy)) {
+        for (let dy = -2; dy <= 2; dy++) {
+          for (let dx = -2; dx <= 2; dx++) {
+            if (Math.max(Math.abs(dx), Math.abs(dy)) > 2) continue;
+            const tx = hx + dx;
+            const ty = hy + dy;
+            if (tx < 0 || ty < 0 || tx >= this.module.width || ty >= this.module.height) continue;
+            const g = this.tileSprites[ty]?.[tx];
+            if (g) g.classList.add("tile-highlight-aoe");
+          }
+        }
+      }
+    }
+    if (["attack", "ranged", "ability"].includes(this.action)) {
+      const target = this.session.monsters.find((m) => m.alive !== false && m.x === hx && m.y === hy);
+      if (target) {
+        const g = this.tileSprites[hy]?.[hx];
+        if (g) g.classList.add("tile-highlight-target");
+        const tokenEl = this.tokenElements.get(target.id);
+        if (tokenEl) tokenEl.classList.add("token-highlight-target");
+      }
+    }
+  }
+  startAmbientParticles() {
+    if (!this.ambientContainer) return;
+    clear(this.ambientContainer);
+    const theme = this.module.theme || "dungeon";
+    const palettes = {
+      dungeon: { color: "#d4d4d4", count: 18, peak: 0.25, dy: -60, dx: 12 },
+      cave: { color: "#c2b280", count: 14, peak: 0.2, dy: -40, dx: 8 },
+      library: { color: "#f7dc6f", count: 10, peak: 0.15, dy: -30, dx: 6 },
+      ice: { color: "#aed6f1", count: 20, peak: 0.3, dy: -80, dx: 4 },
+      lava: { color: "#ff7f50", count: 22, peak: 0.35, dy: -90, dx: -10 },
+      forest: { color: "#a9dfbf", count: 16, peak: 0.22, dy: -50, dx: 14 },
+      tomb: { color: "#bdc3c7", count: 12, peak: 0.18, dy: -45, dx: 5 },
+      sewer: { color: "#2ecc71", count: 14, peak: 0.2, dy: -35, dx: 8 }
+    };
+    const cfg = palettes[theme] || palettes.dungeon;
+    const w = this.canvasContainer.clientWidth || 800;
+    const h = this.canvasContainer.clientHeight || 600;
+    for (let i = 0; i < cfg.count; i++) {
+      const p = el("div", { className: "ambient-particle" });
+      p.style.background = cfg.color;
+      p.style.boxShadow = `0 0 ${2 + Math.random() * 3}px ${cfg.color}`;
+      p.style.left = `${Math.random() * 100}%`;
+      p.style.top = `${Math.random() * 100}%`;
+      p.style.setProperty("--peak-opacity", String(cfg.peak));
+      p.style.setProperty("--dy", `${cfg.dy + Math.random() * 40}px`);
+      p.style.setProperty("--dx", `${cfg.dx + (Math.random() - 0.5) * 30}px`);
+      p.style.animationDuration = `${4 + Math.random() * 6}s`;
+      p.style.animationDelay = `${Math.random() * 6}s`;
+      this.ambientContainer.appendChild(p);
+    }
+  }
+  startHazardEffects() {
+    if (!this.hazardContainer) return;
+    clear(this.hazardContainer);
+    const theme = this.module.theme || "dungeon";
+    const profiles = {
+      dungeon: [
+        { color: "#ff7f50", dy: -28, size: 2, delay: 1.4 },
+        { color: "#95a5a6", dy: -18, size: 2, delay: 2.2 }
+      ],
+      cave: [
+        { color: "#c2b280", dy: -22, size: 2, delay: 1.8 },
+        { color: "#7f8c8d", dy: -14, size: 1, delay: 2.6 }
+      ],
+      forest: [
+        { color: "#a9dfbf", dy: -20, size: 2, delay: 1.6 },
+        { color: "#2ecc71", dy: -32, size: 2, delay: 2.0 }
+      ],
+      ice: [
+        { color: "#aed6f1", dy: -24, size: 2, delay: 1.5 },
+        { color: "#d6eaf8", dy: -36, size: 2, delay: 2.3 }
+      ],
+      lava: [
+        { color: "#ff4500", dy: -40, size: 3, delay: 1.2 },
+        { color: "#ff7f50", dy: -26, size: 2, delay: 1.9 }
+      ],
+      tomb: [
+        { color: "#bdc3c7", dy: -18, size: 2, delay: 2.0 },
+        { color: "#7f8c8d", dy: -12, size: 1, delay: 2.8 }
+      ],
+      sewer: [
+        { color: "#2ecc71", dy: -16, size: 2, delay: 1.7 },
+        { color: "#27ae60", dy: -22, size: 2, delay: 2.4 }
+      ],
+      library: [
+        { color: "#f7dc6f", dy: -20, size: 2, delay: 2.0 },
+        { color: "#d5dbdb", dy: -14, size: 1, delay: 2.6 }
+      ]
+    };
+    const configs = profiles[theme] || profiles.dungeon;
+    for (let y = 0; y < this.module.height; y++) {
+      const row = this.module.tiles[y] || "";
+      for (let x = 0; x < this.module.width; x++) {
+        const tile = row[x] || "0";
+        if (tile !== "3" && tile !== "4") continue;
+        const cfg = configs[tile === "3" ? 0 : 1];
+        if (!cfg) continue;
+        const p = el("div", { className: "hazard-particle" });
+        p.style.left = `${x * TILE_SIZE + TILE_SIZE / 2}px`;
+        p.style.top = `${y * TILE_SIZE + TILE_SIZE / 2}px`;
+        p.style.background = cfg.color;
+        p.style.boxShadow = `0 0 ${cfg.size + 2}px ${cfg.color}`;
+        p.style.width = `${cfg.size}px`;
+        p.style.height = `${cfg.size}px`;
+        p.style.setProperty("--hy", `${cfg.dy}px`);
+        p.style.animationDelay = `${Math.random() * cfg.delay}s`;
+        p.style.animationDuration = `${cfg.delay + Math.random() * 0.8}s`;
+        this.hazardContainer.appendChild(p);
+      }
+    }
+  }
+  startWeatherEffects() {
+    if (!this.weatherContainer) return;
+    clear(this.weatherContainer);
+    const theme = this.module.theme || "dungeon";
+    const profiles = {
+      dungeon: { type: "rain", count: 60, color: "#95a5a6", duration: 0.55 },
+      cave: { type: "rain", count: 40, color: "#7f8c8d", duration: 0.7 },
+      forest: { type: "leaf", count: 35, color: "#a9dfbf", duration: 2.2 },
+      ice: { type: "snow", count: 55, color: "#d6eaf8", duration: 2.8 },
+      lava: { type: "ash", count: 45, color: "#ff7f50", duration: 2.0 },
+      tomb: { type: "dust", count: 30, color: "#bdc3c7", duration: 3.0 },
+      sewer: { type: "rain", count: 50, color: "#2ecc71", duration: 0.6 },
+      library: { type: "dust", count: 25, color: "#f7dc6f", duration: 3.2 }
+    };
+    const cfg = profiles[theme];
+    if (!cfg) return;
+    const w = this.module.width * TILE_SIZE;
+    const h = this.module.height * TILE_SIZE;
+    for (let i = 0; i < cfg.count; i++) {
+      const p = el("div", { className: `weather-particle weather-${cfg.type}` });
+      p.style.background = cfg.color;
+      p.style.left = `${Math.random() * 100}%`;
+      p.style.top = `${Math.random() * 100}%`;
+      p.style.animationDelay = `${Math.random() * cfg.duration}s`;
+      p.style.animationDuration = `${cfg.duration + Math.random() * 0.6}s`;
+      p.style.opacity = String(0.4 + Math.random() * 0.4);
+      this.weatherContainer.appendChild(p);
+    }
+    this.weatherContainer.style.width = `${w}px`;
+    this.weatherContainer.style.height = `${h}px`;
+  }
   updateLighting() {
     if (!this.session || this.tileSprites.length === 0) return;
     const px = this.session.player.x;
     const py = this.session.player.y;
+    const torches = (this.session.props || []).filter((p) => p.type === "torch");
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || "";
       for (let x = 0; x < this.module.width; x++) {
@@ -9227,11 +9951,14 @@ var Game = class {
         const inRadius = dist <= VISION_RADIUS + 1;
         const hasLos = inRadius && this.hasLineOfSight(px, py, x, y);
         const key = `${x},${y}`;
+        const el2 = this.tileSprites[y][x];
+        el2.classList.remove("torch-flicker");
         let alpha;
         if (hasLos) {
           this.visited.add(key);
           if (dist <= VISION_RADIUS - 1) {
             alpha = 1;
+            el2.classList.add("torch-flicker");
           } else {
             const t = (dist - (VISION_RADIUS - 1)) / 2;
             const isWall = tile === "1";
@@ -9242,11 +9969,36 @@ var Game = class {
         } else {
           alpha = 0;
         }
-        const el2 = this.tileSprites[y][x];
+        if (alpha < 1 && torches.length > 0) {
+          let nearest = Infinity;
+          for (const t of torches) {
+            const td = Math.sqrt((x - t.x) ** 2 + (y - t.y) ** 2);
+            if (td <= TORCH_LIGHT_RADIUS && td < nearest && this.hasLineOfSight(t.x, t.y, x, y)) {
+              nearest = td;
+            }
+          }
+          if (nearest !== Infinity) {
+            this.visited.add(key);
+            const boost = 1 - (nearest / TORCH_LIGHT_RADIUS) * 0.5;
+            alpha = Math.max(alpha, boost);
+            el2.classList.add("torch-flicker");
+          }
+        }
         el2.style.opacity = String(alpha);
         el2.classList.toggle("tile-hidden", alpha === 0);
       }
     }
+    this.updateVignette();
+  }
+  updateVignette() {
+    if (!this.lightingOverlay || !this.session) return;
+    const player = this.session.player;
+    const cx = this.cameraX + (player.x * TILE_SIZE + TILE_SIZE / 2) * this.zoom;
+    const cy = this.cameraY + (player.y * TILE_SIZE + TILE_SIZE / 2) * this.zoom;
+    const innerR = VISION_RADIUS * TILE_SIZE * this.zoom * 0.6;
+    const midR = VISION_RADIUS * TILE_SIZE * this.zoom * 0.95;
+    const outerR = VISION_RADIUS * TILE_SIZE * this.zoom * 1.55;
+    this.lightingOverlay.style.background = `radial-gradient(circle at ${cx}px ${cy}px, transparent ${innerR}px, rgba(0,0,0,0.25) ${midR}px, rgba(0,0,0,0.72) ${outerR}px, rgba(0,0,0,0.88))`;
   }
   centerMap() {
     const target = this.playerPixelCenter();
@@ -9272,6 +10024,7 @@ var Game = class {
     this.cameraX = baseX;
     this.cameraY = baseY;
     this.applyMapPosition();
+    this.updateVignette();
   }
   playerPixelCenter() {
     if (!this.session) return null;
@@ -9289,9 +10042,20 @@ var Game = class {
       oy = (Math.random() - 0.5) * intensity;
     }
     const transform = `translate(${this.cameraX + ox}px, ${this.cameraY + oy}px) scale(${this.zoom})`;
+    const transition = this.shakeFrames > 0 ? "none" : "transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+    this.mapContainer.style.transition = transition;
+    this.propContainer.style.transition = transition;
+    this.tokenContainer.style.transition = transition;
+    this.fxContainer.style.transition = transition;
+    this.hazardContainer.style.transition = transition;
+    this.weatherContainer.style.transition = transition;
     this.mapContainer.style.transform = transform;
+    this.propContainer.style.transform = transform;
     this.tokenContainer.style.transform = transform;
     this.fxContainer.style.transform = transform;
+    this.hazardContainer.style.transform = transform;
+    this.weatherContainer.style.transform = transform;
+    this.updateVignette();
   }
   shake(frames) {
     this.shakeFrames = frames;
@@ -9307,23 +10071,178 @@ var Game = class {
     };
     requestAnimationFrame(step);
   }
+  spawnFloatingText(x, y, text, type = "damage") {
+    const el2 = el("div", { className: `floating-text ${type}` }, text);
+    el2.style.left = `${x * TILE_SIZE + TILE_SIZE / 2}px`;
+    el2.style.top = `${y * TILE_SIZE}px`;
+    this.fxContainer.appendChild(el2);
+    window.setTimeout(() => el2.remove(), 1200);
+  }
+  spawnPing(x, y) {
+    const cx = x * TILE_SIZE + TILE_SIZE / 2;
+    const cy = y * TILE_SIZE + TILE_SIZE / 2;
+    const ring = el("div", { className: "map-ping" });
+    ring.style.left = `${cx}px`;
+    ring.style.top = `${cy}px`;
+    this.fxContainer.appendChild(ring);
+    window.setTimeout(() => ring.remove(), 1200);
+  }
+  spawnBloodStain(x, y) {
+    const stain = el("div", { className: "blood-stain" });
+    stain.style.left = `${x * TILE_SIZE}px`;
+    stain.style.top = `${y * TILE_SIZE}px`;
+    stain.style.transform = `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`;
+    this.fxContainer.appendChild(stain);
+    window.setTimeout(() => stain.classList.add("fade"), 4000);
+    window.setTimeout(() => stain.remove(), 7000);
+  }
+  spawnLootSparkle(x, y) {
+    const cx = x * TILE_SIZE + TILE_SIZE / 2;
+    const cy = y * TILE_SIZE + TILE_SIZE / 2;
+    for (let i = 0; i < 8; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 12 + Math.random() * 22;
+      const sx = Math.cos(angle) * dist;
+      const sy = Math.sin(angle) * dist;
+      const s = el("div", { className: "loot-sparkle" });
+      s.style.left = `${cx}px`;
+      s.style.top = `${cy}px`;
+      s.style.setProperty("--sx", `${sx}px`);
+      s.style.setProperty("--sy", `${sy}px`);
+      s.style.animationDelay = `${Math.random() * 0.3}s`;
+      this.fxContainer.appendChild(s);
+      window.setTimeout(() => s.remove(), 900);
+    }
+  }
+  spawnParticleBurst(x, y, color = "#ff6b6b", count = 10) {
+    const cx = x * TILE_SIZE + TILE_SIZE / 2;
+    const cy = y * TILE_SIZE + TILE_SIZE / 2;
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 18 + Math.random() * 32;
+      const px = Math.cos(angle) * dist;
+      const py = Math.sin(angle) * dist;
+      const p = el("div", { className: "particle" });
+      p.style.background = color;
+      p.style.left = `${cx}px`;
+      p.style.top = `${cy}px`;
+      p.style.setProperty("--px", `${px}px`);
+      p.style.setProperty("--py", `${py}px`);
+      p.style.animation = `particle-burst ${0.4 + Math.random() * 0.35}s ease-out forwards`;
+      this.fxContainer.appendChild(p);
+      window.setTimeout(() => p.remove(), 900);
+    }
+  }
+  triggerCritFlash() {
+    this.critFlash.classList.remove("active");
+    void this.critFlash.offsetWidth;
+    this.critFlash.classList.add("active");
+    window.setTimeout(() => this.critFlash.classList.remove("active"), 500);
+  }
+  animateAttackLunge(fromX, fromY, toX, toY) {
+    const tokenEl = this.tokenElements.get(this.session?.player?.id);
+    if (!tokenEl) return;
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    let dir = "e";
+    if (dx === 0 && dy < 0) dir = "n";
+    else if (dx > 0 && dy < 0) dir = "ne";
+    else if (dx > 0 && dy === 0) dir = "e";
+    else if (dx > 0 && dy > 0) dir = "se";
+    else if (dx === 0 && dy > 0) dir = "s";
+    else if (dx < 0 && dy > 0) dir = "sw";
+    else if (dx < 0 && dy === 0) dir = "w";
+    else if (dx < 0 && dy < 0) dir = "nw";
+    tokenEl.classList.remove("lunge-n", "lunge-ne", "lunge-e", "lunge-se", "lunge-s", "lunge-sw", "lunge-w", "lunge-nw");
+    void tokenEl.offsetWidth;
+    tokenEl.classList.add(`lunge-${dir}`);
+    window.setTimeout(() => tokenEl.classList.remove(`lunge-${dir}`), 250);
+  }
+  computeCombatEffects(prevSession, session) {
+    if (!prevSession) return;
+    const allPrev = [...prevSession.players, ...prevSession.monsters];
+    const allNow = [...session.players, ...session.monsters];
+    const prevById = new Map(allPrev.map((t) => [t.id, t]));
+    const newLog = (session.log || []).slice(this.lastLogLength || 0);
+    const hadCrit = newLog.some((e) => /critical|crit/i.test(e));
+    const hadMiss = newLog.some((e) => /miss|misses|dodge/i.test(e));
+    for (const t of allNow) {
+      const prev = prevById.get(t.id);
+      if (!prev || t.hp === prev.hp) continue;
+      const delta = t.hp - prev.hp;
+      const type = delta > 0 ? "heal" : "damage";
+      const text = delta > 0 ? `+${delta}` : `${delta}`;
+      const isKill = t.alive === false && prev.alive !== false;
+      const isDown = t.down && !prev.down;
+      if (hadCrit && delta < 0) {
+        this.spawnFloatingText(t.x, t.y, text, "crit");
+        this.spawnParticleBurst(t.x, t.y, "#ff9f43", 18);
+        this.shake(18);
+        this.triggerCritFlash();
+      } else if (isKill) {
+        this.spawnFloatingText(t.x, t.y, text, "damage");
+        this.spawnFloatingText(t.x, t.y - 0.6, "SLAIN!", "kill");
+        this.spawnParticleBurst(t.x, t.y, "#c0392b", 22);
+        this.spawnBloodStain(t.x, t.y);
+        this.spawnLootSparkle(t.x, t.y);
+        const xp = t.xp_value ?? 50;
+        const gold = Math.floor(xp / 10);
+        window.setTimeout(() => this.spawnFloatingText(t.x, t.y - 1.1, `+${xp} XP`, "xp"), 250);
+        window.setTimeout(() => this.spawnFloatingText(t.x, t.y - 1.7, `+${gold} G`, "gold"), 450);
+        this.shake(14);
+      } else if (isDown) {
+        this.spawnFloatingText(t.x, t.y, text, "damage");
+        this.spawnFloatingText(t.x, t.y - 0.6, "DOWN!", "kill");
+        this.spawnParticleBurst(t.x, t.y, "#c0392b", 14);
+        this.shake(10);
+      } else if (delta < 0) {
+        this.spawnFloatingText(t.x, t.y, text, "damage");
+        this.spawnParticleBurst(t.x, t.y, "#ff6b6b", 8);
+        if (t.type === "player") this.audio?.monsterHit();
+        const tokenEl = this.tokenElements.get(t.id);
+        if (tokenEl) {
+          tokenEl.classList.remove("hit-flash");
+          void tokenEl.offsetWidth;
+          tokenEl.classList.add("hit-flash");
+          window.setTimeout(() => tokenEl.classList.remove("hit-flash"), 260);
+        }
+      } else {
+        this.spawnFloatingText(t.x, t.y, text, "heal");
+        this.spawnParticleBurst(t.x, t.y, "#2ecc71", 8);
+        this.audio?.healSound();
+      }
+    }
+    if (hadMiss) {
+      const active = session.phase === "player" ? session.player : allNow.find((t) => t.id === prevSession.player?.id) || allNow[0];
+      if (active) this.spawnFloatingText(active.x, active.y, "MISS", "miss");
+    }
+  }
   renderTokens(_snap = false) {
     if (!this.session) return;
     const session = this.session;
     const tokens = [...session.players, ...session.monsters];
     const activeId = session.phase === "player" ? session.player?.id : null;
+    const prevById = new Map();
+    for (const [id, el2] of this.tokenElements) {
+      prevById.set(id, { down: el2.classList.contains("down"), dying: el2.classList.contains("dying") });
+    }
     const visible = [];
     const visibleIds = new Set();
     for (const t of tokens) {
-      if (t.alive === false) continue;
       const isPlayer = t.type === "player";
       const isVisible = isPlayer || this.isDm() || this.visited.has(`${t.x},${t.y}`);
-      if (!isVisible) continue;
+      const wasDying = prevById.get(t.id)?.dying;
+      if (t.alive === false && !wasDying && !this.dyingTokens.has(t.id)) continue;
+      if (t.alive === false) {
+        this.dyingTokens.add(t.id);
+        window.setTimeout(() => this.dyingTokens.delete(t.id), 600);
+      }
+      if (!isVisible && !this.dyingTokens.has(t.id)) continue;
       visible.push(t);
       visibleIds.add(t.id);
     }
     for (const [id, el2] of this.tokenElements) {
-      if (!visibleIds.has(id)) {
+      if (!visibleIds.has(id) && !this.dyingTokens.has(id)) {
         el2.remove();
         this.tokenElements.delete(id);
       }
@@ -9331,18 +10250,24 @@ var Game = class {
     for (const t of visible) {
       const isPlayer = t.type === "player";
       const isActive = t.id === activeId;
+      const isDying = t.alive === false || this.dyingTokens.has(t.id);
       const x = t.x * TILE_SIZE;
       const y = t.y * TILE_SIZE;
       let tokenEl = this.tokenElements.get(t.id);
       if (!tokenEl) {
         tokenEl = el("div", {
-          className: `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}`,
-          style: `left:${x}px;top:${y}px;`
+          className: `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}${isDying ? " dying" : ""}`,
+          style: `left:${x}px;top:${y}px;${isDying ? "pointer-events:none;" : ""}`
         });
         const backing = el("div", { className: "token-backing" });
         tokenEl.appendChild(backing);
-        const tokenKey = isPlayer ? t.classes?.[0] ?? "hero" : t.monster ?? "";
-        const tokenUrl = tokenFrame(tokenKey);
+        let tokenKey = isPlayer ? t.classes?.[0] ?? "hero" : t.monster ?? "";
+        if (!isPlayer && t.boss && t.name) {
+          const bossKey = t.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+          if (TOKEN_IMAGES[bossKey]) tokenKey = bossKey;
+        }
+        const tokenTheme = isPlayer ? null : this.module.theme ?? null;
+        const tokenUrl = tokenFrame(tokenKey, tokenTheme);
         if (tokenUrl) {
           const img = el("img", {
             className: "token-image",
@@ -9361,10 +10286,13 @@ var Game = class {
         const fill = el("div", { className: "token-hp-fill" });
         bar.appendChild(fill);
         tokenEl.appendChild(bar);
+        const statusTray = el("div", { className: "token-status-tray" });
+        tokenEl.appendChild(statusTray);
         this.tokenContainer.appendChild(tokenEl);
         this.tokenElements.set(t.id, tokenEl);
       } else {
-        tokenEl.className = `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}`;
+        tokenEl.className = `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}${isDying ? " dying" : ""}`;
+        tokenEl.style.pointerEvents = isDying ? "none" : "auto";
         if (_snap) {
           tokenEl.style.transition = "none";
         }
@@ -9381,6 +10309,7 @@ var Game = class {
           fill.className = `token-hp-fill ${hpRatio > 0.5 ? "high" : hpRatio > 0.25 ? "medium" : "low"}`;
         }
       }
+      this.updateTokenStatuses(tokenEl, t);
       tokenEl.onclick = () => this.onTokenClick(t);
       tokenEl.onmouseenter = (e) => this.showTooltip(t, e.clientX, e.clientY);
       tokenEl.onmousemove = (e) => this.moveTooltip(e.clientX, e.clientY);
@@ -9391,29 +10320,174 @@ var Game = class {
       if (t.alive !== false) this.lastTokenHp.set(t.id, t.hp);
     }
   }
-  spawnSlashEffect(fromX, fromY, toX, toY) {
+  updateTokenStatuses(tokenEl, token) {
+    const tray = tokenEl.querySelector(".token-status-tray");
+    if (!tray) return;
+    clear(tray);
+    const statuses = token.statuses || [];
+    const icons = [];
+    if (token.down) icons.push({ cls: "status-down", icon: "\u2620", label: "Down" });
+    statuses.forEach((s) => {
+      if (s.type === "poisoned") icons.push({ cls: "status-poison", icon: "\u2620", label: "Poisoned" });
+      else if (s.type === "cover") icons.push({ cls: "status-cover", icon: "\u26A1", label: "Cover" });
+      else if (s.type === "blessed") icons.push({ cls: "status-bless", icon: "\u2728", label: "Blessed" });
+      else if (s.type === "frightened") icons.push({ cls: "status-fear", icon: "\u2639", label: "Frightened" });
+      else icons.push({ cls: "status-generic", icon: "\u25C9", label: s.type || "Status" });
+    });
+    icons.forEach((ic) => {
+      tray.appendChild(el("span", { className: `token-status ${ic.cls}`, title: ic.label }, ic.icon));
+    });
+  }
+  spawnSlashEffect(fromX, fromY, toX, toY, isCrit = false) {
     const cx = (fromX + toX) / 2 * TILE_SIZE + TILE_SIZE / 2;
     const cy = (fromY + toY) / 2 * TILE_SIZE + TILE_SIZE / 2;
-    const slash = el("div", { className: "slash-effect" });
+    const slash = el("div", { className: `slash-effect${isCrit ? " crit" : ""}` });
     slash.style.left = `${cx - TILE_SIZE / 2}px`;
     slash.style.top = `${cy - TILE_SIZE / 2}px`;
     this.fxContainer.appendChild(slash);
-    window.setTimeout(() => slash.remove(), 350);
+    window.setTimeout(() => slash.remove(), isCrit ? 450 : 350);
+  }
+  spawnProjectile(fromX, fromY, toX, toY, type = "arrow") {
+    const startX = fromX * TILE_SIZE + TILE_SIZE / 2;
+    const startY = fromY * TILE_SIZE + TILE_SIZE / 2;
+    const endX = toX * TILE_SIZE + TILE_SIZE / 2;
+    const endY = toY * TILE_SIZE + TILE_SIZE / 2;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    const duration = Math.min(0.35, Math.max(0.12, dist / 600));
+    const projectile = el("div", { className: `projectile projectile-${type}` });
+    projectile.style.left = `${startX}px`;
+    projectile.style.top = `${startY - (type === "fire" ? 4 : 2)}px`;
+    projectile.style.transform = `rotate(${angle}deg)`;
+    projectile.style.setProperty("--tx", `${dx}px`);
+    projectile.style.setProperty("--ty", `${dy}px`);
+    projectile.style.animation = `projectile-fly ${duration}s ease-out forwards`;
+    this.fxContainer.appendChild(projectile);
+    if (type === "arrow") {
+      window.setTimeout(() => this.audio?.arrowHit(), duration * 1000);
+    }
+    window.setTimeout(() => projectile.remove(), duration * 1000 + 50);
+  }
+  spawnConfetti() {
+    const colors = ["#f1c40f", "#e74c3c", "#3498db", "#2ecc71", "#9b59b6", "#e67e22"];
+    for (let i = 0; i < 60; i++) {
+      const c = colors[Math.floor(Math.random() * colors.length)];
+      const left = Math.random() * 100;
+      const delay = Math.random() * 1.5;
+      const duration = 2 + Math.random() * 2;
+      const size = 6 + Math.random() * 6;
+      const p = el("div", { className: "confetti-piece" });
+      p.style.background = c;
+      p.style.left = `${left}%`;
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+      p.style.animationDelay = `${delay}s`;
+      p.style.animationDuration = `${duration}s`;
+      this.root.appendChild(p);
+      window.setTimeout(() => p.remove(), (delay + duration) * 1000 + 100);
+    }
+  }
+  spawnSpellBeam(fromX, fromY, toX, toY, cls = "") {
+    const startX = fromX * TILE_SIZE + TILE_SIZE / 2;
+    const startY = fromY * TILE_SIZE + TILE_SIZE / 2;
+    const endX = toX * TILE_SIZE + TILE_SIZE / 2;
+    const endY = toY * TILE_SIZE + TILE_SIZE / 2;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    const c = cls.toLowerCase();
+    let variant = "arcane";
+    if (c === "cleric" || c === "paladin") variant = "holy";
+    else if (c === "druid" || c === "ranger") variant = "nature";
+    else if (c === "illusionist" || c === "assassin") variant = "dark";
+    const beam = el("div", { className: `spell-beam ${variant}` });
+    beam.style.left = `${startX}px`;
+    beam.style.top = `${startY - 1}px`;
+    beam.style.width = `${dist}px`;
+    beam.style.transform = `rotate(${angle}deg)`;
+    this.fxContainer.appendChild(beam);
+    this.spawnSpellCast(startX, startY, variant);
+    window.setTimeout(() => this.spawnSpellImpact(endX, endY, variant), 120);
+    window.setTimeout(() => beam.remove(), 360);
+  }
+  spawnSpellCast(x, y, variant) {
+    const orb = el("div", { className: `spell-cast ${variant}` });
+    orb.style.left = `${x}px`;
+    orb.style.top = `${y}px`;
+    this.fxContainer.appendChild(orb);
+    window.setTimeout(() => orb.remove(), 400);
+  }
+  spawnSpellImpact(x, y, variant) {
+    const burst = el("div", { className: `spell-impact ${variant}` });
+    burst.style.left = `${x}px`;
+    burst.style.top = `${y}px`;
+    this.fxContainer.appendChild(burst);
+    this.spawnSpellDetritus(x, y, variant);
+    this.audio?.spellHit();
+    window.setTimeout(() => burst.remove(), 500);
+  }
+  spawnSpellDetritus(x, y, variant) {
+    const cx = x - TILE_SIZE / 2;
+    const cy = y - TILE_SIZE / 2;
+    const configs = {
+      holy: { count: 6, className: "spell-rune", color: "#f1c40f" },
+      nature: { count: 8, className: "spell-leaf", color: "#2ecc71" },
+      dark: { count: 10, className: "spell-shard", color: "#9b59b6" },
+      arcane: { count: 8, className: "spell-glyph", color: "#3498db" }
+    };
+    const cfg = configs[variant] || configs.arcane;
+    for (let i = 0; i < cfg.count; i++) {
+      const piece = el("div", { className: `spell-piece ${cfg.className}` });
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 10 + Math.random() * 20;
+      const px = Math.cos(angle) * dist;
+      const py = Math.sin(angle) * dist;
+      piece.style.left = `${cx + TILE_SIZE / 2}px`;
+      piece.style.top = `${cy + TILE_SIZE / 2}px`;
+      piece.style.setProperty("--sx", `${px}px`);
+      piece.style.setProperty("--sy", `${py}px`);
+      piece.style.background = cfg.color;
+      this.fxContainer.appendChild(piece);
+      window.setTimeout(() => piece.remove(), 700);
+    }
   }
   async onTileClick(x, y) {
     if (this.observer || !this.session || this.session.status !== "active" || this.inFlight) return;
+    if (this.shiftKey) {
+      this.spawnPing(x, y);
+      return;
+    }
     if (this.dmAction && this.isDm()) {
       try {
         let response;
         if (this.dmAction === "spawn") {
           const name = this.dmMonsterSelect.value || "goblin";
-          response = await dmSpawn(this.sessionId, { name, x, y });
+          const scale = parseFloat(this.dmScaleSelect.value || "1");
+          response = await dmSpawn(this.sessionId, { name, x, y, scale });
         } else if (this.dmAction === "move") {
           const tokenId = this.dmTokenSelect.value;
           if (!tokenId) return;
           response = await dmMove(this.sessionId, { token_id: tokenId, x, y });
         } else if (this.dmAction === "reveal") {
           response = await dmReveal(this.sessionId, { x, y, radius: 4 });
+        } else if (this.dmAction === "prop") {
+          const type = this.dmPropSelect.value || "barrel";
+          response = await dmProp(this.sessionId, { type, x, y });
+        } else if (this.dmAction === "encounter") {
+          const name = this.dmMonsterSelect.value || "goblin";
+          const scale = parseFloat(this.dmScaleSelect.value || "1");
+          const offsets = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
+          let latest = null;
+          for (const [dx, dy] of offsets) {
+            try {
+              latest = await dmSpawn(this.sessionId, { name, x: x + dx, y: y + dy, scale });
+            } catch {
+            }
+          }
+          response = latest;
         }
         if (response) {
           this.dmAction = null;
@@ -9454,7 +10528,14 @@ var Game = class {
     }
   }
   async onTokenClick(token) {
-    if (this.observer || !this.session || this.session.phase !== "player" || this.inFlight) return;
+    if (this.observer || !this.session || this.inFlight) return;
+    if (this.isDm() && this.dmAction === "inspect") {
+      this.openInspector(token);
+      this.dmAction = null;
+      this.updateStatus();
+      return;
+    }
+    if (this.session.phase !== "player") return;
     if (token.type !== "monster") return;
     const player = this.session.player;
     const dist = Math.abs(player.x - token.x) + Math.abs(player.y - token.y);
@@ -9471,6 +10552,9 @@ var Game = class {
       const isAdjacent = Math.abs(player2.x - token.x) + Math.abs(player2.y - token.y) === 1;
       this.audio.swordHit();
       this.audio.combatSting();
+      if (isAdjacent) {
+        this.animateAttackLunge(player2.x, player2.y, token.x, token.y);
+      }
       this.lockInput();
       try {
         const { session } = await actInSession(this.sessionId, "attack", { target_id: token.id });
@@ -9492,11 +10576,11 @@ var Game = class {
       const player2 = this.session.player;
       this.audio.rangedShot();
       this.audio.combatSting();
+      this.spawnProjectile(player2.x, player2.y, token.x, token.y, "arrow");
       this.lockInput();
       try {
         const { session } = await actInSession(this.sessionId, "ranged", { target_id: token.id });
         this.action = null;
-        this.spawnSlashEffect(player2.x, player2.y, token.x, token.y);
         this.update(session);
         if (session.phase === "dm") {
           setTimeout(() => this.runDmTurn(), 600);
@@ -9511,17 +10595,24 @@ var Game = class {
       const player2 = this.session.player;
       const cls = (player2.classes?.[0] ?? "").toLowerCase();
       const rangedAbility = cls === "magic-user" || cls === "illusionist" || cls === "cleric";
+      const isAdjacent = Math.abs(player2.x - token.x) + Math.abs(player2.y - token.y) === 1;
       if (rangedAbility) {
-        this.audio.rangedShot();
+        this.audio.abilitySound(cls);
+        this.spawnSpellBeam(player2.x, player2.y, token.x, token.y, cls);
       } else {
         this.audio.swordHit();
+        if (isAdjacent) {
+          this.animateAttackLunge(player2.x, player2.y, token.x, token.y);
+        }
       }
       this.audio.combatSting();
       this.lockInput();
       try {
         const { session } = await actInSession(this.sessionId, "ability", { target_id: token.id });
         this.action = null;
-        this.spawnSlashEffect(player2.x, player2.y, token.x, token.y);
+        if (!rangedAbility && isAdjacent) {
+          this.spawnSlashEffect(player2.x, player2.y, token.x, token.y);
+        }
         this.update(session);
         if (session.phase === "dm") {
           setTimeout(() => this.runDmTurn(), 600);
@@ -9540,6 +10631,7 @@ var Game = class {
     const prevStatus = prevSession?.status;
     const prevPlayerPos = prevSession ? `${prevSession.player.x},${prevSession.player.y}` : "";
     this.session = session;
+    this.computeCombatEffects(prevSession, session);
     const canObserve = session.status === "active" && !this.isDm();
     this.autoplayBtn.style.display = canObserve ? "inline-block" : "none";
     session.dm_revealed?.forEach((key) => this.visited.add(key));
@@ -9556,6 +10648,7 @@ var Game = class {
     this.updateDmTools();
     this.updateJournal();
     this.renderTokens();
+    this.renderProps();
     this.updateLighting();
     this.highlightActionTiles();
     this.centerMap();
@@ -9564,6 +10657,8 @@ var Game = class {
     this.updateStats();
     this.updatePartyRoster();
     this.updateRoster();
+    this.updateTurnOrder();
+    this.updateMinimap();
     this.updateTimer();
     this.renderLog();
     if (session.status !== "active" && this.autoPlayer?.isRunning()) {
@@ -9576,6 +10671,7 @@ var Game = class {
     this.autoPlayer?.onUpdate();
     if (prevStatus === "active" && session.status === "won") {
       this.audio.victory();
+      this.spawnConfetti();
     } else if (prevStatus === "active" && session.status === "lost") {
       this.audio.defeat();
     }
@@ -9585,6 +10681,10 @@ var Game = class {
     if (session.status === "active" && session.phase === "player" && session.turn !== this.lastBannerTurn) {
       this.showTurnBanner(session.turn);
       this.lastBannerTurn = session.turn;
+    }
+    if (session.mode === "arena" && session.status === "active" && session.wave !== this.lastWaveBanner) {
+      this.showWaveBanner(session.wave);
+      this.lastWaveBanner = session.wave;
     }
     if (wasDm && session.phase === "player" && playerHurt) {
       this.spawnMonsterAttackSlash();
@@ -9608,6 +10708,18 @@ var Game = class {
       banner.classList.remove("visible");
       window.setTimeout(() => banner.remove(), 600);
     }, 1400);
+  }
+  showWaveBanner(wave) {
+    const existing = this.root.querySelector(".wave-banner");
+    if (existing) existing.remove();
+    const banner = el("div", { className: "wave-banner turn-banner" });
+    banner.innerHTML = `<span>Wave ${wave}</span>`;
+    this.root.appendChild(banner);
+    window.setTimeout(() => banner.classList.add("visible"), 10);
+    window.setTimeout(() => {
+      banner.classList.remove("visible");
+      window.setTimeout(() => banner.remove(), 600);
+    }, 1800);
   }
   updateStats() {
     if (!this.session) return;
@@ -9687,6 +10799,108 @@ var Game = class {
       this.rosterEl.appendChild(row);
     });
   }
+  updateTurnOrder() {
+    if (!this.turnOrderEl || !this.session) return;
+    clear(this.turnOrderEl);
+    const isDmPhase = this.session.phase === "dm";
+    const activeId = this.session.phase === "player" ? this.session.player?.id : null;
+    const players = this.session.players || [];
+    players.forEach((p) => {
+      const isActive = p.id === activeId;
+      const ratio = Math.max(0, Math.min(1, p.hp / p.max_hp));
+      const hpColor = ratio > 0.5 ? "#2ecc71" : ratio > 0.25 ? "#f1c40f" : "#c0392b";
+      const tokenUrl = tokenFrame(p.classes?.[0] ?? "hero");
+      const item = el("div", { className: `turn-order-item${isActive ? " active" : ""}${p.down ? " down" : ""}${p.alive === false ? " dead" : ""}` });
+      if (tokenUrl) {
+        item.appendChild(el("img", { className: "turn-order-portrait", src: tokenUrl, alt: p.name }));
+      } else {
+        item.appendChild(el("div", { className: "turn-order-initial" }, (p.name || "?").charAt(0).toUpperCase()));
+      }
+      const info = el("div", { className: "turn-order-info" });
+      info.appendChild(el("span", { className: "turn-order-name" }, p.name));
+      const hpBar = el("div", { className: "turn-order-hp" });
+      hpBar.innerHTML = `<span style="width:${Math.round(ratio * 100)}%; background:${hpColor};"></span>`;
+      info.appendChild(hpBar);
+      item.appendChild(info);
+      if (isActive) {
+        item.appendChild(el("span", { className: "turn-order-badge" }, "ACTIVE"));
+      }
+      this.turnOrderEl.appendChild(item);
+    });
+    const dmItem = el("div", { className: `turn-order-item turn-order-dm${isDmPhase ? " active" : ""}` });
+    dmItem.appendChild(el("div", { className: "turn-order-initial" }, "DM"));
+    const dmInfo = el("div", { className: "turn-order-info" });
+    dmInfo.appendChild(el("span", { className: "turn-order-name" }, "DM Turn"));
+    dmItem.appendChild(dmInfo);
+    if (isDmPhase) {
+      dmItem.appendChild(el("span", { className: "turn-order-badge" }, "ACTIVE"));
+    }
+    this.turnOrderEl.appendChild(dmItem);
+  }
+  updateMinimap() {
+    if (!this.minimapEl || !this.session) return;
+    clear(this.minimapEl);
+    if (!this.minimapVisible) return;
+    const tileSize = Math.max(2, Math.min(6, Math.floor(120 / Math.max(this.module.width, this.module.height))));
+    const w = this.module.width * tileSize;
+    const h = this.module.height * tileSize;
+    this.minimapEl.style.display = "block";
+    this.minimapEl.style.width = `${w + 8}px`;
+    const canvas = el("canvas", { className: "minimap-canvas", width: w, height: h });
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillRect(0, 0, w, h);
+    for (let y = 0; y < this.module.height; y++) {
+      const row = this.module.tiles[y] || "";
+      for (let x = 0; x < this.module.width; x++) {
+        const tile = row[x] || "0";
+        const key = `${x},${y}`;
+        const hasVisited = this.visited.has(key);
+        const hasLos = this.hasLineOfSight(this.session.player.x, this.session.player.y, x, y);
+        if (tile === "1") {
+          ctx.fillStyle = hasVisited ? "rgba(80,80,80,0.9)" : "rgba(40,40,40,0.7)";
+          ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+        } else if (hasVisited) {
+          ctx.fillStyle = hasLos ? "rgba(120,120,120,0.35)" : "rgba(80,80,80,0.25)";
+          ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+        }
+      }
+    }
+    (this.session.props || []).forEach((p) => {
+      if (!this.isDm() && !this.visited.has(`${p.x},${p.y}`)) return;
+      ctx.fillStyle = p.type === "torch" ? "#ff9f43" : "#95a5a6";
+      ctx.fillRect(p.x * tileSize, p.y * tileSize, tileSize, tileSize);
+    });
+    this.session.players.forEach((p, i) => {
+      const cx = p.x * tileSize + tileSize / 2;
+      const cy = p.y * tileSize + tileSize / 2;
+      ctx.fillStyle = i === this.session.active_player_index ? "#2ecc71" : "#27ae60";
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.max(2, tileSize * 0.55), 0, Math.PI * 2);
+      ctx.fill();
+    });
+    this.session.monsters.forEach((m) => {
+      if (m.alive === false) return;
+      if (!this.isDm() && !this.visited.has(`${m.x},${m.y}`)) return;
+      ctx.fillStyle = "#c0392b";
+      ctx.beginPath();
+      ctx.arc(m.x * tileSize + tileSize / 2, m.y * tileSize + tileSize / 2, Math.max(2, tileSize * 0.5), 0, Math.PI * 2);
+      ctx.fill();
+    });
+    const cw = this.canvasContainer.clientWidth;
+    const ch = this.canvasContainer.clientHeight;
+    if (cw && ch) {
+      ctx.strokeStyle = "rgba(241,196,15,0.7)";
+      ctx.lineWidth = 1;
+      const sx = -this.cameraX / this.zoom / TILE_SIZE * tileSize;
+      const sy = -this.cameraY / this.zoom / TILE_SIZE * tileSize;
+      const sw = cw / this.zoom / TILE_SIZE * tileSize;
+      const sh = ch / this.zoom / TILE_SIZE * tileSize;
+      ctx.strokeRect(sx, sy, sw, sh);
+    }
+    this.minimapEl.appendChild(canvas);
+  }
   spawnMonsterAttackSlash() {
     if (!this.session) return;
     const player = this.session.player;
@@ -9756,14 +10970,16 @@ var Game = class {
       this.timerInterval = null;
     }
     if (!this.session || this.session.status !== "active" || this.session.phase !== "player" || this.session.turn_timer_seconds <= 0 || !this.session.turn_deadline) {
-      this.timerEl.textContent = "";
+      this.timerTextEl.textContent = "";
+      this.timerBarEl.style.width = "0%";
       return;
     }
     const tick = () => {
       const deadline = new Date(this.session.turn_deadline).getTime();
       const remaining = Math.ceil((deadline - Date.now()) / 1e3);
       if (remaining <= 0) {
-        this.timerEl.textContent = "Time up!";
+        this.timerTextEl.textContent = "Time up!";
+        this.timerBarEl.style.width = "0%";
         if (!this.timeoutFired) {
           this.timeoutFired = true;
           this.endTurn();
@@ -9772,7 +10988,10 @@ var Game = class {
         this.timeoutFired = false;
         const mins = Math.floor(remaining / 60);
         const secs = remaining % 60;
-        this.timerEl.textContent = `${mins}:${secs.toString().padStart(2, "0")} remaining`;
+        this.timerTextEl.textContent = `${mins}:${secs.toString().padStart(2, "0")} remaining`;
+        const total = this.session.turn_timer_seconds;
+        const pct = Math.max(0, Math.min(100, (remaining / total) * 100));
+        this.timerBarEl.style.width = `${pct}%`;
       }
     };
     tick();

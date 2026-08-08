@@ -47,6 +47,9 @@ async def dm_spawn(
     mod = await _load_session_module(record, db)
 
     try:
+        scale = data.get("scale")
+        if scale is not None:
+            scale = float(scale)
         await session_engine.dm_spawn(
             state,
             mod,
@@ -54,6 +57,46 @@ async def dm_spawn(
             int(data["x"]),
             int(data["y"]),
             token_id=data.get("token_id"),
+            scale=scale,
+        )
+    except (KeyError, ValueError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    _emit_session_events(db, prev_state, state, account_id)
+    record.state = json.dumps(state)
+    record.status = state["status"]
+    await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update", {"session": session_view}, room=session_id
+        )
+    except Exception:
+        pass
+    return {"session": session_view}
+
+
+@router.post("/sessions/{session_id}/dm/prop")
+async def dm_prop(
+    session_id: str,
+    data: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    record = await _load_session_dm_only(session_id, account_id, db)
+    state = json.loads(record.state)
+    prev_state = json.loads(record.state)
+    mod = await _load_session_module(record, db)
+
+    try:
+        await session_engine.dm_prop(
+            state,
+            mod,
+            data["type"],
+            int(data["x"]),
+            int(data["y"]),
+            variant=data.get("variant"),
         )
     except (KeyError, ValueError) as e:
         raise HTTPException(status_code=400, detail=str(e))

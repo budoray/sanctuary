@@ -545,3 +545,38 @@ async def test_morale_check_triggered_at_half_hp(sample_module, hero):
     await session._attack(st, st["player"], goblin, session.Dice(seed=42))
     assert goblin["hp"] <= 5
     assert any("checks morale" in entry for entry in st["log"])
+
+
+async def test_dm_prop_places_and_clears_prop(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    px, py = st["player"]["x"], st["player"]["y"]
+    tx, ty = px + 1, py
+    prop = await session.dm_prop(st, sample_module, "barrel", tx, ty)
+    assert prop["type"] == "barrel"
+    assert prop["x"] == tx
+    assert prop["y"] == ty
+    assert len(st["props"]) == 1
+    cleared = await session.dm_prop(st, sample_module, "clear", tx, ty)
+    assert cleared["cleared"]
+    assert len(st["props"]) == 0
+
+
+async def test_dm_prop_unknown_type_fails(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    with pytest.raises(ValueError):
+        await session.dm_prop(st, sample_module, "chair", 2, 2)
+
+
+async def test_dm_spawn_scale_adjusts_hp_and_damage(sample_module, hero):
+    st = await session.new_game("s1", sample_module, hero, seed=42)
+    px, py = st["player"]["x"], st["player"]["y"]
+    tx, ty = px + 1, py
+    normal = await session.dm_spawn(st, sample_module, "goblin", tx, ty)
+    max_hp = normal["max_hp"]
+    st2 = await session.new_game("s2", sample_module, hero, seed=42)
+    st2["player"]["x"] = px
+    st2["player"]["y"] = py
+    scaled = await session.dm_spawn(st2, sample_module, "goblin", tx, ty, scale=2)
+    assert scaled["max_hp"] == max(1, round(max_hp * 2))
+    assert scaled["damage_bonus"] >= 1
+    assert "x2" in scaled["name"]
