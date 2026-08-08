@@ -420,6 +420,7 @@ async def new_game(
         "lighting": "day",
         "journal": {"notes": [], "quests": []},
         "dm_history": {"undo": [], "redo": []},
+        "decals": [],
     }
     if dungeon_links:
         state["dungeon_links"] = dungeon_links
@@ -467,6 +468,7 @@ async def advance_module(
     state["lighting"] = "day"
     state["journal"] = {"notes": [], "quests": []}
     state["dm_history"] = {"undo": [], "redo": []}
+    state["decals"] = []
     state["player"] = _active_player(state)
     return state
 
@@ -865,6 +867,53 @@ async def dm_lighting(
     state["lighting"] = lighting
     state["version"] += 1
     state["log"].append(f"The light fades to {lighting}.")
+
+
+_DECAL_TYPES = {"blood", "crack", "rune", "scorch", "ice", "poison", "clear"}
+
+
+async def dm_decal(
+    state: dict[str, Any],
+    module: Module,
+    decal_type: str,
+    x: int,
+    y: int,
+    radius: int = 0,
+) -> None:
+    """Paint or clear ground decals in a brush radius."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    _dm_snapshot(state)
+    decal_type = (decal_type or "blood").lower()
+    if decal_type not in _DECAL_TYPES:
+        raise ValueError(f"unknown decal type: {decal_type}")
+    radius = max(0, min(5, int(radius)))
+    decals = state.setdefault("decals", [])
+    affected = 0
+    for dy in range(-radius, radius + 1):
+        for dx in range(-radius, radius + 1):
+            if abs(dx) + abs(dy) > radius:
+                continue
+            tx, ty = x + dx, y + dy
+            if not module.map.in_bounds(tx, ty):
+                continue
+            if decal_type == "clear":
+                before = len(decals)
+                decals[:] = [d for d in decals if not (d.get("x") == tx and d.get("y") == ty)]
+                affected += before - len(decals)
+            else:
+                decals[:] = [d for d in decals if not (d.get("x") == tx and d.get("y") == ty)]
+                decals.append({
+                    "id": f"decal_{len(decals)}_{tx}_{ty}",
+                    "type": decal_type,
+                    "x": tx,
+                    "y": ty,
+                })
+                affected += 1
+    if affected == 0:
+        raise ValueError("no tiles affected")
+    state["version"] += 1
+    state["log"].append(f"The DM paints {decal_type} decals at ({x}, {y}).")
 
 
 async def journal_add(
@@ -2180,4 +2229,5 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "weather": state.get("weather", "auto"),
         "lighting": state.get("lighting", "day"),
         "journal": state.get("journal", {"notes": [], "quests": []}),
+        "decals": state.get("decals", []),
     }

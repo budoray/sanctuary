@@ -349,6 +349,45 @@ async def dm_lighting(
     return {"session": session_view}
 
 
+@router.post("/sessions/{session_id}/dm/decal")
+async def dm_decal(
+    session_id: str,
+    data: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    record = await _load_session_dm_only(session_id, account_id, db)
+    state = json.loads(record.state)
+    prev_state = json.loads(record.state)
+    mod = await _load_session_module(record, db)
+
+    try:
+        await session_engine.dm_decal(
+            state,
+            mod,
+            data.get("type", "blood"),
+            int(data["x"]),
+            int(data["y"]),
+            radius=int(data.get("radius", 0)),
+        )
+    except (KeyError, ValueError) as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    _emit_session_events(db, prev_state, state, account_id)
+    record.state = json.dumps(state)
+    record.status = state["status"]
+    await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update", {"session": session_view}, room=session_id
+        )
+    except Exception:
+        pass
+    return {"session": session_view}
+
+
 @router.post("/sessions/{session_id}/dm/undo")
 async def dm_undo(
     session_id: str,

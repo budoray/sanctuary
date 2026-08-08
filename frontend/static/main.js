@@ -333,6 +333,12 @@ async function dmUndo(sessionId) {
 async function dmRedo(sessionId) {
   return api(`/api/sessions/${sessionId}/dm/redo`, { method: "POST" });
 }
+async function dmDecal(sessionId, payload) {
+  return api(`/api/sessions/${sessionId}/dm/decal`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
 async function journalAdd(sessionId, payload) {
   return api(`/api/sessions/${sessionId}/journal`, {
     method: "POST",
@@ -2995,55 +3001,99 @@ var CampaignDetail = class {
       return;
     }
     const mapById = new Map(this.modules.map((m) => [m.id, m]));
-    const wrapper = el("div", { className: "journey-nodes" });
+    const wrapper = el("div", { className: "journey-map-parchment" });
+    const scroll = el("div", { className: "journey-map-scroll" });
+    scroll.appendChild(el("div", { className: "journey-map-filigree" }));
+    scroll.appendChild(el("div", { className: "journey-map-title" }, `The Road to ${this.campaign.name}`));
+    const nodesWrap = el("div", { className: "journey-nodes-v2" });
     ids.forEach((id, index) => {
       const mod = mapById.get(id) || { id, name: id, theme: "dungeon" };
       const isCleared = cleared.has(id);
       const isCurrent = index === (this.campaign.current_module_index || 0) && !this.campaign.completed;
-      const node = el("div", { className: `journey-node${isCleared ? " cleared" : ""}${isCurrent ? " current" : ""}` });
+      const isLocked = !isCleared && !isCurrent;
+      const node = el("div", {
+        className: `journey-node-v2${isCleared ? " cleared" : ""}${isCurrent ? " current" : ""}${isLocked ? " locked" : ""}`,
+        style: { animationDelay: `${index * 90}ms` }
+      });
       const badge = el("div", { className: "journey-node-badge" });
-      badge.textContent = isCleared ? "\u2713" : isCurrent ? "\u25C9" : String(index + 1);
+      badge.textContent = isCleared ? "\u2713" : isCurrent ? "\u25C9" : isLocked ? "\u25CB" : String(index + 1);
       node.appendChild(badge);
       node.appendChild(el("span", { className: "journey-node-name" }, mod.name || id));
       node.appendChild(el("span", { className: `journey-node-theme theme-${mod.theme || "dungeon"}` }, THEME_LABELS[mod.theme] || mod.theme || "Dungeon"));
-      wrapper.appendChild(node);
+      if (mod.description) {
+        const tip = el("div", { className: "journey-node-tooltip" }, mod.description);
+        node.appendChild(tip);
+      }
+      nodesWrap.appendChild(node);
     });
-    this.journeyEl.appendChild(wrapper);
+    scroll.appendChild(nodesWrap);
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("class", "journey-path");
-    svg.setAttribute("preserveAspectRatio", "none");
-    this.journeyEl.appendChild(svg);
-    requestAnimationFrame(() => this.drawJourneyPath(svg, wrapper, ids.length, cleared.size));
+    svg.setAttribute("class", "journey-path-v2");
+    scroll.appendChild(svg);
+    wrapper.appendChild(scroll);
+    this.journeyEl.appendChild(wrapper);
+    requestAnimationFrame(() => this.drawJourneyPathV2(svg, nodesWrap, ids.length, cleared.size));
+    window.setTimeout(() => this.drawJourneyPathV2(svg, nodesWrap, ids.length, cleared.size), 120);
   }
-  drawJourneyPath(svg, wrapper, count, clearedCount) {
+  drawJourneyPathV2(svg, wrapper, count, clearedCount) {
     if (!svg || !wrapper) return;
     const rect = wrapper.getBoundingClientRect();
-    const width = rect.width;
-    const height = 24;
+    const width = Math.max(rect.width, count * 140);
+    const height = 260;
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     svg.style.width = `${width}px`;
     svg.style.height = `${height}px`;
     clear(svg);
     if (count < 2) return;
-    const nodes = wrapper.querySelectorAll(".journey-node");
+    const nodes = wrapper.querySelectorAll(".journey-node-v2");
     const points = [];
-    nodes.forEach((n) => {
+    nodes.forEach((n, i) => {
       const r = n.getBoundingClientRect();
-      points.push({ x: r.left - rect.left + r.width / 2, y: height / 2 });
+      const x = r.left - rect.left + r.width / 2;
+      const y = r.top - rect.top + r.height / 2;
+      points.push({ x, y, i });
     });
+    const makeBezier = (pts) => {
+      if (pts.length === 0) return "";
+      if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+      let d = `M ${pts[0].x} ${pts[0].y}`;
+      for (let i = 1; i < pts.length; i++) {
+        const prev = pts[i - 1];
+        const cur = pts[i];
+        const cp1x = prev.x + (cur.x - prev.x) * 0.45;
+        const cp1y = prev.y + (i % 2 === 1 ? 40 : -40);
+        const cp2x = prev.x + (cur.x - prev.x) * 0.55;
+        const cp2y = cur.y + (i % 2 === 1 ? -40 : 40);
+        d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${cur.x} ${cur.y}`;
+      }
+      return d;
+    };
+    const fullD = makeBezier(points);
     const fullPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    const clearedPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-    fullPath.setAttribute("d", d);
+    fullPath.setAttribute("d", fullD);
     fullPath.setAttribute("class", "journey-trail");
+    const len = fullPath.getTotalLength ? fullPath.getTotalLength() : 1;
+    fullPath.style.strokeDasharray = String(len);
+    fullPath.style.strokeDashoffset = String(len * 0.15);
+    svg.appendChild(fullPath);
     const clearedUpTo = Math.min(clearedCount, count - 1);
     if (clearedUpTo > 0) {
-      const cd = points.slice(0, clearedUpTo + 1).map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+      const clearedPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      const cd = makeBezier(points.slice(0, clearedUpTo + 1));
       clearedPath.setAttribute("d", cd);
       clearedPath.setAttribute("class", "journey-trail-cleared");
+      svg.appendChild(clearedPath);
     }
-    svg.appendChild(fullPath);
-    if (clearedPath.getAttribute("d")) svg.appendChild(clearedPath);
+    const currentIdx = this.campaign.current_module_index || 0;
+    if (currentIdx >= 0 && currentIdx < points.length) {
+      const cur = points[currentIdx];
+      const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      glow.setAttribute("cx", String(cur.x));
+      glow.setAttribute("cy", String(cur.y));
+      glow.setAttribute("r", "18");
+      glow.setAttribute("class", "journey-current-glow");
+      svg.appendChild(glow);
+    }
   }
   destroy() {
     this.root.remove();
@@ -3067,6 +3117,11 @@ var DiceTray = class {
   rolls = [];
   onRoll;
   collapsed = true;
+  theater;
+  stage;
+  banner;
+  dieWidgets = [];
+  pendingTimer = null;
   constructor(container, onRoll, audio = null) {
     this.onRoll = onRoll;
     this.audio = audio;
@@ -3085,24 +3140,74 @@ var DiceTray = class {
     this.root.appendChild(header);
     this.root.appendChild(this.controls);
     this.root.appendChild(this.history);
-    this.roller = this.buildRoller();
-    this.root.appendChild(this.roller);
+    this.theater = this.buildTheater();
     container.appendChild(this.root);
     this.renderHistory();
   }
-  buildRoller() {
-    const roller = el("div", { className: "die-roller" });
-    const label = el("div", { className: "die-roller-label" }, "Rolling...");
-    const cube = el("div", { className: "die-cube" });
-    const face = el("div", { className: "die-face" }, "?");
-    const glow = el("div", { className: "die-result-glow" });
-    cube.appendChild(face);
-    cube.appendChild(glow);
-    const result = el("div", { className: "die-roller-result" }, "");
-    roller.appendChild(label);
-    roller.appendChild(cube);
-    roller.appendChild(result);
-    return roller;
+  buildTheater() {
+    const theater = el("div", { className: "dice-theater" });
+    const curtain = el("div", { className: "dice-theater-curtain" });
+    const stage = el("div", { className: "dice-stage" });
+    const banner = el("div", { className: "dice-theater-banner" }, "");
+    const close = el("button", {
+      className: "dice-theater-close",
+      onclick: () => this.hideTheater()
+    }, "\u2715");
+    theater.appendChild(curtain);
+    theater.appendChild(stage);
+    theater.appendChild(banner);
+    theater.appendChild(close);
+    this.stage = stage;
+    this.banner = banner;
+    return theater;
+  }
+  buildDieWidget(faces, size = 64) {
+    const wrap = el("div", { className: "die-widget", style: { width: `${size}px`, height: `${size}px` } });
+    const cube = el("div", { className: "die-cube", style: { width: `${size}px`, height: `${size}px` } });
+    const half = size / 2;
+    const transforms = [
+      `rotateY(0deg) translateZ(${half}px)`,
+      `rotateX(-90deg) translateZ(${half}px)`,
+      `rotateY(-90deg) translateZ(${half}px)`,
+      `rotateY(90deg) translateZ(${half}px)`,
+      `rotateX(90deg) translateZ(${half}px)`,
+      `rotateY(180deg) translateZ(${half}px)`
+    ];
+    const faceEls = [];
+    transforms.forEach((t, i) => {
+      const face = el("div", {
+        className: "die-face",
+        style: { transform: t, width: `${size}px`, height: `${size}px` }
+      });
+      if (faces === 6) {
+        face.appendChild(this.buildPips(i + 1));
+      } else {
+        face.textContent = String(Math.min(i + 1, faces));
+      }
+      cube.appendChild(face);
+      faceEls.push(face);
+    });
+    wrap.appendChild(cube);
+    return { wrap, cube, faceEls, faces };
+  }
+  buildPips(n) {
+    const grid = el("div", { className: "die-pips" });
+    const positions = {
+      1: [5],
+      2: [1, 9],
+      3: [1, 5, 9],
+      4: [1, 3, 7, 9],
+      5: [1, 3, 5, 7, 9],
+      6: [1, 3, 4, 6, 7, 9]
+    };
+    for (let i = 1; i <= 9; i++) {
+      const cell = el("div", { className: "die-pip-cell" });
+      if (positions[n].includes(i)) {
+        cell.appendChild(el("div", { className: "die-pip" }));
+      }
+      grid.appendChild(cell);
+    }
+    return grid;
   }
   toggle() {
     this.collapsed = !this.collapsed;
@@ -3145,88 +3250,149 @@ var DiceTray = class {
     return controls;
   }
   async roll(expr) {
-    const faces = this.extractFaces(expr);
+    const parsed = this.parseDice(expr);
+    const mainFaces = parsed.length > 0 ? parsed[0].faces : 20;
     this.audio?.diceRoll();
-    this.showRoller(faces);
-    let total;
+    this.showTheater(parsed);
+    let result;
     try {
       if (this.onRoll) {
-        total = await this.onRoll(expr);
+        const total = await this.onRoll(expr);
+        result = { total, rolls: [] };
       } else {
-        total = this.evaluateLocal(expr);
+        result = this.evaluateLocal(expr);
       }
     } catch (err) {
-      this.hideRoller();
+      this.hideTheater();
       this.addHistory({ expr, total: NaN, timestamp: /* @__PURE__ */ new Date() });
       return;
     }
-    const isCritical = faces === 20 && total === 20;
-    const isFumble = faces === 20 && total === 1;
-    this.revealRoller(total, isCritical, isFumble);
-    window.setTimeout(() => this.hideRoller(), 1400);
-    this.addHistory({ expr, total, timestamp: /* @__PURE__ */ new Date(), critical: isCritical, fumble: isFumble });
+    const isCritical = mainFaces === 20 && result.total === 20;
+    const isFumble = mainFaces === 20 && result.total === 1;
+    this.revealTheater(result, isCritical, isFumble);
+    this.pendingTimer = window.setTimeout(() => this.hideTheater(), 2200);
+    this.addHistory({ expr, total: result.total, timestamp: /* @__PURE__ */ new Date(), critical: isCritical, fumble: isFumble });
+  }
+  parseDice(expr) {
+    const normalized = expr.replace(/\s/g, "").toLowerCase();
+    const dice = [];
+    const re = /([+-]?\d*)d(\d+)/g;
+    let m;
+    while ((m = re.exec(normalized)) !== null) {
+      const countRaw = m[1].replace(/^\+/, "");
+      const count = countRaw === "" || countRaw === "-" ? (countRaw === "-" ? -1 : 1) : parseInt(countRaw, 10);
+      const faces = parseInt(m[2], 10);
+      if (!Number.isNaN(faces)) dice.push({ count, faces });
+    }
+    return dice;
   }
   extractFaces(expr) {
     const normalized = expr.replace(/\s/g, "").toLowerCase();
     const match = normalized.match(/(\d+)d(\d+)/);
     return match ? parseInt(match[2], 10) : 20;
   }
-  showRoller(faces) {
+  showTheater(parsedDice) {
     if (this.collapsed) this.toggle();
-    const face = this.roller.querySelector(".die-face");
-    const glow = this.roller.querySelector(".die-result-glow");
-    const result = this.roller.querySelector(".die-roller-result");
-    const cube = this.roller.querySelector(".die-cube");
-    if (face) {
-      face.textContent = "?";
-      face.classList.remove("is-critical", "is-fumble");
+    clear(this.stage);
+    this.dieWidgets = [];
+    this.banner.textContent = "";
+    this.banner.className = "dice-theater-banner";
+    this.theater.classList.remove("shake", "critical", "fumble");
+    const dice = [];
+    parsedDice.forEach(({ count, faces }) => {
+      const c = Math.abs(count);
+      for (let i = 0; i < c; i++) dice.push(faces);
+    });
+    if (dice.length === 0) dice.push(20);
+    const maxDice = Math.min(dice.length, 8);
+    for (let i = 0; i < maxDice; i++) {
+      const w = this.buildDieWidget(dice[i], 72);
+      this.stage.appendChild(w.wrap);
+      this.dieWidgets.push(w);
+      w.wrap.style.animationDelay = `${i * 80}ms`;
     }
-    if (glow) glow.style.background = "transparent";
-    if (result) result.textContent = "";
-    if (cube) {
-      cube.style.animation = "none";
-      void cube.offsetWidth;
-      cube.style.animation = "die-tumble 0.85s ease-out forwards";
-    }
-    this.roller.classList.add("visible");
+    if (!this.theater.parentNode) document.body.appendChild(this.theater);
+    requestAnimationFrame(() => this.theater.classList.add("visible"));
   }
-  revealRoller(total, isCritical, isFumble) {
-    const face = this.roller.querySelector(".die-face");
-    const glow = this.roller.querySelector(".die-result-glow");
-    const result = this.roller.querySelector(".die-roller-result");
-    if (face) {
-      face.textContent = String(total);
-      face.classList.toggle("is-critical", isCritical);
-      face.classList.toggle("is-fumble", isFumble);
-    }
-    if (glow) {
-      glow.style.background = isCritical ? "rgba(241, 196, 15, 0.4)" : isFumble ? "rgba(192, 57, 43, 0.4)" : "rgba(52, 152, 219, 0.3)";
-    }
-    if (result) {
-      result.textContent = isCritical ? "CRITICAL!" : isFumble ? "FUMBLE!" : `Rolled ${total}`;
+  revealTheater(result, isCritical, isFumble) {
+    const rolls = result.rolls && result.rolls.length > 0 ? result.rolls : [];
+    this.dieWidgets.forEach((w, i) => {
+      const value = rolls[i] ? rolls[i].value : result.total;
+      const targetFace = this.resultToFaceIndex(value, w.faces);
+      const rotations = [
+        { x: 0, y: 0 },
+        { x: 90, y: 0 },
+        { x: 0, y: 90 },
+        { x: 0, y: -90 },
+        { x: -90, y: 0 },
+        { x: 0, y: 180 }
+      ];
+      const end = rotations[targetFace];
+      const extraX = 720 + Math.floor(Math.random() * 360);
+      const extraY = 720 + Math.floor(Math.random() * 360);
+      const final = `rotateX(${end.x + extraX}deg) rotateY(${end.y + extraY}deg)`;
+      if (w.faces !== 6) {
+        w.faceEls[targetFace].textContent = String(value);
+      }
+      w.cube.style.animation = "none";
+      void w.cube.offsetWidth;
+      w.cube.style.animation = `die-tumble-3d ${0.9 + Math.random() * 0.35}s cubic-bezier(0.22, 0.61, 0.36, 1) forwards`;
+      w.cube.style.setProperty("--die-end-rot", final);
+      w.wrap.classList.add("landed");
+      w.faceEls[targetFace].classList.toggle("is-critical", isCritical);
+      w.faceEls[targetFace].classList.toggle("is-fumble", isFumble);
+    });
+    this.banner.textContent = isCritical ? "CRITICAL HIT!" : isFumble ? "CRITICAL MISS!" : `Rolled ${result.total}`;
+    this.banner.classList.toggle("critical", isCritical);
+    this.banner.classList.toggle("fumble", isFumble);
+    if (isCritical || isFumble) {
+      this.theater.classList.add("shake", isCritical ? "critical" : "fumble");
+      this.shakeCamera();
     }
   }
-  hideRoller() {
-    this.roller.classList.remove("visible");
+  resultToFaceIndex(value, faces) {
+    if (faces === 6) {
+      return Math.max(0, Math.min(5, value - 1));
+    }
+    return Math.floor(Math.random() * 6);
+  }
+  shakeCamera() {
+    document.body.classList.add("dice-camera-shake");
+    window.setTimeout(() => document.body.classList.remove("dice-camera-shake"), 520);
+  }
+  hideTheater() {
+    if (this.pendingTimer) {
+      clearTimeout(this.pendingTimer);
+      this.pendingTimer = null;
+    }
+    this.theater.classList.remove("visible");
+    window.setTimeout(() => {
+      if (this.theater.parentNode) this.theater.parentNode.removeChild(this.theater);
+    }, 350);
   }
   evaluateLocal(expr) {
     const normalized = expr.replace(/\s/g, "").toLowerCase();
     const parts2 = normalized.split(/(?=[+-])/);
     let total = 0;
+    const rolls = [];
     for (const part of parts2) {
       if (part.includes("d")) {
-        const [countStr, facesStr] = part.split("d");
+        const sign = part.startsWith("-") ? -1 : 1;
+        const clean = part.replace(/^-/, "");
+        const [countStr, facesStr] = clean.split("d");
         const count = countStr === "" ? 1 : parseInt(countStr, 10);
         const faces = parseInt(facesStr, 10);
         if (Number.isNaN(count) || Number.isNaN(faces)) throw new Error("bad dice");
         for (let i = 0; i < count; i++) {
-          total += Math.floor(Math.random() * faces) + 1;
+          const value = Math.floor(Math.random() * faces) + 1;
+          rolls.push({ faces, value });
+          total += sign * value;
         }
       } else {
         total += parseInt(part, 10) || 0;
       }
     }
-    return total;
+    return { total, rolls };
   }
   addHistory(roll) {
     this.rolls.unshift(roll);
@@ -3249,6 +3415,8 @@ var DiceTray = class {
     });
   }
   destroy() {
+    if (this.pendingTimer) clearTimeout(this.pendingTimer);
+    if (this.theater.parentNode) this.theater.parentNode.removeChild(this.theater);
     this.root.remove();
   }
 };
@@ -7838,9 +8006,11 @@ var AudioController = class {
   ctx = null;
   muted = false;
   musicVolume = 0.35;
+  sfxVolume = 0.7;
   ambientActive = false;
   ambientType = null;
   ambientNodes = null;
+  weatherNodes = null;
   userGestureStarted = false;
   music;
   constructor() {
@@ -7893,12 +8063,21 @@ var AudioController = class {
   setMusicVolume(volume) {
     this.musicVolume = Math.max(0, Math.min(1, volume));
     this.music.setVolume(this.musicVolume);
-    if (this.ambientNodes) {
-      this.ambientNodes.gain.gain.setTargetAtTime(this.musicVolume, this.ctx?.currentTime || 0, 0.1);
-    }
   }
   getMusicVolume() {
     return this.musicVolume;
+  }
+  setSfxVolume(volume) {
+    this.sfxVolume = Math.max(0, Math.min(1, volume));
+    if (this.ambientNodes) {
+      this.ambientNodes.gain.gain.setTargetAtTime(this.sfxVolume * this.musicVolume, this.ctx?.currentTime || 0, 0.1);
+    }
+    if (this.weatherNodes) {
+      this.weatherNodes.gain.gain.setTargetAtTime(this.sfxVolume * this.musicVolume, this.ctx?.currentTime || 0, 0.1);
+    }
+  }
+  getSfxVolume() {
+    return this.sfxVolume ?? 0.7;
   }
   // MusicLibrary façade.
   playTrack(name, loop = false) {
@@ -7989,7 +8168,8 @@ var AudioController = class {
     filter.frequency.value = filterFreq;
     filter.Q.value = 1;
     const env = ctx.createGain();
-    env.gain.setValueAtTime(gain, ctx.currentTime);
+    const master = (this.sfxVolume ?? 0.7) * (this.muted ? 0 : 1);
+    env.gain.setValueAtTime(gain * master, ctx.currentTime);
     env.gain.exponentialRampToValueAtTime(1e-3, ctx.currentTime + duration);
     src.connect(filter);
     filter.connect(env);
@@ -8007,8 +8187,9 @@ var AudioController = class {
       osc.frequency.exponentialRampToValueAtTime(Math.max(20, sweepTo), ctx.currentTime + duration);
     }
     const env = ctx.createGain();
+    const master = (this.sfxVolume ?? 0.7) * (this.muted ? 0 : 1);
     env.gain.setValueAtTime(1e-4, ctx.currentTime);
-    env.gain.linearRampToValueAtTime(gain, ctx.currentTime + Math.min(0.02, duration * 0.2));
+    env.gain.linearRampToValueAtTime(gain * master, ctx.currentTime + Math.min(0.02, duration * 0.2));
     env.gain.exponentialRampToValueAtTime(1e-3, ctx.currentTime + duration);
     osc.connect(env);
     env.connect(ctx.destination);
@@ -8084,16 +8265,131 @@ var AudioController = class {
     this.playNoise(0.14, 900, 0.18);
     this.tone(1320, 0.12, "sine", 0.1, 660);
   }
+  spellHitVariant(variant = "arcane") {
+    const profiles = {
+      holy: () => {
+        this.tone(880, 0.18, "sine", 0.12, 1760);
+        window.setTimeout(() => this.tone(1100, 0.22, "sine", 0.1, 880), 60);
+      },
+      nature: () => {
+        this.playNoise(0.16, 600, 0.16);
+        this.tone(440, 0.2, "triangle", 0.12, 660);
+        window.setTimeout(() => this.tone(550, 0.18, "triangle", 0.1, 330), 80);
+      },
+      dark: () => {
+        this.playNoise(0.18, 350, 0.22);
+        this.tone(220, 0.24, "sawtooth", 0.12, 110);
+        window.setTimeout(() => this.tone(110, 0.2, "sawtooth", 0.1, 55), 80);
+      },
+      arcane: () => {
+        this.playNoise(0.14, 900, 0.18);
+        this.tone(660, 0.16, "square", 0.12, 1320);
+        window.setTimeout(() => this.tone(880, 0.14, "square", 0.08, 440), 80);
+      }
+    };
+    (profiles[variant] || profiles.arcane)();
+  }
   healSound() {
     this.tone(523.25, 0.18, "sine", 0.1, 1046.5);
     window.setTimeout(() => this.tone(659.25, 0.25, "sine", 0.1, 523.25), 80);
   }
-  footstep() {
-    this.playNoise(0.06, 250, 0.08);
+  footstep(terrain = "stone") {
+    const profiles = {
+      stone: { filter: 280, gain: 0.07 },
+      wood: { filter: 420, gain: 0.06 },
+      grass: { filter: 180, gain: 0.05 },
+      ice: { filter: 900, gain: 0.04 },
+      lava: { filter: 120, gain: 0.04 },
+      water: { filter: 500, gain: 0.05 },
+      snow: { filter: 150, gain: 0.04 }
+    };
+    const p = profiles[terrain] || profiles.stone;
+    this.playNoise(0.05, p.filter, p.gain);
+  }
+  terrainForTheme(theme) {
+    const map = {
+      dungeon: "stone",
+      cave: "stone",
+      library: "wood",
+      ice: "ice",
+      lava: "lava",
+      forest: "grass",
+      tomb: "stone",
+      sewer: "water"
+    };
+    return map[theme] || "stone";
+  }
+  playWeather(weather) {
+    this.stopWeather();
+    if (!weather || weather === "clear" || weather === "auto") return;
+    const ctx = this.ensureContext();
+    if (!ctx || this.muted) return;
+    const profiles = {
+      rain: { filter: 650, gain: 0.06 },
+      snow: { filter: 220, gain: 0.04 },
+      ash: { filter: 180, gain: 0.05 },
+      fog: { filter: 120, gain: 0.05 }
+    };
+    const p = profiles[weather];
+    if (!p) return;
+    const duration = 5;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * duration, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < data.length; i++) {
+      const white = Math.random() * 2 - 1;
+      last = (last + white * 0.05) / 1.05;
+      data[i] = last;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = p.filter;
+    filter.Q.value = 0.8;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(p.gain * this.musicVolume * (this.sfxVolume ?? 0.7), ctx.currentTime + 2);
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+    this.weatherNodes = { source: src, gain, filter };
+  }
+  stopWeather() {
+    if (!this.weatherNodes) return;
+    const ctx = this.ctx;
+    if (ctx) {
+      const { source, gain } = this.weatherNodes;
+      try {
+        gain.gain.cancelScheduledValues(ctx.currentTime);
+        gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.8);
+        source.stop(ctx.currentTime + 1);
+      } catch {
+        source.stop();
+      }
+    }
+    this.weatherNodes = null;
   }
   trapTrigger() {
     this.playNoise(0.25, 600, 0.25);
     this.tone(150, 0.2, "sawtooth", 0.12);
+  }
+  rangedHit(type = "arrow") {
+    if (type === "bolt") {
+      this.playNoise(0.12, 900, 0.18);
+      this.tone(600, 0.08, "square", 0.08);
+    } else {
+      this.playNoise(0.12, 1200, 0.18);
+      this.tone(400, 0.08, "sawtooth", 0.08);
+    }
+  }
+  levelUp() {
+    this.tone(523.25, 0.15, "sine", 0.14, 1046.5);
+    window.setTimeout(() => this.tone(659.25, 0.15, "sine", 0.14, 1318.5), 120);
+    window.setTimeout(() => this.tone(783.99, 0.35, "sine", 0.16, 1567.98), 240);
   }
   diceRoll() {
     const ctx = this.ctx;
@@ -8166,7 +8462,7 @@ var AudioController = class {
     filter.Q.value = 0.7;
     const gain = ctx.createGain();
     gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(this.musicVolume, ctx.currentTime + 1.5);
+    gain.gain.linearRampToValueAtTime(this.musicVolume * (this.sfxVolume ?? 0.7), ctx.currentTime + 1.5);
     const lfo = ctx.createOscillator();
     lfo.type = "sine";
     lfo.frequency.value = profile.lfo;
@@ -8629,8 +8925,11 @@ var Game = class {
   dmScaleSelect = document.createElement("select");
   dmPresetSelect = document.createElement("select");
   dmAction = null;
+  dmBrushRadius = 0;
   propContainer = document.createElement("div");
+  decalContainer = document.createElement("div");
   propElements = /* @__PURE__ */ new Map();
+  decalElements = /* @__PURE__ */ new Map();
   trapElements = /* @__PURE__ */ new Map();
   inspectorPanel = null;
   inspectorTarget = null;
@@ -8683,11 +8982,13 @@ var Game = class {
     this.mapContainer = el("div", { className: "game-map" });
     this.tokenContainer = el("div", { className: "game-tokens" });
     this.propContainer = el("div", { className: "game-props" });
+    this.decalContainer = el("div", { className: "game-decals" });
     this.fxContainer = el("div", { className: "game-effects" });
     this.hazardContainer = el("div", { className: "hazard-effects" });
     this.weatherContainer = el("div", { className: "weather-effects" });
     this.ambientContainer = el("div", { className: "ambient-particles" });
     this.canvasContainer.appendChild(this.mapContainer);
+    this.canvasContainer.appendChild(this.decalContainer);
     this.canvasContainer.appendChild(this.propContainer);
     this.canvasContainer.appendChild(this.tokenContainer);
     this.canvasContainer.appendChild(this.fxContainer);
@@ -9089,6 +9390,20 @@ var Game = class {
       }
     });
     audioGroup.appendChild(volumeSlider);
+    const sfxSlider = el("input", {
+      className: "hud-volume sfx-volume",
+      type: "range",
+      min: "0",
+      max: "1",
+      step: "0.05",
+      value: String(this.audio.getSfxVolume()),
+      title: "SFX / ambient volume",
+      oninput: (e) => {
+        const val = parseFloat(e.target.value);
+        this.audio.setSfxVolume(val);
+      }
+    });
+    audioGroup.appendChild(sfxSlider);
     footer.appendChild(audioGroup);
     const actionGroup = el("div", { className: "hud-footer-group" });
     const saveBtn = el("button", {
@@ -10214,6 +10529,38 @@ var Game = class {
     historyWrap.appendChild(this.dmUndoBtn);
     historyWrap.appendChild(this.dmRedoBtn);
     panel.appendChild(historyWrap);
+    const brushWrap = el("div", { className: "dm-tool-row dm-brush" });
+    brushWrap.appendChild(el("label", {}, "Brush"));
+    this.dmBrushSize = el("input", {
+      className: "dm-brush-size",
+      type: "range",
+      min: "0",
+      max: "5",
+      step: "1",
+      value: "0",
+      title: "Brush radius",
+      oninput: (e) => {
+        this.dmBrushRadius = parseInt(e.target.value, 10);
+        if (this.dmBrushValue) this.dmBrushValue.textContent = String(this.dmBrushRadius);
+        this.updateHoverHighlights();
+      }
+    });
+    brushWrap.appendChild(this.dmBrushSize);
+    this.dmBrushValue = el("span", { className: "dm-brush-value" }, "0");
+    brushWrap.appendChild(this.dmBrushValue);
+    panel.appendChild(brushWrap);
+    const decalWrap = el("div", { className: "dm-tool-row" });
+    this.dmDecalSelect = el("select", {});
+    ["blood", "crack", "rune", "scorch", "ice", "poison"].forEach((d) => {
+      const opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d;
+      this.dmDecalSelect.appendChild(opt);
+    });
+    decalWrap.appendChild(this.dmDecalSelect);
+    decalWrap.appendChild(el("button", { onclick: () => this.setDmAction("decal") }, "Paint Decal"));
+    decalWrap.appendChild(el("button", { onclick: () => this.setDmAction("clear-decal") }, "Erase Decal"));
+    panel.appendChild(decalWrap);
     const weatherWrap = el("div", { className: "dm-tool-row dm-atmosphere" });
     this.dmWeatherSelect = el("select", {});
     ["auto", "clear", "rain", "snow", "ash", "fog"].forEach((w) => {
@@ -10517,6 +10864,8 @@ var Game = class {
     clear(this.mapContainer);
     clear(this.tokenContainer);
     clear(this.propContainer);
+    clear(this.decalContainer);
+    this.decalElements.clear();
     this.tokenElements.clear();
     this.propElements.clear();
     this.trapElements.clear();
@@ -10531,6 +10880,8 @@ var Game = class {
     this.mapContainer.style.gridTemplateRows = `repeat(${this.module.height}, ${TILE_SIZE}px)`;
     this.propContainer.style.width = `${mapW}px`;
     this.propContainer.style.height = `${mapH}px`;
+    this.decalContainer.style.width = `${mapW}px`;
+    this.decalContainer.style.height = `${mapH}px`;
     this.tokenContainer.style.width = `${mapW}px`;
     this.tokenContainer.style.height = `${mapH}px`;
     this.fxContainer.style.width = `${mapW}px`;
@@ -10568,6 +10919,7 @@ var Game = class {
     }
     this.renderProps();
     this.renderTraps();
+    this.renderDecals();
     this.centerMap();
     this.startAmbientParticles();
     this.startHazardEffects();
@@ -10640,6 +10992,34 @@ var Game = class {
       }
     }
   }
+  renderDecals() {
+    if (!this.session) return;
+    const decals = this.session.decals || [];
+    const visibleIds = new Set();
+    for (const d of decals) {
+      visibleIds.add(d.id);
+      const isVisible = this.isDm() || this.visited.has(`${d.x},${d.y}`);
+      if (!isVisible) continue;
+      let el2 = this.decalElements.get(d.id);
+      if (!el2) {
+        el2 = el("div", {
+          className: `game-decal decal-${d.type}`,
+          style: `left:${d.x * TILE_SIZE}px;top:${d.y * TILE_SIZE}px;`
+        });
+        this.decalContainer.appendChild(el2);
+        this.decalElements.set(d.id, el2);
+      }
+      el2.className = `game-decal decal-${d.type}`;
+      el2.style.left = `${d.x * TILE_SIZE}px`;
+      el2.style.top = `${d.y * TILE_SIZE}px`;
+    }
+    for (const [id, el2] of this.decalElements) {
+      if (!visibleIds.has(id)) {
+        el2.remove();
+        this.decalElements.delete(id);
+      }
+    }
+  }
   hasLineOfSight(x0, y0, x1, y1) {
     let dx = Math.abs(x1 - x0);
     let dy = Math.abs(y1 - y0);
@@ -10702,7 +11082,7 @@ var Game = class {
       this.hoverTile = null;
       return;
     }
-    const isDmHover = this.isDm() && this.dmAction && ["reveal", "hide", "prop", "inspect"].includes(this.dmAction);
+    const isDmHover = this.isDm() && this.dmAction && ["reveal", "hide", "prop", "inspect", "decal", "clear-decal"].includes(this.dmAction);
     if (!isDmHover && this.session.phase !== "player") {
       this.hoverTile = null;
       return;
@@ -10775,6 +11155,18 @@ var Game = class {
         if (g) g.classList.add("tile-highlight-target");
         const tokenEl = this.tokenElements.get(target.id);
         if (tokenEl) tokenEl.classList.add("token-highlight-target");
+      }
+    }
+    if (this.isDm() && this.dmAction && this.hoverTile) {
+      const r = this.dmBrushRadius ?? 0;
+      const className = ["reveal", "decal"].includes(this.dmAction) ? "tile-highlight-path" : "tile-highlight-aoe";
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (Math.abs(dx) + Math.abs(dy) > r) continue;
+          const tx = hx + dx, ty = hy + dy;
+          const g = this.tileSprites[ty]?.[tx];
+          if (g) g.classList.add(className);
+        }
       }
     }
   }
@@ -10899,6 +11291,7 @@ var Game = class {
     } else {
       cfg = weatherProfiles[weather];
     }
+    this.audio.playWeather(weather === "auto" ? cfg?.type : weather);
     if (!cfg) return;
     const w = this.module.width * TILE_SIZE;
     const h = this.module.height * TILE_SIZE;
@@ -11433,9 +11826,7 @@ var Game = class {
     projectile.style.setProperty("--ty", `${dy}px`);
     projectile.style.animation = `projectile-fly ${duration}s ease-out forwards`;
     this.fxContainer.appendChild(projectile);
-    if (type === "arrow") {
-      window.setTimeout(() => this.audio?.arrowHit(), duration * 1000);
-    }
+    window.setTimeout(() => this.audio?.rangedHit(type === "fire" ? "bolt" : "arrow"), duration * 1000);
     window.setTimeout(() => projectile.remove(), duration * 1000 + 50);
   }
   spawnConfetti() {
@@ -11487,9 +11878,11 @@ var Game = class {
     const dy = endY - startY;
     const dist = Math.sqrt(dx * dx + dy * dy);
     const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    const classesArr = Array.isArray(cls) ? cls : [cls];
+    const primaryClass = (classesArr[0] || "magic-user").toLowerCase().replace(/\s+/g, "-");
     const { colors, variants, blended } = this.spellColorsForClasses(cls);
     const variant = variants[0];
-    const beam = el("div", { className: `spell-beam ${variant}${blended ? " blended" : ""}` });
+    const beam = el("div", { className: `spell-beam ${variant}${blended ? " blended" : ""} class-${primaryClass}` });
     if (blended && Array.isArray(colors)) {
       const stops = colors.map((c) => c.start).join(", ");
       const glows = colors.map((c) => `0 0 12px rgba(${c.glow}, 0.85)`).join(", ");
@@ -11501,55 +11894,67 @@ var Game = class {
     beam.style.width = `${dist}px`;
     beam.style.transform = `rotate(${angle}deg)`;
     this.fxContainer.appendChild(beam);
-    this.spawnSpellCharge(startX, startY, variant);
-    window.setTimeout(() => this.spawnSpellCast(startX, startY, variant), 160);
-    window.setTimeout(() => this.spawnSpellImpact(endX, endY, variant), 280);
+    this.spawnSpellCharge(startX, startY, variant, primaryClass);
+    window.setTimeout(() => this.spawnSpellCast(startX, startY, variant, primaryClass), 160);
+    window.setTimeout(() => this.spawnSpellImpact(endX, endY, variant, primaryClass), 280);
     window.setTimeout(() => beam.remove(), 420);
   }
-  spawnSpellCharge(x, y, variant) {
-    const charge = el("div", { className: `spell-charge ${variant}` });
+  spawnSpellCharge(x, y, variant, primaryClass = "") {
+    const charge = el("div", { className: `spell-charge ${variant} class-${primaryClass}` });
     charge.style.left = `${x}px`;
     charge.style.top = `${y}px`;
     this.fxContainer.appendChild(charge);
     window.setTimeout(() => charge.remove(), 300);
   }
-  spawnSpellCast(x, y, variant) {
-    const orb = el("div", { className: `spell-cast ${variant}` });
+  spawnSpellCast(x, y, variant, primaryClass = "") {
+    const orb = el("div", { className: `spell-cast ${variant} class-${primaryClass}` });
     orb.style.left = `${x}px`;
     orb.style.top = `${y}px`;
     this.fxContainer.appendChild(orb);
     window.setTimeout(() => orb.remove(), 450);
   }
-  spawnSpellImpact(x, y, variant) {
-    const burst = el("div", { className: `spell-impact ${variant}` });
+  spawnSpellImpact(x, y, variant, primaryClass = "") {
+    const burst = el("div", { className: `spell-impact ${variant} class-${primaryClass}` });
     burst.style.left = `${x}px`;
     burst.style.top = `${y}px`;
     this.fxContainer.appendChild(burst);
-    this.spawnSpellDetritus(x, y, variant);
-    this.spawnSpellRing(x, y, variant);
+    this.spawnSpellDetritus(x, y, variant, primaryClass);
+    this.spawnSpellRing(x, y, variant, primaryClass);
     this.spawnGroundDecal(x, y, variant);
-    this.audio?.spellHit();
+    this.audio?.spellHitVariant(variant);
     window.setTimeout(() => burst.remove(), 550);
   }
-  spawnSpellRing(x, y, variant) {
-    const ring = el("div", { className: `spell-ring ${variant}` });
+  spawnSpellRing(x, y, variant, primaryClass = "") {
+    const ring = el("div", { className: `spell-ring ${variant} class-${primaryClass}` });
     ring.style.left = `${x}px`;
     ring.style.top = `${y}px`;
     this.fxContainer.appendChild(ring);
     window.setTimeout(() => ring.remove(), 650);
   }
-  spawnSpellDetritus(x, y, variant) {
+  spawnSpellDetritus(x, y, variant, primaryClass = "") {
     const cx = x - TILE_SIZE / 2;
     const cy = y - TILE_SIZE / 2;
-    const configs = {
+    const classConfigs = {
+      cleric: { count: 10, className: "spell-rune", color: "#f1c40f", gravity: false, spin: true },
+      paladin: { count: 10, className: "spell-rune", color: "#f1c40f", gravity: false, spin: true },
+      druid: { count: 12, className: "spell-leaf", color: "#2ecc71", gravity: true, spin: true },
+      ranger: { count: 12, className: "spell-leaf", color: "#2ecc71", gravity: true, spin: true },
+      illusionist: { count: 14, className: "spell-shard", color: "#9b59b6", gravity: false, spin: false },
+      assassin: { count: 14, className: "spell-shard", color: "#9b59b6", gravity: false, spin: false },
+      thief: { count: 14, className: "spell-shard", color: "#9b59b6", gravity: false, spin: false },
+      "magic-user": { count: 12, className: "spell-glyph", color: "#3498db", gravity: false, spin: true },
+      mage: { count: 12, className: "spell-glyph", color: "#3498db", gravity: false, spin: true },
+      wizard: { count: 12, className: "spell-glyph", color: "#3498db", gravity: false, spin: true }
+    };
+    const variantConfigs = {
       holy: { count: 10, className: "spell-rune", color: "#f1c40f", gravity: false, spin: true },
       nature: { count: 12, className: "spell-leaf", color: "#2ecc71", gravity: true, spin: true },
       dark: { count: 14, className: "spell-shard", color: "#9b59b6", gravity: false, spin: false },
       arcane: { count: 12, className: "spell-glyph", color: "#3498db", gravity: false, spin: true }
     };
-    const cfg = configs[variant] || configs.arcane;
+    const cfg = classConfigs[primaryClass] || variantConfigs[variant] || variantConfigs.arcane;
     for (let i = 0; i < cfg.count; i++) {
-      const piece = el("div", { className: `spell-piece ${cfg.className}` });
+      const piece = el("div", { className: `spell-piece ${cfg.className} class-${primaryClass}` });
       const angle = Math.random() * Math.PI * 2;
       const spread = 14 + Math.random() * 28;
       const px = Math.cos(angle) * spread;
@@ -11585,12 +11990,19 @@ var Game = class {
           if (!tokenId) return;
           response = await dmMove(this.sessionId, { token_id: tokenId, x, y });
         } else if (this.dmAction === "reveal") {
-          response = await dmReveal(this.sessionId, { x, y, radius: 4 });
+          const r = this.dmBrushRadius ?? 0;
+          response = await dmReveal(this.sessionId, { x, y, radius: r });
         } else if (this.dmAction === "hide") {
-          response = await dmHide(this.sessionId, { x, y, radius: 4 });
+          const r = this.dmBrushRadius ?? 0;
+          response = await dmHide(this.sessionId, { x, y, radius: r });
         } else if (this.dmAction === "prop") {
           const type = this.dmPropSelect.value || "barrel";
           response = await dmProp(this.sessionId, { type, x, y });
+        } else if (this.dmAction === "decal") {
+          const type = this.dmDecalSelect.value || "blood";
+          response = await dmDecal(this.sessionId, { type, x, y, radius: this.dmBrushRadius ?? 0 });
+        } else if (this.dmAction === "clear-decal") {
+          response = await dmDecal(this.sessionId, { type: "clear", x, y, radius: this.dmBrushRadius ?? 0 });
         } else if (this.dmAction === "encounter") {
           const presetName = this.dmEncounterSelect.value;
           let name = this.dmMonsterSelect.value || "goblin";
@@ -11784,6 +12196,14 @@ var Game = class {
     const prevPlayerPos = prevSession ? `${prevSession.player.x},${prevSession.player.y}` : "";
     this.session = session;
     this.computeCombatEffects(prevSession, session);
+    if (prevSession) {
+      const prevLevels = (prevSession.players || []).reduce((m, p) => {
+        m[p.id] = p.level ?? 1;
+        return m;
+      }, {});
+      const leveledUp = (session.players || []).some((p) => (p.level ?? 1) > (prevLevels[p.id] ?? 1));
+      if (leveledUp) this.audio.levelUp();
+    }
     const canObserve = session.status === "active" && !this.isDm();
     this.autoplayBtn.style.display = canObserve ? "inline-block" : "none";
     session.dm_revealed?.forEach((key) => this.visited.add(key));
@@ -11802,6 +12222,7 @@ var Game = class {
     this.renderTokens();
     this.renderProps();
     this.renderTraps();
+    this.renderDecals();
     if (!prevSession || prevSession.weather !== session.weather) {
       this.startWeatherEffects();
     }
@@ -11832,7 +12253,7 @@ var Game = class {
       this.audio.defeat();
     }
     if (prevPlayerPos && prevPlayerPos !== `${session.player.x},${session.player.y}`) {
-      this.audio.footstep();
+      this.audio.footstep(this.audio.terrainForTheme(this.module.theme || "dungeon"));
     }
     if (session.status === "active" && session.phase === "player" && session.turn !== this.lastBannerTurn) {
       this.showTurnBanner(session.turn);
