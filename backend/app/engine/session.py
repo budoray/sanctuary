@@ -4,6 +4,7 @@ The state is a plain dict so it serialises cleanly to JSON and the DB.
 """
 from __future__ import annotations
 
+import copy
 import secrets
 from collections import deque
 from datetime import datetime, timedelta, timezone
@@ -417,6 +418,8 @@ async def new_game(
         "traps": [],
         "weather": "auto",
         "lighting": "day",
+        "journal": {"notes": [], "quests": []},
+        "dm_history": {"undo": [], "redo": []},
     }
     if dungeon_links:
         state["dungeon_links"] = dungeon_links
@@ -462,6 +465,8 @@ async def advance_module(
     state["traps"] = []
     state["weather"] = "auto"
     state["lighting"] = "day"
+    state["journal"] = {"notes": [], "quests": []}
+    state["dm_history"] = {"undo": [], "redo": []}
     state["player"] = _active_player(state)
     return state
 
@@ -474,6 +479,67 @@ def _unique_monster_id(state: dict[str, Any], base_id: str) -> str:
     while f"{base_id}_{suffix}" in existing:
         suffix += 1
     return f"{base_id}_{suffix}"
+
+
+def _dm_snapshot(state: dict[str, Any]) -> None:
+    """Push the current state onto the DM undo stack and clear redo."""
+    history = state.setdefault("dm_history", {"undo": [], "redo": []})
+    history["undo"].append(copy.deepcopy(state))
+    history["redo"] = []
+    if len(history["undo"]) > 20:
+        history["undo"].pop(0)
+
+
+async def dm_undo(state: dict[str, Any]) -> dict[str, Any]:
+    """Restore the most recent DM undo snapshot."""
+    history = state.get("dm_history", {"undo": [], "redo": []})
+    if not history.get("undo"):
+        raise ValueError("nothing to undo")
+    history["redo"].append(copy.deepcopy(state))
+    snapshot = history["undo"].pop()
+    preserved = {
+        "id": state.get("id"),
+        "account_id": state.get("account_id"),
+        "campaign_id": state.get("campaign_id"),
+        "character_id": state.get("character_id"),
+        "module_id": state.get("module_id"),
+        "seed": state.get("seed"),
+        "mode": state.get("mode"),
+        "turn_timer_seconds": state.get("turn_timer_seconds"),
+        "dm_history": history,
+    }
+    state.clear()
+    state.update(snapshot)
+    state.update(preserved)
+    state["version"] = snapshot.get("version", 0) + 1
+    state["log"].append("The DM undoes the last action.")
+    return state
+
+
+async def dm_redo(state: dict[str, Any]) -> dict[str, Any]:
+    """Restore the most recent redo snapshot."""
+    history = state.get("dm_history", {"undo": [], "redo": []})
+    if not history.get("redo"):
+        raise ValueError("nothing to redo")
+    history["undo"].append(copy.deepcopy(state))
+    snapshot = history["redo"].pop()
+    preserved = {
+        "id": state.get("id"),
+        "account_id": state.get("account_id"),
+        "campaign_id": state.get("campaign_id"),
+        "character_id": state.get("character_id"),
+        "module_id": state.get("module_id"),
+        "seed": state.get("seed"),
+        "mode": state.get("mode"),
+        "turn_timer_seconds": state.get("turn_timer_seconds"),
+        "dm_history": history,
+    }
+    state.clear()
+    state.update(snapshot)
+    state.update(preserved)
+    state["version"] = snapshot.get("version", 0) + 1
+    state["log"].append("The DM redoes the last action.")
+    return state
 
 
 async def dm_spawn(
@@ -489,6 +555,7 @@ async def dm_spawn(
     """Spawn a named monster at x, y."""
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
+    _dm_snapshot(state)
     if not module.map.in_bounds(x, y):
         raise ValueError("target is out of bounds")
     if not module.map.walkable(x, y):
@@ -531,6 +598,7 @@ async def dm_move(
     """Move any monster to x, y."""
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
+    _dm_snapshot(state)
     token = next(
         (m for m in state.get("monsters", []) if m["id"] == token_id and m.get("alive", True)),
         None,
@@ -556,6 +624,7 @@ async def dm_damage(
     """Apply damage to a monster or player."""
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
+    _dm_snapshot(state)
     token = next(
         (t for t in _tokens(state) if t["id"] == token_id and t.get("alive", True)),
         None,
@@ -591,6 +660,7 @@ async def dm_reveal(
     state: dict[str, Any], module: Module, x: int, y: int, radius: int
 ) -> None:
     """Reveal a radius of fog for all players."""
+    _dm_snapshot(state)
     radius = int(radius)
     if radius < 0 or radius > 20:
         raise ValueError("radius must be between 0 and 20")
@@ -609,6 +679,7 @@ async def dm_hide(
     state: dict[str, Any], module: Module, x: int, y: int, radius: int
 ) -> None:
     """Hide a radius of fog again for all players."""
+    _dm_snapshot(state)
     radius = int(radius)
     if radius < 0 or radius > 20:
         raise ValueError("radius must be between 0 and 20")
@@ -637,6 +708,7 @@ async def dm_prop(
     """Place or remove a decorative environment prop."""
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
+    _dm_snapshot(state)
     if not module.map.in_bounds(x, y):
         raise ValueError("target is out of bounds")
 
@@ -738,6 +810,7 @@ async def dm_trap(
     """Place a hidden DM trap at x, y."""
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
+    _dm_snapshot(state)
     if not module.map.in_bounds(x, y):
         raise ValueError("target is out of bounds")
     if not module.map.walkable(x, y):
@@ -769,6 +842,7 @@ async def dm_weather(
     """Set the session-wide weather overlay."""
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
+    _dm_snapshot(state)
     weather = (weather or "auto").lower()
     if weather not in _WEATHER_TYPES:
         raise ValueError(f"unknown weather: {weather}")
@@ -784,12 +858,81 @@ async def dm_lighting(
     """Set the session-wide lighting mood."""
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
+    _dm_snapshot(state)
     lighting = (lighting or "day").lower()
     if lighting not in _LIGHTING_TYPES:
         raise ValueError(f"unknown lighting: {lighting}")
     state["lighting"] = lighting
     state["version"] += 1
     state["log"].append(f"The light fades to {lighting}.")
+
+
+async def journal_add(
+    state: dict[str, Any],
+    entry_type: str,
+    text: str,
+    x: int | None = None,
+    y: int | None = None,
+) -> dict[str, Any]:
+    """Add a note or quest entry to the campaign journal."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    if entry_type not in ("note", "quest"):
+        raise ValueError("entry_type must be note or quest")
+    text = (text or "").strip()[:500]
+    if not text:
+        raise ValueError("text is required")
+    journal = state.setdefault("journal", {"notes": [], "quests": []})
+    entry = {
+        "id": f"{entry_type}_{len(journal.get(entry_type + 's', []))}_{state['version']}",
+        "type": entry_type,
+        "text": text,
+        "turn": state.get("turn", 1),
+        "x": x,
+        "y": y,
+    }
+    journal.setdefault(entry_type + "s", []).append(entry)
+    state["version"] += 1
+    return entry
+
+
+async def journal_update(
+    state: dict[str, Any],
+    entry_id: str,
+    text: str,
+    completed: bool | None = None,
+) -> dict[str, Any]:
+    """Update or complete a journal entry."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    journal = state.setdefault("journal", {"notes": [], "quests": []})
+    for section in ("notes", "quests"):
+        for entry in journal.get(section, []):
+            if entry.get("id") == entry_id:
+                if text is not None:
+                    entry["text"] = (text or "").strip()[:500]
+                if completed is not None and section == "quests":
+                    entry["completed"] = bool(completed)
+                state["version"] += 1
+                return entry
+    raise ValueError("entry not found")
+
+
+async def journal_delete(
+    state: dict[str, Any],
+    entry_id: str,
+) -> None:
+    """Remove a journal entry."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    journal = state.setdefault("journal", {"notes": [], "quests": []})
+    for section in ("notes", "quests"):
+        before = len(journal.get(section, []))
+        journal[section] = [e for e in journal.get(section, []) if e.get("id") != entry_id]
+        if len(journal[section]) < before:
+            state["version"] += 1
+            return
+    raise ValueError("entry not found")
 
 
 def _tokens(state: dict[str, Any]) -> list[dict[str, Any]]:
@@ -2036,4 +2179,5 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "traps": state.get("traps", []),
         "weather": state.get("weather", "auto"),
         "lighting": state.get("lighting", "day"),
+        "journal": state.get("journal", {"notes": [], "quests": []}),
     }

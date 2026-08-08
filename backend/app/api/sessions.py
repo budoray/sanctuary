@@ -1177,3 +1177,133 @@ async def account_progress(
         "sessions": counts.get("session_start", 0),
         "modules_cleared": len(modules_cleared),
     }
+
+
+@router.post("/sessions/{session_id}/journal")
+async def add_journal_entry(
+    session_id: str,
+    data: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord).where(SessionRecord.id == session_id)
+    )
+    record = result.scalar_one_or_none()
+    if not record or not await _can_access_session(record, account_id, db):
+        raise HTTPException(status_code=404, detail="Session not found")
+    if record.status != "active":
+        raise HTTPException(status_code=400, detail="Instance is not active")
+
+    entry_type = data.get("type", "note")
+    if entry_type == "quest" and not await _is_owner_or_dm(record, account_id, db):
+        raise HTTPException(status_code=403, detail="Only the DM can add quests")
+
+    state = json.loads(record.state)
+    try:
+        await session_engine.journal_add(
+            state,
+            entry_type,
+            data.get("text", ""),
+            x=data.get("x"),
+            y=data.get("y"),
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    _persist_instance_state(record, state)
+    await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update",
+            {"session": session_view},
+            room=session_id,
+        )
+    except Exception:
+        pass
+
+    return {"session": session_view}
+
+
+@router.patch("/sessions/{session_id}/journal/{entry_id}")
+async def update_journal_entry(
+    session_id: str,
+    entry_id: str,
+    data: dict[str, Any],
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord).where(SessionRecord.id == session_id)
+    )
+    record = result.scalar_one_or_none()
+    if not record or not await _can_access_session(record, account_id, db):
+        raise HTTPException(status_code=404, detail="Session not found")
+    if record.status != "active":
+        raise HTTPException(status_code=400, detail="Instance is not active")
+
+    state = json.loads(record.state)
+    try:
+        await session_engine.journal_update(
+            state,
+            entry_id,
+            data.get("text"),
+            completed=data.get("completed"),
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    _persist_instance_state(record, state)
+    await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update",
+            {"session": session_view},
+            room=session_id,
+        )
+    except Exception:
+        pass
+
+    return {"session": session_view}
+
+
+@router.delete("/sessions/{session_id}/journal/{entry_id}")
+async def delete_journal_entry(
+    session_id: str,
+    entry_id: str,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    result = await db.execute(
+        select(SessionRecord).where(SessionRecord.id == session_id)
+    )
+    record = result.scalar_one_or_none()
+    if not record or not await _can_access_session(record, account_id, db):
+        raise HTTPException(status_code=404, detail="Session not found")
+    if record.status != "active":
+        raise HTTPException(status_code=400, detail="Instance is not active")
+
+    state = json.loads(record.state)
+    try:
+        await session_engine.journal_delete(state, entry_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    _persist_instance_state(record, state)
+    await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update",
+            {"session": session_view},
+            room=session_id,
+        )
+    except Exception:
+        pass
+
+    return {"session": session_view}

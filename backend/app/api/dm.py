@@ -347,3 +347,63 @@ async def dm_lighting(
     except Exception:
         pass
     return {"session": session_view}
+
+
+@router.post("/sessions/{session_id}/dm/undo")
+async def dm_undo(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    record = await _load_session_dm_only(session_id, account_id, db)
+    state = json.loads(record.state)
+    prev_state = json.loads(record.state)
+
+    try:
+        await session_engine.dm_undo(state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    _emit_session_events(db, prev_state, state, account_id)
+    record.state = json.dumps(state)
+    record.status = state["status"]
+    await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update", {"session": session_view}, room=session_id
+        )
+    except Exception:
+        pass
+    return {"session": session_view}
+
+
+@router.post("/sessions/{session_id}/dm/redo")
+async def dm_redo(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    account_id: int = Depends(require_account),
+):
+    record = await _load_session_dm_only(session_id, account_id, db)
+    state = json.loads(record.state)
+    prev_state = json.loads(record.state)
+
+    try:
+        await session_engine.dm_redo(state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    _emit_session_events(db, prev_state, state, account_id)
+    record.state = json.dumps(state)
+    record.status = state["status"]
+    await db.commit()
+
+    session_view = session_engine.view(state)
+    try:
+        await socket_manager.emit(
+            "session_update", {"session": session_view}, room=session_id
+        )
+    except Exception:
+        pass
+    return {"session": session_view}

@@ -846,6 +846,83 @@ button.danger:hover:not(:disabled) {
   0% { transform: translateY(0) rotate(0deg); opacity: 1; }
   100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 }
+.victory-flare {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 20px 4px var(--accent-glow), 0 0 40px 8px rgba(212, 175, 55, 0.3);
+  pointer-events: none;
+  z-index: 250;
+  animation: flare-burst 1.2s ease-out forwards;
+}
+@keyframes flare-burst {
+  0% { opacity: 0; transform: scale(0); }
+  20% { opacity: 1; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(0.2); }
+}
+.defeat-mist {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(80, 20, 20, 0.35) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 199;
+  animation: mist-rise 3.5s ease-in forwards;
+}
+@keyframes mist-rise {
+  0% { opacity: 0; transform: translateY(0) scale(0.6); }
+  20% { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(-120vh) scale(2.2); }
+}
+.game-over-overlay.victory {
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(20, 15, 5, 0.9),
+      rgba(5, 6, 7, 0.97));
+}
+.game-over-overlay.defeat {
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(25, 5, 5, 0.9),
+      rgba(5, 6, 7, 0.98));
+}
+.game-over-cinematic {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 201;
+}
+.game-over-title {
+  font-size: clamp(48px, 12vw, 120px);
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: title-impact 1.2s ease-out 0.2s forwards;
+  text-shadow: 0 0 60px currentColor;
+}
+.game-over-title.won {
+  color: var(--accent);
+}
+.game-over-title.lost {
+  color: #c0392b;
+  text-shadow: 0 0 60px rgba(192, 57, 43, 0.5);
+}
+@keyframes title-impact {
+  0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+  30% { opacity: 1; transform: scale(1.05) translateY(0); }
+  60% { opacity: 1; transform: scale(0.98); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
 .game-over-panel h1 {
   margin: 0 0 14px;
   font-size: 30px;
@@ -853,6 +930,32 @@ button.danger:hover:not(:disabled) {
   text-transform: uppercase;
   color: var(--accent);
   text-shadow: 0 0 20px var(--accent-glow);
+}
+.game-over-tally {
+  margin: 0 auto 20px;
+  padding: 14px 18px;
+  max-width: 280px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+  text-align: left;
+}
+.tally-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.tally-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin: 4px 0;
+}
+.tally-value {
+  font-weight: 700;
+  color: var(--accent);
 }
 .game-over-panel .message {
   color: var(--muted);
@@ -1407,6 +1510,146 @@ button.danger:hover:not(:disabled) {
   font-style: italic;
   padding: 6px 0;
 }
+.journal-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 18px 10px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.journal-tab {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.journal-tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+.journal-tab.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(212, 175, 55, 0.08);
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+.journal-section {
+  animation: fade-in 0.2s ease;
+}
+.journal-input {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  outline: none;
+}
+.journal-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.15);
+}
+.journal-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.journal-add-btn {
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 8px 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.journal-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.journal-add-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.journal-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.journal-entry-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+}
+.journal-entry-row.completed {
+  opacity: 0.55;
+}
+.journal-entry-row.completed .journal-entry-text {
+  text-decoration: line-through;
+}
+.journal-entry-text {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+.journal-entry-text span {
+  display: block;
+}
+.journal-edit-input {
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 12px;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  outline: none;
+}
+.journal-entry-meta {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.journal-entry-actions {
+  display: flex;
+  gap: 4px;
+}
+.journal-action-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.journal-action-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+}
+.journal-action-btn.danger:hover {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
 .game-loading {
   position: absolute;
   inset: 0;
@@ -1590,7 +1833,7 @@ button.danger:hover:not(:disabled) {
   z-index: 100;
   pointer-events: none;
   min-width: 120px;
-  max-width: 180px;
+  max-width: 220px;
   padding: 8px 10px;
   background: var(--panel);
   border: 1px solid var(--panel-border);
@@ -1612,6 +1855,30 @@ button.danger:hover:not(:disabled) {
   color: var(--muted);
   font-size: 10px;
   margin-bottom: 3px;
+}
+.token-tooltip-card {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 5px;
+}
+.token-tooltip-ability-name {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+.token-tooltip-ability-meta {
+  color: var(--gold);
+  font-size: 9px;
+  margin-bottom: 3px;
+}
+.token-tooltip-ability-effect {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
 }
 .timer-config {
   display: flex;
@@ -5241,6 +5508,25 @@ button.danger:hover:not(:disabled) {
 .dm-tool-actions button {
   flex: 1 1 auto;
   font-size: 11px;
+}
+.dm-history {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.dm-history button {
+  flex: 1;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.dm-history button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.dm-history button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--accent);
 }
 
 /* Token inspector */

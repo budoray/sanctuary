@@ -327,6 +327,27 @@ async function dmDamage(sessionId, payload) {
     body: JSON.stringify(payload)
   });
 }
+async function dmUndo(sessionId) {
+  return api(`/api/sessions/${sessionId}/dm/undo`, { method: "POST" });
+}
+async function dmRedo(sessionId) {
+  return api(`/api/sessions/${sessionId}/dm/redo`, { method: "POST" });
+}
+async function journalAdd(sessionId, payload) {
+  return api(`/api/sessions/${sessionId}/journal`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+async function journalUpdate(sessionId, entryId, payload) {
+  return api(`/api/sessions/${sessionId}/journal/${entryId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+}
+async function journalDelete(sessionId, entryId) {
+  return api(`/api/sessions/${sessionId}/journal/${entryId}`, { method: "DELETE" });
+}
 async function getAccountProgress() {
   return api("/api/account/progress");
 }
@@ -8543,6 +8564,18 @@ function withTimeout(promise, ms, reason = "Operation timed out") {
 var VISION_RADIUS = 6;
 var TORCH_LIGHT_RADIUS = 3.5;
 var RANGED_RANGE2 = 4;
+var CLASS_ABILITY_CARDS = {
+  fighter: { name: "Power Attack", range: "Melee", effect: "1d8 damage strike." },
+  cleric: { name: "Turn Undead / Holy Burst", range: "Target / 5x5 area", effect: "Turn undead for 1d6 damage, or burst for 1d6 holy damage." },
+  "magic-user": { name: "Magic Missile / Fireball", range: "6 tiles / 5x5 area", effect: "Magic missile for 1d4+1, or fireball for 1d4+1 area damage." },
+  illusionist: { name: "Phantasm / Fireball", range: "6 tiles / 5x5 area", effect: "Phantasm bolt for 1d4+1, or fireball for 1d4+1 area damage." },
+  thief: { name: "Sneak Attack", range: "Melee", effect: "Precise strike for 1d6 damage." },
+  druid: { name: "Nature's Wrath", range: "Melee", effect: "Primal strike for 1d6 damage." },
+  ranger: { name: "Hunter's Shot", range: "4 tiles", effect: "Ranged strike for 1d6 damage." },
+  paladin: { name: "Smite", range: "Melee", effect: "Holy strike for 1d6 damage." },
+  assassin: { name: "Assassinate", range: "Melee", effect: "Lethal strike for 1d6 damage." },
+  monk: { name: "Flurry", range: "Melee", effect: "Rapid strikes for 1d6 damage." }
+};
 var Game = class {
   root;
   sessionId;
@@ -8614,6 +8647,7 @@ var Game = class {
   presenceList = document.createElement("div");
   journalPanel = null;
   journalOpen = false;
+  journalTab = "notes";
   heartbeatInterval = null;
   moduleId;
   loadingOverlay;
@@ -9144,23 +9178,107 @@ var Game = class {
     const close = el("button", { className: "journal-close", onclick: () => this.toggleJournal() }, "\xD7");
     header.appendChild(close);
     card.appendChild(header);
+    const tabs = el("div", { className: "journal-tabs" });
+    const makeTab = (key, label) => {
+      const btn = el("button", {
+        className: `journal-tab${this.journalTab === key ? " active" : ""}`,
+        "data-tab": key,
+        onclick: () => {
+          this.journalTab = key;
+          this.updateJournalTabs();
+          this.updateJournal();
+        }
+      }, label);
+      tabs.appendChild(btn);
+      return btn;
+    };
+    makeTab("notes", "Notes");
+    makeTab("quests", "Quests");
+    makeTab("bestiary", "Bestiary");
+    makeTab("chronicle", "Chronicle");
+    card.appendChild(tabs);
     const body = el("div", { className: "journal-body" });
     const moduleName = el("h3", { className: "journal-module" }, this.moduleId);
     body.appendChild(moduleName);
-    const bestiary = el("div", { className: "journal-bestiary" });
-    bestiary.appendChild(el("h4", {}, "Bestiary"));
+    const notesSection = el("div", { className: "journal-section", "data-section": "notes" });
+    const noteInput = el("input", {
+      className: "journal-input",
+      type: "text",
+      placeholder: "Record a note...",
+      maxlength: 500,
+      onkeydown: (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          this.addJournalEntry("note", e.target.value).then(() => {
+            e.target.value = "";
+          });
+        }
+      }
+    });
+    notesSection.appendChild(noteInput);
+    const noteAdd = el("button", {
+      className: "journal-add-btn",
+      onclick: () => {
+        this.addJournalEntry("note", noteInput.value).then(() => {
+          noteInput.value = "";
+        });
+      }
+    }, "Add Note");
+    notesSection.appendChild(noteAdd);
+    const notesList = el("div", { className: "journal-entries notes-list" });
+    notesSection.appendChild(notesList);
+    body.appendChild(notesSection);
+    const questsSection = el("div", { className: "journal-section", "data-section": "quests", style: "display:none" });
+    const questInput = el("input", {
+      className: "journal-input",
+      type: "text",
+      placeholder: this.isDm() ? "Assign a quest..." : "Quests appear here...",
+      maxlength: 500,
+      disabled: !this.isDm(),
+      onkeydown: (e) => {
+        if (e.key === "Enter" && this.isDm()) {
+          e.preventDefault();
+          this.addJournalEntry("quest", e.target.value).then(() => {
+            e.target.value = "";
+          });
+        }
+      }
+    });
+    questsSection.appendChild(questInput);
+    const questAdd = el("button", {
+      className: "journal-add-btn",
+      disabled: !this.isDm(),
+      onclick: () => {
+        this.addJournalEntry("quest", questInput.value).then(() => {
+          questInput.value = "";
+        });
+      }
+    }, "Add Quest");
+    questsSection.appendChild(questAdd);
+    const questsList = el("div", { className: "journal-entries quests-list" });
+    questsSection.appendChild(questsList);
+    body.appendChild(questsSection);
+    const bestiarySection = el("div", { className: "journal-section", "data-section": "bestiary", style: "display:none" });
     const bestiaryList = el("div", { className: "journal-bestiary-list" });
-    bestiary.appendChild(bestiaryList);
-    body.appendChild(bestiary);
-    const chronicle = el("div", { className: "journal-chronicle" });
-    chronicle.appendChild(el("h4", {}, "Chronicle"));
+    bestiarySection.appendChild(bestiaryList);
+    body.appendChild(bestiarySection);
+    const chronicleSection = el("div", { className: "journal-section", "data-section": "chronicle", style: "display:none" });
     const chronicleList = el("div", { className: "journal-chronicle-list" });
-    chronicle.appendChild(chronicleList);
-    body.appendChild(chronicle);
+    chronicleSection.appendChild(chronicleList);
+    body.appendChild(chronicleSection);
     card.appendChild(body);
     panel.appendChild(card);
     panel.style.display = "none";
     return panel;
+  }
+  updateJournalTabs() {
+    if (!this.journalPanel) return;
+    this.journalPanel.querySelectorAll(".journal-tab").forEach((tab) => {
+      tab.classList.toggle("active", tab.dataset.tab === this.journalTab);
+    });
+    this.journalPanel.querySelectorAll(".journal-section").forEach((sec) => {
+      sec.style.display = sec.dataset.section === this.journalTab ? "block" : "none";
+    });
   }
   toggleJournal() {
     if (!this.journalPanel) {
@@ -9418,10 +9536,143 @@ var Game = class {
     this.dmMonsterSelect.value = preset.monster;
     this.dmScaleSelect.value = String(preset.scale ?? 1);
   }
+  async addJournalEntry(entryType, text) {
+    if (!this.session || this.inFlight) return;
+    const value = (text || "").trim();
+    if (!value) return;
+    this.lockInput();
+    try {
+      const { session } = await journalAdd(this.sessionId, {
+        type: entryType,
+        text: value,
+        x: this.session.player?.x,
+        y: this.session.player?.y
+      });
+      this.update(session);
+    } catch (err) {
+      this.log(err.message || `Failed to add ${entryType}.`);
+    } finally {
+      this.unlockInput();
+    }
+  }
+  async saveJournalEntry(entryId, text) {
+    if (!this.session || this.inFlight) return;
+    const value = (text || "").trim();
+    if (!value) return;
+    this.lockInput();
+    try {
+      const { session } = await journalUpdate(this.sessionId, entryId, { text: value });
+      this.update(session);
+    } catch (err) {
+      this.log(err.message || "Failed to update entry.");
+    } finally {
+      this.unlockInput();
+    }
+  }
+  async toggleJournalQuest(entryId, completed) {
+    if (!this.session || this.inFlight) return;
+    this.lockInput();
+    try {
+      const { session } = await journalUpdate(this.sessionId, entryId, { completed });
+      this.update(session);
+    } catch (err) {
+      this.log(err.message || "Failed to update quest.");
+    } finally {
+      this.unlockInput();
+    }
+  }
+  async removeJournalEntry(entryId) {
+    if (!this.session || this.inFlight) return;
+    this.lockInput();
+    try {
+      const { session } = await journalDelete(this.sessionId, entryId);
+      this.update(session);
+    } catch (err) {
+      this.log(err.message || "Failed to delete entry.");
+    } finally {
+      this.unlockInput();
+    }
+  }
+  renderJournalEntries(listEl, entries, type) {
+    clear(listEl);
+    if (!entries || entries.length === 0) {
+      listEl.appendChild(el("div", { className: "journal-empty" }, type === "notes" ? "No notes yet." : "No quests yet."));
+      return;
+    }
+    const isDm = this.isDm();
+    entries.slice().reverse().forEach((entry) => {
+      const row = el("div", { className: `journal-entry-row${entry.completed ? " completed" : ""}` });
+      const textWrap = el("div", { className: "journal-entry-text" });
+      const textEl = el("span", {}, entry.text);
+      const editInput = el("input", {
+        className: "journal-edit-input",
+        type: "text",
+        value: entry.text,
+        style: "display:none",
+        maxlength: 500,
+        onkeydown: (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            this.saveJournalEntry(entry.id, e.target.value);
+          } else if (e.key === "Escape") {
+            textEl.style.display = "";
+            editInput.style.display = "none";
+            editInput.value = entry.text;
+          }
+        }
+      });
+      textWrap.appendChild(textEl);
+      textWrap.appendChild(editInput);
+      row.appendChild(textWrap);
+      const meta = el("div", { className: "journal-entry-meta" }, `Turn ${entry.turn ?? "?"}`);
+      row.appendChild(meta);
+      const actions = el("div", { className: "journal-entry-actions" });
+      if (type === "quests") {
+        const completeBtn = el("button", {
+          className: "journal-action-btn",
+          title: entry.completed ? "Reopen" : "Complete",
+          onclick: () => this.toggleJournalQuest(entry.id, !entry.completed)
+        }, entry.completed ? "\u21BA" : "\u2713");
+        actions.appendChild(completeBtn);
+      }
+      const editBtn = el("button", {
+        className: "journal-action-btn",
+        title: "Edit",
+        onclick: () => {
+          textEl.style.display = "none";
+          editInput.style.display = "";
+          editInput.focus();
+        }
+      }, "\u270E");
+      actions.appendChild(editBtn);
+      const delBtn = el("button", {
+        className: "journal-action-btn danger",
+        title: "Delete",
+        onclick: () => this.removeJournalEntry(entry.id)
+      }, "\u2715");
+      actions.appendChild(delBtn);
+      row.appendChild(actions);
+      listEl.appendChild(row);
+    });
+  }
   updateJournal() {
     if (!this.journalPanel || !this.session) return;
+    this.updateJournalTabs();
+    const isDm = this.isDm();
+    const questInput = this.journalPanel.querySelector('[data-section="quests"] .journal-input');
+    const questAdd = this.journalPanel.querySelector('[data-section="quests"] .journal-add-btn');
+    if (questInput) {
+      questInput.disabled = !isDm;
+      questInput.placeholder = isDm ? "Assign a quest..." : "Quests appear here...";
+    }
+    if (questAdd) questAdd.disabled = !isDm;
     const moduleName = this.journalPanel.querySelector(".journal-module");
     if (moduleName) moduleName.textContent = this.moduleId;
+    const journal = this.session.journal || { notes: [], quests: [] };
+    const notesList = this.journalPanel.querySelector(".notes-list");
+    if (notesList) this.renderJournalEntries(notesList, journal.notes, "notes");
+    const questsList = this.journalPanel.querySelector(".quests-list");
+    if (questsList) this.renderJournalEntries(questsList, journal.quests, "quests");
     const bestiaryList = this.journalPanel.querySelector(".journal-bestiary-list");
     if (bestiaryList) {
       clear(bestiaryList);
@@ -9625,6 +9876,20 @@ var Game = class {
     const subtitle = token.type === "player" ? (token.classes || ["Adventurer"]).join(" / ") : token.name;
     const statusText = (token.statuses || []).map((s) => `${s.type}${s.duration ? ` (${s.duration})` : ""}`).join(", ");
     const downText = token.down ? '<div class="token-tooltip-down">DOWNED</div>' : "";
+    let abilityCard = "";
+    if (token.type === "player" && token.classes) {
+      const cls = token.classes[0]?.toLowerCase();
+      const card = CLASS_ABILITY_CARDS[cls];
+      if (card) {
+        abilityCard = `
+          <div class="token-tooltip-card">
+            <div class="token-tooltip-ability-name">${card.name}</div>
+            <div class="token-tooltip-ability-meta">Range: ${card.range}</div>
+            <div class="token-tooltip-ability-effect">${card.effect}</div>
+          </div>
+        `;
+      }
+    }
     this.tooltip.innerHTML = `
       <strong>${token.name}</strong>
       <div class="token-tooltip-sub">${subtitle}</div>
@@ -9632,6 +9897,7 @@ var Game = class {
       <div>AC ${token.ac}</div>
       ${downText}
       ${statusText ? `<div>Status: ${statusText}</div>` : ""}
+      ${abilityCard}
     `;
     this.tooltip.style.display = "block";
     this.positionTooltip(clientX, clientY);
@@ -9656,10 +9922,13 @@ var Game = class {
     if (!this.session || this.session.status === "active") return;
     const existing = this.root.querySelector(".game-over-overlay");
     if (existing) return;
-    const overlay = el("div", { className: "game-over-overlay" });
-    const panel = el("div", { className: "game-over-panel" });
     const won = this.session.status === "won";
-    panel.appendChild(el("h1", { className: won ? "won" : "lost" }, won ? "Victory" : "Defeat"));
+    const overlay = el("div", { className: `game-over-overlay${won ? " victory" : " defeat"}` });
+    const cinematic = el("div", { className: "game-over-cinematic" });
+    const title = el("div", { className: `game-over-title${won ? " won" : " lost"}` }, won ? "Victory" : "Defeat");
+    cinematic.appendChild(title);
+    overlay.appendChild(cinematic);
+    const panel = el("div", { className: "game-over-panel" });
     const stats = this.computeEndgameStats();
     const statsGrid = el("div", { className: "game-over-stats" });
     statsGrid.appendChild(el("div", {}, el("strong", {}, `${stats.turns}`), el("span", {}, "Turns")));
@@ -9671,7 +9940,15 @@ var Game = class {
       const living = this.session.players.filter((p) => p.alive !== false);
       const totalXp = living.reduce((sum, p) => sum + (p.xp ?? 0), 0);
       const totalGold = living.reduce((sum, p) => sum + (p.gold ?? 0), 0);
-      panel.appendChild(el("p", { className: "message" }, `The lair is quiet. Party gains ${totalXp} XP and ${totalGold} gold.`));
+      const tally = el("div", { className: "game-over-tally" });
+      tally.appendChild(el("div", { className: "tally-label" }, "Rewards"));
+      const xpEl = el("div", { className: "tally-row" }, el("span", {}, "Experience"), el("span", { className: "tally-value xp-value" }, "0"));
+      const goldEl = el("div", { className: "tally-row" }, el("span", {}, "Gold"), el("span", { className: "tally-value gold-value" }, "0"));
+      tally.appendChild(xpEl);
+      tally.appendChild(goldEl);
+      panel.appendChild(tally);
+      const message = el("p", { className: "message" }, "The lair is quiet. The party emerges victorious.");
+      panel.appendChild(message);
       const roster = el("div", { className: "game-over-roster" });
       this.session.players.forEach((p) => {
         const row = el("div", { className: "game-over-roster-row" });
@@ -9680,6 +9957,8 @@ var Game = class {
         roster.appendChild(row);
       });
       panel.appendChild(roster);
+      window.setTimeout(() => this.animateTally(xpEl.querySelector(".xp-value"), totalXp, 1200), 600);
+      window.setTimeout(() => this.animateTally(goldEl.querySelector(".gold-value"), totalGold, 1200), 900);
     } else {
       panel.appendChild(el("p", { className: "message" }, "Your light fades in the dark. The dungeon claims another."));
       const fallen = el("div", { className: "game-over-roster" });
@@ -9702,6 +9981,48 @@ var Game = class {
     panel.appendChild(actions);
     overlay.appendChild(panel);
     this.root.appendChild(overlay);
+    if (won) {
+      this.spawnVictoryFlare();
+    } else {
+      this.spawnDefeatMist();
+    }
+  }
+  animateTally(el2, target, duration = 1e3) {
+    if (!el2) return;
+    const start = performance.now();
+    const from = 0;
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const value = Math.round(from + (target - from) * eased);
+      el2.textContent = String(value);
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  spawnVictoryFlare() {
+    for (let i = 0; i < 24; i++) {
+      const flare = el("div", { className: "victory-flare" });
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + Math.random() * 200;
+      const x = 50 + Math.cos(angle) * (dist / window.innerWidth * 100);
+      const y = 50 + Math.sin(angle) * (dist / window.innerHeight * 100);
+      flare.style.left = `${x}%`;
+      flare.style.top = `${y}%`;
+      flare.style.animationDelay = `${Math.random() * 0.6}s`;
+      this.root.appendChild(flare);
+      window.setTimeout(() => flare.remove(), 1400);
+    }
+  }
+  spawnDefeatMist() {
+    for (let i = 0; i < 16; i++) {
+      const mist = el("div", { className: "defeat-mist" });
+      mist.style.left = `${Math.random() * 100}%`;
+      mist.style.top = `${100 + Math.random() * 20}%`;
+      mist.style.animationDelay = `${Math.random() * 1.5}s`;
+      this.root.appendChild(mist);
+      window.setTimeout(() => mist.remove(), 4e3);
+    }
   }
   computeEndgameStats() {
     const session = this.session;
@@ -9887,6 +10208,12 @@ var Game = class {
     toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("inspect") }, "Inspect Token"));
     toolWrap.appendChild(el("button", { onclick: () => this.revealAllFog() }, "Reveal All"));
     panel.appendChild(toolWrap);
+    const historyWrap = el("div", { className: "dm-tool-row dm-history" });
+    this.dmUndoBtn = el("button", { className: "dm-undo-btn", onclick: () => this.dmUndo() }, "\u21E6 Undo");
+    this.dmRedoBtn = el("button", { className: "dm-redo-btn", onclick: () => this.dmRedo() }, "Redo \u21E8");
+    historyWrap.appendChild(this.dmUndoBtn);
+    historyWrap.appendChild(this.dmRedoBtn);
+    panel.appendChild(historyWrap);
     const weatherWrap = el("div", { className: "dm-tool-row dm-atmosphere" });
     this.dmWeatherSelect = el("select", {});
     ["auto", "clear", "rain", "snow", "ash", "fog"].forEach((w) => {
@@ -9933,6 +10260,32 @@ var Game = class {
       this.log(err.message || "Lighting change failed.");
     }
   }
+  async dmUndo() {
+    if (!this.isDm() || !this.session || this.inFlight) return;
+    this.lockInput();
+    try {
+      const { session } = await dmUndo(this.sessionId);
+      this.update(session);
+      this.log("Undid last DM action.");
+    } catch (err) {
+      this.log(err.message || "Undo failed.");
+    } finally {
+      this.unlockInput();
+    }
+  }
+  async dmRedo() {
+    if (!this.isDm() || !this.session || this.inFlight) return;
+    this.lockInput();
+    try {
+      const { session } = await dmRedo(this.sessionId);
+      this.update(session);
+      this.log("Redid last DM action.");
+    } catch (err) {
+      this.log(err.message || "Redo failed.");
+    } finally {
+      this.unlockInput();
+    }
+  }
   updateDmTools() {
     const isDm = this.isDm();
     this.dmToolsEl.style.display = isDm && this.session?.status === "active" ? "block" : "none";
@@ -9948,6 +10301,9 @@ var Game = class {
     if (currentToken) this.dmTokenSelect.value = currentToken;
     if (this.dmWeatherSelect) this.dmWeatherSelect.value = this.session.weather || "auto";
     if (this.dmLightingSelect) this.dmLightingSelect.value = this.session.lighting || "day";
+    const history = this.session.dm_history || { undo: [], redo: [] };
+    if (this.dmUndoBtn) this.dmUndoBtn.disabled = !history.undo?.length;
+    if (this.dmRedoBtn) this.dmRedoBtn.disabled = !history.redo?.length;
   }
   onKeyDown(e) {
     this.ensureAudioStarted();
@@ -11109,6 +11465,19 @@ var Game = class {
     if (c === "magic-user" || c === "mage" || c === "wizard") return "arcane";
     return "arcane";
   }
+  spellColorsForClasses(classes) {
+    const map = {
+      holy: { start: "rgba(241, 196, 15, 0.95)", mid: "rgba(255, 255, 255, 0.7)", glow: "241, 196, 15" },
+      nature: { start: "rgba(39, 174, 96, 0.95)", mid: "rgba(46, 204, 113, 0.7)", glow: "39, 174, 96" },
+      dark: { start: "rgba(121, 36, 36, 0.95)", mid: "rgba(192, 57, 43, 0.7)", glow: "192, 57, 43" },
+      arcane: { start: "rgba(142, 68, 173, 0.95)", mid: "rgba(155, 89, 182, 0.7)", glow: "142, 68, 173" }
+    };
+    const variants = (Array.isArray(classes) ? classes : [classes]).map((c) => this.spellVariantForClass(c));
+    const unique = [...new Set(variants.filter((v) => v))];
+    if (unique.length <= 1) return { colors: map[unique[0] || "arcane"], variants: unique.length ? unique : ["arcane"], blended: false };
+    const colors = unique.map((v) => map[v]);
+    return { colors, variants: unique, blended: true };
+  }
   spawnSpellBeam(fromX, fromY, toX, toY, cls = "") {
     const startX = fromX * TILE_SIZE + TILE_SIZE / 2;
     const startY = fromY * TILE_SIZE + TILE_SIZE / 2;
@@ -11118,8 +11487,15 @@ var Game = class {
     const dy = endY - startY;
     const dist = Math.sqrt(dx * dx + dy * dy);
     const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-    const variant = this.spellVariantForClass(cls);
-    const beam = el("div", { className: `spell-beam ${variant}` });
+    const { colors, variants, blended } = this.spellColorsForClasses(cls);
+    const variant = variants[0];
+    const beam = el("div", { className: `spell-beam ${variant}${blended ? " blended" : ""}` });
+    if (blended && Array.isArray(colors)) {
+      const stops = colors.map((c) => c.start).join(", ");
+      const glows = colors.map((c) => `0 0 12px rgba(${c.glow}, 0.85)`).join(", ");
+      beam.style.background = `linear-gradient(90deg, ${stops}, transparent)`;
+      beam.style.boxShadow = `${glows}, 0 0 24px rgba(${colors[0].glow}, 0.45)`;
+    }
     beam.style.left = `${startX}px`;
     beam.style.top = `${startY - 1}px`;
     beam.style.width = `${dist}px`;
@@ -11374,7 +11750,7 @@ var Game = class {
       const isAdjacent = Math.abs(player2.x - token.x) + Math.abs(player2.y - token.y) === 1;
       if (rangedAbility) {
         this.audio.abilitySound(cls);
-        this.spawnSpellBeam(player2.x, player2.y, token.x, token.y, cls);
+        this.spawnSpellBeam(player2.x, player2.y, token.x, token.y, player2.classes || [cls]);
       } else {
         this.audio.weaponSound(cls);
         if (isAdjacent) {
