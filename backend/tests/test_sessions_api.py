@@ -433,3 +433,47 @@ async def test_dm_spawn_and_prop_endpoints():
             })
             assert clear_resp.status_code == 200
             assert len(clear_resp.json()["session"]["props"]) == 0
+
+
+@pytest.mark.asyncio
+async def test_dm_trap_endpoint():
+    async with LifespanManager(fastapi_app) as manager:
+        async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
+            campaign_resp = await client.post("/api/campaigns", json={
+                "name": "DM Traps",
+                "password": "secret",
+                "module_ids": ["sample_lair"],
+            })
+            assert campaign_resp.status_code == 200
+            campaign_id = campaign_resp.json()["campaign"]["id"]
+
+            char_resp = await client.post("/api/characters", json={
+                "mode": "normal",
+                "ancestry": "human",
+                "classes": ["fighter"],
+                "name": "TrapTester",
+                "seed": 1,
+            })
+            assert char_resp.status_code == 200
+            char_id = char_resp.json()["character"]["id"]
+
+            session_resp = await client.post("/api/sessions", json={
+                "character_id": char_id,
+                "campaign_id": campaign_id,
+                "module_id": "sample_lair",
+            })
+            assert session_resp.status_code == 200
+            session_id = session_resp.json()["session"]["id"]
+            player = session_resp.json()["session"]["player"]
+
+            trap_resp = await client.post(f"/api/sessions/{session_id}/dm/trap", json={
+                "x": player["x"] + 1,
+                "y": player["y"],
+                "damage": "2d6",
+            })
+            assert trap_resp.status_code == 200
+            traps = trap_resp.json()["session"]["traps"]
+            assert len(traps) == 1
+            assert traps[0]["x"] == player["x"] + 1
+            assert traps[0]["y"] == player["y"]
+            assert traps[0]["damage"] == "2d6"

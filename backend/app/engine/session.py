@@ -414,6 +414,7 @@ async def new_game(
         "ai_dm_enabled": True,
         "monsters_dir": str(monsters_dir) if monsters_dir else None,
         "props": [],
+        "traps": [],
     }
     if dungeon_links:
         state["dungeon_links"] = dungeon_links
@@ -456,6 +457,7 @@ async def advance_module(
     state["rolls"].extend(_roll_to_dict(r) for r in d.log)
     state["log"].append(f"— The party journeys to {next_module.name} —")
     state["props"] = []
+    state["traps"] = []
     state["player"] = _active_player(state)
     return state
 
@@ -644,6 +646,36 @@ async def dm_prop(
     state["version"] += 1
     state["log"].append(f"The DM places a {prop_type} at ({x}, {y}).")
     return prop
+
+
+async def dm_trap(
+    state: dict[str, Any],
+    module: Module,
+    x: int,
+    y: int,
+    damage: str = "1d6",
+) -> dict[str, Any]:
+    """Place a hidden DM trap at x, y."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    if not module.map.in_bounds(x, y):
+        raise ValueError("target is out of bounds")
+    if not module.map.walkable(x, y):
+        raise ValueError("target tile is blocked")
+
+    traps = state.setdefault("traps", [])
+    trap_id = f"trap_{len(traps)}_{x}_{y}"
+    trap = {
+        "id": trap_id,
+        "x": int(x),
+        "y": int(y),
+        "damage": damage,
+        "triggered": False,
+    }
+    traps.append(trap)
+    state["version"] += 1
+    state["log"].append(f"The DM hides a trap at ({x}, {y}).")
+    return trap
 
 
 def _tokens(state: dict[str, Any]) -> list[dict[str, Any]]:
@@ -853,6 +885,30 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
                 rng=nd,
             )
             state["log"].append(f"{trap_line} {token['name']} suffers {damage} damage.{save_msg}")
+
+    # DM-placed traps trigger on entry (always, once).
+    for trap in state.get("traps", []):
+        if trap.get("triggered") or trap["x"] != x or trap["y"] != y:
+            continue
+        trap["triggered"] = True
+        dmg_roll = d.roll(trap.get("damage", "1d6"), reason="trap damage", kind="trap")
+        damage = max(1, dmg_roll.total)
+        save = saving_throw(d, token, "aimed_magic_items")
+        save_msg = ""
+        if save.success:
+            damage = max(1, damage // 2)
+            save_msg = f" {token['name']} saves for half damage."
+        token["hp"] -= damage
+        if token["type"] == "player":
+            if token["hp"] <= -11:
+                token["alive"] = False
+                token["down"] = True
+                token["hp"] = 0
+                _check_loss(state)
+            elif token["hp"] <= 0:
+                token["hp"] = 0
+                token["down"] = True
+        state["log"].append(f"{token['name']} trips a hidden trap and suffers {damage} damage.{save_msg}")
     state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
     # Theme-aware hazard tiles: 3 and 4.
@@ -1238,9 +1294,12 @@ async def _ranged_attack(
     state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
 
-async def _use_potion(state: dict[str, Any], token: dict[str, Any], d: Dice) -> None:
+async def _use_potion(state: dict[str, Any], token: dict[str, Any], d: Dice, instance_id: str | None = None) -> None:
     inventory = token.get("inventory", [])
-    potion_index = next((i for i, item in enumerate(inventory) if item.get("slot") == "consumable" or item.get("type") == "potion"), None)
+    if instance_id is not None:
+        potion_index = next((i for i, item in enumerate(inventory) if item.get("instance_id") == instance_id), None)
+    else:
+        potion_index = next((i for i, item in enumerate(inventory) if item.get("slot") == "consumable" or item.get("type") == "potion"), None)
     if potion_index is None:
         raise ValueError("no potion available")
     potion = inventory[potion_index]
@@ -1646,7 +1705,7 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
             validate.validate_ranged_target(state, module, kwargs["target_id"], max_range=RANGED_RANGE)
         elif action == "aoe":
             validate.validate_actor(state)
-        elif action in ("use_potion", "end_turn"):
+        elif action in ("use_potion", "use_item", "end_turn"):
             validate.validate_actor(state)
 
         if action == "move":
@@ -1668,6 +1727,11 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
 
         elif action == "use_potion":
             await _use_potion(state, token, d)
+            state["phase"] = PHASE_DM
+            state["turn_deadline"] = None
+
+        elif action == "use_item":
+            await _use_potion(state, token, d, instance_id=kwargs.get("instance_id"))
             state["phase"] = PHASE_DM
             state["turn_deadline"] = None
 
@@ -1850,4 +1914,5 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "dm_revealed": list(state.get("dm_revealed", [])),
         "ai_dm_enabled": _ai_dm_enabled(state),
         "props": state.get("props", []),
+        "traps": state.get("traps", []),
     }

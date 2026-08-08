@@ -297,6 +297,12 @@ async function dmProp(sessionId, payload) {
     body: JSON.stringify(payload)
   });
 }
+async function dmTrap(sessionId, payload) {
+  return api(`/api/sessions/${sessionId}/dm/trap`, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
 async function dmDamage(sessionId, payload) {
   return api(`/api/sessions/${sessionId}/dm/damage`, {
     method: "POST",
@@ -8536,9 +8542,11 @@ var Game = class {
   dmTokenSelect = document.createElement("select");
   dmPropSelect = document.createElement("select");
   dmScaleSelect = document.createElement("select");
+  dmPresetSelect = document.createElement("select");
   dmAction = null;
   propContainer = document.createElement("div");
   propElements = /* @__PURE__ */ new Map();
+  trapElements = /* @__PURE__ */ new Map();
   inspectorPanel = null;
   inspectorTarget = null;
   lastRevealHover = 0;
@@ -8558,6 +8566,12 @@ var Game = class {
   moduleId;
   loadingOverlay;
   minimapVisible = true;
+  rulerActive = false;
+  rulerStart = null;
+  rulerLine = null;
+  rulerLabel = null;
+  rulerDragging = false;
+  aoePreview = null;
   zoom = 1;
   minZoom = 0.5;
   maxZoom = 3;
@@ -8640,6 +8654,23 @@ var Game = class {
       if (e.key === "Shift") this.shiftKey = false;
     };
     window.addEventListener("keyup", this.keyupHandler);
+    this.mapContainer.addEventListener("mousedown", (e) => {
+      if (!this.rulerActive || e.button !== 0) return;
+      const t = this.eventToTile(e);
+      if (t) this.startRuler(t.x, t.y);
+    });
+    this.mapContainer.addEventListener("mousemove", (e) => {
+      if (!this.rulerDragging) return;
+      const t = this.eventToTile(e);
+      if (t) this.updateRuler(t.x, t.y);
+    });
+    this.mapContainer.addEventListener("mouseup", () => {
+      if (!this.rulerDragging) return;
+      window.setTimeout(() => this.clearRuler(), 1200);
+    });
+    this.mapContainer.addEventListener("mouseleave", () => {
+      if (this.rulerDragging) this.clearRuler();
+    });
     this.beforeUnloadHandler = () => {
       if (this.session && this.session.status !== "won") {
         this.saveProgression().catch(() => {
@@ -8752,6 +8783,9 @@ var Game = class {
       });
       this.socket.on("chat_broadcast", (payload) => {
         this.appendChatMessage(payload);
+      });
+      this.socket.on("chat_reaction", (payload) => {
+        this.appendChatReaction(payload);
       });
       this.socket.on("presence_update", (payload) => {
         if (payload.session_id === this.sessionId && payload.present) {
@@ -8869,6 +8903,8 @@ var Game = class {
     actions.appendChild(this.restBtn);
     actions.appendChild(this.endBtn);
     hud.appendChild(actions);
+    this.quickSlotsEl = el("div", { className: "quick-slots" });
+    hud.appendChild(this.quickSlotsEl);
     this.dmTurnBtn = el("button", {
       className: "dm-turn-btn",
       onclick: () => this.runDmTurn()
@@ -8970,6 +9006,12 @@ var Game = class {
       onclick: () => this.toggleMinimap()
     }, "\u{1F5FA}");
     actionGroup.appendChild(minimapBtn);
+    const rulerBtn = el("button", {
+      className: "ruler-btn small",
+      title: "Toggle ruler",
+      onclick: () => this.toggleRuler()
+    }, "\u{1F4CF}");
+    actionGroup.appendChild(rulerBtn);
     const exitBtn = el("button", { className: "danger small", title: "Leave session", onclick: () => this.leaveSession() }, "\u2715");
     actionGroup.appendChild(exitBtn);
     footer.appendChild(actionGroup);
@@ -9058,6 +9100,47 @@ var Game = class {
     this.minimapEl.style.display = this.minimapVisible ? "block" : "none";
     if (this.minimapVisible) this.updateMinimap();
   }
+  toggleRuler() {
+    this.rulerActive = !this.rulerActive;
+    this.action = this.rulerActive ? null : this.action;
+    this.updateStatus();
+    this.highlightActionTiles();
+    if (!this.rulerActive) this.clearRuler();
+  }
+  clearRuler() {
+    this.rulerStart = null;
+    this.rulerDragging = false;
+    if (this.rulerLine) { this.rulerLine.remove(); this.rulerLine = null; }
+    if (this.rulerLabel) { this.rulerLabel.remove(); this.rulerLabel = null; }
+  }
+  startRuler(x, y) {
+    this.rulerStart = { x, y };
+    this.rulerDragging = true;
+    this.rulerLine = el("div", { className: "ruler-line" });
+    this.rulerLabel = el("div", { className: "ruler-label" }, "0");
+    this.fxContainer.appendChild(this.rulerLine);
+    this.fxContainer.appendChild(this.rulerLabel);
+    this.updateRuler(x, y);
+  }
+  updateRuler(x, y) {
+    if (!this.rulerStart || !this.rulerLine || !this.rulerLabel) return;
+    const sx = this.rulerStart.x * TILE_SIZE + TILE_SIZE / 2;
+    const sy = this.rulerStart.y * TILE_SIZE + TILE_SIZE / 2;
+    const ex = x * TILE_SIZE + TILE_SIZE / 2;
+    const ey = y * TILE_SIZE + TILE_SIZE / 2;
+    const dx = ex - sx;
+    const dy = ey - sy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+    const tiles = Math.round(dist / TILE_SIZE);
+    this.rulerLine.style.left = `${sx}px`;
+    this.rulerLine.style.top = `${sy}px`;
+    this.rulerLine.style.width = `${dist}px`;
+    this.rulerLine.style.transform = `rotate(${angle}deg)`;
+    this.rulerLabel.textContent = `${tiles}`;
+    this.rulerLabel.style.left = `${(sx + ex) / 2}px`;
+    this.rulerLabel.style.top = `${(sy + ey) / 2}px`;
+  }
   async revealAllFog() {
     if (!this.session || !this.isDm()) return;
     this.lockInput();
@@ -9073,6 +9156,54 @@ var Game = class {
     } finally {
       this.unlockInput();
     }
+  }
+  dmPresetsKey() {
+    return "sanctuary_dm_presets";
+  }
+  loadDmPresets() {
+    try {
+      return JSON.parse(localStorage.getItem(this.dmPresetsKey()) || "[]");
+    } catch {
+      return [];
+    }
+  }
+  refreshDmPresets() {
+    if (!this.dmPresetSelect) return;
+    const presets = this.loadDmPresets();
+    clear(this.dmPresetSelect);
+    presets.forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      opt.textContent = `${p.name} (${p.monster} x${p.scale})`;
+      this.dmPresetSelect.appendChild(opt);
+    });
+    if (presets.length === 0) {
+      const opt = document.createElement("option");
+      opt.textContent = "No presets";
+      opt.value = "";
+      this.dmPresetSelect.appendChild(opt);
+    }
+  }
+  saveDmPreset() {
+    const name = prompt("Preset name?");
+    if (!name) return;
+    const presets = this.loadDmPresets().filter((p) => p.name !== name);
+    presets.push({
+      name,
+      monster: this.dmMonsterSelect.value,
+      scale: this.dmScaleSelect.value
+    });
+    localStorage.setItem(this.dmPresetsKey(), JSON.stringify(presets));
+    this.refreshDmPresets();
+    this.dmPresetSelect.value = name;
+  }
+  loadDmPreset() {
+    const name = this.dmPresetSelect.value;
+    if (!name) return;
+    const preset = this.loadDmPresets().find((p) => p.name === name);
+    if (!preset) return;
+    this.dmMonsterSelect.value = preset.monster;
+    this.dmScaleSelect.value = preset.scale;
   }
   updateJournal() {
     if (!this.journalPanel || !this.session) return;
@@ -9186,8 +9317,25 @@ var Game = class {
     this.presencePanel.style.display = "block";
     present.forEach((p) => {
       const name = p.name || `Account ${p.account_id ?? "?"}`;
-      this.presenceList.appendChild(el("div", { className: "presence-row" }, name));
+      const row = el("div", { className: "presence-row" }, name);
+      row.dataset.accountId = String(p.account_id ?? "");
+      this.presenceList.appendChild(row);
     });
+    if (this.activeSpeakerId != null) {
+      this.setActiveSpeaker(this.activeSpeakerId);
+    }
+  }
+  setActiveSpeaker(accountId) {
+    this.activeSpeakerId = accountId;
+    if (!this.presenceList) return;
+    this.presenceList.querySelectorAll(".presence-row").forEach((row) => {
+      row.classList.toggle("active", row.dataset.accountId === String(accountId));
+    });
+    window.clearTimeout(this.activeSpeakerTimeout);
+    this.activeSpeakerTimeout = window.setTimeout(() => {
+      this.activeSpeakerId = null;
+      this.presenceList?.querySelectorAll(".presence-row").forEach((row) => row.classList.remove("active"));
+    }, 3e3);
   }
   toggleChat() {
     this.chatCollapsed = !this.chatCollapsed;
@@ -9209,14 +9357,56 @@ var Game = class {
     const name = payload.name || "Player";
     const time = payload.timestamp ? new Date(payload.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
     const row = el("div", { className: "chat-message" });
+    row.dataset.timestamp = payload.timestamp || "";
+    row.dataset.accountId = String(payload.account_id || "");
     const timeSpan = el("span", { className: "chat-time" }, time);
     const nameSpan = el("span", { className: "chat-name" }, name);
     const textSpan = el("span", { className: "chat-text" }, payload.text);
+    const reactions = el("div", { className: "chat-reactions" });
     row.appendChild(timeSpan);
     row.appendChild(nameSpan);
     row.appendChild(textSpan);
+    row.appendChild(reactions);
+    const emoji = ["\u{1F44D}", "\u{1F525}", "\u{1F480}", "\u{1F389}", "\u{1F914}"];
+    const toolbar = el("div", { className: "chat-reaction-toolbar" });
+    emoji.forEach((e) => {
+      const btn = el("button", {
+        className: "chat-reaction-btn",
+        onclick: () => this.sendChatReaction(e, payload.timestamp)
+      }, e);
+      toolbar.appendChild(btn);
+    });
+    row.appendChild(toolbar);
     this.chatMessages.appendChild(row);
     this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    if (payload.account_id != null) {
+      this.setActiveSpeaker(payload.account_id);
+    }
+  }
+  sendChatReaction(reaction, timestamp) {
+    if (!this.socket) return;
+    this.socket.emit("chat_reaction", {
+      session_id: this.sessionId,
+      reaction,
+      timestamp,
+      name: document.body.dataset.user || "Player"
+    });
+  }
+  appendChatReaction(payload) {
+    if (!this.chatMessages) return;
+    const rows = Array.from(this.chatMessages.querySelectorAll(".chat-message"));
+    const target = rows.find((r) => r.dataset.timestamp === (payload.timestamp || "") && r.dataset.accountId === String(payload.account_id || ""));
+    if (!target) return;
+    const container = target.querySelector(".chat-reactions");
+    if (!container) return;
+    const existing = Array.from(container.children).find((c) => c.dataset.reaction === payload.reaction && c.dataset.accountId === String(payload.account_id || ""));
+    if (existing) return;
+    const badge = el("span", {
+      className: "chat-reaction",
+      "data-reaction": payload.reaction,
+      "data-account-id": String(payload.account_id || "")
+    }, payload.reaction);
+    container.appendChild(badge);
   }
   showTooltip(token, clientX, clientY) {
     const subtitle = token.type === "player" ? (token.classes || ["Adventurer"]).join(" / ") : token.name;
@@ -9349,6 +9539,13 @@ var Game = class {
     spawnWrap.appendChild(this.dmScaleSelect);
     spawnWrap.appendChild(el("button", { onclick: () => this.setDmAction("spawn") }, "Spawn"));
     panel.appendChild(spawnWrap);
+    const presetWrap = el("div", { className: "dm-tool-row dm-presets" });
+    this.dmPresetSelect = el("select", {});
+    this.refreshDmPresets();
+    presetWrap.appendChild(this.dmPresetSelect);
+    presetWrap.appendChild(el("button", { onclick: () => this.loadDmPreset() }, "Load"));
+    presetWrap.appendChild(el("button", { onclick: () => this.saveDmPreset() }, "Save"));
+    panel.appendChild(presetWrap);
     const propWrap = el("div", { className: "dm-tool-row" });
     this.dmPropSelect = el("select", {});
     ["barrel", "rubble", "torch", "clear"].forEach((p) => {
@@ -9368,6 +9565,7 @@ var Game = class {
     const toolWrap = el("div", { className: "dm-tool-row dm-tool-actions" });
     toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("reveal") }, "Reveal Fog"));
     toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("encounter") }, "Spawn Group"));
+    toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("trap") }, "Place Trap"));
     toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("inspect") }, "Inspect Token"));
     toolWrap.appendChild(el("button", { onclick: () => this.revealAllFog() }, "Reveal All"));
     panel.appendChild(toolWrap);
@@ -9601,6 +9799,7 @@ var Game = class {
     clear(this.propContainer);
     this.tokenElements.clear();
     this.propElements.clear();
+    this.trapElements.clear();
     this.tileSprites = [];
     const themeId = this.module.theme ?? "";
     const theme = getTheme(themeId);
@@ -9648,10 +9847,41 @@ var Game = class {
       this.tileSprites.push(tileRow);
     }
     this.renderProps();
+    this.renderTraps();
     this.centerMap();
     this.startAmbientParticles();
     this.startHazardEffects();
     this.startWeatherEffects();
+  }
+  renderTraps() {
+    if (!this.session) return;
+    const traps = this.session.traps || [];
+    if (!this.isDm()) {
+      for (const [id, el2] of this.trapElements) {
+        el2.remove();
+        this.trapElements.delete(id);
+      }
+      return;
+    }
+    const visibleIds = new Set();
+    for (const t of traps) {
+      visibleIds.add(t.id);
+      let el2 = this.trapElements.get(t.id);
+      if (!el2) {
+        el2 = el("div", { className: "trap-marker" }, "!");
+        this.propContainer.appendChild(el2);
+        this.trapElements.set(t.id, el2);
+      }
+      el2.style.left = `${t.x * TILE_SIZE + 8}px`;
+      el2.style.top = `${t.y * TILE_SIZE + 8}px`;
+      el2.classList.toggle("triggered", !!t.triggered);
+    }
+    for (const [id, el2] of this.trapElements) {
+      if (!visibleIds.has(id)) {
+        el2.remove();
+        this.trapElements.delete(id);
+      }
+    }
   }
   renderProps() {
     if (!this.session) return;
@@ -9779,6 +10009,10 @@ var Game = class {
   }
   updateHoverHighlights() {
     this.clearHoverHighlights();
+    if (this.aoePreview) {
+      this.aoePreview.remove();
+      this.aoePreview = null;
+    }
     if (!this.hoverTile || !this.action || !this.session) return;
     const player = this.session.player;
     const hx = this.hoverTile.x;
@@ -9804,6 +10038,15 @@ var Game = class {
             if (g) g.classList.add("tile-highlight-aoe");
           }
         }
+        const aoe = el("div", { className: "aoe-preview" });
+        const radiusTiles = 2;
+        const size = (radiusTiles * 2 + 1) * TILE_SIZE;
+        aoe.style.width = `${size}px`;
+        aoe.style.height = `${size}px`;
+        aoe.style.left = `${(hx - radiusTiles) * TILE_SIZE}px`;
+        aoe.style.top = `${(hy - radiusTiles) * TILE_SIZE}px`;
+        this.fxContainer.appendChild(aoe);
+        this.aoePreview = aoe;
       }
     }
     if (["attack", "ranged", "ability"].includes(this.action)) {
@@ -10032,6 +10275,15 @@ var Game = class {
       x: this.session.player.x * TILE_SIZE + TILE_SIZE / 2,
       y: this.session.player.y * TILE_SIZE + TILE_SIZE / 2
     };
+  }
+  eventToTile(e) {
+    const rect = this.canvasContainer.getBoundingClientRect();
+    const mx = (e.clientX - rect.left - this.cameraX) / this.zoom;
+    const my = (e.clientY - rect.top - this.cameraY) / this.zoom;
+    const x = Math.floor(mx / TILE_SIZE);
+    const y = Math.floor(my / TILE_SIZE);
+    if (x < 0 || y < 0 || x >= this.module.width || y >= this.module.height) return null;
+    return { x, y };
   }
   applyMapPosition() {
     let ox = 0;
@@ -10456,6 +10708,7 @@ var Game = class {
   }
   async onTileClick(x, y) {
     if (this.observer || !this.session || this.session.status !== "active" || this.inFlight) return;
+    if (this.rulerActive || this.rulerDragging) return;
     if (this.shiftKey) {
       this.spawnPing(x, y);
       return;
@@ -10488,6 +10741,8 @@ var Game = class {
             }
           }
           response = latest;
+        } else if (this.dmAction === "trap") {
+          response = await dmTrap(this.sessionId, { x, y, damage: "1d6" });
         }
         if (response) {
           this.dmAction = null;
@@ -10649,6 +10904,7 @@ var Game = class {
     this.updateJournal();
     this.renderTokens();
     this.renderProps();
+    this.renderTraps();
     this.updateLighting();
     this.highlightActionTiles();
     this.centerMap();
@@ -10939,6 +11195,51 @@ var Game = class {
     const canStabilize = canAct && !!this.findAdjacentDownedAlly();
     this.stabilizeBtn.style.display = canStabilize ? "inline-block" : "none";
     this.restBtn.disabled = !isSessionPlayer;
+    this.renderQuickSlots();
+  }
+  renderQuickSlots() {
+    if (!this.quickSlotsEl) return;
+    clear(this.quickSlotsEl);
+    const player = this.session?.player;
+    const isActiveUser = !!this.session && this.session.status === "active" && this.session.phase === "player" && (player && "account_id" in player && player.account_id != null && player.account_id === this.userId || (!this.session.campaign_id || this.session.account_id === this.userId));
+    const canAct = isActiveUser && !player?.down;
+    const consumables = (player?.inventory || []).filter((i) => i.slot === "consumable" || i.type === "potion");
+    if (consumables.length === 0) {
+      this.quickSlotsEl.style.display = "none";
+      return;
+    }
+    this.quickSlotsEl.style.display = "flex";
+    consumables.slice(0, 5).forEach((item) => {
+      const btn = el("button", {
+        className: "quick-slot",
+        title: item.name || "Consumable",
+        disabled: !canAct || this.inFlight,
+        onclick: () => this.useQuickSlotItem(item.instance_id)
+      });
+      const icon = el("span", { className: "quick-slot-icon" }, item.type === "potion" || item.name?.toLowerCase().includes("potion") ? "\u{1F9EA}" : "\u{1F4E6}");
+      const name = el("span", { className: "quick-slot-name" }, item.name || "Item");
+      btn.appendChild(icon);
+      btn.appendChild(name);
+      this.quickSlotsEl.appendChild(btn);
+    });
+  }
+  async useQuickSlotItem(instanceId) {
+    if (this.observer || !this.session || this.session.phase !== "player" || this.inFlight) return;
+    const player = this.session.player;
+    const item = (player?.inventory || []).find((i) => i.instance_id === instanceId);
+    if (!item) return;
+    this.lockInput();
+    try {
+      const { session } = await actInSession(this.sessionId, "use_item", { instance_id: instanceId });
+      this.update(session);
+      if (session.phase === "dm" && !this.isCampaignSession()) {
+        setTimeout(() => this.runDmTurn(), 600);
+      }
+    } catch (err) {
+      this.log(err.message || "Item failed.");
+    } finally {
+      this.unlockInput();
+    }
   }
   updateStatus() {
     if (!this.session) return;

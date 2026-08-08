@@ -370,3 +370,37 @@ async def chat_message(sid, data):
     name = (sess.get("name") if sess else None) or data.get("name")
     payload = _format_chat_message(account_id, name, text)
     await socket_manager.emit("chat_broadcast", payload, room=session_id)
+
+
+@socket_manager.event
+async def chat_reaction(sid, data):
+    """Broadcast an emoji reaction to a chat message in the session room."""
+    data = data or {}
+    session_id = data.get("session_id")
+    reaction = data.get("reaction")
+
+    if not session_id or not isinstance(reaction, str) or not reaction.strip():
+        return
+
+    sess = await socket_manager.get_session(sid)
+    account_id = sess.get("account_id") if sess else None
+    if not account_id:
+        return
+
+    if not await _can_chat_in_session(account_id, session_id):
+        return
+
+    name = (sess.get("name") if sess else None) or data.get("name") or "Player"
+    name = name.strip()[:40] or "Player"
+    reaction = reaction.strip()[:8]
+    await socket_manager.emit(
+        "chat_reaction",
+        {
+            "session_id": session_id,
+            "account_id": account_id,
+            "name": name,
+            "reaction": reaction,
+            "timestamp": data.get("timestamp"),
+        },
+        room=session_id,
+    )
