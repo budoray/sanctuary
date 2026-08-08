@@ -13,7 +13,7 @@ from typing import Any
 
 from backend.app.engine import bestiary, items, resolve, validate
 from backend.app.engine.ai_dm import AIDM, AIDMCallbacks
-from backend.app.engine.character import Character, to_hit_target
+from backend.app.engine.character import Character, dexterity_surprise_adjustment, to_hit_target
 from backend.app.engine.dice import Dice, Roll
 from backend.app.engine.module import Module, MonsterSpawn
 from backend.app.engine.narrator import Narrator
@@ -424,6 +424,8 @@ async def new_game(
     }
     if dungeon_links:
         state["dungeon_links"] = dungeon_links
+    await _roll_surprise(state, d)
+    await _resolve_dm_surprise_round(state, module)
     return state
 
 
@@ -469,6 +471,10 @@ async def advance_module(
     state["journal"] = {"notes": [], "quests": []}
     state["dm_history"] = {"undo": [], "redo": []}
     state["decals"] = []
+    state.pop("surprise_round", None)
+    state.pop("surprise_free_side", None)
+    await _roll_surprise(state, d)
+    await _resolve_dm_surprise_round(state, next_module)
     state["player"] = _active_player(state)
     return state
 
@@ -659,23 +665,8 @@ async def dm_damage(
     if amount <= 0:
         raise ValueError("damage amount must be positive")
 
-    token["hp"] -= amount
     state["log"].append(f"The DM deals {amount} damage to {token['name']}.")
-    if token["type"] == "player":
-        if token["hp"] <= -11:
-            token["alive"] = False
-            token["down"] = True
-            token["hp"] = 0
-            _check_loss(state)
-        elif token["hp"] <= 0:
-            token["hp"] = 0
-            token["down"] = True
-    else:
-        if token["hp"] <= 0:
-            token["alive"] = False
-            token["hp"] = 0
-            _grant_rewards(state, token)
-            _check_victory(state)
+    await _damage_token(state, token, amount)
     state["version"] += 1
     return token
 
@@ -1227,16 +1218,7 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
                 save_msg = f" {token['name']} saves for half damage."
             else:
                 save_msg = ""
-            token["hp"] -= damage
-            if token["type"] == "player":
-                if token["hp"] <= -11:
-                    token["alive"] = False
-                    token["down"] = True
-                    token["hp"] = 0
-                    _check_loss(state)
-                elif token["hp"] <= 0:
-                    token["hp"] = 0
-                    token["down"] = True
+            await _damage_token(state, token, damage)
             trap_line = await narrator.narrate_trap(
                 "a hidden trap",
                 triggered=True,
@@ -1256,16 +1238,7 @@ async def _move(state: dict[str, Any], token: dict[str, Any], x: int, y: int, mo
         if save.success:
             damage = max(1, damage // 2)
             save_msg = f" {token['name']} saves for half damage."
-        token["hp"] -= damage
-        if token["type"] == "player":
-            if token["hp"] <= -11:
-                token["alive"] = False
-                token["down"] = True
-                token["hp"] = 0
-                _check_loss(state)
-            elif token["hp"] <= 0:
-                token["hp"] = 0
-                token["down"] = True
+        await _damage_token(state, token, damage)
         state["log"].append(f"{token['name']} trips a hidden trap and suffers {damage} damage.{save_msg}")
     state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
@@ -1323,26 +1296,11 @@ async def _apply_hazard(state: dict[str, Any], token: dict[str, Any], tile: str,
 
     damage_roll = d.roll(expr, reason=f"{name} damage", kind="hazard")
     damage = max(1, damage_roll.total)
-    token["hp"] -= damage
     hazard_line = await narrator.narrate_hazard(
         name, token.get("name", "someone"), rng=nd
     )
     state["log"].append(f"{hazard_line} {token['name']} suffers {damage} damage.")
-    if token["type"] == "player":
-        if token["hp"] <= -11:
-            token["alive"] = False
-            token["down"] = True
-            token["hp"] = 0
-            _check_loss(state)
-        elif token["hp"] <= 0:
-            token["hp"] = 0
-            token["down"] = True
-    else:
-        if token["hp"] <= 0:
-            token["alive"] = False
-            token["hp"] = 0
-            _grant_rewards(state, token)
-            _check_victory(state)
+    await _damage_token(state, token, damage)
     state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
 
 
@@ -1500,7 +1458,47 @@ def _check_victory(state: dict[str, Any]) -> None:
         state["status"] = STATUS_WON
 
 
-def _tick_statuses(state: dict[str, Any]) -> None:
+async def _damage_token(state: dict[str, Any], token: dict[str, Any], damage: int) -> bool:
+    """Apply damage to a token and update alive/down status.
+
+    Returns True if the token was killed by this damage. Players who are
+    already unconscious and take further damage die instantly (OSRIC SS1.6.6).
+    """
+    if damage <= 0:
+        return False
+    token["hp"] -= damage
+    if token["type"] == "player":
+        if token.get("down", False):
+            token["alive"] = False
+            token["down"] = True
+            token["hp"] = 0
+            _check_loss(state)
+            return True
+        if token["hp"] <= resolve.DEATH_THRESHOLD:
+            token["alive"] = False
+            token["down"] = True
+            token["hp"] = 0
+            _check_loss(state)
+            return True
+        if token["hp"] <= 0:
+            token["hp"] = 0
+            token["down"] = True
+            return False
+    else:
+        await _check_boss_phase(state, token)
+        await _check_morale(state, token)
+        if token["hp"] <= 0:
+            token["alive"] = False
+            token["hp"] = 0
+            _grant_rewards(state, token)
+            _check_victory(state)
+            if token.get("boss"):
+                await _morale_for_leader_death(state, token)
+            return True
+    return False
+
+
+async def _tick_statuses(state: dict[str, Any]) -> None:
     """Apply status effects and decrement durations at the start of a turn."""
     for token in _tokens(state):
         if not token.get("alive", True):
@@ -1512,18 +1510,9 @@ def _tick_statuses(state: dict[str, Any]) -> None:
         for status in statuses:
             duration = status.get("duration", 1)
             if status.get("type") == "poisoned" and "damage" in status:
-                token["hp"] -= status["damage"]
-                state["log"].append(f"{token['name']} suffers {status['damage']} poison damage.")
-                if token["type"] == "player" and token["hp"] <= -11:
-                    token["alive"] = False
-                    token["down"] = True
-                    token["hp"] = 0
-                elif token["type"] == "player" and token["hp"] <= 0:
-                    token["hp"] = 0
-                    token["down"] = True
-                elif token["type"] != "player" and token["hp"] <= 0:
-                    token["alive"] = False
-                    token["hp"] = 0
+                damage = status["damage"]
+                state["log"].append(f"{token['name']} suffers {damage} poison damage.")
+                await _damage_token(state, token, damage)
             duration -= 1
             if duration > 0:
                 remaining.append({**status, "duration": duration})
@@ -1552,29 +1541,9 @@ async def _attack(state: dict[str, Any], attacker: dict[str, Any], target: dict[
         damage_bonus = _attacker_damage_bonus(attacker)
         dmg_roll = d.roll(damage_expr, mods=damage_bonus, reason="damage", kind="combat")
         damage = max(1, dmg_roll.total)
-        target["hp"] -= damage
         if target["type"] == "monster":
             target["last_wounded_by"] = attacker["id"]
-        if target["type"] == "player":
-            if target["hp"] <= -11:  # below -10
-                fatal = True
-                target["alive"] = False
-                target["down"] = True
-                target["hp"] = 0
-                _check_loss(state)
-            elif target["hp"] <= 0:
-                target["hp"] = 0
-                target["down"] = True
-        else:
-            await _check_boss_phase(state, target)
-            await _check_morale(state, target)
-            if target["hp"] <= 0:
-                fatal = True
-                target["alive"] = False
-                _grant_rewards(state, target)
-                _check_victory(state)
-                if target.get("boss"):
-                    await _morale_for_leader_death(state, target)
+        await _damage_token(state, target, damage)
 
     nd = Dice(seed=state["seed"] + state["version"])
     lines = await narrator.narrate_attack(
@@ -1617,29 +1586,9 @@ async def _ranged_attack(
         damage_bonus = _attacker_damage_bonus(attacker)
         dmg_roll = d.roll(dmg_expr, mods=damage_bonus, reason="ranged damage", kind="combat")
         damage = max(1, dmg_roll.total)
-        target["hp"] -= damage
         if target["type"] == "monster":
             target["last_wounded_by"] = attacker["id"]
-        if target["type"] == "player":
-            if target["hp"] <= -11:
-                fatal = True
-                target["alive"] = False
-                target["down"] = True
-                target["hp"] = 0
-                _check_loss(state)
-            elif target["hp"] <= 0:
-                target["hp"] = 0
-                target["down"] = True
-        else:
-            await _check_boss_phase(state, target)
-            await _check_morale(state, target)
-            if target["hp"] <= 0:
-                fatal = True
-                target["alive"] = False
-                _grant_rewards(state, target)
-                _check_victory(state)
-                if target.get("boss"):
-                    await _morale_for_leader_death(state, target)
+        await _damage_token(state, target, damage)
 
     nd = Dice(seed=state["seed"] + state["version"])
     lines = await narrator.narrate_ranged_attack(
@@ -1715,16 +1664,10 @@ async def _ability(state: dict[str, Any], token: dict[str, Any], target_id: str,
         if roll >= 10:
             dmg_roll = d.roll("1d6", reason="Turn Undead damage", kind="combat")
             damage = max(1, dmg_roll.total)
-            target["hp"] -= damage
-            await _check_boss_phase(state, target)
             state["log"].append(f"{token['name']} turns the undead, dealing {damage} damage.")
-            if target["hp"] <= 0:
-                target["alive"] = False
-                target["hp"] = 0
-                _grant_rewards(state, target)
-                _check_victory(state)
-                if state["status"] == STATUS_WON:
-                    state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
+            await _damage_token(state, target, damage)
+            if state["status"] == STATUS_WON:
+                state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
         else:
             state["log"].append(f"{token['name']} attempts to turn the undead, but it holds fast.")
     elif cls in ("magic-user", "illusionist"):
@@ -1735,16 +1678,10 @@ async def _ability(state: dict[str, Any], token: dict[str, Any], target_id: str,
             raise ValueError("no line of sight")
         dmg_roll = d.roll("1d4+1", reason="Magic Missile damage", kind="combat")
         damage = max(2, dmg_roll.total)
-        target["hp"] -= damage
-        await _check_boss_phase(state, target)
         state["log"].append(f"{token['name']} fires a magic missile for {damage} damage.")
-        if target["hp"] <= 0:
-            target["alive"] = False
-            target["hp"] = 0
-            _grant_rewards(state, target)
-            _check_victory(state)
-            if state["status"] == STATUS_WON:
-                state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
+        await _damage_token(state, target, damage)
+        if state["status"] == STATUS_WON:
+            state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
     else:
         raise ValueError(f"no special ability for class {cls!r}")
     state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
@@ -1772,11 +1709,14 @@ async def _resolve_aoe(
     if cls == "cleric":
         damage_expr = "1d6"
         reason = "Holy Burst damage"
+        save_category = "spells"
     else:
         damage_expr = "1d4+1"
         reason = "Fireball damage"
+        save_category = "spells"
 
     total_damage = 0
+    saved_count = 0
     for monster in state["monsters"]:
         if not monster.get("alive", True):
             continue
@@ -1785,16 +1725,22 @@ async def _resolve_aoe(
         if not _line_of_sight(state, module, center_x, center_y, monster["x"], monster["y"]):
             continue
         dmg_roll = d.roll(damage_expr, reason=reason, kind="combat")
-        damage = max(1, dmg_roll.total)
-        monster["hp"] -= damage
+        full_damage = max(1, dmg_roll.total)
+        save = saving_throw(d, monster, save_category)
+        if save.success:
+            damage = max(1, full_damage // 2)
+            saved_count += 1
+        else:
+            damage = full_damage
         total_damage += damage
-        await _check_boss_phase(state, monster)
-        if monster["hp"] <= 0:
-            monster["alive"] = False
-            monster["hp"] = 0
-            _grant_rewards(state, monster)
-            _check_victory(state)
-    state["log"].append(f"{token['name']} unleashes an area burst for {total_damage} total damage.")
+        state["log"].append(
+            f"{monster['name']} rolls {save_category} save: "
+            f"{'pass' if save.success else 'fail'} ({save.natural} vs {save.target}); "
+            f"takes {damage} damage."
+        )
+        await _damage_token(state, monster, damage)
+    save_summary = f" ({saved_count} saved for half)" if saved_count else ""
+    state["log"].append(f"{token['name']} unleashes an area burst for {total_damage} total damage.{save_summary}")
     if state["status"] == STATUS_WON:
         state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
     state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
@@ -1823,33 +1769,123 @@ async def _attack_with_bonuses(
         total_bonus = _attacker_damage_bonus(attacker) + damage_bonus
         dmg_roll = d.roll(damage_expr, mods=total_bonus, reason=f"{reason} damage", kind="combat")
         damage = max(1, dmg_roll.total)
-        target["hp"] -= damage
         if target["type"] == "monster":
             target["last_wounded_by"] = attacker["id"]
-        if target["type"] == "player":
-            if target["hp"] <= -11:
-                fatal = True
-                target["alive"] = False
-                target["down"] = True
-                target["hp"] = 0
-                _check_loss(state)
-            elif target["hp"] <= 0:
-                target["hp"] = 0
-                target["down"] = True
-        else:
-            await _check_boss_phase(state, target)
-            await _check_morale(state, target)
-            if target["hp"] <= 0:
-                fatal = True
-                target["alive"] = False
-                _grant_rewards(state, target)
-                _check_victory(state)
-                if target.get("boss"):
-                    await _morale_for_leader_death(state, target)
+        await _damage_token(state, target, damage)
     state["log"].append(f"{attacker['name']} uses {reason} and {'hits' if hit else 'misses'} {target['name']}{' for ' + str(max(0, attacker.get('damage_bonus', 0) + damage_bonus)) + ' bonus damage' if hit else ''}.")
     if state["status"] == STATUS_WON:
         state["log"].append(await narrator.narrate_victory(nd, module=state.get("module_id")))
     state["rolls"].extend(_roll_to_dict(r) for r in nd.log)
+
+
+def _player_surprise_bonus(players: list[dict[str, Any]]) -> int:
+    """Best Dexterity surprise adjustment among living players (Table 1.1.3A)."""
+    best = 0
+    for p in players:
+        if not p.get("alive", True):
+            continue
+        score = p.get("scores", {}).get("dexterity")
+        if score is None:
+            continue
+        try:
+            adj = dexterity_surprise_adjustment(score)
+        except LookupError:
+            continue
+        if adj > best:
+            best = adj
+    return best
+
+
+async def _roll_surprise(state: dict[str, Any], d: Dice) -> None:
+    """Roll surprise once when combat begins.
+
+    If one side is surprised, that side's first round is skipped: the
+    unsurprised side receives a free "surprise round" before normal
+    initiative is rolled. Dexterity surprise bonuses reduce or eliminate
+    surprise segments for the player side.
+    """
+    monsters = [m for m in state.get("monsters", []) if m.get("alive", True)]
+    if not monsters:
+        return
+
+    player_bonus = _player_surprise_bonus(state.get("players", []))
+    surprise = resolve.determine_surprise(d, a_bonus=player_bonus, b_bonus=0)
+    state["rolls"].extend(_roll_to_dict(r) for r in d.log)
+
+    if surprise.a_acts_free:
+        state["surprise_round"] = True
+        state["surprise_free_side"] = "players"
+        state["log"].append(
+            f"The party catches the enemy off-guard! "
+            f"({surprise.b_segments} surprise segments)"
+        )
+    elif surprise.b_acts_free:
+        state["surprise_round"] = True
+        state["surprise_free_side"] = "dm"
+        state["phase"] = PHASE_DM
+        state["turn_deadline"] = None
+        state["log"].append(
+            f"The enemy surprises the party! "
+            f"({surprise.a_segments} surprise segments)"
+        )
+    else:
+        state["log"].append("Neither side is surprised.")
+
+
+def _surprise_skips_dm(state: dict[str, Any]) -> bool:
+    """True during a surprise round where the players are the free side."""
+    return state.get("surprise_round") and state.get("surprise_free_side") == "players"
+
+
+async def _resolve_dm_surprise_round(
+    state: dict[str, Any], module: Module
+) -> None:
+    """Immediately resolve a DM-side surprise round for AI-DM sessions.
+
+    This returns a playable player-phase state to the client instead of
+    leaving the session stuck in a DM-phase surprise round.
+    """
+    if not state.get("surprise_round") or state.get("surprise_free_side") != "dm":
+        return
+    if not state.get("ai_dm_enabled", True):
+        return
+    d = Dice(seed=state["seed"] + state["turn"] * 1000 + state["version"])
+    await _run_dm_turn(state, module, d)
+    state["dm_acted_this_round"] = True
+    state["version"] += 1
+    state["rolls"].extend(_roll_to_dict(r) for r in d.log)
+    if state["status"] == STATUS_ACTIVE:
+        await _start_round(state, module, d)
+        state["version"] += 1
+        state["rolls"].extend(_roll_to_dict(r) for r in d.log)
+
+
+def _find_aoe_target(
+    state: dict[str, Any], module: Module, token: dict[str, Any], max_range: int = 6, radius: int = 2
+) -> dict[str, Any] | None:
+    """Find the grid center within range and LOS that catches the most monsters."""
+    best: tuple[int, int] | None = None
+    best_count = 1  # only worthwhile if at least 2 monsters are caught
+    for cx in range(token["x"] - max_range, token["x"] + max_range + 1):
+        for cy in range(token["y"] - max_range, token["y"] + max_range + 1):
+            if _ranged_distance(token, {"x": cx, "y": cy}) > max_range:
+                continue
+            if not _line_of_sight(state, module, token["x"], token["y"], cx, cy):
+                continue
+            count = 0
+            for m in state.get("monsters", []):
+                if not m.get("alive", True):
+                    continue
+                if max(abs(m["x"] - cx), abs(m["y"] - cy)) > radius:
+                    continue
+                if _line_of_sight(state, module, cx, cy, m["x"], m["y"]):
+                    count += 1
+            if count > best_count:
+                best_count = count
+                best = (cx, cy)
+    if best is None:
+        return None
+    return {"x": best[0], "y": best[1], "count": best_count}
 
 
 async def _start_round(state: dict[str, Any], module: Module, d: Dice) -> None:
@@ -1864,6 +1900,29 @@ async def _start_round(state: dict[str, Any], module: Module, d: Dice) -> None:
         state["turn_deadline"] = None
         return
 
+    # Transition out of the surprise round into normal initiative.
+    if state.pop("surprise_round", False):
+        state["log"].append("— Surprise round ends; rolling initiative —")
+        player_init = d.roll("1d6", reason="player initiative", kind="initiative").total
+        dm_init = d.roll("1d6", reason="DM initiative", kind="initiative").total
+        state["turn"] += 1
+        state["phase"] = PHASE_PLAYER
+        state["active_player_index"] = 0
+        state["dm_acted_this_round"] = False
+        state["player"] = _active_player(state)
+        await _tick_statuses(state)
+        state["statuses_tick_index"] = 0
+        state["turn_deadline"] = _deadline(state["turn_timer_seconds"])
+        state["log"].append(f"— Turn {state['turn']} —")
+        if dm_init > player_init:
+            state["log"].append("The DM seizes the initiative!")
+            await _run_dm_turn(state, module, d)
+            _check_loss(state)
+            state["dm_acted_this_round"] = True
+        else:
+            state["log"].append("The players act first!")
+        return
+
     player_init = d.roll("1d6", reason="player initiative", kind="initiative").total
     dm_init = d.roll("1d6", reason="DM initiative", kind="initiative").total
     state["turn"] += 1
@@ -1871,7 +1930,7 @@ async def _start_round(state: dict[str, Any], module: Module, d: Dice) -> None:
     state["active_player_index"] = 0
     state["dm_acted_this_round"] = False
     state["player"] = _active_player(state)
-    _tick_statuses(state)
+    await _tick_statuses(state)
     state["statuses_tick_index"] = 0
     state["turn_deadline"] = _deadline(state["turn_timer_seconds"])
     state["log"].append(f"— Turn {state['turn']} —")
@@ -1939,8 +1998,8 @@ async def _advance_active_player(
         state["turn_deadline"] = None
         state["active_player_index"] = 0
         if _ai_dm_enabled(state):
-            _tick_statuses(state)
-            if not state.get("dm_acted_this_round", False):
+            await _tick_statuses(state)
+            if not state.get("dm_acted_this_round", False) and not _surprise_skips_dm(state):
                 await _run_dm_turn(state, module, d)
             await _start_round(state, module, d)
     else:
@@ -1952,7 +2011,11 @@ async def _advance_active_player(
 async def _ai_player_turn(
     state: dict[str, Any], module: Module, d: Dice
 ) -> None:
-    """Resolve one AI-controlled player turn automatically."""
+    """Resolve one AI-controlled player turn automatically.
+
+    Class-based tactics use abilities and area spells when they are clearly
+    better than a basic attack, then fall back to melee, ranged or movement.
+    """
     player = _active_player(state)
     state["version"] += 1
 
@@ -1974,32 +2037,73 @@ async def _ai_player_turn(
             await _advance_active_player(state, module, d)
             return
 
-    # Find the nearest living monster.
     targets = [m for m in state.get("monsters", []) if m.get("alive", True)]
     if not targets:
         state["log"].append(f"{player['name']} waits; no enemies in sight.")
         await _advance_active_player(state, module, d)
         return
 
-    target = min(
+    nearest = min(
         targets,
         key=lambda m: abs(m["x"] - player["x"]) + abs(m["y"] - player["y"]),
     )
+    cls = (player.get("classes", [""])[0]).lower()
 
-    if _adjacent(player, target):
-        await _attack(state, player, target, d)
+    # Casters prefer area spells when multiple enemies cluster.
+    if cls in ("magic-user", "illusionist", "cleric"):
+        aoe = _find_aoe_target(state, module, player)
+        if aoe and aoe["count"] >= 2:
+            await _resolve_aoe(state, player, aoe["x"], aoe["y"], module, d)
+            await _advance_active_player(state, module, d)
+            return
+
+    # Magic-user / illusionist: magic missile at a target in range.
+    if cls in ("magic-user", "illusionist"):
+        ranged_targets = [
+            m for m in targets
+            if _ranged_distance(player, m) <= 6
+            and _line_of_sight(state, module, player["x"], player["y"], m["x"], m["y"])
+        ]
+        if ranged_targets:
+            t = min(ranged_targets, key=lambda m: _ranged_distance(player, m))
+            await _ability(state, player, t["id"], module, d)
+            await _advance_active_player(state, module, d)
+            return
+
+    # Cleric: turn undead if any undead is in range.
+    if cls == "cleric":
+        undead = [m for m in targets if _is_undead(m["name"])]
+        ranged_undead = [
+            m for m in undead
+            if _ranged_distance(player, m) <= 4
+            and _line_of_sight(state, module, player["x"], player["y"], m["x"], m["y"])
+        ]
+        if ranged_undead:
+            t = min(ranged_undead, key=lambda m: _ranged_distance(player, m))
+            await _ability(state, player, t["id"], module, d)
+            await _advance_active_player(state, module, d)
+            return
+
+    # Fighter / thief / cleric: use melee ability when adjacent.
+    if cls in ("fighter", "thief") and _adjacent(player, nearest):
+        await _ability(state, player, nearest["id"], module, d)
+        await _advance_active_player(state, module, d)
+        return
+
+    if _adjacent(player, nearest):
+        await _attack(state, player, nearest, d)
         await _advance_active_player(state, module, d)
         return
 
     if (
-        _ranged_distance(player, target) <= RANGED_RANGE
-        and _line_of_sight(state, module, player["x"], player["y"], target["x"], target["y"])
+        _ranged_distance(player, nearest) <= RANGED_RANGE
+        and _line_of_sight(state, module, player["x"], player["y"], nearest["x"], nearest["y"])
     ):
-        await _ranged_attack(state, player, target, module, d)
+        await _ranged_attack(state, player, nearest, module, d)
         await _advance_active_player(state, module, d)
         return
 
-    step = _step_toward(state, module, (player["x"], player["y"]), (target["x"], target["y"]))
+    step = _step_toward(state, module, (player["x"], player["y"]), (nearest["x"], nearest["y"]))
     if step:
         await _move(state, player, step[0], step[1], module, d)
     else:
@@ -2039,7 +2143,7 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
     if action == "dm_turn":
         if state["phase"] != PHASE_DM:
             raise ValueError("not the DM's turn")
-        _tick_statuses(state)
+        await _tick_statuses(state)
         if not state.get("dm_acted_this_round", False):
             await _run_dm_turn(state, module, d)
         await _start_round(state, module, d)
@@ -2050,7 +2154,7 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
             raise ValueError("not the player's turn")
         active_index = state.get("active_player_index", 0)
         if state.get("statuses_tick_index") != active_index:
-            _tick_statuses(state)
+            await _tick_statuses(state)
             state["statuses_tick_index"] = active_index
         token = _active_player(state)
 

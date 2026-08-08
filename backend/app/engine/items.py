@@ -8,6 +8,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
+from backend.app.engine.character import dexterity_ac_adjustment
 from backend.app.engine.dice import Dice
 
 
@@ -17,42 +18,42 @@ LOOT_TABLE: dict[str, dict[str, Any]] = {
         "type": "armor",
         "slot": "body",
         "rarity": "common",
-        "effects": {"ac_bonus": 2},
+        "effects": {"base_ac": 8},
     },
     "chain_shirt": {
         "name": "Chain Shirt",
         "type": "armor",
         "slot": "body",
         "rarity": "uncommon",
-        "effects": {"ac_bonus": 4},
+        "effects": {"base_ac": 5},
     },
     "plate_mail": {
         "name": "Plate Mail",
         "type": "armor",
         "slot": "body",
         "rarity": "rare",
-        "effects": {"ac_bonus": 6},
+        "effects": {"base_ac": 3},
     },
     "short_sword": {
         "name": "Short Sword",
         "type": "weapon",
         "slot": "main_hand",
         "rarity": "common",
-        "effects": {"damage_bonus": 1},
+        "effects": {"damage_die": "1d6"},
     },
     "longsword": {
         "name": "Longsword",
         "type": "weapon",
         "slot": "main_hand",
         "rarity": "uncommon",
-        "effects": {"damage_bonus": 2},
+        "effects": {"damage_die": "1d8"},
     },
     "longbow": {
         "name": "Longbow",
         "type": "weapon",
         "slot": "main_hand",
         "rarity": "uncommon",
-        "effects": {"ranged_damage_override": "1d8"},
+        "effects": {"damage_die": "1d6", "ranged_damage_override": "1d8"},
     },
     "shield": {
         "name": "Wooden Shield",
@@ -137,27 +138,56 @@ def generate_loot(level: int = 1, d: Dice | None = None) -> dict[str, Any]:
 
 
 def _equipment_bonuses(equipment: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    """Sum AC and damage bonuses from equipped items."""
+    """Sum AC and damage bonuses from equipped items and pick weapon dice."""
     bonuses: dict[str, Any] = {"ac_bonus": 0, "damage_bonus": 0}
+    armor: dict[str, Any] | None = None
+    weapon: dict[str, Any] | None = None
     ranged_override: str | None = None
     for slot, item in equipment.items():
         if not item:
             continue
         effects = item.get("effects", {})
-        bonuses["ac_bonus"] += effects.get("ac_bonus", 0)
-        bonuses["damage_bonus"] += effects.get("damage_bonus", 0)
+        if item.get("type") == "armor" and slot == "body":
+            armor = effects
+        elif item.get("type") == "weapon" and slot == "main_hand":
+            weapon = effects
+        else:
+            bonuses["ac_bonus"] += effects.get("ac_bonus", 0)
+            bonuses["damage_bonus"] += effects.get("damage_bonus", 0)
         if "ranged_damage_override" in effects:
             ranged_override = effects["ranged_damage_override"]
     bonuses["ranged_damage_override"] = ranged_override
+    bonuses["armor"] = armor
+    bonuses["weapon"] = weapon
     return bonuses
 
 
 def apply_gear(character_state: dict[str, Any], token: dict[str, Any]) -> None:
-    """Mutate a session token to include equipment bonuses."""
+    """Mutate a session token to include equipment bonuses.
+
+    Body armour sets the base AC (OSRIC style); shields, rings and other
+    items add their bonus on top. A weapon's damage die overrides the
+    class-default melee damage.
+    """
     equipment = character_state.get("equipment", {})
     bonuses = _equipment_bonuses(equipment)
-    token["ac"] = token.get("ac", 10) + bonuses["ac_bonus"]
+    dex_score = token.get("scores", {}).get("dexterity", 10)
+    try:
+        dex_ac_adj = dexterity_ac_adjustment(dex_score)
+    except LookupError:
+        dex_ac_adj = 0
+
+    armor = bonuses["armor"]
+    if armor and "base_ac" in armor:
+        token["ac"] = armor["base_ac"] + dex_ac_adj + bonuses["ac_bonus"]
+    else:
+        token["ac"] = token.get("ac", 10) + bonuses["ac_bonus"]
+
     token["damage_bonus"] = bonuses["damage_bonus"]
+
+    weapon = bonuses["weapon"]
+    if weapon and "damage_die" in weapon:
+        token["damage"] = weapon["damage_die"]
     if bonuses["ranged_damage_override"]:
         token["ranged_damage"] = bonuses["ranged_damage_override"]
 

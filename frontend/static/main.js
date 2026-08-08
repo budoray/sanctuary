@@ -13716,7 +13716,8 @@ var Game = class {
     }
     const actionText = this.action ? ` \xB7 ${this.action} mode` : "";
     const dmActionText = this.dmAction ? ` \xB7 DM: ${this.dmAction}` : "";
-    this.statusEl.textContent = `Turn ${this.session.turn} \xB7 ${phaseText}${actionText}${dmActionText}`;
+    const turnText = this.session.surprise_round ? `SURPRISE ROUND \xB7 ${this.session.surprise_free_side === "players" ? "Party acts" : "DM acts"}` : `Turn ${this.session.turn}`;
+    this.statusEl.textContent = `${turnText} \xB7 ${phaseText}${actionText}${dmActionText}`;
     const showDmBtn = this.session.status === "active" && isDmPhase && isCampaign && this.isDm();
     this.dmTurnBtn.style.display = showDmBtn ? "block" : "none";
     this.dmOverlay.style.display = this.session.status === "active" && isDmPhase ? "flex" : "none";

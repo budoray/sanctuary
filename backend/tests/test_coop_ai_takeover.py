@@ -113,6 +113,9 @@ async def test_ai_controlled_player_takes_turn():
                 record = result.scalar_one()
                 state = json.loads(record.state)
                 state["players"][0]["ai_controlled"] = True
+                # Clear any surprise round so the AI player can act immediately.
+                state.pop("surprise_round", None)
+                state.pop("surprise_free_side", None)
                 # Make the player durable and the monster a one-hit kill so the
                 # AI action is deterministic and the test isn't at the mercy of
                 # dice rolls.

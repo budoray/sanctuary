@@ -365,13 +365,13 @@ async def test_status_ticks_apply_damage_and_expire(sample_module, hero):
     st = await session.new_game("s1", sample_module, hero, seed=42)
     st["player"]["hp"] = 10
     st["player"]["statuses"] = [{"type": "poisoned", "duration": 3, "damage": 1}]
-    session._tick_statuses(st)
+    await session._tick_statuses(st)
     assert st["player"]["hp"] == 9
     assert len(st["player"]["statuses"]) == 1
     assert st["player"]["statuses"][0]["duration"] == 2
-    session._tick_statuses(st)
+    await session._tick_statuses(st)
     assert st["player"]["hp"] == 8
-    session._tick_statuses(st)
+    await session._tick_statuses(st)
     assert st["player"]["hp"] == 7
     assert st["player"]["statuses"] == []
 

@@ -322,6 +322,15 @@ def dexterity_ac_adjustment(score: float, ruleset: Ruleset | None = None) -> int
     raise LookupError(f"no Dexterity AC adjustment row for score {score}")
 
 
+def dexterity_surprise_adjustment(score: float, ruleset: Ruleset | None = None) -> int:
+    """Table 1.1.3A's surprise modifier: positive means the character is
+    harder to surprise (subtracts segments), negative means easier."""
+    for row in tables.rows("1.1.3a", tables_dir=_tables_dir(ruleset)):
+        if int(row[0]) == int(score):
+            return _int(row[1])
+    raise LookupError(f"no Dexterity surprise row for score {score}")
+
+
 _ARMOUR_ROW = re.compile(
     r"^([A-Za-z][A-Za-z,\s]*?)\s+\S+\s+\S+\s+([+-]?\d+)\s*\[[+-]?\d+\]\*{0,2}\s")
 

@@ -43,7 +43,7 @@ def test_use_consumable_restores_hp_and_removes():
     assert potion not in char_state["inventory"]
 
 
-def test_apply_gear_increases_ac_and_damage():
+def test_apply_gear_sets_armor_base_ac_and_weapon_damage_die():
     token = {"ac": 10, "damage": "1d6", "ranged_damage": "1d6"}
     char_state = {
         "inventory": [],
@@ -61,5 +61,7 @@ def test_apply_gear_increases_ac_and_damage():
         },
     }
     items.apply_gear(char_state, token)
-    assert token["ac"] == 12
-    assert token["damage_bonus"] == 1
+    # Leather armor sets OSRIC base AC 8; short sword sets damage die 1d6.
+    assert token["ac"] == 8
+    assert token["damage"] == "1d6"
+    assert token["damage_bonus"] == 0
