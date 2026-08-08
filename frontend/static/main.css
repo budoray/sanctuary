@@ -5349,8 +5349,74 @@ button.danger:hover:not(:disabled) {
   box-shadow: 0 0 4px currentColor;
 }
 @keyframes spell-piece-burst {
-  0% { transform: translate(0, 0) scale(1); opacity: 1; }
-  100% { transform: translate(var(--sx), var(--sy)) scale(0.2); opacity: 0; }
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translate(var(--sx), var(--sy)) rotate(var(--rot, 0deg)) scale(0.2); opacity: 0; }
+}
+.spell-charge {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  margin-left: -32px;
+  margin-top: -32px;
+  border-radius: 50%;
+  z-index: 14;
+  pointer-events: none;
+  opacity: 0;
+  animation: spell-charge-rotate 0.3s ease-out forwards;
+}
+.spell-charge.arcane {
+  background: conic-gradient(from 0deg, transparent, rgba(155,89,182,0.7), transparent, rgba(142,68,173,0.7), transparent);
+  box-shadow: 0 0 20px rgba(142,68,173,0.6);
+}
+.spell-charge.holy {
+  background: conic-gradient(from 0deg, transparent, rgba(241,196,15,0.7), transparent, rgba(255,255,255,0.6), transparent);
+  box-shadow: 0 0 20px rgba(241,196,15,0.6);
+}
+.spell-charge.nature {
+  background: conic-gradient(from 0deg, transparent, rgba(46,204,113,0.7), transparent, rgba(39,174,96,0.7), transparent);
+  box-shadow: 0 0 20px rgba(39,174,96,0.6);
+}
+.spell-charge.dark {
+  background: conic-gradient(from 0deg, transparent, rgba(192,57,43,0.7), transparent, rgba(142,36,36,0.7), transparent);
+  box-shadow: 0 0 20px rgba(192,57,43,0.6);
+}
+@keyframes spell-charge-rotate {
+  0% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+  50% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.2) rotate(180deg); }
+}
+.spell-ring {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  margin-left: -24px;
+  margin-top: -24px;
+  border-radius: 50%;
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+  animation: spell-ring-expand 0.6s ease-out forwards;
+}
+.spell-ring.arcane {
+  border: 2px solid rgba(155,89,182,0.8);
+  box-shadow: 0 0 16px rgba(142,68,173,0.6);
+}
+.spell-ring.holy {
+  border: 2px solid rgba(241,196,15,0.8);
+  box-shadow: 0 0 16px rgba(241,196,15,0.6);
+}
+.spell-ring.nature {
+  border: 2px solid rgba(46,204,113,0.8);
+  box-shadow: 0 0 16px rgba(39,174,96,0.6);
+}
+.spell-ring.dark {
+  border: 2px solid rgba(192,57,43,0.8);
+  box-shadow: 0 0 16px rgba(192,57,43,0.6);
+}
+@keyframes spell-ring-expand {
+  0% { opacity: 0; transform: scale(0.3); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: scale(2.2); }
 }
 
 /* Minimap toggle styling */
@@ -5465,6 +5531,56 @@ button.danger:hover:not(:disabled) {
 .blood-stain.fade {
   opacity: 0;
 }
+.fire-decal,
+.ice-decal,
+.poison-decal,
+.scorch-decal,
+.holy-decal {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+  opacity: 0.85;
+  transition: opacity 2s ease;
+}
+.fire-decal {
+  background: radial-gradient(circle, rgba(231,76,60,0.5) 0%, rgba(241,196,15,0.2) 45%, transparent 70%);
+  animation: fire-flicker 0.4s ease-in-out infinite alternate;
+}
+.ice-decal {
+  background: radial-gradient(circle, rgba(174,214,241,0.55) 0%, rgba(133,193,233,0.2) 50%, transparent 70%);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+.poison-decal {
+  background: radial-gradient(circle, rgba(46,204,113,0.4) 0%, rgba(39,174,96,0.15) 50%, transparent 70%);
+  animation: poison-bubble 1.2s ease-in-out infinite;
+}
+.scorch-decal {
+  background: radial-gradient(circle, rgba(52,73,94,0.6) 0%, rgba(44,62,80,0.2) 50%, transparent 70%);
+}
+.holy-decal {
+  background: radial-gradient(circle, rgba(241,196,15,0.35) 0%, rgba(255,255,255,0.15) 50%, transparent 70%);
+  animation: holy-shimmer 1.5s ease-in-out infinite;
+}
+.fire-decal.fade,
+.ice-decal.fade,
+.poison-decal.fade,
+.scorch-decal.fade,
+.holy-decal.fade {
+  opacity: 0;
+}
+@keyframes fire-flicker {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.08); opacity: 0.95; }
+}
+@keyframes poison-bubble {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+@keyframes holy-shimmer {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.95; }
+}
 
 /* Turn timer bar */
 .game-timer {
@@ -5524,9 +5640,52 @@ button.danger:hover:not(:disabled) {
   animation: aoe-pulse 1.4s ease-in-out infinite;
   z-index: 6;
 }
+.aoe-preview.aoe-square {
+  border-radius: 4px;
+  background: rgba(155,89,182,0.12);
+}
+.aoe-preview.aoe-cone {
+  border-radius: 0;
+  background: conic-gradient(from 270deg at 0% 50%, rgba(155,89,182,0.22), transparent 45deg, transparent 315deg, rgba(155,89,182,0.22));
+  border: none;
+  transform-origin: 0 50%;
+}
+.aoe-preview.aoe-line {
+  border-radius: 2px;
+  background: rgba(155,89,182,0.15);
+  transform-origin: 0 50%;
+}
 @keyframes aoe-pulse {
   0%, 100% { transform: scale(1); opacity: 0.8; }
   50% { transform: scale(1.03); opacity: 1; }
+}
+
+/* Tactical template selector */
+.template-bar {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0;
+  padding: 4px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(155, 89, 182, 0.25);
+}
+.template-btn {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--muted);
+  cursor: pointer;
+}
+.template-btn.active {
+  border-color: rgba(155, 89, 182, 0.7);
+  color: #d7bde2;
+  background: rgba(155, 89, 182, 0.15);
 }
 
 /* DM trap markers */

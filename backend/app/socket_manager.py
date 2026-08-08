@@ -404,3 +404,30 @@ async def chat_reaction(sid, data):
         },
         room=session_id,
     )
+
+
+@socket_manager.event
+async def map_ping(sid, data):
+    """Broadcast a map ping to everyone in the session room."""
+    data = data or {}
+    session_id = data.get("session_id")
+    x = data.get("x")
+    y = data.get("y")
+
+    if not session_id or x is None or y is None:
+        return
+
+    sess = await socket_manager.get_session(sid)
+    account_id = sess.get("account_id") if sess else None
+    if not account_id:
+        return
+
+    if not await _can_chat_in_session(account_id, session_id):
+        return
+
+    await socket_manager.emit(
+        "map_ping",
+        {"session_id": session_id, "x": x, "y": y},
+        room=session_id,
+        skip_sid=sid,
+    )

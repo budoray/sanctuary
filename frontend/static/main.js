@@ -7980,6 +7980,40 @@ var AudioController = class {
     this.playNoise(0.18, 800, 0.25);
     this.tone(120, 0.12, "sawtooth", 0.08);
   }
+  bluntHit() {
+    this.playNoise(0.22, 400, 0.28);
+    this.tone(80, 0.14, "sawtooth", 0.1);
+  }
+  axeHit() {
+    this.playNoise(0.18, 600, 0.26);
+    this.tone(100, 0.13, "sawtooth", 0.09);
+    window.setTimeout(() => this.tone(60, 0.1, "sawtooth", 0.07), 60);
+  }
+  daggerHit() {
+    this.playNoise(0.12, 1400, 0.18);
+    this.tone(1600, 0.06, "square", 0.06);
+  }
+  weaponSound(cls = "") {
+    const c = cls.toLowerCase();
+    if (c === "fighter" || c === "paladin" || c === "ranger") return this.swordHit();
+    if (c === "cleric" || c === "druid") return this.bluntHit();
+    if (c === "thief" || c === "assassin") return this.daggerHit();
+    if (c === "barbarian") return this.axeHit();
+    return this.swordHit();
+  }
+  criticalHit() {
+    this.playNoise(0.2, 1200, 0.22);
+    this.tone(880, 0.08, "sawtooth", 0.12);
+    window.setTimeout(() => this.tone(1760, 0.14, "sine", 0.1), 80);
+  }
+  monsterSpawn() {
+    this.playNoise(0.25, 250, 0.18);
+    this.tone(70, 0.3, "sawtooth", 0.1);
+  }
+  monsterDeath() {
+    this.playNoise(0.28, 180, 0.2);
+    this.tone(60, 0.35, "sawtooth", 0.1, 30);
+  }
   abilitySound(cls = "") {
     const c = cls.toLowerCase();
     if (c === "cleric" || c === "paladin") {
@@ -8638,6 +8672,7 @@ var Game = class {
     this.root.appendChild(this.loadingOverlay);
     this.zoomControls = this.buildZoomControls();
     this.canvasContainer.appendChild(this.zoomControls);
+    this.aoeTemplate = "circle";
     this.autoPlayer = new AutoPlayer(this);
     this.canvasContainer.addEventListener("wheel", (e) => {
       if (e.ctrlKey || e.metaKey || Math.abs(e.deltaY) > 0) {
@@ -8787,6 +8822,11 @@ var Game = class {
       this.socket.on("chat_reaction", (payload) => {
         this.appendChatReaction(payload);
       });
+      this.socket.on("map_ping", (payload) => {
+        if (payload.session_id === this.sessionId) {
+          this.spawnPing(payload.x, payload.y);
+        }
+      });
       this.socket.on("presence_update", (payload) => {
         if (payload.session_id === this.sessionId && payload.present) {
           this.updatePresence(payload.present);
@@ -8905,6 +8945,18 @@ var Game = class {
     hud.appendChild(actions);
     this.quickSlotsEl = el("div", { className: "quick-slots" });
     hud.appendChild(this.quickSlotsEl);
+    this.templateBar = el("div", { className: "template-bar" });
+    this.templateButtons = {};
+    ["circle", "cone", "line", "square"].forEach((t) => {
+      const btn = el("button", {
+        className: `template-btn${t === "circle" ? " active" : ""}`,
+        onclick: () => this.setAoeTemplate(t)
+      }, t);
+      this.templateButtons[t] = btn;
+      this.templateBar.appendChild(btn);
+    });
+    this.templateBar.style.display = "none";
+    hud.appendChild(this.templateBar);
     this.dmTurnBtn = el("button", {
       className: "dm-turn-btn",
       onclick: () => this.runDmTurn()
@@ -9204,6 +9256,56 @@ var Game = class {
     if (!preset) return;
     this.dmMonsterSelect.value = preset.monster;
     this.dmScaleSelect.value = preset.scale;
+  }
+  dmEncountersKey() {
+    return "sanctuary_dm_encounters";
+  }
+  loadDmEncounters() {
+    try {
+      return JSON.parse(localStorage.getItem(this.dmEncountersKey()) || "[]");
+    } catch {
+      return [];
+    }
+  }
+  refreshDmEncounters() {
+    if (!this.dmEncounterSelect) return;
+    const presets = this.loadDmEncounters();
+    clear(this.dmEncounterSelect);
+    presets.forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      opt.textContent = `${p.name} (${p.monster} x${p.count})`;
+      this.dmEncounterSelect.appendChild(opt);
+    });
+    if (presets.length === 0) {
+      const opt = document.createElement("option");
+      opt.textContent = "No encounters";
+      opt.value = "";
+      this.dmEncounterSelect.appendChild(opt);
+    }
+  }
+  saveDmEncounterPreset() {
+    const name = prompt("Encounter name?");
+    if (!name) return;
+    const count = parseInt(prompt("How many?", "4") || "4", 10);
+    const presets = this.loadDmEncounters().filter((p) => p.name !== name);
+    presets.push({
+      name,
+      monster: this.dmMonsterSelect.value,
+      count: Number.isFinite(count) && count > 0 ? count : 4,
+      scale: this.dmScaleSelect.value
+    });
+    localStorage.setItem(this.dmEncountersKey(), JSON.stringify(presets));
+    this.refreshDmEncounters();
+    this.dmEncounterSelect.value = name;
+  }
+  loadDmEncounterPreset() {
+    const name = this.dmEncounterSelect.value;
+    if (!name) return;
+    const preset = this.loadDmEncounters().find((p) => p.name === name);
+    if (!preset) return;
+    this.dmMonsterSelect.value = preset.monster;
+    this.dmScaleSelect.value = String(preset.scale ?? 1);
   }
   updateJournal() {
     if (!this.journalPanel || !this.session) return;
@@ -9509,8 +9611,105 @@ var Game = class {
   setAction(action) {
     if (this.observer) return;
     this.action = this.action === action ? null : action;
+    if (this.templateBar) {
+      this.templateBar.style.display = this.action === "ability" ? "flex" : "none";
+    }
     this.updateStatus();
     this.highlightActionTiles();
+  }
+  setAoeTemplate(template) {
+    this.aoeTemplate = template;
+    Object.entries(this.templateButtons).forEach(([key, btn]) => {
+      btn.classList.toggle("active", key === template);
+    });
+    this.updateHoverHighlights();
+  }
+  getAoeTiles(px, py, hx, hy, template, maxRange) {
+    const tiles = [];
+    const inBounds = (x2, y2) => x2 >= 0 && y2 >= 0 && x2 < this.module.width && y2 < this.module.height;
+    if (template === "circle") {
+      for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) <= 2) {
+            const tx = hx + dx, ty = hy + dy;
+            if (inBounds(tx, ty)) tiles.push({ x: tx, y: ty });
+          }
+        }
+      }
+    } else if (template === "square") {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          const tx = hx + dx, ty = hy + dy;
+          if (inBounds(tx, ty)) tiles.push({ x: tx, y: ty });
+        }
+      }
+    } else if (template === "cone") {
+      const dx = Math.sign(hx - px);
+      const dy = Math.sign(hy - py);
+      const steps = [
+        [{ x: px + dx, y: py + dy }],
+        [{ x: px + dx * 2, y: py + dy * 2 }, dx === 0 ? { x: px + 1, y: py + dy * 2 } : { x: px + dx * 2, y: py + 1 }, dx === 0 ? { x: px - 1, y: py + dy * 2 } : { x: px + dx * 2, y: py - 1 }],
+        [{ x: px + dx * 3, y: py + dy * 3 }, dx === 0 ? { x: px + 2, y: py + dy * 3 } : { x: px + dx * 3, y: py + 2 }, dx === 0 ? { x: px - 2, y: py + dy * 3 } : { x: px + dx * 3, y: py - 2 }]
+      ];
+      steps.forEach((row) => row.forEach((t) => {
+        if (inBounds(t.x, t.y)) tiles.push(t);
+      }));
+    } else if (template === "line") {
+      const dx = hx - px, dy = hy - py;
+      const steps = Math.max(Math.abs(dx), Math.abs(dy));
+      const stepX = steps === 0 ? 0 : dx / steps;
+      const stepY = steps === 0 ? 0 : dy / steps;
+      for (let i = 1; i <= Math.min(steps, maxRange); i++) {
+        const tx = Math.round(px + stepX * i);
+        const ty = Math.round(py + stepY * i);
+        if (inBounds(tx, ty)) tiles.push({ x: tx, y: ty });
+      }
+    }
+    return tiles;
+  }
+  renderAoePreview(px, py, hx, hy, template) {
+    const preview = el("div", { className: `aoe-preview aoe-${template}` });
+    if (template === "circle") {
+      const radiusTiles = 2;
+      const size = (radiusTiles * 2 + 1) * TILE_SIZE;
+      preview.style.width = `${size}px`;
+      preview.style.height = `${size}px`;
+      preview.style.left = `${(hx - radiusTiles) * TILE_SIZE}px`;
+      preview.style.top = `${(hy - radiusTiles) * TILE_SIZE}px`;
+    } else if (template === "square") {
+      const size = 3 * TILE_SIZE;
+      preview.style.width = `${size}px`;
+      preview.style.height = `${size}px`;
+      preview.style.left = `${(hx - 1) * TILE_SIZE}px`;
+      preview.style.top = `${(hy - 1) * TILE_SIZE}px`;
+    } else if (template === "cone") {
+      const cx = (px + 0.5) * TILE_SIZE;
+      const cy = (py + 0.5) * TILE_SIZE;
+      const tcx = (hx + 0.5) * TILE_SIZE;
+      const tcy = (hy + 0.5) * TILE_SIZE;
+      const angle = Math.atan2(tcy - cy, tcx - cx) * 180 / Math.PI;
+      preview.style.left = `${cx}px`;
+      preview.style.top = `${cy}px`;
+      preview.style.transform = `rotate(${angle}deg)`;
+      preview.style.width = `${3.5 * TILE_SIZE}px`;
+      preview.style.height = `${2.5 * TILE_SIZE}px`;
+    } else if (template === "line") {
+      const startX = (px + 0.5) * TILE_SIZE;
+      const startY = (py + 0.5) * TILE_SIZE;
+      const endX = (hx + 0.5) * TILE_SIZE;
+      const endY = (hy + 0.5) * TILE_SIZE;
+      const dx = endX - startX;
+      const dy = endY - startY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      preview.style.left = `${startX}px`;
+      preview.style.top = `${startY - TILE_SIZE / 2}px`;
+      preview.style.width = `${dist}px`;
+      preview.style.height = `${TILE_SIZE}px`;
+      preview.style.transform = `rotate(${angle}deg)`;
+    }
+    this.fxContainer.appendChild(preview);
+    return preview;
   }
   setDmAction(action) {
     this.dmAction = this.dmAction === action ? null : action;
@@ -9546,6 +9745,13 @@ var Game = class {
     presetWrap.appendChild(el("button", { onclick: () => this.loadDmPreset() }, "Load"));
     presetWrap.appendChild(el("button", { onclick: () => this.saveDmPreset() }, "Save"));
     panel.appendChild(presetWrap);
+    const encounterWrap = el("div", { className: "dm-tool-row dm-encounters" });
+    this.dmEncounterSelect = el("select", {});
+    this.refreshDmEncounters();
+    encounterWrap.appendChild(this.dmEncounterSelect);
+    encounterWrap.appendChild(el("button", { onclick: () => this.loadDmEncounterPreset() }, "Load"));
+    encounterWrap.appendChild(el("button", { onclick: () => this.saveDmEncounterPreset() }, "Save"));
+    panel.appendChild(encounterWrap);
     const propWrap = el("div", { className: "dm-tool-row" });
     this.dmPropSelect = el("select", {});
     ["barrel", "rubble", "torch", "clear"].forEach((p) => {
@@ -10028,25 +10234,12 @@ var Game = class {
       const abilityRange = cls === "magic-user" || cls === "illusionist" ? 6 : cls === "cleric" ? 4 : 1;
       const dist = Math.abs(hx - player.x) + Math.abs(hy - player.y);
       if (dist > 0 && dist <= abilityRange && this.hasLineOfSight(player.x, player.y, hx, hy)) {
-        for (let dy = -2; dy <= 2; dy++) {
-          for (let dx = -2; dx <= 2; dx++) {
-            if (Math.max(Math.abs(dx), Math.abs(dy)) > 2) continue;
-            const tx = hx + dx;
-            const ty = hy + dy;
-            if (tx < 0 || ty < 0 || tx >= this.module.width || ty >= this.module.height) continue;
-            const g = this.tileSprites[ty]?.[tx];
-            if (g) g.classList.add("tile-highlight-aoe");
-          }
-        }
-        const aoe = el("div", { className: "aoe-preview" });
-        const radiusTiles = 2;
-        const size = (radiusTiles * 2 + 1) * TILE_SIZE;
-        aoe.style.width = `${size}px`;
-        aoe.style.height = `${size}px`;
-        aoe.style.left = `${(hx - radiusTiles) * TILE_SIZE}px`;
-        aoe.style.top = `${(hy - radiusTiles) * TILE_SIZE}px`;
-        this.fxContainer.appendChild(aoe);
-        this.aoePreview = aoe;
+        const tiles = this.getAoeTiles(player.x, player.y, hx, hy, this.aoeTemplate || "circle", abilityRange);
+        tiles.forEach((t) => {
+          const g = this.tileSprites[t.y]?.[t.x];
+          if (g) g.classList.add("tile-highlight-aoe");
+        });
+        this.aoePreview = this.renderAoePreview(player.x, player.y, hx, hy, this.aoeTemplate || "circle");
       }
     }
     if (["attack", "ranged", "ability"].includes(this.action)) {
@@ -10339,14 +10532,30 @@ var Game = class {
     this.fxContainer.appendChild(ring);
     window.setTimeout(() => ring.remove(), 1200);
   }
+  spawnGroundDecal(x, y, type = "blood") {
+    const configs = {
+      blood: { className: "blood-stain", fade: 4000, remove: 7000 },
+      fire: { className: "fire-decal", fade: 2500, remove: 5000 },
+      ice: { className: "ice-decal", fade: 3000, remove: 6000 },
+      poison: { className: "poison-decal", fade: 3500, remove: 6500 },
+      arcane: { className: "scorch-decal", fade: 3000, remove: 5500 },
+      holy: { className: "holy-decal", fade: 2500, remove: 5000 },
+      nature: { className: "poison-decal", fade: 3500, remove: 6500 },
+      dark: { className: "scorch-decal", fade: 3000, remove: 5500 }
+    };
+    const cfg = configs[type] || configs.blood;
+    const decal = el("div", { className: cfg.className });
+    const tx = Math.floor(x / TILE_SIZE);
+    const ty = Math.floor(y / TILE_SIZE);
+    decal.style.left = `${tx * TILE_SIZE}px`;
+    decal.style.top = `${ty * TILE_SIZE}px`;
+    decal.style.transform = `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`;
+    this.fxContainer.appendChild(decal);
+    window.setTimeout(() => decal.classList.add("fade"), cfg.fade);
+    window.setTimeout(() => decal.remove(), cfg.remove);
+  }
   spawnBloodStain(x, y) {
-    const stain = el("div", { className: "blood-stain" });
-    stain.style.left = `${x * TILE_SIZE}px`;
-    stain.style.top = `${y * TILE_SIZE}px`;
-    stain.style.transform = `rotate(${Math.random() * 360}deg) scale(${0.8 + Math.random() * 0.4})`;
-    this.fxContainer.appendChild(stain);
-    window.setTimeout(() => stain.classList.add("fade"), 4000);
-    window.setTimeout(() => stain.remove(), 7000);
+    this.spawnGroundDecal(x, y, "blood");
   }
   spawnLootSparkle(x, y) {
     const cx = x * TILE_SIZE + TILE_SIZE / 2;
@@ -10418,6 +10627,11 @@ var Game = class {
     const newLog = (session.log || []).slice(this.lastLogLength || 0);
     const hadCrit = newLog.some((e) => /critical|crit/i.test(e));
     const hadMiss = newLog.some((e) => /miss|misses|dodge/i.test(e));
+    const prevMonsterIds = new Set(prevSession.monsters.map((m) => m.id));
+    const newMonsters = session.monsters.filter((m) => !prevMonsterIds.has(m.id));
+    if (newMonsters.length > 0) {
+      this.audio?.monsterSpawn();
+    }
     for (const t of allNow) {
       const prev = prevById.get(t.id);
       if (!prev || t.hp === prev.hp) continue;
@@ -10431,6 +10645,7 @@ var Game = class {
         this.spawnParticleBurst(t.x, t.y, "#ff9f43", 18);
         this.shake(18);
         this.triggerCritFlash();
+        this.audio?.criticalHit();
       } else if (isKill) {
         this.spawnFloatingText(t.x, t.y, text, "damage");
         this.spawnFloatingText(t.x, t.y - 0.6, "SLAIN!", "kill");
@@ -10442,6 +10657,7 @@ var Game = class {
         window.setTimeout(() => this.spawnFloatingText(t.x, t.y - 1.1, `+${xp} XP`, "xp"), 250);
         window.setTimeout(() => this.spawnFloatingText(t.x, t.y - 1.7, `+${gold} G`, "gold"), 450);
         this.shake(14);
+        this.audio?.monsterDeath();
       } else if (isDown) {
         this.spawnFloatingText(t.x, t.y, text, "damage");
         this.spawnFloatingText(t.x, t.y - 0.6, "DOWN!", "kill");
@@ -10641,6 +10857,14 @@ var Game = class {
       window.setTimeout(() => p.remove(), (delay + duration) * 1000 + 100);
     }
   }
+  spellVariantForClass(cls = "") {
+    const c = cls.toLowerCase();
+    if (c === "cleric" || c === "paladin") return "holy";
+    if (c === "druid" || c === "ranger") return "nature";
+    if (c === "illusionist" || c === "assassin" || c === "thief") return "dark";
+    if (c === "magic-user" || c === "mage" || c === "wizard") return "arcane";
+    return "arcane";
+  }
   spawnSpellBeam(fromX, fromY, toX, toY, cls = "") {
     const startX = fromX * TILE_SIZE + TILE_SIZE / 2;
     const startY = fromY * TILE_SIZE + TILE_SIZE / 2;
@@ -10650,27 +10874,31 @@ var Game = class {
     const dy = endY - startY;
     const dist = Math.sqrt(dx * dx + dy * dy);
     const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-    const c = cls.toLowerCase();
-    let variant = "arcane";
-    if (c === "cleric" || c === "paladin") variant = "holy";
-    else if (c === "druid" || c === "ranger") variant = "nature";
-    else if (c === "illusionist" || c === "assassin") variant = "dark";
+    const variant = this.spellVariantForClass(cls);
     const beam = el("div", { className: `spell-beam ${variant}` });
     beam.style.left = `${startX}px`;
     beam.style.top = `${startY - 1}px`;
     beam.style.width = `${dist}px`;
     beam.style.transform = `rotate(${angle}deg)`;
     this.fxContainer.appendChild(beam);
-    this.spawnSpellCast(startX, startY, variant);
-    window.setTimeout(() => this.spawnSpellImpact(endX, endY, variant), 120);
-    window.setTimeout(() => beam.remove(), 360);
+    this.spawnSpellCharge(startX, startY, variant);
+    window.setTimeout(() => this.spawnSpellCast(startX, startY, variant), 160);
+    window.setTimeout(() => this.spawnSpellImpact(endX, endY, variant), 280);
+    window.setTimeout(() => beam.remove(), 420);
+  }
+  spawnSpellCharge(x, y, variant) {
+    const charge = el("div", { className: `spell-charge ${variant}` });
+    charge.style.left = `${x}px`;
+    charge.style.top = `${y}px`;
+    this.fxContainer.appendChild(charge);
+    window.setTimeout(() => charge.remove(), 300);
   }
   spawnSpellCast(x, y, variant) {
     const orb = el("div", { className: `spell-cast ${variant}` });
     orb.style.left = `${x}px`;
     orb.style.top = `${y}px`;
     this.fxContainer.appendChild(orb);
-    window.setTimeout(() => orb.remove(), 400);
+    window.setTimeout(() => orb.remove(), 450);
   }
   spawnSpellImpact(x, y, variant) {
     const burst = el("div", { className: `spell-impact ${variant}` });
@@ -10678,32 +10906,43 @@ var Game = class {
     burst.style.top = `${y}px`;
     this.fxContainer.appendChild(burst);
     this.spawnSpellDetritus(x, y, variant);
+    this.spawnSpellRing(x, y, variant);
+    this.spawnGroundDecal(x, y, variant);
     this.audio?.spellHit();
-    window.setTimeout(() => burst.remove(), 500);
+    window.setTimeout(() => burst.remove(), 550);
+  }
+  spawnSpellRing(x, y, variant) {
+    const ring = el("div", { className: `spell-ring ${variant}` });
+    ring.style.left = `${x}px`;
+    ring.style.top = `${y}px`;
+    this.fxContainer.appendChild(ring);
+    window.setTimeout(() => ring.remove(), 650);
   }
   spawnSpellDetritus(x, y, variant) {
     const cx = x - TILE_SIZE / 2;
     const cy = y - TILE_SIZE / 2;
     const configs = {
-      holy: { count: 6, className: "spell-rune", color: "#f1c40f" },
-      nature: { count: 8, className: "spell-leaf", color: "#2ecc71" },
-      dark: { count: 10, className: "spell-shard", color: "#9b59b6" },
-      arcane: { count: 8, className: "spell-glyph", color: "#3498db" }
+      holy: { count: 10, className: "spell-rune", color: "#f1c40f", gravity: false, spin: true },
+      nature: { count: 12, className: "spell-leaf", color: "#2ecc71", gravity: true, spin: true },
+      dark: { count: 14, className: "spell-shard", color: "#9b59b6", gravity: false, spin: false },
+      arcane: { count: 12, className: "spell-glyph", color: "#3498db", gravity: false, spin: true }
     };
     const cfg = configs[variant] || configs.arcane;
     for (let i = 0; i < cfg.count; i++) {
       const piece = el("div", { className: `spell-piece ${cfg.className}` });
       const angle = Math.random() * Math.PI * 2;
-      const dist = 10 + Math.random() * 20;
-      const px = Math.cos(angle) * dist;
-      const py = Math.sin(angle) * dist;
+      const spread = 14 + Math.random() * 28;
+      const px = Math.cos(angle) * spread;
+      const py = Math.sin(angle) * spread + (cfg.gravity ? 8 + Math.random() * 16 : 0);
+      const rot = cfg.spin ? Math.random() * 360 : 0;
       piece.style.left = `${cx + TILE_SIZE / 2}px`;
       piece.style.top = `${cy + TILE_SIZE / 2}px`;
       piece.style.setProperty("--sx", `${px}px`);
       piece.style.setProperty("--sy", `${py}px`);
+      piece.style.setProperty("--rot", `${rot}deg`);
       piece.style.background = cfg.color;
       this.fxContainer.appendChild(piece);
-      window.setTimeout(() => piece.remove(), 700);
+      window.setTimeout(() => piece.remove(), 750);
     }
   }
   async onTileClick(x, y) {
@@ -10711,6 +10950,7 @@ var Game = class {
     if (this.rulerActive || this.rulerDragging) return;
     if (this.shiftKey) {
       this.spawnPing(x, y);
+      this.socket?.emit("map_ping", { session_id: this.sessionId, x, y });
       return;
     }
     if (this.dmAction && this.isDm()) {
@@ -10730,13 +10970,26 @@ var Game = class {
           const type = this.dmPropSelect.value || "barrel";
           response = await dmProp(this.sessionId, { type, x, y });
         } else if (this.dmAction === "encounter") {
-          const name = this.dmMonsterSelect.value || "goblin";
-          const scale = parseFloat(this.dmScaleSelect.value || "1");
-          const offsets = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
+          const presetName = this.dmEncounterSelect.value;
+          let name = this.dmMonsterSelect.value || "goblin";
+          let scale = parseFloat(this.dmScaleSelect.value || "1");
+          let count = 5;
+          if (presetName) {
+            const preset = this.loadDmEncounters().find((p) => p.name === presetName);
+            if (preset) {
+              name = preset.monster;
+              scale = parseFloat(preset.scale ?? 1);
+              count = Math.max(1, Math.min(12, preset.count ?? 5));
+            }
+          }
+          const offsets = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1], [2, 0], [-2, 0], [0, 2]];
           let latest = null;
+          let spawned = 0;
           for (const [dx, dy] of offsets) {
+            if (spawned >= count) break;
             try {
               latest = await dmSpawn(this.sessionId, { name, x: x + dx, y: y + dy, scale });
+              spawned++;
             } catch {
             }
           }
@@ -10754,8 +11007,29 @@ var Game = class {
       return;
     }
     if (this.session.phase !== "player") return;
-    if (this.action && this.action !== "move") return;
+    if (this.action && this.action !== "move" && this.action !== "ability") return;
     const player = this.session.player;
+    if (this.action === "ability") {
+      const cls = (player.classes?.[0] ?? "").toLowerCase();
+      const abilityRange = cls === "magic-user" || cls === "illusionist" ? 6 : cls === "cleric" ? 4 : 1;
+      const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
+      if (dist > 0 && dist <= abilityRange && this.hasLineOfSight(player.x, player.y, x, y)) {
+        this.lockInput();
+        try {
+          const { session } = await actInSession(this.sessionId, "aoe", { center_x: x, center_y: y });
+          this.action = null;
+          this.update(session);
+          if (session.phase === "dm") {
+            setTimeout(() => this.runDmTurn(), 600);
+          }
+        } catch (err) {
+          this.log(err.message || "Area ability failed.");
+        } finally {
+          this.unlockInput();
+        }
+      }
+      return;
+    }
     const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
     if (dist !== 1) return;
     const prevX = player.x;
@@ -10805,7 +11079,7 @@ var Game = class {
       if (token.type !== "monster") return;
       const player2 = this.session.player;
       const isAdjacent = Math.abs(player2.x - token.x) + Math.abs(player2.y - token.y) === 1;
-      this.audio.swordHit();
+      this.audio.weaponSound(player2.classes?.[0] ?? "");
       this.audio.combatSting();
       if (isAdjacent) {
         this.animateAttackLunge(player2.x, player2.y, token.x, token.y);
@@ -10855,7 +11129,7 @@ var Game = class {
         this.audio.abilitySound(cls);
         this.spawnSpellBeam(player2.x, player2.y, token.x, token.y, cls);
       } else {
-        this.audio.swordHit();
+        this.audio.weaponSound(cls);
         if (isAdjacent) {
           this.animateAttackLunge(player2.x, player2.y, token.x, token.y);
         }
