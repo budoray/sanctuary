@@ -3005,6 +3005,14 @@ var CampaignDetail = class {
     const scroll = el("div", { className: "journey-map-scroll" });
     scroll.appendChild(el("div", { className: "journey-map-filigree" }));
     scroll.appendChild(el("div", { className: "journey-map-title" }, `The Road to ${this.campaign.name}`));
+    const regions = el("div", { className: "journey-regions" });
+    ids.forEach((id, index) => {
+      const mod = mapById.get(id) || { id, name: id, theme: "dungeon" };
+      const region = el("div", { className: `journey-region region-${mod.theme || "dungeon"}` });
+      region.appendChild(el("span", { className: "region-icon" }, this.biomeIconFor(mod.theme)));
+      regions.appendChild(region);
+    });
+    scroll.appendChild(regions);
     const nodesWrap = el("div", { className: "journey-nodes-v2" });
     ids.forEach((id, index) => {
       const mod = mapById.get(id) || { id, name: id, theme: "dungeon" };
@@ -3030,16 +3038,28 @@ var CampaignDetail = class {
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("class", "journey-path-v2");
     scroll.appendChild(svg);
+    const caravan = el("div", { className: "journey-caravan" }, "\u{1F3F0}");
+    scroll.appendChild(caravan);
     wrapper.appendChild(scroll);
     this.journeyEl.appendChild(wrapper);
-    requestAnimationFrame(() => this.drawJourneyPathV2(svg, nodesWrap, ids.length, cleared.size));
-    window.setTimeout(() => this.drawJourneyPathV2(svg, nodesWrap, ids.length, cleared.size), 120);
+    const eventBanner = this.campaign.world_event ? el("div", { className: "journey-world-event" }, `\u26A0 ${this.campaign.world_event}`) : null;
+    if (eventBanner) this.journeyEl.appendChild(eventBanner);
+    requestAnimationFrame(() => this.drawJourneyPathV2(svg, nodesWrap, ids.length, cleared.size, caravan));
+    window.setTimeout(() => this.drawJourneyPathV2(svg, nodesWrap, ids.length, cleared.size, caravan), 120);
   }
-  drawJourneyPathV2(svg, wrapper, count, clearedCount) {
+  biomeIconFor(theme) {
+    const map = {
+      dungeon: "\u{1F3DA}", cave: "\u{1F5DD}", library: "\u{1F4DA}", ice: "\u{1F3D4}",
+      lava: "\u{1F30B}", forest: "\u{1F332}", tomb: "\u{1F3DB}", sewer: "\u{1F6BD}",
+      temple: "\u{1F3CF}", crypt: "\u{1F480}", swamp: "\u{1FAB9}", mountain: "\u{26F0}"
+    };
+    return map[theme] || "\u{1F3F0}";
+  }
+  drawJourneyPathV2(svg, wrapper, count, clearedCount, caravan) {
     if (!svg || !wrapper) return;
     const rect = wrapper.getBoundingClientRect();
-    const width = Math.max(rect.width, count * 140);
-    const height = 260;
+    const width = Math.max(rect.width, count * 160);
+    const height = 280;
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     svg.style.width = `${width}px`;
     svg.style.height = `${height}px`;
@@ -3061,9 +3081,9 @@ var CampaignDetail = class {
         const prev = pts[i - 1];
         const cur = pts[i];
         const cp1x = prev.x + (cur.x - prev.x) * 0.45;
-        const cp1y = prev.y + (i % 2 === 1 ? 40 : -40);
+        const cp1y = prev.y + (i % 2 === 1 ? 50 : -50);
         const cp2x = prev.x + (cur.x - prev.x) * 0.55;
-        const cp2y = cur.y + (i % 2 === 1 ? -40 : 40);
+        const cp2y = cur.y + (i % 2 === 1 ? -50 : 50);
         d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${cur.x} ${cur.y}`;
       }
       return d;
@@ -3093,6 +3113,20 @@ var CampaignDetail = class {
       glow.setAttribute("r", "18");
       glow.setAttribute("class", "journey-current-glow");
       svg.appendChild(glow);
+      if (caravan) {
+        caravan.style.left = `${cur.x}px`;
+        caravan.style.top = `${cur.y - 42}px`;
+      }
+    }
+    for (let i = 1; i < points.length; i++) {
+      const midX = (points[i - 1].x + points[i].x) / 2;
+      const midY = (points[i - 1].y + points[i].y) / 2;
+      const marker = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      marker.setAttribute("cx", String(midX));
+      marker.setAttribute("cy", String(midY));
+      marker.setAttribute("r", "3");
+      marker.setAttribute("class", "journey-encounter-marker");
+      svg.appendChild(marker);
     }
   }
   destroy() {
@@ -9007,11 +9041,14 @@ var Game = class {
   chatMessages = document.createElement("div");
   chatInput = document.createElement("input");
   chatCollapsed = false;
+  charSheetTab = "overview";
+  tokenFrameStyle = "default";
   presencePanel = null;
   presenceList = document.createElement("div");
   journalPanel = null;
   journalOpen = false;
   journalTab = "notes";
+  logTheaterOpen = false;
   heartbeatInterval = null;
   moduleId;
   loadingOverlay;
@@ -9434,8 +9471,33 @@ var Game = class {
     unitsPanel.appendChild(this.partyEl);
     unitsPanel.appendChild(this.rosterEl);
     hud.appendChild(unitsPanel);
+    this.lootPanel = el("div", { className: "loot-panel" });
+    const lootHeader = el("div", { className: "loot-panel-header" });
+    lootHeader.appendChild(el("h3", {}, "Loot"));
+    const lootToggle = el("button", {
+      className: "loot-panel-toggle",
+      title: "Toggle loot panel",
+      onclick: () => {
+        this.lootPanel.classList.toggle("collapsed");
+        lootToggle.textContent = this.lootPanel.classList.contains("collapsed") ? "\u25B2" : "\u25BC";
+      }
+    }, "\u25BC");
+    lootHeader.appendChild(lootToggle);
+    this.lootPanel.appendChild(lootHeader);
+    this.lootPanelBody = el("div", { className: "loot-panel-body" });
+    this.lootPanel.appendChild(this.lootPanelBody);
+    hud.appendChild(this.lootPanel);
+    this.renderLootPanel();
+    const logHeader = el("div", { className: "game-log-header" });
+    logHeader.appendChild(el("h2", {}, "Chronicle"));
+    const logTheaterBtn = el("button", {
+      className: "log-theater-btn",
+      title: "Toggle log theater",
+      onclick: () => this.toggleLogTheater()
+    }, "\u26F6");
+    logHeader.appendChild(logTheaterBtn);
+    hud.appendChild(logHeader);
     this.logEl = el("div", { className: "game-log" });
-    hud.appendChild(el("h2", {}, "Chronicle"));
     hud.appendChild(this.logEl);
     this.dmToolsEl = this.buildDmTools();
     this.dmToolsEl.style.display = "none";
@@ -9517,12 +9579,26 @@ var Game = class {
       onclick: () => this.toggleMinimap()
     }, "\u{1F5FA}");
     actionGroup.appendChild(minimapBtn);
+    const lootBtn = el("button", {
+      className: "loot-panel-btn small",
+      title: "Toggle loot panel",
+      onclick: () => {
+        if (this.lootPanel) this.lootPanel.classList.toggle("collapsed");
+      }
+    }, "\u{1F4E6}");
+    actionGroup.appendChild(lootBtn);
     const rulerBtn = el("button", {
       className: "ruler-btn small",
       title: "Toggle ruler",
       onclick: () => this.toggleRuler()
     }, "\u{1F4CF}");
     actionGroup.appendChild(rulerBtn);
+    this.stealthBtn = el("button", {
+      className: "stealth-btn small",
+      title: "Toggle stealth overlay",
+      onclick: () => this.toggleStealthOverlay()
+    }, "\u{1F300}");
+    actionGroup.appendChild(this.stealthBtn);
     const charSheetBtn = el("button", {
       className: "char-sheet-btn small",
       title: "Character sheet",
@@ -9696,6 +9772,10 @@ var Game = class {
     this.journalPanel.style.display = this.journalOpen ? "flex" : "none";
     if (this.journalOpen) this.updateJournal();
   }
+  toggleLogTheater() {
+    this.logTheaterOpen = !this.logTheaterOpen;
+    this.root.classList.toggle("log-theater", this.logTheaterOpen);
+  }
   buildCharacterSheetPanel() {
     const panel = el("div", { className: "char-sheet-overlay" });
     const card = el("div", { className: "char-sheet-card" });
@@ -9704,11 +9784,37 @@ var Game = class {
     const close = el("button", { className: "char-sheet-close", onclick: () => this.toggleCharacterSheet() }, "\xD7");
     header.appendChild(close);
     card.appendChild(header);
+    const tabs = el("div", { className: "char-sheet-tabs" });
+    this.charSheetTabs = {};
+    const makeTab = (key, label) => {
+      const btn = el("button", {
+        className: `char-sheet-tab${this.charSheetTab === key ? " active" : ""}`,
+        onclick: () => {
+          this.charSheetTab = key;
+          this.updateCharacterSheetTabs();
+          this.updateCharacterSheet();
+        }
+      }, label);
+      tabs.appendChild(btn);
+      this.charSheetTabs[key] = btn;
+      return btn;
+    };
+    makeTab("overview", "Overview");
+    makeTab("equipment", "Equipment");
+    makeTab("inventory", "Inventory");
+    makeTab("abilities", "Abilities");
+    card.appendChild(tabs);
     this.charSheetBody = el("div", { className: "char-sheet-body" });
     card.appendChild(this.charSheetBody);
     panel.appendChild(card);
     panel.style.display = "none";
     return panel;
+  }
+  updateCharacterSheetTabs() {
+    if (!this.charSheetTabs) return;
+    Object.entries(this.charSheetTabs).forEach(([key, btn]) => {
+      btn.classList.toggle("active", key === this.charSheetTab);
+    });
   }
   toggleCharacterSheet() {
     if (!this.charSheetPanel) {
@@ -9721,12 +9827,37 @@ var Game = class {
   }
   updateCharacterSheet() {
     if (!this.charSheetBody || !this.session) return;
+    this.updateCharacterSheetTabs();
     const p = this.session.player;
     clear(this.charSheetBody);
+    const tab = this.charSheetTab || "overview";
+    if (tab === "overview") this.renderCharSheetOverview(p);
+    else if (tab === "equipment") this.renderCharSheetEquipment(p);
+    else if (tab === "inventory") this.renderCharSheetInventory(p);
+    else if (tab === "abilities") this.renderCharSheetAbilities(p);
+  }
+  renderCharSheetOverview(p) {
     const header = el("div", { className: "char-sheet-identity" });
-    const portraitUrl = this.fallbackPortraitUrl(p.classes?.[0] ?? "");
+    const portraitUrl = p.portrait_url || this.fallbackPortraitUrl(p.classes?.[0] ?? "");
+    const portraitWrap = el("div", { className: `char-sheet-portrait-wrap frame-${this.tokenFrameStyle}` });
     const portrait = el("img", { className: "char-sheet-portrait", src: portraitUrl, alt: p.name, onerror: (e) => { e.target.style.display = "none"; } });
-    header.appendChild(portrait);
+    portraitWrap.appendChild(portrait);
+    header.appendChild(portraitWrap);
+    const frameSelect = el("select", {
+      className: "char-sheet-frame-select",
+      onchange: (e) => {
+        this.tokenFrameStyle = e.target.value;
+        this.updateCharacterSheet();
+      }
+    });
+    ["default", "gold", "silver", "dark", "nature", "arcane"].forEach((f) => {
+      const opt = document.createElement("option");
+      opt.value = f;
+      opt.textContent = f;
+      if (f === this.tokenFrameStyle) opt.selected = true;
+      frameSelect.appendChild(opt);
+    });
+    header.appendChild(frameSelect);
     header.appendChild(el("div", { className: "char-sheet-name" }, p.name));
     header.appendChild(el("div", { className: "char-sheet-meta" }, `${this.titleCase(p.ancestry || "")} ${(p.classes || []).map((c) => this.titleCase(c)).join(" / ")} \u2022 Level ${p.level ?? 1}`));
     this.charSheetBody.appendChild(header);
@@ -9734,6 +9865,7 @@ var Game = class {
     [
       ["HP", `${p.hp}/${p.max_hp}`],
       ["AC", p.ac],
+      ["THAC0", p.thac0 ?? "-"],
       ["XP", p.xp ?? 0],
       ["Gold", p.gold ?? 0]
     ].forEach(([label, value]) => {
@@ -9756,20 +9888,21 @@ var Game = class {
       abilities.appendChild(row);
     });
     this.charSheetBody.appendChild(abilities);
-    const invSection = el("div", { className: "char-sheet-section" });
-    invSection.appendChild(el("h3", {}, "Inventory"));
-    const inventory = p.inventory || [];
-    if (inventory.length === 0) {
-      invSection.appendChild(el("div", { className: "char-sheet-empty" }, "No consumables."));
-    } else {
-      inventory.forEach((item) => {
-        const row = el("div", { className: "char-sheet-item" });
-        row.appendChild(el("span", { className: "char-sheet-item-name" }, item.name || "Item"));
-        row.appendChild(el("span", { className: "char-sheet-item-type" }, item.type || item.slot || ""));
-        invSection.appendChild(row);
+    const saves = p.saving_throws || {};
+    const saveKeys = Object.keys(saves);
+    if (saveKeys.length > 0) {
+      const savesSection = el("div", { className: "char-sheet-section" });
+      savesSection.appendChild(el("h3", {}, "Saving Throws"));
+      const grid = el("div", { className: "char-sheet-saves" });
+      saveKeys.forEach((k) => {
+        const cell = el("div", { className: "char-sheet-save" });
+        cell.appendChild(el("span", { className: "char-sheet-save-name" }, this.titleCase(k)));
+        cell.appendChild(el("span", { className: "char-sheet-save-value" }, String(saves[k])));
+        grid.appendChild(cell);
       });
+      savesSection.appendChild(grid);
+      this.charSheetBody.appendChild(savesSection);
     }
-    this.charSheetBody.appendChild(invSection);
     const statusSection = el("div", { className: "char-sheet-section" });
     statusSection.appendChild(el("h3", {}, "Status"));
     const statuses = p.statuses || [];
@@ -9782,6 +9915,72 @@ var Game = class {
       });
     }
     this.charSheetBody.appendChild(statusSection);
+  }
+  renderCharSheetEquipment(p) {
+    const equipment = p.equipment || {};
+    const slots = [
+      { key: "head", label: "Head" },
+      { key: "body", label: "Armor" },
+      { key: "main_hand", label: "Main Hand" },
+      { key: "off_hand", label: "Off Hand" },
+      { key: "hands", label: "Hands" },
+      { key: "feet", label: "Feet" },
+      { key: "neck", label: "Neck" },
+      { key: "ring", label: "Ring" }
+    ];
+    const doll = el("div", { className: "char-sheet-paper-doll" });
+    slots.forEach(({ key, label }) => {
+      const item = equipment[key];
+      const slot = el("div", { className: `paper-doll-slot slot-${key}` });
+      slot.appendChild(el("span", { className: "slot-label" }, label));
+      slot.appendChild(el("span", { className: "slot-item" }, item?.name || "Empty"));
+      doll.appendChild(slot);
+    });
+    this.charSheetBody.appendChild(doll);
+    const acBreakdown = el("div", { className: "char-sheet-section" });
+    acBreakdown.appendChild(el("h3", {}, "Defense"));
+    acBreakdown.appendChild(el("div", { className: "char-sheet-ac-breakdown" }, `Base AC ${p.ac} ${equipment.body ? `(+ ${equipment.body.name})` : ""}`));
+    this.charSheetBody.appendChild(acBreakdown);
+  }
+  renderCharSheetInventory(p) {
+    const section = el("div", { className: "char-sheet-section" });
+    section.appendChild(el("h3", {}, `Inventory (${(p.inventory || []).length})`));
+    const inventory = p.inventory || [];
+    if (inventory.length === 0) {
+      section.appendChild(el("div", { className: "char-sheet-empty" }, "No items."));
+    } else {
+      const grid = el("div", { className: "char-sheet-inventory-grid" });
+      inventory.forEach((item) => {
+        const cell = el("div", { className: `char-sheet-inv-cell rarity-${item.rarity || "common"}` });
+        cell.appendChild(el("span", { className: "inv-cell-name" }, item.name || "Item"));
+        cell.appendChild(el("span", { className: "inv-cell-type" }, item.type || item.slot || ""));
+        if (item.description) {
+          const tip = el("div", { className: "inv-cell-tooltip" }, item.description);
+          cell.appendChild(tip);
+        }
+        grid.appendChild(cell);
+      });
+      section.appendChild(grid);
+    }
+    this.charSheetBody.appendChild(section);
+  }
+  renderCharSheetAbilities(p) {
+    const section = el("div", { className: "char-sheet-section" });
+    section.appendChild(el("h3", {}, "Class Abilities"));
+    const cls = (p.classes?.[0] ?? "").toLowerCase();
+    const card = CLASS_ABILITY_CARDS[cls];
+    if (card) {
+      const ability = el("div", { className: "char-sheet-ability-card" });
+      ability.appendChild(el("div", { className: "ability-card-name" }, card.name));
+      ability.appendChild(el("div", { className: "ability-card-meta" }, `Range: ${card.range}`));
+      ability.appendChild(el("div", { className: "ability-card-effect" }, card.effect));
+      section.appendChild(ability);
+    } else {
+      section.appendChild(el("div", { className: "char-sheet-empty" }, "No special abilities."));
+    }
+    const racial = p.ancestry ? el("div", { className: "char-sheet-ability-card" }, `${this.titleCase(p.ancestry)} traits are handled by the ruleset.`) : null;
+    if (racial) section.appendChild(racial);
+    this.charSheetBody.appendChild(section);
   }
   toggleMinimap() {
     this.minimapVisible = !this.minimapVisible;
@@ -10219,12 +10418,45 @@ var Game = class {
     if (!this.socket) return;
     const text = this.chatInput.value.trim();
     if (!text) return;
-    this.socket.emit("chat_message", {
+    const payload = {
       session_id: this.sessionId,
       text,
       name: document.body.dataset.user || "Player"
-    });
+    };
+    if (text.startsWith("/w ") || text.startsWith("/whisper ")) {
+      payload.whisper = true;
+      payload.text = text.replace(/^\/(w|whisper)\s+/, "");
+    } else if (text.startsWith("/me ")) {
+      payload.emote = true;
+      payload.text = text.replace(/^\/me\s+/, "");
+    } else if (text.startsWith("/roll ") || text.startsWith("/r ")) {
+      payload.roll = true;
+      payload.text = text.replace(/^\/(roll|r)\s+/, "");
+      payload.rollResult = this.evaluateLocalRoll(payload.text);
+    }
+    this.socket.emit("chat_message", payload);
     this.chatInput.value = "";
+  }
+  evaluateLocalRoll(expr) {
+    try {
+      const normalized = expr.replace(/\s/g, "").toLowerCase();
+      const parts = normalized.split(/(?=[+-])/);
+      let total = 0;
+      for (const part of parts) {
+        if (part.includes("d")) {
+          const [countStr, facesStr] = part.replace(/^\+/, "").split("d");
+          const count = countStr === "" ? 1 : parseInt(countStr, 10);
+          const faces = parseInt(facesStr, 10);
+          if (Number.isNaN(count) || Number.isNaN(faces)) throw new Error("bad dice");
+          for (let i = 0; i < count; i++) total += Math.floor(Math.random() * faces) + 1;
+        } else {
+          total += parseInt(part, 10) || 0;
+        }
+      }
+      return total;
+    } catch {
+      return null;
+    }
   }
   appendChatMessage(payload) {
     if (!payload.text) return;
@@ -10233,14 +10465,32 @@ var Game = class {
     const row = el("div", { className: "chat-message" });
     row.dataset.timestamp = payload.timestamp || "";
     row.dataset.accountId = String(payload.account_id || "");
+    if (payload.whisper) row.classList.add("whisper");
+    if (payload.emote) row.classList.add("emote");
+    if (payload.roll) row.classList.add("roll");
     const timeSpan = el("span", { className: "chat-time" }, time);
+    const avatar = el("div", { className: "chat-avatar" }, name.charAt(0).toUpperCase());
+    const content = el("div", { className: "chat-content" });
     const nameSpan = el("span", { className: "chat-name" }, name);
-    const textSpan = el("span", { className: "chat-text" }, payload.text);
+    if (payload.whisper) nameSpan.appendChild(el("span", { className: "chat-tag whisper-tag" }, "whisper"));
+    if (payload.roll) nameSpan.appendChild(el("span", { className: "chat-tag roll-tag" }, "roll"));
+    content.appendChild(nameSpan);
+    let textSpan;
+    if (payload.roll) {
+      textSpan = el("span", { className: "chat-text chat-roll" });
+      textSpan.appendChild(el("span", { className: "chat-roll-expr" }, payload.text));
+      textSpan.appendChild(el("span", { className: "chat-roll-result" }, String(payload.rollResult ?? "?")));
+    } else if (payload.emote) {
+      textSpan = el("span", { className: "chat-text chat-emote" }, `* ${name} ${payload.text}`);
+    } else {
+      textSpan = el("span", { className: "chat-text" }, payload.text);
+    }
+    content.appendChild(textSpan);
     const reactions = el("div", { className: "chat-reactions" });
+    content.appendChild(reactions);
     row.appendChild(timeSpan);
-    row.appendChild(nameSpan);
-    row.appendChild(textSpan);
-    row.appendChild(reactions);
+    row.appendChild(avatar);
+    row.appendChild(content);
     const emoji = ["\u{1F44D}", "\u{1F525}", "\u{1F480}", "\u{1F389}", "\u{1F914}"];
     const toolbar = el("div", { className: "chat-reaction-toolbar" });
     emoji.forEach((e) => {
@@ -11412,53 +11662,101 @@ var Game = class {
     if (!this.session || this.tileSprites.length === 0) return;
     const px = this.session.player.x;
     const py = this.session.player.y;
-    const torches = (this.session.props || []).filter((p) => p.type === "torch");
+    const lightSources = this.gatherLightSources();
+    const flickerSeed = Date.now() / 200;
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || "";
       for (let x = 0; x < this.module.width; x++) {
         const tile = row[x] || "0";
-        const dist = Math.sqrt((x - px) ** 2 + (y - py) ** 2);
-        const inRadius = dist <= VISION_RADIUS + 1;
-        const hasLos = inRadius && this.hasLineOfSight(px, py, x, y);
         const key = `${x},${y}`;
         const el2 = this.tileSprites[y][x];
-        el2.classList.remove("torch-flicker");
-        let alpha;
-        if (hasLos) {
-          this.visited.add(key);
-          if (dist <= VISION_RADIUS - 1) {
-            alpha = 1;
-            el2.classList.add("torch-flicker");
+        el2.classList.remove("torch-flicker", "campfire-flicker", "magic-glow");
+        let maxLight = 0;
+        let hasDirectLos = false;
+        for (const src of lightSources) {
+          const dist = Math.sqrt((x - src.x) ** 2 + (y - src.y) ** 2);
+          if (dist > src.radius + 1) continue;
+          if (!this.hasLineOfSight(src.x, src.y, x, y)) continue;
+          hasDirectLos = true;
+          const inner = src.radius * 0.55;
+          let intensity;
+          if (dist <= inner) {
+            intensity = src.base;
           } else {
-            const t = (dist - (VISION_RADIUS - 1)) / 2;
-            const isWall = tile === "1";
-            alpha = 1 - t * (1 - (isWall ? 0.22 : 0.1));
+            const t = Math.min(1, (dist - inner) / (src.radius - inner));
+            intensity = src.base * (1 - Math.pow(t, src.falloff));
           }
+          if (src.flicker) {
+            intensity *= 0.92 + 0.08 * Math.sin(flickerSeed + src.x * 3 + src.y * 7 + x * 2 + y * 5);
+          }
+          if (intensity > maxLight) maxLight = intensity;
+          if (src.type === "torch" && intensity > 0.35) el2.classList.add("torch-flicker");
+          if (src.type === "campfire" && intensity > 0.25) el2.classList.add("campfire-flicker");
+          if (src.type === "magic" && intensity > 0.3) el2.classList.add("magic-glow");
+        }
+        if (maxLight > 0.08) this.visited.add(key);
+        let alpha;
+        if (maxLight >= 0.95) {
+          alpha = 1;
+        } else if (maxLight > 0.08) {
+          alpha = 0.25 + maxLight * 0.75;
         } else if (this.visited.has(key)) {
-          alpha = 0.35;
+          alpha = 0.32;
         } else {
           alpha = 0;
         }
-        if (alpha < 1 && torches.length > 0) {
-          let nearest = Infinity;
-          for (const t of torches) {
-            const td = Math.sqrt((x - t.x) ** 2 + (y - t.y) ** 2);
-            if (td <= TORCH_LIGHT_RADIUS && td < nearest && this.hasLineOfSight(t.x, t.y, x, y)) {
-              nearest = td;
-            }
+        if (this.stealthMode && alpha > 0.15 && !this.isDm()) {
+          const cover = this.tileCoverLevel(x, y);
+          if (cover >= 2 && maxLight < 0.85) {
+            el2.classList.add("tile-stealth-cover");
+          } else {
+            el2.classList.remove("tile-stealth-cover");
           }
-          if (nearest !== Infinity) {
-            this.visited.add(key);
-            const boost = 1 - (nearest / TORCH_LIGHT_RADIUS) * 0.5;
-            alpha = Math.max(alpha, boost);
-            el2.classList.add("torch-flicker");
-          }
+        } else {
+          el2.classList.remove("tile-stealth-cover");
         }
-        el2.style.opacity = String(alpha);
-        el2.classList.toggle("tile-hidden", alpha === 0);
+        el2.style.opacity = String(Math.min(1, alpha));
+        el2.classList.toggle("tile-hidden", alpha < 0.05);
       }
     }
     this.updateVignette();
+  }
+  gatherLightSources() {
+    const sources = [];
+    if (!this.session) return sources;
+    const player = this.session.player;
+    const lighting = this.session.lighting || "day";
+    const playerBase = lighting === "dark" ? 0.95 : lighting === "night" ? 0.9 : 0.85;
+    sources.push({ x: player.x, y: player.y, radius: VISION_RADIUS, base: playerBase, falloff: 1.8, flicker: false, type: "player" });
+    (this.session.props || []).forEach((p) => {
+      if (p.type === "torch") sources.push({ x: p.x, y: p.y, radius: TORCH_LIGHT_RADIUS, base: 0.85, falloff: 2.2, flicker: true, type: "torch" });
+      if (p.type === "campfire") sources.push({ x: p.x, y: p.y, radius: TORCH_LIGHT_RADIUS + 1.5, base: 0.9, falloff: 2.0, flicker: true, type: "campfire" });
+      if (p.type === "rune" || p.type === "altar") sources.push({ x: p.x, y: p.y, radius: TORCH_LIGHT_RADIUS * 0.8, base: 0.75, falloff: 2.5, flicker: true, type: "magic" });
+    });
+    (this.session.tokens || []).forEach((t) => {
+      if (!t.dead && (t.type === "npc" || t.type === "monster") && t.aura) {
+        sources.push({ x: t.x, y: t.y, radius: t.aura.radius || 2, base: t.aura.base || 0.6, falloff: t.aura.falloff || 2, flicker: true, type: "magic" });
+      }
+    });
+    return sources;
+  }
+  tileCoverLevel(x, y) {
+    let cover = 0;
+    const neighbors = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
+    for (const [dx, dy] of neighbors) {
+      const nx = x + dx, ny = y + dy;
+      if (ny < 0 || ny >= this.module.height || nx < 0 || nx >= this.module.width) continue;
+      const tile = (this.module.tiles[ny] || "")[nx];
+      if (tile === "1") cover += 1;
+      const prop = (this.session.props || []).find((p) => p.x === nx && p.y === ny && (p.type === "barrel" || p.type === "crate" || p.type === "rubble" || p.type === "pillar" || p.type === "vegetation"));
+      if (prop) cover += 1;
+    }
+    return cover;
+  }
+  toggleStealthOverlay() {
+    this.stealthMode = !this.stealthMode;
+    if (this.stealthBtn) this.stealthBtn.classList.toggle("active", this.stealthMode);
+    this.updateLighting();
   }
   updateVignette() {
     if (!this.lightingOverlay || !this.session) return;
@@ -11467,16 +11765,29 @@ var Game = class {
     const cy = this.cameraY + (player.y * TILE_SIZE + TILE_SIZE / 2) * this.zoom;
     const lighting = this.session.lighting || "day";
     const multipliers = {
-      day: { inner: 0.6, mid: 0.95, outer: 1.55, midAlpha: 0.25, outerAlpha: 0.72, bgAlpha: 0.88 },
-      dusk: { inner: 0.55, mid: 0.85, outer: 1.4, midAlpha: 0.45, outerAlpha: 0.82, bgAlpha: 0.92 },
-      night: { inner: 0.45, mid: 0.75, outer: 1.25, midAlpha: 0.65, outerAlpha: 0.9, bgAlpha: 0.96 },
-      dark: { inner: 0.35, mid: 0.6, outer: 1.05, midAlpha: 0.8, outerAlpha: 0.95, bgAlpha: 0.98 }
+      day: { inner: 0.6, mid: 0.95, outer: 1.55, midAlpha: 0.22, outerAlpha: 0.68, bgAlpha: 0.82 },
+      dusk: { inner: 0.55, mid: 0.85, outer: 1.4, midAlpha: 0.42, outerAlpha: 0.78, bgAlpha: 0.9 },
+      night: { inner: 0.45, mid: 0.75, outer: 1.25, midAlpha: 0.62, outerAlpha: 0.88, bgAlpha: 0.95 },
+      dark: { inner: 0.35, mid: 0.6, outer: 1.05, midAlpha: 0.78, outerAlpha: 0.94, bgAlpha: 0.98 }
     };
     const m = multipliers[lighting] || multipliers.day;
     const innerR = VISION_RADIUS * TILE_SIZE * this.zoom * m.inner;
     const midR = VISION_RADIUS * TILE_SIZE * this.zoom * m.mid;
     const outerR = VISION_RADIUS * TILE_SIZE * this.zoom * m.outer;
-    this.lightingOverlay.style.background = `radial-gradient(circle at ${cx}px ${cy}px, transparent ${innerR}px, rgba(0,0,0,${m.midAlpha}) ${midR}px, rgba(0,0,0,${m.outerAlpha}) ${outerR}px, rgba(0,0,0,${m.bgAlpha}))`;
+    const torchStops = this.buildTorchVignetteStops(cx, cy);
+    const stealthTint = this.stealthMode && !this.isDm() ? "rgba(44, 62, 80, 0.18), " : "";
+    this.lightingOverlay.style.background = `radial-gradient(circle at ${cx}px ${cy}px, transparent ${innerR}px, ${stealthTint}rgba(0,0,0,${m.midAlpha}) ${midR}px, rgba(0,0,0,${m.outerAlpha}) ${outerR}px, rgba(0,0,0,${m.bgAlpha})), ${torchStops}`;
+  }
+  buildTorchVignetteStops(cx, cy) {
+    const torches = (this.session.props || []).filter((p) => p.type === "torch" || p.type === "campfire");
+    if (torches.length === 0) return "transparent";
+    const stops = torches.slice(0, 4).map((t) => {
+      const tx = this.cameraX + (t.x * TILE_SIZE + TILE_SIZE / 2) * this.zoom;
+      const ty = this.cameraY + (t.y * TILE_SIZE + TILE_SIZE / 2) * this.zoom;
+      const r = TORCH_LIGHT_RADIUS * TILE_SIZE * this.zoom * 0.9;
+      return `radial-gradient(circle at ${tx}px ${ty}px, transparent 0px, transparent ${r * 0.35}px, rgba(20,10,5,0.55) ${r}px, transparent ${r * 1.25}px)`;
+    });
+    return stops.join(", ");
   }
   centerMap() {
     const target = this.playerPixelCenter();
@@ -11778,8 +12089,9 @@ var Game = class {
       const y = t.y * TILE_SIZE;
       let tokenEl = this.tokenElements.get(t.id);
       if (!tokenEl) {
+        const frameClass = isPlayer && t.id === this.session.player?.id ? ` frame-${this.tokenFrameStyle}` : "";
         tokenEl = el("div", {
-          className: `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}${isDying ? " dying" : ""}`,
+          className: `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}${isDying ? " dying" : ""}${frameClass}`,
           style: `left:${x}px;top:${y}px;${isDying ? "pointer-events:none;" : ""}`
         });
         const backing = el("div", { className: "token-backing" });
@@ -11814,7 +12126,8 @@ var Game = class {
         this.tokenContainer.appendChild(tokenEl);
         this.tokenElements.set(t.id, tokenEl);
       } else {
-        tokenEl.className = `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}${isDying ? " dying" : ""}`;
+        const frameClass = isPlayer && t.id === this.session.player?.id ? ` frame-${this.tokenFrameStyle}` : "";
+        tokenEl.className = `game-token ${isPlayer ? "player" : "monster"}${isActive ? " active" : ""}${t.down ? " down" : ""}${isDying ? " dying" : ""}${frameClass}`;
         tokenEl.style.pointerEvents = isDying ? "none" : "auto";
         if (_snap) {
           tokenEl.style.transition = "none";
@@ -11886,10 +12199,9 @@ var Game = class {
       this.update(session);
       const opened = session.props.find((p) => p.id === prop.id);
       if (opened?.loot) {
-        const lines = [];
-        if (opened.loot.gold) lines.push(`${opened.loot.gold} gold`);
-        if (opened.loot.item) lines.push(opened.loot.item.name);
-        this.showLootModal(lines.length ? lines.join(" and ") : "The chest is empty.");
+        const lootItems = [];
+        if (opened.loot.item) lootItems.push(opened.loot.item);
+        this.showLootModal({ gold: opened.loot.gold || 0, items: lootItems });
       }
       if (session.phase === "dm") {
         setTimeout(() => this.runDmTurn(), 600);
@@ -11900,17 +12212,69 @@ var Game = class {
       this.unlockInput();
     }
   }
-  showLootModal(lootText) {
+  showLootModal(loot) {
+    const gold = typeof loot === "object" ? loot.gold || 0 : 0;
+    const items = typeof loot === "object" ? loot.items || [] : [];
+    const legacyText = typeof loot === "string" ? loot : null;
     const overlay = el("div", { className: "loot-overlay" });
     const card = el("div", { className: "loot-card" });
     card.appendChild(el("h2", {}, "Loot"));
     card.appendChild(el("div", { className: "loot-icon" }, "\u{1F4E6}"));
-    card.appendChild(el("p", { className: "loot-text" }, lootText));
-    const close = el("button", { onclick: () => overlay.remove() }, "Take");
+    const body = el("div", { className: "loot-body" });
+    if (legacyText) {
+      body.appendChild(el("p", { className: "loot-text" }, legacyText));
+    } else {
+      if (gold) body.appendChild(el("div", { className: "loot-gold" }, `\u{1F4B0} ${gold} gold`));
+      if (items.length) {
+        const itemList = el("div", { className: "loot-item-list" });
+        items.forEach((item) => {
+          const row = el("div", { className: `loot-item-row rarity-${item.rarity || "common"}` });
+          row.appendChild(el("span", { className: "loot-item-name" }, item.name));
+          row.appendChild(el("span", { className: "loot-item-type" }, item.type || item.slot || ""));
+          if (item.description) {
+            row.appendChild(el("div", { className: "loot-item-tooltip" }, item.description));
+          }
+          itemList.appendChild(row);
+        });
+        body.appendChild(itemList);
+      }
+      if (!gold && !items.length) {
+        body.appendChild(el("p", { className: "loot-text" }, "The chest is empty."));
+      }
+    }
+    card.appendChild(body);
+    const close = el("button", { className: "loot-take-btn", onclick: () => overlay.remove() }, "Take");
     card.appendChild(close);
     overlay.appendChild(card);
     this.root.appendChild(overlay);
     window.setTimeout(() => overlay.classList.add("visible"), 10);
+    this.addLootHistory({ gold, items, timestamp: Date.now() });
+  }
+  addLootHistory(entry) {
+    if (!this.lootHistory) this.lootHistory = [];
+    this.lootHistory.unshift(entry);
+    if (this.lootHistory.length > 20) this.lootHistory.pop();
+    this.renderLootPanel();
+  }
+  renderLootPanel() {
+    if (!this.lootPanelBody) return;
+    this.lootPanelBody.innerHTML = "";
+    if (!this.lootHistory || this.lootHistory.length === 0) {
+      this.lootPanelBody.appendChild(el("div", { className: "loot-panel-empty" }, "No loot yet."));
+      return;
+    }
+    this.lootHistory.forEach((entry) => {
+      const row = el("div", { className: "loot-panel-row" });
+      const time = entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+      row.appendChild(el("span", { className: "loot-panel-time" }, time));
+      const details = el("div", { className: "loot-panel-details" });
+      if (entry.gold) details.appendChild(el("span", { className: "loot-panel-gold" }, `+${entry.gold}g`));
+      (entry.items || []).forEach((item) => {
+        details.appendChild(el("span", { className: `loot-panel-item rarity-${item.rarity || "common"}` }, item.name));
+      });
+      row.appendChild(details);
+      this.lootPanelBody.appendChild(row);
+    });
   }
   spawnSlashEffect(fromX, fromY, toX, toY, isCrit = false) {
     const cx = (fromX + toX) / 2 * TILE_SIZE + TILE_SIZE / 2;
@@ -12879,15 +13243,9 @@ var Game = class {
       const newCount = log.length - this.lastLogLength;
       for (let i = log.length - newCount; i < log.length; i++) {
         const entry = log[i];
-        const isTurn = entry.startsWith("\u2014 Turn");
-        const className = isTurn ? "log-entry turn-marker" : "log-entry fresh";
-        const row = el("div", { className }, entry);
-        this.logEl.appendChild(row);
-        if (!isTurn) {
-          window.setTimeout(() => row.classList.remove("fresh"), 600);
-        }
+        this.logEl.appendChild(this.createLogRow(entry));
       }
-      while (this.logEl.childElementCount > 20) {
+      while (this.logEl.childElementCount > 50) {
         this.logEl.firstElementChild?.remove();
       }
       const newEntries = log.slice(this.lastLogLength);
@@ -12902,14 +13260,33 @@ var Game = class {
       }
       this.lastLogLength = log.length;
     } else if (this.logEl.childElementCount === 0) {
-      log.slice(-20).forEach((entry) => {
-        const isTurn = entry.startsWith("\u2014 Turn");
-        const className = isTurn ? "log-entry turn-marker" : "log-entry";
-        this.logEl.appendChild(el("div", { className }, entry));
+      log.slice(-50).forEach((entry) => {
+        this.logEl.appendChild(this.createLogRow(entry, false));
       });
       this.lastLogLength = log.length;
     }
     this.logEl.scrollTop = this.logEl.scrollHeight;
+  }
+  createLogRow(entry, fresh = true) {
+    const isTurn = entry.startsWith("\u2014 Turn");
+    const lower = entry.toLowerCase();
+    let icon = "\u2726";
+    if (isTurn) icon = "\u25B6";
+    else if (lower.includes("hit") || lower.includes("strike")) icon = "\u2694";
+    else if (lower.includes("miss") || lower.includes("dodge")) icon = "\u2715";
+    else if (lower.includes("heal") || lower.includes("cure")) icon = "\u271A";
+    else if (lower.includes("spell") || lower.includes("cast")) icon = "\u2728";
+    else if (lower.includes("loot") || lower.includes("chest")) icon = "\u{1F4E6}";
+    else if (lower.includes("trap")) icon = "\u2620";
+    else if (lower.includes("die") || lower.includes("death") || lower.includes("slain")) icon = "\u2620";
+    else if (lower.includes("win") || lower.includes("victory")) icon = "\u{1F3C6}";
+    const row = el("div", { className: isTurn ? "log-entry turn-marker" : `log-entry${fresh ? " fresh" : ""}` });
+    row.appendChild(el("span", { className: "log-icon" }, icon));
+    row.appendChild(el("span", { className: "log-text" }, entry));
+    if (fresh && !isTurn) {
+      window.setTimeout(() => row.classList.remove("fresh"), 600);
+    }
+    return row;
   }
   log(message) {
     this.logEl.appendChild(el("div", { className: "log-entry error" }, message));

@@ -760,6 +760,7 @@ def _roll_chest_loot(seed: int | None = None) -> dict[str, Any]:
             "name": "Healing Potion",
             "type": "potion",
             "slot": "consumable",
+            "rarity": "common",
             "effects": {"hp_restore": heal},
             "instance_id": f"loot_{uid}",
         }
