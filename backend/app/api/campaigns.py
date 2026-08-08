@@ -69,6 +69,8 @@ async def _require_campaign_member(
 def _campaign_response(record: CampaignRecord, is_member: bool = False, is_dm: bool = False) -> dict[str, Any]:
     module_ids = json.loads(record.module_ids)
     cleared = json.loads(record.cleared_module_ids or "[]")
+    quests = json.loads(record.quests or "[]")
+    reputation = json.loads(record.reputation or "{}")
     out = {
         "id": record.id,
         "name": record.name,
@@ -83,6 +85,9 @@ def _campaign_response(record: CampaignRecord, is_member: bool = False, is_dm: b
     }
     if is_member:
         out["is_member"] = True
+        out["quests"] = quests
+        out["reputation"] = reputation
+        out["journey_notes"] = record.journey_notes or ""
     if is_dm:
         out["is_dm"] = True
     return out
@@ -421,3 +426,46 @@ async def set_member_role(
 
     await db.commit()
     return {"account_id": member_account_id, "role": role}
+
+
+@router.post("/campaigns/{campaign_id}/journey")
+async def update_campaign_journey(
+    campaign_id: str,
+    data: dict[str, Any],
+    record: CampaignRecord = Depends(_require_campaign_manager),
+    db: AsyncSession = Depends(get_db),
+):
+    """DM-only endpoint to update quests, reputation, and journey notes."""
+    if "quests" in data:
+        record.quests = json.dumps(data["quests"])
+    if "reputation" in data:
+        record.reputation = json.dumps(data["reputation"])
+    if "journey_notes" in data:
+        record.journey_notes = data["journey_notes"]
+    await db.commit()
+    await db.refresh(record)
+    return {"campaign": _campaign_response(record, is_member=True, is_dm=True)}
+
+
+@router.post("/campaigns/{campaign_id}/advance")
+async def advance_campaign(
+    campaign_id: str,
+    data: dict[str, Any],
+    record: CampaignRecord = Depends(_require_campaign_manager),
+    db: AsyncSession = Depends(get_db),
+):
+    """DM-only endpoint to mark the current module cleared and advance."""
+    module_ids = json.loads(record.module_ids)
+    cleared = json.loads(record.cleared_module_ids or "[]")
+    current_id = module_ids[record.current_module_index or 0] if module_ids else None
+    if current_id and current_id not in cleared:
+        cleared.append(current_id)
+    record.cleared_module_ids = json.dumps(cleared)
+    next_index = data.get("next_module_index")
+    if next_index is not None and 0 <= next_index < len(module_ids):
+        record.current_module_index = next_index
+    elif record.current_module_index is not None and record.current_module_index + 1 < len(module_ids):
+        record.current_module_index = record.current_module_index + 1
+    await db.commit()
+    await db.refresh(record)
+    return {"campaign": _campaign_response(record, is_member=True, is_dm=True)}

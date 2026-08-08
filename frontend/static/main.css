@@ -7776,3 +7776,472 @@ button.danger:hover:not(:disabled) {
   color: #2ecc71;
   box-shadow: 0 0 8px rgba(46, 204, 113, 0.25);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   FEATURE 1 (Wave 2) — Richer Spell VFX per Class
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Magic missiles */
+.magic-missile {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 17;
+  transform: translate(-50%, -50%);
+  animation: missile-fly 0.45s ease-out forwards;
+}
+.magic-missile.arcane {
+  background: radial-gradient(circle, #fff 0%, #9b59b6 60%);
+  box-shadow: 0 0 10px #9b59b6, 0 0 18px rgba(142, 68, 173, 0.6);
+}
+.magic-missile.holy {
+  background: radial-gradient(circle, #fff 0%, #f1c40f 60%);
+  box-shadow: 0 0 10px #f1c40f, 0 0 18px rgba(241, 196, 15, 0.6);
+}
+.magic-missile.nature {
+  background: radial-gradient(circle, #fff 0%, #2ecc71 60%);
+  box-shadow: 0 0 10px #2ecc71, 0 0 18px rgba(39, 174, 96, 0.6);
+}
+.magic-missile.dark {
+  background: radial-gradient(circle, #fff 0%, #e74c3c 60%);
+  box-shadow: 0 0 10px #e74c3c, 0 0 18px rgba(192, 57, 43, 0.6);
+}
+@keyframes missile-fly {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+  70% { opacity: 1; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.4); }
+}
+
+/* AoE burst */
+.spell-aoe-burst {
+  position: absolute;
+  width: 192px;
+  height: 192px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 16;
+  opacity: 0;
+  animation: aoe-burst 0.65s ease-out forwards;
+}
+.spell-aoe-burst.arcane {
+  background: radial-gradient(circle, var(--aoe-color) 0%, transparent 60%);
+  box-shadow: 0 0 40px rgba(var(--aoe-glow), 0.5), inset 0 0 30px rgba(var(--aoe-glow), 0.25);
+}
+.spell-aoe-burst.holy {
+  background: radial-gradient(circle, var(--aoe-color) 0%, transparent 55%);
+  box-shadow: 0 0 50px rgba(var(--aoe-glow), 0.55), inset 0 0 40px rgba(255, 255, 255, 0.2);
+}
+.spell-aoe-burst.nature {
+  background: radial-gradient(circle, var(--aoe-color) 0%, transparent 58%);
+  box-shadow: 0 0 45px rgba(var(--aoe-glow), 0.5), inset 0 0 30px rgba(var(--aoe-glow), 0.2);
+}
+.spell-aoe-burst.dark {
+  background: radial-gradient(circle, var(--aoe-color) 0%, transparent 62%);
+  box-shadow: 0 0 55px rgba(var(--aoe-glow), 0.6), inset 0 0 35px rgba(0, 0, 0, 0.35);
+}
+@keyframes aoe-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.35); }
+}
+
+/* AoE particles */
+.aoe-particle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 17;
+  transform: translate(-50%, -50%);
+  animation: aoe-particle-fly 0.8s ease-out forwards;
+}
+.aoe-particle.glyph {
+  width: 6px;
+  height: 6px;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+.aoe-particle.rune {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+}
+.aoe-particle.leaf {
+  width: 8px;
+  height: 4px;
+  border-radius: 50% 0 50% 0;
+}
+.aoe-particle.shard {
+  width: 5px;
+  height: 9px;
+  clip-path: polygon(50% 0%, 100% 40%, 80% 100%, 20% 100%, 0% 40%);
+}
+@keyframes aoe-particle-fly {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--px)), calc(-50% + var(--py))) scale(0.3) rotate(180deg); }
+}
+
+/* Spell impact flash */
+.spell-impact-flash {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 16;
+  opacity: 0;
+  animation: impact-flash 0.25s ease-out forwards;
+}
+.spell-impact-flash.arcane { background: radial-gradient(circle, rgba(155, 89, 182, 0.7), transparent 70%); }
+.spell-impact-flash.holy { background: radial-gradient(circle, rgba(241, 196, 15, 0.7), transparent 70%); }
+.spell-impact-flash.nature { background: radial-gradient(circle, rgba(46, 204, 113, 0.7), transparent 70%); }
+.spell-impact-flash.dark { background: radial-gradient(circle, rgba(192, 57, 43, 0.7), transparent 70%); }
+@keyframes impact-flash {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  50% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+}
+
+/* Lingering ground effects */
+.lingering-ground {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0.9;
+  animation: ground-fade-in 0.4s ease-out;
+}
+.lingering-ground.fade {
+  opacity: 0;
+  transition: opacity 1.2s ease-out;
+}
+@keyframes ground-fade-in {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 0.9; transform: scale(1); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FEATURE 3 (Wave 2) — Environment Props & Decals
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Footprint decals */
+.footprint-decal {
+  position: absolute;
+  width: 16px;
+  height: 10px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0.55;
+  transition: opacity 2.5s ease;
+}
+.footprint-decal.player {
+  background: radial-gradient(ellipse at center, rgba(52, 152, 219, 0.45) 0%, transparent 70%);
+  box-shadow: 0 0 4px rgba(52, 152, 219, 0.25);
+}
+.footprint-decal.monster {
+  background: radial-gradient(ellipse at center, rgba(192, 57, 43, 0.4) 0%, transparent 70%);
+}
+.footprint-decal.fade {
+  opacity: 0;
+}
+
+/* Enhanced existing decals */
+.game-decal {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.game-decal:hover {
+  opacity: 0.9;
+}
+.decal-blood {
+  background: radial-gradient(circle at 45% 55%, rgba(192, 57, 43, 0.75), rgba(192, 57, 43, 0.35) 40%, transparent 70%);
+  filter: drop-shadow(0 0 4px rgba(192, 57, 43, 0.3));
+}
+.decal-crack {
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.55) 35%, transparent 45%, rgba(0, 0, 0, 0.45) 55%, transparent 65%);
+}
+.decal-rune {
+  background: radial-gradient(circle, rgba(155, 89, 182, 0.3), transparent 70%);
+  border: 1px dashed rgba(155, 89, 182, 0.6);
+  border-radius: 50%;
+  animation: rune-pulse 2s ease-in-out infinite;
+}
+.decal-scorch {
+  background: radial-gradient(circle, rgba(30, 30, 30, 0.85), transparent 65%);
+}
+.decal-ice {
+  background: radial-gradient(circle, rgba(214, 234, 248, 0.5), transparent 70%);
+  border: 1px solid rgba(214, 234, 248, 0.35);
+  border-radius: 40% 60% 50% 50%;
+}
+.decal-poison {
+  background: radial-gradient(circle, rgba(46, 204, 113, 0.4), transparent 70%);
+  border: 1px dotted rgba(46, 204, 113, 0.45);
+  border-radius: 50%;
+  animation: poison-bubble 1.2s ease-in-out infinite;
+}
+
+/* Prop interaction feedback */
+.game-prop {
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.game-prop.opened {
+  filter: brightness(0.7) grayscale(0.4);
+}
+.game-prop.prop-door.opened::after {
+  transform: rotateY(75deg) scaleX(0.3);
+  opacity: 0.6;
+}
+.game-prop.prop-chest {
+  animation: chest-idle 2.5s ease-in-out infinite;
+}
+@keyframes chest-idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+.game-prop.prop-chest.opened {
+  animation: none;
+}
+
+/* Trap tile decal */
+.tile-trap-marker::after {
+  content: "\u2620";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: rgba(231, 76, 60, 0.5);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FEATURE 4 (Wave 2) — Campaign Journey Mode
+   ═══════════════════════════════════════════════════════════════ */
+
+.campaign-subsection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.campaign-subsection-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Quest log */
+.campaign-quest-log {
+  margin-top: 12px;
+}
+.quest-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+.quest-row.status-completed {
+  opacity: 0.65;
+  border-color: rgba(46, 204, 113, 0.3);
+}
+.quest-row.status-failed {
+  border-color: rgba(192, 57, 43, 0.35);
+}
+.quest-status {
+  font-size: 14px;
+  flex: 0 0 18px;
+  text-align: center;
+}
+.quest-row.status-completed .quest-status { color: #2ecc71; }
+.quest-row.status-failed .quest-status { color: #e74c3c; }
+.quest-body {
+  flex: 1;
+  font-size: 12px;
+}
+.quest-body strong {
+  color: var(--text);
+  display: block;
+  margin-bottom: 2px;
+}
+.quest-body p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.quest-controls {
+  display: flex;
+  gap: 4px;
+}
+
+/* Reputation tracker */
+.campaign-reputation-tracker {
+  margin-top: 12px;
+}
+.reputation-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.reputation-name {
+  flex: 0 0 100px;
+  color: var(--text);
+  font-weight: bold;
+}
+.reputation-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.reputation-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #2ecc71, #27ae60);
+  transition: width 0.3s ease;
+}
+.reputation-bar.negative {
+  background: linear-gradient(90deg, #e74c3c, #c0392b);
+}
+.reputation-value {
+  flex: 0 0 30px;
+  text-align: right;
+  color: var(--muted);
+  font-family: var(--font-mono), monospace;
+}
+
+/* Journey notes */
+.campaign-journey-notes {
+  margin-top: 12px;
+}
+.journey-notes-input {
+  width: 100%;
+  min-height: 80px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 8px;
+  font-size: 12px;
+  resize: vertical;
+}
+.journey-notes-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+.journey-notes-read {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: pre-wrap;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  min-height: 40px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FEATURE 5 (Wave 2) — Deeper DM Tools
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Custom token row */
+.dm-custom-token {
+  display: flex;
+  gap: 4px;
+}
+.dm-custom-token input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: var(--text);
+}
+.dm-custom-token input[type="number"] {
+  flex: 0 0 48px;
+}
+
+/* DM notes */
+.dm-notes-input {
+  width: 100%;
+  min-height: 60px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 6px;
+  font-size: 11px;
+  resize: vertical;
+}
+.dm-notes-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Inspector enhancements */
+.inspector-edit-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.inspector-name-input {
+  flex: 2;
+  padding: 5px 8px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: var(--text);
+}
+.inspector-stat-input {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: var(--text);
+}
+
+/* Event trigger button active state */
+.dm-tool-row button.active {
+  background: rgba(241, 196, 15, 0.2);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.tile-trap-marker::after {
+  content: "\u2620";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: rgba(231, 76, 60, 0.5);
+  pointer-events: none;
+  z-index: 2;
+}

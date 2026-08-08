@@ -109,6 +109,9 @@ class CampaignRecord(Base):
     module_ids = Column(Text, default="[]")  # JSON list
     cleared_module_ids = Column(Text, default="[]")  # JSON list
     current_module_index = Column(Integer, default=0)
+    quests = Column(Text, default="[]")  # JSON list
+    reputation = Column(Text, default="{}")  # JSON object
+    journey_notes = Column(Text, default="")
     password_hash = Column(String, nullable=False)
     dm_account_id = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=_utc_now)

@@ -553,8 +553,9 @@ async def dm_spawn(
     token_id: str | None = None,
     monsters_dir: Path | None = None,
     scale: float | None = None,
+    custom: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Spawn a named monster at x, y."""
+    """Spawn a named monster at x, y. Optional custom overrides for home-brew tokens."""
     if state["status"] != STATUS_ACTIVE:
         raise ValueError("game is over")
     _dm_snapshot(state)
@@ -565,28 +566,49 @@ async def dm_spawn(
     if _token_at(state, x, y) is not None:
         raise ValueError("target tile is occupied")
 
-    template = bestiary.load(monster_name, monsters_dir=monsters_dir)
-    if token_id is None:
-        token_id = _unique_monster_id(state, f"dm_{template['id']}")
-    else:
-        token_id = _unique_monster_id(state, token_id)
-
-    spawn = MonsterSpawn(
-        id=token_id,
-        name=template["name"],
-        monster=monster_name,
-        x=x,
-        y=y,
-        color="#e74c3c",
-    )
     d = Dice(seed=state["seed"] + state["version"])
-    token = _spawn_token(spawn, state, d, monsters_dir=monsters_dir)
-    scale_factor = float(scale) if scale else 1.0
-    if scale_factor != 1.0:
-        token["max_hp"] = max(1, round(token["max_hp"] * scale_factor))
-        token["hp"] = max(1, min(token["hp"], token["max_hp"]) if token["hp"] > token["max_hp"] else round(token["hp"] * scale_factor))
-        token["damage_bonus"] = token.get("damage_bonus", 0) + round((scale_factor - 1) * 2)
-        token["name"] = f"{token['name']} (x{scale_factor:g})"
+    custom = custom or {}
+    if custom.get("name"):
+        token_id = _unique_monster_id(state, token_id or "dm_custom")
+        token = {
+            "id": token_id,
+            "name": custom.get("name", "Custom Token"),
+            "type": "monster",
+            "monster": monster_name,
+            "x": x,
+            "y": y,
+            "hp": int(custom.get("hp", 20)),
+            "max_hp": int(custom.get("hp", 20)),
+            "ac": int(custom.get("ac", 10)),
+            "damage": custom.get("damage", "1d6"),
+            "hit_dice": custom.get("hit_dice", "1"),
+            "to_hit": 0,
+            "color": "#e74c3c",
+            "alive": True,
+            "xp_value": int(custom.get("xp_value", 50)),
+        }
+    else:
+        template = bestiary.load(monster_name, monsters_dir=monsters_dir)
+        if token_id is None:
+            token_id = _unique_monster_id(state, f"dm_{template['id']}")
+        else:
+            token_id = _unique_monster_id(state, token_id)
+
+        spawn = MonsterSpawn(
+            id=token_id,
+            name=template["name"],
+            monster=monster_name,
+            x=x,
+            y=y,
+            color="#e74c3c",
+        )
+        token = _spawn_token(spawn, state, d, monsters_dir=monsters_dir)
+        scale_factor = float(scale) if scale else 1.0
+        if scale_factor != 1.0:
+            token["max_hp"] = max(1, round(token["max_hp"] * scale_factor))
+            token["hp"] = max(1, min(token["hp"], token["max_hp"]) if token["hp"] > token["max_hp"] else round(token["hp"] * scale_factor))
+            token["damage_bonus"] = token.get("damage_bonus", 0) + round((scale_factor - 1) * 2)
+            token["name"] = f"{token['name']} (x{scale_factor:g})"
     state["monsters"].append(token)
     state["version"] += 1
     state["log"].append(f"The DM spawns {token['name']} at ({x}, {y}).")
@@ -655,6 +677,35 @@ async def dm_damage(
             _grant_rewards(state, token)
             _check_victory(state)
     state["version"] += 1
+    return token
+
+
+async def dm_set_token_stats(
+    state: dict[str, Any],
+    token_id: str,
+    name: str | None = None,
+    max_hp: int | None = None,
+    ac: int | None = None,
+) -> dict[str, Any]:
+    """Update a token's name, max HP, and AC from the DM inspector."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    _dm_snapshot(state)
+    token = next((t for t in _tokens(state) if t["id"] == token_id and t.get("alive", True)), None)
+    if token is None:
+        raise ValueError("token not found")
+    if name is not None:
+        token["name"] = name
+    if max_hp is not None:
+        max_hp = int(max_hp)
+        if max_hp < 1:
+            raise ValueError("max_hp must be positive")
+        token["max_hp"] = max_hp
+        token["hp"] = min(token.get("hp", max_hp), max_hp)
+    if ac is not None:
+        token["ac"] = int(ac)
+    state["version"] += 1
+    state["log"].append(f"The DM updates {token['name']}'s stats.")
     return token
 
 

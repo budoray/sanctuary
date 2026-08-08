@@ -252,6 +252,18 @@ async function setMemberRole(campaignId, accountId, role) {
     body: JSON.stringify({ role })
   });
 }
+async function updateCampaignJourney(campaignId, data) {
+  return api(`/api/campaigns/${campaignId}/journey`, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+}
+async function advanceCampaign(campaignId, data = {}) {
+  return api(`/api/campaigns/${campaignId}/advance`, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+}
 async function getSessionPresence(sessionId) {
   return api(`/api/sessions/${sessionId}/presence`);
 }
@@ -2817,6 +2829,12 @@ var CampaignDetail = class {
     journeySection.appendChild(el("h2", {}, "Journey"));
     this.journeyEl = el("div", { className: "campaign-journey-map" });
     journeySection.appendChild(this.journeyEl);
+    this.questEl = el("div", { className: "campaign-quest-log" });
+    journeySection.appendChild(this.questEl);
+    this.reputationEl = el("div", { className: "campaign-reputation-tracker" });
+    journeySection.appendChild(this.reputationEl);
+    this.notesEl = el("div", { className: "campaign-journey-notes" });
+    journeySection.appendChild(this.notesEl);
     main.appendChild(journeySection);
     shell.appendChild(main);
     shell.appendChild(this.buildFooter());
@@ -2858,6 +2876,9 @@ var CampaignDetail = class {
       this.render(sessions);
       this.renderMembers();
       this.renderJourneyMap();
+      this.renderQuestLog();
+      this.renderReputation();
+      this.renderJourneyNotes();
     } catch (err) {
       clear(this.sessionsEl);
       this.sessionsEl.appendChild(el("div", { className: "campaigns-empty error" }, err.message || "Failed to load sessions."));
@@ -3128,6 +3149,153 @@ var CampaignDetail = class {
       marker.setAttribute("class", "journey-encounter-marker");
       svg.appendChild(marker);
     }
+  }
+  renderQuestLog() {
+    if (!this.questEl) return;
+    clear(this.questEl);
+    const quests = this.campaign.quests || [];
+    const header = el("div", { className: "campaign-subsection-header" });
+    header.appendChild(el("h3", {}, `Quest Log (${quests.length})`));
+    if (this.campaign.is_dm) {
+      header.appendChild(el("button", {
+        className: "small",
+        onclick: () => this.addQuest()
+      }, "+ Quest"));
+    }
+    this.questEl.appendChild(header);
+    if (quests.length === 0) {
+      this.questEl.appendChild(el("div", { className: "campaigns-empty" }, "No active quests."));
+      return;
+    }
+    quests.forEach((q) => {
+      const row = el("div", { className: `quest-row status-${q.status || "active"}` });
+      row.appendChild(el("span", { className: "quest-status" }, q.status === "completed" ? "\u2713" : q.status === "failed" ? "\u2717" : "\u25CB"));
+      const body = el("div", { className: "quest-body" });
+      body.appendChild(el("strong", {}, q.title || "Unnamed Quest"));
+      if (q.description) body.appendChild(el("p", {}, q.description));
+      row.appendChild(body);
+      if (this.campaign.is_dm) {
+        const controls = el("div", { className: "quest-controls" });
+        const statuses = ["active", "completed", "failed"];
+        const next = statuses[(statuses.indexOf(q.status || "active") + 1) % statuses.length];
+        controls.appendChild(el("button", {
+          className: "small",
+          onclick: async () => {
+            q.status = next;
+            await this.saveJourney();
+          }
+        }, this.titleCase(next)));
+        controls.appendChild(el("button", {
+          className: "small danger",
+          onclick: async () => {
+            this.campaign.quests = quests.filter((x) => x !== q);
+            await this.saveJourney();
+          }
+        }, "Del"));
+        row.appendChild(controls);
+      }
+      this.questEl.appendChild(row);
+    });
+  }
+  renderReputation() {
+    if (!this.reputationEl) return;
+    clear(this.reputationEl);
+    const reputation = this.campaign.reputation || {};
+    const header = el("div", { className: "campaign-subsection-header" });
+    header.appendChild(el("h3", {}, "Reputation"));
+    if (this.campaign.is_dm) {
+      header.appendChild(el("button", {
+        className: "small",
+        onclick: () => this.addReputation()
+      }, "+ Faction"));
+    }
+    this.reputationEl.appendChild(header);
+    const factions = Object.entries(reputation);
+    if (factions.length === 0) {
+      this.reputationEl.appendChild(el("div", { className: "campaigns-empty" }, "No faction reputations yet."));
+      return;
+    }
+    factions.forEach(([name, value]) => {
+      const row = el("div", { className: "reputation-row" });
+      row.appendChild(el("span", { className: "reputation-name" }, name));
+      const barWrap = el("div", { className: "reputation-bar-wrap" });
+      const bar = el("div", { className: `reputation-bar${value < 0 ? " negative" : ""}` });
+      const pct = Math.max(0, Math.min(100, 50 + value / 2));
+      bar.style.width = `${pct}%`;
+      barWrap.appendChild(bar);
+      row.appendChild(barWrap);
+      row.appendChild(el("span", { className: "reputation-value" }, String(value)));
+      if (this.campaign.is_dm) {
+        row.appendChild(el("button", {
+          className: "small",
+          onclick: async () => {
+            reputation[name] = Math.max(-100, Math.min(100, value + 5));
+            await this.saveJourney();
+          }
+        }, "+"));
+        row.appendChild(el("button", {
+          className: "small",
+          onclick: async () => {
+            reputation[name] = Math.max(-100, Math.min(100, value - 5));
+            await this.saveJourney();
+          }
+        }, "-"));
+      }
+      this.reputationEl.appendChild(row);
+    });
+  }
+  renderJourneyNotes() {
+    if (!this.notesEl) return;
+    clear(this.notesEl);
+    const header = el("div", { className: "campaign-subsection-header" });
+    header.appendChild(el("h3", {}, "Journey Notes"));
+    this.notesEl.appendChild(header);
+    if (this.campaign.is_dm) {
+      const textarea = el("textarea", {
+        className: "journey-notes-input",
+        placeholder: "Record plot hooks, NPCs, world events...",
+        value: this.campaign.journey_notes || "",
+        onchange: async (e) => {
+          this.campaign.journey_notes = e.target.value;
+          await this.saveJourney();
+        }
+      });
+      this.notesEl.appendChild(textarea);
+    } else {
+      this.notesEl.appendChild(el("div", { className: "journey-notes-read" }, this.campaign.journey_notes || "No notes yet."));
+    }
+  }
+  async saveJourney() {
+    try {
+      const { campaign } = await updateCampaignJourney(this.campaign.id, {
+        quests: this.campaign.quests || [],
+        reputation: this.campaign.reputation || {},
+        journey_notes: this.campaign.journey_notes || ""
+      });
+      this.campaign.quests = campaign.quests;
+      this.campaign.reputation = campaign.reputation;
+      this.campaign.journey_notes = campaign.journey_notes;
+      this.renderQuestLog();
+      this.renderReputation();
+      this.renderJourneyNotes();
+    } catch (err) {
+      alert(err.message || "Failed to save journey data.");
+    }
+  }
+  addQuest() {
+    const title = window.prompt("Quest title:");
+    if (!title) return;
+    const description = window.prompt("Quest description (optional):") || "";
+    this.campaign.quests = [...(this.campaign.quests || []), { title, description, status: "active" }];
+    this.saveJourney();
+  }
+  addReputation() {
+    const name = window.prompt("Faction name:");
+    if (!name) return;
+    const rep = { ...(this.campaign.reputation || {}) };
+    rep[name] = 0;
+    this.campaign.reputation = rep;
+    this.saveJourney();
   }
   destroy() {
     this.root.remove();
@@ -8247,14 +8415,6 @@ var AudioController = class {
     this.playNoise(0.12, 1400, 0.18);
     this.tone(1600, 0.06, "square", 0.06);
   }
-  weaponSound(cls = "") {
-    const c = cls.toLowerCase();
-    if (c === "fighter" || c === "paladin" || c === "ranger") return this.swordHit();
-    if (c === "cleric" || c === "druid") return this.bluntHit();
-    if (c === "thief" || c === "assassin") return this.daggerHit();
-    if (c === "barbarian") return this.axeHit();
-    return this.swordHit();
-  }
   criticalHit() {
     this.playNoise(0.2, 1200, 0.22);
     this.tone(880, 0.08, "sawtooth", 0.12);
@@ -8388,9 +8548,119 @@ var AudioController = class {
       this.tone(70, 0.25, "sawtooth", 0.09, 35);
     } else if (n.includes("dragon") || n.includes("wyrm")) {
       this.tone(55, 0.35, "sawtooth", 0.12, 27);
+    } else if (n.includes("librarian") || n.includes("book")) {
+      this.playNoise(0.16, 700, 0.1);
+      this.tone(440, 0.15, "square", 0.07, 220);
+    } else if (n.includes("shadow") || n.includes("warden")) {
+      this.playNoise(0.2, 250, 0.14);
+      this.tone(60, 0.3, "sine", 0.08, 30);
     } else {
       this.tone(110, 0.18, "sawtooth", 0.08, 55);
     }
+  }
+  monsterAttack(name = "") {
+    const n = name.toLowerCase();
+    if (n.includes("skeleton") || n.includes("bone")) {
+      this.playNoise(0.12, 850, 0.14);
+      this.tone(700, 0.06, "square", 0.05);
+    } else if (n.includes("zombie") || n.includes("ghoul")) {
+      this.playNoise(0.14, 500, 0.16);
+      this.tone(55, 0.1, "sawtooth", 0.08);
+    } else if (n.includes("dragon") || n.includes("wyrm")) {
+      this.playNoise(0.18, 300, 0.2);
+      this.tone(80, 0.14, "sawtooth", 0.1);
+    } else if (n.includes("shadow") || n.includes("warden")) {
+      this.playNoise(0.12, 400, 0.12);
+      this.tone(90, 0.12, "sine", 0.07, 45);
+    } else {
+      this.playNoise(0.12, 600, 0.15);
+      this.tone(100, 0.08, "sawtooth", 0.07);
+    }
+  }
+  bowShot() {
+    this.playNoise(0.08, 1400, 0.12);
+    this.tone(220, 0.12, "triangle", 0.08, 880);
+  }
+  crossbowShot() {
+    this.playNoise(0.1, 1200, 0.15);
+    this.tone(180, 0.08, "square", 0.1, 720);
+  }
+  staffHit() {
+    this.playNoise(0.14, 550, 0.18);
+    this.tone(120, 0.1, "sawtooth", 0.07);
+    window.setTimeout(() => this.tone(80, 0.06, "sawtooth", 0.05), 50);
+  }
+  unarmedHit() {
+    this.playNoise(0.1, 900, 0.12);
+    this.tone(140, 0.07, "sawtooth", 0.06);
+  }
+  rangedHit(type = "arrow") {
+    if (type === "bolt") {
+      this.playNoise(0.12, 900, 0.18);
+      this.tone(600, 0.08, "square", 0.08);
+    } else if (type === "fire") {
+      this.playNoise(0.16, 450, 0.2);
+      this.tone(100, 0.1, "sawtooth", 0.09);
+    } else {
+      this.playNoise(0.12, 1200, 0.18);
+      this.tone(400, 0.08, "sawtooth", 0.08);
+    }
+  }
+  weaponSound(cls = "") {
+    const c = cls.toLowerCase();
+    if (c === "fighter" || c === "paladin" || c === "ranger") return this.swordHit();
+    if (c === "cleric" || c === "druid") return this.bluntHit();
+    if (c === "thief" || c === "assassin") return this.daggerHit();
+    if (c === "barbarian") return this.axeHit();
+    if (c === "magic-user" || c === "illusionist" || c === "mage" || c === "wizard") return this.staffHit();
+    if (c === "monk") return this.unarmedHit();
+    return this.swordHit();
+  }
+  spellCast(school = "arcane") {
+    const schools = {
+      arcane: () => { this.tone(660, 0.15, "square", 0.1, 1320); this.playNoise(0.08, 1000, 0.08); },
+      holy: () => { this.tone(880, 0.18, "sine", 0.11, 1760); window.setTimeout(() => this.tone(1100, 0.22, "sine", 0.09, 880), 60); },
+      nature: () => { this.tone(440, 0.2, "triangle", 0.1, 660); this.playNoise(0.08, 600, 0.08); },
+      dark: () => { this.tone(220, 0.22, "sawtooth", 0.11, 110); this.playNoise(0.1, 350, 0.12); },
+      fire: () => { this.tone(150, 0.18, "sawtooth", 0.1, 60); this.playNoise(0.12, 500, 0.14); },
+      ice: () => { this.tone(1200, 0.16, "sine", 0.09, 2400); this.playNoise(0.1, 1600, 0.08); },
+      lightning: () => { this.tone(990, 0.12, "square", 0.12, 1980); this.playNoise(0.12, 1800, 0.12); }
+    };
+    (schools[school] || schools.arcane)();
+  }
+  spellImpact(school = "arcane") {
+    const schools = {
+      arcane: () => { this.playNoise(0.12, 900, 0.16); this.tone(660, 0.12, "square", 0.1, 1320); },
+      holy: () => { this.tone(880, 0.14, "sine", 0.11, 1760); window.setTimeout(() => this.tone(1100, 0.18, "sine", 0.09, 880), 50); },
+      nature: () => { this.playNoise(0.1, 600, 0.14); this.tone(440, 0.14, "triangle", 0.1, 660); },
+      dark: () => { this.playNoise(0.12, 350, 0.18); this.tone(220, 0.16, "sawtooth", 0.1, 110); },
+      fire: () => { this.playNoise(0.16, 500, 0.2); this.tone(100, 0.14, "sawtooth", 0.11, 50); },
+      ice: () => { this.playNoise(0.12, 1400, 0.14); this.tone(1200, 0.08, "sine", 0.08, 2400); },
+      lightning: () => { this.playNoise(0.14, 1800, 0.18); this.tone(990, 0.08, "square", 0.12, 1980); }
+    };
+    (schools[school] || schools.arcane)();
+  }
+  uiClick() {
+    this.tone(880, 0.04, "sine", 0.04);
+  }
+  uiHover() {
+    this.tone(1320, 0.03, "sine", 0.02);
+  }
+  uiError() {
+    this.tone(220, 0.08, "sawtooth", 0.06, 110);
+  }
+  coinSound() {
+    this.tone(1046.5, 0.05, "sine", 0.08);
+    window.setTimeout(() => this.tone(1318.5, 0.07, "sine", 0.07), 60);
+  }
+  chestOpen() {
+    this.playNoise(0.1, 350, 0.12);
+    this.tone(120, 0.08, "sawtooth", 0.06);
+    window.setTimeout(() => this.coinSound(), 120);
+  }
+  doorSound() {
+    this.playNoise(0.18, 280, 0.14);
+    this.tone(90, 0.12, "sawtooth", 0.07, 45);
   }
   footstep(terrain = "stone") {
     const profiles = {
@@ -8475,15 +8745,6 @@ var AudioController = class {
   trapTrigger() {
     this.playNoise(0.25, 600, 0.25);
     this.tone(150, 0.2, "sawtooth", 0.12);
-  }
-  rangedHit(type = "arrow") {
-    if (type === "bolt") {
-      this.playNoise(0.12, 900, 0.18);
-      this.tone(600, 0.08, "square", 0.08);
-    } else {
-      this.playNoise(0.12, 1200, 0.18);
-      this.tone(400, 0.08, "sawtooth", 0.08);
-    }
   }
   levelUp() {
     this.tone(523.25, 0.15, "sine", 0.14, 1046.5);
@@ -9171,6 +9432,21 @@ var Game = class {
       }
     };
     window.addEventListener("beforeunload", this.beforeUnloadHandler);
+    this.root.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (btn && !btn.classList.contains("mute-btn") && !btn.disabled) {
+        this.audio?.uiClick();
+      }
+    });
+    let lastHover = 0;
+    this.root.addEventListener("mouseover", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn || btn.disabled) return;
+      const now = Date.now();
+      if (now - lastHover < 80) return;
+      lastHover = now;
+      this.audio?.uiHover();
+    });
   }
   keydownHandler = null;
   keyupHandler = null;
@@ -10332,6 +10608,15 @@ var Game = class {
     card.appendChild(header);
     const body = el("div", { className: "inspector-body" });
     body.appendChild(el("div", { className: "inspector-stats" }));
+    const editRow = el("div", { className: "inspector-edit-row" });
+    this.inspectorNameInput = el("input", { type: "text", className: "inspector-name-input", placeholder: "Name" });
+    this.inspectorHpInput = el("input", { type: "number", className: "inspector-stat-input", placeholder: "HP", min: "1" });
+    this.inspectorAcInput = el("input", { type: "number", className: "inspector-stat-input", placeholder: "AC", min: "1" });
+    editRow.appendChild(this.inspectorNameInput);
+    editRow.appendChild(this.inspectorHpInput);
+    editRow.appendChild(this.inspectorAcInput);
+    editRow.appendChild(el("button", { onclick: () => this.applyInspectorEdit() }, "Update"));
+    body.appendChild(editRow);
     const dmgRow = el("div", { className: "inspector-actions" });
     const dmgInput = el("input", { type: "number", className: "inspector-dmg", value: "5", min: "0" });
     dmgRow.appendChild(dmgInput);
@@ -10366,6 +10651,33 @@ var Game = class {
     stats.appendChild(el("div", {}, `AC ${current.ac}`));
     stats.appendChild(el("div", {}, `Type ${current.type}`));
     stats.appendChild(el("div", {}, `Position (${current.x}, ${current.y})`));
+    if (this.inspectorNameInput) this.inspectorNameInput.value = current.name;
+    if (this.inspectorHpInput) this.inspectorHpInput.value = String(current.max_hp);
+    if (this.inspectorAcInput) this.inspectorAcInput.value = String(current.ac);
+  }
+  async applyInspectorEdit() {
+    if (!this.inspectorTarget || !this.session || this.inFlight) return;
+    const name = this.inspectorNameInput?.value?.trim();
+    const hp = parseInt(this.inspectorHpInput?.value || "0", 10);
+    const ac = parseInt(this.inspectorAcInput?.value || "0", 10);
+    if (!name || hp <= 0 || ac <= 0) return;
+    this.lockInput();
+    try {
+      const { session } = await dmDamage(this.sessionId, {
+        token_id: this.inspectorTarget.id,
+        name,
+        max_hp: hp,
+        ac,
+        set_stats: true
+      });
+      this.update(session);
+      this.updateInspector();
+      this.log(`Updated ${name}.`);
+    } catch (err) {
+      this.log(err.message || "Inspector update failed.");
+    } finally {
+      this.unlockInput();
+    }
   }
   async applyInspectorDamage(amount) {
     if (!this.inspectorTarget || !this.session || this.inFlight) return;
@@ -10812,12 +11124,16 @@ var Game = class {
     panel.appendChild(el("h3", {}, "DM Tools"));
     const spawnWrap = el("div", { className: "dm-tool-row" });
     this.dmMonsterSelect = el("select", {});
-    ["goblin", "orc", "skeleton", "zombie", "ghoul", "shadow_imp", "librarian", "animated_book"].forEach((m) => {
+    ["goblin", "orc", "skeleton", "zombie", "ghoul", "shadow_imp", "librarian", "animated_book", "dragon_wyrmling", "vampire_spawn", "lich"].forEach((m) => {
       const opt = document.createElement("option");
       opt.value = m;
       opt.textContent = m;
       this.dmMonsterSelect.appendChild(opt);
     });
+    const customOpt = document.createElement("option");
+    customOpt.value = "__custom__";
+    customOpt.textContent = "Custom token...";
+    this.dmMonsterSelect.appendChild(customOpt);
     spawnWrap.appendChild(this.dmMonsterSelect);
     this.dmScaleSelect = el("select", { title: "Spawn scale" });
     [["0.5x", 0.5], ["1x", 1], ["1.5x", 1.5], ["2x", 2]].forEach(([label, val]) => {
@@ -10830,6 +11146,16 @@ var Game = class {
     spawnWrap.appendChild(this.dmScaleSelect);
     spawnWrap.appendChild(el("button", { onclick: () => this.setDmAction("spawn") }, "Spawn"));
     panel.appendChild(spawnWrap);
+    const customWrap = el("div", { className: "dm-tool-row dm-custom-token" });
+    this.dmCustomName = el("input", { type: "text", placeholder: "Name", value: "Custom" });
+    this.dmCustomHp = el("input", { type: "number", placeholder: "HP", value: "20", min: "1" });
+    this.dmCustomAc = el("input", { type: "number", placeholder: "AC", value: "10", min: "1" });
+    this.dmCustomDmg = el("input", { type: "text", placeholder: "Dmg", value: "1d6" });
+    customWrap.appendChild(this.dmCustomName);
+    customWrap.appendChild(this.dmCustomHp);
+    customWrap.appendChild(this.dmCustomAc);
+    customWrap.appendChild(this.dmCustomDmg);
+    panel.appendChild(customWrap);
     const presetWrap = el("div", { className: "dm-tool-row dm-presets" });
     this.dmPresetSelect = el("select", {});
     this.refreshDmPresets();
@@ -10936,6 +11262,33 @@ var Game = class {
     lightingWrap.appendChild(this.dmLightingSelect);
     lightingWrap.appendChild(el("button", { onclick: () => this.applyDmLighting() }, "Set Lighting"));
     panel.appendChild(lightingWrap);
+    const eventWrap = el("div", { className: "dm-tool-row" });
+    this.dmEventSelect = el("select", {});
+    [
+      ["alarm", "\u{1F6A8} Alarm"],
+      ["collapse", "\u{1F3D7} Collapse"],
+      ["reinforcements", "\u{1F6E1} Reinforcements"],
+      ["lights_out", "\u{1F311} Lights Out"],
+      ["haunt", "\u{1F47B} Haunt"]
+    ].forEach(([value, label]) => {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = label;
+      this.dmEventSelect.appendChild(opt);
+    });
+    eventWrap.appendChild(this.dmEventSelect);
+    eventWrap.appendChild(el("button", { onclick: () => this.triggerDmEvent() }, "Trigger Event"));
+    panel.appendChild(eventWrap);
+    const notesWrap = el("div", { className: "dm-tool-row dm-notes" });
+    const savedNotes = localStorage.getItem(`dm_notes_${this.sessionId}`) || "";
+    this.dmNotesInput = el("textarea", {
+      placeholder: "Hidden DM notes...",
+      className: "dm-notes-input",
+      value: savedNotes,
+      oninput: (e) => localStorage.setItem(`dm_notes_${this.sessionId}`, e.target.value)
+    });
+    notesWrap.appendChild(this.dmNotesInput);
+    panel.appendChild(notesWrap);
     return panel;
   }
   async applyDmWeather() {
@@ -10956,6 +11309,44 @@ var Game = class {
       this.log(`Lighting set to ${session.lighting}.`);
     } catch (err) {
       this.log(err.message || "Lighting change failed.");
+    }
+  }
+  async triggerDmEvent() {
+    if (!this.isDm() || !this.session) return;
+    const event = this.dmEventSelect.value;
+    const messages = {
+      alarm: "An alarm bell rings out through the halls!",
+      collapse: "The ceiling groans and collapses in a cloud of dust!",
+      reinforcements: "Reinforcements arrive from the shadows!",
+      lights_out: "Every light source flickers and dies.",
+      haunt: "A cold, spectral presence drifts through the room."
+    };
+    this.log(messages[event] || "A scripted event triggers.");
+    this.shake(event === "collapse" ? 14 : 6);
+    if (event === "lights_out") {
+      try {
+        const { session } = await dmLighting(this.sessionId, { lighting: "dark" });
+        this.update(session);
+      } catch (err) {
+        this.log(err.message || "Event failed.");
+      }
+    } else if (event === "reinforcements") {
+      const offsets = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]];
+      const name = this.dmMonsterSelect.value || "goblin";
+      let spawned = 0;
+      for (const [dx, dy] of offsets) {
+        if (spawned >= 3) break;
+        try {
+          await dmSpawn(this.sessionId, { name, x: this.session.player.x + dx + spawned, y: this.session.player.y + dy, scale: 1 });
+          spawned++;
+        } catch {
+        }
+      }
+      try {
+        const { session } = await getSession(this.sessionId);
+        this.update(session);
+      } catch {
+      }
     }
   }
   async dmUndo() {
@@ -11910,6 +12301,23 @@ var Game = class {
   spawnBloodStain(x, y) {
     this.spawnGroundDecal(x, y, "blood");
   }
+  spawnFootprint(x, y, type = "player") {
+    if (Math.random() > 0.65) return;
+    const footprint = el("div", { className: `footprint-decal ${type}` });
+    footprint.style.left = `${x * TILE_SIZE + TILE_SIZE / 4}px`;
+    footprint.style.top = `${y * TILE_SIZE + TILE_SIZE / 4}px`;
+    footprint.style.transform = `rotate(${Math.random() * 360}deg) scale(${0.7 + Math.random() * 0.4})`;
+    this.decalContainer.appendChild(footprint);
+    window.setTimeout(() => footprint.classList.add("fade"), 5000);
+    window.setTimeout(() => footprint.remove(), 8000);
+  }
+  spawnPersistentDecal(x, y, type = "blood") {
+    const decal = el("div", { className: `game-decal decal-${type}` });
+    decal.style.left = `${x * TILE_SIZE}px`;
+    decal.style.top = `${y * TILE_SIZE}px`;
+    decal.style.transform = `rotate(${Math.random() * 360}deg) scale(${0.85 + Math.random() * 0.3})`;
+    this.decalContainer.appendChild(decal);
+  }
   spawnLootSparkle(x, y) {
     const cx = x * TILE_SIZE + TILE_SIZE / 2;
     const cy = y * TILE_SIZE + TILE_SIZE / 2;
@@ -12199,6 +12607,7 @@ var Game = class {
       this.update(session);
       const opened = session.props.find((p) => p.id === prop.id);
       if (opened?.loot) {
+        this.audio?.chestOpen();
         const lootItems = [];
         if (opened.loot.item) lootItems.push(opened.loot.item);
         this.showLootModal({ gold: opened.loot.gold || 0, items: lootItems });
@@ -12465,6 +12874,92 @@ var Game = class {
       window.setTimeout(() => piece.remove(), 750);
     }
   }
+  spawnClassSpellAoe(centerX, centerY, cls = "") {
+    const variant = this.spellVariantForClass(cls);
+    const configs = {
+      arcane: { color: "#9b59b6", glow: "142, 68, 173", particles: "glyph", count: 18, shock: true },
+      holy: { color: "#f1c40f", glow: "241, 196, 15", particles: "rune", count: 16, shock: false },
+      nature: { color: "#2ecc71", glow: "39, 174, 96", particles: "leaf", count: 20, shock: false },
+      dark: { color: "#e74c3c", glow: "192, 57, 43", particles: "shard", count: 22, shock: true }
+    };
+    const cfg = configs[variant] || configs.arcane;
+    const cx = centerX * TILE_SIZE + TILE_SIZE / 2;
+    const cy = centerY * TILE_SIZE + TILE_SIZE / 2;
+    const burst = el("div", { className: `spell-aoe-burst ${variant}` });
+    burst.style.left = `${cx}px`;
+    burst.style.top = `${cy}px`;
+    burst.style.setProperty("--aoe-color", cfg.color);
+    burst.style.setProperty("--aoe-glow", cfg.glow);
+    this.fxContainer.appendChild(burst);
+    if (cfg.shock) this.shake(6);
+    this.audio?.spellImpact(variant);
+    this.spawnSpellDetritus(cx + TILE_SIZE / 2, cy + TILE_SIZE / 2, variant, cls);
+    for (let i = 0; i < cfg.count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 20 + Math.random() * 70;
+      const px = Math.cos(angle) * dist;
+      const py = Math.sin(angle) * dist;
+      const p = el("div", { className: `aoe-particle ${cfg.particles}` });
+      p.style.left = `${cx}px`;
+      p.style.top = `${cy}px`;
+      p.style.setProperty("--px", `${px}px`);
+      p.style.setProperty("--py", `${py}px`);
+      p.style.background = cfg.color;
+      p.style.boxShadow = `0 0 6px ${cfg.color}`;
+      this.fxContainer.appendChild(p);
+      window.setTimeout(() => p.remove(), 900);
+    }
+    this.spawnLingeringGroundEffect(centerX, centerY, variant);
+    window.setTimeout(() => burst.remove(), 700);
+  }
+  spawnLingeringGroundEffect(x, y, variant) {
+    const colors = { arcane: "rgba(142, 68, 173, 0.25)", holy: "rgba(241, 196, 15, 0.22)", nature: "rgba(39, 174, 96, 0.25)", dark: "rgba(192, 57, 43, 0.25)" };
+    const color = colors[variant] || colors.arcane;
+    const ground = el("div", { className: `lingering-ground ${variant}` });
+    ground.style.left = `${(x - 1.5) * TILE_SIZE}px`;
+    ground.style.top = `${(y - 1.5) * TILE_SIZE}px`;
+    ground.style.width = `${4 * TILE_SIZE}px`;
+    ground.style.height = `${4 * TILE_SIZE}px`;
+    ground.style.background = `radial-gradient(circle, ${color} 0%, transparent 70%)`;
+    this.fxContainer.appendChild(ground);
+    window.setTimeout(() => ground.classList.add("fade"), 2500);
+    window.setTimeout(() => ground.remove(), 4500);
+  }
+  spawnClassSpellImpact(x, y, cls = "") {
+    const variant = this.spellVariantForClass(cls);
+    const cx = x * TILE_SIZE + TILE_SIZE / 2;
+    const cy = y * TILE_SIZE + TILE_SIZE / 2;
+    const flash = el("div", { className: `spell-impact-flash ${variant}` });
+    flash.style.left = `${cx}px`;
+    flash.style.top = `${cy}px`;
+    this.fxContainer.appendChild(flash);
+    window.setTimeout(() => flash.remove(), 250);
+    this.spawnSpellImpact(cx + TILE_SIZE / 2, cy + TILE_SIZE / 2, variant, cls);
+  }
+  spawnMagicMissiles(fromX, fromY, toX, toY, cls = "") {
+    const variant = this.spellVariantForClass(cls);
+    const startX = fromX * TILE_SIZE + TILE_SIZE / 2;
+    const startY = fromY * TILE_SIZE + TILE_SIZE / 2;
+    const endX = toX * TILE_SIZE + TILE_SIZE / 2;
+    const endY = toY * TILE_SIZE + TILE_SIZE / 2;
+    const count = 3 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) {
+      const spreadX = (Math.random() - 0.5) * TILE_SIZE * 1.5;
+      const spreadY = (Math.random() - 0.5) * TILE_SIZE * 1.5;
+      const m = el("div", { className: `magic-missile ${variant}` });
+      m.style.left = `${startX}px`;
+      m.style.top = `${startY}px`;
+      m.style.setProperty("--tx", `${endX - startX + spreadX}px`);
+      m.style.setProperty("--ty", `${endY - startY + spreadY}px`);
+      m.style.animationDelay = `${i * 0.08}s`;
+      this.fxContainer.appendChild(m);
+      window.setTimeout(() => m.remove(), 600 + i * 80);
+    }
+    window.setTimeout(() => {
+      this.spawnClassSpellImpact(toX, toY, cls);
+      this.audio?.spellImpact(variant);
+    }, 350);
+  }
   async onTileClick(x, y) {
     if (this.observer || !this.session || this.session.status !== "active" || this.inFlight) return;
     if (this.rulerActive || this.rulerDragging) return;
@@ -12479,7 +12974,17 @@ var Game = class {
         if (this.dmAction === "spawn") {
           const name = this.dmMonsterSelect.value || "goblin";
           const scale = parseFloat(this.dmScaleSelect.value || "1");
-          response = await dmSpawn(this.sessionId, { name, x, y, scale });
+          const payload = { name, x, y, scale };
+          if (name === "__custom__") {
+            payload.custom = {
+              name: this.dmCustomName.value || "Custom Token",
+              hp: parseInt(this.dmCustomHp.value || "20", 10),
+              ac: parseInt(this.dmCustomAc.value || "10", 10),
+              damage: this.dmCustomDmg.value || "1d6",
+              xp_value: 50
+            };
+          }
+          response = await dmSpawn(this.sessionId, payload);
         } else if (this.dmAction === "move") {
           const tokenId = this.dmTokenSelect.value;
           if (!tokenId) return;
@@ -12550,6 +13055,8 @@ var Game = class {
       const dist = Math.abs(x - player.x) + Math.abs(y - player.y);
       if (dist > 0 && dist <= abilityRange && this.hasLineOfSight(player.x, player.y, x, y)) {
         this.lockInput();
+        this.audio.abilitySound(cls);
+        this.spawnClassSpellAoe(x, y, cls);
         try {
           const { session } = await actInSession(this.sessionId, "aoe", { center_x: x, center_y: y });
           this.action = null;
@@ -12638,7 +13145,9 @@ var Game = class {
     } else if (this.action === "ranged") {
       if (token.type !== "monster") return;
       const player2 = this.session.player;
-      this.audio.rangedShot();
+      const cls = (player2.classes?.[0] ?? "").toLowerCase();
+      if (cls === "thief" || cls === "assassin") this.audio.crossbowShot();
+      else this.audio.bowShot();
       this.audio.combatSting();
       this.spawnProjectile(player2.x, player2.y, token.x, token.y, "arrow");
       this.lockInput();
@@ -12662,7 +13171,11 @@ var Game = class {
       const isAdjacent = Math.abs(player2.x - token.x) + Math.abs(player2.y - token.y) === 1;
       if (rangedAbility) {
         this.audio.abilitySound(cls);
-        this.spawnSpellBeam(player2.x, player2.y, token.x, token.y, player2.classes || [cls]);
+        if (cls === "magic-user" || cls === "illusionist") {
+          this.spawnMagicMissiles(player2.x, player2.y, token.x, token.y, cls);
+        } else {
+          this.spawnSpellBeam(player2.x, player2.y, token.x, token.y, player2.classes || [cls]);
+        }
       } else {
         this.audio.weaponSound(cls);
         if (isAdjacent) {
@@ -12696,6 +13209,16 @@ var Game = class {
     const prevPlayerPos = prevSession ? `${prevSession.player.x},${prevSession.player.y}` : "";
     this.session = session;
     this.computeCombatEffects(prevSession, session);
+    if (prevSession) {
+      const allPrev = [...prevSession.players, ...prevSession.monsters];
+      const allNow = [...session.players, ...session.monsters];
+      allNow.forEach((t) => {
+        const prev = allPrev.find((p) => p.id === t.id);
+        if (prev && (prev.x !== t.x || prev.y !== t.y) && !t.dead && t.hp > 0) {
+          this.spawnFootprint(prev.x, prev.y, t.type);
+        }
+      });
+    }
     if (prevSession) {
       const prevLevels = (prevSession.players || []).reduce((m, p) => {
         m[p.id] = p.level ?? 1;
@@ -13109,6 +13632,7 @@ var Game = class {
       }
     }
     if (attacker) {
+      this.audio?.monsterAttack(attacker.name);
       this.spawnSlashEffect(attacker.x, attacker.y, player.x, player.y);
       this.shake(12);
     }

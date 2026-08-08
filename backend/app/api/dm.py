@@ -58,6 +58,7 @@ async def dm_spawn(
             int(data["y"]),
             token_id=data.get("token_id"),
             scale=scale,
+            custom=data.get("custom"),
         )
     except (KeyError, ValueError) as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -200,7 +201,16 @@ async def dm_damage(
     prev_state = json.loads(record.state)
 
     try:
-        await session_engine.dm_damage(state, data["token_id"], int(data["amount"]))
+        if data.get("set_stats"):
+            await session_engine.dm_set_token_stats(
+                state,
+                data["token_id"],
+                name=data.get("name"),
+                max_hp=data.get("max_hp"),
+                ac=data.get("ac"),
+            )
+        else:
+            await session_engine.dm_damage(state, data["token_id"], int(data["amount"]))
     except (KeyError, ValueError) as e:
         raise HTTPException(status_code=400, detail=str(e))
 
