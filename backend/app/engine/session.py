@@ -415,6 +415,8 @@ async def new_game(
         "monsters_dir": str(monsters_dir) if monsters_dir else None,
         "props": [],
         "traps": [],
+        "weather": "auto",
+        "lighting": "day",
     }
     if dungeon_links:
         state["dungeon_links"] = dungeon_links
@@ -458,6 +460,8 @@ async def advance_module(
     state["log"].append(f"— The party journeys to {next_module.name} —")
     state["props"] = []
     state["traps"] = []
+    state["weather"] = "auto"
+    state["lighting"] = "day"
     state["player"] = _active_player(state)
     return state
 
@@ -601,7 +605,25 @@ async def dm_reveal(
     state["log"].append(f"The DM reveals the fog around ({x}, {y}).")
 
 
-_PROP_TYPES = {"barrel", "rubble", "torch"}
+async def dm_hide(
+    state: dict[str, Any], module: Module, x: int, y: int, radius: int
+) -> None:
+    """Hide a radius of fog again for all players."""
+    radius = int(radius)
+    if radius < 0 or radius > 20:
+        raise ValueError("radius must be between 0 and 20")
+    revealed = state.setdefault("dm_revealed", set())
+    for dy in range(-radius, radius + 1):
+        for dx in range(-radius, radius + 1):
+            if abs(dx) + abs(dy) <= radius:
+                tx, ty = x + dx, y + dy
+                if module.map.in_bounds(tx, ty):
+                    revealed.discard(f"{tx},{ty}")
+    state["version"] += 1
+    state["log"].append(f"The DM shrouds the fog around ({x}, {y}).")
+
+
+_PROP_TYPES = {"barrel", "rubble", "torch", "chest"}
 
 
 async def dm_prop(
@@ -642,10 +664,68 @@ async def dm_prop(
         "y": int(y),
         "variant": variant or "",
     }
+    if prop_type == "chest":
+        prop["opened"] = False
+        prop["loot"] = _roll_chest_loot(seed=hash(prop_id) % (2**31))
     props.append(prop)
     state["version"] += 1
     state["log"].append(f"The DM places a {prop_type} at ({x}, {y}).")
     return prop
+
+
+def _roll_chest_loot(seed: int | None = None) -> dict[str, Any]:
+    """Generate semi-random chest contents using the engine dice."""
+    d = Dice(seed=seed if seed is not None else 0)
+    gold = d.roll("2d10", reason="chest gold", kind="loot").total
+    potion_chance = d.roll("1d100", reason="chest loot chance", kind="loot").total
+    loot = {"gold": gold}
+    if potion_chance > 60:
+        heal = d.roll("1d8+1", reason="potion strength", kind="loot").total
+        uid = d.roll("1d1000000", reason="item id", kind="loot").total
+        loot["item"] = {
+            "name": "Healing Potion",
+            "type": "potion",
+            "slot": "consumable",
+            "effects": {"hp_restore": heal},
+            "instance_id": f"loot_{uid}",
+        }
+    return loot
+
+
+async def interact_prop(
+    state: dict[str, Any],
+    module: Module,
+    token: dict[str, Any],
+    prop_id: str,
+) -> dict[str, Any]:
+    """A player opens a chest prop and claims its loot."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    prop = next((p for p in state.get("props", []) if p.get("id") == prop_id), None)
+    if not prop:
+        raise ValueError("prop not found")
+    if prop.get("type") != "chest":
+        raise ValueError("prop is not a chest")
+    if prop.get("opened"):
+        raise ValueError("chest already opened")
+    dist = abs(token["x"] - prop["x"]) + abs(token["y"] - prop["y"])
+    if dist > 1:
+        raise ValueError("must be adjacent to open")
+
+    prop["opened"] = True
+    loot = prop.get("loot", {})
+    gold = loot.get("gold", 0)
+    item = loot.get("item")
+    token["gold"] = token.get("gold", 0) + gold
+    if item:
+        token.setdefault("inventory", []).append(item)
+    state["version"] += 1
+    summary = f"{token['name']} opens a chest and finds {gold} gold"
+    if item:
+        summary += f" and a {item['name']}"
+    summary += "."
+    state["log"].append(summary)
+    return {"gold": gold, "item": item}
 
 
 async def dm_trap(
@@ -676,6 +756,40 @@ async def dm_trap(
     state["version"] += 1
     state["log"].append(f"The DM hides a trap at ({x}, {y}).")
     return trap
+
+
+_WEATHER_TYPES = {"auto", "clear", "rain", "snow", "ash", "fog"}
+_LIGHTING_TYPES = {"day", "dusk", "night", "dark"}
+
+
+async def dm_weather(
+    state: dict[str, Any],
+    weather: str,
+) -> None:
+    """Set the session-wide weather overlay."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    weather = (weather or "auto").lower()
+    if weather not in _WEATHER_TYPES:
+        raise ValueError(f"unknown weather: {weather}")
+    state["weather"] = weather
+    state["version"] += 1
+    state["log"].append(f"The weather shifts to {weather}.")
+
+
+async def dm_lighting(
+    state: dict[str, Any],
+    lighting: str,
+) -> None:
+    """Set the session-wide lighting mood."""
+    if state["status"] != STATUS_ACTIVE:
+        raise ValueError("game is over")
+    lighting = (lighting or "day").lower()
+    if lighting not in _LIGHTING_TYPES:
+        raise ValueError(f"unknown lighting: {lighting}")
+    state["lighting"] = lighting
+    state["version"] += 1
+    state["log"].append(f"The light fades to {lighting}.")
 
 
 def _tokens(state: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1705,7 +1819,7 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
             validate.validate_ranged_target(state, module, kwargs["target_id"], max_range=RANGED_RANGE)
         elif action == "aoe":
             validate.validate_actor(state)
-        elif action in ("use_potion", "use_item", "end_turn"):
+        elif action in ("use_potion", "use_item", "interact_prop", "end_turn"):
             validate.validate_actor(state)
 
         if action == "move":
@@ -1732,6 +1846,11 @@ async def act(state: dict[str, Any], module: Module, action: str, **kwargs: Any)
 
         elif action == "use_item":
             await _use_potion(state, token, d, instance_id=kwargs.get("instance_id"))
+            state["phase"] = PHASE_DM
+            state["turn_deadline"] = None
+
+        elif action == "interact_prop":
+            await interact_prop(state, module, token, kwargs["prop_id"])
             state["phase"] = PHASE_DM
             state["turn_deadline"] = None
 
@@ -1915,4 +2034,6 @@ def view(state: dict[str, Any]) -> dict[str, Any]:
         "ai_dm_enabled": _ai_dm_enabled(state),
         "props": state.get("props", []),
         "traps": state.get("traps", []),
+        "weather": state.get("weather", "auto"),
+        "lighting": state.get("lighting", "day"),
     }

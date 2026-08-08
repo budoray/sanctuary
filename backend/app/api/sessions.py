@@ -655,7 +655,7 @@ async def act_in_session(
     action = data.get("action")
     if action == "dm_turn" and record.campaign_id and not await _is_campaign_dm(record, account_id, db):
         raise HTTPException(status_code=403, detail="Only the DM can run the DM turn")
-    if action in ("move", "attack", "ranged", "end_turn", "use_potion", "stabilize", "ability"):
+    if action in ("move", "attack", "ranged", "end_turn", "use_potion", "stabilize", "ability", "interact_prop"):
         if record.campaign_id:
             active_index = state.get("active_player_index", 0)
             active_players = state.get("players", [])
