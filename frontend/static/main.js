@@ -8293,6 +8293,71 @@ var AudioController = class {
     this.tone(523.25, 0.18, "sine", 0.1, 1046.5);
     window.setTimeout(() => this.tone(659.25, 0.25, "sine", 0.1, 523.25), 80);
   }
+  missSound() {
+    this.playNoise(0.12, 1600, 0.12);
+    this.tone(220, 0.08, "sine", 0.06, 110);
+  }
+  parrySound() {
+    this.playNoise(0.1, 1800, 0.14);
+    this.tone(880, 0.06, "sawtooth", 0.07);
+  }
+  armorHit() {
+    this.playNoise(0.14, 650, 0.18);
+    this.tone(140, 0.09, "square", 0.08);
+  }
+  shieldBlock() {
+    this.playNoise(0.16, 500, 0.2);
+    this.tone(220, 0.12, "sawtooth", 0.09, 110);
+  }
+  spellCastSwoosh(variant = "arcane") {
+    const profiles = {
+      holy: () => this.tone(1320, 0.18, "sine", 0.08, 2640),
+      nature: () => this.tone(660, 0.2, "triangle", 0.09, 1320),
+      dark: () => this.tone(330, 0.22, "sawtooth", 0.1, 165),
+      arcane: () => this.tone(990, 0.18, "square", 0.09, 1980)
+    };
+    (profiles[variant] || profiles.arcane)();
+    this.playNoise(0.12, 1200, 0.1);
+  }
+  weaponDraw() {
+    this.playNoise(0.08, 1400, 0.1);
+    this.tone(660, 0.05, "sawtooth", 0.05);
+  }
+  deathKnell() {
+    this.tone(196, 0.35, "sine", 0.12, 98);
+    window.setTimeout(() => this.tone(98, 0.55, "sine", 0.1, 49), 120);
+  }
+  propPlaceSound(type = "barrel") {
+    const t = type.toLowerCase();
+    if (t === "torch" || t === "campfire") {
+      this.playNoise(0.12, 600, 0.12);
+    } else if (t === "door" || t === "chest") {
+      this.playNoise(0.1, 350, 0.14);
+      this.tone(120, 0.08, "sawtooth", 0.06);
+    } else if (t === "web" || t === "vegetation") {
+      this.playNoise(0.1, 900, 0.08);
+    } else {
+      this.playNoise(0.08, 450, 0.12);
+      this.tone(80, 0.06, "sawtooth", 0.05);
+    }
+  }
+  monsterGrowl(name = "") {
+    const n = name.toLowerCase();
+    if (n.includes("goblin") || n.includes("imp")) {
+      this.tone(340, 0.12, "sawtooth", 0.08, 170);
+    } else if (n.includes("orc") || n.includes("ogre")) {
+      this.tone(90, 0.2, "sawtooth", 0.1, 45);
+    } else if (n.includes("skeleton") || n.includes("bone")) {
+      this.playNoise(0.14, 900, 0.12);
+      this.tone(800, 0.08, "square", 0.06);
+    } else if (n.includes("zombie") || n.includes("ghoul")) {
+      this.tone(70, 0.25, "sawtooth", 0.09, 35);
+    } else if (n.includes("dragon") || n.includes("wyrm")) {
+      this.tone(55, 0.35, "sawtooth", 0.12, 27);
+    } else {
+      this.tone(110, 0.18, "sawtooth", 0.08, 55);
+    }
+  }
   footstep(terrain = "stone") {
     const profiles = {
       stone: { filter: 280, gain: 0.07 },
@@ -8951,6 +9016,9 @@ var Game = class {
   moduleId;
   loadingOverlay;
   minimapVisible = true;
+  initiativeRolls = /* @__PURE__ */ new Map();
+  turnTimer = null;
+  turnTimerRemaining = 0;
   rulerActive = false;
   rulerStart = null;
   rulerLine = null;
@@ -9251,9 +9319,33 @@ var Game = class {
     hud.appendChild(this.timerEl);
     this.turnOrderEl = el("div", { className: "turn-order-bar" });
     hud.appendChild(this.turnOrderEl);
+    this.minimapFrame = el("div", { className: "minimap-frame" });
+    const minimapHeader = el("div", { className: "minimap-header" });
+    minimapHeader.appendChild(el("span", {}, "Tactical Map"));
+    const minimapClose = el("button", {
+      className: "minimap-close",
+      title: "Close minimap",
+      onclick: () => this.toggleMinimap()
+    }, "\u2715");
+    minimapHeader.appendChild(minimapClose);
+    this.minimapFrame.appendChild(minimapHeader);
     this.minimapEl = el("div", { className: "minimap" });
     this.minimapEl.style.display = "none";
-    hud.appendChild(this.minimapEl);
+    this.minimapFrame.appendChild(this.minimapEl);
+    const minimapFooter = el("div", { className: "minimap-footer" });
+    minimapFooter.appendChild(el("button", {
+      className: "minimap-focus",
+      title: "Center on active token",
+      onclick: () => this.focusMinimapOnActive()
+    }, "\u25C8 Focus"));
+    minimapFooter.appendChild(el("button", {
+      className: "minimap-fit",
+      title: "Fit map to screen",
+      onclick: () => this.fitMapToScreen()
+    }, "\u26F6 Fit"));
+    this.minimapFrame.appendChild(minimapFooter);
+    this.minimapFrame.style.display = "none";
+    hud.appendChild(this.minimapFrame);
     const actions = el("div", { className: "game-actions" });
     this.moveBtn = el("button", { onclick: () => {
       this.ensureAudioStarted();
@@ -9693,7 +9785,8 @@ var Game = class {
   }
   toggleMinimap() {
     this.minimapVisible = !this.minimapVisible;
-    this.minimapEl.style.display = this.minimapVisible ? "block" : "none";
+    if (this.minimapFrame) this.minimapFrame.style.display = this.minimapVisible ? "block" : "none";
+    if (this.minimapEl) this.minimapEl.style.display = this.minimapVisible ? "block" : "none";
     if (this.minimapVisible) this.updateMinimap();
   }
   toggleRuler() {
@@ -9729,11 +9822,13 @@ var Game = class {
     const dist = Math.sqrt(dx * dx + dy * dy);
     const angle = Math.atan2(dy, dx) * 180 / Math.PI;
     const tiles = Math.round(dist / TILE_SIZE);
+    const manhattan = Math.abs(x - this.rulerStart.x) + Math.abs(y - this.rulerStart.y);
+    const feet = tiles * 5;
     this.rulerLine.style.left = `${sx}px`;
     this.rulerLine.style.top = `${sy}px`;
     this.rulerLine.style.width = `${dist}px`;
     this.rulerLine.style.transform = `rotate(${angle}deg)`;
-    this.rulerLabel.textContent = `${tiles}`;
+    this.rulerLabel.innerHTML = `<strong>${tiles}</strong><span>${manhattan}M \u00B7 ${feet}ft</span>`;
     this.rulerLabel.style.left = `${(sx + ex) / 2}px`;
     this.rulerLabel.style.top = `${(sy + ey) / 2}px`;
   }
@@ -10501,7 +10596,7 @@ var Game = class {
     panel.appendChild(encounterWrap);
     const propWrap = el("div", { className: "dm-tool-row" });
     this.dmPropSelect = el("select", {});
-    ["barrel", "rubble", "torch", "chest", "clear"].forEach((p) => {
+    ["barrel", "crate", "rubble", "torch", "campfire", "chest", "door", "stairs", "pillar", "table", "chair", "bones", "web", "vegetation", "altar", "statue", "fountain", "rune", "clear"].forEach((p) => {
       const opt = document.createElement("option");
       opt.value = p;
       opt.textContent = p;
@@ -10521,8 +10616,14 @@ var Game = class {
     toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("encounter") }, "Spawn Group"));
     toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("trap") }, "Place Trap"));
     toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("inspect") }, "Inspect Token"));
+    toolWrap.appendChild(el("button", { onclick: () => this.setDmAction("ping") }, "Ping"));
     toolWrap.appendChild(el("button", { onclick: () => this.revealAllFog() }, "Reveal All"));
+    toolWrap.appendChild(el("button", { onclick: () => this.clearAnnotations() }, "Clear Marks"));
     panel.appendChild(toolWrap);
+    const initiativeWrap = el("div", { className: "dm-tool-row dm-initiative" });
+    initiativeWrap.appendChild(el("button", { onclick: () => this.rollInitiative() }, "\u{1F3B2} Roll Initiative"));
+    initiativeWrap.appendChild(el("button", { onclick: () => { this.initiativeRolls.clear(); this.updateTurnOrder(); this.log("Initiative cleared."); } }, "Reset Order"));
+    panel.appendChild(initiativeWrap);
     const historyWrap = el("div", { className: "dm-tool-row dm-history" });
     this.dmUndoBtn = el("button", { className: "dm-undo-btn", onclick: () => this.dmUndo() }, "\u21E6 Undo");
     this.dmRedoBtn = el("button", { className: "dm-redo-btn", onclick: () => this.dmRedo() }, "Redo \u21E8");
@@ -10967,23 +11068,22 @@ var Game = class {
       if (!el2) {
         const url2 = tokenFrame(p.type);
         el2 = el("div", {
-          className: `game-prop prop-${p.type}${p.opened ? " opened" : ""}`,
-          style: `left:${p.x * TILE_SIZE}px;top:${p.y * TILE_SIZE}px;`,
+          className: `game-prop prop-${p.type}${p.opened ? " opened" : ""}${p.type === "torch" || p.type === "campfire" ? " prop-torch-lit" : ""}${p.type === "rune" || p.type === "fountain" ? " prop-animated" : ""}`,
+          style: `left:${p.x * TILE_SIZE}px;top:${p.y * TILE_SIZE}px;transform:rotate(${p.rotation || 0}deg) scale(${p.scale || 1});`,
           onclick: () => this.onPropClick(p)
         });
         if (url2) {
           const img = el("img", { src: url2, alt: p.type, onerror: () => { img.style.display = "none"; } });
           el2.appendChild(img);
         }
-        if (p.type === "torch") {
-          el2.classList.add("prop-torch-lit");
-        }
         this.propContainer.appendChild(el2);
         this.propElements.set(p.id, el2);
+        window.setTimeout(() => el2.classList.add("prop-settled"), 20);
       }
-      el2.className = `game-prop prop-${p.type}${p.opened ? " opened" : ""}${p.type === "torch" ? " prop-torch-lit" : ""}`;
+      el2.className = `game-prop prop-${p.type}${p.opened ? " opened" : ""}${p.type === "torch" || p.type === "campfire" ? " prop-torch-lit" : ""}${p.type === "rune" || p.type === "fountain" ? " prop-animated" : ""}`;
       el2.style.left = `${p.x * TILE_SIZE}px`;
       el2.style.top = `${p.y * TILE_SIZE}px`;
+      el2.style.transform = `rotate(${p.rotation || 0}deg) scale(${p.scale || 1})`;
     }
     for (const [id, el2] of this.propElements) {
       if (!visibleIds.has(id)) {
@@ -11082,7 +11182,7 @@ var Game = class {
       this.hoverTile = null;
       return;
     }
-    const isDmHover = this.isDm() && this.dmAction && ["reveal", "hide", "prop", "inspect", "decal", "clear-decal"].includes(this.dmAction);
+    const isDmHover = this.isDm() && this.dmAction && ["reveal", "hide", "prop", "inspect", "decal", "clear-decal", "ping"].includes(this.dmAction);
     if (!isDmHover && this.session.phase !== "player") {
       this.hoverTile = null;
       return;
@@ -11573,6 +11673,9 @@ var Game = class {
     const newMonsters = session.monsters.filter((m) => !prevMonsterIds.has(m.id));
     if (newMonsters.length > 0) {
       this.audio?.monsterSpawn();
+      newMonsters.slice(0, 3).forEach((m, i) => {
+        window.setTimeout(() => this.audio?.monsterGrowl(m.name), i * 90);
+      });
     }
     for (const t of allNow) {
       const prev = prevById.get(t.id);
@@ -11605,10 +11708,15 @@ var Game = class {
         this.spawnFloatingText(t.x, t.y - 0.6, "DOWN!", "kill");
         this.spawnParticleBurst(t.x, t.y, "#c0392b", 14);
         this.shake(10);
+        if (t.type === "player") this.audio?.deathKnell();
       } else if (delta < 0) {
         this.spawnFloatingText(t.x, t.y, text, "damage");
         this.spawnParticleBurst(t.x, t.y, "#ff6b6b", 8);
-        if (t.type === "player") this.audio?.monsterHit();
+        if (t.type === "player") {
+          this.audio?.monsterHit();
+        } else {
+          this.audio?.armorHit();
+        }
         const tokenEl = this.tokenElements.get(t.id);
         if (tokenEl) {
           tokenEl.classList.remove("hit-flash");
@@ -11625,6 +11733,11 @@ var Game = class {
     if (hadMiss) {
       const active = session.phase === "player" ? session.player : allNow.find((t) => t.id === prevSession.player?.id) || allNow[0];
       if (active) this.spawnFloatingText(active.x, active.y, "MISS", "miss");
+      const isParry = newLog.some((e) => /parr/i.test(e));
+      const isBlock = newLog.some((e) => /block/i.test(e));
+      if (isParry) this.audio?.parrySound();
+      else if (isBlock) this.audio?.shieldBlock();
+      else this.audio?.missSound();
     }
   }
   renderTokens(_snap = false) {
@@ -11848,6 +11961,23 @@ var Game = class {
       window.setTimeout(() => p.remove(), (delay + duration) * 1000 + 100);
     }
   }
+  spawnPing(x, y) {
+    const cx = x * TILE_SIZE + TILE_SIZE / 2;
+    const cy = y * TILE_SIZE + TILE_SIZE / 2;
+    const ping = el("div", { className: "dm-ping" });
+    ping.style.left = `${cx}px`;
+    ping.style.top = `${cy}px`;
+    this.fxContainer.appendChild(ping);
+    this.audio?.tone(880, 0.12, "sine", 0.08, 1760);
+    window.setTimeout(() => ping.remove(), 1200);
+  }
+  clearAnnotations() {
+    this.fxContainer.querySelectorAll(".dm-ping, .ruler-line, .ruler-label").forEach((el2) => el2.remove());
+    this.rulerStart = null;
+    this.rulerDragging = false;
+    this.rulerLine = null;
+    this.rulerLabel = null;
+  }
   spellVariantForClass(cls = "") {
     const c = cls.toLowerCase();
     if (c === "cleric" || c === "paladin") return "holy";
@@ -11894,6 +12024,7 @@ var Game = class {
     beam.style.width = `${dist}px`;
     beam.style.transform = `rotate(${angle}deg)`;
     this.fxContainer.appendChild(beam);
+    this.audio?.spellCastSwoosh(variant);
     this.spawnSpellCharge(startX, startY, variant, primaryClass);
     window.setTimeout(() => this.spawnSpellCast(startX, startY, variant, primaryClass), 160);
     window.setTimeout(() => this.spawnSpellImpact(endX, endY, variant, primaryClass), 280);
@@ -11997,6 +12128,7 @@ var Game = class {
           response = await dmHide(this.sessionId, { x, y, radius: r });
         } else if (this.dmAction === "prop") {
           const type = this.dmPropSelect.value || "barrel";
+          this.audio?.propPlaceSound(type);
           response = await dmProp(this.sessionId, { type, x, y });
         } else if (this.dmAction === "decal") {
           const type = this.dmDecalSelect.value || "blood";
@@ -12030,6 +12162,10 @@ var Game = class {
           response = latest;
         } else if (this.dmAction === "trap") {
           response = await dmTrap(this.sessionId, { x, y, damage: "1d6" });
+        } else if (this.dmAction === "ping") {
+          this.spawnPing(x, y);
+          this.dmAction = null;
+          return;
         }
         if (response) {
           this.dmAction = null;
@@ -12381,27 +12517,51 @@ var Game = class {
     clear(this.turnOrderEl);
     const isDmPhase = this.session.phase === "dm";
     const activeId = this.session.phase === "player" ? this.session.player?.id : null;
-    const players = this.session.players || [];
-    players.forEach((p) => {
-      const isActive = p.id === activeId;
-      const ratio = Math.max(0, Math.min(1, p.hp / p.max_hp));
+    const players = [...(this.session.players || [])];
+    const monsters = [...(this.session.monsters || [])].filter((m) => m.alive !== false);
+    const allTokens = [...players, ...monsters.map((m) => ({ ...m, type: "monster" }))];
+    const hasInitiative = this.initiativeRolls.size > 0;
+    if (hasInitiative) {
+      allTokens.sort((a, b) => (this.initiativeRolls.get(b.id) ?? 0) - (this.initiativeRolls.get(a.id) ?? 0));
+    }
+    allTokens.forEach((t) => {
+      const isActive = t.id === activeId;
+      const ratio = Math.max(0, Math.min(1, t.hp / t.max_hp));
       const hpColor = ratio > 0.5 ? "#2ecc71" : ratio > 0.25 ? "#f1c40f" : "#c0392b";
-      const tokenUrl = tokenFrame(p.classes?.[0] ?? "hero");
-      const item = el("div", { className: `turn-order-item${isActive ? " active" : ""}${p.down ? " down" : ""}${p.alive === false ? " dead" : ""}` });
+      const tokenUrl = t.type === "monster" ? tokenFrame(t.name) : tokenFrame(t.classes?.[0] ?? "hero");
+      const init = this.initiativeRolls.get(t.id);
+      const item = el("div", { className: `turn-order-item${isActive ? " active" : ""}${t.down ? " down" : ""}${t.alive === false ? " dead" : ""}` });
       if (tokenUrl) {
-        item.appendChild(el("img", { className: "turn-order-portrait", src: tokenUrl, alt: p.name }));
+        item.appendChild(el("img", { className: "turn-order-portrait", src: tokenUrl, alt: t.name }));
       } else {
-        item.appendChild(el("div", { className: "turn-order-initial" }, (p.name || "?").charAt(0).toUpperCase()));
+        item.appendChild(el("div", { className: "turn-order-initial" }, (t.name || "?").charAt(0).toUpperCase()));
       }
       const info = el("div", { className: "turn-order-info" });
-      info.appendChild(el("span", { className: "turn-order-name" }, p.name));
+      const nameRow = el("div", { className: "turn-order-name-row" });
+      nameRow.appendChild(el("span", { className: "turn-order-name" }, t.name));
+      if (init !== void 0) {
+        nameRow.appendChild(el("span", { className: "turn-order-initiative" }, init));
+      }
+      info.appendChild(nameRow);
       const hpBar = el("div", { className: "turn-order-hp" });
       hpBar.innerHTML = `<span style="width:${Math.round(ratio * 100)}%; background:${hpColor};"></span>`;
       info.appendChild(hpBar);
+      const statuses = t.statuses || [];
+      if (t.down || statuses.length > 0) {
+        const statusRow = el("div", { className: "turn-order-status-row" });
+        if (t.down) statusRow.appendChild(el("span", { className: "turn-order-status down" }, "DOWN"));
+        statuses.forEach((s) => {
+          statusRow.appendChild(el("span", { className: `turn-order-status ${s.type}` }, `${s.type}${s.duration ? ` ${s.duration}` : ""}`));
+        });
+        info.appendChild(statusRow);
+      }
       item.appendChild(info);
       if (isActive) {
         item.appendChild(el("span", { className: "turn-order-badge" }, "ACTIVE"));
       }
+      item.onclick = () => {
+        if (this.isDm() && t.x !== void 0 && t.y !== void 0) this.panCameraToTile(t.x + 0.5, t.y + 0.5);
+      };
       this.turnOrderEl.appendChild(item);
     });
     const dmItem = el("div", { className: `turn-order-item turn-order-dm${isDmPhase ? " active" : ""}` });
@@ -12413,62 +12573,113 @@ var Game = class {
       dmItem.appendChild(el("span", { className: "turn-order-badge" }, "ACTIVE"));
     }
     this.turnOrderEl.appendChild(dmItem);
+    this.startTurnTimer();
+  }
+  rollInitiative() {
+    if (!this.session) return;
+    this.initiativeRolls.clear();
+    const players = this.session.players || [];
+    const monsters = this.session.monsters || [];
+    const modifierFor = (t) => {
+      if (t.dexterity) return Math.floor((t.dexterity - 10) / 2);
+      const cls = (t.classes?.[0] ?? "").toLowerCase();
+      if (["thief", "assassin", "monk"].includes(cls)) return 2;
+      if (["ranger", "fighter"].includes(cls)) return 1;
+      return 0;
+    };
+    [...players, ...monsters].forEach((t) => {
+      if (t.alive === false) return;
+      const roll = Math.floor(Math.random() * 20) + 1;
+      this.initiativeRolls.set(t.id, roll + modifierFor(t));
+    });
+    this.audio?.diceRoll();
+    this.log("Initiative rolled. Turn order updated.");
+    this.updateTurnOrder();
+  }
+  startTurnTimer() {
+    if (this.turnTimer) clearInterval(this.turnTimer);
+    this.turnTimerRemaining = 90;
+    this.turnTimer = window.setInterval(() => {
+      this.turnTimerRemaining--;
+      if (this.turnTimerRemaining <= 0) clearInterval(this.turnTimer);
+      this.renderTurnTimer();
+    }, 1000);
+    this.renderTurnTimer();
+  }
+  renderTurnTimer() {
+    if (!this.timerBarEl) return;
+    const pct = Math.max(0, Math.min(100, this.turnTimerRemaining / 90 * 100));
+    this.timerBarEl.style.width = `${pct}%`;
+    this.timerBarEl.classList.toggle("urgent", pct < 25);
+    if (this.timerTextEl) this.timerTextEl.textContent = `${this.turnTimerRemaining}s`;
   }
   updateMinimap() {
     if (!this.minimapEl || !this.session) return;
     clear(this.minimapEl);
     if (!this.minimapVisible) return;
-    const tileSize = Math.max(2, Math.min(6, Math.floor(120 / Math.max(this.module.width, this.module.height))));
+    const maxDim = Math.max(this.module.width, this.module.height);
+    const tileSize = Math.max(2, Math.min(6, Math.floor(140 / maxDim)));
     const w = this.module.width * tileSize;
     const h = this.module.height * tileSize;
     this.minimapEl.style.display = "block";
-    this.minimapEl.style.width = `${w + 8}px`;
+    this.minimapEl.style.width = `${w}px`;
     const canvas = el("canvas", { className: "minimap-canvas", width: w, height: h });
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    ctx.fillStyle = "rgba(0,0,0,0.5)";
+    ctx.fillStyle = "rgba(8,9,10,0.78)";
     ctx.fillRect(0, 0, w, h);
+    const player = this.session.player;
     for (let y = 0; y < this.module.height; y++) {
       const row = this.module.tiles[y] || "";
       for (let x = 0; x < this.module.width; x++) {
         const tile = row[x] || "0";
         const key = `${x},${y}`;
         const hasVisited = this.visited.has(key);
-        const hasLos = this.hasLineOfSight(this.session.player.x, this.session.player.y, x, y);
+        const hasLos = player && this.hasLineOfSight(player.x, player.y, x, y);
         if (tile === "1") {
-          ctx.fillStyle = hasVisited ? "rgba(80,80,80,0.9)" : "rgba(40,40,40,0.7)";
+          ctx.fillStyle = hasVisited ? "rgba(60,60,62,0.92)" : "rgba(35,35,37,0.75)";
           ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
         } else if (hasVisited) {
-          ctx.fillStyle = hasLos ? "rgba(120,120,120,0.35)" : "rgba(80,80,80,0.25)";
+          ctx.fillStyle = hasLos ? "rgba(90,90,95,0.38)" : "rgba(65,65,70,0.28)";
           ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
         }
       }
     }
     (this.session.props || []).forEach((p) => {
       if (!this.isDm() && !this.visited.has(`${p.x},${p.y}`)) return;
-      ctx.fillStyle = p.type === "torch" ? "#ff9f43" : "#95a5a6";
-      ctx.fillRect(p.x * tileSize, p.y * tileSize, tileSize, tileSize);
+      ctx.fillStyle = p.type === "torch" ? "#ff9f43" : p.type === "door" ? "#8e44ad" : "#7f8c8d";
+      ctx.fillRect(p.x * tileSize, p.y * tileSize, Math.max(2, tileSize - 1), Math.max(2, tileSize - 1));
     });
     this.session.players.forEach((p, i) => {
       const cx = p.x * tileSize + tileSize / 2;
       const cy = p.y * tileSize + tileSize / 2;
-      ctx.fillStyle = i === this.session.active_player_index ? "#2ecc71" : "#27ae60";
+      const isActive = i === this.session.active_player_index;
+      ctx.fillStyle = isActive ? "#2ecc71" : "#27ae60";
       ctx.beginPath();
       ctx.arc(cx, cy, Math.max(2, tileSize * 0.55), 0, Math.PI * 2);
       ctx.fill();
+      if (isActive) {
+        ctx.strokeStyle = "#f1c40f";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, Math.max(3, tileSize * 0.75), 0, Math.PI * 2);
+        ctx.stroke();
+      }
     });
     this.session.monsters.forEach((m) => {
       if (m.alive === false) return;
       if (!this.isDm() && !this.visited.has(`${m.x},${m.y}`)) return;
-      ctx.fillStyle = "#c0392b";
+      const cx = m.x * tileSize + tileSize / 2;
+      const cy = m.y * tileSize + tileSize / 2;
+      ctx.fillStyle = m.hostile === false ? "#3498db" : "#c0392b";
       ctx.beginPath();
-      ctx.arc(m.x * tileSize + tileSize / 2, m.y * tileSize + tileSize / 2, Math.max(2, tileSize * 0.5), 0, Math.PI * 2);
+      ctx.arc(cx, cy, Math.max(2, tileSize * 0.5), 0, Math.PI * 2);
       ctx.fill();
     });
     const cw = this.canvasContainer.clientWidth;
     const ch = this.canvasContainer.clientHeight;
     if (cw && ch) {
-      ctx.strokeStyle = "rgba(241,196,15,0.7)";
+      ctx.strokeStyle = "rgba(241,196,15,0.85)";
       ctx.lineWidth = 1;
       const sx = -this.cameraX / this.zoom / TILE_SIZE * tileSize;
       const sy = -this.cameraY / this.zoom / TILE_SIZE * tileSize;
@@ -12476,7 +12687,49 @@ var Game = class {
       const sh = ch / this.zoom / TILE_SIZE * tileSize;
       ctx.strokeRect(sx, sy, sw, sh);
     }
+    canvas.onclick = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) / rect.width * this.module.width;
+      const my = (e.clientY - rect.top) / rect.height * this.module.height;
+      this.panCameraToTile(mx, my);
+    };
     this.minimapEl.appendChild(canvas);
+  }
+  panCameraToTile(x, y) {
+    const cw = this.canvasContainer.clientWidth;
+    const ch = this.canvasContainer.clientHeight;
+    this.cameraX = cw / 2 - x * TILE_SIZE * this.zoom;
+    this.cameraY = ch / 2 - y * TILE_SIZE * this.zoom;
+    this.clampCamera();
+    this.applyMapPosition();
+    this.updateMinimap();
+  }
+  clampCamera() {
+    const mw = this.module.width * TILE_SIZE;
+    const mh = this.module.height * TILE_SIZE;
+    const smw = mw * this.zoom;
+    const smh = mh * this.zoom;
+    const cw = this.canvasContainer.clientWidth;
+    const ch = this.canvasContainer.clientHeight;
+    if (smw <= cw && smh <= ch) {
+      this.cameraX = (cw - smw) / 2;
+      this.cameraY = (ch - smh) / 2;
+    } else {
+      this.cameraX = Math.min(0, Math.max(cw - smw, this.cameraX));
+      this.cameraY = Math.min(0, Math.max(ch - smh, this.cameraY));
+    }
+  }
+  focusMinimapOnActive() {
+    if (!this.session) return;
+    const active = this.session.phase === "player" ? this.session.player : this.session.monsters[this.session.active_monster_index];
+    if (active) this.panCameraToTile(active.x + 0.5, active.y + 0.5);
+  }
+  fitMapToScreen() {
+    const cw = this.canvasContainer.clientWidth;
+    const ch = this.canvasContainer.clientHeight;
+    const zx = cw / (this.module.width * TILE_SIZE);
+    const zy = ch / (this.module.height * TILE_SIZE);
+    this.setZoom(Math.min(zx, zy, 1) * 0.92);
   }
   spawnMonsterAttackSlash() {
     if (!this.session) return;
