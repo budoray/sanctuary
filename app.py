@@ -72,8 +72,17 @@ def landing():
 
 @app.get("/begin")
 def begin(request: Request):
-    _account(request)
+    try:
+        _account(request)
+    except HTTPException:
+        return RedirectResponse("/", status_code=303)
     return FileResponse(ROOT / "static" / "begin.html")
+
+
+@app.get("/live")
+def live_landing():
+    """Sanctuary has no spectator live stream; /live redirects to the about page."""
+    return RedirectResponse("/", status_code=303)
 
 
 @app.get("/api/me")
