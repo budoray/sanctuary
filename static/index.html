@@ -4,56 +4,150 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sanctuary — OSRIC VTT</title>
+  <meta name="description" content="Sanctuary is a browser-based virtual tabletop for OSRIC 3.0. Roll a hero, choose a class, and move your token on the test ground.">
   <link rel="stylesheet" href="/css/sanctuary.css">
 </head>
-<body>
-  <main class="landing">
-    <h1>Sanctuary</h1>
-    <p class="tagline">A data-first virtual tabletop for OSRIC and beyond.</p>
+<body class="about-page">
+  <header class="mast">
+    <div class="mast-in">
+      <a class="mast-logo" href="https://tenshinarts.com">Tenshin Arts</a>
+      <span class="mast-game">Sanctuary</span>
+    </div>
+  </header>
 
-    <section class="about-summary">
-      <p>
-        Sanctuary is a browser-based VTT built around the
-        <strong>OSRIC 3.0</strong> ruleset. Roll a hero with classic 3d6 abilities,
-        choose an ancestry and class, kit them out with equipment, and step onto
-        the test ground to move your token around the map.
-      </p>
-      <p>
-        This is <strong>0.1.0-beta</strong>: character creation and grid movement
-        are live. Combat, campaigns, and an AI-assisted DM are coming in later
-        builds.
-      </p>
-    </section>
+  <section class="hero">
+    <div class="hero-in">
+      <div class="hero-text">
+        <span class="badge">OSRIC 3.0 Beta</span>
+        <h1>Roll a hero. Delve a dungeon. <span>Play OSRIC in your browser.</span></h1>
+        <p class="subtitle">
+          Sanctuary is a data-first virtual tabletop built around the OSRIC ruleset.
+          Create a character with classic 3d6 rolls, equip them for the delve, and
+          move your token across the test ground.
+        </p>
+        <div class="hero-actions">
+          <a id="cta" class="btn btn-primary" href="/begin">Enter Sanctuary</a>
+          <a class="btn btn-secondary" href="#how-it-works">How it works</a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="map-preview">
+          <div class="map-grid">
+            <div class="tile floor"></div><div class="tile floor"></div><div class="tile wall"></div><div class="tile floor"></div><div class="tile floor"></div>
+            <div class="tile floor"></div><div class="tile floor"></div><div class="tile wall"></div><div class="tile floor"></div><div class="tile floor"></div>
+            <div class="tile floor"></div><div class="tile token hero"></div><div class="tile floor"></div><div class="tile floor"></div><div class="tile token foe"></div>
+            <div class="tile wall"></div><div class="tile wall"></div><div class="tile floor"></div><div class="tile floor"></div><div class="tile floor"></div>
+            <div class="tile floor"></div><div class="tile floor"></div><div class="tile floor"></div><div class="tile chest"></div><div class="tile floor"></div>
+          </div>
+        </div>
+        <div class="char-sheet">
+          <div class="sheet-row"><span>STR</span><b>13</b></div>
+          <div class="sheet-row"><span>INT</span><b>9</b></div>
+          <div class="sheet-row"><span>WIS</span><b>11</b></div>
+          <div class="sheet-row"><span>DEX</span><b>15</b></div>
+          <div class="sheet-row"><span>CON</span><b>12</b></div>
+          <div class="sheet-row"><span>CHA</span><b>8</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <section class="about-features">
-      <h2>What is working now</h2>
-      <ul>
-        <li>Full OSRIC character creation (abilities, ancestry, class, alignment, equipment)</li>
-        <li>Interactive character sheet with inventory and dice rolling</li>
-        <li>Top-down test ground with square grid movement</li>
-        <li>One Tenshin Arts account, multiple characters, one character per campaign</li>
-      </ul>
-    </section>
+  <section class="beats">
+    <div class="section-head">
+      <h2>What makes Sanctuary different</h2>
+      <p>A VTT that starts with the rules, not the graphics. Every class, spell, and table is data-driven first.</p>
+    </div>
+    <div class="beat-grid">
+      <div class="beat">
+        <div class="beat-icon dice">⚅</div>
+        <h3>Classic OSRIC rolls</h3>
+        <p>Roll 3d6 in order for abilities, then choose an ancestry and class that fit the dice the gods gave you.</p>
+      </div>
+      <div class="beat">
+        <div class="beat-icon sheet">🛡️</div>
+        <h3>Living character sheet</h3>
+        <p>Equipment, inventory, and dice macros update as you play. No PDFs to print, no math to memorize.</p>
+      </div>
+      <div class="beat">
+        <div class="beat-icon grid">🗺️</div>
+        <h3>Square-grid test ground</h3>
+        <p>Move your token on a 5-foot square grid. A 3×3 tile block represents a 10×10 foot space, just like the table.</p>
+      </div>
+    </div>
+  </section>
 
-    <section class="about-coming">
-      <h2>Coming soon</h2>
-      <ul>
-        <li>DM-created campaigns and turn-based party play</li>
-        <li>Combat, spells, and full OSRIC rules from the PDFs</li>
-        <li>AI-assisted DM decisions and world generation</li>
-      </ul>
-    </section>
+  <section class="steps" id="how-it-works">
+    <div class="section-head">
+      <h2>How it works</h2>
+      <p>From dice roll to first step on the grid in minutes.</p>
+    </div>
+    <div class="step-grid">
+      <div class="step">
+        <span class="step-num">1</span>
+        <h3>Roll abilities</h3>
+        <p>Six rolls of 3d6 set your STR, INT, WIS, DEX, CON, and CHA.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <h3>Choose ancestry &amp; class</h3>
+        <p>Pick from OSRIC options and see prerequisites, saves, and hit dice update instantly.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <h3>Buy equipment</h3>
+        <p>Spend starting gold on weapons, armor, and adventuring gear from the OSRIC equipment list.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">4</span>
+        <h3>Enter the test ground</h3>
+        <p>Place your token and move across the grid to test exploration and positioning.</p>
+      </div>
+    </div>
+  </section>
 
-    <a id="cta" class="cta" href="/begin">Enter Sanctuary</a>
-  </main>
+  <section class="roadmap">
+    <div class="roadmap-in">
+      <div class="roadmap-col">
+        <h2>Live in 0.1.0-beta</h2>
+        <ul>
+          <li>Full OSRIC character creation</li>
+          <li>Interactive character sheet</li>
+          <li>Inventory with equip/unequip</li>
+          <li>Square-grid movement</li>
+          <li>One account, multiple characters</li>
+        </ul>
+      </div>
+      <div class="roadmap-col">
+        <h2>Coming next</h2>
+        <ul>
+          <li>DM-created campaigns</li>
+          <li>Turn-based party play</li>
+          <li>Combat, spells, and full OSRIC tables</li>
+          <li>AI-assisted DM decisions</li>
+          <li>Procedurally generated delves</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="final-cta">
+    <h2>Your table is waiting.</h2>
+    <a id="cta-bottom" class="btn btn-primary" href="/begin">Enter Sanctuary</a>
+  </section>
+
+  <footer class="about-footer">
+    <p>Sanctuary is a Tenshin Arts game. Built for OSRIC 3.0.</p>
+  </footer>
+
   <script>
     fetch('/api/me', { credentials: 'same-origin' })
       .then(r => r.json())
       .then(data => {
-        const cta = document.getElementById('cta');
         if (!data.logged_in) {
-          cta.textContent = 'Sign in to play';
-          cta.href = 'https://tenshinarts.com/login';
+          document.getElementById('cta').textContent = 'Sign in to play';
+          document.getElementById('cta').href = 'https://tenshinarts.com/login';
+          document.getElementById('cta-bottom').textContent = 'Sign in to play';
+          document.getElementById('cta-bottom').href = 'https://tenshinarts.com/login';
         }
       })
       .catch(() => {});
