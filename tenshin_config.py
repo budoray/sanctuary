@@ -14,7 +14,7 @@ class TenshinSettings(BaseSettings):
         extra="ignore",
     )
 
-    database_url: str = Field(validation_alias="DATABASE_URL")
+    database_url: str = Field(..., validation_alias="DATABASE_URL")
     tenshin_secret: str = Field(default="", validation_alias="TENSHIN_SECRET")
     tenshin_site_url: str = Field(
         default="https://tenshinarts.com", validation_alias="TENSHIN_SITE_URL")

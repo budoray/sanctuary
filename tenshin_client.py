@@ -324,7 +324,10 @@ def _self_check():
     # ...and the reverse must NOT fire: the SHORT name dead, the LONG one live.
     # Without the lookahead this direction was fine; with it, it is what proves the
     # lookahead did not simply break the check the other way round.
-    long_live = _OK.replace("--ink:#111", "--ink-deep:#000").replace("var(--ink)", "var(--ink-deep)")
+    long_live = (
+        _OK.replace("--ink:#111", "--ink-deep:#000")
+           .replace("var(--ink)", "var(--ink-deep)")
+    )
     assert "'--ink'" in long_live                       # the JS read still names --ink
     assert_tokens_consumed(long_live.replace("'--ink'", "'--ink-deep'"), name="prefix sibling")
 

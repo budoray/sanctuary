@@ -6,15 +6,16 @@ Each app calls configure() once, then uses db() and init_schema().
 from __future__ import annotations
 
 import threading
+from collections.abc import Callable
 
 import psycopg
 from psycopg.rows import dict_row
 
 _local = threading.local()
-_url_fn = None
+_url_fn: Callable[[], str] | None = None
 
 
-def configure(get_database_url):
+def configure(get_database_url: str | Callable[[], str]) -> None:
     """Register how to resolve DATABASE_URL (callable or string)."""
     global _url_fn
     if callable(get_database_url):
