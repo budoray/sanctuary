@@ -255,6 +255,15 @@ a:hover { color: var(--accent-2); }
   pointer-events: none;
 }
 
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.hero-visual img {
+  animation: hero-float 7s ease-in-out infinite;
+}
+
 /* Sections */
 .section {
   max-width: 1100px;
