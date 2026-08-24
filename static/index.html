@@ -44,7 +44,19 @@
       </ul>
     </section>
 
-    <a class="cta" href="/begin">Enter Sanctuary</a>
+    <a id="cta" class="cta" href="/begin">Enter Sanctuary</a>
   </main>
+  <script>
+    fetch('/api/me', { credentials: 'same-origin' })
+      .then(r => r.json())
+      .then(data => {
+        const cta = document.getElementById('cta');
+        if (!data.logged_in) {
+          cta.textContent = 'Sign in to play';
+          cta.href = 'https://tenshinarts.com/login';
+        }
+      })
+      .catch(() => {});
+  </script>
 </body>
 </html>
