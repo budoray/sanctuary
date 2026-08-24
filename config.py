@@ -14,3 +14,4 @@ class Settings(TenshinSettings):
 
 
 settings = Settings()
+  # type: ignore[call-arg]  # values come from .env at runtime
