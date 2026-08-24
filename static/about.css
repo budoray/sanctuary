@@ -72,12 +72,10 @@ a:hover { color: var(--accent-2); }
 /* Hero */
 .hero {
   position: relative;
-  min-height: 100vh;
+  min-height: calc(100vh - 4rem);
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 6rem 1.5rem 5rem;
+  padding: 5rem 2rem;
   overflow: hidden;
 }
 
@@ -86,25 +84,27 @@ a:hover { color: var(--accent-2); }
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse at 50% 30%, rgba(201, 162, 39, 0.12), transparent 55%),
-    linear-gradient(180deg, rgba(15, 14, 11, 0.3), var(--bg)),
-    repeating-linear-gradient(0deg, rgba(201, 162, 39, 0.03) 0 1px, transparent 1px 40px),
-    repeating-linear-gradient(90deg, rgba(201, 162, 39, 0.03) 0 1px, transparent 1px 40px);
-  z-index: 0;
-}
-
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 70% 80%, rgba(217, 108, 74, 0.08), transparent 35%);
+    radial-gradient(ellipse at 30% 30%, rgba(201, 162, 39, 0.1), transparent 50%),
+    linear-gradient(180deg, rgba(15, 14, 11, 0.2), var(--bg)),
+    repeating-linear-gradient(0deg, rgba(201, 162, 39, 0.025) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(90deg, rgba(201, 162, 39, 0.025) 0 1px, transparent 1px 40px);
   z-index: 0;
 }
 
 .hero-in {
   position: relative;
   z-index: 2;
-  max-width: 900px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.hero-text {
+  text-align: left;
 }
 
 .badge {
@@ -117,13 +117,13 @@ a:hover { color: var(--accent-2); }
   border: 1px solid var(--rule);
   padding: 0.4rem 0.85rem;
   border-radius: 99px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .hero h1 {
   font-family: var(--font-display);
-  font-size: clamp(2.5rem, 7vw, 5rem);
-  line-height: 1.05;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1.08;
   margin: 0 0 1.25rem;
   font-weight: 700;
 }
@@ -133,18 +133,17 @@ a:hover { color: var(--accent-2); }
 .hero h1 .line3 { color: var(--fire); }
 
 .hero-sub {
-  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-size: 1.1rem;
   color: var(--ink-2);
-  max-width: 640px;
-  margin: 0 auto 2rem;
+  max-width: 520px;
+  margin: 0 0 1.75rem;
 }
 
 .hero-actions {
   display: flex;
   gap: 1rem;
-  justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.75rem;
 }
 
 .btn {
@@ -184,8 +183,7 @@ a:hover { color: var(--accent-2); }
 
 .hero-meta {
   display: flex;
-  gap: 1.5rem;
-  justify-content: center;
+  gap: 1.25rem;
   flex-wrap: wrap;
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -205,6 +203,83 @@ a:hover { color: var(--accent-2); }
   height: 6px;
   border-radius: 50%;
   background: var(--accent);
+}
+
+/* Hero visual */
+.hero-visual {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.hero-map {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.hero-map-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+
+.hero-tile {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+}
+
+.hero-tile.wall { background: #4a4238; }
+.hero-tile.hero::after { content: '🧙'; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+.hero-tile.foe::after { content: '🐀'; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+.hero-tile.chest::after { content: '📦'; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+
+.hero-sheet {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.hero-sheet h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.hero-ability-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.hero-ability {
+  flex: 1;
+  text-align: center;
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.5rem 0.25rem;
+}
+
+.hero-ability .ab-name {
+  font-size: 0.6rem;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.hero-ability .ab-score {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
 }
 
 /* Sections */
