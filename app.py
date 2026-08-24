@@ -7,7 +7,7 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 import db
@@ -65,9 +65,18 @@ def version():
     return PlainTextResponse(tenshin_version.get_version())
 
 
+def _landing():
+    return FileResponse(ROOT / "static" / "index.html")
+
+
 @app.get("/")
 def landing():
-    return FileResponse(ROOT / "static" / "index.html")
+    return _landing()
+
+
+@app.get("/about")
+def about():
+    return _landing()
 
 
 @app.get("/begin")
