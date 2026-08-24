@@ -5,149 +5,176 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sanctuary — OSRIC VTT</title>
   <meta name="description" content="Sanctuary is a browser-based virtual tabletop for OSRIC 3.0. Roll a hero, choose a class, and move your token on the test ground.">
-  <link rel="stylesheet" href="/css/sanctuary.css">
+  <link rel="stylesheet" href="/about.css">
 </head>
-<body class="about-page">
-  <header class="mast">
-    <div class="mast-in">
-      <a class="mast-logo" href="https://tenshinarts.com">Tenshin Arts</a>
-      <span class="mast-game">Sanctuary</span>
+<body>
+  <header class="topbar">
+    <div class="breadcrumb">Sanctuary <span>•</span> OSRIC 3.0 Virtual Tabletop</div>
+    <div class="topbar-logo">
+      <small>Tenshin Arts</small>
+      Sanctuary
     </div>
   </header>
 
-  <section class="hero">
-    <div class="hero-in">
-      <div class="hero-text">
-        <span class="badge">OSRIC 3.0 Beta</span>
-        <h1>Roll a hero. Delve a dungeon. <span>Play OSRIC in your browser.</span></h1>
-        <p class="subtitle">
-          Sanctuary is a data-first virtual tabletop built around the OSRIC ruleset.
-          Create a character with classic 3d6 rolls, equip them for the delve, and
-          move your token across the test ground.
+  <div class="shell">
+    <nav class="sidebar">
+      <h3>On this page</h3>
+      <ul>
+        <li><a href="#what-this-is">What this is</a></li>
+        <li><a href="#how-it-plays">How it plays</a></li>
+        <li><a href="#the-test-ground">The test ground</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+      </ul>
+
+      <h3>Play</h3>
+      <ul>
+        <li><a id="cta-side" class="cta" href="/begin">Enter Sanctuary</a></li>
+        <li><a href="https://tenshinarts.com">Tenshin Arts hub</a></li>
+        <li><a href="https://tenshinarts.com/login">Sign in</a></li>
+      </ul>
+    </nav>
+
+    <main class="main">
+      <section class="paper" id="what-this-is">
+        <p class="page-title">The sentence waits on your name</p>
+        <h1>Sanctuary is an <em>OSRIC 3.0</em> table in the browser.</h1>
+        <p class="lead">
+          Roll a hero with classic 3d6 abilities, choose an ancestry and class,
+          kit them out with equipment, and step onto the test ground to move
+          your token across the map. No install, no subscription — one Tenshin
+          Arts account opens the gate.
         </p>
-        <div class="hero-actions">
-          <a id="cta" class="btn btn-primary" href="/begin">Enter Sanctuary</a>
-          <a class="btn btn-secondary" href="#how-it-works">How it works</a>
-        </div>
-      </div>
-      <div class="hero-visual" aria-hidden="true">
-        <div class="map-preview">
-          <div class="map-grid">
-            <div class="tile floor"></div><div class="tile floor"></div><div class="tile wall"></div><div class="tile floor"></div><div class="tile floor"></div>
-            <div class="tile floor"></div><div class="tile floor"></div><div class="tile wall"></div><div class="tile floor"></div><div class="tile floor"></div>
-            <div class="tile floor"></div><div class="tile token hero"></div><div class="tile floor"></div><div class="tile floor"></div><div class="tile token foe"></div>
-            <div class="tile wall"></div><div class="tile wall"></div><div class="tile floor"></div><div class="tile floor"></div><div class="tile floor"></div>
-            <div class="tile floor"></div><div class="tile floor"></div><div class="tile floor"></div><div class="tile chest"></div><div class="tile floor"></div>
+
+        <blockquote>
+          “The old rules still work. We are just giving them a room with better light,
+          better dice, and friends who can sit anywhere in the world.”
+        </blockquote>
+
+        <h2>What makes Sanctuary different</h2>
+        <p>
+          Most VTTs start with a map and paste rules on top. Sanctuary starts with the
+          rules. Every class, ancestry, saving throw, and equipment entry is data first —
+          pulled from the OSRIC source material so the sheet can reason about your
+          character instead of just displaying it.
+        </p>
+        <ul>
+          <li><strong>Data-driven first.</strong> Rules live in the database and YAML files, not hardcoded logic.</li>
+          <li><strong>Classic rolls.</strong> 3d6 in order, just like the original table.</li>
+          <li><strong>Square grid.</strong> A 3×3 block of tiles represents a 10×10 foot space.</li>
+          <li><strong>One account, many characters.</strong> Create multiple heroes; each can join one campaign at a time.</li>
+        </ul>
+      </section>
+
+      <section class="paper" id="how-it-plays">
+        <h2>How it plays</h2>
+        <p>
+          Character creation follows the OSRIC procedure: roll abilities, choose an
+          ancestry, pick a class that your scores qualify for, select alignment, buy
+          equipment with starting gold, and name your hero. The sheet updates your
+          armor class, hit points, and saves as you go.
+        </p>
+        <ul>
+          <li><strong>Step 1 — Roll.</strong> Six 3d6 rolls become your ability scores.</li>
+          <li><strong>Step 2 — Build.</strong> Ancestry and class shape your saves, hit dice, and gear.</li>
+          <li><strong>Step 3 — Equip.</strong> Spend starting gold on weapons, armor, and supplies.</li>
+          <li><strong>Step 4 — Delve.</strong> Place your token on the test ground and move square by square.</li>
+        </ul>
+      </section>
+
+      <section class="paper" id="the-test-ground">
+        <h2>The test ground</h2>
+        <p>
+          The test ground is a sandbox map where you can move your character around,
+          see the grid scale in action, and verify that your token, speed, and position
+          feel right. It is the first slice of what will become full campaign maps with
+          fog of war, DM-placed assets, and encounter triggers.
+        </p>
+      </section>
+
+      <section class="paper" id="roadmap">
+        <h2>What is live vs. what is next</h2>
+        <div class="status-list">
+          <div>
+            <h4>Live in 0.1.0-beta</h4>
+            <ul>
+              <li>Full OSRIC character creation</li>
+              <li>Interactive character sheet</li>
+              <li>Inventory with equip/unequip</li>
+              <li>Square-grid movement</li>
+              <li>One account, multiple characters</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Coming next</h4>
+            <ul>
+              <li>DM-created campaigns</li>
+              <li>Turn-based party play</li>
+              <li>Combat, spells, and full OSRIC tables</li>
+              <li>AI-assisted DM decisions</li>
+              <li>Procedurally generated delves</li>
+            </ul>
           </div>
         </div>
-        <div class="char-sheet">
-          <div class="sheet-row"><span>STR</span><b>13</b></div>
-          <div class="sheet-row"><span>INT</span><b>9</b></div>
-          <div class="sheet-row"><span>WIS</span><b>11</b></div>
-          <div class="sheet-row"><span>DEX</span><b>15</b></div>
-          <div class="sheet-row"><span>CON</span><b>12</b></div>
-          <div class="sheet-row"><span>CHA</span><b>8</b></div>
+      </section>
+    </main>
+
+    <aside class="side-panel">
+      <div class="panel-card">
+        <h3>Try a build — Level 1</h3>
+        <div class="preview-label"><span>Name</span> <span>Mirelle</span></div>
+        <div class="preview-value">Human Fighter</div>
+
+        <div class="preview-label"><span>Alignment</span> <span>Lawful Good</span></div>
+
+        <div class="ability-grid">
+          <div class="ability"><div class="ab-name">STR</div><div class="ab-score">15</div></div>
+          <div class="ability"><div class="ab-name">INT</div><div class="ab-score">9</div></div>
+          <div class="ability"><div class="ab-name">WIS</div><div class="ab-score">11</div></div>
+          <div class="ability"><div class="ab-name">DEX</div><div class="ab-score">13</div></div>
+          <div class="ability"><div class="ab-name">CON</div><div class="ab-score">12</div></div>
+          <div class="ability"><div class="ab-name">CHA</div><div class="ab-score">8</div></div>
+        </div>
+
+        <div class="preview-label"><span>HP</span> <span>8 / 8</span></div>
+        <div class="preview-label"><span>AC</span> <span>4 (chain mail + shield)</span></div>
+        <div class="preview-label"><span>Gold</span> <span>47 gp</span></div>
+      </div>
+
+      <div class="panel-card">
+        <h3>Test ground preview</h3>
+        <div class="mini-map">
+          <div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile wall"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div>
+          <div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile wall"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div>
+          <div class="mini-tile floor"></div><div class="mini-tile hero"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile foe"></div>
+          <div class="mini-tile wall"></div><div class="mini-tile wall"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div>
+          <div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <section class="beats">
-    <div class="section-head">
-      <h2>What makes Sanctuary different</h2>
-      <p>A VTT that starts with the rules, not the graphics. Every class, spell, and table is data-driven first.</p>
-    </div>
-    <div class="beat-grid">
-      <div class="beat">
-        <div class="beat-icon dice">⚅</div>
-        <h3>Classic OSRIC rolls</h3>
-        <p>Roll 3d6 in order for abilities, then choose an ancestry and class that fit the dice the gods gave you.</p>
+      <div class="live-strip">
+        <h3>Live now</h3>
+        <p>Sanctuary 0.1.0-beta is running. Create a character and walk the test ground.</p>
       </div>
-      <div class="beat">
-        <div class="beat-icon sheet">🛡️</div>
-        <h3>Living character sheet</h3>
-        <p>Equipment, inventory, and dice macros update as you play. No PDFs to print, no math to memorize.</p>
-      </div>
-      <div class="beat">
-        <div class="beat-icon grid">🗺️</div>
-        <h3>Square-grid test ground</h3>
-        <p>Move your token on a 5-foot square grid. A 3×3 tile block represents a 10×10 foot space, just like the table.</p>
-      </div>
-    </div>
-  </section>
+    </aside>
+  </div>
 
-  <section class="steps" id="how-it-works">
-    <div class="section-head">
-      <h2>How it works</h2>
-      <p>From dice roll to first step on the grid in minutes.</p>
-    </div>
-    <div class="step-grid">
-      <div class="step">
-        <span class="step-num">1</span>
-        <h3>Roll abilities</h3>
-        <p>Six rolls of 3d6 set your STR, INT, WIS, DEX, CON, and CHA.</p>
-      </div>
-      <div class="step">
-        <span class="step-num">2</span>
-        <h3>Choose ancestry &amp; class</h3>
-        <p>Pick from OSRIC options and see prerequisites, saves, and hit dice update instantly.</p>
-      </div>
-      <div class="step">
-        <span class="step-num">3</span>
-        <h3>Buy equipment</h3>
-        <p>Spend starting gold on weapons, armor, and adventuring gear from the OSRIC equipment list.</p>
-      </div>
-      <div class="step">
-        <span class="step-num">4</span>
-        <h3>Enter the test ground</h3>
-        <p>Place your token and move across the grid to test exploration and positioning.</p>
-      </div>
-    </div>
+  <section class="bottom-cta">
+    <a id="cta-main" class="btn btn-primary" href="/begin">Enter Sanctuary</a>
+    <a class="btn btn-secondary" href="https://tenshinarts.com">Back to hub</a>
   </section>
-
-  <section class="roadmap">
-    <div class="roadmap-in">
-      <div class="roadmap-col">
-        <h2>Live in 0.1.0-beta</h2>
-        <ul>
-          <li>Full OSRIC character creation</li>
-          <li>Interactive character sheet</li>
-          <li>Inventory with equip/unequip</li>
-          <li>Square-grid movement</li>
-          <li>One account, multiple characters</li>
-        </ul>
-      </div>
-      <div class="roadmap-col">
-        <h2>Coming next</h2>
-        <ul>
-          <li>DM-created campaigns</li>
-          <li>Turn-based party play</li>
-          <li>Combat, spells, and full OSRIC tables</li>
-          <li>AI-assisted DM decisions</li>
-          <li>Procedurally generated delves</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="final-cta">
-    <h2>Your table is waiting.</h2>
-    <a id="cta-bottom" class="btn btn-primary" href="/begin">Enter Sanctuary</a>
-  </section>
-
-  <footer class="about-footer">
-    <p>Sanctuary is a Tenshin Arts game. Built for OSRIC 3.0.</p>
-  </footer>
 
   <script>
     fetch('/api/me', { credentials: 'same-origin' })
       .then(r => r.json())
       .then(data => {
         if (!data.logged_in) {
-          document.getElementById('cta').textContent = 'Sign in to play';
-          document.getElementById('cta').href = 'https://tenshinarts.com/login';
-          document.getElementById('cta-bottom').textContent = 'Sign in to play';
-          document.getElementById('cta-bottom').href = 'https://tenshinarts.com/login';
+          ['cta-side', 'cta-main'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+              el.textContent = 'Sign in to play';
+              el.href = 'https://tenshinarts.com/login';
+            }
+          });
         }
       })
       .catch(() => {});
