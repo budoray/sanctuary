@@ -230,83 +230,29 @@ a:hover { color: var(--accent-2); }
 
 /* Hero visual */
 .hero-visual {
-  background: var(--parchment);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
   border-radius: 16px;
-  padding: 1.25rem;
+  overflow: hidden;
   box-shadow:
     0 24px 80px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  color: var(--parchment-ink);
+    0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-.hero-map {
-  background: var(--parchment-2);
-  border: 1px solid rgba(43, 35, 24, 0.12);
-  border-radius: 10px;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  box-shadow: inset 0 2px 8px rgba(43, 35, 24, 0.08);
+.hero-visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  image-rendering: pixelated;
 }
 
-.hero-map-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 4px;
-}
-
-.hero-tile {
-  aspect-ratio: 1;
-  border-radius: 4px;
-  background: #d4c9b3;
-  border: 1px solid rgba(43, 35, 24, 0.12);
-}
-
-.hero-tile.wall { background: #5c4d3c; border-color: #453929; }
-.hero-tile.hero { background: var(--cyan); box-shadow: inset 0 0 0 2px #fff; }
-.hero-tile.foe { background: var(--fire); box-shadow: inset 0 0 0 2px #fff; }
-.hero-tile.chest { background: var(--accent); box-shadow: inset 0 0 0 2px #fff; }
-
-.hero-sheet {
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(43, 35, 24, 0.1);
-  border-radius: 10px;
-  padding: 1rem;
-}
-
-.hero-sheet h4 {
-  margin: 0 0 0.75rem;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--parchment-muted);
-}
-
-.hero-ability-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.hero-ability {
-  flex: 1;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(43, 35, 24, 0.1);
-  border-radius: 6px;
-  padding: 0.5rem 0.25rem;
-}
-
-.hero-ability .ab-name {
-  font-size: 0.6rem;
-  color: var(--parchment-muted);
-  text-transform: uppercase;
-}
-
-.hero-ability .ab-score {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #8a6d1f;
+.hero-visual::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
 }
 
 /* Sections */
