@@ -37,8 +37,8 @@ header a {
 }
 
 .landing {
-  max-width: 640px;
-  margin: 6rem auto;
+  max-width: 960px;
+  margin: 4rem auto;
   text-align: center;
   padding: 2rem;
 }
