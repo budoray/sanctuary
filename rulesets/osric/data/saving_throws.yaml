@@ -1,0 +1,81 @@
+# OSRIC 3.0 first-level saving throws, extracted from the Player Guide.
+# Keys follow the class IDs in classes.yaml.
+assassin:
+  level_range: "1-4"
+  aimed_magic_items: 14
+  breath_weapons: 16
+  death_paralysis_poison: 13
+  petrification_polymorph: 12
+  spells: 15
+
+cleric:
+  level_range: "1-3"
+  aimed_magic_items: 14
+  breath_weapons: 16
+  death_paralysis_poison: 10
+  petrification_polymorph: 13
+  spells: 15
+
+druid:
+  level_range: "1-3"
+  aimed_magic_items: 14
+  breath_weapons: 16
+  death_paralysis_poison: 10
+  petrification_polymorph: 13
+  spells: 15
+
+fighter:
+  level_range: "1-2"
+  aimed_magic_items: 16
+  breath_weapons: 17
+  death_paralysis_poison: 14
+  petrification_polymorph: 15
+  spells: 17
+
+illusionist:
+  level_range: "1-5"
+  aimed_magic_items: 11
+  breath_weapons: 15
+  death_paralysis_poison: 14
+  petrification_polymorph: 13
+  spells: 12
+
+magic_user:
+  level_range: "1-5"
+  aimed_magic_items: 11
+  breath_weapons: 15
+  death_paralysis_poison: 14
+  petrification_polymorph: 13
+  spells: 12
+
+monk:
+  level_range: "1-4"
+  aimed_magic_items: 14
+  breath_weapons: 16
+  death_paralysis_poison: 13
+  petrification_polymorph: 12
+  spells: 15
+
+paladin:
+  level_range: "1-2"
+  aimed_magic_items: 14
+  breath_weapons: 15
+  death_paralysis_poison: 12
+  petrification_polymorph: 13
+  spells: 15
+
+ranger:
+  level_range: "1-2"
+  aimed_magic_items: 16
+  breath_weapons: 17
+  death_paralysis_poison: 14
+  petrification_polymorph: 15
+  spells: 17
+
+thief:
+  level_range: "1-4"
+  aimed_magic_items: 14
+  breath_weapons: 16
+  death_paralysis_poison: 13
+  petrification_polymorph: 12
+  spells: 15

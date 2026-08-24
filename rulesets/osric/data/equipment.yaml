@@ -1,0 +1,407 @@
+# OSRIC 3.0 starting equipment, extracted from the Player Guide.
+# Values use copper pieces internally for easy arithmetic (1 gp = 10 sp = 100 cp).
+---
+currency:
+  cp_per_sp: 10
+  cp_per_gp: 100
+
+armour:
+  - id: padded
+    name: Padded armour
+    weight: 10
+    cost_cp: 400
+    ac_descending: 9
+    ac_ascending: 11
+    movement_cap: 120
+  - id: leather
+    name: Leather armour
+    weight: 15
+    cost_cp: 500
+    ac_descending: 8
+    ac_ascending: 12
+    movement_cap: 120
+  - id: studded_leather
+    name: Studded leather armour
+    weight: 20
+    cost_cp: 1500
+    ac_descending: 7
+    ac_ascending: 13
+    movement_cap: 120
+  - id: ring_mail
+    name: Ring mail
+    weight: 35
+    cost_cp: 3000
+    ac_descending: 7
+    ac_ascending: 13
+    movement_cap: 120
+  - id: scale_mail
+    name: Scale or lamellar armour
+    weight: 40
+    cost_cp: 4500
+    ac_descending: 6
+    ac_ascending: 14
+    movement_cap: 90
+  - id: chain_mail
+    name: Chain mail
+    weight: 30
+    cost_cp: 7500
+    ac_descending: 5
+    ac_ascending: 15
+    movement_cap: 90
+  - id: banded_mail
+    name: Banded mail
+    weight: 35
+    cost_cp: 9000
+    ac_descending: 4
+    ac_ascending: 16
+    movement_cap: 60
+  - id: splint_mail
+    name: Splint mail
+    weight: 40
+    cost_cp: 8000
+    ac_descending: 4
+    ac_ascending: 16
+    movement_cap: 60
+  - id: plate_mail
+    name: Plate mail
+    weight: 45
+    cost_cp: 40000
+    ac_descending: 3
+    ac_ascending: 17
+    movement_cap: 60
+
+shields:
+  - id: shield_small
+    name: Small shield
+    weight: 5
+    cost_cp: 1000
+    ac_descending_modifier: -1
+    ac_ascending_modifier: 1
+  - id: shield_medium
+    name: Medium shield
+    weight: 8
+    cost_cp: 1200
+    ac_descending_modifier: -1
+    ac_ascending_modifier: 1
+  - id: shield_large
+    name: Large shield
+    weight: 10
+    cost_cp: 1500
+    ac_descending_modifier: -1
+    ac_ascending_modifier: 1
+
+weapons:
+  - id: axe_battle
+    name: Battle axe
+    weight: 7
+    cost_cp: 500
+    hands: 2
+    melee: true
+    missile: false
+    damage: 1d8
+    damage_large: 1d8
+  - id: axe_hand
+    name: Hand axe
+    weight: 5
+    cost_cp: 100
+    hands: 1
+    melee: true
+    missile: true
+    damage: 1d6
+    damage_large: 1d4
+    range: 10
+  - id: club
+    name: Club
+    weight: 5
+    cost_cp: 100
+    hands: 1
+    melee: true
+    missile: false
+    damage: 1d4
+    damage_large: 1d4
+  - id: dagger
+    name: Dagger
+    weight: 1
+    cost_cp: 200
+    hands: 1
+    melee: true
+    missile: true
+    damage: 1d4
+    damage_large: 1d3
+    range: 10
+  - id: flail_heavy
+    name: Heavy flail
+    weight: 10
+    cost_cp: 2500
+    hands: 2
+    melee: true
+    missile: false
+    damage: 1d6
+    damage_large: 2d4
+  - id: flail_light
+    name: Light flail
+    weight: 4
+    cost_cp: 600
+    hands: 1
+    melee: true
+    missile: false
+    damage: 1d4
+    damage_large: 1d3
+  - id: halberd
+    name: Halberd
+    weight: 10
+    cost_cp: 2500
+    hands: 2
+    melee: true
+    missile: false
+    damage: 1d10
+    damage_large: 2d6
+  - id: javelin
+    name: Javelin
+    weight: 2
+    cost_cp: 50
+    hands: 1
+    melee: true
+    missile: true
+    damage: 1d6
+    damage_large: 1d6
+    range: 20
+  - id: lance
+    name: Lance
+    weight: 5
+    cost_cp: 0
+    hands: 1
+    melee: true
+    missile: false
+    damage: 1d6
+    damage_large: 1d12
+  - id: mace_heavy
+    name: Heavy mace
+    weight: 10
+    cost_cp: 300
+    hands: 2
+    melee: true
+    missile: false
+    damage: 1d6
+    damage_large: 1d6
+  - id: mace_light
+    name: Light mace
+    weight: 4
+    cost_cp: 500
+    hands: 1
+    melee: true
+    missile: false
+    damage: 1d4
+    damage_large: 1d4
+  - id: morning_star
+    name: Morning star
+    weight: 4
+    cost_cp: 600
+    hands: 1
+    melee: true
+    missile: false
+    damage: 1d6
+    damage_large: 1d6
+  - id: pole_arm
+    name: Pole arm
+    weight: 8
+    cost_cp: 1500
+    hands: 2
+    melee: true
+    missile: false
+    damage: 1d8
+    damage_large: 1d10
+  - id: spear
+    name: Spear
+    weight: 5
+    cost_cp: 100
+    hands: 1
+    melee: true
+    missile: true
+    damage: 1d6
+    damage_large: 1d8
+    range: 15
+  - id: staff
+    name: Quarterstaff
+    weight: 4
+    cost_cp: 200
+    hands: 2
+    melee: true
+    missile: false
+    damage: 1d6
+    damage_large: 1d6
+  - id: sword_bastard
+    name: Bastard sword
+    weight: 10
+    cost_cp: 600
+    hands: 2
+    melee: true
+    missile: false
+    damage: 2d4
+    damage_large: 2d8
+  - id: sword_long
+    name: Long sword
+    weight: 4
+    cost_cp: 1000
+    hands: 1
+    melee: true
+    missile: false
+    damage: 1d8
+    damage_large: 1d12
+  - id: sword_short
+    name: Short sword
+    weight: 3
+    cost_cp: 800
+    hands: 1
+    melee: true
+    missile: false
+    damage: 1d6
+    damage_large: 1d8
+  - id: sword_two_handed
+    name: Two-handed sword
+    weight: 12
+    cost_cp: 5000
+    hands: 2
+    melee: true
+    missile: false
+    damage: 1d10
+    damage_large: 3d6
+  - id: warhammer_light
+    name: Light warhammer
+    weight: 4
+    cost_cp: 500
+    hands: 1
+    melee: true
+    missile: true
+    damage: 1d4
+    damage_large: 1d4
+    range: 10
+  - id: warhammer_heavy
+    name: Heavy warhammer
+    weight: 6
+    cost_cp: 800
+    hands: 2
+    melee: true
+    missile: false
+    damage: 1d6
+    damage_large: 1d6
+  - id: bow_long
+    name: Long bow
+    weight: 8
+    cost_cp: 1500
+    hands: 2
+    melee: false
+    missile: true
+    damage: 1d6
+    damage_large: 1d6
+    range: 70
+    rate_of_fire: "2"
+  - id: bow_short
+    name: Short bow
+    weight: 3
+    cost_cp: 200
+    hands: 2
+    melee: false
+    missile: true
+    damage: 1d6
+    damage_large: 1d3
+    range: 50
+    rate_of_fire: "2"
+  - id: crossbow_heavy
+    name: Heavy crossbow
+    weight: 12
+    cost_cp: 2000
+    hands: 2
+    melee: false
+    missile: true
+    damage: 1d6+1
+    damage_large: 1d6+1
+    range: 80
+    rate_of_fire: "1/2"
+  - id: crossbow_light
+    name: Light crossbow
+    weight: 4
+    cost_cp: 1200
+    hands: 2
+    melee: false
+    missile: true
+    damage: 1d4
+    damage_large: 1d3
+    range: 60
+    rate_of_fire: "1"
+  - id: sling
+    name: Sling
+    weight: 1
+    cost_cp: 50
+    hands: 1
+    melee: false
+    missile: true
+    damage: 1d4
+    damage_large: 1d6
+    range: 35
+    rate_of_fire: "1"
+  - id: dart
+    name: Dart
+    weight: 1
+    cost_cp: 20
+    hands: 1
+    melee: false
+    missile: true
+    damage: 1d3
+    damage_large: 1d2
+    range: 15
+    rate_of_fire: "3"
+
+gear:
+  - id: backpack
+    name: Backpack
+    weight: 2
+    cost_cp: 200
+  - id: bedroll
+    name: Bedroll
+    weight: 5
+    cost_cp: 20
+  - id: rope_hemp
+    name: Rope, hemp (50 ft)
+    weight: 10
+    cost_cp: 100
+  - id: rope_silk
+    name: Rope, silk (50 ft)
+    weight: 5
+    cost_cp: 1000
+  - id: torches
+    name: Torches (6)
+    weight: 6
+    cost_cp: 6
+  - id: lantern_hooded
+    name: Hooded lantern
+    weight: 2
+    cost_cp: 700
+  - id: oil_lamp
+    name: Lamp oil (1 pint)
+    weight: 1
+    cost_cp: 10
+  - id: rations_standard
+    name: Rations, standard (1 day)
+    weight: 2
+    cost_cp: 200
+  - id: rations_trail
+    name: Rations, trail (1 day)
+    weight: 1
+    cost_cp: 60
+  - id: waterskin
+    name: Waterskin (3 pints)
+    weight: 1
+    cost_cp: 100
+  - id: holy_symbol_wooden
+    name: Holy symbol, wooden
+    weight: 1
+    cost_cp: 60
+  - id: thieves_tools
+    name: Thieves' tools
+    weight: 1
+    cost_cp: 3000
+  - id: spellbook_blank
+    name: Spell book (blank)
+    weight: 5
+    cost_cp: 2500

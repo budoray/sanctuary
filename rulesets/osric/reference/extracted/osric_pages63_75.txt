@@ -1,0 +1,800 @@
+--- PAGE 63 ---
+62 | OSRIC 3.0 - PART ONE: CREATING A CHARACTER  
+ 1.3.9.4. RANGER LEVEL ADVANCEMENT
+ TABLE 1.3.9.4A: RANGER LEVEL ADVANCEMENT
+LEVEL XP NEEDED HIT DICE 
+(D8) NOTES SPELL CASTING 
+LEVEL DRUID SPELLS MAGIC-USER 
+SPELLS
+1 2 3 1 2
+1 0 2 0 — — — — —
+2 2,250 3 0 — — — — —
+3 4,500 4 0 — — — — —
+4 9,500 5 0 — — — — —
+5 20,000 6 0 — — — — —
+6 40,000 7 0 — — — — —
+7 90,000 8 0 — — — — —
+8 150,000 9
+May employ followers
+Melee Attack Combination 
+(3/2);  Druidic Spell Casting
+1 1 — — — —
+9 225,000 10  Arcane Spell Casting 1 1 — — 1 —
+10 325,000 11 2 2 — — 1 —
+11 650,000 11+2* 2 2 — — 2 —
+12 975,000 11+4* 3 2 1 — 2 —
+13 1,300,000 11+6* 3 2 1 — 2 1
+14 1,625,000 11+8* 4 2 2 — 2 1
+15 1,950,000 11+10* Melee Attack Combination 
+(2/1) 4 2 2 — 2 2
+16 2,275,000 11+12* 5 2 2 1 2 2
+17 2,600,000 11+14* 5 2 2 2 2 2
+18 2,925,000 11+16* 6† 3 2 2 2 2
+19 3,250,000 11+18* 6† 3 2 2 3 2
+20 3,575,000 11+20* 6† 3 3 2 3 2
+* After you reach 11th level, you don’t get any more hit dice or Constitution hp adjustments. Instead you get a fixed +2 hp per level. Each level 
+gained thereafter requires 325,000 additional experience points and gains 2hp.
+† You don’t gain further casting levels.
+
+--- PAGE 64 ---
+ CHAPTER THREE: CHARACTER CLASS  | 63
+     TABLE 1.3.9.4B: RANGER SAVING THROWS
+LEVEL TYPE OF SAVING THROW
+AIMED MAGIC ITEMS  
+(E.G., ROD, STAFF, WAND)
+BREATH 
+ WEAPONS
+ DEATH/
+PARALYSIS/ POISON
+PETRIFACTION/
+POLYMORPH
+SPELLS FOR UNLISTED 
+CATEGORIES
+1–2 16 17 14 15 17
+3–4 15 16 13 14 16
+5–6 13 13 11 12 14
+7–8 12 12 10 11 13
+9–10 10 9 8 9 11
+11–12 9 8 7 8 10
+13–14 7 5 5 6 8
+15–16 6 4 4 5 7
+17–18 5 4 3 4 6
+19+ 4 3 2 3 5 
+ TABLE 1.3.9.4C: RANGER TO-HIT TABLE
+LEVEL ROLL REQUIRED TO HIT  ARMOUR CLASS
+10 9 8 7 6 5 4 3 2 1 0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -10
+[10] [11] [12] [13] [14] [15] [16] [17] [18] [19] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30]
+0 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20 21 22 23 24 25 26
+1 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20 21 22 23 24 25
+2 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20 21 22 23 24
+3 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20 21 22 23
+4 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20 21 22
+5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20 21
+6 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20
+7 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20
+8 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20
+9 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20
+10 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20
+11 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+12 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+13 -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+14 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
+15 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+16 -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+17 -6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+18 -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12 13
+19 -8 -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10 11 12
+20+ -9 -8 -7 -6 -5 -4 -3 -2 -1 0 1 2 3 4 5 6 7 8 9 10 11
+
+--- PAGE 65 ---
+64 | OSRIC 3.0 - PART ONE: CREATING A CHARACTER  
+ 1.3.10. THIEF
+Thieves live by their wits and skills, experts at a variety of dif -
+ferent tasks. You might have been trained by a thieves’ guild, or 
+you might be a self-taught freelancer. Adventuring parties need 
+your skills, and although the risks are greater as an adventurer, 
+so are the rewards. The thief is the member of an adventuring 
+party who is tasked with looking for traps, disarming danger -
+ous devices, climbing walls to let down a rope for the others, 
+and many other essential skills that keep the others alive long 
+enough to do the fighting and the spell-casting.
+Thieves in OSRIC are modelled on characters like the Gray 
+Mouser from Fritz Leiber’s stories, or Cugel the Clever from Jack 
+Vance.
+As a thief, your alignment must include the words “neutral” or 
+“evil”, but many GMs house-rule that you can be of any align -
+ment except Lawful Good, to account for those who use thiev -
+ing skills as an adventurer but don’t make their living by stealing 
+from others.
+All thieves can communicate in the secret language known as 
+Thieves' Cant.
+Guildmaster: When you reach 10th level in the thief class, 
+you’ve become famous enough to take over leadership of a 
+Thieves’ Guild, or establish your own. If taking over an existing 
+Thieves’ Guild, you will need to displace or remove its leader. A 
+Guild typically consists of 6d4 NPC thieves of varying level.
+ 1.3.10.1. THE THIEF CHARACTER
+Minimum Scores: STR 6, DEX 9, CON 6, INT 6, CHA 6
+Hit Die Type: d6 (max 10)
+Alignment: Neutral or evil
+Prime Requisite Bonus: 10% bonus to XP if DEX is 16+
+Armour/ Shield Allowed: Leather, padded, or studded leather armour 
+only; no shields
+Weapons  Allowed: Club, dagger, dart, oil, sling, most swords (not 
+bastard swords or two handed swords), torch
+Weapon Proficiencies: 2 (additional proficiency at level 6, 10, 14, and 18)
+Non-Proficiency Penalty: -3 to hit
+Weapon Specialisation: No
+Initial Gold Pieces: 2d6 x 10
+ 1.3.10.2. THIEF CLASS ABILITIES
+Your thief skills depend on your level (see Table 1.3.10.4b: Thief 
+Skills), and may be modified by your dexterity and your ancestry 
+(see Tables 1.3.10.4c and d). No matter how many modifiers you 
+have, always roll. A roll of 01 always succeeds, and a roll of 00 
+always fails. 
+Backstab: If you’re immediately behind a creature that isn’t 
+aware of you, you can backstab with any of the melee weapons 
+a single-classed thief can use. 
+If you backstab, you gain a bonus of +4 to hit in place of the 
+usual +2, and your damage die roll is multiplied as shown on 
+Table 1.3.10.4b.
+Your group may also decide that additional backstab damage 
+will be resolved by rolling extra dice of damage instead of mul -
+tiplying a single die. Using multiple dice instead of multiplying 
+one die reduces the chance of a really bad (and a really good) 
+result, pushing the results toward the average. The two meth -
+ods are statistically identical.
+
+--- PAGE 66 ---
+ CHAPTER THREE: CHARACTER CLASS  | 65
+RECOMMENDED INTERPRETATION:  
+Combat Backstab
+The general rule is that a thief must succeed at both 
+moving quietly and hiding to set up for a backstab. This 
+makes sense if the thief is sneaking into a room alone 
+to backstab an alert opponent. However, requiring 
+success at two thief abilities plus the success at a to-
+hit roll makes backstabbing almost impossible to use 
+at lower levels. We offer the following recommended 
+rule:
+If combat has begun in hearing range (or there is any 
+other noise source), the thief only needs to make 
+a successful Hide roll in order to be able to make a 
+backstabbing attack. The sound of combat prevents 
+“hearing” a thief’s approach from behind. This gives 
+even a first-level thief a 1 in 10 chance to move into 
+position for a backstab (instead of a 1.5% chance).
+Climb: You can scale sheer walls and surfaces and even cling 
+to ceilings. You don’t need to make a climbing check to climb 
+a tree, rope, or ladder; your Climb skill is only for challenging 
+climbs. You normally need to repeat the check at the mid-point 
+of the climb. Failure means a fall.
+Hide: You can try to hide behind cover, in a crowd of people, 
+or in any area where you aren’t directly lit, from creatures that 
+don’t already know you’re there. Success means those creatures 
+can’t see you. You can move while hidden at half speed. If there 
+is a lot of noise, this is all you need to sneak up on someone, but 
+if it’s quiet, you might also need to move quietly. The original 
+AD&D rules were clear that you didn’t know if you succeeded on 
+the die roll, but in OSRIC, if you took an action to hide, you know 
+whether or not you succeeded. If you failed, you can try again 
+the next round.
+Listen: If you aren’t wearing a helmet that covers your ears, you 
+can spend one round trying to detect a sound, such as from a 
+creature that’s being quiet. Any character (not just thieves) can 
+listen with the same chance as a first-level thief. Thieves, how-
+ever, improve with level.
+Pick Locks: If you’re holding a set of thieves’ tools and you have 
+the other hand free, then you can spend one combat round try-
+ing to pick a lock. Success means it opens.
+Pick Pockets: If you’ve got a hand free and you’re next to a crea-
+ture that isn’t aware of you, you can spend one combat round 
+trying to pick its pocket. For every level or hit die of the target 
+above level 3, there is a -5% modifier (-10% for level 5, -15% for 
+6 HD, etc.). If you fail by 20% or more, then your intended target 
+notices you.
+Read Languages: You have seen many purloined documents, 
+such as title deeds or letters of credit, so you’ve learned a smat-
+tering of many languages. You can try to decipher any non-mag-
+ical language that originates on the Prime Material Plane.
+Move Quietly: You can try to move without other creatures 
+hearing you. While you’re attempting to move quietly, you 
+move at half speed. If you’re sneaking up on creatures who are 
+in combat, you don’t need to move quietly, but you do need to 
+be hidden (see above). The only time you need to use both hide 
+and move quietly is to sneak up on someone when there isn’t 
+any other noise. When using both hide and move quietly, you 
+can still move at half speed.
+The original AD&D rules were clear that you didn’t know if you 
+succeeded on the die roll, but in OSRIC, if you took an action to 
+move quietly, you know whether or not you succeeded. If you 
+failed, you can try again the next round.
+Traps: You can check for traps and remove them using this skill. 
+Usually you will check an object or item for traps (making the 
+die roll), and if you successfully discover something that looks 
+like a trap, you might choose to roll again to see if you can dis -
+arm it (or you might decide to just not mess with it). 
+• You can check for traps  on a particular object or item (such 
+as a statue or a door) in 1 round. You can’t generally check a 
+whole room or a floor for traps; that’s usually done 
+
+--- PAGE 67 ---
+66 | OSRIC 3.0 - PART ONE: CREATING A CHARACTER  
+1.3.10.3. HIGHER-LEVEL ABILITIES
+10th Level—Establish Guild
+At this level, you may establish a guild or a stronghold in a town 
+(or city), as described above.
+10th Level—Read  Scrolls
+When you reach 10th level in the thief class, you have a chance 
+to cast spells from an arcane, phantasmal, or druidic scroll. 
+When you try this, roll 1d4. On a result of “1”, the casting fails 
+and you cannot use that scroll to cast a spell (although the scroll 
+survives). If the spell is cast, there is still a 5% chance that its 
+effect will be reversed or otherwise harmful in some way to the 
+caster. In this case, the scroll is erased when the spell is cast.
+ 1.3.10.4. THIEF LEVEL ADVANCEMENT
+ TABLE 1.3.10.4A: THIEF LEVEL ADVANCEMENT
+LEVEL XP NEEDED HIT DICE (D6)
+1 0 1
+2 1,250 2
+3 2,500 3
+4 5,000 4
+5 10,000 5
+6 20,000 6
+7 40,000 7
+8 70,000 8
+9 110,000 9
+10 160,000 10
+LEVEL XP NEEDED HIT DICE (D6)
+11 220,000 10+2*
+12 440,000 10+4*
+13 660,000 10+6*
+14 880,000 10+8*
+15 1,100,000 10+10*
+16 1,320,000 10+12*
+17 1,540,000 10+14*
+18 1,760,000 10+16*
+19 1,980,000 10+18*
+20 2,200,000 10+20* 
+*After you reach 10th level, you don’t get any more hit dice or 
+Constitution hp adjustments. Instead you get a fixed +2 hp per level. 
+Each level gained thereafter requires 220,000 additional experience 
+points and gains 2hp.
+
+--- PAGE 68 ---
+ CHAPTER THREE: CHARACTER CLASS  | 67
+ TABLE 1.3.10.4B: THIEF SKILLS
+LEVEL BACKSTAB CLIMB HIDE LISTEN PICK 
+LOCKS
+PICK 
+POCKETS
+READ 
+LANGUAGES
+MOVE 
+QUIETLY  TRAPS
+1 x2, or +1 die 85% 10% 10% 25% 30% 1% 15% 20%
+2 x2, or +1 die 86% 15% 10% 29% 35% 5% 20% 25%
+3 x2, or +1 die 87% 20% 15% 33% 40% 15% 27% 30%
+4 x2, or +1 die 88% 25% 15% 37% 45% 20% 33% 35%
+5 x3, or +2 dice 90% 30% 20% 42% 50% 25% 40% 40%
+6 x3, or +2 dice 92% 35% 20% 47% 55% 30% 47% 45%
+7 x3, or +2 dice 94% 42% 25% 52% 60% 35% 55% 50%
+8 x3, or +2 dice 96% 48% 25% 57% 65% 40% 62% 55%
+9 x4, or +3 dice 98% 55% 30% 62% 70% 45% 70% 60%
+10 x4, or +3 dice 99% 65% 30% 67% 80% 50% 78% 65%
+11 x4, or +3 dice 99% 70% 35% 72% 90% 55% 86% 70%
+12 x4, or +3 dice 99% 75% 35% 77% 100% 60% 94% 75%
+13 x5, or +4 dice 99% 85% 40% 82% 105% 65% 99% 80%
+14 x5, or +4 dice 99% 95% 40% 87% 110% 70% 99% 85%
+15 x5, or +4 dice 99% 99% 50% 92% 115% 75% 99% 90%
+16 x5, or +4 dice 99% 99% 50% 97% 125% 80% 99% 95%
+17 x6, or +5 dice 99% 99% 55% 99% 125% 80% 99% 99%
+18 x6, or +5 dice 99% 99% 55% 99% 125% 80% 99% 99%
+19 x6, or +5 dice 99% 99% 55% 99% 125% 80% 99% 99%
+20 x6, or +5 dice 99% 99% 55% 99% 125% 80% 99% 99%
+ TABLE 1.3.10.4C: THIEF SKILLS— DEXTERITY ADJUSTMENTS
+ DEXTERITY CLIMB HIDE LISTEN PICK 
+LOCKS
+PICK 
+POCKETS
+MOVE 
+QUIETLY  TRAPS READ 
+LANGUAGES
+9 — -10% — -10% -15% -20% -15% —
+10 — -5% — -5% -10% -15% -10% —
+11 — — — — -5% -10% -5% —
+12 — — — — — -5% — —
+13 — — — — — — — —
+14 — — — — — — — —
+15 — — — — — — — —
+16 — — — +5% — — — —
+17 — +5% — +10% +5% +5% +5% —
+18 — +10% — +15% +10% +10% +10% —
+19 — +15% — +20% +15% +15% +15% — 
+
+--- PAGE 69 ---
+68 | OSRIC 3.0 - PART ONE: CREATING A CHARACTER  
+ TABLE 1.3.10.4D: THIEF SKILLS—ANCESTRY ADJUSTMENTS
+ANCESTRY CLIMB HIDE LISTEN PICK 
+LOCKS
+PICK 
+POCKETS
+MOVE 
+QUIETLY  TRAPS READ 
+LANGUAGES
+Dwarf -10% — — +15% — -5% +15% -5%
+Elf -5% +10% +5% -5% +5% +5% +5% +10%
+Gnome -15% — +5% +10% — — — —
+Half-elf — +5% — –— +10% — — —
+Halfling -15% +15% +5% — +5% +15% — -5%
+Half-orc +5% — +5% +5% -5% — +5% -10%
+Human +5% — — +5% — — — — 
+ TABLE 1.3.10.4E: THIEF SAVING THROW TABLE
+LEVEL TYPE OF SAVING THROW
+AIMED MAGIC ITEMS  
+(E.G., ROD, STAFF, WAND)
+BREATH 
+ WEAPONS
+ DEATH/
+PARALYSIS/ POISON
+PETRIFACTION/
+POLYMORPH
+SPELLS FOR UNLISTED 
+CATEGORIES
+1–4 14 16 13 12 15
+5–8 12 15 12 11 13
+9–12 10 14 11 10 11
+13–16 8 13 10 9 9
+17–20 6 12 9 8 7 
+ TABLE 1.3.10.4F: THIEF TO-HIT TABLE
+LEVEL ROLL REQUIRED TO HIT  ARMOUR CLASS
+10 9 8 7 6 5 4 3 2 1 0 -1 -2 -3 -4 -5 -6 -7 -8 -9 -10
+[10] [11] [12] [13] [14] [15] [16] [17] [18] [19] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30]
+1–4 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20 21 22 23 24 25 26
+5–8 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20 21 22 23 24
+9–12 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20 20 21
+13–16 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20 20 20
+17–20 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 20 20
+
+--- PAGE 70 ---
+ CHAPTER THREE: CHARACTER CLASS  | 69
+ 1.3.11. MULTI-CLASSING
+A multi-classed character has two or three classes and ad -
+vances in all of them at once. Multi-classes are shown like this: 
+“cleric/thief” or “fighter/cleric/magic-user”. You can’t multi-class 
+if you’re human. If you’re not human, the multi-class combina -
+tions you can choose depends on your ancestry, and the start -
+ing age is that of the class with the highest starting age.
+Experience Points. When you gain experience, divide it up equal-
+ly between your classes, and drop any fractions. So for example, 
+if you’re a fighter/thief and your GM awards you 125 xp, you 
+gain 62 xp in each class and 1 xp is lost. Even after you reach 
+your level limit in a class, you still need to allocate experience to 
+that class whenever you gain xp.
+Attacks and Saving Throws. In any situation, you can choose which 
+of your classes’ tables you use for combat and saving throws 
+(pick the best one). Example: A cleric/assassin would normally 
+choose to use the cleric saving throw tables, but if faced with a 
+petrifaction save, the assassin class is slightly better, and you 
+can choose to make the saving throw using that table.
+Gaining Hit Points. When you increase your hit points after gain-
+ing a level, you calculate your new hp by rolling the right dice 
+for your class, applying your constitution modifier if any, and 
+then dividing by the number of classes you have. Drop any frac-
+tions. Example: Erix Uncle is a fighter/cleric/thief with a consti -
+tution of 15. When Erix gains a thief level, the player rolls 1d6 
+for the new hp, adds one from the constitution bonus, and then 
+divides the total by 3. The player curses when they roll a 4; this 
+changes to 5 with the constitution bonus, but 5 divided by 3 is 
+1 2/3. Dropping the fraction (which is required because the rule 
+is “drop fractions”, not “round the number up or down”) means 
+Erix only gains 1 hp for that level.
+Each ancestry has a section on Multi-class rules, describing the 
+interaction of armour, spells, and abilities.
+ 1.3.12.  DUAL-CLASSING
+A dual-classed character has two classes and advances in one of 
+them at a time. You can only dual-class if you’re human.
+You need high ability scores to dual-class. You must have at 
+least 15 in the Prime Requisite(s) of the class you’re changing 
+from, and at least 17 in the Prime Requisite(s) of the class you’re 
+changing to. You can mix any combination of classes if you meet 
+these requirements—so for example, if you were a paladin and 
+you wanted to switch to ranger, you’d need 17 STR, 17 INT, and 
+17 WIS.
+When you dual-class, you keep the hit points you had before 
+you dual-classed, but otherwise you’re a 1st level character of 
+the new class. All your xp go to your new class, and when you 
+gain a level, you don’t gain any hp until you reach a higher level 
+in the new class than you had in the old one.
+Normally dual-class characters don’t use their old class’s abili -
+ties at this stage. You can use them, but if you do, you forfeit all 
+the experience for that adventure. This is the sort of thing you’d 
+do only in an emergency.
+Once you’re higher level in your new class than in your old one, 
+you start to gain hp like a member of your new class, and you 
+can start to use your old class’s abilities without penalty. You 
+still can’t cast magic-user or illusionist spells while you’re wear -
+ing armour, and you still can’t cast druid spells while you’re 
+wearing armour a druid can’t use. You can’t use thief abilities 
+while you’re wearing armour a thief can’t wear (with the sole ex-
+ception of Read Languages). Monks cannot use their class abil -
+ities while wearing armour, with the exception of the monkish 
+thief abilities, which are limited by thief armour requirements 
+(see above).
+
+
+--- PAGE 71 ---
+70 | OSRIC 3.0 - PART ONE: CREATING A CHARACTER  
+ TABLE 1.3.13A: ATTACK RATE WITH SPECIALISED WEAPON
+LEVEL OF 
+SPECIALIST
+MELEE 
+WEAPON
+PULLED BOW  
+(LONG OR SHORT)  LIGHT CROSSBOW HEAVY CROSSBOW
+1-6 3/2 RoF 2 (normal) RoF 1 (normal) RoF 0.5 (normal)
+7-12 2/1 RoF 3 RoF 2 in odd numbered rounds only RoF 1
+13+ 5/2 RoF 4 RoF 2 RoF 2 in odd numbered rounds only
+“RoF” means “rate of fire.” Specialising in a missile weapon does 
+not increase your attack rate, but it does increase the number 
+of shots you can take during your combat segment when at -
+tacking with the specialised weapon. 
+The difference between “RoF” and “attack rate” is that RoF may 
+give you extra attacks in your normal initiative segment (the ini-
+tiative die roll, possibly modified by a Dex modifier). A better 
+attack rate changes the initiative segment in which you attack 
+(usually segments 1 and 10).
+A melee attack combination of 5/2 means you are able to make 
+a repeating pattern of 3 attacks in round 1, and 2 attacks in 
+round 2. The three attacks in round 1 take place (regardless of 
+initiative roll) in segments 1, 5, and 10. The two attacks in round 
+2 take place (regardless of initiative roll) in segments 1 and 10.
+Double Specialisation (optional): For melee weapons that are 
+not pole arms or two-handed swords, a third weapon proficien-
+cy may be used to specialise further; this increases combat bo -
+nuses to +3 “to hit” and +3 damage with the weapon. This rule 
+was added to AD&D in a later supplement, so it can be disal -
+lowed by the GM.
+ 1.3.13. WEAPON SPECIALISATION
+OPTIONAL RULE: Fighters, rangers, and paladins can take pro -
+ficiency in the same weapon twice (see below for cost). This is 
+called your Specialised Weapon. You can only take a specialised 
+weapon during character creation (unless a wish spell or similar 
+boon allows it later).
+Specialising in a weapon costs two of your proficiencies (for me-
+lee weapons and crossbows), or three of your proficiencies for 
+missile weapons other than crossbows. The weapon type must 
+be exact: you cannot specialise in “swords”; you must specialise 
+in “longsword”, “short sword”, etc.
+When you attack with your Specialised Weapon, you can add 
++1 to your roll to hit and +2 to your damage roll. Note: These 
+bonuses aren’t magical, so they don’t let you hit a creature that 
+can only be hit by magical weapons.
+Using a Specialised Weapon also increases the number of at -
+tacks you can make:
+• For melee weapons, when using the Specialised Weapon, you 
+have an increased attack rate (see Table 1.3.13a below). For 
+the specialised weapon, this replaces the normal progression 
+of Melee Attack Combinations (in other words, it doesn’t stack 
+with your improved Melee Attack Combinations as a high -
+er-level character).
+• For missile weapons, you have an increased rate of fire when 
+using the specialised weapon.
+
+--- PAGE 72 ---
+ CHAPTER FOUR: COMPLETING THE CHARACTER  | 71
+ CHAPTER FOUR: COMPLETING THE CHARACTER
+ 1.4.1. ALIGNMENT
+A typical creature in the game world has an alignment, which 
+broadly describes its moral and personal attitudes. Alignments 
+are linked to powerful supernatural forces in the multiverse.
+These cosmic forces are Law and Chaos, which are opposed 
+to each other, and Good and Evil, also opposed to each other. 
+The forces have self-awareness and means of communicating 
+with the gods and mortals, but they are so complex and alien 
+to human understanding that their communications are usually 
+misunderstood and sometimes cause insanity.
+Lawful 
+ Good 
+Lawful 
+Neutral
+Lawful  
+ Evil
+Neutral 
+ Good
+True 
+Neutral
+Neutral 
+ Evil
+Chaotic 
+ Good
+Chaotic 
+Neutral
+Chaotic 
+ Evil
+ 1.4.1.1. THE BATTLE BETWEEN  LAW AND  CHAOS
+ Law
+The cosmic force of Law seeks ever-increasing perfection across 
+the cosmos. The goal requires efficiency, complexity, and spe -
+cialisation, because individuals are all just cogs in the machine. 
+To achieve ever-expanding perfection, the right leaders must 
+be in place, and the right people must be doing the right things 
+in order to support the entire structure of cosmic Law. Since 
+the components of the structure cannot communicate perfect -
+ly, rules are in place to guide leaders and followers. These rules 
+should not be broken, but another rule might apply better, and 
+it is important to know when to switch guidelines.
+ Chaos
+The cosmic force of Chaos is opposed to Law and is focused on 
+simplicity and individualism. Nothing happens without individ -
+ual inspiration, and every situation is different. Rules only serve 
+to restrict. Orders given personally by a trusted leader are much 
+better than general rules. If you can’t hear the king give the or -
+ders, he shouldn’t be your king.
+Neutrality
+Neutrality is when an individual isn’t aligned with a cosmic force. 
+It’s a matter of pragmatism. What’s the best course of action for 
+myself, my family, or my village? Sometimes the answer is to 
+follow laws and rules, but sometimes the answer is to break 
+the rules based on the situation. Sometimes standing up for the 
+truth is important, but if I am living under the rule of a tyrant it 
+might get me thrown into a dungeon. Neutral alignments (other 
+than Chaotic Neutral and Lawful Neutral) don’t place much val -
+ue on their oaths. That’s more a function of “people should keep 
+their oaths (Lawful)” or “I keep my oaths because it is a matter of 
+personal honour (Chaos)”. The Neutral alignments not modified 
+by Chaos or Law tend to be about results, not personal honour 
+or general rules.
+ 1.4.1.2. THE BATTLE BETWEEN  GOOD AND  EVIL
+ Good
+The cosmic force of goodness is a mystical power that seeks to 
+build universal compassion and empathy throughout the mul -
+tiverse. We’re all in it together. Help those in need, and respect 
+their lives.
+ Evil
+The cosmic force of evil seeks to build universal selfishness and 
+tyranny throughout the multiverse. It’s all about you. Feel free 
+to use or destroy anyone who gets in your way, whatever gives 
+you the best advantage.
+ 1.4.1.3. LAWFUL  GOOD
+• Because you are Lawful, you have a strong tendency to obey 
+and support authority as long as the authority isn’t Evil or 
+Chaotic in nature.
+• Because you are Good, you have a strong tendency toward 
+helping those in need and protecting the weak.
+ 1.4.1.4. CHAOTIC  GOOD
+• Because you are Chaotic, you have a strong tendency to work 
+against authority unless you trust the individuals who are in 
+charge. You don’t believe in abstract systems of justice or gov-
+ernment; you prefer personal connections. You do not have a 
+tendency toward forcing others to behave in particular ways; 
+you respect individualism.
+• Because you are Good, you have a strong tendency toward 
+helping those in need and protecting the weak.
+
+--- PAGE 73 ---
+72 | OSRIC 3.0 - PART ONE: CREATING A CHARACTER  
+ 1.4.1.5. NEUTRAL  GOOD
+• Because you are Neutral in terms of Law and Chaos, you have 
+a pragmatic approach to laws, organisations, and authority. 
+You probably believe that organisations can sometimes be 
+the best approach, but sometimes they can get off track or 
+become corrupt. You follow the law if it supports the cause of 
+Good, and you probably don’t consider yourself to be bound 
+by your promises.
+• Because you are Good, you have a strong tendency toward 
+helping those in need and protecting the weak.
+ 1.4.1.6. LAWFUL NEUTRAL
+• Because you are Lawful, you have a strong tendency to obey 
+and support authority. You probably believe that a well-ad -
+ministered set of laws is the best possible way of organizing 
+things, even if it goes wrong sometimes.
+• Because you are Neutral between Good and Evil, you don’t 
+tend to help those who are in need unless it is requested by 
+an authority figure.
+ 1.4.1.7. CHAOTIC NEUTRAL
+• Because you are Chaotic, you tend to oppose laws and au -
+thority, and you don’t consider them to be binding upon you. 
+You only “obey” those you have sworn to obey based on per -
+sonal respect. In general, you keep your oaths as a matter of 
+personal honour.
+• Because you are Neutral between Good and Evil, your actions 
+aren’t geared toward helping or hurting others.
+• Chaotic Neutral characters usually direct their actions toward 
+an individual goal they pursue for their own reasons, usually 
+personal honour. So, you might be trying to live a life that’s 
+so epic that bards will tell your tale for generations. Or you 
+might seek to build a library—not out of a sense of charity, 
+but because you want to do it.
+ 1.4.1.8. TRUE NEUTRAL
+• You are not Lawful, Chaotic, Good, or Evil. These characters 
+are pragmatists who are out for themselves, their families, 
+their communities, and their friends, regardless of the law 
+and regardless of morality. You probably keep oaths only as a 
+matter of maintaining credibility; oaths aren’t terribly import-
+ant to Neutral characters.
+ 1.4.1.9. LAWFUL  EVIL
+• Because you are Lawful, you have a strong tendency to obey 
+and support authority as long as the authority isn’t  Good or 
+Chaotic in nature. If a law is inconvenient, you probably inter-
+pret it to the letter, not according to the spirit, if you can get 
+away with it. Nevertheless, you are the perfect minion for a 
+villain.
+• Because you are Evil, you act in your own interest with no 
+limitations on the harm you will do to others (although some 
+limits may be imposed by following laws or by a leader).
+ 1.4.1.10. CHAOTIC  EVIL
+• Because you are Chaotic, you tend to oppose laws and au -
+thority, and you don’t consider them to be binding upon you. 
+You probably keep your oaths as a matter of personal hon -
+our, or to maintain credibility.
+• Because you are Evil, you act in your own interest with no 
+limitations on the harm you will do to others.
+ 1.4.1.11. NEUTRAL  EVIL
+• Because you are Neutral in terms of Law and Chaos, you have 
+a pragmatic approach to laws, organisations, and authority. 
+You probably believe that organisations and laws are a good 
+idea sometimes, but at other times they become corrupted, 
+inefficient, or misguided. You follow the law only if it supports 
+the cause of  Evil, and you probably don’t feel bound by your 
+word.
+• Because you are Evil, you act in your own interest with no 
+limitations on the harm you will do to others.
+For most creatures, alignment is a choice and it might change 
+from time to time. For others, alignment is an essential part of 
+their nature. For example, demons don’t get a choice of align -
+ment—they’re embodiments of chaotic evil. Usually it is only 
+creatures from other planes of existence who are physically tied 
+to their alignment.
+ 1.4.1.12. ALIGNMENT  LANGUAGE
+All creatures that are capable of speaking are able to speak the 
+“alignment tongue” of their alignment, which is a mode of com-
+munication made up of gestures, 
+
+--- PAGE 74 ---
+ CHAPTER FOUR: COMPLETING THE CHARACTER  | 73
+ 1.4.2.  MONEY,  EQUIPMENT AND  
+ ENCUMBRANCE
+OSRIC prices far exceed prices in the real mediæval world. Gold 
+is more plentiful, so it is worth a lot less. This allows GMs to 
+place the kinds of treasure mentioned in works of fantasy liter -
+ature—huge piles of gold, enormous gems and pieces of beauti-
+ful jewellery—without destroying the game’s fantasy economy.
+The basic unit of currency is the gold piece.
+1 platinum piece = 5 gold pieces 
+1 gold piece = 2 electrum pieces 
+1 gold piece = 10 silver pieces 
+1 gold piece = 100 copper pieces
+ 1.4.2.1. STARTING  MONEY
+When you create your character, you get some money to buy 
+your starting equipment. How much you get depends on your 
+class:
+Assassin 2d6 x 10 gp
+Cleric 3d6 x 10 gp
+Druid 3d6 x 10 gp
+Fighter 5d4 x 10 gp
+Illusionist 2d4 x 10 gp
+Magic-user 2d4 x 10 gp
+Monk 5d4 gp
+Paladin 5d4 x 10 gp
+Ranger 5d4 x 10 gp
+Thief 2d6 x 10 gp
+You also have basic clothes, and if you’re an illusionist or mag -
+ic-user, you have a spell book. If you or your GM need to know 
+more specifically what you have, then you can choose one of 
+the following options:
+• A set of worn but serviceable travellers’ clothes, including 
+shoes, cloak and hood.
+• A worn but serviceable foot soldier’s uniform, including boots, 
+cloak and hood.
+• A clean linen robe; a hat; sandals; and a satchel containing a 
+spell book.
+• A dark-coloured tunic; your choice of trousers or leggings; 
+soft shoes; cotton gloves; and your choice of a face mask, ker-
+chief or bandanna.
+• A priestly vestment including ceremonial headgear appropri-
+ate to your religion, and a pair of shoes.
+ 1.4.2.2.  ENCUMBRANCE
+In OSRIC, coins are heavy. Ten coins weigh one pound. All coins 
+weigh the same amount, so in OSRIC a “coin” is a unit of weight 
+equal to 0.1 lbs. Some OSRIC-compatible publishers use “gold 
+pieces” (“gp”) as units of weight as well as units of currency.
+Most items you’re carrying have a weight. A few items have 
+a weight of “—”, which means they don’t add to your encum -
+brance; these are usually very light items or the clothes that you 
+wear. A few things have a weight of “N/A” which means they do 
+have weight but you won’t normally be carrying them. Horses 
+are a good example of things that have a weight of N/A.
+Clothing and some other items have a listing for weight such as 
+0 (5). When these items are worn, they do not add to weight for 
+game purposes, but if they are carried as extras they add the 
+weight in parentheses.
+Your encumbrance is the total weight you’re carrying. It deter -
+mines how fast you can move.
+You have an encumbrance allowance, which depends on your 
+strength score (see Table 1.1.2a). This is the amount you can 
+carry without penalty. If you’re carrying weight above your en -
+cumbrance allowance, then your maximum movement speed is 
+reduced, and it’s harder for you to surprise any creatures you 
+meet.
+The effect of encumbrance on movement and surprise is de -
+scribed in Table 1.5.3.3A under Movement Rate.
+
+
+--- PAGE 75 ---
+74 | OSRIC 3.0 - PART ONE: CREATING A CHARACTER  
+ 1.4.2.3. STARTING  EQUIPMENT
+You can spend your starting money on the following items. 
+There are separate tables for weapons and armour.
+ TABLE 1.4.2.3A: GENERAL  EQUIPMENT
+ITEM WEIGHT  
+(IN POUNDS) COST
+Ale, pint 1 1 sp
+Bedroll 5 2 sp
+Bell — 1 gp
+Belt — 5 sp
+Blanket, woollen 2 2 sp
+Block and tackle 5 5 gp
+Boots, soft 0 (3) 1 gp
+Boots, heavy 0 (5) 2 gp
+Bottle (wine) 1 2 gp
+Bracer, leather 0 (.1) 8 sp
+Caltrops 2 1 gp
+Candle, beeswax — 1 cp
+Canvas (per sq. yd) 1 1 sp
+Cauldron and tripod 15 2 gp
+Chain (per 10ft) 10 30 gp
+Chalk, piece — 1 cp
+Cloak 0 (1) 3 sp
+Crowbar 5 2 gp
+Dice, bone, pair — 5 sp
+Dice, loaded, pair — 5 gp
+Doublet, linen 0 (.5) 3 gp
+Firewood (per day) 3 1 cp
+Fish hook — 1 sp
+Fishing net (per 25 sq.ft) — 1 sp
+Flask (leather) — 3 cp
+Flint and steel — 1 gp
+Gloves, kidskin, pair — 3 gp
+Gown, woollen 0 (1) 5 sp
+Gown, linen 0 (1) 3 gp
+Gown, silk 0 (1) 50+ gp
+ Grappling hook 4 1 gp
+ITEM WEIGHT  
+(IN POUNDS) COST
+Hammer (tool, not war) 2 5 sp
+Holy symbol, silver 0 (1) 25 gp
+Holy symbol, pewter 0 (1) 5 gp
+Holy symbol, wooden 0 (.5) 6 sp
+Hose — 1 gp
+Iron spikes, dozen 5 1 gp
+Ladder (per 10ft) 20 5 sp
+Lamp (bronze) 1 1 sp
+Lantern, bullseye 3 12 gp
+Lantern, hooded 2 7 gp
+Lock .5 20+ gp
+Manacles 2 15 gp
+Mirror (small steel) .5 20 gp
+Mirror (small silver) .5 45 gp
+Musical instrument 1+ 5+ gp
+Needle and thread — 3 cp
+ Oil (lamp) (per pint) 1 1 sp
+Parchment (per sheet) — 2 sp
+Pin (cloak) — 4 sp
+Piton .5 1 sp
+Pole (per 10ft) 8 2 sp
+Pot, iron 5 5 sp
+Quill (pen) — 1 sp
+Quiver (holds 12 arrows) 0 (empty) 1 gp
+Quiver (holds 24 arrows) 0 (empty) 25 sp
+Quiver (holds 12 bolts) 0 (empty) 12 sp
+Quiver (holds 24 bolts) 0 (empty) 3 gp
+Rations, standard (per day) 2 2 gp
+Rations, trail (per day) 1 6 gp
+Reins, bit and bridle 0 (5) 2 gp
+Robe, linen 0 (1) 3 gp
+Robe, silk 0 (1) 60+ gp
+Rope, hemp (per 50ft) 10 1 gp
+Rope, silk (per 50ft) 5 10 gp
+Saddle and stirrups 0 (20) 10 gp
+

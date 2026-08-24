@@ -1,0 +1,12 @@
+# OSRIC 3.0 first-level THAC0 values (roll needed to hit AC 0 in descending AC).
+# All standard classes begin at THAC0 20.
+assassin: 20
+cleric: 20
+druid: 20
+fighter: 20
+illusionist: 20
+magic_user: 20
+monk: 20
+paladin: 20
+ranger: 20
+thief: 20

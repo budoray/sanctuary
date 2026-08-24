@@ -1,0 +1,269 @@
+assassin:
+  name: Assassin
+  hit_die: 6
+  starting_hit_dice: 1
+  fighter_type: false
+  prime_requisites:
+    - strength
+    - dexterity
+    - intelligence
+  ability_score_requirements:
+    strength: 12
+    intelligence: 11
+    dexterity: 12
+  allowed_alignments:
+    - Lawful Evil
+    - Neutral Evil
+    - Chaotic Evil
+  next_level_xp: 1500
+  armour_allowed:
+    - leather
+    - padded
+    - studded_leather
+  shields_allowed: false
+  weapons_allowed:
+    - all
+
+cleric:
+  name: Cleric
+  hit_die: 8
+  starting_hit_dice: 1
+  fighter_type: false
+  prime_requisites:
+    - wisdom
+  ability_score_requirements:
+    wisdom: 9
+  allowed_alignments:
+    - Lawful Good
+    - Lawful Neutral
+    - Lawful Evil
+    - Neutral Good
+    - True Neutral
+    - Neutral Evil
+    - Lawful Evil
+  next_level_xp: 1500
+  armour_allowed:
+    - all
+  shields_allowed: true
+  weapons_allowed:
+    - club
+    - flail_light
+    - flail_heavy
+    - mace_light
+    - mace_heavy
+    - morning_star
+    - staff
+    - warhammer_light
+    - warhammer_heavy
+
+druid:
+  name: Druid
+  hit_die: 8
+  starting_hit_dice: 1
+  fighter_type: false
+  prime_requisites:
+    - wisdom
+  ability_score_requirements:
+    wisdom: 12
+    charisma: 15
+  allowed_alignments:
+    - True Neutral
+  next_level_xp: 2000
+  armour_allowed:
+    - leather
+    - padded
+  shields_allowed: true
+  weapons_allowed:
+    - club
+    - dagger
+    - dart
+    - javelin
+    - sling
+    - spear
+    - staff
+
+fighter:
+  name: Fighter
+  hit_die: 10
+  starting_hit_dice: 1
+  fighter_type: true
+  prime_requisites:
+    - strength
+  ability_score_requirements: {}
+  allowed_alignments:
+    - Lawful Good
+    - Lawful Neutral
+    - Lawful Evil
+    - Neutral Good
+    - True Neutral
+    - Neutral Evil
+    - Chaotic Good
+    - Chaotic Neutral
+    - Chaotic Evil
+  next_level_xp: 2000
+  armour_allowed:
+    - all
+  shields_allowed: true
+  weapons_allowed:
+    - all
+
+illusionist:
+  name: Illusionist
+  hit_die: 4
+  starting_hit_dice: 1
+  fighter_type: false
+  prime_requisites:
+    - intelligence
+  ability_score_requirements:
+    intelligence: 9
+    dexterity: 9
+  allowed_alignments:
+    - Lawful Good
+    - Lawful Neutral
+    - Lawful Evil
+    - Neutral Good
+    - True Neutral
+    - Neutral Evil
+    - Chaotic Good
+    - Chaotic Neutral
+    - Chaotic Evil
+  next_level_xp: 2500
+  armour_allowed: []
+  shields_allowed: false
+  weapons_allowed:
+    - dagger
+    - dart
+    - staff
+
+magic_user:
+  name: Magic-User
+  hit_die: 4
+  starting_hit_dice: 1
+  fighter_type: false
+  prime_requisites:
+    - intelligence
+  ability_score_requirements:
+    intelligence: 9
+  allowed_alignments:
+    - Lawful Good
+    - Lawful Neutral
+    - Lawful Evil
+    - Neutral Good
+    - True Neutral
+    - Neutral Evil
+    - Chaotic Good
+    - Chaotic Neutral
+    - Chaotic Evil
+  next_level_xp: 2400
+  armour_allowed: []
+  shields_allowed: false
+  weapons_allowed:
+    - dagger
+    - dart
+    - staff
+
+monk:
+  name: Monk
+  hit_die: 4
+  starting_hit_dice: 2
+  fighter_type: false
+  prime_requisites:
+    - strength
+    - wisdom
+    - dexterity
+  ability_score_requirements:
+    strength: 15
+    wisdom: 15
+    dexterity: 15
+    constitution: 11
+  allowed_alignments:
+    - Lawful Good
+    - Lawful Neutral
+    - Lawful Evil
+  next_level_xp: 2000
+  armour_allowed: []
+  shields_allowed: false
+  weapons_allowed:
+    - club
+    - dagger
+    - javelin
+    - pole_arm
+    - staff
+    - sword_short
+
+paladin:
+  name: Paladin
+  hit_die: 10
+  starting_hit_dice: 1
+  fighter_type: true
+  prime_requisites:
+    - strength
+  ability_score_requirements:
+    strength: 12
+    intelligence: 9
+    wisdom: 13
+    constitution: 9
+    charisma: 17
+  allowed_alignments:
+    - Lawful Good
+  next_level_xp: 2550
+  armour_allowed:
+    - all
+  shields_allowed: true
+  weapons_allowed:
+    - all
+
+ranger:
+  name: Ranger
+  hit_die: 8
+  starting_hit_dice: 2
+  fighter_type: true
+  prime_requisites:
+    - strength
+    - intelligence
+    - wisdom
+  ability_score_requirements:
+    strength: 13
+    intelligence: 13
+    wisdom: 14
+    constitution: 14
+  allowed_alignments:
+    - Lawful Good
+    - Neutral Good
+    - Chaotic Good
+  next_level_xp: 2250
+  armour_allowed:
+    - all
+  shields_allowed: true
+  weapons_allowed:
+    - all
+
+thief:
+  name: Thief
+  hit_die: 6
+  starting_hit_dice: 1
+  fighter_type: false
+  prime_requisites:
+    - dexterity
+  ability_score_requirements:
+    dexterity: 9
+  allowed_alignments:
+    - Neutral Good
+    - True Neutral
+    - Neutral Evil
+    - Chaotic Good
+    - Chaotic Neutral
+    - Chaotic Evil
+  next_level_xp: 1250
+  armour_allowed:
+    - leather
+    - padded
+    - studded_leather
+  shields_allowed: false
+  weapons_allowed:
+    - club
+    - dagger
+    - dart
+    - sling
+    - sword_long
+    - sword_short

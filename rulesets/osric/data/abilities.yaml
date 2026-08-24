@@ -1,0 +1,12 @@
+abilities:
+  - strength
+  - intelligence
+  - wisdom
+  - dexterity
+  - constitution
+  - charisma
+
+roll_method: 3d6_in_order
+
+# Optional: ability score modifiers can be added here as the rules are ported.
+modifiers: {}

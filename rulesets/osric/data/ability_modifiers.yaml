@@ -1,0 +1,113 @@
+strength:
+  3:  {to_hit: -3, damage: -1}
+  4:  {to_hit: -2, damage: -1}
+  5:  {to_hit: -2, damage: -1}
+  6:  {to_hit: -1, damage: 0}
+  7:  {to_hit: -1, damage: 0}
+  8:  {to_hit: 0, damage: 0}
+  9:  {to_hit: 0, damage: 0}
+  10: {to_hit: 0, damage: 0}
+  11: {to_hit: 0, damage: 0}
+  12: {to_hit: 0, damage: 0}
+  13: {to_hit: 0, damage: 0}
+  14: {to_hit: 0, damage: 0}
+  15: {to_hit: 0, damage: 0}
+  16: {to_hit: 0, damage: 1}
+  17: {to_hit: 1, damage: 1}
+  18: {to_hit: 1, damage: 2}
+  19: {to_hit: 3, damage: 6}
+
+dexterity:
+  3:  {surprise: -3, missile_to_hit: -3, initiative_missile: 3, ac_descending: 4, ac_ascending: -4, agility_save: -4}
+  4:  {surprise: -2, missile_to_hit: -2, initiative_missile: 2, ac_descending: 3, ac_ascending: -3, agility_save: -3}
+  5:  {surprise: -1, missile_to_hit: -1, initiative_missile: 1, ac_descending: 2, ac_ascending: -2, agility_save: -2}
+  6:  {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: 1, ac_ascending: -1, agility_save: -1}
+  7:  {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: 0, ac_ascending: 0, agility_save: 0}
+  8:  {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: 0, ac_ascending: 0, agility_save: 0}
+  9:  {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: 0, ac_ascending: 0, agility_save: 0}
+  10: {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: 0, ac_ascending: 0, agility_save: 0}
+  11: {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: 0, ac_ascending: 0, agility_save: 0}
+  12: {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: 0, ac_ascending: 0, agility_save: 0}
+  13: {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: 0, ac_ascending: 0, agility_save: 0}
+  14: {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: 0, ac_ascending: 0, agility_save: 0}
+  15: {surprise: 0, missile_to_hit: 0, initiative_missile: 0, ac_descending: -1, ac_ascending: 1, agility_save: 1}
+  16: {surprise: 1, missile_to_hit: 1, initiative_missile: -1, ac_descending: -2, ac_ascending: 2, agility_save: 2}
+  17: {surprise: 2, missile_to_hit: 2, initiative_missile: -2, ac_descending: -3, ac_ascending: 3, agility_save: 3}
+  18: {surprise: 3, missile_to_hit: 3, initiative_missile: -3, ac_descending: -4, ac_ascending: 4, agility_save: 4}
+  19: {surprise: 3, missile_to_hit: 3, initiative_missile: -3, ac_descending: -4, ac_ascending: 4, agility_save: 4}
+
+constitution:
+  3:  {hp_modifier: -2, fighter_extra_hp: 0, resurrection: 40, system_shock: 35}
+  4:  {hp_modifier: -1, fighter_extra_hp: 0, resurrection: 45, system_shock: 40}
+  5:  {hp_modifier: -1, fighter_extra_hp: 0, resurrection: 50, system_shock: 45}
+  6:  {hp_modifier: -1, fighter_extra_hp: 0, resurrection: 55, system_shock: 50}
+  7:  {hp_modifier: 0, fighter_extra_hp: 0, resurrection: 60, system_shock: 55}
+  8:  {hp_modifier: 0, fighter_extra_hp: 0, resurrection: 65, system_shock: 60}
+  9:  {hp_modifier: 0, fighter_extra_hp: 0, resurrection: 70, system_shock: 65}
+  10: {hp_modifier: 0, fighter_extra_hp: 0, resurrection: 75, system_shock: 70}
+  11: {hp_modifier: 0, fighter_extra_hp: 0, resurrection: 80, system_shock: 75}
+  12: {hp_modifier: 0, fighter_extra_hp: 0, resurrection: 85, system_shock: 80}
+  13: {hp_modifier: 0, fighter_extra_hp: 0, resurrection: 90, system_shock: 85}
+  14: {hp_modifier: 0, fighter_extra_hp: 0, resurrection: 92, system_shock: 88}
+  15: {hp_modifier: 1, fighter_extra_hp: 0, resurrection: 94, system_shock: 91}
+  16: {hp_modifier: 2, fighter_extra_hp: 0, resurrection: 96, system_shock: 95}
+  17: {hp_modifier: 2, fighter_extra_hp: 1, resurrection: 98, system_shock: 97}
+  18: {hp_modifier: 2, fighter_extra_hp: 2, resurrection: 100, system_shock: 99}
+  19: {hp_modifier: 2, fighter_extra_hp: 3, resurrection: 100, system_shock: 99}
+
+intelligence:
+  3:  {bonus_languages: 0}
+  4:  {bonus_languages: 0}
+  5:  {bonus_languages: 0}
+  6:  {bonus_languages: 0}
+  7:  {bonus_languages: 0}
+  8:  {bonus_languages: 1}
+  9:  {bonus_languages: 1}
+  10: {bonus_languages: 2}
+  11: {bonus_languages: 2}
+  12: {bonus_languages: 3}
+  13: {bonus_languages: 3}
+  14: {bonus_languages: 4}
+  15: {bonus_languages: 4}
+  16: {bonus_languages: 5}
+  17: {bonus_languages: 6}
+  18: {bonus_languages: 7}
+  19: {bonus_languages: 8}
+
+wisdom:
+  3:  {mental_save: -3}
+  4:  {mental_save: -2}
+  5:  {mental_save: -1}
+  6:  {mental_save: -1}
+  7:  {mental_save: -1}
+  8:  {mental_save: 0}
+  9:  {mental_save: 0}
+  10: {mental_save: 0}
+  11: {mental_save: 0}
+  12: {mental_save: 0}
+  13: {mental_save: 0}
+  14: {mental_save: 0}
+  15: {mental_save: 1}
+  16: {mental_save: 2}
+  17: {mental_save: 3}
+  18: {mental_save: 4}
+  19: {mental_save: 5}
+
+charisma:
+  3:  {sidekick_limit: 1, loyalty: -30, reaction: -25}
+  4:  {sidekick_limit: 1, loyalty: -25, reaction: -20}
+  5:  {sidekick_limit: 2, loyalty: -20, reaction: -15}
+  6:  {sidekick_limit: 2, loyalty: -15, reaction: -10}
+  7:  {sidekick_limit: 3, loyalty: -10, reaction: -5}
+  8:  {sidekick_limit: 3, loyalty: -5, reaction: 0}
+  9:  {sidekick_limit: 4, loyalty: 0, reaction: 0}
+  10: {sidekick_limit: 4, loyalty: 0, reaction: 0}
+  11: {sidekick_limit: 4, loyalty: 0, reaction: 0}
+  12: {sidekick_limit: 5, loyalty: 0, reaction: 0}
+  13: {sidekick_limit: 5, loyalty: 0, reaction: 5}
+  14: {sidekick_limit: 6, loyalty: 5, reaction: 10}
+  15: {sidekick_limit: 7, loyalty: 15, reaction: 15}
+  16: {sidekick_limit: 8, loyalty: 20, reaction: 25}
+  17: {sidekick_limit: 10, loyalty: 30, reaction: 30}
+  18: {sidekick_limit: 15, loyalty: 40, reaction: 35}
+  19: {sidekick_limit: 20, loyalty: 50, reaction: 40}
