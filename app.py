@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, Form, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -69,6 +69,12 @@ class CreateCharacter(BaseModel):
 @app.get("/")
 def index():
     return FileResponse(ROOT / "static" / "index.html")
+
+
+@app.get("/begin")
+def begin():
+    """Hub play-gate sends signed-in users here; redirect straight to the game."""
+    return RedirectResponse("/", status_code=303)
 
 
 @app.get("/api/osric/rules")
