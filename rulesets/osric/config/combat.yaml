@@ -16,3 +16,25 @@ range_penalty_per_increment: -2
 
 # Sell-back ratio for equipment (fraction of purchase price returned).
 sell_back_ratio: 0.5
+
+# Encumbrance tiers (weight in lb). Movement penalty is applied to base movement.
+encumbrance:
+  light:
+    max_weight: 75
+    movement_penalty: 0
+    label: Light
+  medium:
+    max_weight: 100
+    movement_penalty: 30
+    label: Medium
+  heavy:
+    max_weight: 150
+    movement_penalty: 60
+    label: Heavy
+  very_heavy:
+    max_weight: 999999
+    movement_penalty: 90
+    label: Very Heavy
+
+# Minimum movement rate regardless of encumbrance.
+min_movement: 30

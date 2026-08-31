@@ -161,3 +161,17 @@ thief_skills:
   climb_walls: 85
   hear_noise: 10
   read_languages: 0
+
+# Level 1 Turn Undead target numbers (roll d20 >= target). Classes without an entry cannot turn.
+turn_undead:
+  cleric:
+    skeleton: 10
+    zombie: 13
+    ghoul: 16
+    shadow: 19
+    wight: 20
+  paladin:
+    skeleton: 13
+    zombie: 16
+    ghoul: 19
+    shadow: 20

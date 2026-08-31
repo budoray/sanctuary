@@ -333,6 +333,32 @@ def compute_movement(ancestry_id: str, inventory: list[dict]) -> int:
     return base
 
 
+def compute_encumbrance(inventory: list[dict]) -> dict[str, Any]:
+    """Return encumbrance tier, movement penalty, and effective movement."""
+    weight = inventory_weight(inventory)
+    tiers = COMBAT.get("encumbrance", {})
+    min_movement = COMBAT.get("min_movement", 30)
+    for key, cfg in tiers.items():
+        if weight <= cfg.get("max_weight", 999999):
+            penalty = cfg.get("movement_penalty", 0)
+            return {
+                "tier": key,
+                "label": cfg.get("label", key),
+                "weight": round(weight, 1),
+                "max_weight": cfg.get("max_weight"),
+                "movement_penalty": penalty,
+            }
+    # Fallback if config is empty.
+    return {"tier": "light", "label": "Light", "weight": round(weight, 1), "max_weight": None, "movement_penalty": 0}
+
+
+def encumbered_movement(base_movement: int, inventory: list[dict]) -> int:
+    """Base movement after encumbrance penalty, but not below min_movement."""
+    enc = compute_encumbrance(inventory)
+    min_movement = COMBAT.get("min_movement", 30)
+    return max(min_movement, base_movement - enc.get("movement_penalty", 0))
+
+
 def starting_hit_points(class_id: str, constitution: int) -> int:
     """First-level hit points: roll class hit dice and apply CON modifier per die."""
     klass = get_class(class_id)
@@ -371,6 +397,8 @@ def build_sheet(
 
     ac = compute_armour_class(abilities, inventory)
     con_mod = constitution_hp_modifier(abilities["constitution"], klass.get("fighter_type", False))
+    base_movement = ancestry.get("base_movement", 120)
+    enc = compute_encumbrance(inventory)
 
     return {
         "level": 1,
@@ -387,12 +415,15 @@ def build_sheet(
         "armour_class_descending": ac["descending"],
         "ac_breakdown": ac["breakdown"],
         "thac0": THAC0.get(class_id, 20),
-        "base_movement": ancestry.get("base_movement", 120),
-        "movement": compute_movement(ancestry_id, inventory),
+        "base_movement": base_movement,
+        "movement": encumbered_movement(base_movement, inventory),
+        "encumbrance": enc,
         "starting_gold": starting_gold,
         "remaining_gold": starting_gold,
         "alignment": alignment,
         "saving_throws": dict(SAVING_THROWS.get(class_id, {})),
+        "turn_undead": CLASS_FEATURES.get("turn_undead", {}).get(class_id),
+        "ancestry_traits": ancestry.get("traits", []),
         "ability_modifiers": {
             "strength": strength_modifier(abilities["strength"]),
             "dexterity": dexterity_modifier(abilities["dexterity"]),

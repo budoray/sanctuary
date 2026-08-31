@@ -279,6 +279,8 @@ function showRolledCharacter() {
   renderClassAbilities();
   renderThiefSkills();
   renderLanguagesCreate();
+  renderAncestryTraitsCreate();
+  renderTurnUndeadCreate();
   renderCreationSaves();
   renderBreakdowns();
   renderStarterKit();
@@ -457,7 +459,7 @@ function updateCreationSummary() {
       <span>Languages <b>${mods.intelligence.bonus_languages}</b></span>
       <span>Mental save <b>${modifierText(mods.wisdom.mental_save)}</b></span>
       <span>Reaction <b>${modifierText(mods.charisma.reaction)}</b></span>
-      <span>Weight <b>${s.inventory.weight.toFixed(1)} lb</b></span>
+      <span>Enc <b>${s.encumbrance?.label || "Light"}</b> ${s.inventory.weight.toFixed(1)} lb</span>
     </div>
   `;
 }
@@ -538,6 +540,40 @@ function renderCreationSaves() {
       <div class="save-card"><b>${s.saving_throws.spells}</b><span>Spell</span></div>
     </div>
   `;
+}
+
+function renderAncestryTraitsCreate() {
+  const s = playerCharacter.sheet;
+  const el = document.getElementById("class-info");
+  if (!el || !s.ancestry_traits || !s.ancestry_traits.length) return;
+  // Append after existing class-info content.
+  const existing = el.querySelector(".traits-list");
+  if (existing) existing.remove();
+  const div = document.createElement("div");
+  div.className = "traits-list";
+  div.style.marginTop = "0.75rem";
+  div.innerHTML = `<div class="section-title">Ancestry Traits</div><ul class="ability-list">${s.ancestry_traits.map(t => `<li>${t}</li>`).join("")}</ul>`;
+  el.appendChild(div);
+}
+
+function renderTurnUndeadCreate() {
+  const s = playerCharacter.sheet;
+  const el = document.getElementById("class-abilities");
+  if (!el || !s.turn_undead) return;
+  const existing = el.querySelector(".turn-undead-list");
+  if (existing) existing.remove();
+  const div = document.createElement("div");
+  div.className = "turn-undead-list";
+  div.style.marginTop = "0.75rem";
+  div.innerHTML = `
+    <div class="section-title">Turn Undead</div>
+    <div class="save-grid">
+      ${Object.entries(s.turn_undead).map(([creature, target]) => `
+        <div class="save-card"><b>${target}+</b><span>${titleCase(creature.replace(/_/g, " "))}</span></div>
+      `).join("")}
+    </div>
+  `;
+  el.appendChild(div);
 }
 
 function renderBreakdowns() {
@@ -995,6 +1031,9 @@ function renderCharacterPanel() {
     ${renderLanguagesInline(mods)}
     ${renderClassAbilitiesInline(playerCharacter.class)}
     ${playerCharacter.class === "thief" ? renderThiefSkillsInline() : ""}
+    ${renderTurnUndeadInline()}
+    ${renderAncestryTraitsInline()}
+    ${renderEncumbranceInline(s)}
     <div class="gold-line">Gold: <b>${Number(playerCharacter.remaining_gold).toFixed(1)} gp</b></div>
   `;
 }
@@ -1027,6 +1066,41 @@ function renderThiefSkillsInline() {
     <div class="section-title">Thief Skills</div>
     <div class="mod-row">
       ${entries.map(([name, value]) => `<div class="mod-pill">${titleCase(name.replace(/_/g, " "))} <b>${value}%</b></div>`).join(" ")}
+    </div>
+  `;
+}
+
+function renderEncumbranceInline(s) {
+  const enc = s.encumbrance;
+  if (!enc) return "";
+  return `
+    <div class="section-title">Encumbrance</div>
+    <div class="mod-row">
+      <div class="mod-pill">${enc.label} <b>${enc.weight} lb</b></div>
+      <div class="mod-pill">Penalty <b>-${enc.movement_penalty}</b></div>
+      <div class="mod-pill">Base MV <b>${s.base_movement}</b></div>
+    </div>
+  `;
+}
+
+function renderAncestryTraitsInline() {
+  const traits = playerCharacter.sheet.ancestry_traits;
+  if (!traits || !traits.length) return "";
+  return `
+    <div class="section-title">Ancestry Traits</div>
+    <div class="mod-row">
+      ${traits.map(t => `<div class="mod-pill">${t}</div>`).join(" ")}
+    </div>
+  `;
+}
+
+function renderTurnUndeadInline() {
+  const table = playerCharacter.sheet.turn_undead;
+  if (!table) return "";
+  return `
+    <div class="section-title">Turn Undead</div>
+    <div class="mod-row">
+      ${Object.entries(table).map(([creature, target]) => `<div class="mod-pill">${titleCase(creature.replace(/_/g, " "))} <b>${target}+</b></div>`).join(" ")}
     </div>
   `;
 }
