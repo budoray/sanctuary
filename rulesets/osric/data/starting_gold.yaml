@@ -3,10 +3,10 @@
 assassin:    {dice: "2d6", multiplier: 10, unit: "gp"}
 cleric:      {dice: "3d6", multiplier: 10, unit: "gp"}
 druid:       {dice: "3d6", multiplier: 10, unit: "gp"}
-fighter:     {dice: "5d4", multiplier: 10, unit: "gp"}
+fighter:     {dice: "5d4", multiplier: 10, min_gold: 110, unit: "gp"}
 illusionist: {dice: "2d4", multiplier: 10, unit: "gp"}
 magic_user:  {dice: "2d4", multiplier: 10, unit: "gp"}
 monk:        {dice: "5d4", multiplier: 1,  unit: "gp"}
-paladin:     {dice: "5d4", multiplier: 10, unit: "gp"}
-ranger:      {dice: "5d4", multiplier: 10, unit: "gp"}
+paladin:     {dice: "5d4", multiplier: 10, min_gold: 110, unit: "gp"}
+ranger:      {dice: "5d4", multiplier: 10, min_gold: 110, unit: "gp"}
 thief:       {dice: "2d6", multiplier: 10, unit: "gp"}

@@ -376,7 +376,10 @@ def starting_hit_points(class_id: str, constitution: int) -> int:
 
 def roll_starting_gold(class_id: str) -> int:
     spec = STARTING_GOLD[class_id]
-    return roll_dice(spec["dice"]) * spec.get("multiplier", 1)
+    gold = roll_dice(spec["dice"]) * spec.get("multiplier", 1)
+    if "min_gold" in spec:
+        gold = max(gold, spec["min_gold"])
+    return gold
 
 
 def build_sheet(
