@@ -257,6 +257,7 @@ function modifierText(mod) {
 }
 
 function showRolledCharacter() {
+  validateCharacterReady();
   const abilities = playerCharacter.abilities;
   const mods = playerCharacter.sheet.ability_modifiers;
   const container = document.getElementById("rolled-abilities");
@@ -617,17 +618,27 @@ function itemDetail(item) {
   return parts.join(" · ") || item.category;
 }
 
+function canAffordItem(item) {
+  if (!playerCharacter) return false;
+  return playerCharacter.remaining_gold >= item.cost_cp / 100;
+}
+
 function renderShopItem(item) {
   const usable = canUseItem(item);
+  const affordable = canAffordItem(item);
+  const disabled = !usable || !affordable;
+  let priceLabel = formatCoins(item.cost_cp);
+  if (!usable) priceLabel += ' · cannot use';
+  else if (!affordable) priceLabel += ' · cannot afford';
   return `
-    <div class="shop-list-row ${usable ? '' : 'unusable'}">
+    <div class="shop-list-row ${usable ? '' : 'unusable'} ${affordable ? '' : 'unaffordable'}">
       <div class="shop-list-main">
         <div class="shop-list-name">${item.name}</div>
         <div class="shop-list-detail">${itemDetail(item)}</div>
       </div>
       <div class="shop-list-meta">
-        <div class="shop-list-price">${formatCoins(item.cost_cp)}${usable ? '' : ' · cannot use'}</div>
-        <button class="btn btn-secondary buy-btn" data-id="${item.id}" ${usable ? '' : 'disabled'}>Buy & Equip</button>
+        <div class="shop-list-price">${priceLabel}</div>
+        <button class="btn btn-secondary buy-btn" data-id="${item.id}" ${disabled ? 'disabled' : ''}>Buy & Equip</button>
       </div>
     </div>
   `;
@@ -713,14 +724,19 @@ function renderShopModal() {
 
 function renderShopModalRow(item) {
   const usable = canUseItem(item);
+  const affordable = canAffordItem(item);
+  const rowClass = [usable ? "" : "unusable", affordable ? "" : "unaffordable"].filter(Boolean).join(" ").trim();
+  let priceLabel = formatCoins(item.cost_cp);
+  if (!usable) priceLabel += " · cannot use";
+  else if (!affordable) priceLabel += " · cannot afford";
   return `
-    <div class="shop-modal-row ${usable ? "" : "unusable"}" draggable="true" data-id="${item.id}">
+    <div class="shop-modal-row ${rowClass}" draggable="${usable && affordable ? "true" : "false"}" data-id="${item.id}">
       <div class="shop-modal-info">
         <div class="shop-modal-name">${item.name}</div>
         <div class="shop-modal-detail">${itemDetail(item)}</div>
       </div>
       <div class="shop-modal-meta">
-        <div class="shop-modal-price">${formatCoins(item.cost_cp)}${usable ? "" : " · cannot use"}</div>
+        <div class="shop-modal-price">${priceLabel}</div>
       </div>
     </div>
   `;
@@ -746,7 +762,7 @@ function bindCartDropZone() {
 
 function addToCart(itemId) {
   const item = osricOptions.equipment.find(e => e.id === itemId);
-  if (!item || !canUseItem(item)) return;
+  if (!item || !canUseItem(item) || !canAffordItem(item)) return;
   shopCart.set(itemId, (shopCart.get(itemId) || 0) + 1);
   renderCart();
 }
@@ -836,6 +852,7 @@ function refreshAfterTransaction() {
   showRolledCharacter();
   renderShop();
   renderInventoryCreate();
+  validateCharacterReady();
 }
 
 function starterPackageCost(classId) {
@@ -1151,10 +1168,36 @@ function clearLog() {
 
 let dungeonModuleName = "crooked_tower";
 
+function hasEquippedWeapon() {
+  if (!playerCharacter) return false;
+  const inv = playerCharacter.sheet.inventory || { items: [] };
+  return inv.items.some(entry => entry.equipped && osricOptions.equipment.find(e => e.id === entry.item_id)?.category === "weapons");
+}
+
+function validateCharacterReady() {
+  const btn = document.getElementById("enter-dungeon-btn");
+  if (!btn) return;
+  if (!playerCharacter) {
+    btn.disabled = true;
+    return;
+  }
+  const ready = hasEquippedWeapon();
+  btn.disabled = !ready;
+  if (!ready) {
+    btn.title = "Equip a weapon before entering the dungeon.";
+  } else {
+    btn.title = "";
+  }
+}
+
 async function enterDungeon() {
   if (!playerCharacter) {
     await rollCharacter();
     if (!playerCharacter) return;
+  }
+  if (!hasEquippedWeapon()) {
+    showCreationError("Equip a weapon before entering the dungeon.");
+    return;
   }
   renderModuleList();
   document.getElementById("module-modal").classList.remove("hidden");

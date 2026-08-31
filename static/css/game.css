@@ -716,6 +716,8 @@ html, body {
 }
 .shop-list-row:hover { border-color: var(--accent); }
 .shop-list-row.unusable { opacity: 0.65; }
+.shop-list-row.unaffordable .shop-list-price { color: var(--danger); }
+.shop-list-row.unaffordable .buy-btn:disabled { opacity: 0.5; }
 .shop-list-main {
   display: flex;
   flex-direction: column;
