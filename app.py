@@ -197,7 +197,8 @@ def buy_item(req: CharacterAction):
     if character.get("remaining_gold", 0) < cost_gp:
         raise HTTPException(status_code=400, detail="Not enough gold.")
 
-    inventory = osric.add_item(character.get("inventory", []), req.item_id, quantity=1)
+    quantity = item.get("ammo_quantity", 1)
+    inventory = osric.add_item(character.get("inventory", []), req.item_id, quantity=quantity)
     character["inventory"] = inventory
     character["remaining_gold"] -= cost_gp
     character["sheet"] = _rebuild_sheet(character, inventory)
@@ -250,7 +251,8 @@ def buy_package(req: BuyPackage):
             unaffordable.append(item["name"])
             continue
         remaining -= cost_gp
-        inventory = osric.add_item(inventory, item_id, quantity=1)
+        quantity = item.get("ammo_quantity", 1)
+        inventory = osric.add_item(inventory, item_id, quantity=quantity)
         if req.equip and item.get("category") in ("armour", "shields", "weapons"):
             try:
                 inventory = osric.equip_item(inventory, item_id, class_id=class_id)

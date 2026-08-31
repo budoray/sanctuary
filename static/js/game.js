@@ -834,10 +834,13 @@ async function buyCart() {
           body: JSON.stringify({ character: playerCharacter, item_id: itemId }),
         });
       }
-      playerCharacter = await api("/api/osric/equip", {
-        method: "POST",
-        body: JSON.stringify({ character: playerCharacter, item_id: itemId, equip: true }),
-      });
+      const item = osricOptions.equipment.find(e => e.id === itemId);
+      if (item && ["armour", "shields", "weapons"].includes(item.category)) {
+        playerCharacter = await api("/api/osric/equip", {
+          method: "POST",
+          body: JSON.stringify({ character: playerCharacter, item_id: itemId, equip: true }),
+        });
+      }
     }
     shopCart.clear();
     refreshAfterTransaction();

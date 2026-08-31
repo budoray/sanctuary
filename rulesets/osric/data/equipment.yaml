@@ -433,6 +433,17 @@ gear:
     weight: 5
     cost_cp: 2500
   - id: arrows
-    name: Arrows (20)
+    name: Arrows
     weight: 1
     cost_cp: 100
+    ammo_quantity: 20
+  - id: bolts
+    name: Bolts
+    weight: 1
+    cost_cp: 100
+    ammo_quantity: 20
+  - id: sling_bullet
+    name: Sling bullets
+    weight: 1
+    cost_cp: 50
+    ammo_quantity: 20

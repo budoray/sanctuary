@@ -409,6 +409,11 @@ html, body {
   align-items: center;
   gap: 0.5rem;
 }
+.turn-undead-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 /* Buttons */
 .btn {

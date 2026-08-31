@@ -380,6 +380,7 @@ function drawTokens() {
 }
 
 function monsterTexturePath(name) {
+  if (name && name.toLowerCase().includes("grik")) return "/art/monster_goblin_boss.png";
   const map = {
     Kobold: "/art/monster_kobold.png",
     "Giant Rat": "/art/monster_rat.png",

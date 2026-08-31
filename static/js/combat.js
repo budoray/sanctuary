@@ -31,6 +31,7 @@ function initCombat() {
   initDungeon();
   document.getElementById("end-turn-btn").addEventListener("click", endTurn);
   renderSpellBar();
+  renderTurnUndeadButton();
   combatState = {
     phase: "player",
     round: 1,
@@ -60,6 +61,74 @@ function renderSpellBar() {
     btn.addEventListener("click", () => selectSpell(spell));
     bar.appendChild(btn);
   }
+}
+
+function renderTurnUndeadButton() {
+  const bar = document.getElementById("turn-undead-bar");
+  if (!bar) return;
+  bar.innerHTML = "";
+  const table = playerCharacter.sheet.turn_undead;
+  if (!table || !Object.keys(table).length) return;
+  const btn = document.createElement("button");
+  btn.id = "turn-undead-btn";
+  btn.className = "btn btn-secondary";
+  btn.textContent = "Turn Undead";
+  btn.title = "Attempt to turn visible undead.";
+  btn.disabled = combatState && combatState.phase !== "player";
+  btn.addEventListener("click", playerTurnUndead);
+  bar.appendChild(btn);
+}
+
+const UNDEAD_TYPES = ["Skeleton", "Zombie", "Ghoul", "Shadow", "Wight", "Wraith", "Mummy", "Spectre", "Vampire", "Ghost", "Lich"];
+
+function isUndead(monster) {
+  return UNDEAD_TYPES.some(type => monster.name.toLowerCase().includes(type.toLowerCase()));
+}
+
+async function playerTurnUndead() {
+  if (!combatState || combatState.phase !== "player") return;
+  if (combatState.attacked) {
+    log("You have already acted this round.");
+    return;
+  }
+  const table = playerCharacter.sheet.turn_undead;
+  if (!table) return;
+
+  const visible = computeVisibility();
+  const targets = monsters.filter(m => {
+    if (!m.alive || !isUndead(m)) return false;
+    return visible.has(`${m.x},${m.y}`);
+  });
+
+  if (!targets.length) {
+    log("No visible undead to turn.");
+    return;
+  }
+
+  combatState.acted = true;
+  combatState.attacked = true;
+  let anyTurned = false;
+
+  for (const m of targets) {
+    const key = Object.keys(table).find(k => m.name.toLowerCase().includes(k.replace(/_/g, " ")));
+    if (!key) continue;
+    const target = table[key];
+    const roll = rollDie(20);
+    const turned = roll >= target;
+    log(`${playerCharacter.name} turns toward <b>${m.name}</b>: roll <span class="roll">${roll}</span> vs ${target} — ${turned ? '<span class="hit">turned</span>' : '<span class="miss">resists</span>'}.`);
+    if (turned) {
+      anyTurned = true;
+      showFloatingText(m.x, m.y, "TURNED", 0xd4a03d);
+      killMonster(m);
+    }
+  }
+
+  if (anyTurned) {
+    log("<span class='hit'>The undead cower and fall.</span>", "hit");
+  }
+  renderCharacterPanel();
+  updateCombatUI();
+  checkEnd();
 }
 
 function selectSpell(spell) {
@@ -120,12 +189,16 @@ function updateCombatUI() {
     hint = "You have attacked. Move or end your turn.";
   } else {
     const ranged = findEquippedRangedWeapon();
+    const ammo = ranged && hasAmmoForRangedAttack();
     hint = ranged
-      ? "Click a highlighted tile to move, an adjacent monster to melee, or a circled monster to shoot."
+      ? (ammo
+        ? "Click a highlighted tile to move, an adjacent monster to melee, or a circled monster to shoot."
+        : "Out of ammo. Move or melee with a different weapon.")
       : "Click a highlighted tile to move, or click an adjacent monster to attack (once per round).";
   }
   document.getElementById("action-hint").textContent = hint;
   renderSpellBar();
+  renderTurnUndeadButton();
 }
 
 function findEquippedMeleeWeapon() {
@@ -148,6 +221,44 @@ function findEquippedRangedWeapon() {
   return null;
 }
 
+function ammoForWeapon(weapon) {
+  if (!weapon) return null;
+  if (weapon.id.includes("bow") || weapon.id === "arrows") return "arrows";
+  if (weapon.id.includes("crossbow")) return "bolts";
+  if (weapon.id === "sling") return "sling_bullet";
+  return null;
+}
+
+function countAmmo(ammoId) {
+  const inv = playerCharacter.sheet.inventory.items;
+  const entry = inv.find(i => i.item_id === ammoId);
+  return entry ? (entry.quantity || 1) : 0;
+}
+
+function hasAmmoForRangedAttack() {
+  const weapon = findEquippedRangedWeapon();
+  if (!weapon) return false;
+  const ammoId = ammoForWeapon(weapon);
+  if (!ammoId) return true; // self-ammo weapons like darts, javelins when thrown are the weapon itself
+  return countAmmo(ammoId) > 0;
+}
+
+function consumeAmmo() {
+  const weapon = findEquippedRangedWeapon();
+  if (!weapon) return false;
+  const ammoId = ammoForWeapon(weapon);
+  if (!ammoId) return true;
+  const inv = playerCharacter.sheet.inventory.items;
+  const entry = inv.find(i => i.item_id === ammoId);
+  if (!entry || (entry.quantity || 1) <= 0) return false;
+  entry.quantity -= 1;
+  if (entry.quantity <= 0) {
+    const idx = inv.indexOf(entry);
+    if (idx >= 0) inv.splice(idx, 1);
+  }
+  return true;
+}
+
 function rangedRangeTiles() {
   const weapon = findEquippedRangedWeapon();
   if (!weapon || !weapon.range) return [];
@@ -164,7 +275,8 @@ function rangedRangeTiles() {
 
 function highlightRangedTargets() {
   if (!highlightGraphics) return;
-  if (pendingSpell || findEquippedRangedWeapon()) {
+  const rangedReady = findEquippedRangedWeapon() && hasAmmoForRangedAttack();
+  if (pendingSpell || rangedReady) {
     for (const m of monsters) {
       if (!m.alive) continue;
       const d = distance(playerPos, { x: m.x, y: m.y });
@@ -238,12 +350,21 @@ async function handleGridClick(gx, gy) {
       log("You have already attacked this round.");
       return;
     }
+    if (!hasAmmoForRangedAttack()) {
+      log("<span class='damage'>No ammo left for this weapon.</span>");
+      return;
+    }
     const d = distance(playerPos, { x: gx, y: gy });
     const maxTiles = Math.floor(findEquippedRangedWeapon().range / 10);
     if (d <= maxTiles) {
+      if (!consumeAmmo()) {
+        log("<span class='damage'>No ammo left for this weapon.</span>");
+        return;
+      }
       await playerAttackMonster(targetMonster, true, d * 10);
       combatState.acted = true;
       combatState.attacked = true;
+      renderCharacterPanel();
       updateCombatUI();
       checkEnd();
       return;
