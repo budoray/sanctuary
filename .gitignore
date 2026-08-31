@@ -1,7 +1,10 @@
-.venv
-__pycache__
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+screenshots/
+postgres_data/
 *.pyc
 .env
-.pytest_cache
-.ruff_cache
-postgres_data
+.env.local

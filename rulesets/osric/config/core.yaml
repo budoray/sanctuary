@@ -1,0 +1,21 @@
+# Core constants used across the OSRIC ruleset.
+ability_order:
+  - strength
+  - intelligence
+  - wisdom
+  - dexterity
+  - constitution
+  - charisma
+
+default_roll_method: 3d6_in_order
+
+base_armour_class:
+  descending: 10
+  ascending: 10
+
+base_movement:
+  default: 120
+
+currency:
+  cp_per_sp: 10
+  cp_per_gp: 100

@@ -1,174 +1,316 @@
-"""Sanctuary VTT — FastAPI entry point."""
+"""OSRIC dungeon crawl backend.
+
+Self-contained OSRIC rules engine; no external Sanctuary dependency.
+"""
 from __future__ import annotations
 
 import os
-from contextlib import asynccontextmanager
 from pathlib import Path
 
-import uvicorn
-from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse
+from fastapi import FastAPI, Form, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
-import db
-import tenshin_version
-from config import settings
-from tenshin_auth import require_account
+from engine.dice import DiceError, roll_expression
+from rulesets.osric import adapter as osric
+from rulesets.osric import combat as osric_combat
+from rulesets.osric import loader as osric_loader
+from rulesets.osric import spells as osric_spells
 
 ROOT = Path(__file__).parent
 
-from engine.dice import DiceError, roll_expression
-from engine.test_ground import apply_move, get_test_ground
-from rulesets.osric.adapter import (
-    ABILITIES,
-    ALIGNMENTS,
-    add_item,
-    create_character_data,
-    equipment_ids,
-    equipment_options,
-    equip_item,
-    get_equipment,
-    remove_item,
-    serialise_character,
-    unequip_item,
-)
-from rulesets.osric.adapter import class_ids as osric_class_ids
-from rulesets.osric.adapter import ancestry_ids as osric_ancestry_ids
+app = FastAPI(title="OSRIC Dungeon")
 
 
-def _apply_pending_moves(moves):
-    for move in moves:
-        token = db.get_token(move.character_id)
-        if token:
-            x, y = apply_move(token["x"], token["y"], move.direction)
-            db.place_token(move.character_id, x, y)
+class CharacterAction(BaseModel):
+    character: dict
+    item_id: str
 
 
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    db.init_sanctuary_schema()
-    ground = get_test_ground(settings.decision_timeout_seconds)
-    ground.on_tick = _apply_pending_moves
-    ground.participant_count_fn = lambda: len(db.list_tokens())
-    yield
+class EquipAction(BaseModel):
+    character: dict
+    item_id: str
+    equip: bool = True
 
 
-app = FastAPI(lifespan=lifespan, title="Sanctuary")
+class BuyPackage(BaseModel):
+    character: dict
+    package_id: str | None = None
+    equip: bool = True
 
 
-def _account(request: Request) -> int:
-    return require_account(request)
+class AttackAction(BaseModel):
+    attacker: dict
+    defender: dict
+    ranged: bool = False
+    range_ft: int = 0
 
 
-@app.get("/version")
-def version():
-    return PlainTextResponse(tenshin_version.get_version())
+class SpellAction(BaseModel):
+    caster: dict
+    spell_id: str
+    target: dict | None = None
 
 
-def _landing():
-    return FileResponse(ROOT / "static" / "index.html")
+class LevelUpAction(BaseModel):
+    character: dict
+
+
+class CreateCharacter(BaseModel):
+    name: str
+    ancestry: str
+    class_id: str
+    alignment: str
+    roll_method: str = "3d6_in_order"
+    abilities: dict[str, int] | None = None
 
 
 @app.get("/")
-def landing():
-    return _landing()
+def index():
+    return FileResponse(ROOT / "static" / "index.html")
 
 
-@app.get("/about")
-def about():
-    return _landing()
-
-
-@app.get("/begin")
-def begin(request: Request):
-    try:
-        _account(request)
-    except HTTPException:
-        return RedirectResponse("/", status_code=303)
-    return FileResponse(ROOT / "static" / "begin.html")
-
-
-@app.get("/live")
-def live_landing():
-    """Sanctuary has no spectator live stream; /live redirects to the about page."""
-    return RedirectResponse("/", status_code=303)
-
-
-@app.get("/api/me")
-def api_me(request: Request):
-    try:
-        account_id = _account(request)
-        return {"logged_in": True, "account_id": account_id}
-    except HTTPException:
-        return {"logged_in": False}
-
-
-@app.get("/api/ruleset/osric/options")
-def osric_options():
+@app.get("/api/osric/rules")
+def osric_rules():
     return {
-        "ancestries": [
-            {"id": aid, "name": aid.replace("_", " ").title()}
-            for aid in osric_ancestry_ids()
-        ],
-        "classes": [
-            {"id": cid, "name": cid.replace("_", " ").title()}
-            for cid in osric_class_ids()
-        ],
-        "alignments": ALIGNMENTS,
-        "abilities": ABILITIES["abilities"],
-        "roll_method": ABILITIES["roll_method"],
+        "core": osric.CORE,
+        "rolling": osric.ROLLING,
+        "progression": osric.PROGRESSION,
+        "combat": osric.COMBAT,
+        "ability_modifiers": osric.ABILITY_MODIFIERS,
+        "class_features": osric.CLASS_FEATURES,
     }
 
 
-@app.post("/api/characters")
-def create_character(
-    request: Request,
-    name: str = Form(...),
-    ancestry: str = Form(...),
-    class_id: str = Form(..., alias="class"),
-    alignment: str = Form(...),
-):
-    account_id = _account(request)
+@app.get("/api/osric/class-features/{class_id}")
+def class_features(class_id: str):
+    if class_id not in osric.CLASSES:
+        raise HTTPException(status_code=404, detail=f"Unknown class: {class_id}")
+    return osric.class_features(class_id)
+
+
+@app.get("/api/osric/options")
+def osric_options():
+    return {
+        "ancestries": [
+            {
+                "id": aid,
+                "name": osric.get_ancestry(aid)["name"],
+                "allowed_classes": osric.get_ancestry(aid).get("allowed_classes", []),
+            }
+            for aid in osric.ancestry_ids()
+        ],
+        "classes": [
+            {
+                "id": cid,
+                "name": klass["name"],
+                "hit_die": klass.get("hit_die", 8),
+                "prime_requisites": klass.get("prime_requisites", []),
+                "ability_score_requirements": klass.get("ability_score_requirements", {}),
+                "allowed_alignments": klass.get("allowed_alignments", []),
+                "armour_allowed": klass.get("armour_allowed", []),
+                "weapons_allowed": klass.get("weapons_allowed", []),
+                "shields_allowed": klass.get("shields_allowed", False),
+                "fighter_type": klass.get("fighter_type", False),
+                "next_level_xp": klass.get("next_level_xp", 0),
+            }
+            for cid, klass in [(cid, osric.get_class(cid)) for cid in osric.class_ids()]
+        ],
+        "alignments": osric.ALIGNMENTS,
+        "equipment": [
+            {
+                "id": iid,
+                "name": item["name"],
+                "category": item["category"],
+                "cost_cp": item["cost_cp"],
+                "missile": item.get("missile", False),
+                "range": item.get("range"),
+                "ac_ascending": item.get("ac_ascending"),
+                "ac_ascending_modifier": item.get("ac_ascending_modifier"),
+                "damage": item.get("damage"),
+                "weight": item.get("weight"),
+                "subcategory": item.get("subcategory"),
+            }
+            for iid, item in osric.EQUIPMENT_BY_ID.items()
+        ],
+        "spells": osric_spells.CLASS_SPELLS,
+    }
+
+
+def _rebuild_sheet(character: dict, inventory: list[dict]) -> dict:
+    """Rebuild the OSRIC sheet and preserve transient state like spell slots."""
+    slots = character.get("sheet", {}).get("spell_slots", osric_spells.initial_spell_slots(character["class"]))
+    sheet = osric.build_sheet(
+        character["ancestry"],
+        character["class"],
+        character["alignment"],
+        character["abilities"],
+        character["hit_points"],
+        inventory=inventory,
+        starting_gold=character["starting_gold"],
+    )
+    sheet["spell_slots"] = slots
+    return sheet
+
+
+@app.get("/api/osric/roll-abilities")
+def roll_abilities(method: str = "3d6"):
+    return {"pool": osric.roll_ability_pool(method)}
+
+
+@app.post("/api/osric/character")
+def create_character(req: CreateCharacter):
     try:
-        data = create_character_data(ancestry, class_id, alignment, name)
+        data = osric.create_character_data(
+            req.ancestry, req.class_id, req.alignment, req.name, req.roll_method, req.abilities
+        )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
-    character_id = db.create_character(
-        account_id,
-        data["name"],
-        data["ancestry"],
-        data["class"],
-        data["alignment"],
+    data["remaining_gold"] = data["starting_gold"]
+    data["inventory"] = []
+    data["sheet"] = osric.build_sheet(
+        req.ancestry,
+        req.class_id,
+        req.alignment,
         data["abilities"],
         data["hit_points"],
-        data["sheet"],
-        data["inventory"],
+        inventory=[],
+        starting_gold=data["starting_gold"],
     )
-    # Place token on test ground at origin.
-    db.place_token(character_id, 0, 0)
-    return JSONResponse({"id": character_id, **data})
+    data["sheet"]["spell_slots"] = osric_spells.initial_spell_slots(req.class_id)
+    return data
 
 
-@app.get("/api/characters")
-def list_characters(request: Request):
-    account_id = _account(request)
-    rows = db.list_characters(account_id)
-    return [serialise_character(row) for row in rows]
+@app.post("/api/osric/buy")
+def buy_item(req: CharacterAction):
+    item = osric.get_equipment(req.item_id)
+    character = req.character
+    cost_gp = item["cost_cp"] / 100
+    if character.get("remaining_gold", 0) < cost_gp:
+        raise HTTPException(status_code=400, detail="Not enough gold.")
+
+    inventory = osric.add_item(character.get("inventory", []), req.item_id, quantity=1)
+    character["inventory"] = inventory
+    character["remaining_gold"] -= cost_gp
+    character["sheet"] = _rebuild_sheet(character, inventory)
+    return character
 
 
-@app.get("/api/characters/{character_id}")
-def get_character(request: Request, character_id: int):
-    account_id = _account(request)
-    row = db.get_character(character_id, account_id)
-    if not row:
-        raise HTTPException(status_code=404, detail="Character not found.")
-    return serialise_character(row)
+@app.post("/api/osric/sell")
+def sell_item(req: CharacterAction):
+    item = osric.get_equipment(req.item_id)
+    character = req.character
+    inventory = character.get("inventory", [])
+    idx = next((i for i, e in enumerate(inventory) if e.get("item_id") == req.item_id), None)
+    if idx is None:
+        raise HTTPException(status_code=400, detail="Item not in inventory.")
+
+    entry = inventory[idx]
+    sell_ratio = osric.COMBAT.get("sell_back_ratio", 0.5)
+    sell_price_gp = item["cost_cp"] / 100 * sell_ratio
+    character["remaining_gold"] = round(character.get("remaining_gold", 0) + sell_price_gp, 1)
+    if entry.get("quantity", 1) > 1:
+        entry["quantity"] -= 1
+    else:
+        inventory.pop(idx)
+    character["inventory"] = inventory
+    character["sheet"] = _rebuild_sheet(character, inventory)
+    return character
 
 
-@app.get("/api/ruleset/osric/equipment")
-def osric_equipment():
-    return {"equipment": equipment_options()}
+@app.post("/api/osric/buy-package")
+def buy_package(req: BuyPackage):
+    """Buy a configurable starter package (defaults to the character's class package)."""
+    character = req.character
+    class_id = character.get("class", "")
+    package_id = req.package_id or class_id
+    package = osric.CLASS_FEATURES.get("starting_packages", {}).get(package_id)
+    if not package:
+        raise HTTPException(status_code=400, detail=f"No starter package for '{package_id}'.")
+
+    inventory = list(character.get("inventory", []))
+    remaining = float(character.get("remaining_gold", 0))
+    unaffordable: list[str] = []
+
+    for item_id in package.get("items", []):
+        try:
+            item = osric.get_equipment(item_id)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
+        cost_gp = item["cost_cp"] / 100
+        if remaining < cost_gp:
+            unaffordable.append(item["name"])
+            continue
+        remaining -= cost_gp
+        inventory = osric.add_item(inventory, item_id, quantity=1)
+        if req.equip and item.get("category") in ("armour", "shields", "weapons"):
+            try:
+                inventory = osric.equip_item(inventory, item_id, class_id=class_id)
+            except ValueError:
+                # Item cannot be equipped by this class; keep it in inventory.
+                pass
+
+    if unaffordable:
+        raise HTTPException(status_code=400, detail=f"Cannot afford: {', '.join(unaffordable)}")
+
+    character["inventory"] = inventory
+    character["remaining_gold"] = round(remaining, 2)
+    character["sheet"] = _rebuild_sheet(character, inventory)
+    return character
+
+
+@app.post("/api/osric/equip")
+def equip_item(req: EquipAction):
+    character = req.character
+    try:
+        if req.equip:
+            inventory = osric.equip_item(
+                character.get("inventory", []), req.item_id, class_id=character.get("class", "")
+            )
+        else:
+            inventory = osric.unequip_item(character.get("inventory", []), req.item_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    character["inventory"] = inventory
+    character["sheet"] = _rebuild_sheet(character, inventory)
+    return character
+
+
+@app.post("/api/osric/attack")
+def resolve_attack(req: AttackAction):
+    """Resolve a single melee or ranged attack using OSRIC THAC0 vs descending AC."""
+    return osric_combat.resolve_attack(req.attacker, req.defender, req.ranged, req.range_ft)
+
+
+@app.post("/api/osric/spell")
+def cast_spell(req: SpellAction):
+    caster = req.caster
+    spell = osric_spells.SPELLS.get(req.spell_id)
+    if not spell:
+        raise HTTPException(status_code=400, detail=f"Unknown spell: {req.spell_id}")
+    if caster.get("class", "") not in spell["classes"]:
+        raise HTTPException(status_code=400, detail=f"{caster.get('class')} cannot cast {spell['name']}.")
+
+    slots = caster.get("sheet", {}).get("spell_slots", {})
+    level_key = str(spell["level"])
+    if int(slots.get(level_key, slots.get(spell["level"], 0))) <= 0:
+        raise HTTPException(status_code=400, detail="No spell slots remaining.")
+
+    new_slots = dict(slots)
+    new_slots[level_key] = int(new_slots.get(level_key, new_slots.get(spell["level"], 0))) - 1
+    caster["sheet"]["spell_slots"] = new_slots
+
+    result = osric_spells.resolve_spell(caster, req.spell_id)
+    result["target"] = (req.target or {}).get("name")
+    return {"result": result, "character": caster}
+
+
+@app.post("/api/osric/level-up")
+def level_up(req: LevelUpAction):
+    return osric.level_up(req.character)
 
 
 @app.post("/api/roll")
@@ -180,148 +322,17 @@ def roll_dice_endpoint(expression: str = Form(...)):
     return result
 
 
-@app.get("/api/characters/{character_id}/inventory")
-def get_inventory(request: Request, character_id: int):
-    account_id = _account(request)
-    row = db.get_character(character_id, account_id)
-    if not row:
-        raise HTTPException(status_code=404, detail="Character not found.")
-    return {
-        "character_id": character_id,
-        "inventory": row.get("inventory") or [],
-        "equipment": equipment_options(),
-    }
+@app.get("/version")
+def version():
+    version_text = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    return {"version": version_text}
 
 
-@app.post("/api/characters/{character_id}/inventory")
-def add_inventory_item(
-    request: Request,
-    character_id: int,
-    item_id: str = Form(...),
-    quantity: int = Form(1),
-    equipped: bool = Form(False),
-):
-    account_id = _account(request)
-    row = db.get_character(character_id, account_id)
-    if not row:
-        raise HTTPException(status_code=404, detail="Character not found.")
-    if item_id not in equipment_ids():
-        raise HTTPException(status_code=400, detail="Unknown equipment.")
-
-    inventory = row.get("inventory") or []
-    try:
-        inventory = add_item(
-            inventory, item_id, quantity=quantity, equipped=equipped, class_id=row["class"]
-        )
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
-
-    db.set_inventory(character_id, account_id, inventory)
-    return serialise_character(db.get_character(character_id, account_id))
-
-
-@app.delete("/api/characters/{character_id}/inventory/{item_id}")
-def delete_inventory_item(request: Request, character_id: int, item_id: str):
-    account_id = _account(request)
-    row = db.get_character(character_id, account_id)
-    if not row:
-        raise HTTPException(status_code=404, detail="Character not found.")
-
-    inventory = remove_item(row.get("inventory") or [], item_id)
-    db.set_inventory(character_id, account_id, inventory)
-    return serialise_character(db.get_character(character_id, account_id))
-
-
-@app.post("/api/characters/{character_id}/inventory/{item_id}/equip")
-def equip_inventory_item(request: Request, character_id: int, item_id: str):
-    account_id = _account(request)
-    row = db.get_character(character_id, account_id)
-    if not row:
-        raise HTTPException(status_code=404, detail="Character not found.")
-
-    try:
-        inventory = equip_item(row.get("inventory") or [], item_id, class_id=row["class"])
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
-    db.set_inventory(character_id, account_id, inventory)
-    return serialise_character(db.get_character(character_id, account_id))
-
-
-@app.post("/api/characters/{character_id}/inventory/{item_id}/unequip")
-def unequip_inventory_item(request: Request, character_id: int, item_id: str):
-    account_id = _account(request)
-    row = db.get_character(character_id, account_id)
-    if not row:
-        raise HTTPException(status_code=404, detail="Character not found.")
-
-    inventory = unequip_item(row.get("inventory") or [], item_id)
-    db.set_inventory(character_id, account_id, inventory)
-    return serialise_character(db.get_character(character_id, account_id))
-
-
-@app.post("/api/test-ground/{character_id}/move")
-def move_token(request: Request, character_id: int, direction: int = Form(...)):
-    account_id = _account(request)
-    row = db.get_character(character_id, account_id)
-    if not row:
-        raise HTTPException(status_code=404, detail="Character not found.")
-
-    token = db.get_token(character_id)
-    if not token:
-        raise HTTPException(status_code=404, detail="Token not found.")
-
-    ground = get_test_ground(settings.decision_timeout_seconds)
-    if not ground.submit_move(character_id, direction):
-        raise HTTPException(status_code=409, detail="Move already submitted this round.")
-
-    state = ground.get_state()
-    return {
-        "status": "pending",
-        "character_id": character_id,
-        "direction": direction,
-        "round": state["round"],
-        "pending_count": state["pending_count"],
-        "expected_count": state["expected_count"],
-    }
-
-
-@app.get("/api/test-ground/state")
-def test_ground_state():
-    from engine.grid import TILES_PER_10FT
-
-    ground = get_test_ground(settings.decision_timeout_seconds)
-    state = ground.get_state()
-    tokens = db.list_tokens()
-    return {
-        "round": state["round"],
-        "timer_end": state["timer_end"],
-        "pending_count": state["pending_count"],
-        "expected_count": state["expected_count"],
-        "decision_timeout_seconds": settings.decision_timeout_seconds,
-        "scale": {"tiles_per_10ft": TILES_PER_10FT},
-        "tokens": [
-            {
-                "character_id": t["character_id"],
-                "x": t["x"],
-                "y": t["y"],
-                "name": t["name"],
-                "ancestry": t["ancestry"],
-                "class": t["class"],
-            }
-            for t in tokens
-        ],
-    }
-
-
-# Static assets — registered after API routes.
 app.mount("/", StaticFiles(directory=ROOT / "static"), name="static")
 
 
 if __name__ == "__main__":
-    dev = os.environ.get("TENSHIN_DEV", "").lower() in ("1", "true", "yes")
-    uvicorn.run(
-        "app:app" if dev else app,
-        host=settings.load_host,
-        port=settings.load_port,
-        reload=dev,
-    )
+    import uvicorn
+
+    port = int(os.environ.get("LOAD_PORT", "8700"))
+    uvicorn.run("app:app", host="127.0.0.1", port=port)

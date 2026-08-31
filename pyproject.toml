@@ -1,21 +1,10 @@
 [project]
-name = "tenshin-sanctuary"
-version = "0.1.0-beta"
-requires-python = "==3.14.7"
+name = "sanctuary"
+version = "0.1.0-alpha"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
-    "itsdangerous",
-    "pydantic-settings>=2",
-    "psycopg[binary]>=3",
     "pyyaml>=6.0",
     "python-multipart",
-    "httpx",
-    "pypdf>=6.16.2",
-]
-
-[dependency-groups]
-dev = [
-    "pytest",
-    "pytest-asyncio",
 ]

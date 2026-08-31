@@ -1,0 +1,31 @@
+magic_missile:
+  name: Magic Missile
+  level: 1
+  classes: [magic_user, illusionist]
+  damage: 1d4+1
+  auto_hit: true
+  heal: ""
+
+burning_hands:
+  name: Burning Hands
+  level: 1
+  classes: [magic_user]
+  damage: 1d3
+  auto_hit: true
+  heal: ""
+
+cure_light_wounds:
+  name: Cure Light Wounds
+  level: 1
+  classes: [cleric, druid]
+  damage: ""
+  auto_hit: true
+  heal: 1d8
+
+cause_light_wounds:
+  name: Cause Light Wounds
+  level: 1
+  classes: [cleric, druid]
+  damage: 1d8
+  auto_hit: true
+  heal: ""

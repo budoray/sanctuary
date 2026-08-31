@@ -1,0 +1,18 @@
+# Combat-resolution constants.
+
+# Death and unconsciousness thresholds (HP).
+death_threshold: -10
+unconscious_threshold: 0
+
+# Automatic success/failure on a d20 attack roll.
+auto_hit: 20
+auto_miss: 1
+
+# Damage used when no weapon is equipped.
+unarmed_damage: 1d2
+
+# Ranged attack penalty per range increment beyond the first.
+range_penalty_per_increment: -2
+
+# Sell-back ratio for equipment (fraction of purchase price returned).
+sell_back_ratio: 0.5

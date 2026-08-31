@@ -92,6 +92,7 @@ shields:
 
 weapons:
   - id: axe_battle
+    subcategory: axe
     name: Battle axe
     weight: 7
     cost_cp: 500
@@ -101,6 +102,7 @@ weapons:
     damage: 1d8
     damage_large: 1d8
   - id: axe_hand
+    subcategory: axe
     name: Hand axe
     weight: 5
     cost_cp: 100
@@ -111,6 +113,7 @@ weapons:
     damage_large: 1d4
     range: 10
   - id: club
+    subcategory: blunt
     name: Club
     weight: 5
     cost_cp: 100
@@ -120,6 +123,7 @@ weapons:
     damage: 1d4
     damage_large: 1d4
   - id: dagger
+    subcategory: other
     name: Dagger
     weight: 1
     cost_cp: 200
@@ -130,6 +134,7 @@ weapons:
     damage_large: 1d3
     range: 10
   - id: flail_heavy
+    subcategory: blunt
     name: Heavy flail
     weight: 10
     cost_cp: 2500
@@ -139,6 +144,7 @@ weapons:
     damage: 1d6
     damage_large: 2d4
   - id: flail_light
+    subcategory: blunt
     name: Light flail
     weight: 4
     cost_cp: 600
@@ -148,6 +154,7 @@ weapons:
     damage: 1d4
     damage_large: 1d3
   - id: halberd
+    subcategory: polearm
     name: Halberd
     weight: 10
     cost_cp: 2500
@@ -157,6 +164,7 @@ weapons:
     damage: 1d10
     damage_large: 2d6
   - id: javelin
+    subcategory: missile
     name: Javelin
     weight: 2
     cost_cp: 50
@@ -167,6 +175,7 @@ weapons:
     damage_large: 1d6
     range: 20
   - id: lance
+    subcategory: polearm
     name: Lance
     weight: 5
     cost_cp: 0
@@ -176,6 +185,7 @@ weapons:
     damage: 1d6
     damage_large: 1d12
   - id: mace_heavy
+    subcategory: blunt
     name: Heavy mace
     weight: 10
     cost_cp: 300
@@ -185,6 +195,7 @@ weapons:
     damage: 1d6
     damage_large: 1d6
   - id: mace_light
+    subcategory: blunt
     name: Light mace
     weight: 4
     cost_cp: 500
@@ -194,6 +205,7 @@ weapons:
     damage: 1d4
     damage_large: 1d4
   - id: morning_star
+    subcategory: blunt
     name: Morning star
     weight: 4
     cost_cp: 600
@@ -203,6 +215,7 @@ weapons:
     damage: 1d6
     damage_large: 1d6
   - id: pole_arm
+    subcategory: polearm
     name: Pole arm
     weight: 8
     cost_cp: 1500
@@ -212,6 +225,7 @@ weapons:
     damage: 1d8
     damage_large: 1d10
   - id: spear
+    subcategory: polearm
     name: Spear
     weight: 5
     cost_cp: 100
@@ -222,6 +236,7 @@ weapons:
     damage_large: 1d8
     range: 15
   - id: staff
+    subcategory: other
     name: Quarterstaff
     weight: 4
     cost_cp: 200
@@ -231,6 +246,7 @@ weapons:
     damage: 1d6
     damage_large: 1d6
   - id: sword_bastard
+    subcategory: sword
     name: Bastard sword
     weight: 10
     cost_cp: 600
@@ -240,6 +256,7 @@ weapons:
     damage: 2d4
     damage_large: 2d8
   - id: sword_long
+    subcategory: sword
     name: Long sword
     weight: 4
     cost_cp: 1000
@@ -249,6 +266,7 @@ weapons:
     damage: 1d8
     damage_large: 1d12
   - id: sword_short
+    subcategory: sword
     name: Short sword
     weight: 3
     cost_cp: 800
@@ -258,6 +276,7 @@ weapons:
     damage: 1d6
     damage_large: 1d8
   - id: sword_two_handed
+    subcategory: sword
     name: Two-handed sword
     weight: 12
     cost_cp: 5000
@@ -267,6 +286,7 @@ weapons:
     damage: 1d10
     damage_large: 3d6
   - id: warhammer_light
+    subcategory: blunt
     name: Light warhammer
     weight: 4
     cost_cp: 500
@@ -277,6 +297,7 @@ weapons:
     damage_large: 1d4
     range: 10
   - id: warhammer_heavy
+    subcategory: blunt
     name: Heavy warhammer
     weight: 6
     cost_cp: 800
@@ -286,6 +307,7 @@ weapons:
     damage: 1d6
     damage_large: 1d6
   - id: bow_long
+    subcategory: missile
     name: Long bow
     weight: 8
     cost_cp: 1500
@@ -297,6 +319,7 @@ weapons:
     range: 70
     rate_of_fire: "2"
   - id: bow_short
+    subcategory: missile
     name: Short bow
     weight: 3
     cost_cp: 200
@@ -308,6 +331,7 @@ weapons:
     range: 50
     rate_of_fire: "2"
   - id: crossbow_heavy
+    subcategory: missile
     name: Heavy crossbow
     weight: 12
     cost_cp: 2000
@@ -319,6 +343,7 @@ weapons:
     range: 80
     rate_of_fire: "1/2"
   - id: crossbow_light
+    subcategory: missile
     name: Light crossbow
     weight: 4
     cost_cp: 1200
@@ -330,6 +355,7 @@ weapons:
     range: 60
     rate_of_fire: "1"
   - id: sling
+    subcategory: missile
     name: Sling
     weight: 1
     cost_cp: 50
@@ -341,6 +367,7 @@ weapons:
     range: 35
     rate_of_fire: "1"
   - id: dart
+    subcategory: missile
     name: Dart
     weight: 1
     cost_cp: 20
@@ -405,3 +432,7 @@ gear:
     name: Spell book (blank)
     weight: 5
     cost_cp: 2500
+  - id: arrows
+    name: Arrows (20)
+    weight: 1
+    cost_cp: 100

@@ -1,0 +1,163 @@
+# Class abilities, starting packages, and thief skills for OSRIC character creation.
+
+starting_packages:
+  fighter:
+    name: Fighter's kit
+    items:
+      - chain_mail
+      - shield_medium
+      - sword_long
+      - backpack
+      - rope_hemp
+      - torches
+      - rations_standard
+      - waterskin
+
+  cleric:
+    name: Cleric's kit
+    items:
+      - leather
+      - shield_medium
+      - mace_light
+      - holy_symbol_wooden
+      - backpack
+      - torches
+      - rations_standard
+      - waterskin
+
+  druid:
+    name: Druid's kit
+    items:
+      - leather
+      - shield_small
+      - staff
+      - backpack
+      - torches
+      - rations_standard
+      - waterskin
+
+  magic_user:
+    name: Magic-User's kit
+    items:
+      - dagger
+      - staff
+      - backpack
+      - torches
+      - rations_standard
+      - waterskin
+      - spellbook_blank
+
+  illusionist:
+    name: Illusionist's kit
+    items:
+      - dagger
+      - staff
+      - backpack
+      - torches
+      - rations_standard
+      - waterskin
+      - spellbook_blank
+
+  thief:
+    name: Thief's kit
+    items:
+      - leather
+      - sword_short
+      - thieves_tools
+      - backpack
+      - rope_hemp
+      - torches
+      - rations_standard
+      - waterskin
+
+  assassin:
+    name: Assassin's kit
+    items:
+      - leather
+      - sword_short
+      - dagger
+      - backpack
+      - rope_hemp
+      - torches
+      - rations_standard
+      - waterskin
+
+  monk:
+    name: Monk's kit
+    items:
+      - club
+      - dagger
+      - backpack
+      - torches
+      - rations_standard
+      - waterskin
+
+  paladin:
+    name: Paladin's kit
+    items:
+      - chain_mail
+      - shield_medium
+      - sword_long
+      - holy_symbol_wooden
+      - backpack
+      - torches
+      - rations_standard
+      - waterskin
+
+  ranger:
+    name: Ranger's kit
+    items:
+      - leather
+      - sword_long
+      - bow_short
+      - arrows
+      - backpack
+      - torches
+      - rations_standard
+      - waterskin
+
+abilities:
+  cleric:
+    - Turn Undead
+    - Divine spellcasting at higher levels
+  druid:
+    - Nature lore
+    - Divine spellcasting at higher levels
+  fighter:
+    - Can use any armour and weapon
+    - Best THAC0 progression
+  magic_user:
+    - Arcane spellcasting
+    - Must keep a spellbook
+  illusionist:
+    - Arcane illusion magic
+    - Must keep a spellbook
+  thief:
+    - Thief skills
+    - Backstab
+  assassin:
+    - Assassination
+    - Disguise
+    - Poison use
+  monk:
+    - Unarmed combat
+    - Stunning attack at higher levels
+  paladin:
+    - Detect evil
+    - Lay on hands
+    - Divine spellcasting at higher levels
+  ranger:
+    - Tracking
+    - Surprise bonus
+    - Divine spellcasting at higher levels
+
+thief_skills:
+  # Base first-level percentages. Adjusted by race, armour, and dexterity in full OSRIC.
+  pick_pockets: 15
+  open_locks: 10
+  find_remove_traps: 5
+  move_silently: 10
+  hide_in_shadows: 5
+  climb_walls: 85
+  hear_noise: 10
+  read_languages: 0

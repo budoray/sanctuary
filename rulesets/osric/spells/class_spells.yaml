@@ -1,0 +1,14 @@
+magic_user:
+  - magic_missile
+  - burning_hands
+
+illusionist:
+  - magic_missile
+
+cleric:
+  - cure_light_wounds
+  - cause_light_wounds
+
+druid:
+  - cure_light_wounds
+  - cause_light_wounds

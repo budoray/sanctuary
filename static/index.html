@@ -3,324 +3,237 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sanctuary — OSRIC VTT</title>
-  <meta name="description" content="Sanctuary is a browser-based virtual tabletop for OSRIC 3.0. Roll a hero, choose a class, and move your token on the test ground.">
-  <meta property="og:title" content="Sanctuary — OSRIC VTT">
-  <meta property="og:description" content="A browser-based virtual tabletop for OSRIC 3.0. Roll a hero, choose a class, and move your token on the test ground.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="__SITE__">
-  <meta name="twitter:card" content="summary">
-  <meta name="theme-color" content="#0f0e0b">
-  <link rel="stylesheet" href="/about.css">
-  <link rel="icon" type="image/png" href="/static/art/beacon.png">
+  <title>Sanctuary — OSRIC Dungeon</title>
+  <meta name="description" content="Sanctuary is a browser-based OSRIC dungeon crawl. Roll a hero, buy gear, and descend into procedural dungeons.">
+  <link rel="stylesheet" href="/css/game.css">
+  <link rel="icon" type="image/png" href="/art/beacon.png">
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@7/dist/pixi.min.js"></script>
+  <script src="/js/icons.js"></script>
+  <script src="/js/dungeon.js"></script>
+  <script src="/js/modules.js"></script>
+  <script src="/js/combat.js"></script>
+  <script src="/js/game.js"></script>
 </head>
 <body>
-
-<a class="skip-link" href="#main">Skip to main content</a>
-
-<header class="topnav">
-  <div class="topnav-logo">Sanctuary</div>
-  <nav class="topnav-links" aria-label="Primary">
-    <a href="https://tenshinarts.com">Hub</a>
-    <a href="https://tenshinarts.com/login">Sign in</a>
-    <a id="cta-nav" class="btn btn-primary" href="/begin">Play free</a>
-  </nav>
-</header>
-
-<main id="main">
-
-<header class="hero">
-  <div class="hero-in">
-    <div class="hero-text">
-      <div class="badge">OSRIC 3.0 Virtual Tabletop</div>
-      <h1>
-        <span class="line1">The dice remember.</span><br>
-        <span class="line2">The table does not forget.</span><br>
-        <span class="line3">Now it lives in your browser.</span>
-      </h1>
-      <p class="hero-sub">
-        Sanctuary is a browser-based virtual tabletop built around the OSRIC 3.0 ruleset.
-        Roll a hero with classic 3d6 abilities, choose an ancestry and class, kit them out
-        with equipment, and move your token across a tactical square-grid test ground.
-      </p>
-      <div class="hero-actions">
-        <a id="cta-main" class="btn btn-primary" href="/begin">▶ Play free</a>
-        <a class="btn btn-secondary" href="#how-it-works">How it plays</a>
-      </div>
-      <div class="hero-meta">
-        <span><span class="dot"></span> v0.1.0-beta live</span>
-        <span>7 classes</span>
-        <span>9 ancestries</span>
-        <span>turn-based</span>
-      </div>
-    </div>
-
-    <div class="hero-visual">
-      <img src="/static/art/hero.png" alt="A candle-lit OSRIC tabletop with a gridded battlemap, dice, and an open character sheet" width="680" height="384" loading="eager">
-    </div>
-  </div>
-</header>
-
-<section class="section">
-  <div class="section-head">
-    <h2>What is Sanctuary?</h2>
-    <p>
-      Sanctuary is a browser-based virtual tabletop that brings the OSRIC 3.0 ruleset online.
-      You create a classic old-school hero, manage their sheet and inventory, and move them
-      across a tactical square-grid test ground. Whether you are here to roll a quick character
-      or to run a full campaign with friends, the rules are handled so you can focus on the fiction.
-    </p>
-  </div>
-</section>
-
-<section class="shot">
-  <div class="shot-head">
-    <h2>A look inside Sanctuary</h2>
-  </div>
-  <img src="/static/art/action.png" alt="Gameplay preview of Sanctuary" width="680" height="384" loading="lazy">
-</section>
-
-<section class="section">
-  <div class="section-head">
-    <h2>What makes Sanctuary different</h2>
-    <p>Most VTTs start with a map and paste rules on top. Sanctuary starts with the rules.</p>
-  </div>
-  <div class="beat-grid">
-    <div class="beat">
-      <div class="beat-icon">⚅</div>
-      <h3>Classic OSRIC rolls</h3>
-      <p>Roll 3d6 in order for STR, INT, WIS, DEX, CON, and CHA, then choose the ancestry and class that the dice allow.</p>
-    </div>
-    <div class="beat">
-      <div class="beat-icon">🛡️</div>
-      <h3>Living character sheet</h3>
-      <p>Equip a shield and your AC updates. Change armor and your movement changes. The sheet handles the math so you do not have to.</p>
-    </div>
-    <div class="beat">
-      <div class="beat-icon">🗺️</div>
-      <h3>Square-grid test ground</h3>
-      <p>Each tile is a 10×10 foot space. Click to move your token square by square and test exploration, positioning, and line of sight.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section section-dark" id="how-it-works">
-  <div class="section-head">
-    <h2>How it plays</h2>
-    <p>From dice roll to first step on the grid in minutes.</p>
-  </div>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <h3>Roll abilities</h3>
-      <p>Six rolls of 3d6 set your STR, INT, WIS, DEX, CON, and CHA.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <h3>Build your hero</h3>
-      <p>Ancestry and class shape your saves, hit dice, and starting gear.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <h3>Buy equipment</h3>
-      <p>Spend starting gold on weapons, armor, and adventuring supplies.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <h3>Enter the test ground</h3>
-      <p>Place your token and move across the grid to test exploration and positioning.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section section-dark">
-  <div class="section-head">
-    <h2>What to expect</h2>
-    <p>Sanctuary handles the rules, the sheet, and the table so you can play.</p>
-  </div>
-  <div class="roadmap-grid">
-    <div class="roadmap-card">
-      <h3>Character creation</h3>
-      <ul>
-        <li>Roll 3d6 in order for STR, INT, WIS, DEX, CON, and CHA</li>
-        <li>Choose from nine ancestries with proper limits and adjustments</li>
-        <li>Pick one of seven core classes, each with real progressions and restrictions</li>
-        <li>Spend starting gold on weapons, armor, and adventuring supplies</li>
-      </ul>
-    </div>
-    <div class="roadmap-card">
-      <h3>At the table</h3>
-      <ul>
-        <li>A living character sheet that updates HP, AC, and saves as you equip gear</li>
-        <li>Tactical square-grid movement on a 10×10 foot test ground</li>
-        <li>Server-side dice rolls with a full log for transparent results</li>
-        <li>Rules-first resolution using original OSRIC tables and modifiers</li>
-      </ul>
-    </div>
-    <div class="roadmap-card">
-      <h3>Solo and party play</h3>
-      <ul>
-        <li>Create and manage multiple characters from one account</li>
-        <li>Invite friends to the same campaign and share fog of war</li>
-        <li>Pass the spotlight without passing a laptop</li>
-        <li>Optional AI-assisted DM to keep sessions moving between games</li>
-      </ul>
-    </div>
-    <div class="roadmap-card">
-      <h3>Coming next</h3>
-      <ul>
-        <li>DM-created campaigns with custom maps</li>
-        <li>Turn-based combat, spells, and full OSRIC tables</li>
-        <li>Procedurally generated delves</li>
-        <li>Deeper AI-assisted DM tooling</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="section-head">
-    <h2>See a build in action</h2>
-    <p>A level 1 Human Fighter ready for the test ground.</p>
-  </div>
-  <div class="preview-grid">
-    <div class="preview-card">
-      <h3>Vital Info — Level 1</h3>
-      <div class="preview-row"><span>Name</span> <b>Mirelle</b></div>
-      <div class="preview-row"><span>Ancestry</span> <b>Human</b></div>
-      <div class="preview-row"><span>Class</span> <b>Fighter</b></div>
-      <div class="preview-row"><span>Alignment</span> <b>Lawful Good</b></div>
-      <div class="preview-row"><span>HP</span> <b>8 / 8</b></div>
-      <div class="preview-row"><span>AC</span> <b>4</b></div>
-      <div class="preview-row"><span>Gold</span> <b>47 gp</b></div>
-
-      <div class="ability-grid">
-        <div class="ability"><div class="ab-name">STR</div><div class="ab-score">15</div></div>
-        <div class="ability"><div class="ab-name">INT</div><div class="ab-score">9</div></div>
-        <div class="ability"><div class="ab-name">WIS</div><div class="ab-score">11</div></div>
-        <div class="ability"><div class="ab-name">DEX</div><div class="ab-score">13</div></div>
-        <div class="ability"><div class="ab-name">CON</div><div class="ab-score">12</div></div>
-        <div class="ability"><div class="ab-name">CHA</div><div class="ab-score">8</div></div>
-      </div>
-    </div>
-
-    <div class="preview-card">
-      <h3>Test ground preview</h3>
-      <div class="mini-map">
-        <div class="mini-tile wall"></div><div class="mini-tile wall"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile wall"></div><div class="mini-tile wall"></div>
-        <div class="mini-tile wall"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile wall"></div>
-        <div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile hero"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div>
-        <div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile foe"></div><div class="mini-tile floor"></div>
-        <div class="mini-tile wall"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile chest"></div><div class="mini-tile floor"></div><div class="mini-tile wall"></div>
-        <div class="mini-tile wall"></div><div class="mini-tile wall"></div><div class="mini-tile floor"></div><div class="mini-tile floor"></div><div class="mini-tile wall"></div><div class="mini-tile wall"></div>
+  <div id="landing-screen" class="landing-screen">
+    <div class="landing-card">
+      <img src="/art/hero.png" alt="Sanctuary hero" class="landing-hero">
+      <h1>Sanctuary</h1>
+      <p class="landing-tagline">A browser-based OSRIC dungeon crawl.</p>
+      <p class="landing-blurb">Roll a hero, buy gear, choose a dungeon, and descend.</p>
+      <button id="play-now-btn" class="btn btn-primary btn-large">▶ Play Now</button>
+      <div class="landing-meta">
+        <span>OSRIC 3.0</span>
+        <span>·</span>
+        <span>Single-player</span>
+        <span>·</span>
+        <span>Turn-based</span>
       </div>
     </div>
   </div>
-</section>
 
-<section class="section section-dark">
-  <div class="section-head">
-    <h2>Built for OSRIC 3.0</h2>
-    <p>Sanctuary is not a simplified adaptation. It is a browser-native VTT that treats the OSRIC rules as the source of truth.</p>
-  </div>
-  <div class="beat-grid">
-    <div class="beat">
-      <div class="beat-icon">📜</div>
-      <h3>Rules-first design</h3>
-      <p>Ability checks, saving throws, thief skills, and turning undead resolve using the original OSRIC tables and modifiers.</p>
-    </div>
-    <div class="beat">
-      <div class="beat-icon">🧙</div>
-      <h3>Seven core classes</h3>
-      <p>Cleric, Druid, Fighter, Magic-User, Paladin, Ranger, and Thief — each with proper hit dice, saves, spell progression, and restrictions.</p>
-    </div>
-    <div class="beat">
-      <div class="beat-icon">🧬</div>
-      <h3>Nine ancestries</h3>
-      <p>Dwarf, Elf, Gnome, Half-Elf, Halfling, Half-Orc, Human, and more — each with class limits, ability adjustments, and racial abilities.</p>
-    </div>
-    <div class="beat">
-      <div class="beat-icon">🤖</div>
-      <h3>AI-assisted DM</h3>
-      <p>An optional digital DM handles rulings, narrates outcomes, and remembers what happened last session so you can keep playing.</p>
-    </div>
-    <div class="beat">
-      <div class="beat-icon">🌐</div>
-      <h3>Party play</h3>
-      <p>Invite friends to the same campaign, share fog of war, and take turns without anyone leaning over a single screen.</p>
-    </div>
-    <div class="beat">
-      <div class="beat-icon">🎲</div>
-      <h3>Fair dice</h3>
-      <p>Every roll is made server-side and logged. Results are transparent to the whole table — no hidden math, no trust required.</p>
-    </div>
-  </div>
-</section>
+  <div class="game-shell">
+    <header class="topbar">
+      <div class="logo">Sanctuary</div>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <button id="help-btn" class="btn btn-secondary" style="padding:0.4rem 0.7rem;font-size:0.75rem;">?</button>
+        <div class="level-badge" id="level-badge">Level 1</div>
+        <div class="turn-badge" id="turn-badge">Create your hero</div>
+      </div>
+    </header>
 
-<section class="section section-dark">
-  <div class="section-head">
-    <h2>Live now vs. coming next</h2>
-    <p>Sanctuary is in early beta. Here is what is open today and what is behind the next door.</p>
+    <main class="battlefield">
+      <aside class="panel char-panel" id="char-panel">
+        <p style="color:var(--ink-2)">No hero yet.</p>
+      </aside>
+
+      <section class="board" id="board">
+        <div class="board-bg"></div>
+        <div class="board-vignette"></div>
+        <div id="board-canvas"></div>
+      </section>
+
+      <aside class="panel log-panel">
+        <h3>Adventure Log</h3>
+        <div id="log"></div>
+      </aside>
+    </main>
+
+    <footer class="action-bar" id="action-bar">
+      <span class="action-hint" id="action-hint">Create a character to enter the dungeon.</span>
+      <span class="spacer"></span>
+      <span id="spell-bar" class="spell-bar"></span>
+      <button id="end-turn-btn" class="btn btn-primary" disabled>End Turn</button>
+    </footer>
   </div>
-  <div class="roadmap-grid">
-    <div class="roadmap-card">
-      <h3>Live in 0.1.0-beta</h3>
-      <ul>
-        <li>Full OSRIC character creation</li>
-        <li>Interactive character sheet</li>
-        <li>Inventory with equip/unequip</li>
-        <li>Square-grid movement</li>
-        <li>One account, multiple characters</li>
+
+  <div id="create-modal" class="modal create-modal hidden">
+    <div class="create-card">
+      <header class="create-header">
+        <img src="/art/hero.png" alt="Dungeon hero" class="modal-hero">
+        <div class="create-title">
+          <h2>Forging Your Hero</h2>
+          <p>Roll abilities, choose lineage and vocation, then outfit your adventurer.</p>
+        </div>
+        <div class="create-header-stats">
+          <div class="header-stat"><b id="header-hp">—</b><span>HP</span></div>
+          <div class="header-stat"><b id="header-ac">—</b><span>AC</span></div>
+          <div class="header-stat"><b id="header-thac0">—</b><span>THAC0</span></div>
+          <div class="header-stat"><b id="header-gold">0 gp</b><span>Gold</span></div>
+        </div>
+      </header>
+
+      <div class="create-body">
+        <div class="create-col">
+          <section class="create-section" id="identity-section">
+            <h3>Identity & Abilities</h3>
+            <div class="form-grid">
+              <label>
+                Name
+                <input type="text" id="char-name" value="Mirelle" maxlength="24">
+              </label>
+              <label>
+                Ancestry
+                <select id="char-ancestry"></select>
+              </label>
+              <label>
+                Class
+                <select id="char-class"></select>
+              </label>
+              <label>
+                Alignment
+                <select id="char-alignment"></select>
+              </label>
+            </div>
+
+            <div class="create-actions">
+              <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                <button id="roll-character-btn" class="btn btn-secondary">Roll Abilities</button>
+                <label class="method-label">
+                  Method
+                  <select id="roll-method"></select>
+                </label>
+              </div>
+              <button id="auto-arrange-btn" class="btn btn-secondary hidden">Auto-Arrange</button>
+            </div>
+
+            <div id="rolled-abilities" class="rolled-abilities"></div>
+            <div id="ability-pool" class="ability-pool hidden"></div>
+          </section>
+
+          <section class="create-section" id="summary-section">
+            <h3>Character Summary</h3>
+            <div id="creation-summary" class="creation-summary"></div>
+            <div id="breakdowns" class="breakdowns-row hidden">
+              <div id="ac-breakdown" class="breakdown-panel"></div>
+              <div id="hp-breakdown" class="breakdown-panel"></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="create-col">
+          <section class="create-section" id="equipment-section">
+            <h3>Equipment</h3>
+            <div class="equipment-top">
+              <div id="starter-kit" class="starter-kit"></div>
+              <div class="shop-grid" id="shop-grid"></div>
+            </div>
+            <p class="section-hint">Buy armour, a shield, and a weapon. Greyed items cannot be used by your class. Sell back for half value.</p>
+            <div id="inventory-create" class="inventory-create"></div>
+          </section>
+
+          <section class="create-section" id="details-section">
+            <h3>Character Details</h3>
+            <div id="class-info" class="class-info"></div>
+            <div id="class-abilities" class="class-abilities"></div>
+            <div id="thief-skills" class="thief-skills"></div>
+            <div id="languages-create" class="languages-create"></div>
+            <div id="saving-throws-create" class="saving-throws-create"></div>
+          </section>
+        </div>
+      </div>
+
+      <footer class="create-footer">
+        <div id="creation-errors" class="creation-errors"></div>
+        <button id="enter-dungeon-btn" class="btn btn-primary btn-large">Enter the Dungeon</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="shop-modal" class="modal hidden">
+    <div class="modal-card shop-modal-card">
+      <div class="shop-modal-header">
+        <h2>Equipment Shop</h2>
+        <button id="close-shop-btn" class="btn btn-secondary">Close</button>
+      </div>
+      <div class="shop-modal-gold" id="shop-modal-gold">0 gp</div>
+      <div class="shop-tabs" id="shop-tabs">
+        <button class="shop-tab active" data-cat="armour">Armour</button>
+        <button class="shop-tab" data-cat="shields">Shields</button>
+        <button class="shop-tab" data-cat="weapons">Weapons</button>
+        <button class="shop-tab" data-cat="gear">Gear</button>
+      </div>
+      <div class="shop-modal-body" id="shop-modal-body">
+        <div class="shop-catalog" id="shop-catalog"></div>
+        <div class="shop-cart" id="shop-cart">
+          <div class="shop-cart-title">Cart</div>
+          <div class="shop-cart-items" id="shop-cart-items"></div>
+          <div class="shop-cart-empty" id="shop-cart-empty">Drag items here</div>
+          <div class="shop-cart-footer">
+            <div class="shop-cart-total" id="shop-cart-total">Total: 0 gp</div>
+            <div class="shop-cart-actions">
+              <button class="btn btn-secondary" id="clear-cart-btn">Clear</button>
+              <button class="btn btn-primary" id="buy-cart-btn">Buy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="module-modal" class="modal hidden">
+    <div class="modal-card module-modal-card">
+      <h2>Choose a Dungeon</h2>
+      <div id="module-list" class="module-list"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+        <button id="close-module-btn" class="btn btn-secondary">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="end-modal" class="modal hidden">
+    <div class="modal-card" style="text-align:center;">
+      <h2 id="end-title">Victory</h2>
+      <p id="end-msg">The dungeon is quiet.</p>
+      <button id="restart-btn" class="btn btn-primary">Play Again</button>
+    </div>
+  </div>
+
+  <div id="help-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>How to Play</h2>
+      <ul class="help-list">
+        <li><b>Create</b> a hero, buy gear, then click <b>Enter Dungeon</b>.</li>
+        <li><b>Move</b> by clicking the golden highlighted tiles.</li>
+        <li><b>Attack</b> adjacent monsters once per round; ranged weapons can shoot circled targets.</li>
+        <li><b>Click doors</b> next to you to open them.</li>
+        <li><b>End Turn</b> finishes your side of the round; initiative is rolled each round.</li>
+        <li><b>Traps</b> hide in corridors and trigger saving throws.</li>
+        <li><b>Spells</b> appear in the action bar when available.</li>
+        <li>Clear the level and reach the <b>beacon</b> to escape or descend deeper.</li>
       </ul>
-    </div>
-    <div class="roadmap-card">
-      <h3>Coming next</h3>
-      <ul>
-        <li>DM-created campaigns</li>
-        <li>Turn-based party play</li>
-        <li>Combat, spells, and full OSRIC tables</li>
-        <li>AI-assisted DM decisions</li>
-        <li>Procedurally generated delves</li>
-      </ul>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+        <button id="close-help-btn" class="btn btn-primary">Close</button>
+      </div>
     </div>
   </div>
-</section>
 
-<section class="final-cta">
-  <h2>Your table is waiting.</h2>
-  <a id="cta-bottom" class="btn btn-primary" href="/begin">▶ Play free</a>
-</section>
-
-</main>
-
-<footer class="about-footer">
-  <div>
-    <span><b>Sanctuary</b> — a free game from <a href="https://tenshinarts.com">Tenshin Arts</a>. Built for OSRIC 3.0.</span>
-    <span id="ver" style="font-family:var(--font-mono)">—</span>
-  </div>
-</footer>
-
-<script>
-(function(){
-  fetch('/api/me', { credentials: 'same-origin' })
-    .then(r => r.ok ? r.json() : {})
-    .then(data => {
-      if (!data.logged_in) {
-        ['cta-nav', 'cta-main', 'cta-bottom'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.textContent = 'Sign in to play';
-            el.href = 'https://tenshinarts.com/login';
-          }
-        });
-      }
-    })
-    .catch(() => {});
-
-  fetch('/version').then(r => r.ok ? r.text() : Promise.reject()).then(v => {
-    document.getElementById('ver').textContent = v.trim();
-  }).catch(() => {});
-})();
-</script>
+  <script>
+    document.querySelectorAll('[data-icon]').forEach(el => {
+      const name = el.dataset.icon;
+      const size = parseInt(el.dataset.size || '20', 10);
+      el.outerHTML = icon(name, size);
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,64 @@
+# Level and advancement progression rules.
+
+thac0:
+  # Class groups share a progression formula. A class belongs to the first
+  # group whose condition matches. The formula is evaluated as:
+  #   max(min_value, base - floor((level - 1) / step) * step_reduction)
+  groups:
+    - id: fighter
+      condition:
+        fighter_type: true
+      base: 20
+      step: 1
+      step_reduction: 1
+      min_value: 1
+
+    - id: semi_fighter
+      condition:
+        class_ids: [cleric, druid, assassin, monk, thief]
+      base: 20
+      step: 2
+      step_reduction: 1
+      min_value: 1
+
+    - id: magic_user
+      condition:
+        class_ids: [magic_user, illusionist]
+      base: 20
+      step: 3
+      step_reduction: 1
+      min_value: 1
+
+saving_throws:
+  # Improvement is a flat bonus applied every N levels.
+  improvement:
+    levels_per_bonus: 4
+    bonus: -1
+    min_value: 1
+
+xp:
+  # XP required for next level = base * 2^(level - 1)
+  formula:
+    base_field: next_level_xp
+    multiplier: 2
+    exponent: level_minus_1
+
+hp:
+  first_level:
+    dice_field: hit_die
+    dice_count_field: starting_hit_dice
+    con_modifier_per_die: true
+    min_hp_per_die: 1
+  level_up:
+    dice_field: hit_die
+    con_modifier: true
+    min_hp_gained: 1
+
+spell_slots:
+  # Simple per-level slot schedule. Caster classes gain +1 first-level slot
+  # per level. This can be expanded to full tables later.
+  caster_classes: [magic_user, illusionist, cleric, druid]
+  per_level:
+    - level: 1
+      slots:
+        1: 1

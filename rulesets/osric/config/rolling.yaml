@@ -1,0 +1,32 @@
+# Ability-score rolling methods. All methods are defined here so the UI and
+# backend discover them dynamically. New methods can be added without code.
+methods:
+  3d6_in_order:
+    name: 3d6 in Order
+    description: Roll 3d6 for each ability in order.
+    dice: 3d6
+    rolls_per_ability: 1
+    assign: in_order
+
+  4d6_drop_lowest_in_order:
+    name: 4d6 Drop Lowest
+    description: Roll 4d6, drop the lowest, assign in order.
+    dice: 1d6
+    rolls_per_ability: 4
+    drop_lowest: 1
+    assign: in_order
+
+  3d6_twice_take_best_in_order:
+    name: 3d6 Twice, Take Best
+    description: Roll 3d6 twice for each ability and keep the higher roll.
+    dice: 3d6
+    rolls_per_ability: 2
+    keep: highest
+    assign: in_order
+
+  arrange_to_taste:
+    name: Arrange to Taste
+    description: Roll a pool of six 3d6 scores and assign them to abilities.
+    pool_dice: 3d6
+    pool_size: 6
+    assign: pool
