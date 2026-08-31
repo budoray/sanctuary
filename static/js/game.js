@@ -1230,6 +1230,7 @@ function startModule(id) {
   clearLog();
   const mod = DUNGEON_MODULES[id];
   log(`<b>${playerCharacter.name}</b> enters ${mod ? mod.name : "the dungeon"}.`, "hit");
+  if (mod && mod.intro) log(mod.intro);
   updateLevelBadge();
   initCombat();
 }

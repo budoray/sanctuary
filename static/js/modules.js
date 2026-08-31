@@ -6,6 +6,7 @@ const DUNGEON_MODULES = {
     blurb: "Lord Huet's fallen keep. Something gnaws in the cellars beneath.",
     story: "Lord Huet was a feared warrior who drove the valley's goblin tribes into the hills. After his death the keep was abandoned, and now travelers report torchlight in the tower windows and missing livestock. The local reeve offers a modest purse for anyone who clears out whatever has taken root below.",
     objective: "Explore the cellars beneath the Crooked Tower, defeat the creatures lairing there, and reach the beacon that marks the old escape tunnel.",
+    intro: "You descend a crumbling stair into damp torchlight. Somewhere ahead, something scrapes stone against stone.",
     width: 22,
     height: 16,
     rooms: [
@@ -18,6 +19,16 @@ const DUNGEON_MODULES = {
       { id: "throne",     x: 2, y: 1,  w: 7, h: 4, label: "Throne Room" },
       { id: "exit",       x: 16, y: 1,  w: 5, h: 4, label: "Exit Chamber" },
     ],
+    room_descriptions: {
+      entrance: "The entrance hall stinks of mildew and old blood. Rusted sconces still hold guttering torches.",
+      antechamber: "A cramped antechamber where sentries once warmed themselves. Now kobold paw-prints streak the dust.",
+      storage: "Cracked casks and rotted sacks line the walls. Something has gnawed through the grain barrels.",
+      crossing: "A low crossing where three passages meet. The floor is unnaturally smooth, worn by recent traffic.",
+      westhall: "A narrow hall leading toward the old throne room. Trip-wires glint in the torchlight.",
+      shrine: "A forgotten shrine to a nameless god. Its altar has been desecrated and used as a larder.",
+      throne: "Lord Huet's throne room. A hunched figure in rusted mail sits on the dais, gnawing a bone.",
+      exit: "The old escape tunnel ends at a brass beacon, cold and dim. Beyond it lies the surface."
+    },
     corridors: [
       ["entrance", "antechamber"],
       ["antechamber", "storage"],
@@ -34,12 +45,16 @@ const DUNGEON_MODULES = {
       { room: "storage",     type: "Giant Rat" },
       { room: "shrine",      type: "Skeleton" },
       { room: "exit",        type: "Orc" },
-      { room: "throne",      type: "Goblin" },
+      { room: "throne",      type: "Goblin", boss: true, name: "Grik the Goblin Chieftain" },
     ],
     chests: ["storage", "shrine"],
     traps: ["westhall"],
   },
 };
+
+let currentModule = null;
+let roomIdGrid = [];
+let roomsVisited = new Set();
 
 function loadDungeonModule(name) {
   const mod = DUNGEON_MODULES[name];
@@ -47,16 +62,26 @@ function loadDungeonModule(name) {
     console.warn("Unknown module", name);
     return false;
   }
+  currentModule = mod;
+  roomsVisited = new Set();
 
   MAP_W = mod.width;
   MAP_H = mod.height;
   const grid = makeEmptyMap();
   const roomGrid = makeEmptyMap();
+  roomIdGrid = makeEmptyMap();
   const roomById = {};
 
   for (const room of mod.rooms) {
     carveRoom(grid, room);
     carveRoom(roomGrid, room);
+    for (let y = room.y; y < room.y + room.h; y++) {
+      for (let x = room.x; x < room.x + room.w; x++) {
+        if (y > 0 && y < MAP_H - 1 && x > 0 && x < MAP_W - 1) {
+          roomIdGrid[y][x] = room.id;
+        }
+      }
+    }
     roomById[room.id] = room;
   }
 
@@ -113,16 +138,19 @@ function loadDungeonModule(name) {
     const base = MONSTER_BASE_STATS[type];
     if (!base) continue;
     const levelMult = 1 + (dungeonLevel - 1) * 0.35;
+    const isBoss = entry.boss;
+    const hp = Math.floor(base.hp * levelMult * (isBoss ? 1.5 : 1));
     monsters.push({
       id: `${type.toLowerCase().replace(/\s+/g, "_")}-${pos.x}-${pos.y}-${dungeonLevel}`,
-      name: type,
+      name: entry.name || type,
       x: pos.x,
       y: pos.y,
       ...base,
-      hp: Math.floor(base.hp * levelMult),
-      maxHp: Math.floor(base.maxHp * levelMult),
-      thac0: Math.max(1, base.thac0 - (dungeonLevel - 1)),
-      xp: Math.floor(base.xp * levelMult),
+      hp: hp,
+      maxHp: hp,
+      thac0: Math.max(1, base.thac0 - (dungeonLevel - 1) - (isBoss ? 1 : 0)),
+      damage: isBoss ? `1d${parseInt(base.damage.slice(2)) + 2}` : base.damage,
+      xp: Math.floor(base.xp * levelMult * (isBoss ? 2 : 1)),
       alive: true,
       fled: false,
       moraleChecked: false,
@@ -132,6 +160,17 @@ function loadDungeonModule(name) {
   mapData = grid;
   computeVisibility();
   return true;
+}
+
+function checkRoomEntry(x, y) {
+  if (!currentModule || !roomIdGrid.length) return;
+  const roomId = roomIdGrid[y] && roomIdGrid[y][x];
+  if (!roomId || roomsVisited.has(roomId)) return;
+  roomsVisited.add(roomId);
+  const desc = currentModule.room_descriptions && currentModule.room_descriptions[roomId];
+  if (desc && typeof log === "function") {
+    log(desc);
+  }
 }
 
 const MONSTER_BASE_STATS = {

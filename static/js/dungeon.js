@@ -521,6 +521,7 @@ function clearHighlights() {
 function movePlayer(x, y) {
   playerPos.x = x;
   playerPos.y = y;
+  if (typeof checkRoomEntry === "function") checkRoomEntry(x, y);
   computeVisibility();
   drawTokens();
   renderFog();
