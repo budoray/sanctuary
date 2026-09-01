@@ -17,6 +17,20 @@ range_penalty_per_increment: -2
 # Sell-back ratio for equipment (fraction of purchase price returned).
 sell_back_ratio: 0.5
 
+# Thief backstab: bonus to hit and damage multiplier.
+backstab:
+  to_hit_bonus: 4
+  damage_multiplier: 2
+
+# Surprise chance for each side when combat begins or a new group is met (1-6).
+surprise:
+  chance_in_6: 2
+
+# Initiative: side-based d6 plus this modifier. Uses the acting side's average
+# dexterity missile adjustment (OSRIC reaction/attacking adjustment).
+initiative:
+  dex_modifier_per_point: 1
+
 # Encumbrance tiers (weight in lb). Movement penalty is applied to base movement.
 encumbrance:
   light:

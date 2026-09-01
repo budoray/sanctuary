@@ -30,8 +30,11 @@ function formatCoins(cp) {
 function initCombat() {
   initDungeon();
   document.getElementById("end-turn-btn").addEventListener("click", endTurn);
+  playerStealthed = false;
+  pendingTrapSearch = false;
   renderSpellBar();
   renderTurnUndeadButton();
+  renderThiefBar();
   combatState = {
     phase: "player",
     round: 1,
@@ -43,7 +46,7 @@ function initCombat() {
     playerActedThisRound: false,
     enemyActedThisRound: false,
   };
-  startRound();
+  resolveSurpriseAtStart();
 }
 
 function renderSpellBar() {
@@ -131,6 +134,117 @@ async function playerTurnUndead() {
   checkEnd();
 }
 
+let playerStealthed = false;
+let pendingTrapSearch = false;
+
+function getThiefSkills() {
+  return osricRules?.class_features?.thief_skills || {};
+}
+
+function isThief() {
+  return playerCharacter.class === "thief";
+}
+
+function renderThiefBar() {
+  const bar = document.getElementById("thief-bar");
+  if (!bar) return;
+  bar.innerHTML = "";
+  if (!isThief()) return;
+  const skills = getThiefSkills();
+
+  const sneakBtn = document.createElement("button");
+  sneakBtn.id = "sneak-btn";
+  sneakBtn.className = "btn btn-secondary";
+  sneakBtn.textContent = playerStealthed ? "Hidden" : `Sneak (${skills.move_silently}%)`;
+  sneakBtn.title = "Roll Move Silently / Hide in Shadows to become hidden.";
+  sneakBtn.disabled = combatState && combatState.phase !== "player" || playerStealthed;
+  sneakBtn.addEventListener("click", playerSneak);
+  bar.appendChild(sneakBtn);
+
+  const trapBtn = document.createElement("button");
+  trapBtn.id = "search-traps-btn";
+  trapBtn.className = "btn btn-secondary";
+  trapBtn.textContent = `Find Traps (${skills.find_remove_traps}%)`;
+  trapBtn.title = "Search adjacent tiles for traps.";
+  trapBtn.disabled = combatState && combatState.phase !== "player";
+  trapBtn.addEventListener("click", () => {
+    pendingTrapSearch = true;
+    log("Click an adjacent tile to search for traps.");
+    updateCombatUI();
+  });
+  bar.appendChild(trapBtn);
+}
+
+function rollPercentile() {
+  return rollDie(100);
+}
+
+async function playerSneak() {
+  if (!combatState || combatState.phase !== "player") return;
+  if (combatState.attacked) {
+    log("You have already acted this round.");
+    return;
+  }
+  const skills = getThiefSkills();
+  const roll = rollPercentile();
+  const success = roll <= skills.move_silently;
+  log(`Sneak: Move Silently <span class="roll">${roll}</span>/${skills.move_silently}.`);
+  if (success) {
+    playerStealthed = true;
+    log("<span class='hit'>You melt into the shadows.</span>", "hit");
+    showFloatingText(playerPos.x, playerPos.y, "HIDDEN", 0x5ac989);
+  } else {
+    log("<span class='miss'>You fail to hide.</span>", "miss");
+  }
+  combatState.acted = true;
+  updateCombatUI();
+}
+
+function clearStealth() {
+  if (playerStealthed) {
+    playerStealthed = false;
+    log("Your position is revealed!");
+  }
+}
+
+function searchTrapsAt(x, y) {
+  const skills = getThiefSkills();
+  const roll = rollPercentile();
+  const found = roll <= skills.find_remove_traps;
+  const key = `${x},${y}`;
+  if (mapData[y] && mapData[y][x] === TILE.TRAP && !trapsTriggered.has(key)) {
+    if (found) {
+      trapsDiscovered.add(key);
+      log(`<span class='hit'>Trap found at (${x}, ${y})!</span> Roll ${roll}/${skills.find_remove_traps}.`, "hit");
+      drawMap();
+    } else {
+      log(`No trap found at (${x}, ${y}). Roll ${roll}/${skills.find_remove_traps}.`);
+    }
+  } else {
+    log(`No trap at (${x}, ${y}).`);
+  }
+  pendingTrapSearch = false;
+  combatState.acted = true;
+  updateCombatUI();
+}
+
+function removeTrapAt(x, y) {
+  const skills = getThiefSkills();
+  const roll = rollPercentile();
+  const removed = roll <= skills.find_remove_traps;
+  const key = `${x},${y}`;
+  if (removed) {
+    trapsTriggered.add(key);
+    log(`<span class='hit'>Trap disarmed at (${x}, ${y})!</span> Roll ${roll}/${skills.find_remove_traps}.`, "hit");
+  } else {
+    log(`<span class='damage'>Trap disarm failed at (${x}, ${y}).</span> Roll ${roll}/${skills.find_remove_traps}.`);
+    triggerTrap(x, y);
+  }
+  pendingTrapSearch = false;
+  drawMap();
+  updateCombatUI();
+}
+
 function selectSpell(spell) {
   if (!combatState || combatState.phase !== "player") return;
   if (combatState.attacked) {
@@ -148,8 +262,15 @@ function clearPendingSpell() {
   updateCombatUI();
 }
 
+function dexInitiativeMod() {
+  const mods = playerCharacter.sheet.ability_modifiers;
+  const dex = mods?.dexterity?.missile_to_hit || 0;
+  return dex;
+}
+
 function rollInitiative() {
-  combatState.playerInitiative = rollDie(6);
+  const playerMod = dexInitiativeMod();
+  combatState.playerInitiative = rollDie(6) + playerMod;
   combatState.enemyInitiative = rollDie(6);
   const wentFirst = combatState.playerInitiative >= combatState.enemyInitiative ? "You" : "Enemies";
   log(`${wentFirst} win initiative (player ${combatState.playerInitiative}, enemy ${combatState.enemyInitiative}).`);
@@ -160,6 +281,49 @@ function rollInitiative() {
   combatState.playerActedThisRound = false;
   combatState.enemyActedThisRound = false;
   pendingSpell = null;
+  pendingTrapSearch = false;
+}
+
+function rollSurprise() {
+  const cfg = osricRules?.combat?.surprise || { chance_in_6: 2 };
+  const threshold = cfg.chance_in_6 || 2;
+  const playerSurprised = rollDie(6) <= threshold;
+  const enemySurprised = rollDie(6) <= threshold;
+  return { playerSurprised, enemySurprised };
+}
+
+async function resolveSurpriseAtStart() {
+  const { playerSurprised, enemySurprised } = rollSurprise();
+  if (!playerSurprised && enemySurprised) {
+    log("<span class='hit'>You surprise the enemy!</span>", "hit");
+    await playerSurpriseRound();
+    return;
+  }
+  if (playerSurprised && !enemySurprised) {
+    log("<span class='damage'>The enemy surprises you!</span>", "damage");
+    await enemySurpriseRound();
+    return;
+  }
+  log("Both sides are wary.");
+  startRound();
+}
+
+async function playerSurpriseRound() {
+  // Player gets a free action round before normal initiative begins.
+  combatState.phase = "player";
+  combatState.movementRemaining = tilesPerRound(playerCharacter.sheet.movement);
+  combatState.acted = false;
+  combatState.attacked = false;
+  updateCombatUI();
+  highlightReachable(playerPos, combatState.movementRemaining);
+  highlightRangedTargets();
+  // Wait for the player to act and end turn, then begin round 1.
+}
+
+async function enemySurpriseRound() {
+  // Enemies get a free round; mark them so they don't get another when normal combat starts.
+  await enemyTurn();
+  combatState.enemyActedThisRound = true;
 }
 
 function startRound() {
@@ -185,20 +349,25 @@ function updateCombatUI() {
     hint = "The dungeon stirs…";
   } else if (pendingSpell) {
     hint = `Click a monster to cast ${pendingSpell.name}.`;
+  } else if (pendingTrapSearch) {
+    hint = "Click an adjacent tile to search for traps.";
   } else if (combatState.attacked) {
     hint = "You have attacked. Move or end your turn.";
   } else {
     const ranged = findEquippedRangedWeapon();
     const ammo = ranged && hasAmmoForRangedAttack();
-    hint = ranged
+    let base = ranged
       ? (ammo
         ? "Click a highlighted tile to move, an adjacent monster to melee, or a circled monster to shoot."
         : "Out of ammo. Move or melee with a different weapon.")
       : "Click a highlighted tile to move, or click an adjacent monster to attack (once per round).";
+    if (playerStealthed) base += " You are hidden.";
+    hint = base;
   }
   document.getElementById("action-hint").textContent = hint;
   renderSpellBar();
   renderTurnUndeadButton();
+  renderThiefBar();
 }
 
 function findEquippedMeleeWeapon() {
@@ -314,6 +483,24 @@ async function handleGridClick(gx, gy) {
 
   const targetMonster = monsterAt(gx, gy);
 
+  // Trap search / remove target selection.
+  if (pendingTrapSearch) {
+    const d = distance(playerPos, { x: gx, y: gy });
+    if (d !== 1) {
+      log("You must be adjacent to search for traps.");
+      pendingTrapSearch = false;
+      updateCombatUI();
+      return;
+    }
+    const key = `${gx},${gy}`;
+    if (mapData[gy] && mapData[gy][gx] === TILE.TRAP && trapsDiscovered.has(key) && !trapsTriggered.has(key)) {
+      removeTrapAt(gx, gy);
+    } else {
+      searchTrapsAt(gx, gy);
+    }
+    return;
+  }
+
   // Spell casting target selection.
   if (pendingSpell && targetMonster) {
     await playerCastSpell(pendingSpell, targetMonster);
@@ -336,9 +523,11 @@ async function handleGridClick(gx, gy) {
       log("You have no weapon equipped.");
       return;
     }
-    await playerAttackMonster(targetMonster, false);
+    const backstab = isThief() && playerStealthed;
+    await playerAttackMonster(targetMonster, false, 0, backstab);
     combatState.acted = true;
     combatState.attacked = true;
+    clearStealth();
     updateCombatUI();
     checkEnd();
     return;
@@ -364,6 +553,7 @@ async function handleGridClick(gx, gy) {
       await playerAttackMonster(targetMonster, true, d * 10);
       combatState.acted = true;
       combatState.attacked = true;
+      clearStealth();
       renderCharacterPanel();
       updateCombatUI();
       checkEnd();
@@ -378,6 +568,8 @@ async function handleGridClick(gx, gy) {
     movePlayer(gx, gy);
     combatState.movementRemaining -= dist;
     log(`${playerCharacter.name} moves ${dist * 10} ft.`);
+    // Moving silently is hard; stealth breaks on movement unless thief.
+    if (!isThief()) clearStealth();
     updateCombatUI();
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();
@@ -427,13 +619,10 @@ function triggerTrap(x, y) {
   }
 }
 
-async function playerAttackMonster(monster, ranged = false, rangeFt = 0) {
+async function playerAttackMonster(monster, ranged = false, rangeFt = 0, backstab = false) {
   try {
-    if (!ranged) {
-      showAttackSlash(playerPos.x, playerPos.y, monster.x, monster.y, 0xd4a03d);
-    } else {
-      showAttackSlash(playerPos.x, playerPos.y, monster.x, monster.y, 0xff6b6b);
-    }
+    const slashColor = backstab ? 0xffd700 : (ranged ? 0xff6b6b : 0xd4a03d);
+    showAttackSlash(playerPos.x, playerPos.y, monster.x, monster.y, slashColor);
     const res = await api("/api/osric/attack", {
       method: "POST",
       body: JSON.stringify({
@@ -441,11 +630,14 @@ async function playerAttackMonster(monster, ranged = false, rangeFt = 0) {
         defender: monsterToCombatant(monster),
         ranged,
         range_ft: rangeFt,
+        backstab,
       }),
     });
-    const action = ranged ? "shoots" : "attacks";
+    let action = ranged ? "shoots" : "attacks";
+    if (backstab) action = "backstabs";
     const rangeNote = ranged && res.range_penalty ? ` (${res.range_penalty} range)` : "";
-    log(`${res.attacker} ${action} ${res.defender}${rangeNote}: rolled <span class="roll">${res.raw_roll}</span> vs AC ${res.needed}. ${res.hit ? `<span class="hit">Hit</span> for <span class="damage">${res.damage}</span> damage` : '<span class="miss">Miss</span>'}.`);
+    const backstabNote = backstab ? ` <span class="hit">backstab x${res.backstab_multiplier}</span>` : "";
+    log(`${res.attacker} ${action} ${res.defender}${rangeNote}: rolled <span class="roll">${res.raw_roll}</span> vs AC ${res.needed}. ${res.hit ? `<span class="hit">Hit</span>${backstabNote} for <span class="damage">${res.damage}</span> damage` : '<span class="miss">Miss</span>'}.`);
     if (res.hit) {
       monster.hp -= res.damage;
       showFloatingText(monster.x, monster.y, `-${res.damage}`, 0xff6b6b);
@@ -757,9 +949,11 @@ async function handleKeyDown(e) {
       log("You have no weapon equipped.");
       return;
     }
-    await playerAttackMonster(target, false);
+    const backstab = isThief() && playerStealthed;
+    await playerAttackMonster(target, false, 0, backstab);
     combatState.acted = true;
     combatState.attacked = true;
+    clearStealth();
     updateCombatUI();
     checkEnd();
     return;
@@ -772,6 +966,7 @@ async function handleKeyDown(e) {
     movePlayer(tx, ty);
     combatState.movementRemaining -= 1;
     log(`${playerCharacter.name} moves 10 ft.`);
+    if (!isThief()) clearStealth();
     updateCombatUI();
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();

@@ -17,6 +17,7 @@ let monsters = [];
 let chestsOpened = new Set();
 let doorsOpened = new Set();
 let trapsTriggered = new Set();
+let trapsDiscovered = new Set();
 
 let app = null;
 let boardContainer = null;
@@ -185,6 +186,7 @@ function generateDungeon() {
   chestsOpened.clear();
   doorsOpened.clear();
   trapsTriggered.clear();
+  trapsDiscovered.clear();
   explored.clear();
   computeVisibility();
 }
@@ -288,6 +290,8 @@ function drawMap() {
           drawExitBeacon(x, y);
         } else if (t === TILE.TRAP && trapsTriggered.has(`${x},${y}`)) {
           drawFeatureIcon("trap", x, y, 0xc94a4a);
+        } else if (t === TILE.TRAP && trapsDiscovered.has(`${x},${y}`)) {
+          drawFeatureIcon("trap", x, y, 0xd4a03d);
         }
       }
     }

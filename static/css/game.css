@@ -414,6 +414,11 @@ html, body {
   align-items: center;
   gap: 0.5rem;
 }
+.thief-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 /* Buttons */
 .btn {

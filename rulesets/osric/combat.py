@@ -53,6 +53,7 @@ def resolve_attack(
     defender: dict,
     ranged: bool = False,
     range_ft: int = 0,
+    backstab: bool = False,
 ) -> dict[str, Any]:
     """Resolve a single melee or ranged attack using OSRIC THAC0 vs descending AC."""
     attacker_sheet = attacker.get("sheet", {})
@@ -65,6 +66,8 @@ def resolve_attack(
     damage_mod = 0
     to_hit_mod = 0
     range_penalty = 0
+    backstab_multiplier = 1
+    backstab_bonus = 0
 
     if ranged:
         weapon = _find_equipped_weapon(attacker.get("inventory", []), missile_only=True)
@@ -83,6 +86,12 @@ def resolve_attack(
         str_mods = strength_modifier(attacker["abilities"]["strength"])
         to_hit_mod = str_mods.get("to_hit", 0)
         damage_mod = str_mods.get("damage", 0)
+
+    if backstab:
+        backstab_cfg = COMBAT.get("backstab", {"to_hit_bonus": 4, "damage_multiplier": 2})
+        backstab_bonus = backstab_cfg.get("to_hit_bonus", 4)
+        backstab_multiplier = backstab_cfg.get("damage_multiplier", 2)
+        to_hit_mod += backstab_bonus
 
     damage_die = weapon.get("damage", COMBAT.get("unarmed_damage", "1d2")) if weapon else COMBAT.get("unarmed_damage", "1d2")
     weapon_name = weapon["name"] if weapon else "Unarmed"
@@ -103,6 +112,9 @@ def resolve_attack(
         "needed": needed,
         "to_hit_mod": to_hit_mod,
         "range_penalty": range_penalty,
+        "backstab": backstab,
+        "backstab_bonus": backstab_bonus,
+        "backstab_multiplier": backstab_multiplier,
         "hit": hit,
         "ranged": ranged,
         "weapon": weapon_name,
@@ -112,7 +124,7 @@ def resolve_attack(
 
     if hit:
         damage_roll = roll_expression(damage_die)["total"]
-        result["damage"] = max(1, damage_roll + damage_mod)
+        result["damage"] = max(1, (damage_roll + damage_mod) * backstab_multiplier)
         result["damage_roll"] = damage_roll
 
     return result

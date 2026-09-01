@@ -84,6 +84,46 @@ def run() -> int:
         page.click("#buy-starter-kit")
         page.wait_for_timeout(500)
 
+        # Restart as thief to verify Sneak / Find Traps buttons appear.
+        page.goto(URL)
+        page.wait_for_selector("#play-now-btn", state="visible", timeout=10000)
+        page.click("#play-now-btn")
+        page.wait_for_selector("#create-modal", state="visible", timeout=10000)
+        page.select_option("#char-class", "thief")
+        page.select_option("#roll-method", "arrange_to_taste")
+        page.click("#roll-character-btn")
+        page.wait_for_selector("#ability-pool:not(.hidden)", timeout=10000)
+        page.click("#auto-arrange-btn")
+        page.wait_for_selector("#rolled-abilities .ability-grid", state="visible", timeout=10000)
+        page.click("#buy-starter-kit")
+        page.wait_for_timeout(500)
+        page.click("#enter-dungeon-btn")
+        page.wait_for_selector("#module-list .module-card", state="visible", timeout=10000)
+        page.click(".module-card[data-id='crooked_tower']")
+        page.wait_for_selector("#board-canvas canvas", state="visible", timeout=10000)
+        page.wait_for_selector("text=Round 1", timeout=10000)
+        page.wait_for_timeout(1000)
+
+        if not page.locator("#sneak-btn").count():
+            errors.append("Sneak button not found for thief")
+        else:
+            print("Sneak button present for thief")
+        if not page.locator("#search-traps-btn").count():
+            errors.append("Search Traps button not found for thief")
+        else:
+            print("Search Traps button present for thief")
+
+        # Restart as fighter, buy a bow and arrows, equip bow to verify ammo UI.
+        page.goto(URL)
+        page.wait_for_selector("#play-now-btn", state="visible", timeout=10000)
+        page.click("#play-now-btn")
+        page.wait_for_selector("#create-modal", state="visible", timeout=10000)
+        page.select_option("#char-class", "fighter")
+        page.click("#roll-character-btn")
+        page.wait_for_selector("#rolled-abilities .ability-grid", state="visible", timeout=10000)
+        page.click("#buy-starter-kit")
+        page.wait_for_timeout(500)
+
         page.click(".shop-open-btn")
         page.wait_for_selector("#shop-catalog", state="visible", timeout=10000)
         page.click(".shop-tab[data-cat='weapons']")
@@ -97,11 +137,6 @@ def run() -> int:
         page.click("#close-shop-btn")
         page.wait_for_timeout(300)
 
-        # Equip the bow (fighter can use all weapons).
-        def log_equip(resp):
-            if resp.url.endswith("/api/osric/equip"):
-                print("Equip response:", resp.status, resp.text()[:300])
-        page.on("response", log_equip)
         # Ensure the bow is equipped before entering the dungeon.
         def ensure_bow_equipped():
             state = page.evaluate("""() => ({

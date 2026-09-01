@@ -45,6 +45,7 @@ class AttackAction(BaseModel):
     defender: dict
     ranged: bool = False
     range_ft: int = 0
+    backstab: bool = False
 
 
 class SpellAction(BaseModel):
@@ -290,7 +291,7 @@ def equip_item(req: EquipAction):
 @app.post("/api/osric/attack")
 def resolve_attack(req: AttackAction):
     """Resolve a single melee or ranged attack using OSRIC THAC0 vs descending AC."""
-    return osric_combat.resolve_attack(req.attacker, req.defender, req.ranged, req.range_ft)
+    return osric_combat.resolve_attack(req.attacker, req.defender, req.ranged, req.range_ft, req.backstab)
 
 
 @app.post("/api/osric/spell")
