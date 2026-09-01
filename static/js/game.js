@@ -1334,10 +1334,12 @@ function renderCharacterPanel() {
       <div>
         <div class="char-title">${playerCharacter.name}</div>
         <div class="char-sub">${titleCase(playerCharacter.ancestry)} ${titleCase(playerCharacter.class)} · ${playerCharacter.alignment}</div>
+        <div class="char-sub">Prime: <b class="prime">${classData?.prime_requisites.map(titleCase).join(", ") || "—"}</b></div>
       </div>
     </div>
     <div class="hp-bar"><div class="hp-fill ${hpPct <= 25 ? 'hp-low' : ''}" id="hp-fill" style="width:${hpPct}%"></div></div>
     <div class="char-meta">Level <b>${s.level}</b> · XP <b>${s.xp}</b> / ${s.next_level_xp} · HD <b>${s.hit_die || '1d' + (classData?.hit_die || 8)}</b></div>
+    <div class="xp-bar"><div class="xp-fill" style="width:${Math.min(100, (s.next_level_xp ? (s.xp / s.next_level_xp) * 100 : 0))}%"></div></div>
     <div class="stat-row">
       <div class="stat-card"><div class="stat-icon">${icon("heart", 18)}</div><div class="stat-value" id="char-hp">${s.hit_points}/${s.max_hit_points}</div><div class="stat-label">HP</div></div>
       <div class="stat-card"><div class="stat-icon">${icon("shield", 18)}</div><div class="stat-value">${s.armour_class}</div><div class="stat-label">AC</div></div>
@@ -1398,6 +1400,7 @@ function renderCharacterPanel() {
     ${renderTurnUndeadInline()}
     ${renderAncestryTraitsInline()}
     ${renderEncumbranceInline(s)}
+    ${renderArmourCapInline(s)}
     <div class="gold-line">Gold: <b>${Number(playerCharacter.remaining_gold).toFixed(1)} gp</b></div>
   `;
 
@@ -1453,6 +1456,23 @@ function renderEncumbranceInline(s) {
       <div class="mod-pill">Base MV <b>${s.base_movement}</b></div>
     </div>
   `;
+}
+
+function renderArmourCapInline(s) {
+  const inv = s.inventory?.items || [];
+  for (const entry of inv) {
+    if (!entry.equipped) continue;
+    const item = osricOptions.equipment.find(e => e.id === entry.item_id);
+    if (item && item.category === "armour" && item.movement_cap != null) {
+      return `
+        <div class="section-title">Armour Cap</div>
+        <div class="mod-row">
+          <div class="mod-pill">${item.name} <b>${item.movement_cap} ft</b></div>
+        </div>
+      `;
+    }
+  }
+  return "";
 }
 
 function renderAncestryTraitsInline() {

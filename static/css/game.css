@@ -198,6 +198,19 @@ html, body {
   box-shadow: 0 0 8px rgba(255, 68, 68, 0.4);
 }
 
+.xp-bar {
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #5a8fc9 0%, var(--block) 100%);
+  transition: width 0.2s ease;
+}
+
 .stat-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
