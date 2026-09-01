@@ -50,6 +50,55 @@ const DUNGEON_MODULES = {
     chests: ["storage", "shrine"],
     traps: ["westhall"],
   },
+  sunken_crypt: {
+    name: "The Sunken Crypt",
+    blurb: "A flooded river-tomb where the drowned dead walk again.",
+    story: "The old kings of the River Mere were buried in tombs cut into the chalk beneath the watermeadows. After the spring floods a faint green light has been seen down there, and villagers speak of figures dragging themselves through the marsh at night. The churchwarden offers coin for anyone who seals the lower vault.",
+    objective: "Descend into the flooded crypts, destroy the walking dead, and reach the seal-stone that bars the lowest vault.",
+    intro: "You wade down a slime-slick stair. The air smells of river mud and old bone. Somewhere ahead, water drips into still water.",
+    width: 22,
+    height: 16,
+    rooms: [
+      { id: "entrance",   x: 1, y: 12, w: 6, h: 4, label: "Flooded Entry" },
+      { id: "catacombs",  x: 8, y: 10, w: 5, h: 5, label: "Catacombs" },
+      { id: "cistern",    x: 16, y: 10, w: 5, h: 4, label: "Cistern" },
+      { id: "crossing",   x: 8, y: 6,  w: 6, h: 3, label: "Sunken Crossing" },
+      { id: "ossuary",    x: 2, y: 5,  w: 5, h: 3, label: "Ossuary" },
+      { id: "shrine",     x: 16, y: 5,  w: 5, h: 5, label: "Shrine of Weeds" },
+      { id: "tomb",       x: 2, y: 1,  w: 7, h: 4, label: "King's Tomb" },
+      { id: "exit",       x: 16, y: 1,  w: 5, h: 4, label: "Seal Chamber" },
+    ],
+    room_descriptions: {
+      entrance: "The entry stair is half-flooded. Rusted lanterns still hang from the ceiling, swaying in a draught from below.",
+      catacombs: "Narrow alcoves hold stacked bones. Something has pulled many of them loose and scattered them across the floor.",
+      cistern: "A cistern of black water fills the southern end of the room. Shapes move beneath the surface.",
+      crossing: "Three passages meet in a low vault where the water is ankle-deep and unnaturally cold.",
+      ossuary: "A chamber of heaped bones. Fresh mud and water stain the walls, as if something climbed up from below.",
+      shrine: "A river-shrine to a forgotten god. Its altar is overgrown with weeds and circled by standing water.",
+      tomb: "The royal tomb. A crowned figure in rotted silk stands knee-deep in water, its head lolling to one side.",
+      exit: "The seal-stone stands in the centre of the chamber, carved with warnings against disturbing the dead."
+    },
+    corridors: [
+      ["entrance", "catacombs"],
+      ["catacombs", "cistern"],
+      ["catacombs", "crossing"],
+      ["crossing", "shrine"],
+      ["crossing", "ossuary"],
+      ["ossuary", "tomb"],
+      ["shrine", "exit"],
+    ],
+    playerStart: "entrance",
+    exitRoom: "exit",
+    monsters: [
+      { room: "catacombs", type: "Giant Rat" },
+      { room: "cistern",   type: "Zombie" },
+      { room: "ossuary",   type: "Skeleton" },
+      { room: "shrine",    type: "Zombie" },
+      { room: "tomb",      type: "Ghoul", boss: true, name: "The Drowned King" },
+    ],
+    chests: ["cistern", "shrine"],
+    traps: ["crossing"],
+  },
 };
 
 let currentModule = null;
@@ -174,9 +223,11 @@ function checkRoomEntry(x, y) {
 }
 
 const MONSTER_BASE_STATS = {
-  Kobold:     { hp: 4,  maxHp: 4,  acDesc: 7, thac0: 20, damage: "1d4", xp: 7,  morale: 6 },
+  Kobold:     { hp: 4,  maxHp: 4,  acDesc: 7, thac0: 20, damage: "1d4", xp: 7,  morale: 6,  ranged: { damage: "1d4", range: 40 } },
   "Giant Rat":{ hp: 6,  maxHp: 6,  acDesc: 7, thac0: 20, damage: "1d3", xp: 10, morale: 8 },
-  Goblin:     { hp: 8,  maxHp: 8,  acDesc: 7, thac0: 20, damage: "1d6", xp: 15, morale: 7 },
-  Skeleton:   { hp: 12, maxHp: 12, acDesc: 7, thac0: 20, damage: "1d6", xp: 25, morale: 12 },
-  Orc:        { hp: 16, maxHp: 16, acDesc: 6, thac0: 19, damage: "1d8", xp: 40, morale: 8 },
+  Goblin:     { hp: 8,  maxHp: 8,  acDesc: 7, thac0: 20, damage: "1d6", xp: 15, morale: 7,  ranged: { damage: "1d4", range: 30 } },
+  Skeleton:   { hp: 12, maxHp: 12, acDesc: 7, thac0: 20, damage: "1d6", xp: 25, morale: 12, ranged: { damage: "1d6", range: 50 } },
+  Zombie:     { hp: 14, maxHp: 14, acDesc: 8, thac0: 20, damage: "1d8", xp: 20, morale: 12 },
+  Ghoul:      { hp: 16, maxHp: 16, acDesc: 6, thac0: 19, damage: "1d6", xp: 35, morale: 10 },
+  Orc:        { hp: 16, maxHp: 16, acDesc: 6, thac0: 19, damage: "1d8", xp: 40, morale: 8,  ranged: { damage: "1d6", range: 20 } },
 };

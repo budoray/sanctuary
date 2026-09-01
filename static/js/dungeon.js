@@ -384,12 +384,17 @@ function drawTokens() {
 }
 
 function monsterTexturePath(name) {
-  if (name && name.toLowerCase().includes("grik")) return "/art/monster_goblin_boss.png";
+  if (!name) return null;
+  const lower = name.toLowerCase();
+  if (lower.includes("grik")) return "/art/monster_goblin_boss.png";
+  if (lower.includes("drowned king")) return "/art/monster_drowned_king.png";
   const map = {
     Kobold: "/art/monster_kobold.png",
     "Giant Rat": "/art/monster_rat.png",
     Goblin: "/art/monster_goblin.png",
     Skeleton: "/art/monster_skeleton.png",
+    Zombie: "/art/monster_zombie.png",
+    Ghoul: "/art/monster_ghoul.png",
     Orc: "/art/monster_orc.png",
   };
   return map[name] || null;
@@ -670,6 +675,7 @@ async function killMonster(m) {
       await levelUpCharacter();
     }
     renderCharacterPanel();
+    saveGame();
   }
 }
 

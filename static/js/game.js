@@ -9,6 +9,97 @@ let dungeonLevel = 1;
 let abilityDraft = null; // { pool: [...], assigned: {str: index, ...}, mode: null|"arrange" }
 let rollMethod = "3d6_in_order";
 
+const SAVE_KEY = "sanctuary_run_v1";
+
+function hasSavedRun() {
+  try {
+    return !!localStorage.getItem(SAVE_KEY);
+  } catch (e) {
+    return false;
+  }
+}
+
+function saveGame() {
+  try {
+    const data = {
+      playerCharacter,
+      dungeonLevel,
+      dungeonModuleName,
+      mapData,
+      monsters,
+      playerPos,
+      chestsOpened: Array.from(chestsOpened),
+      doorsOpened: Array.from(doorsOpened),
+      trapsTriggered: Array.from(trapsTriggered),
+      trapsDiscovered: Array.from(trapsDiscovered),
+      explored: Array.from(explored),
+      roomsVisited: Array.from(roomsVisited),
+      currentModule,
+      combatState,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn("Failed to save game:", e);
+  }
+}
+
+function clearSave() {
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch (e) {
+    console.warn("Failed to clear save:", e);
+  }
+}
+
+async function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!data.playerCharacter) return false;
+
+    playerCharacter = data.playerCharacter;
+    dungeonLevel = data.dungeonLevel || 1;
+    dungeonModuleName = data.dungeonModuleName || "crooked_tower";
+    mapData = data.mapData || [];
+    monsters = data.monsters || [];
+    playerPos = data.playerPos || { x: 1, y: 1 };
+    chestsOpened = new Set(data.chestsOpened || []);
+    doorsOpened = new Set(data.doorsOpened || []);
+    trapsTriggered = new Set(data.trapsTriggered || []);
+    trapsDiscovered = new Set(data.trapsDiscovered || []);
+    explored = new Set(data.explored || []);
+    roomsVisited = new Set(data.roomsVisited || []);
+    currentModule = data.currentModule || null;
+    if (data.combatState) {
+      combatState = data.combatState;
+    }
+
+    // Rebuild transient state.
+    document.getElementById("landing-screen").classList.add("hidden");
+    document.getElementById("create-modal").classList.add("hidden");
+    renderCharacterPanel();
+    clearLog();
+    updateLevelBadge();
+    log(`<b>${playerCharacter.name}</b> returns to ${currentModule?.name || "the dungeon"}.`, "hit");
+    initDungeon();
+    drawMap();
+    drawTokens();
+    renderFog();
+    if (combatState) {
+      updateCombatUI();
+      highlightReachable(playerPos, combatState.movementRemaining);
+      highlightRangedTargets();
+    }
+    return true;
+  } catch (e) {
+    console.error("Failed to load game:", e);
+    clearSave();
+    return false;
+  }
+}
+
 async function api(path, options = {}) {
   const res = await fetch(path, {
     headers: { "Accept": "application/json", "Content-Type": "application/json" },
@@ -286,6 +377,7 @@ function showRolledCharacter() {
   renderBreakdowns();
   renderStarterKit();
   updateHeaderStats();
+  saveGame();
 }
 
 function renderAbilityPool() {
@@ -856,6 +948,7 @@ function refreshAfterTransaction() {
   renderShop();
   renderInventoryCreate();
   validateCharacterReady();
+  saveGame();
 }
 
 function starterPackageCost(classId) {
@@ -1236,6 +1329,7 @@ function startModule(id) {
   if (mod && mod.intro) log(mod.intro);
   updateLevelBadge();
   initCombat();
+  saveGame();
 }
 
 function closeModuleModal() {
@@ -1285,12 +1379,37 @@ function descendLevel() {
   updateLevelBadge();
   log(`<b>${playerCharacter.name}</b> descends to level ${dungeonLevel}.`, "hit");
   initCombat();
+  saveGame();
 }
 
 async function initGame() {
   await loadOptions();
 
-  document.getElementById("play-now-btn").addEventListener("click", () => {
+  const playBtn = document.getElementById("play-now-btn");
+  const continueBtn = document.getElementById("continue-btn");
+  const abandonBtn = document.getElementById("abandon-btn");
+
+  if (hasSavedRun()) {
+    continueBtn.classList.remove("hidden");
+    abandonBtn.classList.remove("hidden");
+  }
+
+  continueBtn.addEventListener("click", async () => {
+    const ok = await loadGame();
+    if (!ok) {
+      continueBtn.classList.add("hidden");
+      abandonBtn.classList.add("hidden");
+    }
+  });
+
+  abandonBtn.addEventListener("click", () => {
+    clearSave();
+    continueBtn.classList.add("hidden");
+    abandonBtn.classList.add("hidden");
+    log("Previous run abandoned.");
+  });
+
+  playBtn.addEventListener("click", () => {
     document.getElementById("landing-screen").classList.add("hidden");
     document.getElementById("create-modal").classList.remove("hidden");
     rollCharacter();
@@ -1300,6 +1419,7 @@ async function initGame() {
   document.getElementById("auto-arrange-btn").addEventListener("click", autoArrange);
   document.getElementById("enter-dungeon-btn").addEventListener("click", enterDungeon);
   document.getElementById("restart-btn").addEventListener("click", () => {
+    clearSave();
     location.reload();
   });
 

@@ -115,6 +115,11 @@ html, body {
 .landing-card .btn-large {
   font-size: 1.15rem;
   padding: 0.9rem 2.5rem;
+  margin-bottom: 0.75rem;
+  width: 100%;
+  max-width: 280px;
+}
+.landing-card .btn-large:last-of-type {
   margin-bottom: 1.5rem;
 }
 .landing-meta {

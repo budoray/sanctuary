@@ -477,6 +477,7 @@ async function handleGridClick(gx, gy) {
       drawMap();
       renderFog();
       highlightReachable(playerPos, combatState.movementRemaining);
+      saveGame();
     }
     return;
   }
@@ -574,6 +575,7 @@ async function handleGridClick(gx, gy) {
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();
     await checkTileInteraction(gx, gy);
+    saveGame();
   }
 }
 
@@ -589,6 +591,7 @@ async function checkTileInteraction(x, y) {
       await levelUpCharacter();
     }
     renderCharacterPanel();
+    saveGame();
   } else if (t === TILE.EXIT) {
     if (monsters.every(m => !m.alive || m.fled)) {
       showDescendChoice();
@@ -612,6 +615,7 @@ function triggerTrap(x, y) {
   renderCharacterPanel();
   showFloatingText(x, y, `-${finalDamage}`, 0xff6b6b);
   log(`A trap springs! Save roll <span class="roll">${saveRoll}</span> vs ${saveTarget}: ${saved ? '<span class="hit">saved</span>' : '<span class="miss">failed</span>'}. Take <span class="damage">${finalDamage}</span> damage.`);
+  saveGame();
   if (!playerAlive()) {
     showEnd(false, "Your hero has fallen to a hidden trap.");
   } else if (!playerConscious()) {
@@ -648,6 +652,7 @@ async function playerAttackMonster(monster, ranged = false, rangeFt = 0, backsta
       }
     }
     drawTokens();
+    saveGame();
   } catch (err) {
     log(`<span class="damage">${err.message}</span>`);
   }
@@ -661,6 +666,7 @@ async function levelUpCharacter() {
     });
     log(`<b>${playerCharacter.name} reaches level ${playerCharacter.sheet.level}!</b> HP ${playerCharacter.sheet.hit_points}, THAC0 ${playerCharacter.sheet.thac0}.`, "hit");
     renderCharacterPanel();
+    saveGame();
   } catch (err) {
     log(`<span class="damage">${err.message}</span>`);
   }
@@ -743,6 +749,57 @@ function monsterToCombatant(m) {
   };
 }
 
+function rollDamageExpression(expr) {
+  // Parse simple expressions like "1d6", "1d6+1", "2d4".
+  const match = expr.match(/(\d+)d(\d+)(?:\s*([+-])\s*(\d+))?/);
+  if (!match) return 1;
+  const count = parseInt(match[1], 10);
+  const sides = parseInt(match[2], 10);
+  const modOp = match[3];
+  const modVal = match[4] ? parseInt(match[4], 10) : 0;
+  let total = 0;
+  for (let i = 0; i < count; i++) total += rollDie(sides);
+  if (modOp === "+") total += modVal;
+  if (modOp === "-") total -= modVal;
+  return Math.max(1, total);
+}
+
+function monsterRangedInRange(m) {
+  return m.ranged && distance(m, playerPos) > 0 && distance(m, playerPos) <= Math.floor(m.ranged.range / 10);
+}
+
+async function monsterRangedAttack(m) {
+  try {
+    showAttackSlash(m.x, m.y, playerPos.x, playerPos.y, 0xff6b6b);
+    const rawRoll = rollDie(20);
+    const needed = m.thac0 - playerCharacter.sheet.armour_class_descending;
+    const autoHit = rawRoll === 20;
+    const autoMiss = rawRoll === 1;
+    const hit = autoHit || (!autoMiss && rawRoll >= needed);
+    let damage = 0;
+    if (hit) {
+      damage = rollDamageExpression(m.ranged.damage);
+      playerCharacter.sheet.hit_points -= damage;
+      showFloatingText(playerPos.x, playerPos.y, `-${damage}`, 0xff6b6b);
+      renderCharacterPanel();
+    }
+    log(`${m.name} shoots ${playerCharacter.name}: rolled <span class="roll">${rawRoll}</span> vs AC ${needed}. ${hit ? `<span class="hit">Hit</span> for <span class="damage">${damage}</span> damage` : '<span class="miss">Miss</span>'}.`);
+    if (hit) {
+      if (!playerAlive()) {
+        showEnd(false, "Your hero has fallen.");
+        return;
+      }
+      if (!playerConscious()) {
+        showEnd(false, "Your hero is unconscious and overcome.");
+        return;
+      }
+    }
+    drawTokens();
+  } catch (err) {
+    log(`<span class="damage">${err.message}</span>`);
+  }
+}
+
 function endTurn() {
   if (!combatState || combatState.phase !== "player") return;
   if (!playerConscious()) {
@@ -757,25 +814,73 @@ function endTurn() {
   setTimeout(enemyTurn, 400);
 }
 
+function checkMonsterRally(m) {
+  // A fleeing monster rallies if cornered or if it has put distance between itself and the player.
+  if (!m.fled) return;
+  const d = distance(m, playerPos);
+  if (d >= 8) {
+    m.fled = false;
+    m.moraleChecked = false;
+    log(`<b>${m.name}</b> stops fleeing and readies itself.`, "miss");
+    return;
+  }
+  // Cornered: no valid step away means it must fight.
+  const step = nextStepAway(m, playerPos);
+  if (!step) {
+    m.fled = false;
+    m.moraleChecked = false;
+    log(`<b>${m.name}</b> is cornered and turns to fight!`, "miss");
+  }
+}
+
 async function enemyTurn() {
   const activeMonsters = monsters.filter(m => m.alive);
   for (const m of activeMonsters) {
     if (!playerAlive()) break;
 
-    // Monsters can bash open adjacent doors.
-    for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
-      const nx = m.x + dx, ny = m.y + dy;
-      if (mapData[ny] && mapData[ny][nx] === TILE.DOOR && !doorsOpened.has(`${nx},${ny}`)) {
-        doorsOpened.add(`${nx},${ny}`);
-        log(`A ${m.name} bursts through a door!`);
-        drawMap();
-        renderFog();
-        break;
+    checkMonsterRally(m);
+
+    // Intelligent monsters bash open adjacent doors to reach the player.
+    if (!m.fled && m.morale > 4) {
+      for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+        const nx = m.x + dx, ny = m.y + dy;
+        if (mapData[ny] && mapData[ny][nx] === TILE.DOOR && !doorsOpened.has(`${nx},${ny}`)) {
+          doorsOpened.add(`${nx},${ny}`);
+          log(`A ${m.name} bursts through a door!`);
+          drawMap();
+          renderFog();
+          break;
+        }
       }
     }
 
     const speed = 6; // generic monster speed in tiles
     let moves = speed;
+
+    // Ranged monsters prefer to shoot when in range and not adjacent.
+    if (!m.fled && m.ranged) {
+      const inRange = monsterRangedInRange(m);
+      const adjacent = distance(m, playerPos) === 1;
+      if (inRange && !adjacent) {
+        await monsterRangedAttack(m);
+        if (!playerAlive()) break;
+        continue;
+      }
+      // Move to get in range if too far; back up if adjacent.
+      while (moves > 0 && !monsterRangedInRange(m)) {
+        const step = adjacent ? nextStepAway(m, playerPos) : nextStepToward(m, playerPos);
+        if (!step) break;
+        m.x = step.x;
+        m.y = step.y;
+        moves--;
+      }
+      if (monsterRangedInRange(m) && distance(m, playerPos) > 1) {
+        await monsterRangedAttack(m);
+        if (!playerAlive()) break;
+        continue;
+      }
+    }
+
     const target = m.fled ? farthestFromPlayer(m) : playerPos;
     while (moves > 0 && distance(m, target) > (m.fled ? 0 : 1)) {
       const step = m.fled ? nextStepAway(m, playerPos) : nextStepToward(m, playerPos);
@@ -814,6 +919,7 @@ async function enemyTurn() {
     startRound();
   }
   checkEnd();
+  saveGame();
 }
 
 function nextStepToward(from, to) {
@@ -935,6 +1041,7 @@ async function handleKeyDown(e) {
     drawMap();
     renderFog();
     highlightReachable(playerPos, combatState.movementRemaining);
+    saveGame();
     return;
   }
 
@@ -956,6 +1063,7 @@ async function handleKeyDown(e) {
     clearStealth();
     updateCombatUI();
     checkEnd();
+    saveGame();
     return;
   }
 
@@ -971,6 +1079,7 @@ async function handleKeyDown(e) {
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();
     await checkTileInteraction(tx, ty);
+    saveGame();
   }
 }
 
