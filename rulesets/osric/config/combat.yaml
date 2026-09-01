@@ -52,3 +52,24 @@ encumbrance:
 
 # Minimum movement rate regardless of encumbrance.
 min_movement: 30
+
+# Rest and recovery. All values are moddable via combat.yaml.
+rest:
+  # HP healed per character level when taking a short rest.
+  short_rest_heal_per_level: 1
+  # A short rest consumes the player's action for the round.
+  consumes_action: true
+  # Only safe to rest when no hostile monsters are adjacent/alive.
+  require_safe_area: true
+  # Chance in 6 of a wandering monster if resting in a non-safe area (disabled by require_safe_area).
+  wandering_monster_chance_in_6: 1
+
+# Death saves (optional death's-door rule).
+death_saves:
+  enabled: true
+  # Saving throw used: "death_poison_save" maps to the character's Death/Poison/Paralysis save.
+  target: "death_poison_save"
+  # HP set on a successful save (stabilise). Use 0 to remain unconscious, 1 to wake with 1 HP.
+  success_stabilize_at: 0
+  # HP lost on a failed save.
+  failure_hp_loss: 1

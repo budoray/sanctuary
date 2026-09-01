@@ -1121,9 +1121,13 @@ function renderCharacterPanel() {
     <ul class="inventory-list">
       ${inv.items.length ? inv.items.map(i => {
         const item = osricOptions.equipment.find(e => e.id === i.item_id) || { name: i.item_id };
+        const usable = item.use_action === "heal" && combatState && playerConscious();
         return `<li class="inventory-row">
           <span class="${i.equipped ? 'equipped' : ''}">${item.name}${i.equipped ? ' ◆' : ''}</span>
-          <span class="qty">×${i.quantity || 1}</span>
+          <span style="display:flex;align-items:center;gap:0.4rem;">
+            <span class="qty">×${i.quantity || 1}</span>
+            ${usable ? `<button class="btn btn-secondary use-item-btn" data-id="${i.item_id}" style="font-size:0.7rem;padding:0.2rem 0.4rem;">Use</button>` : ""}
+          </span>
         </li>`;
       }).join("") : '<li style="color:var(--ink-2);font-size:0.8rem;">Empty</li>'}
     </ul>
@@ -1149,6 +1153,14 @@ function renderCharacterPanel() {
     ${renderEncumbranceInline(s)}
     <div class="gold-line">Gold: <b>${Number(playerCharacter.remaining_gold).toFixed(1)} gp</b></div>
   `;
+
+  document.getElementById("char-panel").querySelectorAll(".use-item-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (btn.dataset.id === "potion_of_healing") {
+        await usePotion();
+      }
+    });
+  });
 }
 
 function renderLanguagesInline(mods) {

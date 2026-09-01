@@ -12,17 +12,197 @@ function rollDie(sides) {
 }
 
 function playerAlive() {
-  return playerCharacter && playerCharacter.sheet && playerCharacter.sheet.hit_points > -10;
+  const threshold = combatConfig().death_threshold ?? -10;
+  return playerCharacter && playerCharacter.sheet && playerCharacter.sheet.hit_points > threshold;
 }
 
 function playerConscious() {
-  return playerCharacter && playerCharacter.sheet && playerCharacter.sheet.hit_points > 0;
+  const threshold = combatConfig().unconscious_threshold ?? 0;
+  return playerCharacter && playerCharacter.sheet && playerCharacter.sheet.hit_points > threshold;
 }
 
 function formatCoins(cp) {
   if (cp >= 100) return `${Math.floor(cp / 100)} gp`;
   if (cp >= 10) return `${Math.floor(cp / 10)} sp`;
   return `${cp} cp`;
+}
+
+function combatConfig() {
+  return osricRules?.combat || {};
+}
+
+function isCombatSafe() {
+  return monsters.every(m => !m.alive || m.fled);
+}
+
+function playerDying() {
+  return playerCharacter && playerCharacter.sheet && playerCharacter.sheet.hit_points <= 0 && playerAlive();
+}
+
+function healPlayer(amount) {
+  const s = playerCharacter.sheet;
+  const before = s.hit_points;
+  s.hit_points = Math.min(s.max_hit_points, s.hit_points + amount);
+  const healed = s.hit_points - before;
+  if (healed > 0) {
+    showFloatingText(playerPos.x, playerPos.y, `+${healed}`, 0x5ac989);
+    log(`${playerCharacter.name} heals <span class="hit">${healed}</span> HP.`);
+  }
+  renderCharacterPanel();
+  return healed;
+}
+
+function potionEntry() {
+  return playerCharacter.sheet.inventory.items.find(i => i.item_id === "potion_of_healing" && (i.quantity || 1) > 0);
+}
+
+function hasPotion() {
+  return !!potionEntry();
+}
+
+async function usePotion() {
+  const entry = potionEntry();
+  if (!entry) {
+    log("No potion of healing available.");
+    return 0;
+  }
+  const item = osricOptions.equipment.find(e => e.id === "potion_of_healing");
+  const amount = rollDamageExpression(item?.heal || "1d8");
+  const healed = healPlayer(amount);
+  entry.quantity = (entry.quantity || 1) - 1;
+  if (entry.quantity <= 0) {
+    const idx = playerCharacter.sheet.inventory.items.indexOf(entry);
+    if (idx >= 0) playerCharacter.sheet.inventory.items.splice(idx, 1);
+  }
+  log(`${playerCharacter.name} quaffs a <b>potion of healing</b>.`);
+  renderCharacterPanel();
+  renderConsumablesButton();
+  saveGame();
+  return healed;
+}
+
+function canRest() {
+  const cfg = combatConfig().rest;
+  if (!combatState) return false;
+  if (cfg?.require_safe_area && !isCombatSafe()) return false;
+  if (!playerAlive()) return false;
+  // Unconscious characters can only rest if the area is safe (companions bind wounds).
+  if (!playerConscious() && (!cfg?.require_safe_area || !isCombatSafe())) return false;
+  return combatState.phase === "player";
+}
+
+async function playerRest() {
+  if (!canRest()) {
+    log("It is not safe to rest here.");
+    return;
+  }
+  const cfg = combatConfig().rest;
+  const level = playerCharacter.sheet.level || 1;
+  const perLevel = cfg?.short_rest_heal_per_level ?? 1;
+
+  // Wake an unconscious but stable hero if the area is safe.
+  if (!playerConscious() && playerAlive()) {
+    playerCharacter.sheet.hit_points = 1;
+    log(`<span class="hit">${playerCharacter.name} wakes with 1 HP.</span>`, "hit");
+  }
+
+  const amount = perLevel * level;
+  const healed = healPlayer(amount);
+
+  if (cfg?.consumes_action) {
+    combatState.acted = true;
+    combatState.attacked = true;
+  }
+  log(`${playerCharacter.name} rests and recovers <span class="hit">${healed}</span> HP.`);
+  updateCombatUI();
+  saveGame();
+  if (cfg?.consumes_action) {
+    endTurn();
+  }
+}
+
+async function doDeathSave() {
+  const cfg = combatConfig().death_saves;
+  if (!cfg || !cfg.enabled) {
+    showEnd(false, "Your hero has fallen.");
+    return;
+  }
+  if (!playerDying()) return;
+  const saveKey = cfg.target || "death_poison_save";
+  let target = 15;
+  if (saveKey === "death_poison_save") {
+    target = playerCharacter.sheet.saving_throws?.death_paralysis_poison ?? 15;
+  } else if (typeof saveKey === "number") {
+    target = saveKey;
+  }
+  const roll = rollDie(20);
+  const success = roll >= target;
+  if (success) {
+    const stabilizeAt = cfg.success_stabilize_at ?? 0;
+    playerCharacter.sheet.hit_points = Math.max(playerCharacter.sheet.hit_points, stabilizeAt);
+    log(`Death save <span class="roll">${roll}</span> vs ${target}: <span class="hit">stabilised</span> at ${playerCharacter.sheet.hit_points} HP.`, "hit");
+    showFloatingText(playerPos.x, playerPos.y, "STABLE", 0x5ac989);
+  } else {
+    const loss = cfg.failure_hp_loss ?? 1;
+    playerCharacter.sheet.hit_points -= loss;
+    log(`Death save <span class="roll">${roll}</span> vs ${target}: <span class="miss">failed</span>. Lose ${loss} HP.`, "miss");
+    showFloatingText(playerPos.x, playerPos.y, `-${loss}`, 0xff6b6b);
+  }
+  renderCharacterPanel();
+  if (!playerAlive()) {
+    showEnd(false, "Your hero has bled out.");
+  } else if (isCombatSafe() && !playerConscious()) {
+    // With no immediate threats, rest wakes the character.
+    await playerRest();
+  }
+  saveGame();
+}
+
+function handlePlayerDown(source) {
+  if (!playerAlive()) {
+    showEnd(false, source || "Your hero has fallen.");
+    return;
+  }
+  if (playerDying()) {
+    log(`<span class="damage">${playerCharacter.name} falls unconscious!</span>`, "damage");
+    showFloatingText(playerPos.x, playerPos.y, "UNCONSCIOUS", 0xff6b6b);
+    renderCharacterPanel();
+    saveGame();
+  }
+}
+
+function renderConsumablesButton() {
+  const bar = document.getElementById("consumables-bar");
+  if (!bar) return;
+  bar.innerHTML = "";
+  if (!combatState || !playerConscious()) return;
+  if (!hasPotion()) return;
+  const btn = document.createElement("button");
+  btn.id = "use-potion-btn";
+  btn.className = "btn btn-secondary";
+  btn.textContent = "Use Potion";
+  btn.title = "Drink a potion of healing.";
+  btn.disabled = combatState.phase !== "player";
+  btn.addEventListener("click", usePotion);
+  bar.appendChild(btn);
+}
+
+function renderRestButton() {
+  const bar = document.getElementById("rest-bar");
+  if (!bar) return;
+  bar.innerHTML = "";
+  if (!combatState) return;
+  if (!canRest()) return;
+  const cfg = combatConfig().rest;
+  const amount = (cfg?.short_rest_heal_per_level ?? 1) * (playerCharacter.sheet.level || 1);
+  const btn = document.createElement("button");
+  btn.id = "rest-btn";
+  btn.className = "btn btn-secondary";
+  btn.textContent = playerConscious() ? `Rest (+${amount})` : "Bind Wounds";
+  btn.title = playerConscious() ? "Take a short rest to recover HP." : "Rest until you can stand.";
+  btn.disabled = combatState.phase !== "player";
+  btn.addEventListener("click", playerRest);
+  bar.appendChild(btn);
 }
 
 
@@ -46,6 +226,8 @@ function initCombat() {
     playerActedThisRound: false,
     enemyActedThisRound: false,
   };
+  renderRestButton();
+  renderConsumablesButton();
   resolveSurpriseAtStart();
 }
 
@@ -245,10 +427,21 @@ function removeTrapAt(x, y) {
   updateCombatUI();
 }
 
-function selectSpell(spell) {
+async function selectSpell(spell) {
   if (!combatState || combatState.phase !== "player") return;
   if (combatState.attacked) {
     log("You have already acted this round.");
+    return;
+  }
+  // Healing spells target the caster automatically.
+  if (spell.heal) {
+    await playerCastSpell(spell, null);
+    combatState.acted = true;
+    combatState.attacked = true;
+    renderSpellBar();
+    updateCombatUI();
+    checkEnd();
+    saveGame();
     return;
   }
   pendingSpell = spell;
@@ -326,9 +519,13 @@ async function enemySurpriseRound() {
   combatState.enemyActedThisRound = true;
 }
 
-function startRound() {
+async function startRound() {
   rollInitiative();
   updateCombatUI();
+  if (combatState.phase === "player" && !playerConscious()) {
+    await doDeathSave();
+    return;
+  }
   if (combatState.phase === "player") {
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();
@@ -342,7 +539,10 @@ function updateCombatUI() {
     ? `Round ${combatState.round} — Your turn · Move ${combatState.movementRemaining} tiles`
     : `Round ${combatState.round} — Enemy turn`;
   document.getElementById("turn-badge").textContent = turnText;
-  document.getElementById("end-turn-btn").disabled = combatState.phase !== "player";
+  document.getElementById("end-turn-btn").disabled = combatState.phase !== "player" || !playerConscious();
+
+  renderRestButton();
+  renderConsumablesButton();
 
   let hint;
   if (combatState.phase !== "player") {
@@ -611,7 +811,7 @@ function triggerTrap(x, y) {
   const saveRoll = rollDie(20);
   const saved = saveRoll >= saveTarget;
   const finalDamage = saved ? Math.max(1, Math.floor(damage / 2)) : damage;
-  playerCharacter.sheet.hit_points = Math.max(0, playerCharacter.sheet.hit_points - finalDamage);
+  playerCharacter.sheet.hit_points -= finalDamage;
   renderCharacterPanel();
   showFloatingText(x, y, `-${finalDamage}`, 0xff6b6b);
   log(`A trap springs! Save roll <span class="roll">${saveRoll}</span> vs ${saveTarget}: ${saved ? '<span class="hit">saved</span>' : '<span class="miss">failed</span>'}. Take <span class="damage">${finalDamage}</span> damage.`);
@@ -619,7 +819,7 @@ function triggerTrap(x, y) {
   if (!playerAlive()) {
     showEnd(false, "Your hero has fallen to a hidden trap.");
   } else if (!playerConscious()) {
-    showEnd(false, "Your hero has been knocked unconscious and is slain.");
+    handlePlayerDown("Your hero has been knocked unconscious by a trap.");
   }
 }
 
@@ -726,7 +926,7 @@ async function monsterAttackPlayer(monster) {
         return;
       }
       if (!playerConscious()) {
-        showEnd(false, "Your hero is unconscious and overcome.");
+        handlePlayerDown("Your hero is unconscious and overcome.");
         return;
       }
     }
@@ -790,7 +990,7 @@ async function monsterRangedAttack(m) {
         return;
       }
       if (!playerConscious()) {
-        showEnd(false, "Your hero is unconscious and overcome.");
+        handlePlayerDown("Your hero is unconscious and overcome.");
         return;
       }
     }
@@ -863,7 +1063,7 @@ async function enemyTurn() {
       const adjacent = distance(m, playerPos) === 1;
       if (inRange && !adjacent) {
         await monsterRangedAttack(m);
-        if (!playerAlive()) break;
+        if (!playerAlive() || !playerConscious()) break;
         continue;
       }
       // Move to get in range if too far; back up if adjacent.
@@ -876,7 +1076,7 @@ async function enemyTurn() {
       }
       if (monsterRangedInRange(m) && distance(m, playerPos) > 1) {
         await monsterRangedAttack(m);
-        if (!playerAlive()) break;
+        if (!playerAlive() || !playerConscious()) break;
         continue;
       }
     }
@@ -893,7 +1093,7 @@ async function enemyTurn() {
 
     if (!m.fled && distance(m, playerPos) === 1) {
       await monsterAttackPlayer(m);
-      if (!playerAlive()) break;
+      if (!playerAlive() || !playerConscious()) break;
     }
   }
 
@@ -901,6 +1101,11 @@ async function enemyTurn() {
 
   if (!playerAlive()) {
     showEnd(false, "Your hero has fallen.");
+    return;
+  }
+
+  if (!playerConscious()) {
+    await doDeathSave();
     return;
   }
 

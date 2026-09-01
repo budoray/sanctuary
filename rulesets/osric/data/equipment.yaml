@@ -447,3 +447,9 @@ gear:
     weight: 1
     cost_cp: 50
     ammo_quantity: 20
+  - id: potion_of_healing
+    name: Potion of healing
+    weight: 1
+    cost_cp: 5000
+    use_action: heal
+    heal: 1d8

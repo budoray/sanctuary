@@ -424,6 +424,16 @@ html, body {
   align-items: center;
   gap: 0.5rem;
 }
+.consumables-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.rest-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 /* Buttons */
 .btn {

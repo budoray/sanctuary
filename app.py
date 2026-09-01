@@ -138,10 +138,19 @@ def osric_options():
                 "damage": item.get("damage"),
                 "weight": item.get("weight"),
                 "subcategory": item.get("subcategory"),
+                "use_action": item.get("use_action"),
+                "heal": item.get("heal"),
             }
             for iid, item in osric.EQUIPMENT_BY_ID.items()
         ],
-        "spells": osric_spells.CLASS_SPELLS,
+        "spells": {
+            class_id: [{"id": sid, **spell} for sid, spell in [
+                (s["id"], s) for s in (
+                    [{"id": spell_id, **osric_spells.SPELLS[spell_id]} for spell_id in spell_ids if spell_id in osric_spells.SPELLS]
+                )
+            ]]
+            for class_id, spell_ids in osric_spells.CLASS_SPELLS_RAW.items()
+        },
     }
 
 
