@@ -11,6 +11,19 @@ monsters:
     damage: 1d4
     xp: 7
     morale: 6
+    ranged:
+      damage: 1d4
+      range: 40
+  giant_rat:
+    name: Giant Rat
+    hd: 1
+    hp: 6
+    max_hp: 6
+    ac_descending: 7
+    thac0: 20
+    damage: 1d3
+    xp: 10
+    morale: 5
   goblin:
     name: Goblin
     hd: 1
@@ -21,6 +34,9 @@ monsters:
     damage: 1d6
     xp: 15
     morale: 7
+    ranged:
+      damage: 1d4
+      range: 30
   skeleton:
     name: Skeleton
     hd: 1
@@ -31,6 +47,9 @@ monsters:
     damage: 1d6
     xp: 25
     morale: 12
+    ranged:
+      damage: 1d6
+      range: 50
   orc:
     name: Orc
     hd: 1
@@ -41,6 +60,9 @@ monsters:
     damage: 1d8
     xp: 40
     morale: 8
+    ranged:
+      damage: 1d6
+      range: 20
   hobgoblin:
     name: Hobgoblin
     hd: 1
@@ -51,6 +73,9 @@ monsters:
     damage: 1d8
     xp: 50
     morale: 9
+    ranged:
+      damage: 1d6
+      range: 30
   zombie:
     name: Zombie
     hd: 2
@@ -71,16 +96,29 @@ monsters:
     damage: 1d3
     xp: 75
     morale: 10
-  giant_rat:
-    name: Giant Rat
+  giant_spider:
+    name: Giant Spider
     hd: 1
-    hp: 6
-    max_hp: 6
+    hp: 10
+    max_hp: 10
     ac_descending: 7
     thac0: 20
-    damage: 1d3
-    xp: 10
-    morale: 5
+    damage: 1d6
+    xp: 25
+    morale: 7
+  bandit:
+    name: Bandit
+    hd: 1
+    hp: 10
+    max_hp: 10
+    ac_descending: 7
+    thac0: 20
+    damage: 1d6
+    xp: 15
+    morale: 7
+    ranged:
+      damage: 1d4
+      range: 30
 
 encounter_tables:
   1:

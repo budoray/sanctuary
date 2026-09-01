@@ -511,6 +511,16 @@ function scaleMonsterStats(base, level) {
   };
 }
 
+function findMonsterIdByName(name) {
+  const monsters = osricMonsters?.monsters || {};
+  const direct = name.toLowerCase().replace(/\s+/g, "_");
+  if (monsters[direct]) return direct;
+  for (const [id, tpl] of Object.entries(monsters)) {
+    if (tpl.name && tpl.name.toLowerCase() === name.toLowerCase()) return id;
+  }
+  return null;
+}
+
 function isWalkable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = mapData[y][x];

@@ -928,6 +928,9 @@ async function levelUpCharacter() {
       method: "POST",
       body: JSON.stringify({ character: playerCharacter }),
     });
+    if (party.length && activePartyIndex >= 0 && activePartyIndex < party.length) {
+      party[activePartyIndex] = playerCharacter;
+    }
     log(`<b>${playerCharacter.name} reaches level ${playerCharacter.sheet.level}!</b> HP ${playerCharacter.sheet.hit_points}, THAC0 ${playerCharacter.sheet.thac0}.`, "hit");
     renderCharacterPanel();
     saveGame();

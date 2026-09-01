@@ -288,23 +288,35 @@ function loadDungeonModule(name) {
   monsters = [];
   for (const entry of mod.monsters) {
     const pos = roomCenter(roomById[entry.room]);
-    const type = entry.type;
-    const base = MONSTER_BASE_STATS[type];
-    if (!base) continue;
-    const levelMult = 1 + (dungeonLevel - 1) * 0.35;
+    const monsterId = findMonsterIdByName(entry.type);
+    if (!monsterId) {
+      console.warn("Unknown monster type in module:", entry.type);
+      continue;
+    }
+    const template = getMonsterTemplate(monsterId);
+    if (!template) continue;
     const isBoss = entry.boss;
-    const hp = Math.floor(base.hp * levelMult * (isBoss ? 1.5 : 1));
+    const stats = scaleMonsterStats(template, dungeonLevel);
+    const hp = Math.floor(stats.hp * (isBoss ? 1.5 : 1));
+    const thac0 = Math.max(1, stats.thac0 - (isBoss ? 1 : 0));
+    const damage = isBoss
+      ? `1d${Math.min(12, parseInt(template.damage.slice(2)) + 2)}`
+      : template.damage;
+    const xp = Math.floor(stats.xp * (isBoss ? 2 : 1));
     monsters.push({
-      id: `${type.toLowerCase().replace(/\s+/g, "_")}-${pos.x}-${pos.y}-${dungeonLevel}`,
-      name: entry.name || type,
+      id: `${monsterId}-${pos.x}-${pos.y}-${dungeonLevel}`,
+      name: entry.name || template.name,
+      hd: template.hd || 1,
       x: pos.x,
       y: pos.y,
-      ...base,
       hp: hp,
       maxHp: hp,
-      thac0: Math.max(1, base.thac0 - (dungeonLevel - 1) - (isBoss ? 1 : 0)),
-      damage: isBoss ? `1d${parseInt(base.damage.slice(2)) + 2}` : base.damage,
-      xp: Math.floor(base.xp * levelMult * (isBoss ? 2 : 1)),
+      acDesc: template.ac_descending,
+      thac0: thac0,
+      damage: damage,
+      xp: xp,
+      morale: template.morale,
+      ranged: template.ranged || null,
       alive: true,
       fled: false,
       moraleChecked: false,
@@ -326,17 +338,3 @@ function checkRoomEntry(x, y) {
     log(desc);
   }
 }
-
-const MONSTER_BASE_STATS = {
-  Kobold:     { hp: 4,  maxHp: 4,  acDesc: 7, thac0: 20, damage: "1d4", xp: 7,  morale: 6,  ranged: { damage: "1d4", range: 40 } },
-  "Giant Rat":{ hp: 6,  maxHp: 6,  acDesc: 7, thac0: 20, damage: "1d3", xp: 10, morale: 8 },
-  Goblin:     { hp: 8,  maxHp: 8,  acDesc: 7, thac0: 20, damage: "1d6", xp: 15, morale: 7,  ranged: { damage: "1d4", range: 30 } },
-  Skeleton:   { hp: 12, maxHp: 12, acDesc: 7, thac0: 20, damage: "1d6", xp: 25, morale: 12, ranged: { damage: "1d6", range: 50 } },
-  Zombie:     { hp: 14, maxHp: 14, acDesc: 8, thac0: 20, damage: "1d8", xp: 20, morale: 12 },
-  Ghoul:      { hp: 16, maxHp: 16, acDesc: 6, thac0: 19, damage: "1d6", xp: 35, morale: 10 },
-  Orc:        { hp: 16, maxHp: 16, acDesc: 6, thac0: 19, damage: "1d8", xp: 40, morale: 8,  ranged: { damage: "1d6", range: 20 } },
-  Hobgoblin:  { hp: 18, maxHp: 18, acDesc: 5, thac0: 18, damage: "1d8", xp: 45, morale: 10, ranged: { damage: "1d6", range: 30 } },
-  Wight:      { hp: 20, maxHp: 20, acDesc: 5, thac0: 17, damage: "1d6", xp: 60, morale: 12 },
-  "Giant Spider": { hp: 10, maxHp: 10, acDesc: 7, thac0: 20, damage: "1d6", xp: 25, morale: 7 },
-  Bandit:     { hp: 10, maxHp: 10, acDesc: 7, thac0: 20, damage: "1d6", xp: 15, morale: 7, ranged: { damage: "1d4", range: 30 } },
-};
