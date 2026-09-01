@@ -46,6 +46,15 @@ function isModuleUnlocked(id) {
 
 function setActiveCharacter(index) {
   if (index < 0 || index >= party.length) return;
+  if (combatState && combatState.phase !== "player") {
+    log("You cannot switch characters during the enemy turn.");
+    return;
+  }
+  const threshold = osricRules?.combat?.unconscious_threshold ?? 0;
+  if (party[index].sheet.hit_points <= threshold) {
+    log(`${party[index].name} is unconscious and cannot act.`);
+    return;
+  }
   activePartyIndex = index;
   playerCharacter = party[index];
   renderCharacterPanel();
@@ -347,6 +356,43 @@ function showCreationError(message, actions = "") {
 function clearCreationErrors() {
   const el = document.getElementById("creation-errors");
   if (el) el.innerHTML = "";
+}
+
+function showMessageModal(title, body, actions = []) {
+  const modal = document.getElementById("message-modal");
+  const titleEl = document.getElementById("message-title");
+  const bodyEl = document.getElementById("message-body");
+  const actionsEl = document.getElementById("message-actions");
+  if (!modal || !titleEl || !bodyEl || !actionsEl) return;
+  titleEl.textContent = title;
+  bodyEl.innerHTML = body;
+  actionsEl.innerHTML = "";
+  if (!actions.length) {
+    const ok = document.createElement("button");
+    ok.className = "btn btn-primary";
+    ok.textContent = "OK";
+    ok.addEventListener("click", () => modal.classList.add("hidden"));
+    actionsEl.appendChild(ok);
+  } else {
+    for (const { label, primary, onClick } of actions) {
+      const btn = document.createElement("button");
+      btn.className = primary ? "btn btn-primary" : "btn btn-secondary";
+      btn.textContent = label;
+      btn.addEventListener("click", () => {
+        modal.classList.add("hidden");
+        if (onClick) onClick();
+      });
+      actionsEl.appendChild(btn);
+    }
+  }
+  modal.classList.remove("hidden");
+}
+
+function confirmAction(title, body, onConfirm) {
+  showMessageModal(title, body, [
+    { label: "Cancel", primary: false },
+    { label: "Confirm", primary: true, onClick: onConfirm },
+  ]);
 }
 
 function abilityShort(name) {
@@ -1509,7 +1555,9 @@ async function enterDungeon() {
   }
   const status = partyReadyForDungeon();
   if (!status.ready) {
-    showCreationError(status.reason);
+    showMessageModal("Party Not Ready", status.reason, [
+      { label: "OK", primary: true },
+    ]);
     return;
   }
   renderModuleList();
@@ -1644,10 +1692,12 @@ async function initGame() {
   });
 
   abandonBtn.addEventListener("click", () => {
-    clearSave();
-    continueBtn.classList.add("hidden");
-    abandonBtn.classList.add("hidden");
-    log("Previous run abandoned.");
+    confirmAction("Abandon Run", "This will permanently delete your saved party and dungeon progress. Are you sure?", () => {
+      clearSave();
+      continueBtn.classList.add("hidden");
+      abandonBtn.classList.add("hidden");
+      log("Previous run abandoned.");
+    });
   });
 
   playBtn.addEventListener("click", () => {
@@ -1708,6 +1758,13 @@ async function initGame() {
   moduleModal.addEventListener("click", (e) => {
     if (e.target === moduleModal) closeModuleModal();
   });
+
+  const messageModal = document.getElementById("message-modal");
+  if (messageModal) {
+    messageModal.addEventListener("click", (e) => {
+      if (e.target === messageModal) messageModal.classList.add("hidden");
+    });
+  }
   document.querySelectorAll(".shop-tab").forEach(tab => {
     tab.addEventListener("click", () => {
       shopModalActiveCategory = tab.dataset.cat;
