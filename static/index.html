@@ -46,7 +46,8 @@
 
     <main class="battlefield">
       <aside class="panel char-panel" id="char-panel">
-        <p style="color:var(--ink-2)">No hero yet.</p>
+        <div id="party-panel" class="party-panel"></div>
+        <div id="char-panel-content"><p style="color:var(--ink-2)">No hero yet.</p></div>
       </aside>
 
       <section class="board" id="board">
@@ -88,6 +89,8 @@
           <div class="header-stat"><b id="header-gold">0 gp</b><span>Gold</span></div>
         </div>
       </header>
+
+      <div id="party-roster-bar" class="party-roster-bar"></div>
 
       <div class="create-body">
         <div class="create-col">

@@ -3,6 +3,9 @@
 const ABILITY_ORDER = ["strength", "intelligence", "wisdom", "dexterity", "constitution", "charisma"];
 
 let playerCharacter = null;
+let party = []; // Hot-seat party array
+let activePartyIndex = 0;
+const MAX_PARTY_SIZE = 6;
 let osricOptions = null;
 let osricRules = null;
 let dungeonLevel = 1;
@@ -40,6 +43,54 @@ function isModuleUnlocked(id) {
   return getUnlockedModules().has(id);
 }
 
+function setActiveCharacter(index) {
+  if (index < 0 || index >= party.length) return;
+  activePartyIndex = index;
+  playerCharacter = party[index];
+  renderCharacterPanel();
+  if (combatState && combatState.phase === "player") {
+    combatState.movementRemaining = tilesPerRound(playerCharacter.sheet.movement);
+    combatState.acted = false;
+    combatState.attacked = false;
+    updateCombatUI();
+    highlightReachable(playerPos, combatState.movementRemaining);
+    highlightRangedTargets();
+  }
+}
+
+function activeCharacter() {
+  return playerCharacter || (party.length ? party[0] : null);
+}
+
+function partyConsciousMembers() {
+  const threshold = osricRules?.combat?.unconscious_threshold ?? 0;
+  return party.filter(c => c.sheet.hit_points > threshold);
+}
+
+function partyAliveMembers() {
+  const threshold = osricRules?.combat?.death_threshold ?? -10;
+  return party.filter(c => c.sheet.hit_points > threshold);
+}
+
+function firstConsciousPartyIndex() {
+  const threshold = osricRules?.combat?.unconscious_threshold ?? 0;
+  for (let i = 0; i < party.length; i++) {
+    if (party[i].sheet.hit_points > threshold) return i;
+  }
+  return -1;
+}
+
+function ensureConsciousActive() {
+  const idx = firstConsciousPartyIndex();
+  if (idx >= 0) {
+    activePartyIndex = idx;
+    playerCharacter = party[idx];
+    renderCharacterPanel();
+    return true;
+  }
+  return false;
+}
+
 function hasSavedRun() {
   try {
     return !!localStorage.getItem(SAVE_KEY);
@@ -51,6 +102,8 @@ function hasSavedRun() {
 function saveGame() {
   try {
     const data = {
+      party,
+      activePartyIndex,
       playerCharacter,
       dungeonLevel,
       dungeonModuleName,
@@ -64,7 +117,10 @@ function saveGame() {
       explored: Array.from(explored),
       roomsVisited: Array.from(roomsVisited),
       currentModule,
-      combatState,
+      combatState: combatState ? {
+        ...combatState,
+        partyActed: Array.from(combatState.partyActed || []),
+      } : null,
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -86,9 +142,12 @@ async function loadGame() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return false;
     const data = JSON.parse(raw);
-    if (!data.playerCharacter) return false;
+    if (!data.playerCharacter && !data.party?.length) return false;
 
-    playerCharacter = data.playerCharacter;
+    party = data.party || (data.playerCharacter ? [data.playerCharacter] : []);
+    activePartyIndex = data.activePartyIndex || 0;
+    if (activePartyIndex >= party.length) activePartyIndex = 0;
+    playerCharacter = activeCharacter();
     dungeonLevel = data.dungeonLevel || 1;
     dungeonModuleName = data.dungeonModuleName || "crooked_tower";
     mapData = data.mapData || [];
@@ -103,6 +162,7 @@ async function loadGame() {
     currentModule = data.currentModule || null;
     if (data.combatState) {
       combatState = data.combatState;
+      combatState.partyActed = new Set(combatState.partyActed || []);
     }
 
     // Rebuild transient state.
@@ -111,7 +171,7 @@ async function loadGame() {
     renderCharacterPanel();
     clearLog();
     updateLevelBadge();
-    log(`<b>${playerCharacter.name}</b> returns to ${currentModule?.name || "the dungeon"}.`, "hit");
+    log(`<b>${playerCharacter.name}</b> and company return to ${currentModule?.name || "the dungeon"}.`, "hit");
     initDungeon();
     drawMap();
     drawTokens();
@@ -324,13 +384,17 @@ async function rollCharacter() {
   }
 
   try {
-    playerCharacter = await api("/api/osric/character", {
+    const newCharacter = await api("/api/osric/character", {
       method: "POST",
       body: JSON.stringify({ name, ancestry, class_id, alignment, roll_method: rollMethod }),
     });
+    party.push(newCharacter);
+    activePartyIndex = party.length - 1;
+    playerCharacter = newCharacter;
     showRolledCharacter();
     renderShop();
     renderInventoryCreate();
+    renderPartyRosterCreation();
   } catch (err) {
     const actions = `
       <button class="btn btn-secondary" onclick="rollCharacter()" style="font-size:0.75rem;padding:0.3rem 0.6rem;">Re-roll</button>
@@ -370,6 +434,66 @@ function updateHeaderStats() {
   safeSetText("header-gold", playerCharacter ? `${Number(playerCharacter.remaining_gold).toFixed(1)} gp` : "0 gp");
 }
 
+function classIcon(classId) {
+  const map = {
+    cleric: "✝", druid: "🌿", fighter: "⚔", paladin: "🛡", ranger: "🏹",
+    magic_user: "✦", thief: "🗡", assassin: "☠", monk: "👊", bard: "🎵",
+  };
+  return map[classId] || "★";
+}
+
+function renderPartyRosterCreation() {
+  const bar = document.getElementById("party-roster-bar");
+  if (!bar) return;
+  const atMax = party.length >= MAX_PARTY_SIZE;
+  const html = party.map((c, i) => {
+    const s = c.sheet;
+    const active = i === activePartyIndex;
+    return `
+      <div class="party-member-mini ${active ? 'active' : ''}" data-index="${i}">
+        <div class="mini-portrait"><span>${classIcon(c.class)}</span></div>
+        <div class="mini-info">
+          <div class="mini-name">${c.name}</div>
+          <div class="mini-meta">${titleCase(c.class)} · HP ${s.hit_points}/${s.max_hit_points}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+  bar.innerHTML = html + `
+    <button id="add-companion-btn" class="btn btn-secondary add-companion-btn" ${atMax ? 'disabled' : ''}>
+      + Add Companion (${party.length}/${MAX_PARTY_SIZE})
+    </button>
+  `;
+  bar.querySelectorAll(".party-member-mini").forEach(el => {
+    el.addEventListener("click", () => selectCreationMember(parseInt(el.dataset.index, 10)));
+  });
+  const addBtn = document.getElementById("add-companion-btn");
+  if (addBtn) addBtn.addEventListener("click", addCompanion);
+}
+
+function selectCreationMember(index) {
+  if (index < 0 || index >= party.length) return;
+  activePartyIndex = index;
+  playerCharacter = party[index];
+  abilityDraft = null;
+  document.getElementById("ability-pool").classList.add("hidden");
+  document.getElementById("auto-arrange-btn").classList.add("hidden");
+  updateHeaderStats();
+  showRolledCharacter();
+  renderShop();
+  renderInventoryCreate();
+  renderPartyRosterCreation();
+  validateCharacterReady();
+}
+
+async function addCompanion() {
+  if (party.length >= MAX_PARTY_SIZE) {
+    showCreationError("Your party is full.");
+    return;
+  }
+  await rollCharacter();
+}
+
 function modifierText(mod) {
   if (mod > 0) return `+${mod}`;
   if (mod < 0) return `${mod}`;
@@ -406,6 +530,8 @@ function showRolledCharacter() {
   renderBreakdowns();
   renderStarterKit();
   updateHeaderStats();
+  renderPartyRosterCreation();
+  validateCharacterReady();
   saveGame();
 }
 
@@ -516,16 +642,20 @@ async function finalizeArrangeCharacter() {
     abilities[ability] = abilityDraft.pool[idx];
   }
   try {
-    playerCharacter = await api("/api/osric/character", {
+    const newCharacter = await api("/api/osric/character", {
       method: "POST",
       body: JSON.stringify({ name, ancestry, class_id, alignment, roll_method: "arrange_to_taste", abilities }),
     });
+    party.push(newCharacter);
+    activePartyIndex = party.length - 1;
+    playerCharacter = newCharacter;
     abilityDraft = null;
     document.getElementById("ability-pool").classList.add("hidden");
     document.getElementById("auto-arrange-btn").classList.add("hidden");
     showRolledCharacter();
     renderShop();
     renderInventoryCreate();
+    renderPartyRosterCreation();
   } catch (err) {
     showCreationError(err.message, `<button class="btn btn-secondary" onclick="autoArrange()" style="font-size:0.75rem;padding:0.3rem 0.6rem;">Auto-Arrange</button>`);
   }
@@ -973,9 +1103,13 @@ async function buyCart() {
 }
 
 function refreshAfterTransaction() {
+  if (party.length && activePartyIndex >= 0 && activePartyIndex < party.length) {
+    party[activePartyIndex] = playerCharacter;
+  }
   showRolledCharacter();
   renderShop();
   renderInventoryCreate();
+  renderPartyRosterCreation();
   validateCharacterReady();
   saveGame();
 }
@@ -1033,7 +1167,7 @@ async function buyStarterKit() {
   try {
     playerCharacter = await api("/api/osric/buy-package", {
       method: "POST",
-      body: JSON.stringify({ character: playerCharacter }),
+      body: JSON.stringify({ character: playerCharacter, equip: true }),
     });
     refreshAfterTransaction();
   } catch (err) {
@@ -1100,9 +1234,40 @@ function renderInventoryCreate() {
   });
 }
 
+function renderPartyPanel() {
+  const panel = document.getElementById("party-panel");
+  if (!panel) return;
+  if (party.length <= 1) {
+    panel.innerHTML = "";
+    return;
+  }
+  const acted = combatState?.partyActed || new Set();
+  panel.innerHTML = party.map((c, i) => {
+    const s = c.sheet;
+    const hpPct = s.max_hit_points > 0 ? (s.hit_points / s.max_hit_points) * 100 : 0;
+    const active = i === activePartyIndex;
+    const hasActed = acted.has(i);
+    return `
+      <div class="party-member-token ${active ? 'active' : ''} ${hasActed ? 'acted' : ''}" data-index="${i}">
+        <div class="token-portrait"><span>${classIcon(c.class)}</span></div>
+        <div class="token-bar">
+          <div class="token-name">${c.name}</div>
+          <div class="token-hp"><div class="token-hp-fill" style="width:${hpPct}%"></div></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+  panel.querySelectorAll(".party-member-token").forEach(el => {
+    el.addEventListener("click", () => setActiveCharacter(parseInt(el.dataset.index, 10)));
+  });
+}
+
 function renderCharacterPanel() {
+  renderPartyPanel();
+  const content = document.getElementById("char-panel-content");
+  if (!content) return;
   if (!playerCharacter) {
-    document.getElementById("char-panel").innerHTML = `<p style="color:var(--ink-2)">No hero yet.</p>`;
+    content.innerHTML = `<p style="color:var(--ink-2)">No hero yet.</p>`;
     return;
   }
   const s = playerCharacter.sheet;
@@ -1110,7 +1275,7 @@ function renderCharacterPanel() {
   const mods = s.ability_modifiers;
   const hpPct = s.max_hit_points > 0 ? (s.hit_points / s.max_hit_points) * 100 : 0;
   const classData = osricOptions.classes.find(c => c.id === playerCharacter.class);
-  document.getElementById("char-panel").innerHTML = `
+  content.innerHTML = `
     <div class="char-header">
       <div class="portrait"><span>${playerCharacter.name[0]}</span></div>
       <div>
@@ -1183,7 +1348,7 @@ function renderCharacterPanel() {
     <div class="gold-line">Gold: <b>${Number(playerCharacter.remaining_gold).toFixed(1)} gp</b></div>
   `;
 
-  document.getElementById("char-panel").querySelectorAll(".use-item-btn").forEach(btn => {
+  content.querySelectorAll(".use-item-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       if (btn.dataset.id === "potion_of_healing") {
         await usePotion();
@@ -1305,35 +1470,39 @@ function clearLog() {
 
 let dungeonModuleName = "crooked_tower";
 
-function hasEquippedWeapon() {
-  if (!playerCharacter) return false;
-  const inv = playerCharacter.sheet.inventory || { items: [] };
+function hasEquippedWeapon(character) {
+  const c = character || playerCharacter;
+  if (!c) return false;
+  const inv = c.sheet.inventory || { items: [] };
   return inv.items.some(entry => entry.equipped && osricOptions.equipment.find(e => e.id === entry.item_id)?.category === "weapons");
+}
+
+function partyReadyForDungeon() {
+  if (!party.length) return { ready: false, reason: "Create at least one character." };
+  for (const c of party) {
+    if (!hasEquippedWeapon(c)) {
+      return { ready: false, reason: `${c.name} has no weapon equipped.` };
+    }
+  }
+  return { ready: true, reason: "" };
 }
 
 function validateCharacterReady() {
   const btn = document.getElementById("enter-dungeon-btn");
   if (!btn) return;
-  if (!playerCharacter) {
-    btn.disabled = true;
-    return;
-  }
-  const ready = hasEquippedWeapon();
-  btn.disabled = !ready;
-  if (!ready) {
-    btn.title = "Equip a weapon before entering the dungeon.";
-  } else {
-    btn.title = "";
-  }
+  const status = partyReadyForDungeon();
+  btn.disabled = !status.ready;
+  btn.title = status.reason;
 }
 
 async function enterDungeon() {
-  if (!playerCharacter) {
+  if (!party.length) {
     await rollCharacter();
-    if (!playerCharacter) return;
+    if (!party.length) return;
   }
-  if (!hasEquippedWeapon()) {
-    showCreationError("Equip a weapon before entering the dungeon.");
+  const status = partyReadyForDungeon();
+  if (!status.ready) {
+    showCreationError(status.reason);
     return;
   }
   renderModuleList();
@@ -1373,10 +1542,13 @@ function startModule(id) {
   dungeonModuleName = id;
   document.getElementById("module-modal").classList.add("hidden");
   document.getElementById("create-modal").classList.add("hidden");
+  activePartyIndex = 0;
+  playerCharacter = activeCharacter();
   renderCharacterPanel();
   clearLog();
   const mod = DUNGEON_MODULES[id];
-  log(`<b>${playerCharacter.name}</b> enters ${mod ? mod.name : "the dungeon"}.`, "hit");
+  const names = party.map(c => c.name).join(", ");
+  log(`<b>${names}</b> enter ${mod ? mod.name : "the dungeon"}.`, "hit");
   if (mod && mod.intro) log(mod.intro);
   updateLevelBadge();
   initCombat();
@@ -1474,7 +1646,17 @@ async function initGame() {
   playBtn.addEventListener("click", () => {
     document.getElementById("landing-screen").classList.add("hidden");
     document.getElementById("create-modal").classList.remove("hidden");
-    rollCharacter();
+    party = [];
+    activePartyIndex = 0;
+    playerCharacter = null;
+    abilityDraft = null;
+    document.getElementById("ability-pool").classList.add("hidden");
+    document.getElementById("auto-arrange-btn").classList.add("hidden");
+    updateHeaderStats();
+    renderPartyRosterCreation();
+    clearCreationDetails();
+    document.getElementById("rolled-abilities").innerHTML = "";
+    document.getElementById("creation-summary").innerHTML = `<p style="color:var(--ink-2)">Roll your first hero to begin the party.</p>`;
   });
 
   document.getElementById("roll-character-btn").addEventListener("click", rollCharacter);
@@ -1487,34 +1669,18 @@ async function initGame() {
 
   document.getElementById("roll-method").addEventListener("change", () => {
     rollMethod = document.getElementById("roll-method").value;
-    rollCharacter();
   });
 
   document.getElementById("char-ancestry").addEventListener("change", () => {
     filterCreationOptions();
-    if (rollMethod !== "arrange_to_taste") {
-      rollCharacter();
-    } else if (abilityDraft && Object.keys(abilityDraft.assigned).length === 6) {
-      finalizeArrangeCharacter();
-    }
   });
 
   document.getElementById("char-class").addEventListener("change", () => {
     filterCreationOptions();
-    if (rollMethod !== "arrange_to_taste") {
-      rollCharacter();
-    } else if (abilityDraft && Object.keys(abilityDraft.assigned).length === 6) {
-      finalizeArrangeCharacter();
-    }
   });
 
   document.getElementById("char-alignment").addEventListener("change", () => {
     clearCreationErrors();
-    if (rollMethod !== "arrange_to_taste") {
-      rollCharacter();
-    } else if (abilityDraft && Object.keys(abilityDraft.assigned).length === 6) {
-      finalizeArrangeCharacter();
-    }
   });
 
   const helpModal = document.getElementById("help-modal");

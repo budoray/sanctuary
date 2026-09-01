@@ -21,6 +21,16 @@ function playerConscious() {
   return playerCharacter && playerCharacter.sheet && playerCharacter.sheet.hit_points > threshold;
 }
 
+function anyPartyAlive() {
+  const threshold = combatConfig().death_threshold ?? -10;
+  return party.some(c => c.sheet && c.sheet.hit_points > threshold);
+}
+
+function anyPartyConscious() {
+  const threshold = combatConfig().unconscious_threshold ?? 0;
+  return party.some(c => c.sheet && c.sheet.hit_points > threshold);
+}
+
 function formatCoins(cp) {
   if (cp >= 100) return `${Math.floor(cp / 100)} gp`;
   if (cp >= 10) return `${Math.floor(cp / 10)} sp`;
@@ -124,7 +134,7 @@ async function playerRest() {
 async function doDeathSave() {
   const cfg = combatConfig().death_saves;
   if (!cfg || !cfg.enabled) {
-    showEnd(false, "Your hero has fallen.");
+    showEnd(false, "Your party has fallen.");
     return;
   }
   if (!playerDying()) return;
@@ -150,7 +160,11 @@ async function doDeathSave() {
   }
   renderCharacterPanel();
   if (!playerAlive()) {
-    showEnd(false, "Your hero has bled out.");
+    if (!anyPartyAlive()) {
+      showEnd(false, "Your party has bled out.");
+      return;
+    }
+    ensureConsciousActive();
   } else if (isCombatSafe() && !playerConscious()) {
     // With no immediate threats, rest wakes the character.
     await playerRest();
@@ -159,14 +173,16 @@ async function doDeathSave() {
 }
 
 function handlePlayerDown(source) {
-  if (!playerAlive()) {
-    showEnd(false, source || "Your hero has fallen.");
+  if (!anyPartyAlive()) {
+    showEnd(false, source || "Your party has fallen.");
     return;
   }
   if (playerDying()) {
     log(`<span class="damage">${playerCharacter.name} falls unconscious!</span>`, "damage");
     showFloatingText(playerPos.x, playerPos.y, "UNCONSCIOUS", 0xff6b6b);
+    ensureConsciousActive();
     renderCharacterPanel();
+    updateCombatUI();
     saveGame();
   }
 }
@@ -215,6 +231,8 @@ function initCombat() {
   renderSpellBar();
   renderTurnUndeadButton();
   renderThiefBar();
+  activePartyIndex = 0;
+  playerCharacter = activeCharacter();
   combatState = {
     phase: "player",
     round: 1,
@@ -225,6 +243,7 @@ function initCombat() {
     attacked: false,
     playerActedThisRound: false,
     enemyActedThisRound: false,
+    partyActed: new Set(),
   };
   renderRestButton();
   renderConsumablesButton();
@@ -462,13 +481,14 @@ function dexInitiativeMod() {
 }
 
 function rollInitiative() {
+  const active = activeCharacter();
   const playerMod = dexInitiativeMod();
   combatState.playerInitiative = rollDie(6) + playerMod;
   combatState.enemyInitiative = rollDie(6);
   const wentFirst = combatState.playerInitiative >= combatState.enemyInitiative ? "You" : "Enemies";
   log(`${wentFirst} win initiative (player ${combatState.playerInitiative}, enemy ${combatState.enemyInitiative}).`);
   combatState.phase = combatState.playerInitiative >= combatState.enemyInitiative ? "player" : "enemy";
-  combatState.movementRemaining = tilesPerRound(playerCharacter.sheet.movement);
+  combatState.movementRemaining = tilesPerRound(active.sheet.movement);
   combatState.acted = false;
   combatState.attacked = false;
   combatState.playerActedThisRound = false;
@@ -504,6 +524,8 @@ async function resolveSurpriseAtStart() {
 async function playerSurpriseRound() {
   // Player gets a free action round before normal initiative begins.
   combatState.phase = "player";
+  combatState.partyActed = new Set();
+  if (!playerConscious()) ensureConsciousActive();
   combatState.movementRemaining = tilesPerRound(playerCharacter.sheet.movement);
   combatState.acted = false;
   combatState.attacked = false;
@@ -520,6 +542,10 @@ async function enemySurpriseRound() {
 }
 
 async function startRound() {
+  combatState.partyActed = new Set();
+  if (!playerConscious()) {
+    ensureConsciousActive();
+  }
   rollInitiative();
   updateCombatUI();
   if (combatState.phase === "player" && !playerConscious()) {
@@ -535,8 +561,9 @@ async function startRound() {
 }
 
 function updateCombatUI() {
+  const name = playerCharacter ? playerCharacter.name : "Party";
   const turnText = combatState.phase === "player"
-    ? `Round ${combatState.round} — Your turn · Move ${combatState.movementRemaining} tiles`
+    ? `Round ${combatState.round} — ${name}'s turn · Move ${combatState.movementRemaining} tiles`
     : `Round ${combatState.round} — Enemy turn`;
   document.getElementById("turn-badge").textContent = turnText;
   document.getElementById("end-turn-btn").disabled = combatState.phase !== "player" || !playerConscious();
@@ -817,7 +844,11 @@ function triggerTrap(x, y) {
   log(`A trap springs! Save roll <span class="roll">${saveRoll}</span> vs ${saveTarget}: ${saved ? '<span class="hit">saved</span>' : '<span class="miss">failed</span>'}. Take <span class="damage">${finalDamage}</span> damage.`);
   saveGame();
   if (!playerAlive()) {
-    showEnd(false, "Your hero has fallen to a hidden trap.");
+    if (!anyPartyAlive()) {
+      showEnd(false, "Your party has fallen to a hidden trap.");
+      return;
+    }
+    ensureConsciousActive();
   } else if (!playerConscious()) {
     handlePlayerDown("Your hero has been knocked unconscious by a trap.");
   }
@@ -911,6 +942,8 @@ async function playerCastSpell(spell, targetMonster) {
 
 async function monsterAttackPlayer(monster) {
   try {
+    if (!playerConscious()) ensureConsciousActive();
+    if (!playerCharacter) return;
     showAttackSlash(monster.x, monster.y, playerPos.x, playerPos.y, 0xc94a4a);
     const res = await api("/api/osric/attack", {
       method: "POST",
@@ -922,8 +955,11 @@ async function monsterAttackPlayer(monster) {
       showFloatingText(playerPos.x, playerPos.y, `-${res.damage}`, 0xff6b6b);
       renderCharacterPanel();
       if (!playerAlive()) {
-        showEnd(false, "Your hero has fallen.");
-        return;
+        if (!anyPartyAlive()) {
+          showEnd(false, "Your party has fallen.");
+          return;
+        }
+        ensureConsciousActive();
       }
       if (!playerConscious()) {
         handlePlayerDown("Your hero is unconscious and overcome.");
@@ -970,6 +1006,8 @@ function monsterRangedInRange(m) {
 
 async function monsterRangedAttack(m) {
   try {
+    if (!playerConscious()) ensureConsciousActive();
+    if (!playerCharacter) return;
     showAttackSlash(m.x, m.y, playerPos.x, playerPos.y, 0xff6b6b);
     const rawRoll = rollDie(20);
     const needed = m.thac0 - playerCharacter.sheet.armour_class_descending;
@@ -986,8 +1024,11 @@ async function monsterRangedAttack(m) {
     log(`${m.name} shoots ${playerCharacter.name}: rolled <span class="roll">${rawRoll}</span> vs AC ${needed}. ${hit ? `<span class="hit">Hit</span> for <span class="damage">${damage}</span> damage` : '<span class="miss">Miss</span>'}.`);
     if (hit) {
       if (!playerAlive()) {
-        showEnd(false, "Your hero has fallen.");
-        return;
+        if (!anyPartyAlive()) {
+          showEnd(false, "Your party has fallen.");
+          return;
+        }
+        ensureConsciousActive();
       }
       if (!playerConscious()) {
         handlePlayerDown("Your hero is unconscious and overcome.");
@@ -1000,10 +1041,36 @@ async function monsterRangedAttack(m) {
   }
 }
 
+function nextActingPartyMember() {
+  const threshold = combatConfig().unconscious_threshold ?? 0;
+  const acted = combatState.partyActed || new Set();
+  for (let i = activePartyIndex + 1; i < party.length; i++) {
+    if (party[i].sheet.hit_points > threshold && !acted.has(i)) return i;
+  }
+  for (let i = 0; i <= activePartyIndex; i++) {
+    if (party[i].sheet.hit_points > threshold && !acted.has(i)) return i;
+  }
+  return -1;
+}
+
 function endTurn() {
   if (!combatState || combatState.phase !== "player") return;
   if (!playerConscious()) {
     log("You are unconscious and cannot act.");
+    return;
+  }
+  combatState.partyActed.add(activePartyIndex);
+  const next = nextActingPartyMember();
+  if (next >= 0) {
+    activePartyIndex = next;
+    playerCharacter = party[next];
+    combatState.acted = false;
+    combatState.attacked = false;
+    combatState.movementRemaining = tilesPerRound(playerCharacter.sheet.movement);
+    renderCharacterPanel();
+    updateCombatUI();
+    highlightReachable(playerPos, combatState.movementRemaining);
+    highlightRangedTargets();
     return;
   }
   combatState.playerActedThisRound = true;
@@ -1034,9 +1101,16 @@ function checkMonsterRally(m) {
 }
 
 async function enemyTurn() {
+  if (!anyPartyAlive()) {
+    showEnd(false, "Your party has fallen.");
+    return;
+  }
+  if (!playerConscious()) ensureConsciousActive();
+
   const activeMonsters = monsters.filter(m => m.alive);
   for (const m of activeMonsters) {
-    if (!playerAlive()) break;
+    if (!anyPartyAlive()) break;
+    if (!playerConscious()) ensureConsciousActive();
 
     checkMonsterRally(m);
 
@@ -1063,7 +1137,7 @@ async function enemyTurn() {
       const adjacent = distance(m, playerPos) === 1;
       if (inRange && !adjacent) {
         await monsterRangedAttack(m);
-        if (!playerAlive() || !playerConscious()) break;
+        if (!anyPartyAlive() || !anyPartyConscious()) break;
         continue;
       }
       // Move to get in range if too far; back up if adjacent.
@@ -1076,7 +1150,7 @@ async function enemyTurn() {
       }
       if (monsterRangedInRange(m) && distance(m, playerPos) > 1) {
         await monsterRangedAttack(m);
-        if (!playerAlive() || !playerConscious()) break;
+        if (!anyPartyAlive() || !anyPartyConscious()) break;
         continue;
       }
     }
@@ -1093,14 +1167,14 @@ async function enemyTurn() {
 
     if (!m.fled && distance(m, playerPos) === 1) {
       await monsterAttackPlayer(m);
-      if (!playerAlive() || !playerConscious()) break;
+      if (!anyPartyAlive() || !anyPartyConscious()) break;
     }
   }
 
   combatState.enemyActedThisRound = true;
 
-  if (!playerAlive()) {
-    showEnd(false, "Your hero has fallen.");
+  if (!anyPartyAlive()) {
+    showEnd(false, "Your party has fallen.");
     return;
   }
 
@@ -1112,6 +1186,8 @@ async function enemyTurn() {
   if (!combatState.playerActedThisRound) {
     // Player lost initiative; now it's their turn in the same round.
     combatState.phase = "player";
+    combatState.partyActed = new Set();
+    if (!playerConscious()) ensureConsciousActive();
     combatState.movementRemaining = tilesPerRound(playerCharacter.sheet.movement);
     combatState.acted = false;
     combatState.attacked = false;
