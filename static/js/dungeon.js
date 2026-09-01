@@ -154,28 +154,21 @@ function generateDungeon() {
     const r = monsterRooms[i % monsterRooms.length];
     const pos = roomCenter(r);
     if (distance(pos, playerPos) <= 2) continue;
-    const roll = Math.random();
-    const type = roll < 0.25 ? "Kobold" : roll < 0.55 ? "Goblin" : roll < 0.8 ? "Skeleton" : "Orc";
-    const base = {
-      Kobold:   { hp: 4,  maxHp: 4,  acDesc: 7, thac0: 20, damage: "1d4", xp: 7,  morale: 6 },
-      Goblin:   { hp: 8,  maxHp: 8,  acDesc: 7, thac0: 20, damage: "1d6", xp: 15, morale: 7 },
-      Skeleton: { hp: 12, maxHp: 12, acDesc: 7, thac0: 20, damage: "1d6", xp: 25, morale: 12 },
-      Orc:      { hp: 16, maxHp: 16, acDesc: 6, thac0: 19, damage: "1d8", xp: 40, morale: 8 },
-    }[type];
-    const levelMult = 1 + (dungeonLevel - 1) * 0.35;
-    const stats = {
-      ...base,
-      hp: Math.floor(base.hp * levelMult),
-      maxHp: Math.floor(base.maxHp * levelMult),
-      thac0: Math.max(1, base.thac0 - (dungeonLevel - 1)),
-      xp: Math.floor(base.xp * levelMult),
-    };
+    const monsterId = pickEncounterMonster(dungeonLevel);
+    if (!monsterId) continue;
+    const template = getMonsterTemplate(monsterId);
+    if (!template) continue;
+    const stats = scaleMonsterStats(template, dungeonLevel);
     monsters.push({
-      id: `${type.toLowerCase()}-${pos.x}-${pos.y}-${dungeonLevel}`,
-      name: type,
+      id: `${monsterId}-${pos.x}-${pos.y}-${dungeonLevel}`,
+      name: template.name,
+      hd: template.hd || 1,
       x: pos.x,
       y: pos.y,
       ...stats,
+      acDesc: template.ac_descending,
+      damage: template.damage,
+      morale: template.morale,
       alive: true,
       fled: false,
       moraleChecked: false,
@@ -492,6 +485,32 @@ function classTokenLabel(classId) {
   }[classId] || "H";
 }
 
+function getMonsterTemplate(monsterId) {
+  return osricMonsters?.monsters?.[monsterId] || null;
+}
+
+function pickEncounterMonster(level) {
+  const table = osricMonsters?.encounter_tables?.[String(level)] || osricMonsters?.encounter_tables?.["1"] || [];
+  if (!table.length) return null;
+  const totalWeight = table.reduce((sum, e) => sum + (e.weight || 1), 0);
+  let roll = Math.random() * totalWeight;
+  for (const entry of table) {
+    roll -= entry.weight || 1;
+    if (roll <= 0) return entry.id;
+  }
+  return table[table.length - 1].id;
+}
+
+function scaleMonsterStats(base, level) {
+  const levelMult = 1 + (level - 1) * 0.35;
+  return {
+    hp: Math.max(1, Math.floor((base.hp || 1) * levelMult)),
+    maxHp: Math.max(1, Math.floor((base.max_hp || base.hp || 1) * levelMult)),
+    thac0: Math.max(1, (base.thac0 || 20) - (level - 1)),
+    xp: Math.floor((base.xp || 1) * levelMult),
+  };
+}
+
 function isWalkable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = mapData[y][x];
@@ -694,8 +713,8 @@ async function killMonster(m) {
     playerCharacter.sheet.xp += gained;
     log(`${playerCharacter.name} gains <b>${gained} XP</b>.`, "hit");
 
-    // Gold drop: 1d20 cp per HD, scaled by monster type.
-    const goldRoll = Math.max(1, rollDie(20) * Math.max(1, Math.floor(m.maxHp / 4)));
+    // Gold drop: 1d20 cp per HD.
+    const goldRoll = Math.max(1, rollDie(20) * (m.hd || 1));
     const goldGp = goldRoll / 100;
     playerCharacter.remaining_gold += goldGp;
     // OSRIC: 1 GP = 1 XP.
@@ -714,4 +733,57 @@ async function killMonster(m) {
 function openChest(x, y) {
   chestsOpened.add(`${x},${y}`);
   drawMap();
+}
+
+function findSpawnTiles(minDistance) {
+  const tiles = [];
+  for (let y = 1; y < MAP_H - 1; y++) {
+    for (let x = 1; x < MAP_W - 1; x++) {
+      if (!isWalkable(x, y)) continue;
+      if (monsterAt(x, y)) continue;
+      if (x === playerPos.x && y === playerPos.y) continue;
+      if (distance({ x, y }, playerPos) >= minDistance) {
+        tiles.push({ x, y });
+      }
+    }
+  }
+  return tiles;
+}
+
+function spawnWanderingMonster(countExpr = "1") {
+  const count = Math.max(1, rollDamageExpression(countExpr));
+  const cfg = combatConfig().wandering_monsters || {};
+  const minDistance = cfg.min_distance_tiles || 5;
+  const tiles = findSpawnTiles(minDistance);
+  if (!tiles.length) return 0;
+
+  let spawned = 0;
+  for (let i = 0; i < count; i++) {
+    const monsterId = pickEncounterMonster(dungeonLevel);
+    if (!monsterId) continue;
+    const template = getMonsterTemplate(monsterId);
+    if (!template) continue;
+    const pos = tiles[Math.floor(Math.random() * tiles.length)];
+    const stats = scaleMonsterStats(template, dungeonLevel);
+    monsters.push({
+      id: `${monsterId}-wander-${pos.x}-${pos.y}-${dungeonLevel}-${Date.now()}-${i}`,
+      name: template.name,
+      hd: template.hd || 1,
+      x: pos.x,
+      y: pos.y,
+      ...stats,
+      acDesc: template.ac_descending,
+      damage: template.damage,
+      morale: template.morale,
+      alive: true,
+      fled: false,
+      moraleChecked: false,
+    });
+    spawned++;
+  }
+  if (spawned) {
+    drawTokens();
+    renderFog();
+  }
+  return spawned;
 }

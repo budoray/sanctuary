@@ -95,3 +95,17 @@ death_saves:
   success_stabilize_at: 0
   # HP lost on a failed save.
   failure_hp_loss: 1
+
+# Wandering monsters.
+wandering_monsters:
+  enabled: true
+  # Chance in 6 of an encounter each time it is checked.
+  chance_in_6: 1
+  # Number of monsters spawned per encounter.
+  count_per_encounter: 1d3
+  # Minimum distance from the party when they spawn.
+  min_distance_tiles: 5
+  # Check for wanderers when the party rests in the dungeon.
+  check_on_rest: true
+  # Check for wanderers at the end of each full round.
+  check_every_round: false

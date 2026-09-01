@@ -1,0 +1,112 @@
+# OSRIC monster definitions and dungeon encounter tables.
+
+monsters:
+  kobold:
+    name: Kobold
+    hd: 1
+    hp: 4
+    max_hp: 4
+    ac_descending: 7
+    thac0: 20
+    damage: 1d4
+    xp: 7
+    morale: 6
+  goblin:
+    name: Goblin
+    hd: 1
+    hp: 8
+    max_hp: 8
+    ac_descending: 7
+    thac0: 20
+    damage: 1d6
+    xp: 15
+    morale: 7
+  skeleton:
+    name: Skeleton
+    hd: 1
+    hp: 12
+    max_hp: 12
+    ac_descending: 7
+    thac0: 20
+    damage: 1d6
+    xp: 25
+    morale: 12
+  orc:
+    name: Orc
+    hd: 1
+    hp: 16
+    max_hp: 16
+    ac_descending: 6
+    thac0: 19
+    damage: 1d8
+    xp: 40
+    morale: 8
+  hobgoblin:
+    name: Hobgoblin
+    hd: 1
+    hp: 18
+    max_hp: 18
+    ac_descending: 5
+    thac0: 19
+    damage: 1d8
+    xp: 50
+    morale: 9
+  zombie:
+    name: Zombie
+    hd: 2
+    hp: 22
+    max_hp: 22
+    ac_descending: 8
+    thac0: 19
+    damage: 1d8
+    xp: 65
+    morale: 12
+  ghoul:
+    name: Ghoul
+    hd: 2
+    hp: 26
+    max_hp: 26
+    ac_descending: 6
+    thac0: 19
+    damage: 1d3
+    xp: 75
+    morale: 10
+  giant_rat:
+    name: Giant Rat
+    hd: 1
+    hp: 6
+    max_hp: 6
+    ac_descending: 7
+    thac0: 20
+    damage: 1d3
+    xp: 10
+    morale: 5
+
+encounter_tables:
+  1:
+    - id: kobold
+      weight: 25
+    - id: goblin
+      weight: 30
+    - id: skeleton
+      weight: 25
+    - id: orc
+      weight: 20
+  2:
+    - id: orc
+      weight: 30
+    - id: hobgoblin
+      weight: 25
+    - id: zombie
+      weight: 25
+    - id: ghoul
+      weight: 20
+  3:
+    - id: hobgoblin
+      weight: 30
+    - id: ghoul
+      weight: 25
+    - id: zombie
+      weight: 25
+    - id: giant_rat
+      weight: 20

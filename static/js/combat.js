@@ -106,6 +106,20 @@ async function playerRest() {
     log("It is not safe to rest here.");
     return;
   }
+  const wanderCfg = combatConfig().wandering_monsters;
+  if (wanderCfg?.enabled && wanderCfg?.check_on_rest) {
+    const chance = wanderCfg.chance_in_6 ?? 1;
+    if (rollDie(6) <= chance) {
+      const spawned = spawnWanderingMonster(wanderCfg.count_per_encounter);
+      if (spawned) {
+        log(`<span class="damage">Wandering monsters find the party while resting!</span>`, "damage");
+        updateCombatUI();
+        saveGame();
+        return;
+      }
+    }
+  }
+
   const cfg = combatConfig().rest;
   const level = playerCharacter.sheet.level || 1;
   const perLevel = cfg?.short_rest_heal_per_level ?? 1;
@@ -1202,6 +1216,17 @@ async function enemyTurn() {
   if (!playerConscious()) {
     await doDeathSave();
     return;
+  }
+
+  const wanderCfg = combatConfig().wandering_monsters;
+  if (wanderCfg?.enabled && wanderCfg?.check_every_round && !isCombatSafe()) {
+    const chance = wanderCfg.chance_in_6 ?? 1;
+    if (rollDie(6) <= chance) {
+      const spawned = spawnWanderingMonster(wanderCfg.count_per_encounter);
+      if (spawned) {
+        log(`<span class="damage">More monsters wander into the fight!</span>`, "damage");
+      }
+    }
   }
 
   if (!combatState.playerActedThisRound) {

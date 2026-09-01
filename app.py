@@ -154,6 +154,14 @@ def osric_options():
     }
 
 
+@app.get("/api/osric/monsters")
+def osric_monsters():
+    return {
+        "monsters": osric.all_monsters(),
+        "encounter_tables": osric.MONSTERS.get("encounter_tables", {}),
+    }
+
+
 def _rebuild_sheet(character: dict, inventory: list[dict]) -> dict:
     """Rebuild the OSRIC sheet and preserve transient state like spell slots."""
     slots = character.get("sheet", {}).get("spell_slots", osric_spells.initial_spell_slots(character["class"]))

@@ -23,6 +23,7 @@ THAC0: dict[str, int] = loader.load_data("thac0.yaml")
 STARTING_GOLD: dict[str, dict] = loader.load_data("starting_gold.yaml")
 EQUIPMENT: dict = loader.load_data("equipment.yaml")
 CLASS_FEATURES: dict = loader.load_data("class_features.yaml")
+MONSTERS: dict = loader.load_data("monsters.yaml")
 
 CORE: dict = loader.load_config("core.yaml")
 ROLLING: dict = loader.load_config("rolling.yaml")
@@ -51,6 +52,22 @@ def class_features(class_id: str) -> dict[str, Any]:
         "abilities": CLASS_FEATURES.get("abilities", {}).get(class_id, []),
         "thief_skills": CLASS_FEATURES.get("thief_skills", {}) if class_id == "thief" else {},
     }
+
+
+def monster_data(monster_id: str) -> dict[str, Any]:
+    """Return a monster template by id."""
+    return MONSTERS.get("monsters", {}).get(monster_id, {})
+
+
+def encounter_table(level: int) -> list[dict]:
+    """Return the encounter table for a dungeon level."""
+    tables = MONSTERS.get("encounter_tables", {})
+    return tables.get(str(level), tables.get("1", []))
+
+
+def all_monsters() -> dict[str, dict]:
+    """Return all monster templates keyed by id."""
+    return dict(MONSTERS.get("monsters", {}))
 
 
 def _roll_dice_expression(dice: str) -> int:

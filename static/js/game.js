@@ -8,6 +8,7 @@ let activePartyIndex = 0;
 const MAX_PARTY_SIZE = 6;
 let osricOptions = null;
 let osricRules = null;
+let osricMonsters = null;
 let dungeonLevel = 1;
 let abilityDraft = null; // { pool: [...], assigned: {str: index, ...}, mode: null|"arrange" }
 let rollMethod = "3d6_in_order";
@@ -207,9 +208,10 @@ async function api(path, options = {}) {
 }
 
 async function loadOptions() {
-  [osricOptions, osricRules] = await Promise.all([
+  [osricOptions, osricRules, osricMonsters] = await Promise.all([
     api("/api/osric/options"),
     api("/api/osric/rules"),
+    api("/api/osric/monsters"),
   ]);
   populateSelect("char-ancestry", osricOptions.ancestries);
   populateSelect("char-class", osricOptions.classes);
