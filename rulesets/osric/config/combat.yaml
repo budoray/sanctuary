@@ -53,6 +53,28 @@ encumbrance:
 # Minimum movement rate regardless of encumbrance.
 min_movement: 30
 
+# Generic monster movement in tiles per round (10 ft per tile).
+monster_speed_tiles: 6
+
+# Traps.
+trap:
+  # Damage expression for triggered traps.
+  damage_die: "1d6"
+  # Saving throw used to reduce trap damage (maps to sheet.saving_throws key).
+  save_target: "petrification_polymorph"
+  # Save target fallback if the key is missing.
+  save_fallback: 15
+  # Damage on a successful save is half, minimum 1.
+  save_half: true
+  # Minimum damage even on a successful save.
+  min_damage_on_save: 1
+
+# Chests.
+chest:
+  # Gold found in a chest is roll * cp_per_roll.
+  gold_die: "1d6"
+  gold_cp_per_roll: 100
+
 # Rest and recovery. All values are moddable via combat.yaml.
 rest:
   # HP healed per character level when taking a short rest.

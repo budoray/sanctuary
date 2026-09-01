@@ -49,12 +49,17 @@ function setActiveCharacter(index) {
   playerCharacter = party[index];
   renderCharacterPanel();
   if (combatState && combatState.phase === "player") {
-    combatState.movementRemaining = tilesPerRound(playerCharacter.sheet.movement);
-    combatState.acted = false;
-    combatState.attacked = false;
+    const acted = combatState.partyActed?.has(index);
+    combatState.acted = !!acted;
+    combatState.attacked = !!acted;
+    combatState.movementRemaining = acted ? 0 : tilesPerRound(playerCharacter.sheet.movement);
     updateCombatUI();
-    highlightReachable(playerPos, combatState.movementRemaining);
-    highlightRangedTargets();
+    if (!acted) {
+      highlightReachable(playerPos, combatState.movementRemaining);
+      highlightRangedTargets();
+    } else {
+      clearHighlights();
+    }
   }
 }
 

@@ -810,7 +810,9 @@ async function checkTileInteraction(x, y) {
   const t = mapData[y][x];
   if (t === TILE.CHEST && !chestsOpened.has(`${x},${y}`)) {
     openChest(x, y);
-    const cp = rollDie(6) * 100;
+    const chestCfg = combatConfig().chest || {};
+    const rolls = rollDamageExpression(chestCfg.gold_die || "1d6");
+    const cp = rolls * (chestCfg.gold_cp_per_roll || 100);
     playerCharacter.remaining_gold += cp / 100;
     playerCharacter.sheet.xp += cp;
     log(`The chest holds <b>${formatCoins(cp)}</b> (${cp} XP).`, "hit");
@@ -830,14 +832,31 @@ async function checkTileInteraction(x, y) {
   }
 }
 
+function trapDamage() {
+  const die = combatConfig().trap?.damage_die || "1d6";
+  return rollDamageExpression(die);
+}
+
+function trapSaveTarget() {
+  const cfg = combatConfig().trap || {};
+  const key = cfg.save_target;
+  if (key && playerCharacter?.sheet?.saving_throws && playerCharacter.sheet.saving_throws[key] !== undefined) {
+    return playerCharacter.sheet.saving_throws[key];
+  }
+  return cfg.save_fallback || 15;
+}
+
 function triggerTrap(x, y) {
   trapsTriggered.add(`${x},${y}`);
   drawMap();
-  const damage = rollDie(6);
-  const saveTarget = playerCharacter.sheet.saving_throws.petrification_polymorph || 15;
+  const cfg = combatConfig().trap || {};
+  const damage = trapDamage();
+  const saveTarget = trapSaveTarget();
   const saveRoll = rollDie(20);
   const saved = saveRoll >= saveTarget;
-  const finalDamage = saved ? Math.max(1, Math.floor(damage / 2)) : damage;
+  const finalDamage = saved
+    ? Math.max(cfg.min_damage_on_save ?? 1, Math.floor(damage / 2))
+    : damage;
   playerCharacter.sheet.hit_points -= finalDamage;
   renderCharacterPanel();
   showFloatingText(x, y, `-${finalDamage}`, 0xff6b6b);
@@ -1011,8 +1030,10 @@ async function monsterRangedAttack(m) {
     showAttackSlash(m.x, m.y, playerPos.x, playerPos.y, 0xff6b6b);
     const rawRoll = rollDie(20);
     const needed = m.thac0 - playerCharacter.sheet.armour_class_descending;
-    const autoHit = rawRoll === 20;
-    const autoMiss = rawRoll === 1;
+    const autoHitVal = combatConfig().auto_hit ?? 20;
+    const autoMissVal = combatConfig().auto_miss ?? 1;
+    const autoHit = rawRoll === autoHitVal;
+    const autoMiss = rawRoll === autoMissVal;
     const hit = autoHit || (!autoMiss && rawRoll >= needed);
     let damage = 0;
     if (hit) {
@@ -1128,7 +1149,7 @@ async function enemyTurn() {
       }
     }
 
-    const speed = 6; // generic monster speed in tiles
+    const speed = combatConfig().monster_speed_tiles || 6;
     let moves = speed;
 
     // Ranged monsters prefer to shoot when in range and not adjacent.
