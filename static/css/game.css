@@ -1046,6 +1046,30 @@ html, body {
   font-weight: 700;
   white-space: nowrap;
 }
+.module-card.locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-color: var(--rule);
+}
+.module-card.locked:hover {
+  background: var(--panel-2);
+  border-color: var(--rule);
+}
+.module-card-locked {
+  font-size: 0.75rem;
+  color: var(--danger);
+  margin-bottom: 0.5rem;
+}
+.lock-tag {
+  font-size: 0.65rem;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 4px;
+  padding: 0.05rem 0.35rem;
+  margin-left: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
 
 .help-list {
   margin: 0;

@@ -260,6 +260,7 @@ function drawMap() {
   const wallEdge = 0x463a2d;
   const floorA = 0x1e1a16;
   const floorB = 0x242019;
+  const hasTileArt = textureExists("/art/tile_floor.png");
 
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
@@ -268,22 +269,30 @@ function drawMap() {
       const py = y * TILE_SIZE;
 
       if (t === TILE.WALL) {
-        tileGraphics.beginFill(wallColor);
-        tileGraphics.lineStyle(1, wallEdge, 1);
-        tileGraphics.drawRect(px, py, TILE_SIZE, TILE_SIZE);
-        tileGraphics.endFill();
-        // Add a little stone highlight at top-left.
-        tileGraphics.beginFill(0x3d352c, 0.5);
-        tileGraphics.drawRect(px + 2, py + 2, TILE_SIZE * 0.4, TILE_SIZE * 0.25);
-        tileGraphics.endFill();
+        if (hasTileArt) {
+          drawTileSprite("/art/tile_wall.png", x, y);
+        } else {
+          tileGraphics.beginFill(wallColor);
+          tileGraphics.lineStyle(1, wallEdge, 1);
+          tileGraphics.drawRect(px, py, TILE_SIZE, TILE_SIZE);
+          tileGraphics.endFill();
+          tileGraphics.beginFill(0x3d352c, 0.5);
+          tileGraphics.drawRect(px + 2, py + 2, TILE_SIZE * 0.4, TILE_SIZE * 0.25);
+          tileGraphics.endFill();
+        }
       } else {
-        tileGraphics.beginFill((x + y) % 2 === 0 ? floorA : floorB);
-        tileGraphics.lineStyle(1, 0x322a22, 0.6);
-        tileGraphics.drawRect(px, py, TILE_SIZE, TILE_SIZE);
-        tileGraphics.endFill();
+        if (hasTileArt) {
+          const path = (x + y) % 2 === 0 ? "/art/tile_floor.png" : "/art/tile_floor_alt.png";
+          drawTileSprite(path, x, y);
+        } else {
+          tileGraphics.beginFill((x + y) % 2 === 0 ? floorA : floorB);
+          tileGraphics.lineStyle(1, 0x322a22, 0.6);
+          tileGraphics.drawRect(px, py, TILE_SIZE, TILE_SIZE);
+          tileGraphics.endFill();
+        }
 
         if (t === TILE.DOOR && !doorsOpened.has(`${x},${y}`)) {
-          drawFeatureSprite("/art/icon_door.png", x, y);
+          drawTileSprite("/art/tile_door.png", x, y);
         } else if (t === TILE.CHEST && !chestsOpened.has(`${x},${y}`)) {
           drawFeatureSprite("/art/icon_chest.png", x, y);
         } else if (t === TILE.EXIT) {
@@ -296,6 +305,25 @@ function drawMap() {
       }
     }
   }
+}
+
+function textureExists(path) {
+  if (textureCache[path]) return true;
+  // PIXI.Texture.from creates the texture immediately; we assume assets exist if generated.
+  try {
+    const t = PIXI.Texture.from(path);
+    return t && t.baseTexture && !t.baseTexture._invalid;
+  } catch (e) {
+    return false;
+  }
+}
+
+function drawTileSprite(path, x, y) {
+  const sprite = new PIXI.Sprite(getTexture(path));
+  sprite.position.set(x * TILE_SIZE, y * TILE_SIZE);
+  sprite.width = TILE_SIZE;
+  sprite.height = TILE_SIZE;
+  tileGraphics.addChild(sprite);
 }
 
 function drawFeatureSprite(path, x, y) {
@@ -396,6 +424,10 @@ function monsterTexturePath(name) {
     Zombie: "/art/monster_zombie.png",
     Ghoul: "/art/monster_ghoul.png",
     Orc: "/art/monster_orc.png",
+    Hobgoblin: "/art/monster_hobgoblin.png",
+    Wight: "/art/monster_wight.png",
+    "Giant Spider": "/art/monster_spider.png",
+    Bandit: "/art/monster_bandit.png",
   };
   return map[name] || null;
 }

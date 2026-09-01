@@ -10,6 +10,35 @@ let abilityDraft = null; // { pool: [...], assigned: {str: index, ...}, mode: nu
 let rollMethod = "3d6_in_order";
 
 const SAVE_KEY = "sanctuary_run_v1";
+const UNLOCK_KEY = "sanctuary_unlocked_v1";
+
+function getUnlockedModules() {
+  try {
+    const raw = localStorage.getItem(UNLOCK_KEY);
+    const set = new Set(raw ? JSON.parse(raw) : []);
+    set.add("crooked_tower"); // starter module always available
+    return set;
+  } catch (e) {
+    return new Set(["crooked_tower"]);
+  }
+}
+
+function unlockModule(id) {
+  if (!id) return;
+  const unlocked = getUnlockedModules();
+  if (unlocked.has(id)) return;
+  unlocked.add(id);
+  try {
+    localStorage.setItem(UNLOCK_KEY, JSON.stringify(Array.from(unlocked)));
+    log(`<span class="hit">New dungeon unlocked: ${DUNGEON_MODULES[id]?.name || id}</span>`, "hit");
+  } catch (e) {
+    console.warn("Failed to save unlocks:", e);
+  }
+}
+
+function isModuleUnlocked(id) {
+  return getUnlockedModules().has(id);
+}
 
 function hasSavedRun() {
   try {
@@ -1314,18 +1343,28 @@ async function enterDungeon() {
 function renderModuleList() {
   const list = document.getElementById("module-list");
   if (!list || typeof DUNGEON_MODULES === "undefined") return;
-  list.innerHTML = Object.entries(DUNGEON_MODULES).map(([id, mod]) => `
-    <div class="module-card" data-id="${id}">
+  const unlocked = getUnlockedModules();
+  list.innerHTML = Object.entries(DUNGEON_MODULES).map(([id, mod]) => {
+    const locked = !unlocked.has(id);
+    const predecessor = Object.entries(DUNGEON_MODULES).find(([_, m]) => m.unlocks === id);
+    const lockHint = locked
+      ? `Complete ${predecessor ? predecessor[1].name : "the prior dungeon"} to unlock.`
+      : "";
+    const levelText = mod.level ? `Level ${mod.level}` : "Level 1";
+    return `
+    <div class="module-card ${locked ? 'locked' : ''}" data-id="${id}" ${locked ? 'title="' + lockHint + '"' : ''}>
       <div class="module-card-info">
-        <div class="module-card-title">${mod.name}</div>
+        <div class="module-card-title">${mod.name}${locked ? ' <span class="lock-tag">Locked</span>' : ''}</div>
         <div class="module-card-blurb">${mod.blurb}</div>
-        ${mod.story ? `<div class="module-card-story">${mod.story}</div>` : ""}
-        ${mod.objective ? `<div class="module-card-objective"><b>Objective:</b> ${mod.objective}</div>` : ""}
+        ${locked ? `<div class="module-card-locked">${lockHint}</div>` : ""}
+        ${!locked && mod.story ? `<div class="module-card-story">${mod.story}</div>` : ""}
+        ${!locked && mod.objective ? `<div class="module-card-objective"><b>Objective:</b> ${mod.objective}</div>` : ""}
       </div>
-      <div class="module-card-level">Level 1</div>
+      <div class="module-card-level">${levelText}</div>
     </div>
-  `).join("");
-  list.querySelectorAll(".module-card").forEach(card => {
+  `;
+  }).join("");
+  list.querySelectorAll(".module-card:not(.locked)").forEach(card => {
     card.addEventListener("click", () => startModule(card.dataset.id));
   });
 }
@@ -1362,12 +1401,22 @@ function showEnd(won, message) {
   modal.classList.remove("hidden");
 }
 
+function unlockNextModule() {
+  const mod = DUNGEON_MODULES[dungeonModuleName];
+  if (mod && mod.unlocks) {
+    unlockModule(mod.unlocks);
+  }
+}
+
 function showDescendChoice() {
   const modal = document.getElementById("end-modal");
   document.getElementById("end-title").textContent = "Exit Open";
   document.getElementById("end-msg").textContent = `You have cleared level ${dungeonLevel}. Escape with your loot, or descend deeper?`;
   document.getElementById("restart-btn").textContent = "Escape";
-  document.getElementById("restart-btn").onclick = () => location.reload();
+  document.getElementById("restart-btn").onclick = () => {
+    unlockNextModule();
+    location.reload();
+  };
 
   const descendBtn = document.getElementById("descend-btn");
   if (!descendBtn) {
@@ -1385,6 +1434,7 @@ function showDescendChoice() {
 }
 
 function descendLevel() {
+  unlockNextModule();
   dungeonLevel++;
   document.getElementById("end-modal").classList.add("hidden");
   clearLog();
