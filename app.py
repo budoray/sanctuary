@@ -87,6 +87,7 @@ def osric_rules():
         "combat": osric.COMBAT,
         "ability_modifiers": osric.ABILITY_MODIFIERS,
         "class_features": osric.CLASS_FEATURES,
+        "traps": osric_loader.load_data("traps.yaml") or {},
     }
 
 
@@ -140,6 +141,7 @@ def osric_options():
                 "subcategory": item.get("subcategory"),
                 "use_action": item.get("use_action"),
                 "heal": item.get("heal"),
+                "weapon_speed": item.get("weapon_speed"),
             }
             for iid, item in osric.EQUIPMENT_BY_ID.items()
         ],

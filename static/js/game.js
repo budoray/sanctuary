@@ -50,6 +50,10 @@ function setActiveCharacter(index) {
     log("You cannot switch characters during the enemy turn.");
     return;
   }
+  if (combatState && combatState.partyActed?.has(index)) {
+    log(`${party[index].name} has already acted this round.`);
+    return;
+  }
   const threshold = osricRules?.combat?.unconscious_threshold ?? 0;
   if (party[index].sheet.hit_points <= threshold) {
     log(`${party[index].name} is unconscious and cannot act.`);
@@ -129,6 +133,8 @@ function saveGame() {
       doorsOpened: Array.from(doorsOpened),
       trapsTriggered: Array.from(trapsTriggered),
       trapsDiscovered: Array.from(trapsDiscovered),
+      trapData: Array.from(trapData),
+      secretDoorsDiscovered: Array.from(secretDoorsDiscovered),
       explored: Array.from(explored),
       roomsVisited: Array.from(roomsVisited),
       currentModule,
@@ -172,6 +178,8 @@ async function loadGame() {
     doorsOpened = new Set(data.doorsOpened || []);
     trapsTriggered = new Set(data.trapsTriggered || []);
     trapsDiscovered = new Set(data.trapsDiscovered || []);
+    trapData = new Map(data.trapData || []);
+    secretDoorsDiscovered = new Set(data.secretDoorsDiscovered || []);
     explored = new Set(data.explored || []);
     roomsVisited = new Set(data.roomsVisited || []);
     currentModule = data.currentModule || null;
@@ -1401,6 +1409,7 @@ function renderCharacterPanel() {
     ${renderAncestryTraitsInline()}
     ${renderEncumbranceInline(s)}
     ${renderArmourCapInline(s)}
+    ${formatActiveSpellsInline(s.active_spells)}
     <div class="gold-line">Gold: <b>${Number(playerCharacter.remaining_gold).toFixed(1)} gp</b></div>
   `;
 

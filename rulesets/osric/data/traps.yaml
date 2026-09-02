@@ -1,0 +1,16 @@
+# OSRIC-style trap definitions.
+
+traps:
+  pit:
+    name: Pit
+    damage: 1d6
+    save: petrification_polymorph
+    effect: stuck
+  poison_needle:
+    name: Poison Needle
+    damage: 1d4
+    save: death_paralysis_poison
+  spike:
+    name: Spike Trap
+    damage: 2d4
+    save: breath_weapons

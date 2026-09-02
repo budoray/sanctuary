@@ -29,3 +29,23 @@ cause_light_wounds:
   damage: 1d8
   auto_hit: true
   heal: ""
+
+bless:
+  name: Bless
+  level: 1
+  classes: [cleric]
+  damage: ""
+  auto_hit: true
+  heal: ""
+  buff: true
+  duration: 6
+
+shield:
+  name: Shield
+  level: 1
+  classes: [magic_user, illusionist]
+  damage: ""
+  auto_hit: true
+  heal: ""
+  buff: true
+  duration: 5

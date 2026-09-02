@@ -1,13 +1,16 @@
 magic_user:
   - magic_missile
   - burning_hands
+  - shield
 
 illusionist:
   - magic_missile
+  - shield
 
 cleric:
   - cure_light_wounds
   - cause_light_wounds
+  - bless
 
 druid:
   - cure_light_wounds

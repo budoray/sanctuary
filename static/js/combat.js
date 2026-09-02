@@ -96,6 +96,7 @@ function canRest() {
   if (!combatState) return false;
   if (cfg?.require_safe_area && !isCombatSafe()) return false;
   if (!playerAlive()) return false;
+  if (isStuck(playerCharacter)) return false;
   // Unconscious characters can only rest if the area is safe (companions bind wounds).
   if (!playerConscious() && (!cfg?.require_safe_area || !isCombatSafe())) return false;
   return combatState.phase === "player";
@@ -258,6 +259,8 @@ function initCombat() {
     playerActedThisRound: false,
     enemyActedThisRound: false,
     partyActed: new Set(),
+    monsterCountAtStart: monsters.filter(m => m.alive).length,
+    groupMoraleChecked: false,
   };
   renderRestButton();
   renderConsumablesButton();
@@ -303,10 +306,18 @@ function isUndead(monster) {
   return UNDEAD_TYPES.some(type => monster.name.toLowerCase().includes(type.toLowerCase()));
 }
 
+function clericLevelForTurnUndead() {
+  return playerCharacter?.sheet?.level || 1;
+}
+
 async function playerTurnUndead() {
   if (!combatState || combatState.phase !== "player") return;
   if (combatState.attacked) {
     log("You have already acted this round.");
+    return;
+  }
+  if (isStuck(playerCharacter)) {
+    log("You are stuck in a pit and cannot turn undead.");
     return;
   }
   const table = playerCharacter.sheet.turn_undead;
@@ -332,21 +343,32 @@ async function playerTurnUndead() {
     if (!key) continue;
     const target = table[key];
     const roll = rollDie(20);
-    const turned = roll >= target;
-    log(`${playerCharacter.name} turns toward <b>${m.name}</b>: roll <span class="roll">${roll}</span> vs ${target} — ${turned ? '<span class="hit">turned</span>' : '<span class="miss">resists</span>'}.`);
-    if (turned) {
+    const success = roll >= target;
+    log(`${playerCharacter.name} turns toward <b>${m.name}</b>: roll <span class="roll">${roll}</span> vs ${target} — ${success ? '<span class="hit">turned</span>' : '<span class="miss">resists</span>'}.`);
+    if (success) {
       anyTurned = true;
-      showFloatingText(m.x, m.y, "TURNED", 0xd4a03d);
-      killMonster(m);
+      const clericLevel = clericLevelForTurnUndead();
+      const destroy = roll === 20 || clericLevel > (m.hd || 1) + 3;
+      if (destroy) {
+        showFloatingText(m.x, m.y, "DESTROYED", 0xd4a03d);
+        log(`<b>${m.name}</b> is destroyed by the power of ${playerCharacter.name}'s faith!`, "hit");
+        killMonster(m);
+      } else {
+        m.turned = rollDamageExpression("2d4");
+        showFloatingText(m.x, m.y, "TURNED", 0xd4a03d);
+        log(`<b>${m.name}</b> flees in terror for <span class="hit">${m.turned}</span> rounds.`, "hit");
+      }
     }
   }
 
   if (anyTurned) {
-    log("<span class='hit'>The undead cower and fall.</span>", "hit");
+    log("<span class='hit'>The undead cower and flee.</span>", "hit");
   }
+  drawTokens();
   renderCharacterPanel();
   updateCombatUI();
   checkEnd();
+  saveGame();
 }
 
 let playerStealthed = false;
@@ -372,7 +394,7 @@ function renderThiefBar() {
   sneakBtn.className = "btn btn-secondary";
   sneakBtn.textContent = playerStealthed ? "Hidden" : `Sneak (${skills.move_silently}%)`;
   sneakBtn.title = "Roll Move Silently / Hide in Shadows to become hidden.";
-  sneakBtn.disabled = combatState && combatState.phase !== "player" || playerStealthed;
+  sneakBtn.disabled = (combatState && combatState.phase !== "player") || playerStealthed || isStuck(playerCharacter);
   sneakBtn.addEventListener("click", playerSneak);
   bar.appendChild(sneakBtn);
 
@@ -381,7 +403,7 @@ function renderThiefBar() {
   trapBtn.className = "btn btn-secondary";
   trapBtn.textContent = `Find Traps (${skills.find_remove_traps}%)`;
   trapBtn.title = "Search adjacent tiles for traps.";
-  trapBtn.disabled = combatState && combatState.phase !== "player";
+  trapBtn.disabled = (combatState && combatState.phase !== "player") || isStuck(playerCharacter);
   trapBtn.addEventListener("click", () => {
     pendingTrapSearch = true;
     log("Click an adjacent tile to search for traps.");
@@ -400,6 +422,10 @@ async function playerSneak() {
     log("You have already acted this round.");
     return;
   }
+  if (isStuck(playerCharacter)) {
+    log("You are stuck in a pit and cannot sneak.");
+    return;
+  }
   const skills = getThiefSkills();
   const roll = rollPercentile();
   const success = roll <= skills.move_silently;
@@ -413,6 +439,66 @@ async function playerSneak() {
   }
   combatState.acted = true;
   updateCombatUI();
+}
+
+function secretDoorSearchChance(character) {
+  // OSRIC-style: 1-in-6 for most, 2-in-6 for elves and dwarves.
+  const ancestry = character?.ancestry;
+  if (ancestry === "elf" || ancestry === "dwarf") return 2;
+  return 1;
+}
+
+function searchSecretDoors() {
+  if (!combatState || combatState.phase !== "player") return;
+  if (combatState.acted) {
+    log("You have already acted this round.");
+    return;
+  }
+  if (isStuck(playerCharacter)) {
+    log("You are stuck in a pit and cannot search.");
+    return;
+  }
+  let found = false;
+  const chance = secretDoorSearchChance(playerCharacter);
+  for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+    const nx = playerPos.x + dx, ny = playerPos.y + dy;
+    if (nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) continue;
+    if (mapData[ny][nx] === TILE.SECRET_DOOR) {
+      const roll = rollDie(6);
+      if (roll <= chance) {
+        mapData[ny][nx] = TILE.DOOR;
+        doorsOpened.add(`${nx},${ny}`);
+        log(`<span class='hit'>${playerCharacter.name} discovers a secret door!</span> Roll ${roll}/${chance}.`, "hit");
+        drawMap();
+        renderFog();
+        found = true;
+      } else {
+        log(`${playerCharacter.name} searches the wall but finds nothing. Roll ${roll}/${chance}.`);
+      }
+    }
+  }
+  if (!found) {
+    log(`${playerCharacter.name} searches the nearby walls. Nothing hidden is found.`);
+  }
+  combatState.acted = true;
+  updateCombatUI();
+  saveGame();
+}
+
+function renderSearchSecretDoorsButton() {
+  const bar = document.getElementById("secret-door-bar");
+  if (!bar) return;
+  bar.innerHTML = "";
+  if (!combatState) return;
+  if (!playerConscious()) return;
+  const btn = document.createElement("button");
+  btn.id = "search-secret-doors-btn";
+  btn.className = "btn btn-secondary";
+  btn.textContent = "Search Walls";
+  btn.title = "Search adjacent walls for secret doors.";
+  btn.disabled = combatState.phase !== "player" || combatState.acted || isStuck(playerCharacter);
+  btn.addEventListener("click", searchSecretDoors);
+  bar.appendChild(btn);
 }
 
 function clearStealth() {
@@ -466,8 +552,8 @@ async function selectSpell(spell) {
     log("You have already acted this round.");
     return;
   }
-  // Healing spells target the caster automatically.
-  if (spell.heal) {
+  // Healing spells target the caster automatically; buff spells target the caster and persist.
+  if (spell.heal || spell.buff) {
     await playerCastSpell(spell, null);
     combatState.acted = true;
     combatState.attacked = true;
@@ -494,13 +580,33 @@ function dexInitiativeMod() {
   return dex;
 }
 
+function equippedWeaponSpeed() {
+  // Use the speed of the currently relevant equipped weapon.
+  const ranged = findEquippedRangedWeapon();
+  if (ranged && hasAmmoForRangedAttack()) return ranged.weapon_speed || 5;
+  const melee = findEquippedMeleeWeapon();
+  if (melee) return melee.weapon_speed || 5;
+  return 0;
+}
+
+function castingTimeModifier() {
+  // Casting time (in segments/rounds) slows the caster's initiative.
+  return pendingSpell?.casting_time || 0;
+}
+
 function rollInitiative() {
   const active = activeCharacter();
-  const playerMod = dexInitiativeMod();
+  // OSRIC-style initiative formula used here:
+  //   d6 + DEX missile reaction mod + weapon speed + casting time.
+  // Higher roll wins initiative in this implementation.
+  const dexMod = dexInitiativeMod();
+  const weaponSpeed = equippedWeaponSpeed();
+  const castMod = castingTimeModifier();
+  const playerMod = dexMod + weaponSpeed + castMod;
   combatState.playerInitiative = rollDie(6) + playerMod;
   combatState.enemyInitiative = rollDie(6);
   const wentFirst = combatState.playerInitiative >= combatState.enemyInitiative ? "You" : "Enemies";
-  log(`${wentFirst} win initiative (player ${combatState.playerInitiative}, enemy ${combatState.enemyInitiative}).`);
+  log(`${wentFirst} win initiative (player ${combatState.playerInitiative} = d6${dexMod ? ` +${dexMod} DEX` : ""}${weaponSpeed ? ` +${weaponSpeed} weapon` : ""}${castMod ? ` +${castMod} casting` : ""}, enemy ${combatState.enemyInitiative}).`);
   combatState.phase = combatState.playerInitiative >= combatState.enemyInitiative ? "player" : "enemy";
   combatState.movementRemaining = tilesPerRound(active.sheet.movement);
   combatState.acted = false;
@@ -511,11 +617,26 @@ function rollInitiative() {
   pendingTrapSearch = false;
 }
 
+function surpriseModifierForParty() {
+  // Elves and dwarves are unusually alert underground.
+  let mod = 0;
+  for (const c of party) {
+    if (c.ancestry === "elf" || c.ancestry === "dwarf") {
+      mod = Math.max(mod, 1);
+    }
+  }
+  return mod;
+}
+
 function rollSurprise() {
   const cfg = osricRules?.combat?.surprise || { chance_in_6: 2 };
-  const threshold = cfg.chance_in_6 || 2;
-  const playerSurprised = rollDie(6) <= threshold;
-  const enemySurprised = rollDie(6) <= threshold;
+  const base = cfg.chance_in_6 || 2;
+  const alertMod = surpriseModifierForParty();
+  // Alert ancestries are harder to surprise and more likely to surprise foes.
+  const playerThreshold = Math.max(1, base - alertMod);
+  const enemyThreshold = Math.min(5, base + alertMod);
+  const playerSurprised = rollDie(6) <= playerThreshold;
+  const enemySurprised = rollDie(6) <= enemyThreshold;
   return { playerSurprised, enemySurprised };
 }
 
@@ -557,6 +678,7 @@ async function enemySurpriseRound() {
 
 async function startRound() {
   combatState.partyActed = new Set();
+  decrementPartyActiveSpells();
   if (!playerConscious()) {
     ensureConsciousActive();
   }
@@ -576,9 +698,13 @@ async function startRound() {
 
 function updateCombatUI() {
   const name = playerCharacter ? playerCharacter.name : "Party";
-  const turnText = combatState.phase === "player"
+  let turnText = combatState.phase === "player"
     ? `Round ${combatState.round} — ${name}'s turn · Move ${combatState.movementRemaining} tiles`
     : `Round ${combatState.round} — Enemy turn`;
+  const turned = monsters.filter(m => m.alive && m.turned > 0);
+  if (turned.length) {
+    turnText += ` · ${turned.length} turned`;
+  }
   document.getElementById("turn-badge").textContent = turnText;
   document.getElementById("end-turn-btn").disabled = combatState.phase !== "player" || !playerConscious();
 
@@ -609,6 +735,8 @@ function updateCombatUI() {
   renderSpellBar();
   renderTurnUndeadButton();
   renderThiefBar();
+  renderSearchSecretDoorsButton();
+  renderClimbOutButton();
 }
 
 function findEquippedMeleeWeapon() {
@@ -707,6 +835,10 @@ async function handleGridClick(gx, gy) {
   if (!combatState || combatState.phase !== "player") return;
   if (!playerConscious()) {
     log("You are unconscious and cannot act.");
+    return;
+  }
+  if (isStuck(playerCharacter)) {
+    log("You are stuck in a pit. Climb out first.");
     return;
   }
 
@@ -816,6 +948,7 @@ async function handleGridClick(gx, gy) {
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();
     await checkTileInteraction(gx, gy);
+    maybeSpawnWanderingMonster();
     saveGame();
   }
 }
@@ -846,35 +979,86 @@ async function checkTileInteraction(x, y) {
   }
 }
 
-function trapDamage() {
-  const die = combatConfig().trap?.damage_die || "1d6";
-  return rollDamageExpression(die);
+function trapDamageForType(typeKey) {
+  const def = trapTypes()[typeKey] || trapTypes().spike;
+  return rollDamageExpression(def.damage || "1d6");
 }
 
-function trapSaveTarget() {
-  const cfg = combatConfig().trap || {};
-  const key = cfg.save_target;
+function trapSaveForType(typeKey) {
+  const def = trapTypes()[typeKey] || trapTypes().spike;
+  const key = def.save;
   if (key && playerCharacter?.sheet?.saving_throws && playerCharacter.sheet.saving_throws[key] !== undefined) {
     return playerCharacter.sheet.saving_throws[key];
   }
-  return cfg.save_fallback || 15;
+  return combatConfig().trap?.save_fallback || 15;
+}
+
+function makeSavingThrow(key) {
+  if (key && playerCharacter?.sheet?.saving_throws && playerCharacter.sheet.saving_throws[key] !== undefined) {
+    return { target: playerCharacter.sheet.saving_throws[key], roll: rollDie(20) };
+  }
+  return { target: combatConfig().trap?.save_fallback || 15, roll: rollDie(20) };
+}
+
+function isStuck(character) {
+  return character?.sheet?.stuck === true;
+}
+
+function setStuck(character, value) {
+  if (character && character.sheet) character.sheet.stuck = value;
+}
+
+async function climbOutOfPit() {
+  if (!combatState || combatState.phase !== "player") return;
+  if (!isStuck(playerCharacter)) return;
+  log(`${playerCharacter.name} climbs out of the pit.`, "hit");
+  setStuck(playerCharacter, false);
+  renderClimbOutButton();
+  updateCombatUI();
+  saveGame();
+  endTurn();
+}
+
+function renderClimbOutButton() {
+  const bar = document.getElementById("rest-bar");
+  if (!bar) return;
+  const existing = document.getElementById("climb-out-btn");
+  if (existing) existing.remove();
+  if (!isStuck(playerCharacter)) return;
+  const btn = document.createElement("button");
+  btn.id = "climb-out-btn";
+  btn.className = "btn btn-secondary";
+  btn.textContent = "Climb Out";
+  btn.title = "Spend your action climbing out of the pit.";
+  btn.disabled = combatState && combatState.phase !== "player";
+  btn.addEventListener("click", climbOutOfPit);
+  bar.appendChild(btn);
 }
 
 function triggerTrap(x, y) {
   trapsTriggered.add(`${x},${y}`);
   drawMap();
-  const cfg = combatConfig().trap || {};
-  const damage = trapDamage();
-  const saveTarget = trapSaveTarget();
-  const saveRoll = rollDie(20);
+  const typeKey = trapData.get(`${x},${y}`) || "spike";
+  const def = trapTypes()[typeKey] || trapTypes().spike;
+  const damage = trapDamageForType(typeKey);
+  const saveKey = def.save;
+  const { target: saveTarget, roll: saveRoll } = makeSavingThrow(saveKey);
   const saved = saveRoll >= saveTarget;
-  const finalDamage = saved
-    ? Math.max(cfg.min_damage_on_save ?? 1, Math.floor(damage / 2))
-    : damage;
+  const finalDamage = saved ? Math.max(1, Math.floor(damage / 2)) : damage;
+
+  let extra = "";
+  if (typeKey === "pit") {
+    setStuck(playerCharacter, true);
+    extra = " You are stuck in the pit!";
+    renderClimbOutButton();
+  } else if (typeKey === "poison_needle" && !saved) {
+    extra = " Poison courses through your veins!";
+  }
+
   playerCharacter.sheet.hit_points -= finalDamage;
   renderCharacterPanel();
   showFloatingText(x, y, `-${finalDamage}`, 0xff6b6b);
-  log(`A trap springs! Save roll <span class="roll">${saveRoll}</span> vs ${saveTarget}: ${saved ? '<span class="hit">saved</span>' : '<span class="miss">failed</span>'}. Take <span class="damage">${finalDamage}</span> damage.`);
+  log(`A <b>${def.name}</b> springs! Save roll <span class="roll">${saveRoll}</span> vs ${saveTarget}: ${saved ? '<span class="hit">saved</span>' : '<span class="miss">failed</span>'}. Take <span class="damage">${finalDamage}</span> damage.${extra}`);
   saveGame();
   if (!playerAlive()) {
     if (!anyPartyAlive()) {
@@ -924,10 +1108,14 @@ async function playerAttackMonster(monster, ranged = false, rangeFt = 0, backsta
 
 async function levelUpCharacter() {
   try {
+    const oldSpells = playerCharacter.sheet.active_spells;
     playerCharacter = await api("/api/osric/level-up", {
       method: "POST",
       body: JSON.stringify({ character: playerCharacter }),
     });
+    if (oldSpells && oldSpells.length) {
+      playerCharacter.sheet.active_spells = oldSpells;
+    }
     if (party.length && activePartyIndex >= 0 && activePartyIndex < party.length) {
       party[activePartyIndex] = playerCharacter;
     }
@@ -949,7 +1137,13 @@ async function playerCastSpell(spell, targetMonster) {
     const res = await api("/api/osric/spell", { method: "POST", body: JSON.stringify(body) });
     playerCharacter = res.character;
     const result = res.result;
-    if (result.heal) {
+    if (spell.buff) {
+      const rounds = spell.duration || 1;
+      playerCharacter.sheet.active_spells = playerCharacter.sheet.active_spells || [];
+      playerCharacter.sheet.active_spells.push({ spell_id: spell.id, name: spell.name, rounds_remaining: rounds });
+      log(`${result.caster} casts <b>${result.spell}</b>. It will last <span class="hit">${rounds}</span> rounds.`);
+      showFloatingText(playerPos.x, playerPos.y, spell.name.toUpperCase(), 0x5ac989);
+    } else if (result.heal) {
       const oldHp = playerCharacter.sheet.hit_points;
       playerCharacter.sheet.hit_points = Math.min(
         playerCharacter.sheet.max_hit_points,
@@ -974,6 +1168,29 @@ async function playerCastSpell(spell, targetMonster) {
   } catch (err) {
     log(`<span class="damage">${err.message}</span>`);
   }
+}
+
+function decrementActiveSpells(character) {
+  if (!character?.sheet?.active_spells) return;
+  const before = character.sheet.active_spells.length;
+  for (const entry of character.sheet.active_spells) {
+    entry.rounds_remaining -= 1;
+  }
+  character.sheet.active_spells = character.sheet.active_spells.filter(e => e.rounds_remaining > 0);
+  const expired = before - character.sheet.active_spells.length;
+  if (expired > 0) {
+    log(`${character.name}'s active spells fade.`, "miss");
+  }
+}
+
+function decrementPartyActiveSpells() {
+  for (const c of party) decrementActiveSpells(c);
+}
+
+function formatActiveSpellsInline(spells) {
+  if (!spells || !spells.length) return "";
+  const list = spells.map(s => `${s.name} (${s.rounds_remaining})`).join(", ");
+  return `<div class="section-title">Active Spells</div><div class="mod-row"><div class="mod-pill">${list}</div></div>`;
 }
 
 async function monsterAttackPlayer(monster) {
@@ -1150,6 +1367,9 @@ async function enemyTurn() {
     if (!anyPartyAlive()) break;
     if (!playerConscious()) ensureConsciousActive();
 
+    checkMorale(m);
+    if (m.fled || m.turned > 0) continue;
+
     checkMonsterRally(m);
 
     // Intelligent monsters bash open adjacent doors to reach the player.
@@ -1210,6 +1430,16 @@ async function enemyTurn() {
   }
 
   combatState.enemyActedThisRound = true;
+
+  // Count down turn-undead durations.
+  for (const m of monsters) {
+    if (m.turned > 0) {
+      m.turned -= 1;
+      if (m.turned <= 0) {
+        log(`<b>${m.name}</b> shakes off its terror and returns.`, "miss");
+      }
+    }
+  }
 
   if (!anyPartyAlive()) {
     showEnd(false, "Your party has fallen.");
@@ -1332,13 +1562,33 @@ function checkEnd() {
 
 function checkMorale(monster) {
   if (monster.moraleChecked || monster.fled || !monster.alive) return;
-  if (monster.hp > monster.maxHp / 2) return;
+  const wounded = monster.hp <= monster.maxHp / 2;
+  if (!wounded) return;
   monster.moraleChecked = true;
   const roll = rollDie(6) + rollDie(6);
   if (roll > monster.morale) {
     monster.fled = true;
     log(`<b>${monster.name}</b> loses morale and flees!`, "miss");
     showFloatingText(monster.x, monster.y, "FLEE", 0x888888);
+  }
+}
+
+function checkGroupMorale() {
+  if (!combatState || combatState.groupMoraleChecked) return;
+  const start = combatState.monsterCountAtStart || monsters.length;
+  if (start <= 1) return;
+  const alive = monsters.filter(m => m.alive).length;
+  if (alive > start / 2) return;
+  combatState.groupMoraleChecked = true;
+  for (const m of monsters) {
+    if (!m.alive || m.fled || m.moraleChecked) continue;
+    m.moraleChecked = true;
+    const roll = rollDie(6) + rollDie(6);
+    if (roll > m.morale) {
+      m.fled = true;
+      log(`<b>${m.name}</b> sees half its companions fall and flees!`, "miss");
+      showFloatingText(m.x, m.y, "FLEE", 0x888888);
+    }
   }
 }
 
@@ -1354,6 +1604,10 @@ async function handleKeyDown(e) {
   if (!combatState || combatState.phase !== "player") return;
   if (!playerConscious()) {
     log("You are unconscious and cannot act.");
+    return;
+  }
+  if (isStuck(playerCharacter)) {
+    log("You are stuck in a pit. Climb out first.");
     return;
   }
   e.preventDefault();
@@ -1409,6 +1663,7 @@ async function handleKeyDown(e) {
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();
     await checkTileInteraction(tx, ty);
+    maybeSpawnWanderingMonster();
     saveGame();
   }
 }

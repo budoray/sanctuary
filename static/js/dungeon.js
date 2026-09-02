@@ -4,6 +4,7 @@ const TILE = {
   WALL: "#",
   FLOOR: ".",
   DOOR: "D",
+  SECRET_DOOR: "S",
   CHEST: "C",
   EXIT: "E",
   TRAP: "T",
@@ -18,6 +19,8 @@ let chestsOpened = new Set();
 let doorsOpened = new Set();
 let trapsTriggered = new Set();
 let trapsDiscovered = new Set();
+let trapData = new Map();
+let secretDoorsDiscovered = new Set();
 
 let app = null;
 let boardContainer = null;
@@ -29,6 +32,21 @@ let TILE_SIZE = 32;
 
 const VISION_RADIUS = 6;
 let explored = new Set();
+
+function trapTypes() {
+  // Prefer server-loaded OSRIC trap definitions; fall back to inline defaults.
+  return osricRules?.traps?.traps || {
+    pit: { name: "Pit", damage: "1d6", save: "petrification_polymorph", effect: "stuck" },
+    poison_needle: { name: "Poison Needle", damage: "1d4", save: "death_paralysis_poison" },
+    spike: { name: "Spike Trap", damage: "2d4", save: "breath_weapons" },
+  };
+}
+
+function randomTrapType() {
+  const keys = Object.keys(trapTypes());
+  return keys[Math.floor(Math.random() * keys.length)];
+}
+
 
 function rollDie(sides) {
   return Math.floor(Math.random() * sides) + 1;
@@ -59,6 +77,21 @@ function carveCorridor(grid, x1, y1, x2, y2) {
     y += y < y2 ? 1 : -1;
   }
   grid[y][x] = TILE.FLOOR;
+}
+
+function findDoorTileAdjacentToRoom(grid, roomGrid, roomId) {
+  // Return a DOOR tile that sits on the boundary of the given room.
+  for (let y = 1; y < MAP_H - 1; y++) {
+    for (let x = 1; x < MAP_W - 1; x++) {
+      if (grid[y][x] !== TILE.DOOR) continue;
+      for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+        if (roomGrid[y + dy] && roomGrid[y + dy][x + dx] === roomId) {
+          return { x, y };
+        }
+      }
+    }
+  }
+  return null;
 }
 
 function roomCenter(room) {
@@ -172,6 +205,7 @@ function generateDungeon() {
       alive: true,
       fled: false,
       moraleChecked: false,
+      turned: 0,
     });
   }
 
@@ -180,7 +214,15 @@ function generateDungeon() {
   doorsOpened.clear();
   trapsTriggered.clear();
   trapsDiscovered.clear();
-  explored.clear();
+  secretDoorsDiscovered.clear();
+  trapData.clear();
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      if (mapData[y][x] === TILE.TRAP) {
+        trapData.set(`${x},${y}`, randomTrapType());
+      }
+    }
+  }
   computeVisibility();
 }
 
@@ -261,7 +303,7 @@ function drawMap() {
       const px = x * TILE_SIZE;
       const py = y * TILE_SIZE;
 
-      if (t === TILE.WALL) {
+      if (t === TILE.WALL || t === TILE.SECRET_DOOR) {
         if (hasTileArt) {
           drawTileSprite("/art/tile_wall.png", x, y);
         } else {
@@ -401,6 +443,9 @@ function drawTokens() {
     if (!visible.has(`${m.x},${m.y}`)) continue;
     const path = monsterTexturePath(m.name);
     drawSpriteToken(m.x, m.y, path, false, m.name);
+    if (m.turned > 0) {
+      drawStatusBadge(m.x, m.y, "T", 0xd4a03d);
+    }
   }
 }
 
@@ -471,6 +516,22 @@ function drawFallbackToken(x, y, color, label, isPlayer) {
   tokenGraphics.addChild(text);
 }
 
+function drawStatusBadge(x, y, label, color) {
+  const cx = x * TILE_SIZE + TILE_SIZE / 2;
+  const cy = y * TILE_SIZE + TILE_SIZE * 0.15;
+  const text = new PIXI.Text(label, {
+    fontSize: TILE_SIZE * 0.35,
+    fill: color,
+    fontWeight: "bold",
+    dropShadow: true,
+    dropShadowColor: 0x000000,
+    dropShadowDistance: 1,
+  });
+  text.anchor.set(0.5);
+  text.position.set(cx, cy);
+  tokenGraphics.addChild(text);
+}
+
 function classTokenLabel(classId) {
   return {
     fighter: "F",
@@ -525,6 +586,7 @@ function isWalkable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = mapData[y][x];
   if (t === TILE.WALL) return false;
+  if (t === TILE.SECRET_DOOR) return false;
   if (t === TILE.DOOR && !doorsOpened.has(`${x},${y}`)) return false;
   return true;
 }
@@ -718,6 +780,7 @@ function renderFog() {
 async function killMonster(m) {
   m.alive = false;
   drawTokens();
+  if (typeof checkGroupMorale === "function") checkGroupMorale();
   if (m.xp && playerCharacter && playerCharacter.sheet) {
     const gained = m.xp;
     playerCharacter.sheet.xp += gained;
@@ -760,6 +823,19 @@ function findSpawnTiles(minDistance) {
   return tiles;
 }
 
+function maybeSpawnWanderingMonster() {
+  const cfg = combatConfig().wandering_monsters || {};
+  if (!cfg.enabled) return 0;
+  if (!isCombatSafe()) return 0;
+  const chance = cfg.chance_in_6 ?? 1;
+  if (rollDie(6) > chance) return 0;
+  const spawned = spawnWanderingMonster(cfg.count_per_encounter);
+  if (spawned) {
+    log(`<span class="damage">Wandering monsters appear!</span>`, "damage");
+  }
+  return spawned;
+}
+
 function spawnWanderingMonster(countExpr = "1") {
   const count = Math.max(1, rollDamageExpression(countExpr));
   const cfg = combatConfig().wandering_monsters || {};
@@ -788,6 +864,7 @@ function spawnWanderingMonster(countExpr = "1") {
       alive: true,
       fled: false,
       moraleChecked: false,
+      turned: 0,
     });
     spawned++;
   }

@@ -50,7 +50,8 @@ const DUNGEON_MODULES = {
       { room: "throne",      type: "Goblin", boss: true, name: "Grik the Goblin Chieftain" },
     ],
     chests: ["storage", "shrine"],
-    traps: ["westhall"],
+    traps: [{ room: "westhall", type: "pit" }],
+    secret_doors: ["westhall"],
   },
   sunken_crypt: {
     name: "The Sunken Crypt",
@@ -101,7 +102,8 @@ const DUNGEON_MODULES = {
       { room: "tomb",      type: "Ghoul", boss: true, name: "The Drowned King" },
     ],
     chests: ["cistern", "shrine"],
-    traps: ["crossing"],
+    traps: [{ room: "crossing", type: "poison_needle" }],
+    secret_doors: ["ossuary"],
   },
   goblin_warren: {
     name: "The Goblin Warren",
@@ -152,7 +154,8 @@ const DUNGEON_MODULES = {
       { room: "chieftain", type: "Hobgoblin", boss: true, name: "Krag the Hobgoblin" },
     ],
     chests: ["storeroom", "breeding"],
-    traps: ["pit"],
+    traps: [{ room: "pit", type: "spike" }],
+    secret_doors: ["storeroom"],
   },
   forgotten_shrine: {
     name: "The Forgotten Shrine",
@@ -202,7 +205,8 @@ const DUNGEON_MODULES = {
       { room: "sanctuary", type: "Wight", boss: true, name: "The Shrine Wight" },
     ],
     chests: ["camp", "reliquary"],
-    traps: ["crossing"],
+    traps: [{ room: "crossing", type: "spike" }],
+    secret_doors: ["crypt"],
   },
 };
 
@@ -265,7 +269,9 @@ function loadDungeonModule(name) {
   chestsOpened.clear();
   doorsOpened.clear();
   trapsTriggered.clear();
-  explored.clear();
+  trapsDiscovered.clear();
+  secretDoorsDiscovered.clear();
+  trapData.clear();
 
   // Player and exit.
   playerPos = roomCenter(roomById[mod.playerStart]);
@@ -279,9 +285,20 @@ function loadDungeonModule(name) {
   }
 
   // Traps.
-  for (const roomId of mod.traps) {
+  for (const entry of mod.traps || []) {
+    const roomId = typeof entry === "string" ? entry : entry.room;
+    const type = typeof entry === "string" ? randomTrapType() : (entry.type || randomTrapType());
     const pos = roomCenter(roomById[roomId]);
     grid[pos.y][pos.x] = TILE.TRAP;
+    trapData.set(`${pos.x},${pos.y}`, type);
+  }
+
+  // Secret doors: replace a normal door adjacent to the named room(s).
+  for (const roomId of mod.secret_doors || []) {
+    const doorTile = findDoorTileAdjacentToRoom(grid, roomIdGrid, roomId);
+    if (doorTile) {
+      grid[doorTile.y][doorTile.x] = TILE.SECRET_DOOR;
+    }
   }
 
   // Monsters.
@@ -320,6 +337,7 @@ function loadDungeonModule(name) {
       alive: true,
       fled: false,
       moraleChecked: false,
+      turned: 0,
     });
   }
 
