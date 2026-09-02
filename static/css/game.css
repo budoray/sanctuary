@@ -480,7 +480,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 110;
   padding: 1rem;
 }
 .modal.hidden { display: none; }
@@ -1609,4 +1609,507 @@ html, body {
   .create-header .modal-hero { display: none; }
   .tutorial-toast { max-width: 90vw; bottom: 120px; }
   .tutorial-toast.visible { bottom: 128px; }
+}
+
+
+/* Town hub */
+.town-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #1a1612 0%, #0f0d0b 100%);
+  color: var(--ink);
+  overflow: hidden;
+}
+.town-screen.hidden { display: none; }
+
+.town-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid var(--rule);
+  flex: 0 0 auto;
+}
+.town-title h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.town-subtitle {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  margin-top: 0.15rem;
+}
+.town-header-meta {
+  text-align: right;
+}
+.town-campaign {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+.town-gold-line {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  margin-top: 0.2rem;
+}
+.town-gold-line b { color: var(--accent); }
+.town-party-tokens {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+.town-party-token {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #5a4a2a, #2a2212);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+.town-party-token.dead {
+  border-color: var(--danger);
+  color: var(--danger);
+  opacity: 0.6;
+}
+
+.town-main {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  min-height: 0;
+  overflow: hidden;
+}
+.town-locations {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  align-content: start;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+.town-card {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  gap: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  min-height: 120px;
+}
+.town-card:hover {
+  border-color: var(--accent);
+  background: var(--panel-2);
+  transform: translateY(-2px);
+}
+.town-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.town-card-body { min-width: 0; }
+.town-card-body h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  color: var(--accent);
+}
+.town-card-body p {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  line-height: 1.4;
+}
+.town-card-hint {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-style: italic;
+}
+
+.town-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+  overflow-y: auto;
+}
+.town-panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 0.9rem;
+  flex: 0 0 auto;
+}
+.town-panel h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.town-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.town-actions button {
+  flex: 1 1 auto;
+  font-size: 0.75rem;
+  padding: 0.45rem;
+}
+
+.town-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.town-roster-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+.town-roster-card.dead {
+  opacity: 0.6;
+  border-color: var(--danger);
+}
+.town-roster-portrait {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #5a4a2a, #2a2212);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.town-roster-info { flex: 1 1 auto; min-width: 0; }
+.town-roster-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.town-roster-meta {
+  font-size: 0.65rem;
+  color: var(--ink-2);
+  margin-top: 0.1rem;
+}
+.town-roster-hp {
+  height: 5px;
+  background: #333;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.3rem;
+}
+.town-roster-hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d45a5a 0%, var(--danger) 100%);
+  transition: width 0.2s ease;
+}
+.town-roster-hp-fill.hp-dead { background: #444; }
+.town-roster-hp-text {
+  font-size: 0.6rem;
+  color: var(--ink-2);
+  margin-top: 0.15rem;
+}
+
+.town-stash-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.town-stash-list li {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+}
+
+.town-empty {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  font-style: italic;
+  margin: 0;
+}
+
+.town-footer {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-top: 1px solid var(--rule);
+}
+.town-footer button {
+  font-size: 0.8rem;
+  padding: 0.5rem 1rem;
+}
+
+/* Town modals */
+.roster-modal-card,
+.journal-modal-card,
+.campaign-modal-card {
+  max-width: 760px;
+  width: 100%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+}
+.roster-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.roster-modal-header h2 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 1.35rem;
+}
+.roster-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.roster-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 0.9rem;
+}
+.roster-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+.roster-section-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+.roster-limit {
+  font-size: 0.7rem;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.6rem;
+}
+
+.roster-card {
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: border-color 0.15s;
+}
+.roster-card.dead {
+  border-color: var(--danger);
+  opacity: 0.7;
+}
+.roster-card:hover { border-color: var(--accent); }
+.roster-portrait {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #5a4a2a, #2a2212);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.roster-info { flex: 1 1 auto; min-width: 0; }
+.roster-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.roster-meta {
+  font-size: 0.65rem;
+  color: var(--ink-2);
+  margin-top: 0.15rem;
+}
+.roster-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+.roster-actions button {
+  font-size: 0.65rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.merc-tag {
+  font-size: 0.6rem;
+  color: var(--block);
+  border: 1px solid var(--block);
+  border-radius: 4px;
+  padding: 0.05rem 0.3rem;
+  margin-left: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.temple-revive-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.temple-revive-list li {
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.journal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+.journal-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 0.9rem;
+}
+.journal-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--accent);
+}
+.journal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.journal-list li {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.4rem 0.55rem;
+  line-height: 1.4;
+}
+.journal-list li b { color: var(--ink); }
+
+.campaign-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+}
+.campaign-card {
+  background: var(--panel-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  transition: border-color 0.15s;
+}
+.campaign-card:hover { border-color: var(--accent); }
+.campaign-card.active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.campaign-name {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+.campaign-desc {
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  margin-top: 0.2rem;
+  line-height: 1.35;
+}
+.campaign-active-tag {
+  font-size: 0.65rem;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1000px) {
+  .town-main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; overflow-y: auto; }
+  .town-locations { grid-template-columns: 1fr; }
+  .town-sidebar { flex-direction: row; flex-wrap: wrap; }
+  .town-panel { flex: 1 1 280px; }
+  .town-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .town-header-meta { text-align: left; width: 100%; }
+  .town-party-tokens { justify-content: flex-start; }
 }

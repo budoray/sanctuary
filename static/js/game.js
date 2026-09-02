@@ -16,15 +16,108 @@ let rollMethod = "3d6_in_order";
 const SAVE_KEY = "sanctuary_run_v1";
 const UNLOCK_KEY = "sanctuary_unlocked_v1";
 
-function getUnlockedModules() {
+let campaign = {
+  campaign_id: "ashen_hollow",
+  campaign_gold: 0,
+  unlocked_modules: ["crooked_tower"],
+  completed_modules: [],
+  story_flags: [],
+  stash: [],
+};
+let playerCharacters = []; // Persistent custom roster (max 5)
+let availableMercenaries = []; // Hireable NPCs in town
+let partyComposition = []; // [{type, index}, ...] active party
+let inTown = false;
+let townShopMode = false;
+
+const CAMPAIGNS = {
+  ashen_hollow: {
+    id: "ashen_hollow",
+    name: "The Vale of Ashen Hollow",
+    description: "A valley of forgotten barrows, drowned kings, and a pale herald who walks beneath a black sun.",
+  },
+};
+
+function loadCampaign() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data.campaign_gold !== undefined) {
+        campaign.campaign_id = data.campaign_id || "ashen_hollow";
+        campaign.campaign_gold = Number(data.campaign_gold) || 0;
+        campaign.unlocked_modules = Array.isArray(data.unlocked_modules) ? data.unlocked_modules : ["crooked_tower"];
+        campaign.completed_modules = Array.isArray(data.completed_modules) ? data.completed_modules : [];
+        campaign.story_flags = Array.isArray(data.story_flags) ? data.story_flags : [];
+        campaign.stash = Array.isArray(data.stash) ? data.stash : [];
+        playerCharacters = Array.isArray(data.playerCharacters) ? data.playerCharacters : [];
+        availableMercenaries = Array.isArray(data.availableMercenaries) ? data.availableMercenaries : [];
+        partyComposition = Array.isArray(data.partyComposition) ? data.partyComposition : [];
+        return;
+      }
+    }
+    // Legacy unlock key fallback.
+    const unlocked = getLegacyUnlockedModules();
+    campaign.unlocked_modules = Array.from(unlocked);
+  } catch (e) {
+    console.warn("Failed to load campaign:", e);
+  }
+}
+
+function saveCampaign() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    const data = raw ? JSON.parse(raw) : {};
+    data.campaign_id = campaign.campaign_id;
+    data.campaign_gold = campaign.campaign_gold;
+    data.unlocked_modules = campaign.unlocked_modules;
+    data.completed_modules = campaign.completed_modules;
+    data.story_flags = campaign.story_flags;
+    data.stash = campaign.stash;
+    data.playerCharacters = playerCharacters;
+    data.availableMercenaries = availableMercenaries;
+    data.partyComposition = partyComposition;
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn("Failed to save campaign:", e);
+  }
+}
+
+function rebuildPartyFromComposition() {
+  party = partyComposition.map(comp => {
+    if (comp.type === "pc") return playerCharacters[comp.index];
+    if (comp.type === "merc") return availableMercenaries[comp.index];
+    return null;
+  }).filter(Boolean);
+  if (!party.length && playerCharacters.length) {
+    party = playerCharacters.filter(c => c.status !== "dead").slice(0, 5);
+    partyComposition = party.map((_, i) => ({ type: "pc", index: i }));
+  }
+}
+
+function syncPartyToComposition() {
+  partyComposition = party.map(c => {
+    const pcIdx = playerCharacters.indexOf(c);
+    if (pcIdx >= 0) return { type: "pc", index: pcIdx };
+    const mercIdx = availableMercenaries.indexOf(c);
+    if (mercIdx >= 0) return { type: "merc", index: mercIdx };
+    return null;
+  }).filter(Boolean);
+}
+
+function getLegacyUnlockedModules() {
   try {
     const raw = localStorage.getItem(UNLOCK_KEY);
     const set = new Set(raw ? JSON.parse(raw) : []);
-    set.add("crooked_tower"); // starter module always available
+    set.add("crooked_tower");
     return set;
   } catch (e) {
     return new Set(["crooked_tower"]);
   }
+}
+
+function getUnlockedModules() {
+  return new Set(campaign.unlocked_modules);
 }
 
 function unlockModule(id) {
@@ -32,16 +125,49 @@ function unlockModule(id) {
   const unlocked = getUnlockedModules();
   if (unlocked.has(id)) return;
   unlocked.add(id);
-  try {
-    localStorage.setItem(UNLOCK_KEY, JSON.stringify(Array.from(unlocked)));
-    log(`<span class="hit">New dungeon unlocked: ${DUNGEON_MODULES[id]?.name || id}</span>`, "hit");
-  } catch (e) {
-    console.warn("Failed to save unlocks:", e);
+  campaign.unlocked_modules = Array.from(unlocked);
+  saveCampaign();
+  log(`<span class="hit">New dungeon unlocked: ${DUNGEON_MODULES[id]?.name || id}</span>`, "hit");
+}
+
+function completeModule(id) {
+  if (!id) return;
+  if (!campaign.completed_modules.includes(id)) {
+    campaign.completed_modules.push(id);
   }
+  const mod = DUNGEON_MODULES[id];
+  if (mod && mod.unlocks) {
+    unlockModule(mod.unlocks);
+  }
+  saveCampaign();
 }
 
 function isModuleUnlocked(id) {
   return getUnlockedModules().has(id);
+}
+
+function isModuleAvailable(id) {
+  if (!isModuleUnlocked(id)) return false;
+  const mod = DUNGEON_MODULES[id];
+  if (!mod || !mod.requires || !mod.requires.length) return true;
+  return mod.requires.every(req => campaign.completed_modules.includes(req));
+}
+
+function moduleLockReason(id) {
+  const mod = DUNGEON_MODULES[id];
+  if (!mod) return "";
+  if (!isModuleUnlocked(id)) {
+    const predecessor = Object.entries(DUNGEON_MODULES).find(([_, m]) => m.unlocks === id);
+    return `Clear ${predecessor ? predecessor[1].name : "the prior dungeon"} to unlock.`;
+  }
+  if (mod.requires && mod.requires.length) {
+    const missing = mod.requires.filter(req => !campaign.completed_modules.includes(req));
+    if (missing.length) {
+      const names = missing.map(req => DUNGEON_MODULES[req]?.name || req).join(" and ");
+      return `Clear ${names} first.`;
+    }
+  }
+  return "";
 }
 
 function setActiveCharacter(index) {
@@ -121,6 +247,16 @@ function hasSavedRun() {
 function saveGame() {
   try {
     const data = {
+      campaign_id: campaign.campaign_id,
+      campaign_gold: campaign.campaign_gold,
+      unlocked_modules: campaign.unlocked_modules,
+      completed_modules: campaign.completed_modules,
+      story_flags: campaign.story_flags,
+      stash: campaign.stash,
+      playerCharacters,
+      availableMercenaries,
+      partyComposition,
+      inTown,
       party,
       activePartyIndex,
       playerCharacter,
@@ -166,7 +302,31 @@ async function loadGame() {
     const data = JSON.parse(raw);
     if (!data.playerCharacter && !data.party?.length) return false;
 
-    party = data.party || (data.playerCharacter ? [data.playerCharacter] : []);
+    // Migrate legacy saves that did not store campaign state.
+    if (data.campaign_gold === undefined) {
+      const legacyParty = data.party || (data.playerCharacter ? [data.playerCharacter] : []);
+      playerCharacters = legacyParty.map(c => ({ ...c, status: "alive" }));
+      campaign.campaign_gold = Number(data.playerCharacter?.remaining_gold) || 0;
+      campaign.unlocked_modules = ["crooked_tower"];
+      campaign.completed_modules = [];
+      campaign.story_flags = [];
+      campaign.stash = [];
+      partyComposition = playerCharacters.map((_, i) => ({ type: "pc", index: i }));
+      saveCampaign();
+    } else {
+      campaign.campaign_id = data.campaign_id || "ashen_hollow";
+      campaign.campaign_gold = Number(data.campaign_gold) || 0;
+      campaign.unlocked_modules = Array.isArray(data.unlocked_modules) ? data.unlocked_modules : ["crooked_tower"];
+      campaign.completed_modules = Array.isArray(data.completed_modules) ? data.completed_modules : [];
+      campaign.story_flags = Array.isArray(data.story_flags) ? data.story_flags : [];
+      campaign.stash = Array.isArray(data.stash) ? data.stash : [];
+      playerCharacters = Array.isArray(data.playerCharacters) ? data.playerCharacters : [];
+      availableMercenaries = Array.isArray(data.availableMercenaries) ? data.availableMercenaries : [];
+      partyComposition = Array.isArray(data.partyComposition) ? data.partyComposition : [];
+    }
+
+    rebuildPartyFromComposition();
+    party = data.party || party;
     activePartyIndex = data.activePartyIndex || 0;
     if (activePartyIndex >= party.length) activePartyIndex = 0;
     playerCharacter = activeCharacter();
@@ -189,10 +349,15 @@ async function loadGame() {
       combatState = data.combatState;
       combatState.partyActed = new Set(combatState.partyActed || []);
     }
+    inTown = !!data.inTown;
 
     // Rebuild transient state.
     document.getElementById("landing-screen").classList.add("hidden");
     document.getElementById("create-modal").classList.add("hidden");
+    if (inTown) {
+      showTown();
+      return true;
+    }
     renderCharacterPanel();
     clearLog();
     updateLevelBadge();
@@ -966,9 +1131,13 @@ function itemDetail(item) {
   return parts.join(" · ") || item.category;
 }
 
+function getShopPurse() {
+  if (townShopMode) return campaign.campaign_gold;
+  return playerCharacter ? Number(playerCharacter.remaining_gold) || 0 : 0;
+}
+
 function canAffordItem(item) {
-  if (!playerCharacter) return false;
-  return playerCharacter.remaining_gold >= item.cost_cp / 100;
+  return getShopPurse() >= item.cost_cp / 100;
 }
 
 function renderShopItem(item) {
@@ -1034,12 +1203,13 @@ function openShopModal(category) {
 function closeShopModal() {
   document.getElementById("shop-modal").classList.add("hidden");
   shopCart.clear();
+  townShopMode = false;
 }
 
 function renderShopModal() {
   const catalog = document.getElementById("shop-catalog");
-  if (!catalog || !playerCharacter) return;
-  safeSetText("shop-modal-gold", `${Number(playerCharacter.remaining_gold).toFixed(1)} gp`);
+  if (!catalog || (!playerCharacter && !townShopMode)) return;
+  safeSetText("shop-modal-gold", `${Number(getShopPurse()).toFixed(1)} gp`);
   document.querySelectorAll(".shop-tab").forEach(tab => {
     tab.classList.toggle("active", tab.dataset.cat === shopModalActiveCategory);
   });
@@ -1165,12 +1335,13 @@ function renderCart() {
 }
 
 async function buyCart() {
-  if (!playerCharacter || !shopCart.size) return;
+  if (!playerCharacter) return;
+  if (!shopCart.size) return;
   const totalCp = Array.from(shopCart.entries()).reduce((sum, [id, qty]) => {
     const item = osricOptions.equipment.find(e => e.id === id);
     return sum + (item ? item.cost_cp * qty : 0);
   }, 0);
-  if (totalCp > playerCharacter.remaining_gold * 100) {
+  if (totalCp > getShopPurse() * 100) {
     showCreationError("Not enough gold for this cart.");
     return;
   }
@@ -1190,6 +1361,12 @@ async function buyCart() {
         });
       }
     }
+    if (townShopMode) {
+      const totalGp = totalCp / 100;
+      playerCharacter.remaining_gold = (Number(playerCharacter.remaining_gold) || 0) + totalGp;
+      campaign.campaign_gold -= totalGp;
+      saveCampaign();
+    }
     shopCart.clear();
     refreshAfterTransaction();
     renderCart();
@@ -1206,8 +1383,10 @@ function refreshAfterTransaction() {
   showRolledCharacter();
   renderShop();
   renderInventoryCreate();
+  renderInventoryCreate("town-inventory");
   renderPartyRosterCreation();
   validateCharacterReady();
+  if (inTown) renderTown();
   saveGame();
 }
 
@@ -1272,8 +1451,8 @@ async function buyStarterKit() {
   }
 }
 
-function renderInventoryCreate() {
-  const el = document.getElementById("inventory-create");
+function renderInventoryCreate(containerId = "inventory-create") {
+  const el = document.getElementById(containerId);
   if (!el || !playerCharacter) return;
   const inv = playerCharacter.sheet.inventory || { items: [] };
   if (!inv.items.length) {
@@ -1319,10 +1498,18 @@ function renderInventoryCreate() {
   el.querySelectorAll(".sell-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       try {
+        const item = osricOptions.equipment.find(e => e.id === btn.dataset.id);
+        const sellRatio = osricRules?.combat?.sell_back_ratio ?? 0.5;
+        const sellPrice = item ? item.cost_cp / 100 * sellRatio : 0;
         playerCharacter = await api("/api/osric/sell", {
           method: "POST",
           body: JSON.stringify({ character: playerCharacter, item_id: btn.dataset.id }),
         });
+        if (inTown && sellPrice > 0) {
+          playerCharacter.remaining_gold = (Number(playerCharacter.remaining_gold) || 0) - sellPrice;
+          campaign.campaign_gold += sellPrice;
+          saveCampaign();
+        }
         refreshAfterTransaction();
       } catch (err) {
         showCreationError(err.message);
@@ -1614,6 +1801,10 @@ function validateCharacterReady() {
 }
 
 async function enterDungeon() {
+  if (rosterCreationMode) {
+    finishRosterCreation();
+    return;
+  }
   if (!party.length) {
     await rollCharacter();
     if (!party.length) return;
@@ -1625,43 +1816,63 @@ async function enterDungeon() {
     ]);
     return;
   }
-  renderModuleList();
-  document.getElementById("module-modal").classList.remove("hidden");
+  // First party created in a fresh game becomes the initial roster.
+  if (!playerCharacters.length && party.length) {
+    playerCharacters = party.map(c => ({ ...c, status: "alive" }));
+    party = playerCharacters.slice();
+    activePartyIndex = 0;
+    playerCharacter = party[0] || null;
+    syncPartyToComposition();
+  }
+  inTown = true;
+  saveGame();
+  showTown();
 }
 
-function renderModuleList() {
+function renderModuleList(fromTown = false) {
   const list = document.getElementById("module-list");
   if (!list || typeof DUNGEON_MODULES === "undefined") return;
-  const unlocked = getUnlockedModules();
-  list.innerHTML = Object.entries(DUNGEON_MODULES).map(([id, mod]) => {
-    const locked = !unlocked.has(id);
-    const predecessor = Object.entries(DUNGEON_MODULES).find(([_, m]) => m.unlocks === id);
-    const lockHint = locked
-      ? `Complete ${predecessor ? predecessor[1].name : "the prior dungeon"} to unlock.`
-      : "";
+  list.innerHTML = Object.entries(DUNGEON_MODULES).filter(([_, mod]) => !mod.campaign_id || mod.campaign_id === campaign.campaign_id).map(([id, mod]) => {
+    const available = isModuleAvailable(id);
+    const locked = !isModuleUnlocked(id);
+    const lockHint = moduleLockReason(id);
+    const completed = campaign.completed_modules.includes(id);
     const levelText = mod.level ? `Level ${mod.level}` : "Level 1";
     return `
-    <div class="module-card ${locked ? 'locked' : ''}" data-id="${id}" ${locked ? 'title="' + lockHint + '"' : ''}>
+    <div class="module-card ${!available ? 'locked' : ''}" data-id="${id}" ${!available ? 'title="' + lockHint + '"' : ''}>
       <div class="module-card-info">
-        <div class="module-card-title">${mod.name}${locked ? ' <span class="lock-tag">Locked</span>' : ''}</div>
+        <div class="module-card-title">${mod.name}${!available ? ' <span class="lock-tag">Locked</span>' : completed ? ' <span class="lock-tag" style="border-color:var(--success);color:var(--success);">Cleared</span>' : ''}</div>
         <div class="module-card-blurb">${mod.blurb}</div>
-        ${locked ? `<div class="module-card-locked">${lockHint}</div>` : ""}
-        ${!locked && mod.story ? `<div class="module-card-story">${mod.story}</div>` : ""}
-        ${!locked && mod.objective ? `<div class="module-card-objective"><b>Objective:</b> ${mod.objective}</div>` : ""}
+        ${!available ? `<div class="module-card-locked">${lockHint}</div>` : ""}
+        ${available && mod.story ? `<div class="module-card-story">${mod.story}</div>` : ""}
+        ${available && mod.story_objective ? `<div class="module-card-objective"><b>Story:</b> ${mod.story_objective}</div>` : ""}
       </div>
       <div class="module-card-level">${levelText}</div>
     </div>
   `;
   }).join("");
   list.querySelectorAll(".module-card:not(.locked)").forEach(card => {
-    card.addEventListener("click", () => startModule(card.dataset.id));
+    card.addEventListener("click", () => {
+      if (fromTown) departToModule(card.dataset.id);
+      else startModule(card.dataset.id);
+    });
   });
 }
 
 function startModule(id) {
   dungeonModuleName = id;
+  dungeonLevel = 1;
   document.getElementById("module-modal").classList.add("hidden");
   document.getElementById("create-modal").classList.add("hidden");
+  hideTown();
+  document.querySelector(".game-shell").classList.remove("hidden");
+
+  // Remove dead members from the departing party.
+  const deathThreshold = osricRules?.combat?.death_threshold ?? -10;
+  party = party.filter(c => c.sheet.hit_points > deathThreshold);
+  if (party.length > 5) party = party.slice(0, 5);
+  syncPartyToComposition();
+
   activePartyIndex = 0;
   playerCharacter = activeCharacter();
   renderCharacterPanel();
@@ -1680,6 +1891,614 @@ function closeModuleModal() {
   document.getElementById("module-modal").classList.add("hidden");
 }
 
+const MERC_NAMES = [
+  "Aldric", "Brunhild", "Cedric", "Dalia", "Eldwin", "Fiona", "Gareth", "Hilda",
+  "Ivor", "Jocelyn", "Kael", "Liora", "Morgan", "Nessa", "Oswin", "Petra",
+  "Quentin", "Rowan", "Sable", "Tristan", "Ulric", "Vesper", "Wynn", "Yorick",
+];
+
+const MERC_CLASSES = ["fighter", "cleric", "thief", "magic_user"];
+
+function randomMercName() {
+  return MERC_NAMES[Math.floor(Math.random() * MERC_NAMES.length)];
+}
+
+function randomAlignment(classId) {
+  const klass = osricOptions?.classes?.find(c => c.id === classId);
+  const allowed = klass?.allowed_alignments || ["Lawful Good"];
+  return allowed[Math.floor(Math.random() * allowed.length)];
+}
+
+function randomAncestryForClass(classId) {
+  const allowed = osricOptions?.ancestries?.filter(a => a.allowed_classes?.includes(classId)) || [];
+  if (!allowed.length) return "human";
+  return allowed[Math.floor(Math.random() * allowed.length)].id;
+}
+
+async function generateMercenary(classId, level = 1) {
+  const name = randomMercName();
+  const ancestry = randomAncestryForClass(classId);
+  const alignment = randomAlignment(classId);
+  try {
+    const merc = await api("/api/osric/character", {
+      method: "POST",
+      body: JSON.stringify({ name, ancestry, class_id: classId, alignment, roll_method: "3d6_in_order" }),
+    });
+    merc.status = "alive";
+    merc.isMercenary = true;
+    merc.dailyWage = level * 2;
+    merc.sheet.level = level;
+    // Equip starter package if affordable.
+    try {
+      const equipped = await api("/api/osric/buy-package", {
+        method: "POST",
+        body: JSON.stringify({ character: merc, equip: true }),
+      });
+      return equipped;
+    } catch (e) {
+      return merc;
+    }
+  } catch (e) {
+    console.warn("Failed to generate mercenary:", e);
+    return null;
+  }
+}
+
+async function ensureMercenaries() {
+  if (!availableMercenaries.length) {
+    await refreshMercenaries();
+  }
+}
+
+async function refreshMercenaries() {
+  const count = 3;
+  const newMercs = [];
+  for (let i = 0; i < count; i++) {
+    const classId = MERC_CLASSES[Math.floor(Math.random() * MERC_CLASSES.length)];
+    const merc = await generateMercenary(classId, 1);
+    if (merc) newMercs.push(merc);
+  }
+  availableMercenaries = newMercs;
+  // Preserve any mercenaries currently in the active party by not overwriting them.
+  syncPartyToComposition();
+  saveGame();
+  renderRosterManager();
+  log("A new batch of mercenaries arrives in Ashen Hollow.", "hit");
+}
+
+function innCost() {
+  return party.reduce((sum, c) => sum + (c.sheet?.level || 1), 0);
+}
+
+function reviveCost(character) {
+  return (character.sheet?.level || 1) * 50;
+}
+
+function openTemple() {
+  const dead = playerCharacters.filter(c => c.status === "dead");
+  let body = "";
+  if (!dead.length) {
+    body = `<p>No fallen characters await revival. The priests will remove diseases and curses in a future update.</p>`;
+  } else {
+    body = `<p>The priests can restore life for a donation:</p><ul class="temple-revive-list">${dead.map((c, i) => {
+      const originalIndex = playerCharacters.indexOf(c);
+      return `<li><b>${c.name}</b> (Lvl ${c.sheet.level}) — <button class="btn btn-primary roster-revive" data-index="${originalIndex}">Revive ${reviveCost(c)}gp</button></li>`;
+    }).join("")}</ul>`;
+  }
+  showMessageModal("Temple of the Quiet Veil", body);
+  document.querySelectorAll(".roster-revive").forEach(btn => {
+    btn.addEventListener("click", () => {
+      reviveCharacter(parseInt(btn.dataset.index, 10));
+      document.getElementById("message-modal").classList.add("hidden");
+    });
+  });
+}
+
+function townRest() {
+  const cost = innCost();
+  if (campaign.campaign_gold < cost) {
+    showMessageModal("Inn", `The innkeeper asks for ${cost.toFixed(0)} gp. You only have ${campaign.campaign_gold.toFixed(1)} gp.`);
+    return;
+  }
+  campaign.campaign_gold -= cost;
+  for (const c of party) {
+    if (c.status !== "dead") {
+      c.sheet.hit_points = c.sheet.max_hit_points;
+    }
+  }
+  renderCharacterPanel();
+  renderTown();
+  renderRosterManager();
+  saveGame();
+  log(`The party rests at the inn for ${cost.toFixed(0)} gp and recovers to full health.`, "hit");
+}
+
+function reviveCharacter(index) {
+  const c = playerCharacters[index];
+  if (!c || c.status !== "dead") return;
+  const cost = reviveCost(c);
+  if (campaign.campaign_gold < cost) {
+    showMessageModal("Temple", `The priests ask for ${cost.toFixed(0)} gp to revive ${c.name}. You only have ${campaign.campaign_gold.toFixed(1)} gp.`);
+    return;
+  }
+  campaign.campaign_gold -= cost;
+  c.status = "alive";
+  c.sheet.hit_points = 1;
+  renderTown();
+  renderRosterManager();
+  saveGame();
+  log(`<span class="hit">${c.name} is restored to life at the temple for ${cost.toFixed(0)} gp.</span>`, "hit");
+}
+
+function addPlayerCharacterToParty(index) {
+  if (party.length >= 5) {
+    showMessageModal("Party Full", "The active party can hold at most 5 members.");
+    return;
+  }
+  const c = playerCharacters[index];
+  if (!c) return;
+  if (c.status === "dead") {
+    showMessageModal("Cannot Add", `${c.name} is dead. Revive them at the temple first.`);
+    return;
+  }
+  if (party.includes(c)) return;
+  party.push(c);
+  syncPartyToComposition();
+  renderRosterManager();
+  renderTown();
+  saveGame();
+}
+
+function hireMercenary(index) {
+  if (party.length >= 5) {
+    showMessageModal("Party Full", "The active party can hold at most 5 members.");
+    return;
+  }
+  const merc = availableMercenaries[index];
+  if (!merc) return;
+  if (party.includes(merc)) return;
+  party.push(merc);
+  syncPartyToComposition();
+  renderRosterManager();
+  renderTown();
+  saveGame();
+}
+
+function removeFromParty(index) {
+  if (index < 0 || index >= party.length) return;
+  party.splice(index, 1);
+  activePartyIndex = Math.min(activePartyIndex, party.length - 1);
+  if (activePartyIndex < 0) activePartyIndex = 0;
+  playerCharacter = party[activePartyIndex] || null;
+  syncPartyToComposition();
+  renderRosterManager();
+  renderTown();
+  saveGame();
+}
+
+function createNewRosterCharacter() {
+  if (playerCharacters.length >= 5) {
+    showMessageModal("Roster Full", "You can keep up to 5 custom characters. Dismiss one from the roster first.");
+    return;
+  }
+  rosterCreationMode = true;
+  document.getElementById("create-modal").classList.remove("hidden");
+  party = [];
+  activePartyIndex = 0;
+  playerCharacter = null;
+  abilityDraft = null;
+  document.getElementById("ability-pool").classList.add("hidden");
+  document.getElementById("auto-arrange-btn").classList.add("hidden");
+  const enterBtn = document.getElementById("enter-dungeon-btn");
+  if (enterBtn) enterBtn.textContent = "Add to Roster";
+  updateHeaderStats();
+  renderPartyRosterCreation();
+  clearCreationDetails();
+  document.getElementById("rolled-abilities").innerHTML = "";
+  document.getElementById("creation-summary").innerHTML = `<p style="color:var(--ink-2)">Roll a new character to add to your roster.</p>`;
+}
+
+function dismissRosterCharacter(index) {
+  const c = playerCharacters[index];
+  if (!c) return;
+  confirmAction("Dismiss Character", `Permanently remove ${c.name} from your roster? This cannot be undone.`, () => {
+    playerCharacters.splice(index, 1);
+    // Remove from party if present.
+    const inParty = party.indexOf(c);
+    if (inParty >= 0) removeFromParty(inParty);
+    // Rebuild composition indices after removal.
+    syncPartyToComposition();
+    renderRosterManager();
+    renderTown();
+    saveGame();
+  });
+}
+
+let rosterCreationMode = false;
+
+function finishRosterCreation() {
+  if (!playerCharacter) return;
+  playerCharacter.status = "alive";
+  playerCharacters.push(playerCharacter);
+  if (party.length < 5) {
+    party.push(playerCharacter);
+    syncPartyToComposition();
+  }
+  rosterCreationMode = false;
+  document.getElementById("create-modal").classList.add("hidden");
+  const enterBtn = document.getElementById("enter-dungeon-btn");
+  if (enterBtn) enterBtn.textContent = "Enter Ashen Hollow";
+  renderRosterManager();
+  renderTown();
+  saveGame();
+  showTown();
+}
+
+function openRosterManager() {
+  ensureMercenaries().then(() => {
+    document.getElementById("roster-modal").classList.remove("hidden");
+    renderRosterManager();
+  });
+}
+
+function closeRosterManager() {
+  document.getElementById("roster-modal").classList.add("hidden");
+}
+
+function renderRosterManager() {
+  const modal = document.getElementById("roster-modal");
+  if (!modal) return;
+  const active = document.getElementById("roster-active");
+  const roster = document.getElementById("roster-pcs");
+  const mercs = document.getElementById("roster-mercs");
+
+  if (active) {
+    active.innerHTML = party.map((c, i) => {
+      const s = c.sheet;
+      const hpPct = s.max_hit_points > 0 ? (s.hit_points / s.max_hit_points) * 100 : 0;
+      const dead = c.status === "dead";
+      return `
+        <div class="roster-card ${dead ? 'dead' : ''}">
+          <div class="roster-portrait"><span>${classIcon(c.class)}</span></div>
+          <div class="roster-info">
+            <div class="roster-name">${c.name}${c.isMercenary ? ' <span class="merc-tag">Merc</span>' : ''}</div>
+            <div class="roster-meta">${titleCase(c.ancestry)} ${titleCase(c.class)} · Lvl ${s.level}${c.isMercenary ? ' · ' + c.dailyWage + 'gp/day' : ''}</div>
+            <div class="town-roster-hp"><div class="town-roster-hp-fill ${dead ? 'hp-dead' : ''}" style="width:${dead ? 0 : hpPct}%"></div></div>
+            <div class="town-roster-hp-text">${dead ? 'Dead' : `HP ${s.hit_points}/${s.max_hit_points}`}</div>
+          </div>
+          <button class="btn btn-secondary roster-remove" data-index="${i}">Remove</button>
+        </div>
+      `;
+    }).join("");
+    active.querySelectorAll(".roster-remove").forEach(btn => {
+      btn.addEventListener("click", () => removeFromParty(parseInt(btn.dataset.index, 10)));
+    });
+  }
+
+  if (roster) {
+    roster.innerHTML = playerCharacters.map((c, i) => {
+      const s = c.sheet;
+      const dead = c.status === "dead";
+      const inParty = party.includes(c);
+      return `
+        <div class="roster-card ${dead ? 'dead' : ''}">
+          <div class="roster-portrait"><span>${classIcon(c.class)}</span></div>
+          <div class="roster-info">
+            <div class="roster-name">${c.name}</div>
+            <div class="roster-meta">${titleCase(c.ancestry)} ${titleCase(c.class)} · Lvl ${s.level}</div>
+            <div class="town-roster-hp"><div class="town-roster-hp-fill ${dead ? 'hp-dead' : ''}" style="width:${dead ? 0 : (s.hit_points / s.max_hit_points * 100)}%"></div></div>
+            <div class="town-roster-hp-text">${dead ? 'Dead' : `HP ${s.hit_points}/${s.max_hit_points}`}</div>
+          </div>
+          <div class="roster-actions">
+            ${!inParty && !dead ? `<button class="btn btn-secondary roster-add-pc" data-index="${i}">Add to Party</button>` : ""}
+            ${dead ? `<button class="btn btn-primary roster-revive" data-index="${i}">Revive ${reviveCost(c)}gp</button>` : ""}
+            <button class="btn btn-danger roster-dismiss" data-index="${i}">Dismiss</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+    roster.querySelectorAll(".roster-add-pc").forEach(btn => {
+      btn.addEventListener("click", () => addPlayerCharacterToParty(parseInt(btn.dataset.index, 10)));
+    });
+    roster.querySelectorAll(".roster-revive").forEach(btn => {
+      btn.addEventListener("click", () => reviveCharacter(parseInt(btn.dataset.index, 10)));
+    });
+    roster.querySelectorAll(".roster-dismiss").forEach(btn => {
+      btn.addEventListener("click", () => dismissRosterCharacter(parseInt(btn.dataset.index, 10)));
+    });
+  }
+
+  if (mercs) {
+    mercs.innerHTML = availableMercenaries.map((c, i) => {
+      const s = c.sheet;
+      const inParty = party.includes(c);
+      return `
+        <div class="roster-card">
+          <div class="roster-portrait"><span>${classIcon(c.class)}</span></div>
+          <div class="roster-info">
+            <div class="roster-name">${c.name} <span class="merc-tag">Merc</span></div>
+            <div class="roster-meta">${titleCase(c.ancestry)} ${titleCase(c.class)} · Lvl ${s.level} · ${c.dailyWage}gp/day</div>
+            <div class="town-roster-hp"><div class="town-roster-hp-fill" style="width:${s.hit_points / s.max_hit_points * 100}%"></div></div>
+            <div class="town-roster-hp-text">HP ${s.hit_points}/${s.max_hit_points}</div>
+          </div>
+          ${!inParty ? `<button class="btn btn-secondary roster-hire" data-index="${i}">Hire</button>` : ""}
+        </div>
+      `;
+    }).join("");
+    mercs.querySelectorAll(".roster-hire").forEach(btn => {
+      btn.addEventListener("click", () => hireMercenary(parseInt(btn.dataset.index, 10)));
+    });
+  }
+}
+
+function openCampaignJournal() {
+  const modal = document.getElementById("journal-modal");
+  if (!modal) return;
+  const body = document.getElementById("journal-body");
+  const completed = campaign.completed_modules;
+  const flags = campaign.story_flags;
+  let html = "";
+  if (!completed.length && !flags.length) {
+    html = `<p class="town-empty">Your journal is empty. Complete modules to record clues and relics.</p>`;
+  } else {
+    html += `<div class="journal-section"><h3>Relics & Clues</h3>`;
+    if (flags.length) {
+      html += `<ul class="journal-list">${flags.map(f => `<li>${f}</li>`).join("")}</ul>`;
+    } else {
+      html += `<p class="town-empty">No story clues yet.</p>`;
+    }
+    html += `</div>`;
+    html += `<div class="journal-section"><h3>Completed Modules</h3>`;
+    if (completed.length) {
+      html += `<ul class="journal-list">${completed.map(id => {
+        const mod = DUNGEON_MODULES[id];
+        return `<li><b>${mod?.name || id}</b>${mod?.story_reward ? ` — ${mod.story_reward}` : ""}</li>`;
+      }).join("")}</ul>`;
+    } else {
+      html += `<p class="town-empty">No modules completed.</p>`;
+    }
+    html += `</div>`;
+  }
+  body.innerHTML = html;
+  modal.classList.remove("hidden");
+}
+
+function closeCampaignJournal() {
+  document.getElementById("journal-modal").classList.add("hidden");
+}
+
+function openCampaignSelect() {
+  const modal = document.getElementById("campaign-modal");
+  if (!modal) return;
+  const body = document.getElementById("campaign-list");
+  body.innerHTML = Object.values(CAMPAIGNS).map(camp => `
+    <div class="campaign-card ${camp.id === campaign.campaign_id ? 'active' : ''}" data-id="${camp.id}">
+      <div class="campaign-name">${camp.name}</div>
+      <div class="campaign-desc">${camp.description}</div>
+      ${camp.id === campaign.campaign_id ? '<span class="campaign-active-tag">Current</span>' : '<button class="btn btn-secondary campaign-switch" data-id="' + camp.id + '">Switch</button>'}
+    </div>
+  `).join("");
+  body.querySelectorAll(".campaign-switch").forEach(btn => {
+    btn.addEventListener("click", () => {
+      campaign.campaign_id = btn.dataset.id;
+      // Reset modules for the new campaign selection if none completed there.
+      campaign.completed_modules = [];
+      campaign.unlocked_modules = ["crooked_tower"];
+      campaign.story_flags = [];
+      saveGame();
+      renderTown();
+      closeCampaignSelect();
+      showMessageModal("Campaign Switched", `Now playing: ${CAMPAIGNS[campaign.campaign_id].name}`);
+    });
+  });
+  modal.classList.remove("hidden");
+}
+
+function closeCampaignSelect() {
+  document.getElementById("campaign-modal").classList.add("hidden");
+}
+
+function showTown() {
+  inTown = true;
+  const town = document.getElementById("town-screen");
+  if (!town) return;
+  document.getElementById("landing-screen").classList.add("hidden");
+  document.getElementById("create-modal").classList.add("hidden");
+  document.querySelector(".game-shell").classList.add("hidden");
+  town.classList.remove("hidden");
+  renderTown();
+  saveGame();
+}
+
+function hideTown() {
+  const town = document.getElementById("town-screen");
+  if (town) town.classList.add("hidden");
+}
+
+function renderTown() {
+  const goldEl = document.getElementById("town-gold");
+  if (goldEl) goldEl.textContent = `${Number(campaign.campaign_gold).toFixed(1)} gp`;
+
+  const campaignEl = document.getElementById("town-campaign");
+  if (campaignEl) campaignEl.textContent = CAMPAIGNS[campaign.campaign_id]?.name || campaign.campaign_id;
+
+  const partyHeader = document.getElementById("town-party-header");
+  if (partyHeader) {
+    partyHeader.innerHTML = party.map(c => {
+      const dead = c.status === "dead";
+      return `
+        <div class="town-party-token ${dead ? 'dead' : ''}" title="${c.name} · ${titleCase(c.class)} · ${dead ? 'Dead' : `HP ${c.sheet.hit_points}/${c.sheet.max_hit_points}`}">
+          <span>${classIcon(c.class)}</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  const roster = document.getElementById("town-roster");
+  if (roster) {
+    roster.innerHTML = party.map((c, i) => {
+      const s = c.sheet;
+      const hpPct = s.max_hit_points > 0 ? (s.hit_points / s.max_hit_points) * 100 : 0;
+      const dead = c.status === "dead";
+      return `
+        <div class="town-roster-card ${dead ? 'dead' : ''}">
+          <div class="town-roster-portrait"><span>${classIcon(c.class)}</span></div>
+          <div class="town-roster-info">
+            <div class="town-roster-name">${c.name}${c.isMercenary ? ' <span class="merc-tag">Merc</span>' : ''}</div>
+            <div class="town-roster-meta">${titleCase(c.ancestry)} ${titleCase(c.class)} · Lvl ${s.level}</div>
+            <div class="town-roster-hp"><div class="town-roster-hp-fill ${dead ? 'hp-dead' : ''}" style="width:${dead ? 0 : hpPct}%"></div></div>
+            <div class="town-roster-hp-text">${dead ? 'Dead' : `HP ${s.hit_points}/${s.max_hit_points}`}</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  const stashEl = document.getElementById("town-stash");
+  if (stashEl) {
+    if (campaign.stash.length) {
+      stashEl.innerHTML = `<ul class="town-stash-list">${campaign.stash.map(item => `<li>${item}</li>`).join("")}</ul>`;
+    } else {
+      stashEl.innerHTML = `<p class="town-empty">Your stash is empty. Looted gear will appear here after a successful delve.</p>`;
+    }
+  }
+
+  const deadList = document.getElementById("town-dead-list");
+  if (deadList) {
+    const dead = playerCharacters.filter(c => c.status === "dead");
+    deadList.innerHTML = dead.length
+      ? dead.map(c => `<li>${c.name} — Revive: ${reviveCost(c)}gp</li>`).join("")
+      : `<li class="town-empty">No fallen characters awaiting revival.</li>`;
+  }
+
+  renderInventoryCreate("town-inventory");
+}
+
+function townRest() {
+  for (const c of party) {
+    c.sheet.hit_points = c.sheet.max_hit_points;
+  }
+  renderCharacterPanel();
+  renderTown();
+  log("The party rests at the inn and recovers to full health.", "hit");
+  saveGame();
+}
+
+function openTownMarket() {
+  townShopMode = true;
+  openShopModal("armour");
+}
+
+function closeTownMarket() {
+  townShopMode = false;
+  closeShopModal();
+}
+
+function openGuildBoard() {
+  renderModuleList(true);
+  document.getElementById("module-modal").classList.remove("hidden");
+}
+
+function departToModule(id) {
+  inTown = false;
+  startModule(id);
+}
+
+function returnToTown(won, source) {
+  const deathThreshold = osricRules?.combat?.death_threshold ?? -10;
+
+  // Convert carried gold to campaign gold.
+  let carriedGold = 0;
+  for (const c of party) {
+    if (c.remaining_gold > 0) {
+      carriedGold += Number(c.remaining_gold) || 0;
+      c.remaining_gold = 0;
+    }
+  }
+  if (carriedGold > 0) {
+    campaign.campaign_gold += carriedGold;
+    log(`You bank <b>${carriedGold.toFixed(1)} gp</b> in campaign gold.`, "hit");
+  }
+
+  // Handle fallen characters.
+  const fallenPCs = [];
+  const surviving = [];
+  for (const c of party) {
+    if (c.sheet.hit_points <= deathThreshold) {
+      if (!c.isMercenary) {
+        c.status = "dead";
+        fallenPCs.push(c.name);
+      }
+    } else {
+      surviving.push(c);
+    }
+  }
+  // Remove dead mercenaries from the mercenary pool and party.
+  availableMercenaries = availableMercenaries.filter(m => m.sheet.hit_points > deathThreshold);
+  party = surviving;
+  activePartyIndex = Math.min(activePartyIndex, party.length - 1);
+  if (activePartyIndex < 0) activePartyIndex = 0;
+  playerCharacter = party[activePartyIndex] || null;
+  syncPartyToComposition();
+
+  if (fallenPCs.length) {
+    log(`<span class="damage">${fallenPCs.join(", ")} has fallen.</span>`, "damage");
+  }
+
+  if (won) {
+    const completed = dungeonModuleName || "crooked_tower";
+    completeModule(completed);
+    const mod = DUNGEON_MODULES[completed];
+    if (mod?.story_reward && !campaign.story_flags.includes(mod.story_reward)) {
+      campaign.story_flags.push(mod.story_reward);
+    }
+    // Award module completion gold and XP.
+    const rewardGold = 25 * (mod?.level || 1);
+    const rewardXp = 200 * (mod?.level || 1);
+    campaign.campaign_gold += rewardGold;
+    for (const c of party) {
+      if (c.status !== "dead") {
+        c.sheet.xp += rewardXp;
+      }
+    }
+    log(`Module reward: <b>${rewardGold} gp</b> and <b>${rewardXp} XP</b> per survivor.`, "hit");
+
+    // Add non-consumable looted gear to stash.
+    for (const c of party) {
+      const inv = c.sheet.inventory?.items || [];
+      for (const entry of inv) {
+        const item = osricOptions.equipment.find(e => e.id === entry.item_id);
+        if (!item) continue;
+        if (item.category === "gear" && item.use_action === "heal") continue;
+        const label = `${item.name}${entry.quantity > 1 ? ` ×${entry.quantity}` : ""}`;
+        if (!campaign.stash.includes(label)) campaign.stash.push(label);
+      }
+    }
+  }
+
+  // Heal surviving party to full on a successful return.
+  if (won) {
+    for (const c of party) {
+      if (c.status !== "dead") {
+        c.sheet.hit_points = c.sheet.max_hit_points;
+      }
+    }
+  }
+
+  // Reset dungeon run state.
+  combatState = null;
+  dungeonLevel = 1;
+  mapData = [];
+  monsters = [];
+  currentModule = null;
+  explored = new Set();
+  roomsVisited = new Set();
+
+  saveGame();
+  showTown();
+  if (source) log(source, won ? "hit" : "damage");
+}
+
 function updateLevelBadge() {
   const badge = document.getElementById("level-badge");
   if (badge) badge.textContent = `Dungeon ${dungeonLevel}`;
@@ -1689,8 +2508,13 @@ function showEnd(won, message) {
   const modal = document.getElementById("end-modal");
   document.getElementById("end-title").textContent = won ? "Victory" : "Defeat";
   document.getElementById("end-msg").textContent = message;
-  document.getElementById("restart-btn").textContent = "Play Again";
-  document.getElementById("restart-btn").onclick = () => location.reload();
+  document.getElementById("restart-btn").textContent = won ? "Return to Town" : "Return to Town";
+  document.getElementById("restart-btn").onclick = () => {
+    modal.classList.add("hidden");
+    returnToTown(won, won ? "You return to Ashen Hollow with your spoils." : "You limp back to Ashen Hollow, empty-handed.");
+  };
+  const descendBtn = document.getElementById("descend-btn");
+  if (descendBtn) descendBtn.style.display = "none";
   modal.classList.remove("hidden");
 }
 
@@ -1704,11 +2528,11 @@ function unlockNextModule() {
 function showDescendChoice() {
   const modal = document.getElementById("end-modal");
   document.getElementById("end-title").textContent = "Exit Open";
-  document.getElementById("end-msg").textContent = `You have cleared level ${dungeonLevel}. Escape with your loot, or descend deeper?`;
-  document.getElementById("restart-btn").textContent = "Escape";
+  document.getElementById("end-msg").textContent = `You have cleared level ${dungeonLevel}. Return to town with your loot, or descend deeper into ${DUNGEON_MODULES[dungeonModuleName]?.name || "the dungeon"}?`;
+  document.getElementById("restart-btn").textContent = "Return to Town";
   document.getElementById("restart-btn").onclick = () => {
-    unlockNextModule();
-    location.reload();
+    modal.classList.add("hidden");
+    returnToTown(true, "You return to Ashen Hollow with your spoils.");
   };
 
   const descendBtn = document.getElementById("descend-btn");
@@ -1727,7 +2551,6 @@ function showDescendChoice() {
 }
 
 function descendLevel() {
-  unlockNextModule();
   dungeonLevel++;
   document.getElementById("end-modal").classList.add("hidden");
   clearLog();
@@ -1738,6 +2561,7 @@ function descendLevel() {
 }
 
 async function initGame() {
+  loadCampaign();
   await loadOptions();
 
   const playBtn = document.getElementById("play-now-btn");
@@ -1773,8 +2597,11 @@ async function initGame() {
     activePartyIndex = 0;
     playerCharacter = null;
     abilityDraft = null;
+    inTown = false;
     document.getElementById("ability-pool").classList.add("hidden");
     document.getElementById("auto-arrange-btn").classList.add("hidden");
+    const enterBtn = document.getElementById("enter-dungeon-btn");
+    if (enterBtn) enterBtn.textContent = "Enter Ashen Hollow";
     updateHeaderStats();
     renderPartyRosterCreation();
     clearCreationDetails();
@@ -1850,6 +2677,45 @@ async function initGame() {
   });
   document.getElementById("clear-cart-btn").addEventListener("click", clearCart);
   document.getElementById("buy-cart-btn").addEventListener("click", buyCart);
+
+  // Town hub bindings.
+  const townInn = document.getElementById("town-inn");
+  const townTemple = document.getElementById("town-temple");
+  const townMarket = document.getElementById("town-market");
+  const townGuild = document.getElementById("town-guild");
+  const townRoster = document.getElementById("town-roster-btn");
+  const townJournal = document.getElementById("town-journal-btn");
+  const townCampaign = document.getElementById("town-campaign-btn");
+  const townSave = document.getElementById("town-save");
+  if (townInn) townInn.addEventListener("click", townRest);
+  if (townTemple) townTemple.addEventListener("click", () => openTemple());
+  if (townMarket) townMarket.addEventListener("click", openTownMarket);
+  if (townGuild) townGuild.addEventListener("click", openGuildBoard);
+  if (townRoster) townRoster.addEventListener("click", openRosterManager);
+  if (townJournal) townJournal.addEventListener("click", openCampaignJournal);
+  if (townCampaign) townCampaign.addEventListener("click", openCampaignSelect);
+  if (townSave) townSave.addEventListener("click", () => {
+    saveGame();
+    showMessageModal("Saved", "Your campaign progress has been saved.");
+  });
+
+  // Roster modal bindings.
+  const rosterModal = document.getElementById("roster-modal");
+  const closeRoster = document.getElementById("close-roster-btn");
+  const refreshMercs = document.getElementById("refresh-mercs-btn");
+  const createRosterChar = document.getElementById("create-roster-char-btn");
+  if (closeRoster) closeRoster.addEventListener("click", closeRosterManager);
+  if (rosterModal) rosterModal.addEventListener("click", (e) => { if (e.target === rosterModal) closeRosterManager(); });
+  if (refreshMercs) refreshMercs.addEventListener("click", refreshMercenaries);
+  if (createRosterChar) createRosterChar.addEventListener("click", createNewRosterCharacter);
+
+  // Journal modal bindings.
+  const closeJournal = document.getElementById("close-journal-btn");
+  if (closeJournal) closeJournal.addEventListener("click", closeCampaignJournal);
+
+  // Campaign modal bindings.
+  const closeCampaign = document.getElementById("close-campaign-btn");
+  if (closeCampaign) closeCampaign.addEventListener("click", closeCampaignSelect);
 }
 
 window.addEventListener("DOMContentLoaded", initGame);

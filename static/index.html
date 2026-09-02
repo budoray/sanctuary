@@ -304,6 +304,135 @@
     </div>
   </div>
 
+  <div id="town-screen" class="town-screen hidden">
+    <header class="town-header">
+      <div class="town-title">
+        <h1>Ashen Hollow</h1>
+        <div class="town-subtitle">A weary town on the edge of the Vale</div>
+      </div>
+      <div class="town-header-meta">
+        <div class="town-campaign" id="town-campaign">The Vale of Ashen Hollow</div>
+        <div class="town-gold-line">Campaign Gold: <b id="town-gold">0 gp</b></div>
+        <div class="town-party-tokens" id="town-party-header"></div>
+      </div>
+    </header>
+
+    <main class="town-main">
+      <section class="town-locations">
+        <div class="town-card" id="town-inn">
+          <div class="town-card-icon">🛏</div>
+          <div class="town-card-body">
+            <h3>The Crooked Candle</h3>
+            <p>Rest the active party to full HP. Fallen companions remain here until revived.</p>
+            <div class="town-card-hint">Cost based on party level</div>
+          </div>
+        </div>
+        <div class="town-card" id="town-temple">
+          <div class="town-card-icon">✝</div>
+          <div class="town-card-body">
+            <h3>Temple of the Quiet Veil</h3>
+            <p>Revive dead characters for gold. Remove diseases and curses in time.</p>
+            <div class="town-card-hint" id="town-dead-list">No fallen characters awaiting revival.</div>
+          </div>
+        </div>
+        <div class="town-card" id="town-market">
+          <div class="town-card-icon">⚖</div>
+          <div class="town-card-body">
+            <h3>Market Square</h3>
+            <p>Buy and sell adventuring gear with campaign gold.</p>
+            <div class="town-card-hint">Re-uses the equipment shop</div>
+          </div>
+        </div>
+        <div class="town-card" id="town-guild">
+          <div class="town-card-icon">📜</div>
+          <div class="town-card-body">
+            <h3>Adventurers' Guild</h3>
+            <p>View available modules, locks, prerequisites, and story hooks. Depart from here.</p>
+            <div class="town-card-hint">Choose your next delve</div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="town-sidebar">
+        <div class="town-panel">
+          <h3>Active Party</h3>
+          <div id="town-roster" class="town-roster"></div>
+          <div class="town-actions">
+            <button id="town-roster-btn" class="btn btn-secondary">Roster &amp; Party</button>
+            <button id="town-journal-btn" class="btn btn-secondary">Journal</button>
+            <button id="town-campaign-btn" class="btn btn-secondary">Campaign</button>
+          </div>
+        </div>
+        <div class="town-panel">
+          <h3>Stash</h3>
+          <div id="town-stash" class="town-stash"></div>
+        </div>
+        <div class="town-panel">
+          <h3>Current Gear</h3>
+          <div id="town-inventory" class="town-inventory"></div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="town-footer">
+      <button id="town-save" class="btn btn-secondary">Save Campaign</button>
+      <button id="town-return-title" class="btn btn-secondary" onclick="location.reload()">Return to Title</button>
+    </footer>
+  </div>
+
+  <div id="roster-modal" class="modal hidden">
+    <div class="modal-card roster-modal-card">
+      <div class="roster-modal-header">
+        <h2>Roster &amp; Party Manager</h2>
+        <button id="close-roster-btn" class="btn btn-secondary">Close</button>
+      </div>
+      <div class="roster-modal-body">
+        <section class="roster-section">
+          <div class="roster-section-head">
+            <h3>Active Party</h3>
+            <span class="roster-limit">Max 5</span>
+          </div>
+          <div id="roster-active" class="roster-grid"></div>
+        </section>
+        <section class="roster-section">
+          <div class="roster-section-head">
+            <h3>Player Characters</h3>
+            <span class="roster-limit">Max 5</span>
+          </div>
+          <div id="roster-pcs" class="roster-grid"></div>
+          <button id="create-roster-char-btn" class="btn btn-primary">Create New Character</button>
+        </section>
+        <section class="roster-section">
+          <div class="roster-section-head">
+            <h3>Available Mercenaries</h3>
+            <button id="refresh-mercs-btn" class="btn btn-secondary">Refresh Pool</button>
+          </div>
+          <div id="roster-mercs" class="roster-grid"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="journal-modal" class="modal hidden">
+    <div class="modal-card journal-modal-card">
+      <div class="roster-modal-header">
+        <h2>Campaign Journal</h2>
+        <button id="close-journal-btn" class="btn btn-secondary">Close</button>
+      </div>
+      <div id="journal-body" class="journal-body"></div>
+    </div>
+  </div>
+
+  <div id="campaign-modal" class="modal hidden">
+    <div class="modal-card campaign-modal-card">
+      <div class="roster-modal-header">
+        <h2>Campaign Select</h2>
+        <button id="close-campaign-btn" class="btn btn-secondary">Close</button>
+      </div>
+      <div id="campaign-list" class="campaign-list"></div>
+    </div>
+  </div>
+
   <script>
     document.querySelectorAll('[data-icon]').forEach(el => {
       const name = el.dataset.icon;
