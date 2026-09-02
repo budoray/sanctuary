@@ -1463,6 +1463,10 @@ async function buyStarterKit() {
       method: "POST",
       body: JSON.stringify({ character: playerCharacter, equip: true }),
     });
+    // Keep the active party slot in sync when the API returns a fresh object.
+    if (party.length && activePartyIndex >= 0 && activePartyIndex < party.length) {
+      party[activePartyIndex] = playerCharacter;
+    }
     refreshAfterTransaction();
   } catch (err) {
     showCreationError(err.message);
@@ -1841,6 +1845,10 @@ async function enterDungeon() {
     activePartyIndex = 0;
     playerCharacter = party[0] || null;
     syncPartyToComposition();
+  }
+  // Seed the campaign treasury from the founding character's purse.
+  if (campaign.campaign_gold <= 0 && playerCharacter?.remaining_gold > 0) {
+    campaign.campaign_gold = Number(playerCharacter.remaining_gold);
   }
   inTown = true;
   saveGame();
