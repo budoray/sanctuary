@@ -1950,7 +1950,14 @@ async function ensureMercenaries() {
   }
 }
 
+const REFRESH_MERC_COST = 10;
+
 async function refreshMercenaries() {
+  if (campaign.campaign_gold < REFRESH_MERC_COST) {
+    showMessageModal("Not Enough Gold", `Refreshing the mercenary pool costs ${REFRESH_MERC_COST} gp. You only have ${campaign.campaign_gold.toFixed(1)} gp.`);
+    return;
+  }
+  campaign.campaign_gold -= REFRESH_MERC_COST;
   const count = 3;
   const newMercs = [];
   for (let i = 0; i < count; i++) {
@@ -1963,7 +1970,8 @@ async function refreshMercenaries() {
   syncPartyToComposition();
   saveGame();
   renderRosterManager();
-  log("A new batch of mercenaries arrives in Ashen Hollow.", "hit");
+  renderTown();
+  log(`A new batch of mercenaries arrives in Ashen Hollow for <b>${REFRESH_MERC_COST} gp</b>.`, "hit");
 }
 
 function innCost() {
@@ -2057,11 +2065,18 @@ function hireMercenary(index) {
   const merc = availableMercenaries[index];
   if (!merc) return;
   if (party.includes(merc)) return;
+  const cost = merc.dailyWage * 7;
+  if (campaign.campaign_gold < cost) {
+    showMessageModal("Not Enough Gold", `Hiring ${merc.name} costs ${cost} gp. You only have ${campaign.campaign_gold.toFixed(1)} gp.`);
+    return;
+  }
+  campaign.campaign_gold -= cost;
   party.push(merc);
   syncPartyToComposition();
   renderRosterManager();
   renderTown();
   saveGame();
+  log(`<span class="hit">${merc.name}</span> joins the party for <b>${cost} gp</b>.`, "hit");
 }
 
 function removeFromParty(index) {
@@ -2372,6 +2387,7 @@ function renderTown() {
   }
 
   renderInventoryCreate("town-inventory");
+  renderTownAutoMercToggle();
 }
 
 function townRest() {

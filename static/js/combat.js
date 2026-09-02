@@ -674,6 +674,7 @@ async function playerSurpriseRound() {
   updateCombatUI();
   highlightReachable(playerPos, combatState.movementRemaining);
   highlightRangedTargets();
+  maybeAutoMercTurn();
   // Wait for the player to act and end turn, then begin round 1.
 }
 
@@ -701,6 +702,7 @@ async function startRound() {
   if (combatState.phase === "player") {
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();
+    maybeAutoMercTurn();
   } else {
     setTimeout(enemyTurn, 600);
   }
@@ -755,6 +757,7 @@ function updateCombatUI() {
   renderThiefBar();
   renderSearchSecretDoorsButton();
   renderClimbOutButton();
+  renderCombatAutoMercToggle();
 }
 
 function findEquippedMeleeWeapon() {
@@ -1356,6 +1359,7 @@ function endTurn() {
     updateCombatUI();
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();
+    maybeAutoMercTurn();
     return;
   }
   combatState.playerActedThisRound = true;
@@ -1364,6 +1368,19 @@ function endTurn() {
   clearHighlights();
   updateCombatUI();
   setTimeout(enemyTurn, 400);
+}
+
+function maybeAutoMercTurn() {
+  if (!combatState || combatState.phase !== "player") return;
+  if (!autoMercs) return;
+  const c = party[activePartyIndex];
+  if (!c || !c.isMercenary) return;
+  if (combatState.partyActed?.has(activePartyIndex)) return;
+  const threshold = combatConfig().unconscious_threshold ?? 0;
+  if (c.sheet.hit_points <= threshold) return;
+  clearPendingSpell();
+  clearHighlights();
+  setTimeout(() => runMercenaryTurn(c, activePartyIndex), MERC_AI_DELAY);
 }
 
 function checkMonsterRally(m) {
