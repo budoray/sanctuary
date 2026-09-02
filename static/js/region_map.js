@@ -110,6 +110,12 @@ function renderRegionMap() {
     g.setAttribute("data-id", id);
     g.style.cursor = state === "available" ? "pointer" : "default";
 
+    // Tooltip title.
+    const tooltip = document.createElementNS(ns, "title");
+    const lockReason = moduleLockReason(id);
+    tooltip.textContent = `${mod.name}\n${mod.blurb}${lockReason ? "\n" + lockReason : ""}`;
+    g.appendChild(tooltip);
+
     const circle = document.createElementNS(ns, "circle");
     circle.setAttribute("cx", pos.x);
     circle.setAttribute("cy", pos.y);
@@ -151,7 +157,7 @@ function renderRegionMap() {
         campaign.selected_module = id;
         saveCampaign();
         closeRegionMap();
-        openGuildBoard();
+        openModuleBrief(id, () => departToModule(id));
       });
     }
 

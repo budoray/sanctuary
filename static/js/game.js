@@ -36,11 +36,13 @@ const CAMPAIGNS = {
     id: "ashen_hollow",
     name: "The Vale of Ashen Hollow",
     description: "A valley of forgotten barrows, drowned kings, and a pale herald who walks beneath a black sun.",
+    goal: "Unravel the Black Sun cult, recover the stolen relics, and stop the pale herald before his shadow swallows the vale.",
   },
   iron_spire: {
     id: "iron_spire",
     name: "The Iron Spire",
     description: "A crashed sky-forge in the northern wastes. Dwarven ghosts, clockwork sentinels, and scavenger clans fight over its secrets.",
+    goal: "Restore the Engine-Sigil, descend into the sky-forge heart, and reclaim the master-cog that can raise the spire again.",
   },
 };
 
@@ -145,6 +147,12 @@ function completeModule(id) {
   const mod = DUNGEON_MODULES[id];
   if (mod && mod.unlocks) {
     unlockModule(mod.unlocks);
+  }
+  if (mod && mod.story_reward) {
+    const flag = `Relic recovered: ${mod.story_reward}`;
+    if (!campaign.story_flags.includes(flag)) {
+      campaign.story_flags.push(flag);
+    }
   }
   saveCampaign();
 }
@@ -1879,10 +1887,99 @@ function renderModuleList(fromTown = false) {
   }).join("");
   list.querySelectorAll(".module-card:not(.locked)").forEach(card => {
     card.addEventListener("click", () => {
-      if (fromTown) departToModule(card.dataset.id);
-      else startModule(card.dataset.id);
+      openModuleBrief(card.dataset.id, () => {
+        if (fromTown) departToModule(card.dataset.id);
+        else startModule(card.dataset.id);
+      });
     });
   });
+}
+
+function openModuleBrief(id, onDepart) {
+  const mod = DUNGEON_MODULES[id];
+  if (!mod) return;
+  const modal = document.getElementById("module-brief-modal");
+  const title = document.getElementById("module-brief-title");
+  const level = document.getElementById("module-brief-level");
+  const body = document.getElementById("module-brief-body");
+  const objective = document.getElementById("module-brief-objective");
+  const departBtn = document.getElementById("module-brief-depart");
+  const cancelBtn = document.getElementById("module-brief-cancel");
+  if (!modal || !title || !level || !body || !objective || !departBtn || !cancelBtn) return;
+
+  title.textContent = mod.name;
+  level.textContent = `Level ${mod.level || 1}`;
+  body.innerHTML = `
+    <p class="module-brief-blurb">${mod.blurb}</p>
+    <p class="module-brief-story">${mod.story || ""}</p>
+    <p class="module-brief-intro">${mod.intro || ""}</p>
+  `;
+  objective.innerHTML = `<b>Objective:</b> ${mod.story_objective || mod.objective || "Explore and survive."}`;
+
+  const closeBrief = () => modal.classList.add("hidden");
+  departBtn.onclick = () => {
+    closeBrief();
+    if (onDepart) onDepart();
+  };
+  cancelBtn.onclick = closeBrief;
+
+  modal.classList.remove("hidden");
+}
+
+function closeModuleBrief() {
+  const modal = document.getElementById("module-brief-modal");
+  if (modal) modal.classList.add("hidden");
+}
+
+function renderQuestPanel() {
+  const panel = document.getElementById("town-quest-body");
+  if (!panel) return;
+
+  const campaignData = CAMPAIGNS[campaign.campaign_id];
+  const modules = Object.entries(DUNGEON_MODULES)
+    .filter(([_, mod]) => mod.campaign_id === campaign.campaign_id)
+    .sort((a, b) => (a[1].chapter || 0) - (b[1].chapter || 0));
+  const totalChapters = modules.length;
+  const completedInCampaign = modules.filter(([id]) => campaign.completed_modules.includes(id)).length;
+  const currentChapter = Math.min(completedInCampaign + 1, totalChapters);
+
+  // If currently in a delve, show the active module objective instead.
+  if (!inTown && currentModule) {
+    panel.innerHTML = `
+      <div class="quest-campaign">${campaignData?.name || campaign.campaign_id}</div>
+      <div class="quest-chapter">Current Delve</div>
+      <div class="quest-module">${currentModule.name}</div>
+      <div class="quest-objective"><b>Objective:</b> ${currentModule.story_objective || currentModule.objective || ""}</div>
+      <div class="quest-reminder">Find the beacon to escape and bank your spoils.</div>
+      <div class="quest-goal">${campaignData?.goal || ""}</div>
+    `;
+    return;
+  }
+
+  // Find the next recommended module.
+  const nextEntry = modules.find(([id, mod]) => {
+    if (campaign.completed_modules.includes(id)) return false;
+    return isModuleAvailable(id);
+  });
+  const [nextId, nextMod] = nextEntry || [null, null];
+
+  let html = `
+    <div class="quest-campaign">${campaignData?.name || campaign.campaign_id}</div>
+    <div class="quest-chapter">Chapter ${currentChapter} of ${totalChapters}</div>
+  `;
+  if (nextMod) {
+    html += `
+      <div class="quest-module">${nextMod.name}</div>
+      <div class="quest-objective"><b>Next Goal:</b> ${nextMod.story_objective || nextMod.objective || ""}</div>
+      ${nextMod.level ? `<div class="quest-level">Recommended level: ${nextMod.level}</div>` : ""}
+    `;
+  } else if (completedInCampaign === totalChapters && totalChapters > 0) {
+    html += `<div class="quest-module">Campaign Complete</div><div class="quest-objective">Every chapter of this campaign has been cleared.</div>`;
+  } else {
+    html += `<div class="quest-module">No available chapter</div><div class="quest-objective">Complete earlier chapters to continue the story.</div>`;
+  }
+  html += `<div class="quest-goal">${campaignData?.goal || ""}</div>`;
+  panel.innerHTML = html;
 }
 
 function startModule(id) {
@@ -2278,27 +2375,61 @@ function openCampaignJournal() {
   const body = document.getElementById("journal-body");
   const completed = campaign.completed_modules;
   const flags = campaign.story_flags;
+
+  // Map each story reward to its campaign and module for grouping.
+  const rewardToModule = new Map();
+  for (const [id, mod] of Object.entries(DUNGEON_MODULES)) {
+    if (mod.story_reward) {
+      rewardToModule.set(mod.story_reward, { id, name: mod.name, campaign_id: mod.campaign_id });
+    }
+  }
+
+  function campaignForFlag(flag) {
+    for (const [reward, info] of rewardToModule) {
+      if (flag.includes(reward)) return info.campaign_id;
+    }
+    return "other";
+  }
+
+  const flagsByCampaign = new Map();
+  for (const flag of flags) {
+    const cid = campaignForFlag(flag);
+    if (!flagsByCampaign.has(cid)) flagsByCampaign.set(cid, []);
+    flagsByCampaign.get(cid).push(flag);
+  }
+
+  const modulesByCampaign = new Map();
+  for (const id of completed) {
+    const mod = DUNGEON_MODULES[id];
+    const cid = mod?.campaign_id || "other";
+    if (!modulesByCampaign.has(cid)) modulesByCampaign.set(cid, []);
+    modulesByCampaign.get(cid).push(mod ? { id, name: mod.name, reward: mod.story_reward } : { id, name: id, reward: "" });
+  }
+
+  const campaignIds = new Set([...flagsByCampaign.keys(), ...modulesByCampaign.keys()]);
+  const sortedIds = Object.keys(CAMPAIGNS).filter(cid => campaignIds.has(cid));
+  if (campaignIds.has("other")) sortedIds.push("other");
+
   let html = "";
-  if (!completed.length && !flags.length) {
+  if (!sortedIds.length) {
     html = `<p class="town-empty">Your journal is empty. Complete modules to record clues and relics.</p>`;
   } else {
-    html += `<div class="journal-section"><h3>Relics & Clues</h3>`;
-    if (flags.length) {
-      html += `<ul class="journal-list">${flags.map(f => `<li>${f}</li>`).join("")}</ul>`;
-    } else {
-      html += `<p class="town-empty">No story clues yet.</p>`;
+    for (const cid of sortedIds) {
+      const camp = CAMPAIGNS[cid];
+      const campFlags = flagsByCampaign.get(cid) || [];
+      const campMods = modulesByCampaign.get(cid) || [];
+      html += `<div class="journal-section"><h3>${camp ? camp.name : "Other"}</h3>`;
+      if (campFlags.length) {
+        html += `<ul class="journal-list">${campFlags.map(f => `<li>${f}</li>`).join("")}</ul>`;
+      }
+      if (campMods.length) {
+        html += `<ul class="journal-list">${campMods.map(m => `<li><b>${m.name}</b>${m.reward ? ` — ${m.reward}` : ""}</li>`).join("")}</ul>`;
+      }
+      if (!campFlags.length && !campMods.length) {
+        html += `<p class="town-empty">No records for this campaign.</p>`;
+      }
+      html += `</div>`;
     }
-    html += `</div>`;
-    html += `<div class="journal-section"><h3>Completed Modules</h3>`;
-    if (completed.length) {
-      html += `<ul class="journal-list">${completed.map(id => {
-        const mod = DUNGEON_MODULES[id];
-        return `<li><b>${mod?.name || id}</b>${mod?.story_reward ? ` — ${mod.story_reward}` : ""}</li>`;
-      }).join("")}</ul>`;
-    } else {
-      html += `<p class="town-empty">No modules completed.</p>`;
-    }
-    html += `</div>`;
   }
   body.innerHTML = html;
   modal.classList.remove("hidden");
@@ -2415,6 +2546,7 @@ function renderTown() {
 
   renderInventoryCreate("town-inventory");
   renderTownAutoMercToggle();
+  renderQuestPanel();
 }
 
 function townRest() {
@@ -2492,9 +2624,6 @@ function returnToTown(won, source) {
     const completed = dungeonModuleName || "crooked_tower";
     completeModule(completed);
     const mod = DUNGEON_MODULES[completed];
-    if (mod?.story_reward && !campaign.story_flags.includes(mod.story_reward)) {
-      campaign.story_flags.push(mod.story_reward);
-    }
     // Award module completion gold and XP.
     const rewardGold = 25 * (mod?.level || 1);
     const rewardXp = 200 * (mod?.level || 1);
@@ -2705,6 +2834,13 @@ async function initGame() {
   moduleModal.addEventListener("click", (e) => {
     if (e.target === moduleModal) closeModuleModal();
   });
+
+  const moduleBriefModal = document.getElementById("module-brief-modal");
+  if (moduleBriefModal) {
+    moduleBriefModal.addEventListener("click", (e) => {
+      if (e.target === moduleBriefModal) closeModuleBrief();
+    });
+  }
 
   const messageModal = document.getElementById("message-modal");
   if (messageModal) {

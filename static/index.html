@@ -221,6 +221,21 @@
     </div>
   </div>
 
+  <div id="module-brief-modal" class="modal hidden">
+    <div class="modal-card module-brief-modal-card">
+      <div class="module-brief-header">
+        <h2 id="module-brief-title">Dungeon Brief</h2>
+        <span id="module-brief-level" class="module-brief-level">Level 1</span>
+      </div>
+      <div id="module-brief-body" class="module-brief-body"></div>
+      <div id="module-brief-objective" class="module-brief-objective"></div>
+      <div class="module-brief-actions">
+        <button id="module-brief-cancel" class="btn btn-secondary">Cancel</button>
+        <button id="module-brief-depart" class="btn btn-primary">Depart</button>
+      </div>
+    </div>
+  </div>
+
   <div id="end-modal" class="modal hidden">
     <div class="modal-card" style="text-align:center;">
       <h2 id="end-title">Victory</h2>
@@ -356,6 +371,10 @@
       </section>
 
       <aside class="town-sidebar">
+        <div class="town-panel" id="town-quest-panel">
+          <h3>Quests / Current Objective</h3>
+          <div id="town-quest-body" class="town-quest-body"></div>
+        </div>
         <div class="town-panel">
           <h3>Active Party</h3>
           <div id="town-roster" class="town-roster"></div>

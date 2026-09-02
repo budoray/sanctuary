@@ -2250,4 +2250,145 @@ html, body {
   fill: var(--ink-2);
   pointer-events: none;
 }
+
+/* Quest panel */
+.town-quest-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.quest-campaign {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+.quest-chapter {
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.quest-module {
+  font-size: 0.95rem;
+  color: var(--ink);
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+.quest-objective {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+.quest-objective b { color: var(--accent); }
+.quest-level {
+  font-size: 0.75rem;
+  color: var(--block);
+  font-weight: 600;
+}
+.quest-reminder {
+  font-size: 0.75rem;
+  color: var(--success);
+  font-style: italic;
+}
+.quest-goal {
+  font-size: 0.75rem;
+  color: var(--ink-2);
+  line-height: 1.4;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--rule);
+  font-style: italic;
+}
+
+/* Module brief modal */
+.module-brief-modal-card {
+  max-width: 560px;
+  width: 100%;
+  padding: 1.5rem;
+}
+.module-brief-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+.module-brief-header h2 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 1.4rem;
+}
+.module-brief-level {
+  font-size: 0.75rem;
+  color: var(--block);
+  font-weight: 700;
+  border: 1px solid var(--block);
+  border-radius: 4px;
+  padding: 0.2rem 0.5rem;
+  white-space: nowrap;
+}
+.module-brief-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.module-brief-body p {
+  margin: 0;
+  line-height: 1.5;
+}
+.module-brief-blurb {
+  font-size: 0.9rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+.module-brief-story {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
+.module-brief-intro {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  font-style: italic;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--accent);
+}
+.module-brief-objective {
+  font-size: 0.85rem;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  line-height: 1.45;
+}
+.module-brief-objective b { color: var(--accent); }
+.module-brief-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Region map node state polish */
+.region-node.locked {
+  cursor: not-allowed;
+}
+.region-node.locked circle {
+  fill: var(--panel);
+  stroke: #555;
+}
+.region-node.available circle {
+  fill: var(--panel-2);
+  stroke: var(--accent);
+  filter: drop-shadow(0 0 6px rgba(212, 160, 61, 0.35));
+}
+.region-node.available:hover circle {
+  fill: rgba(212, 160, 61, 0.12);
+  filter: drop-shadow(0 0 10px rgba(212, 160, 61, 0.55));
+}
+.region-node.completed circle {
+  fill: rgba(90, 201, 137, 0.12);
+  stroke: var(--success);
+}
 }
