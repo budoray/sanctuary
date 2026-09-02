@@ -664,6 +664,7 @@ function loadDungeonModule(name) {
       id: `${monsterId}-${pos.x}-${pos.y}-${dungeonLevel}`,
       name: entry.name || template.name,
       hd: template.hd || 1,
+      boss: isBoss,
       x: pos.x,
       y: pos.y,
       hp: hp,

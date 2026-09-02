@@ -10,6 +10,7 @@ from typing import Any
 
 from engine.dice import roll_expression
 from rulesets.osric.adapter import (
+    CLASS_FEATURES,
     COMBAT,
     constitution_hp_modifier,
     dexterity_modifier,
@@ -157,3 +158,87 @@ def heal_damage(character: dict, amount: int) -> dict:
     sheet["hit_points"] = min(max_hp, sheet.get("hit_points", 0) + amount)
     character["hit_points"] = sheet["hit_points"]
     return character
+
+
+def _roll_2d6() -> int:
+    return random.randint(1, 6) + random.randint(1, 6)
+
+
+def check_morale(
+    morale: int,
+    bonus: int = 0,
+    penalty: int = 0,
+    roll: int | None = None,
+) -> dict[str, Any]:
+    """Roll 2d6 against a morale score; return pass/fail details.
+
+    A roll less than or equal to the effective morale score holds; a higher
+    roll breaks.  Bonuses raise the effective score, penalties lower it.
+    """
+    if roll is None:
+        roll = _roll_2d6()
+    effective = morale + bonus - penalty
+    return {
+        "roll": roll,
+        "morale": morale,
+        "effective": effective,
+        "passed": roll <= effective,
+    }
+
+
+def check_surprise(
+    party_alertness: int = 0,
+    enemy_alertness: int = 0,
+    party_roll: int | None = None,
+    enemy_roll: int | None = None,
+) -> dict[str, Any]:
+    """Determine surprise for a new encounter.
+
+    Alertness reduces the chance the party is surprised and increases the
+    chance the enemy is surprised.  If no rolls are supplied, d6s are rolled.
+    """
+    cfg = COMBAT.get("surprise", {"chance_in_6": 2})
+    base = cfg.get("chance_in_6", 2)
+    party_threshold = max(1, base - party_alertness)
+    enemy_threshold = min(5, base + enemy_alertness)
+    if party_roll is None:
+        party_roll = random.randint(1, 6)
+    if enemy_roll is None:
+        enemy_roll = random.randint(1, 6)
+    return {
+        "party_surprised": party_roll <= party_threshold,
+        "enemy_surprised": enemy_roll <= enemy_threshold,
+        "party_roll": party_roll,
+        "enemy_roll": enemy_roll,
+        "party_threshold": party_threshold,
+        "enemy_threshold": enemy_threshold,
+    }
+
+
+def turn_undead(
+    turner_level: int,
+    undead_type: str,
+    undead_hd: int = 1,
+    class_id: str = "cleric",
+    roll: int | None = None,
+) -> dict[str, Any]:
+    """Resolve a Turn Undead attempt against a single undead creature.
+
+    Looks up the target number for the turning class and rolls d20 if no
+    roll is supplied.  A natural 20 or a turner four or more levels above
+    the undead's HD destroys it outright.
+    """
+    table = CLASS_FEATURES.get("turn_undead", {}).get(class_id, {})
+    target = table.get(undead_type.lower())
+    if target is None:
+        return {"roll": roll, "target": None, "turned": False, "destroyed": False}
+    if roll is None:
+        roll = _roll_d20()
+    success = roll >= target
+    destroyed = success and (roll == 20 or turner_level > undead_hd + 3)
+    return {
+        "roll": roll,
+        "target": target,
+        "turned": success,
+        "destroyed": destroyed,
+    }

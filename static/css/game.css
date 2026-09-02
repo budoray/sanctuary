@@ -2119,6 +2119,10 @@ html, body {
   color: var(--block);
   font-weight: 600;
 }
+.merc-action.retreat {
+  color: var(--ink-2);
+  font-weight: 500;
+}
 
 .auto-merc-toggle {
   display: inline-flex;

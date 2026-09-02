@@ -76,10 +76,17 @@ def run() -> int:
         page.wait_for_selector("#board-canvas canvas", state="visible", timeout=10000)
         page.wait_for_timeout(1000)
 
+        page.wait_for_selector("text=Round 1", timeout=10000)
         if not page.locator("#turn-undead-btn").count():
             errors.append("Turn Undead button not found for cleric")
         else:
             print("Turn Undead button present for cleric")
+            try:
+                page.click("#turn-undead-btn")
+                page.wait_for_selector("text=undead", timeout=10000)
+                print("Turn Undead interaction succeeded")
+            except Exception as exc:
+                errors.append(f"Turn Undead interaction failed: {exc}")
 
         # Restart as fighter, buy a bow and arrows, equip bow to verify ammo UI.
         page.goto(URL)
@@ -189,6 +196,45 @@ def run() -> int:
         print("Action hint with bow:", repr(hint))
         if "shoot" not in hint.lower() and "out of ammo" not in hint.lower():
             errors.append(f"Unexpected action hint for bow fighter: {hint!r}")
+
+        # Mercenary auto-AI scenario: hire a mercenary and let them act.
+        page.goto(URL)
+        page.wait_for_selector("#play-now-btn", state="visible", timeout=10000)
+        page.click("#play-now-btn")
+        page.wait_for_selector("#create-modal", state="visible", timeout=10000)
+        page.select_option("#char-class", "fighter")
+        page.click("#roll-character-btn")
+        page.wait_for_selector("#rolled-abilities .ability-grid", state="visible", timeout=10000)
+        page.click("#buy-starter-kit")
+        page.wait_for_timeout(500)
+        page.click("#enter-dungeon-btn")
+        page.wait_for_selector("#town-screen", state="visible", timeout=10000)
+
+        page.evaluate("""() => {
+            if (campaign.campaign_gold < 50) { campaign.campaign_gold = 50; saveCampaign(); }
+        }""")
+        page.click("#town-roster-btn")
+        page.wait_for_selector("#roster-modal:not(.hidden)", timeout=10000)
+        if not page.locator(".roster-hire").count():
+            page.click("#refresh-mercs-btn")
+            page.wait_for_timeout(800)
+        page.click(".roster-hire[data-index='0']")
+        page.wait_for_timeout(300)
+        page.click("#close-roster-btn")
+        page.wait_for_timeout(300)
+        page.click("#town-guild")
+        page.wait_for_selector("#module-list .module-card", state="visible", timeout=10000)
+        page.click(".module-card[data-id='crooked_tower']")
+        page.wait_for_selector("#module-brief-modal", state="visible", timeout=10000)
+        page.click("#module-brief-depart")
+        page.wait_for_selector("#board-canvas canvas", state="visible", timeout=10000)
+        page.wait_for_selector("text=Round 1", timeout=10000)
+        page.click("#end-turn-btn")
+        try:
+            page.wait_for_selector("#log .merc-action", timeout=20000)
+            print("Mercenary auto-AI acted")
+        except Exception as exc:
+            errors.append(f"Mercenary auto-AI did not act: {exc}")
 
         browser.close()
 

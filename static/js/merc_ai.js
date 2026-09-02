@@ -126,12 +126,142 @@ function mercBestAttackSpell(character) {
   return null;
 }
 
-async function mercAttackTarget(character, monster, ranged) {
+function mercHasHealingSpell(character) {
+  const spells = (osricOptions.spells && osricOptions.spells[character.class]) || [];
+  const slots = character.sheet.spell_slots || {};
+  return spells.some(spell => {
+    if (!spell.heal) return false;
+    const remaining = slots[spell.level] || slots[String(spell.level)] || 0;
+    return remaining > 0;
+  });
+}
+
+function mercBestMeleeTarget(adjacent) {
+  return adjacent.slice().sort((a, b) => a.hp - b.hp)[0];
+}
+
+function mercConsciousThreshold() {
+  return osricRules?.combat?.unconscious_threshold ?? 0;
+}
+
+function mercWoundedAllyForHealing(character) {
+  const threshold = mercConsciousThreshold();
+  let best = null;
+  let bestPct = 0.5;
+  for (const c of party) {
+    if (!c.sheet || c.sheet.hit_points <= threshold) continue;
+    if (c === character) continue;
+    const pct = c.sheet.hit_points / c.sheet.max_hit_points;
+    if (pct < bestPct) {
+      bestPct = pct;
+      best = c;
+    }
+  }
+  if (!best && character.sheet.hit_points / character.sheet.max_hit_points < 0.5) {
+    best = character;
+  }
+  return best;
+}
+
+async function mercCastHealingSpell(character, ally) {
+  const spells = (osricOptions.spells && osricOptions.spells[character.class]) || [];
+  const slots = character.sheet.spell_slots || {};
+  const spell = spells.find(s => {
+    if (!s.heal) return false;
+    return (slots[s.level] || slots[String(s.level)] || 0) > 0;
+  });
+  if (!spell) return 0;
+
+  const prevCharacter = playerCharacter;
+  playerCharacter = character;
+  try {
+    const res = await api("/api/osric/spell", {
+      method: "POST",
+      body: JSON.stringify({ caster: character, spell_id: spell.id, target: null }),
+    });
+    const healed = res.result.heal || 0;
+    const s = ally.sheet;
+    const before = s.hit_points;
+    s.hit_points = Math.min(s.max_hit_points, s.hit_points + healed);
+    const actual = s.hit_points - before;
+
+    // Sync the caster's spell slots back from the API response.
+    character.sheet.spell_slots = res.character.sheet.spell_slots;
+    if (typeof activePartyIndex === "number" && party[activePartyIndex] === character) {
+      party[activePartyIndex] = character;
+    }
+
+    if (actual > 0) {
+      showFloatingText(playerPos.x, playerPos.y, `+${actual}`, 0x5ac989);
+      log(`${character.name} casts <b>${spell.name}</b> on <b>${ally.name}</b>, healing <span class="hit">${actual}</span> HP.`);
+    }
+    renderCharacterPanel();
+    saveGame();
+    return actual;
+  } catch (err) {
+    log(`<span class="damage">${err.message}</span>`);
+    return 0;
+  } finally {
+    playerCharacter = prevCharacter;
+  }
+}
+
+function mercAdjacentUnexploredDoor() {
+  for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+    const nx = playerPos.x + dx, ny = playerPos.y + dy;
+    if (nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) continue;
+    const t = mapData[ny][nx];
+    if (t === TILE.DOOR && !doorsOpened.has(`${nx},${ny}`)) return { x: nx, y: ny };
+    if (t === TILE.SECRET_DOOR && !secretDoorsDiscovered.has(`${nx},${ny}`)) return { x: nx, y: ny };
+  }
+  return null;
+}
+
+function mercFindSafeExploredTile(threatPos) {
+  let best = null;
+  let bestDist = distance(playerPos, threatPos);
+  for (const key of explored) {
+    const [x, y] = key.split(",").map(Number);
+    if (!isWalkable(x, y)) continue;
+    if (mapData[y][x] === TILE.TRAP) continue;
+    if (monsterAt(x, y)) continue;
+    const d = distance({ x, y }, threatPos);
+    if (d > bestDist) {
+      bestDist = d;
+      best = { x, y };
+    }
+  }
+  return best;
+}
+
+async function mercRetreatFrom(character, threatPos) {
+  if (!combatState || combatState.movementRemaining <= 0) return false;
+  const safeTile = mercFindSafeExploredTile(threatPos);
+  const target = safeTile || playerPos;
+  let moved = false;
+  while (combatState.movementRemaining > 0) {
+    const step = nextStepToward(playerPos, target);
+    if (!step) break;
+    if (!mercCanStepOn(step.x, step.y)) break;
+    const dNow = distance(playerPos, threatPos);
+    const dNext = distance(step, threatPos);
+    if (dNext <= dNow && safeTile) break;
+    movePlayer(step.x, step.y);
+    combatState.movementRemaining -= 1;
+    moved = true;
+    await checkTileInteraction(step.x, step.y);
+    saveGame();
+    await new Promise(r => setTimeout(r, MERC_STEP_DELAY));
+  }
+  return moved;
+}
+
+async function mercAttackTarget(character, monster, ranged, backstab = false) {
   const prevCharacter = playerCharacter;
   playerCharacter = character;
   try {
     const d = distance(playerPos, { x: monster.x, y: monster.y });
-    await playerAttackMonster(monster, ranged, ranged ? d * 10 : 0, false);
+    await playerAttackMonster(monster, ranged, ranged ? d * 10 : 0, backstab);
   } finally {
     playerCharacter = prevCharacter;
   }
@@ -142,7 +272,6 @@ async function mercCastSpell(character, spell, targetMonster) {
   playerCharacter = character;
   try {
     await playerCastSpell(spell, targetMonster);
-    // playerCastSpell may replace playerCharacter with a fresh API result.
     if (typeof activePartyIndex === "number" && party[activePartyIndex]) {
       party[activePartyIndex] = playerCharacter;
     }
@@ -222,6 +351,9 @@ async function runMercenaryTurn(character, index) {
   }
 
   const hpPct = character.sheet.max_hit_points > 0 ? character.sheet.hit_points / character.sheet.max_hit_points : 1;
+  const adjacent = mercAdjacentMonsters();
+  const nearest = mercNearestVisibleMonster();
+  const bossAdjacent = nearest?.boss && distance(playerPos, { x: nearest.x, y: nearest.y }) === 1;
 
   // 1. Drink a potion when badly wounded.
   if (hpPct <= 0.25 && mercHasPotion(character)) {
@@ -231,21 +363,81 @@ async function runMercenaryTurn(character, index) {
     return;
   }
 
-  // 2. Melee attack the weakest adjacent monster.
-  const adjacent = mercAdjacentMonsters();
-  if (adjacent.length) {
-    const target = adjacent.slice().sort((a, b) => a.hp - b.hp)[0];
-    mercLog(character, `strikes at <b>${target.name}</b>.`);
-    await mercAttackTarget(character, target, false);
-    endTurn();
-    return;
+  // 2. Retreat if badly wounded, out of potions, and overwhelmed.
+  if (hpPct <= 0.25 && !mercHasPotion(character) && (adjacent.length >= 2 || bossAdjacent)) {
+    const threat = nearest || (adjacent.length ? adjacent[0] : null);
+    if (threat) {
+      const retreated = await mercRetreatFrom(character, { x: threat.x, y: threat.y });
+      if (retreated) {
+        log(`<span class="merc-action">${character.name}</span> <span class="retreat">retreats</span> from the enemy.`, "merc-action retreat");
+        endTurn();
+        return;
+      }
+    }
   }
 
-  const nearest = mercNearestVisibleMonster();
+  // 3. Class-specific behaviour.
+  if (character.class === "cleric") {
+    if (adjacent.some(m => isUndead(m))) {
+      await playerTurnUndead();
+      endTurn();
+      return;
+    }
+    const woundedAlly = mercWoundedAllyForHealing(character);
+    if (woundedAlly && mercHasHealingSpell(character)) {
+      const healed = await mercCastHealingSpell(character, woundedAlly);
+      if (healed > 0) {
+        mercLog(character, `heals <b>${woundedAlly.name}</b>.`);
+        endTurn();
+        return;
+      }
+    }
+  }
 
-  // 3. Ranged or spell attack the nearest visible target.
-  if (nearest) {
-    if (mercCanUseRanged(character)) {
+  if (character.class === "thief") {
+    if (nearest) {
+      if (!playerStealthed && !combatState.attacked) {
+        await playerSneak();
+      }
+      if (adjacent.length) {
+        const target = mercBestMeleeTarget(adjacent);
+        const backstab = playerStealthed;
+        mercLog(character, backstab ? `backstabs <b>${target.name}</b>!` : `strikes at <b>${target.name}</b>.`);
+        await mercAttackTarget(character, target, false, backstab);
+        endTurn();
+        return;
+      }
+    } else {
+      const door = mercAdjacentUnexploredDoor();
+      if (door && !combatState.acted) {
+        pendingTrapSearch = true;
+        searchTrapsAt(door.x, door.y);
+        endTurn();
+        return;
+      }
+    }
+  }
+
+  if (character.class === "magic_user") {
+    // Keep distance from adjacent enemies.
+    if (adjacent.length) {
+      const retreated = await mercRetreatFrom(character, { x: adjacent[0].x, y: adjacent[0].y });
+      if (retreated) {
+        log(`<span class="merc-action">${character.name}</span> <span class="retreat">steps back</span> to cast.`, "merc-action retreat");
+        endTurn();
+        return;
+      }
+    }
+
+    const spell = mercBestAttackSpell(character);
+    if (spell && nearest) {
+      mercLog(character, `casts <b>${spell.name}</b> at <b>${nearest.name}</b>.`);
+      await mercCastSpell(character, spell, nearest);
+      endTurn();
+      return;
+    }
+
+    if (nearest && mercCanUseRanged(character)) {
       const weapon = mercFindEquippedRangedWeapon(character);
       const maxTiles = Math.floor((weapon?.range || 0) / 10);
       const d = distance(playerPos, { x: nearest.x, y: nearest.y });
@@ -256,16 +448,42 @@ async function runMercenaryTurn(character, index) {
         return;
       }
     }
-    const spell = mercBestAttackSpell(character);
-    if (spell) {
-      mercLog(character, `casts <b>${spell.name}</b> at <b>${nearest.name}</b>.`);
-      await mercCastSpell(character, spell, nearest);
+
+    if (nearest && combatState.movementRemaining > 0) {
+      const step = nextStepAway(playerPos, { x: nearest.x, y: nearest.y });
+      if (step && mercCanStepOn(step.x, step.y)) {
+        const reachable = computeReachable(playerPos, 1);
+        if (reachable.some(p => p.x === step.x && p.y === step.y)) {
+          movePlayer(step.x, step.y);
+          combatState.movementRemaining -= 1;
+          mercLog(character, "keeps distance from the enemy.");
+          await checkTileInteraction(step.x, step.y);
+          saveGame();
+          endTurn();
+          return;
+        }
+      }
+    }
+
+    // Last resort: close to melee only if there is no other option.
+    if (nearest && adjacent.length) {
+      const target = mercBestMeleeTarget(adjacent);
+      mercLog(character, `swings at <b>${target.name}</b> as a last resort.`);
+      await mercAttackTarget(character, target, false);
       endTurn();
       return;
     }
   }
 
-  // 4. Move toward the nearest visible monster.
+  // 4. Default fighter-style behaviour: charge and melee.
+  if (adjacent.length) {
+    const target = mercBestMeleeTarget(adjacent);
+    mercLog(character, `strikes at <b>${target.name}</b>.`);
+    await mercAttackTarget(character, target, false);
+    endTurn();
+    return;
+  }
+
   if (nearest && combatState.movementRemaining > 0) {
     let moved = false;
     while (combatState.movementRemaining > 0 && distance(playerPos, { x: nearest.x, y: nearest.y }) > 1) {
@@ -277,7 +495,7 @@ async function runMercenaryTurn(character, index) {
     if (moved) {
       const adjacentNow = mercAdjacentMonsters();
       if (adjacentNow.length && !combatState.attacked) {
-        const target = adjacentNow.slice().sort((a, b) => a.hp - b.hp)[0];
+        const target = mercBestMeleeTarget(adjacentNow);
         mercLog(character, `strikes at <b>${target.name}</b>.`);
         await mercAttackTarget(character, target, false);
       }
