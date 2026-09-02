@@ -23,6 +23,7 @@ let campaign = {
   completed_modules: [],
   story_flags: [],
   stash: [],
+  selected_module: null,
 };
 let playerCharacters = []; // Persistent custom roster (max 5)
 let availableMercenaries = []; // Hireable NPCs in town
@@ -36,6 +37,11 @@ const CAMPAIGNS = {
     name: "The Vale of Ashen Hollow",
     description: "A valley of forgotten barrows, drowned kings, and a pale herald who walks beneath a black sun.",
   },
+  iron_spire: {
+    id: "iron_spire",
+    name: "The Iron Spire",
+    description: "A crashed sky-forge in the northern wastes. Dwarven ghosts, clockwork sentinels, and scavenger clans fight over its secrets.",
+  },
 };
 
 function loadCampaign() {
@@ -46,7 +52,8 @@ function loadCampaign() {
       if (data.campaign_gold !== undefined) {
         campaign.campaign_id = data.campaign_id || "ashen_hollow";
         campaign.campaign_gold = Number(data.campaign_gold) || 0;
-        campaign.unlocked_modules = Array.isArray(data.unlocked_modules) ? data.unlocked_modules : ["crooked_tower"];
+        const starter = getCampaignStarterModule(campaign.campaign_id);
+        campaign.unlocked_modules = Array.isArray(data.unlocked_modules) ? data.unlocked_modules : [starter];
         campaign.completed_modules = Array.isArray(data.completed_modules) ? data.completed_modules : [];
         campaign.story_flags = Array.isArray(data.story_flags) ? data.story_flags : [];
         campaign.stash = Array.isArray(data.stash) ? data.stash : [];
@@ -140,6 +147,17 @@ function completeModule(id) {
     unlockModule(mod.unlocks);
   }
   saveCampaign();
+}
+
+function getCampaignModules(campaignId) {
+  if (typeof DUNGEON_MODULES === "undefined") return [];
+  return Object.entries(DUNGEON_MODULES).filter(([_, mod]) => mod.campaign_id === campaignId);
+}
+
+function getCampaignStarterModule(campaignId) {
+  const modules = getCampaignModules(campaignId);
+  const first = modules.find(([_, mod]) => mod.chapter === 1 || !mod.requires || !mod.requires.length);
+  return first ? first[0] : (modules[0] ? modules[0][0] : "crooked_tower");
 }
 
 function isModuleUnlocked(id) {
@@ -1832,7 +1850,7 @@ async function enterDungeon() {
 function renderModuleList(fromTown = false) {
   const list = document.getElementById("module-list");
   if (!list || typeof DUNGEON_MODULES === "undefined") return;
-  list.innerHTML = Object.entries(DUNGEON_MODULES).filter(([_, mod]) => !mod.campaign_id || mod.campaign_id === campaign.campaign_id).map(([id, mod]) => {
+  list.innerHTML = Object.entries(DUNGEON_MODULES).filter(([_, mod]) => mod.campaign_id === campaign.campaign_id).map(([id, mod]) => {
     const available = isModuleAvailable(id);
     const locked = !isModuleUnlocked(id);
     const lockHint = moduleLockReason(id);
@@ -2298,9 +2316,10 @@ function openCampaignSelect() {
       campaign.campaign_id = btn.dataset.id;
       // Reset modules for the new campaign selection if none completed there.
       campaign.completed_modules = [];
-      campaign.unlocked_modules = ["crooked_tower"];
+      const starter = getCampaignStarterModule(campaign.campaign_id);
+      campaign.unlocked_modules = [starter];
       campaign.story_flags = [];
-      saveGame();
+      saveCampaign();
       renderTown();
       closeCampaignSelect();
       showMessageModal("Campaign Switched", `Now playing: ${CAMPAIGNS[campaign.campaign_id].name}`);
@@ -2702,6 +2721,7 @@ async function initGame() {
   const townRoster = document.getElementById("town-roster-btn");
   const townJournal = document.getElementById("town-journal-btn");
   const townCampaign = document.getElementById("town-campaign-btn");
+  const townRegionMap = document.getElementById("town-region-map-btn");
   const townSave = document.getElementById("town-save");
   if (townInn) townInn.addEventListener("click", townRest);
   if (townTemple) townTemple.addEventListener("click", () => openTemple());
@@ -2710,6 +2730,7 @@ async function initGame() {
   if (townRoster) townRoster.addEventListener("click", openRosterManager);
   if (townJournal) townJournal.addEventListener("click", openCampaignJournal);
   if (townCampaign) townCampaign.addEventListener("click", openCampaignSelect);
+  if (townRegionMap) townRegionMap.addEventListener("click", openRegionMap);
   if (townSave) townSave.addEventListener("click", () => {
     saveGame();
     showMessageModal("Saved", "Your campaign progress has been saved.");
@@ -2732,6 +2753,12 @@ async function initGame() {
   // Campaign modal bindings.
   const closeCampaign = document.getElementById("close-campaign-btn");
   if (closeCampaign) closeCampaign.addEventListener("click", closeCampaignSelect);
+
+  // Region map modal bindings.
+  const regionMapModal = document.getElementById("region-map-modal");
+  const closeRegionMapBtn = document.getElementById("close-region-map-btn");
+  if (closeRegionMapBtn) closeRegionMapBtn.addEventListener("click", closeRegionMap);
+  if (regionMapModal) regionMapModal.addEventListener("click", (e) => { if (e.target === regionMapModal) closeRegionMap(); });
 }
 
 window.addEventListener("DOMContentLoaded", initGame);

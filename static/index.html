@@ -13,6 +13,7 @@
   <script src="/js/modules.js"></script>
   <script src="/js/merc_ai.js"></script>
   <script src="/js/combat.js"></script>
+  <script src="/js/region_map.js"></script>
   <script src="/js/game.js"></script>
   <script src="/js/watch-agent.js"></script>
 </head>
@@ -362,6 +363,7 @@
             <button id="town-roster-btn" class="btn btn-secondary">Roster &amp; Party</button>
             <button id="town-journal-btn" class="btn btn-secondary">Journal</button>
             <button id="town-campaign-btn" class="btn btn-secondary">Campaign</button>
+            <button id="town-region-map-btn" class="btn btn-secondary">Region Map</button>
           </div>
         </div>
         <div class="town-panel">
@@ -431,6 +433,16 @@
         <button id="close-campaign-btn" class="btn btn-secondary">Close</button>
       </div>
       <div id="campaign-list" class="campaign-list"></div>
+    </div>
+  </div>
+
+  <div id="region-map-modal" class="modal hidden">
+    <div class="modal-card region-map-modal-card">
+      <div class="roster-modal-header">
+        <h2 id="region-map-title">Region Map</h2>
+        <button id="close-region-map-btn" class="btn btn-secondary">Close</button>
+      </div>
+      <div id="region-map-svg" class="region-map-svg-wrap"></div>
     </div>
   </div>
 
