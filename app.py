@@ -72,6 +72,12 @@ def index():
     return FileResponse(ROOT / "static" / "index.html")
 
 
+@app.get("/live")
+def live():
+    """Public spectate — in-page agent plays a delve."""
+    return FileResponse(ROOT / "static" / "index.html")
+
+
 @app.get("/begin")
 def begin():
     """Hub play-gate sends signed-in users here; redirect straight to the game."""
