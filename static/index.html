@@ -38,7 +38,7 @@
     <header class="topbar">
       <div class="logo">Sanctuary</div>
       <div style="display:flex;align-items:center;gap:1rem;">
-        <button id="help-btn" class="btn btn-secondary" style="padding:0.4rem 0.7rem;font-size:0.75rem;">?</button>
+        <button id="help-btn" class="btn btn-secondary" style="padding:0.4rem 0.7rem;font-size:0.75rem;">? Help</button>
         <div class="level-badge" id="level-badge">Level 1</div>
         <div class="turn-badge" id="turn-badge">Create your hero</div>
       </div>
@@ -109,11 +109,18 @@
               <label>
                 Class
                 <select id="char-class"></select>
+                <span class="field-tip" id="class-tip">Fighters are recommended for beginners.</span>
               </label>
               <label>
                 Alignment
                 <select id="char-alignment"></select>
               </label>
+            </div>
+
+            <div class="creation-hints" id="creation-hints">
+              <p><b>Roll method:</b> <span id="roll-method-hint">3d6 in order rolls scores for STR, INT, WIS, DEX, CON, CHA in order.</span></p>
+              <p><b>Prime requisites:</b> your class's most important abilities. High prime requisites grant bonus XP.</p>
+              <p><b>Starting gold:</b> spend it on armour, a weapon, and the starter kit. Sell back unwanted gear for half value.</p>
             </div>
 
             <div class="create-actions">
@@ -228,22 +235,68 @@
   </div>
 
   <div id="help-modal" class="modal hidden">
-    <div class="modal-card">
-      <h2>How to Play</h2>
-      <ul class="help-list">
-        <li><b>Create</b> a hero, buy gear, then click <b>Enter Dungeon</b>.</li>
-        <li><b>Move</b> by clicking the golden highlighted tiles.</li>
-        <li><b>Attack</b> adjacent monsters once per round; ranged weapons can shoot circled targets.</li>
-        <li><b>Click doors</b> next to you to open them.</li>
-        <li><b>End Turn</b> finishes your side of the round; initiative is rolled each round.</li>
-        <li><b>Traps</b> hide in corridors and trigger saving throws.</li>
-        <li><b>Spells</b>, <b>Turn Undead</b>, and <b>Thief skills</b> appear in the action bar when available.</li>
-        <li><b>Missile weapons</b> consume ammo; carry arrows, bolts, or bullets.</li>
-        <li><b>Surprise</b> is rolled at the start of each encounter; DEX adjusts your initiative.</li>
-        <li><b>Rest</b> in a cleared room to recover HP. <b>Potions</b> can be quaffed from the action bar or character sheet.</li>
-        <li><b>Death saves</b> are rolled when you fall unconscious; stabilise at 0 HP, then rest or receive healing.</li>
-        <li>Clear the level and reach the <b>beacon</b> to escape or descend deeper.</li>
-      </ul>
+    <div class="modal-card help-modal-card">
+      <h2>Player's Tome</h2>
+      <div class="help-tabs" id="help-tabs">
+        <button class="help-tab active" data-tab="controls">Controls</button>
+        <button class="help-tab" data-tab="osric">OSRIC Basics</button>
+        <button class="help-tab" data-tab="classes">Classes</button>
+        <button class="help-tab" data-tab="combat">Combat</button>
+      </div>
+      <div class="help-body">
+        <div class="help-panel active" id="help-controls">
+          <ul class="help-list">
+            <li><b>Move:</b> Click the golden highlighted tiles, or press arrow keys / WASD.</li>
+            <li><b>Attack:</b> Click an adjacent monster to strike it in melee (once per round).</li>
+            <li><b>Shoot:</b> With a bow or sling loaded, click a monster inside the red circle.</li>
+            <li><b>Doors:</b> Closed doors block movement. Click a door next to you, or press a direction into it, to open it.</li>
+            <li><b>Search traps:</b> Thieves can click <b>Find Traps</b>, then click an adjacent tile.</li>
+            <li><b>Cast spells:</b> Click a spell button, then click a target. Healing and buff spells target yourself.</li>
+            <li><b>Rest:</b> Click the <b>Rest</b> button in a safe area to recover HP. It consumes your action.</li>
+            <li><b>End Turn:</b> Click <b>End Turn</b> when you are done acting; enemies then take their turn.</li>
+            <li><b>Items:</b> Potions and scrolls can be used from the action bar or from your character sheet.</li>
+          </ul>
+        </div>
+        <div class="help-panel" id="help-osric">
+          <ul class="help-list">
+            <li><b>Ability Scores:</b> Strength, Intelligence, Wisdom, Dexterity, Constitution, Charisma. High scores grant modifiers to hit points, attacks, AC, and more.</li>
+            <li><b>AC (Armour Class):</b> In OSRIC, lower AC is better. A base AC 10 person in plate mail might be AC 3. The UI also shows the modern ascending value in parentheses.</li>
+            <li><b>THAC0:</b> "To Hit Armour Class 0". To hit an enemy, roll d20 and meet or exceed THAC0 minus the target's descending AC. The server resolves this for you.</li>
+            <li><b>HP:</b> Hit points. Reaching 0 renders you unconscious; negative HP risks death. Rest, potions, or healing spells restore HP.</li>
+            <li><b>Saves:</b> Saving throws resist traps, poison, breath weapons, and spells. Roll d20 and meet or exceed your save number.</li>
+            <li><b>Morale:</b> Monsters may flee when wounded or when half their group falls. Bosses usually stand firm.</li>
+            <li><b>Surprise:</b> Each encounter rolls surprise. A surprised side skips its first round.</li>
+            <li><b>Initiative:</b> Each round both sides roll d6, plus DEX and weapon speed. The higher roll acts first.</li>
+            <li><b>XP & Leveling:</b> Defeat monsters and loot gold to earn XP. Reach the listed XP threshold to gain a level, more HP, and better saves.</li>
+          </ul>
+        </div>
+        <div class="help-panel" id="help-classes">
+          <ul class="help-list">
+            <li><b>Fighter</b> — High HP, all armour and weapons. Simple and durable. <em>Recommended for beginners.</em></li>
+            <li><b>Cleric</b> — Wears armour, heals allies, and turns undead. No edged weapons.</li>
+            <li><b>Magic-User</b> — Powerful spells but fragile; no armour and poor weapons.</li>
+            <li><b>Thief</b> — Sneaks, finds traps, and backstabs. Light armour only.</li>
+            <li><b>Druid</b> — Nature magic, healing, and useful summoning. Cannot use metal armour.</li>
+            <li><b>Paladin</b> — Holy warrior with healing and undead turning. High ability requirements.</li>
+            <li><b>Ranger</b> — Skilled warrior with nature magic and bonuses against certain foes.</li>
+            <li><b>Assassin</b> — Sneaks and backstabs like a thief but fights better. Evil alignments only.</li>
+            <li><b>Monk</b> — Unarmed combatant with high saves and mobility. No armour.</li>
+            <li><b>Bard</b> — Jack of all trades: some thief skills, some magic, and inspiration.</li>
+          </ul>
+        </div>
+        <div class="help-panel" id="help-combat">
+          <ul class="help-list">
+            <li><b>Round structure:</b> Each round both sides roll initiative. The winning side acts first, then the other, then the next round begins.</li>
+            <li><b>Movement:</b> Your movement in tiles is shown on the turn badge. Moving consumes movement; diagonal movement is not used.</li>
+            <li><b>Attacks:</b> Each character can make one attack action per round, whether melee, ranged, a spell, or a class ability.</li>
+            <li><b>Spell casting:</b> Casting a spell counts as your attack. If you are hit while casting, the spell may be lost.</li>
+            <li><b>Turning undead:</b> Clerics and paladins can attempt to drive away visible undead instead of attacking.</li>
+            <li><b>Thief skills:</b> Sneaking and trap-finding count as your action for the round.</li>
+            <li><b>Resting:</b> In a safe area, resting recovers HP but ends your turn. Wandering monsters may interrupt rest.</li>
+            <li><b>Death and dying:</b> At 0 HP you fall unconscious and roll a death save each turn. Stabilise at 0 HP, then rest or heal.</li>
+          </ul>
+        </div>
+      </div>
       <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
         <button id="close-help-btn" class="btn btn-primary">Close</button>
       </div>

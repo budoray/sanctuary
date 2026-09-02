@@ -137,6 +137,7 @@ function saveGame() {
       secretDoorsDiscovered: Array.from(secretDoorsDiscovered),
       explored: Array.from(explored),
       roomsVisited: Array.from(roomsVisited),
+      tutorialHintsShown: Array.from(tutorialHintsShown || []),
       currentModule,
       combatState: combatState ? {
         ...combatState,
@@ -182,6 +183,7 @@ async function loadGame() {
     secretDoorsDiscovered = new Set(data.secretDoorsDiscovered || []);
     explored = new Set(data.explored || []);
     roomsVisited = new Set(data.roomsVisited || []);
+    tutorialHintsShown = new Set(data.tutorialHintsShown || []);
     currentModule = data.currentModule || null;
     if (data.combatState) {
       combatState = data.combatState;
@@ -196,6 +198,7 @@ async function loadGame() {
     updateLevelBadge();
     log(`<b>${playerCharacter.name}</b> and company return to ${currentModule?.name || "the dungeon"}.`, "hit");
     initDungeon();
+    if (typeof initTutorial === "function") initTutorial();
     drawMap();
     drawTokens();
     renderFog();
@@ -240,6 +243,7 @@ async function loadOptions() {
   document.getElementById("char-alignment").value = "Lawful Good";
   rollMethod = document.getElementById("roll-method").value;
   filterCreationOptions();
+  updateClassTip();
 }
 
 function populateRollMethods() {
@@ -254,6 +258,37 @@ function populateRollMethods() {
     sel.appendChild(opt);
   }
   sel.value = defaultMethod;
+  updateRollMethodHint();
+}
+
+function updateRollMethodHint() {
+  const sel = document.getElementById("roll-method");
+  const hint = document.getElementById("roll-method-hint");
+  if (!sel || !hint) return;
+  const method = sel.value;
+  if (method === "arrange_to_taste") {
+    hint.textContent = "Arrange to Taste rolls a pool of six scores and lets you place them where you want. Good for meeting class requirements.";
+  } else {
+    hint.textContent = "3d6 in order rolls scores for STR, INT, WIS, DEX, CON, CHA in order. What the dice give is what you get.";
+  }
+}
+
+function updateClassTip() {
+  const sel = document.getElementById("char-class");
+  const tip = document.getElementById("class-tip");
+  if (!sel || !tip) return;
+  const classId = sel.value;
+  if (classId === "fighter") {
+    tip.textContent = "Fighters are recommended for beginners — high HP, all weapons and armour.";
+  } else if (classId === "cleric") {
+    tip.textContent = "Clerics wear armour, heal, and turn undead. No edged weapons.";
+  } else if (classId === "magic_user") {
+    tip.textContent = "Magic-users are fragile but cast powerful spells. No armour and poor weapons.";
+  } else if (classId === "thief") {
+    tip.textContent = "Thieves sneak, find traps, and backstab. Light armour only.";
+  } else {
+    tip.textContent = "Check the Character Details panel for this class's strengths.";
+  }
 }
 
 function populateSelect(id, items) {
@@ -333,6 +368,7 @@ function filterCreationOptions() {
   }
 
   renderClassRequirements();
+  updateClassTip();
   clearCreationErrors();
 }
 
@@ -1635,6 +1671,7 @@ function startModule(id) {
   log(`<b>${names}</b> enter ${mod ? mod.name : "the dungeon"}.`, "hit");
   if (mod && mod.intro) log(mod.intro);
   updateLevelBadge();
+  if (typeof resetTutorial === "function") resetTutorial();
   initCombat();
   saveGame();
 }
@@ -1755,6 +1792,7 @@ async function initGame() {
 
   document.getElementById("roll-method").addEventListener("change", () => {
     rollMethod = document.getElementById("roll-method").value;
+    updateRollMethodHint();
   });
 
   document.getElementById("char-ancestry").addEventListener("change", () => {
@@ -1774,6 +1812,16 @@ async function initGame() {
   document.getElementById("close-help-btn").addEventListener("click", () => helpModal.classList.add("hidden"));
   helpModal.addEventListener("click", (e) => {
     if (e.target === helpModal) helpModal.classList.add("hidden");
+  });
+  document.querySelectorAll(".help-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      const tabId = tab.dataset.tab;
+      document.querySelectorAll(".help-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".help-panel").forEach(p => p.classList.remove("active"));
+      tab.classList.add("active");
+      const panel = document.getElementById(`help-${tabId}`);
+      if (panel) panel.classList.add("active");
+    });
   });
 
   const shopModal = document.getElementById("shop-modal");

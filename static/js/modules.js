@@ -4,6 +4,19 @@ const DUNGEON_MODULES = {
   crooked_tower: {
     name: "The Crooked Tower",
     level: 1,
+    tutorial: true,
+    tutorial_steps: [
+      { id: "welcome", text: "Welcome to Sanctuary. Click highlighted tiles to move.", once: true },
+      { id: "room", text: "Each room has a description in the Adventure Log. Explore carefully.", once: true },
+      { id: "door", text: "Doors block movement until opened. Click an adjacent door to open it.", once: true },
+      { id: "monster", text: "Monsters are red tokens. Click an adjacent monster to attack.", once: true },
+      { id: "attack", text: "Each character can attack once per round. End your turn when done.", once: true },
+      { id: "rest", text: "Use the Rest button to recover HP when the area is safe.", once: true },
+      { id: "chest", text: "Click chests to loot them.", once: true },
+      { id: "trap", text: "Traps are hidden. Thieves can search adjacent tiles for traps.", once: true },
+      { id: "boss", text: "Bosses are tougher and may have better morale. Use potions and spells wisely.", once: true },
+      { id: "exit", text: "Reach the beacon to escape the dungeon.", once: true },
+    ],
     unlocks: "sunken_crypt",
     blurb: "Lord Huet's fallen keep. Something gnaws in the cellars beneath.",
     story: "Lord Huet was a feared warrior who drove the valley's goblin tribes into the hills. After his death the keep was abandoned, and now travelers report torchlight in the tower windows and missing livestock. The local reeve offers a modest purse for anyone who clears out whatever has taken root below.",
@@ -354,5 +367,8 @@ function checkRoomEntry(x, y) {
   const desc = currentModule.room_descriptions && currentModule.room_descriptions[roomId];
   if (desc && typeof log === "function") {
     log(desc);
+  }
+  if (typeof tutorialManager !== "undefined" && tutorialManager) {
+    tutorialManager.onRoomEntered(roomId);
   }
 }

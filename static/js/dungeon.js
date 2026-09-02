@@ -658,6 +658,9 @@ function movePlayer(x, y) {
   computeVisibility();
   drawTokens();
   renderFog();
+  if (typeof tutorialManager !== "undefined" && tutorialManager) {
+    tutorialManager.onPlayerMoved();
+  }
 }
 
 function showFloatingText(x, y, text, color = 0xffffff) {
@@ -834,6 +837,219 @@ function maybeSpawnWanderingMonster() {
     log(`<span class="damage">Wandering monsters appear!</span>`, "damage");
   }
   return spawned;
+}
+
+/** Tutorial system for the Crooked Tower starter dungeon. */
+let tutorialManager = null;
+let tutorialHintsShown = new Set();
+
+class TutorialManager {
+  constructor() {
+    this.toastEl = null;
+    this.dismissTimer = null;
+    this.actedTimer = null;
+    this.hasAttacked = false;
+    this.hasActedThisTurn = false;
+    this.createToast();
+  }
+
+  static isActive() {
+    return currentModule && currentModule.tutorial === true;
+  }
+
+  createToast() {
+    let el = document.getElementById("tutorial-toast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "tutorial-toast";
+      el.className = "tutorial-toast";
+      el.innerHTML = `<div class="tutorial-title">Hint</div><div class="tutorial-text"></div><span class="tutorial-dismiss">Click to dismiss</span>`;
+      document.body.appendChild(el);
+      el.addEventListener("click", () => this.hideToast());
+    }
+    this.toastEl = el;
+  }
+
+  showToast(text, title = "Hint") {
+    if (!this.toastEl) return;
+    this.toastEl.querySelector(".tutorial-title").textContent = title;
+    this.toastEl.querySelector(".tutorial-text").textContent = text;
+    this.toastEl.classList.add("visible");
+    if (this.dismissTimer) clearTimeout(this.dismissTimer);
+    this.dismissTimer = setTimeout(() => this.hideToast(), 6000);
+  }
+
+  hideToast() {
+    if (!this.toastEl) return;
+    this.toastEl.classList.remove("visible");
+    if (this.dismissTimer) {
+      clearTimeout(this.dismissTimer);
+      this.dismissTimer = null;
+    }
+  }
+
+  showOnce(id, text, title = "Hint") {
+    if (tutorialHintsShown.has(id)) return false;
+    tutorialHintsShown.add(id);
+    log(`<span class="hit">${title}:</span> ${text}`, "hit");
+    this.showToast(text, title);
+    return true;
+  }
+
+  onDungeonStart() {
+    if (!TutorialManager.isActive()) return;
+    const steps = currentModule.tutorial_steps || [];
+    const welcome = steps.find(s => s.id === "welcome");
+    if (welcome) this.showOnce("welcome", welcome.text);
+    this.checkConditions();
+  }
+
+  onRoomEntered(roomId) {
+    if (!TutorialManager.isActive()) return;
+    const steps = currentModule.tutorial_steps || [];
+    const step = steps.find(s => s.id === "room");
+    if (step) this.showOnce("room", step.text);
+    if (roomId === currentModule.exitRoom) {
+      const exitStep = steps.find(s => s.id === "exit");
+      if (exitStep) this.showOnce("exit", exitStep.text);
+    }
+    this.checkConditions();
+  }
+
+  onPlayerMoved() {
+    if (!TutorialManager.isActive()) return;
+    this.checkConditions();
+  }
+
+  onPlayerAttacked() {
+    if (!TutorialManager.isActive()) return;
+    if (!this.hasAttacked) {
+      this.hasAttacked = true;
+      const steps = currentModule.tutorial_steps || [];
+      const step = steps.find(s => s.id === "attack");
+      if (step) this.showOnce("attack", step.text);
+    }
+  }
+
+  onTrapTriggered() {
+    if (!TutorialManager.isActive()) return;
+    const steps = currentModule.tutorial_steps || [];
+    const step = steps.find(s => s.id === "trap");
+    if (step) this.showOnce("trap", step.text);
+  }
+
+  onChestOpened() {
+    if (!TutorialManager.isActive()) return;
+    const steps = currentModule.tutorial_steps || [];
+    const step = steps.find(s => s.id === "chest");
+    if (step) this.showOnce("chest", step.text);
+  }
+
+  checkConditions() {
+    if (!TutorialManager.isActive()) return;
+    const px = playerPos.x, py = playerPos.y;
+    const visible = computeVisibility();
+
+    // Door proximity.
+    for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const nx = px + dx, ny = py + dy;
+      if (nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) continue;
+      if (mapData[ny][nx] === TILE.DOOR && !doorsOpened.has(`${nx},${ny}`)) {
+        const steps = currentModule.tutorial_steps || [];
+        const step = steps.find(s => s.id === "door");
+        if (step) this.showOnce("door", step.text);
+        break;
+      }
+    }
+
+    // Monster visibility.
+    const visibleMonster = monsters.find(m => m.alive && visible.has(`${m.x},${m.y}`));
+    if (visibleMonster) {
+      const steps = currentModule.tutorial_steps || [];
+      const step = steps.find(s => s.id === "monster");
+      if (step) this.showOnce("monster", step.text);
+    }
+
+    // Boss proximity.
+    const boss = monsters.find(m => m.alive && m.name && (m.name.includes("Grik") || m.name.includes("Drowned King")));
+    if (boss && visible.has(`${boss.x},${boss.y}`) && distance(playerPos, boss) <= 4) {
+      const steps = currentModule.tutorial_steps || [];
+      const step = steps.find(s => s.id === "boss");
+      if (step) this.showOnce("boss", step.text);
+    }
+
+    // Chest visibility.
+    for (let y = 0; y < MAP_H; y++) {
+      for (let x = 0; x < MAP_W; x++) {
+        if (mapData[y][x] === TILE.CHEST && !chestsOpened.has(`${x},${y}`) && visible.has(`${x},${y}`)) {
+          const steps = currentModule.tutorial_steps || [];
+          const step = steps.find(s => s.id === "chest");
+          if (step) this.showOnce("chest", step.text);
+        }
+      }
+    }
+
+    // Trap proximity (discovered or triggered).
+    for (let y = 0; y < MAP_H; y++) {
+      for (let x = 0; x < MAP_W; x++) {
+        if (mapData[y][x] !== TILE.TRAP) continue;
+        const key = `${x},${y}`;
+        const discovered = trapsDiscovered.has(key) || trapsTriggered.has(key);
+        if (discovered && visible.has(key) && distance(playerPos, { x, y }) <= 2) {
+          const steps = currentModule.tutorial_steps || [];
+          const step = steps.find(s => s.id === "trap");
+          if (step) this.showOnce("trap", step.text);
+        }
+      }
+    }
+
+    // Low HP reminder.
+    if (playerCharacter && playerCharacter.sheet) {
+      const hpPct = playerCharacter.sheet.max_hit_points > 0
+        ? playerCharacter.sheet.hit_points / playerCharacter.sheet.max_hit_points
+        : 1;
+      if (hpPct <= 0.35 && playerCharacter.sheet.hit_points > 0) {
+        const steps = currentModule.tutorial_steps || [];
+        const step = steps.find(s => s.id === "rest");
+        if (step) this.showOnce("rest", step.text);
+      }
+    }
+  }
+
+  markActed() {
+    if (!TutorialManager.isActive()) return;
+    this.hasActedThisTurn = true;
+    if (this.actedTimer) clearTimeout(this.actedTimer);
+    this.actedTimer = setTimeout(() => {
+      if (combatState && combatState.phase === "player" && this.hasActedThisTurn) {
+        this.showToast("Press End Turn when you are finished acting.", "Reminder");
+        const endBtn = document.getElementById("end-turn-btn");
+        if (endBtn) endBtn.classList.add("end-turn-reminder");
+      }
+    }, 10000);
+  }
+
+  resetTurn() {
+    this.hasActedThisTurn = false;
+    if (this.actedTimer) {
+      clearTimeout(this.actedTimer);
+      this.actedTimer = null;
+    }
+    const endBtn = document.getElementById("end-turn-btn");
+    if (endBtn) endBtn.classList.remove("end-turn-reminder");
+  }
+}
+
+function initTutorial() {
+  tutorialManager = new TutorialManager();
+  if (TutorialManager.isActive()) {
+    tutorialManager.onDungeonStart();
+  }
+}
+
+function resetTutorial() {
+  tutorialHintsShown = new Set();
+  tutorialManager = null;
 }
 
 function spawnWanderingMonster(countExpr = "1") {

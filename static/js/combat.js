@@ -3,6 +3,15 @@
 let combatState = null;
 let pendingSpell = null;
 
+function setPlayerActed(attacked = false) {
+  if (!combatState) return;
+  combatState.acted = true;
+  if (attacked) combatState.attacked = true;
+  if (typeof tutorialManager !== "undefined" && tutorialManager) {
+    tutorialManager.markActed();
+  }
+}
+
 function tilesPerRound(movementFt) {
   return Math.floor(movementFt / 10);
 }
@@ -135,8 +144,7 @@ async function playerRest() {
   const healed = healPlayer(amount);
 
   if (cfg?.consumes_action) {
-    combatState.acted = true;
-    combatState.attacked = true;
+    setPlayerActed(true);
   }
   log(`${playerCharacter.name} rests and recovers <span class="hit">${healed}</span> HP.`);
   updateCombatUI();
@@ -240,6 +248,7 @@ function renderRestButton() {
 
 function initCombat() {
   initDungeon();
+  if (typeof initTutorial === "function") initTutorial();
   document.getElementById("end-turn-btn").addEventListener("click", endTurn);
   playerStealthed = false;
   pendingTrapSearch = false;
@@ -334,8 +343,7 @@ async function playerTurnUndead() {
     return;
   }
 
-  combatState.acted = true;
-  combatState.attacked = true;
+  setPlayerActed(true);
   let anyTurned = false;
 
   for (const m of targets) {
@@ -437,7 +445,7 @@ async function playerSneak() {
   } else {
     log("<span class='miss'>You fail to hide.</span>", "miss");
   }
-  combatState.acted = true;
+  setPlayerActed();
   updateCombatUI();
 }
 
@@ -480,7 +488,7 @@ function searchSecretDoors() {
   if (!found) {
     log(`${playerCharacter.name} searches the nearby walls. Nothing hidden is found.`);
   }
-  combatState.acted = true;
+  setPlayerActed();
   updateCombatUI();
   saveGame();
 }
@@ -525,7 +533,7 @@ function searchTrapsAt(x, y) {
     log(`No trap at (${x}, ${y}).`);
   }
   pendingTrapSearch = false;
-  combatState.acted = true;
+  setPlayerActed();
   updateCombatUI();
 }
 
@@ -555,8 +563,7 @@ async function selectSpell(spell) {
   // Healing spells target the caster automatically; buff spells target the caster and persist.
   if (spell.heal || spell.buff) {
     await playerCastSpell(spell, null);
-    combatState.acted = true;
-    combatState.attacked = true;
+    setPlayerActed(true);
     renderSpellBar();
     updateCombatUI();
     checkEnd();
@@ -678,6 +685,9 @@ async function enemySurpriseRound() {
 
 async function startRound() {
   combatState.partyActed = new Set();
+  if (typeof tutorialManager !== "undefined" && tutorialManager) {
+    tutorialManager.resetTurn();
+  }
   decrementPartyActiveSpells();
   if (!playerConscious()) {
     ensureConsciousActive();
@@ -705,8 +715,16 @@ function updateCombatUI() {
   if (turned.length) {
     turnText += ` · ${turned.length} turned`;
   }
-  document.getElementById("turn-badge").textContent = turnText;
+  const turnBadge = document.getElementById("turn-badge");
+  turnBadge.textContent = turnText;
+  turnBadge.classList.toggle("player-turn", combatState.phase === "player");
+  turnBadge.classList.toggle("enemy-turn", combatState.phase !== "player");
   document.getElementById("end-turn-btn").disabled = combatState.phase !== "player" || !playerConscious();
+
+  const actionHint = document.getElementById("action-hint");
+  if (actionHint) {
+    actionHint.classList.toggle("prominent", combatState.phase === "player" && combatState.round <= 3);
+  }
 
   renderRestButton();
   renderConsumablesButton();
@@ -879,8 +897,7 @@ async function handleGridClick(gx, gy) {
   if (pendingSpell && targetMonster) {
     await playerCastSpell(pendingSpell, targetMonster);
     pendingSpell = null;
-    combatState.acted = true;
-    combatState.attacked = true; // spells count as the round's attack action
+    setPlayerActed(true); // spells count as the round's attack action
     renderSpellBar();
     updateCombatUI();
     checkEnd();
@@ -899,8 +916,7 @@ async function handleGridClick(gx, gy) {
     }
     const backstab = isThief() && playerStealthed;
     await playerAttackMonster(targetMonster, false, 0, backstab);
-    combatState.acted = true;
-    combatState.attacked = true;
+    setPlayerActed(true);
     clearStealth();
     updateCombatUI();
     checkEnd();
@@ -925,8 +941,7 @@ async function handleGridClick(gx, gy) {
         return;
       }
       await playerAttackMonster(targetMonster, true, d * 10);
-      combatState.acted = true;
-      combatState.attacked = true;
+      setPlayerActed(true);
       clearStealth();
       renderCharacterPanel();
       updateCombatUI();
@@ -942,6 +957,9 @@ async function handleGridClick(gx, gy) {
     movePlayer(gx, gy);
     combatState.movementRemaining -= dist;
     log(`${playerCharacter.name} moves ${dist * 10} ft.`);
+    if (typeof tutorialManager !== "undefined" && tutorialManager) {
+      tutorialManager.markActed();
+    }
     // Moving silently is hard; stealth breaks on movement unless thief.
     if (!isThief()) clearStealth();
     updateCombatUI();
@@ -957,6 +975,9 @@ async function checkTileInteraction(x, y) {
   const t = mapData[y][x];
   if (t === TILE.CHEST && !chestsOpened.has(`${x},${y}`)) {
     openChest(x, y);
+    if (typeof tutorialManager !== "undefined" && tutorialManager) {
+      tutorialManager.onChestOpened();
+    }
     const chestCfg = combatConfig().chest || {};
     const rolls = rollDamageExpression(chestCfg.gold_die || "1d6");
     const cp = rolls * (chestCfg.gold_cp_per_roll || 100);
@@ -1037,6 +1058,9 @@ function renderClimbOutButton() {
 
 function triggerTrap(x, y) {
   trapsTriggered.add(`${x},${y}`);
+  if (typeof tutorialManager !== "undefined" && tutorialManager) {
+    tutorialManager.onTrapTriggered();
+  }
   drawMap();
   const typeKey = trapData.get(`${x},${y}`) || "spike";
   const def = trapTypes()[typeKey] || trapTypes().spike;
@@ -1075,6 +1099,9 @@ async function playerAttackMonster(monster, ranged = false, rangeFt = 0, backsta
   try {
     const slashColor = backstab ? 0xffd700 : (ranged ? 0xff6b6b : 0xd4a03d);
     showAttackSlash(playerPos.x, playerPos.y, monster.x, monster.y, slashColor);
+    if (typeof tutorialManager !== "undefined" && tutorialManager) {
+      tutorialManager.onPlayerAttacked();
+    }
     const res = await api("/api/osric/attack", {
       method: "POST",
       body: JSON.stringify({
@@ -1313,6 +1340,9 @@ function endTurn() {
   if (!playerConscious()) {
     log("You are unconscious and cannot act.");
     return;
+  }
+  if (typeof tutorialManager !== "undefined" && tutorialManager) {
+    tutorialManager.resetTurn();
   }
   combatState.partyActed.add(activePartyIndex);
   const next = nextActingPartyMember();
@@ -1642,8 +1672,7 @@ async function handleKeyDown(e) {
     }
     const backstab = isThief() && playerStealthed;
     await playerAttackMonster(target, false, 0, backstab);
-    combatState.acted = true;
-    combatState.attacked = true;
+    setPlayerActed(true);
     clearStealth();
     updateCombatUI();
     checkEnd();
@@ -1658,6 +1687,9 @@ async function handleKeyDown(e) {
     movePlayer(tx, ty);
     combatState.movementRemaining -= 1;
     log(`${playerCharacter.name} moves 10 ft.`);
+    if (typeof tutorialManager !== "undefined" && tutorialManager) {
+      tutorialManager.markActed();
+    }
     if (!isThief()) clearStealth();
     updateCombatUI();
     highlightReachable(playerPos, combatState.movementRemaining);
