@@ -4,10 +4,13 @@ const TILE = {
   WALL: "#",
   FLOOR: ".",
   DOOR: "D",
+  LOCKED_DOOR: "L",
   SECRET_DOOR: "S",
   CHEST: "C",
   EXIT: "E",
   TRAP: "T",
+  BARREL: "B",
+  WATER: "W",
 };
 
 let MAP_W = 22;
@@ -17,18 +20,27 @@ let playerPos = { x: 1, y: 1 };
 let monsters = [];
 let chestsOpened = new Set();
 let doorsOpened = new Set();
+let doorsLocked = new Set();
+let chestsWithKey = new Set();
+let chestGoldGp = new Map();
 let trapsTriggered = new Set();
 let trapsDiscovered = new Set();
 let trapData = new Map();
 let secretDoorsDiscovered = new Set();
+let barrelData = new Map(); // key "x,y" -> { hp, maxHp }
 
-let app = null;
-let boardContainer = null;
-let tileGraphics = null;
-let tokenGraphics = null;
-let highlightGraphics = null;
-let fogGraphics = null;
+let app = null; // { view: canvas } — Canvas 2D, no Pixi
+let canvas = null;
+let ctx = null;
+let boardContainer = { x: 0, y: 0 };
+let highlightCells = [];
+let pathCells = [];
+let reachPrev = new Map();
+let fxList = [];
+let imageCache = {};
+let fxRaf = 0;
 let TILE_SIZE = 32;
+const highlightGraphics = { clear() { highlightCells = []; requestDraw(); } };
 
 const VISION_RADIUS = 6;
 let explored = new Set();
@@ -198,16 +210,24 @@ function generateDungeon() {
       hd: template.hd || 1,
       x: pos.x,
       y: pos.y,
+      acDesc: stats.acDesc,
       ...stats,
-      acDesc: template.ac_descending,
-      damage: template.damage,
       morale: template.morale,
+      aiRole: template.ai_role || "brute",
       alive: true,
       fled: false,
+      asleep: dungeonLevel > 1,
       moraleChecked: false,
       turned: 0,
     });
+    if (typeof recordMonsterSeen === "function") recordMonsterSeen(template.name);
   }
+
+  // Place environmental features (level 1 keeps them sparse and off critical paths).
+  const maxBarrels = dungeonLevel === 1 ? 1 : 2 + rollDie(2);
+  const maxWaterPools = dungeonLevel === 1 ? 1 : 2;
+  placeBarrels(grid, rooms, startRoom, exitRoom, chestRoom, maxBarrels);
+  placeWaterPools(grid, rooms, startRoom, exitRoom, chestRoom, maxWaterPools);
 
   mapData = grid;
   chestsOpened.clear();
@@ -215,15 +235,69 @@ function generateDungeon() {
   trapsTriggered.clear();
   trapsDiscovered.clear();
   secretDoorsDiscovered.clear();
-  trapData.clear();
+  barrelData.clear();
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       if (mapData[y][x] === TILE.TRAP) {
         trapData.set(`${x},${y}`, randomTrapType());
+      } else if (mapData[y][x] === TILE.BARREL) {
+        barrelData.set(`${x},${y}`, { hp: 1, maxHp: 1 });
       }
     }
   }
   computeVisibility();
+}
+
+function placeBarrels(grid, rooms, startRoom, exitRoom, chestRoom, count) {
+  // Barrels go in non-essential rooms so they add cover/tactics without hard-locking progress.
+  const candidates = rooms.filter(r => r !== startRoom && r !== exitRoom && r !== chestRoom);
+  let placed = 0;
+  for (let attempt = 0; attempt < 40 && placed < count; attempt++) {
+    const room = candidates[Math.floor(Math.random() * candidates.length)];
+    const x = room.x + rollDie(Math.max(1, room.w - 2));
+    const y = room.y + rollDie(Math.max(1, room.h - 2));
+    if (grid[y][x] !== TILE.FLOOR) continue;
+    if (distance({ x, y }, roomCenter(room)) <= 1) continue; // keep center clear for combat
+    // Don't block a corridor/door tile.
+    let blocksCorridor = false;
+    for (const [dx, dy] of [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]]) {
+      const nx = x + dx, ny = y + dy;
+      if (nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) continue;
+      if (grid[ny][nx] === TILE.DOOR || grid[ny][nx] === TILE.LOCKED_DOOR) {
+        blocksCorridor = true;
+        break;
+      }
+    }
+    if (blocksCorridor) continue;
+    grid[y][x] = TILE.BARREL;
+    placed++;
+  }
+}
+
+function placeWaterPools(grid, rooms, startRoom, exitRoom, chestRoom, count) {
+  // Small water pools in non-essential rooms; each pool is 1-3 contiguous tiles.
+  const candidates = rooms.filter(r => r !== startRoom && r !== exitRoom && r !== chestRoom);
+  let placed = 0;
+  for (let attempt = 0; attempt < 40 && placed < count; attempt++) {
+    const room = candidates[Math.floor(Math.random() * candidates.length)];
+    const centerX = room.x + Math.floor(room.w / 2);
+    const centerY = room.y + Math.floor(room.h / 2);
+    if (grid[centerY][centerX] !== TILE.FLOOR) continue;
+    const pool = [{ x: centerX, y: centerY }];
+    const size = dungeonLevel === 1 ? 1 : 1 + rollDie(2);
+    let failures = 0;
+    while (pool.length < size && failures < 20) {
+      const base = pool[Math.floor(Math.random() * pool.length)];
+      const dir = [[0,1],[0,-1],[1,0],[-1,0]][Math.floor(Math.random() * 4)];
+      const nx = base.x + dir[0], ny = base.y + dir[1];
+      if (nx < room.x || nx >= room.x + room.w || ny < room.y || ny >= room.y + room.h) { failures++; continue; }
+      if (grid[ny][nx] !== TILE.FLOOR) { failures++; continue; }
+      if (pool.some(p => p.x === nx && p.y === ny)) { failures++; continue; }
+      pool.push({ x: nx, y: ny });
+    }
+    for (const p of pool) grid[p.y][p.x] = TILE.WATER;
+    placed++;
+  }
 }
 
 function parseMap() {
@@ -234,218 +308,183 @@ function parseMap() {
   }
 }
 
+function cssColor(n, a) {
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return a == null ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${a})`;
+}
+
+function getImage(path) {
+  if (!path) return null;
+  if (imageCache[path]) return imageCache[path].complete && imageCache[path].naturalWidth ? imageCache[path] : null;
+  const img = new Image();
+  img.onload = () => requestDraw();
+  img.src = path;
+  imageCache[path] = img;
+  return null;
+}
+
+function requestDraw() {
+  if (!ctx || !canvas) return;
+  paintBoard();
+}
+
 function initDungeon() {
   parseMap();
   const container = document.getElementById("board-canvas");
-  if (app) app.destroy(true, { children: true });
-
-  app = new PIXI.Application({
-    width: container.clientWidth,
-    height: container.clientHeight,
-    background: "#1a1a1a",
-    resolution: window.devicePixelRatio || 1,
-    autoDensity: true,
-  });
-  container.appendChild(app.view);
-
-  boardContainer = new PIXI.Container();
-  app.stage.addChild(boardContainer);
-
-  tileGraphics = new PIXI.Graphics();
-  boardContainer.addChild(tileGraphics);
-
-  highlightGraphics = new PIXI.Graphics();
-  boardContainer.addChild(highlightGraphics);
-
-  tokenGraphics = new PIXI.Container();
-  boardContainer.addChild(tokenGraphics);
-
-  fogGraphics = new PIXI.Graphics();
-  boardContainer.addChild(fogGraphics);
-
-  app.view.addEventListener("pointerdown", onBoardClick);
+  container.innerHTML = "";
+  canvas = document.createElement("canvas");
+  canvas.setAttribute("aria-label", "Dungeon map");
+  container.appendChild(canvas);
+  ctx = canvas.getContext("2d");
+  app = {
+    view: canvas,
+    ticker: { add() {}, remove() {}, elapsedMS: 16, speed: 1 },
+    destroy() {},
+  };
+  canvas.addEventListener("pointerdown", onBoardClick);
+  canvas.addEventListener("pointermove", onBoardHover);
+  canvas.addEventListener("pointerleave", () => { pathCells = []; requestDraw(); });
   window.addEventListener("resize", resizeDungeon);
-
+  [
+    "/art/tile_floor.png", "/art/tile_floor_alt.png", "/art/tile_wall.png", "/art/tile_door.png",
+    "/art/player_token.png", "/art/monster_kobold.png", "/art/monster_rat.png",
+    "/art/monster_goblin.png", "/art/monster_goblin_boss.png",
+    "/art/monster_skeleton.png", "/art/monster_zombie.png", "/art/monster_ghoul.png",
+    "/art/monster_drowned_king.png",
+    "/art/icon_chest.png", "/art/icon_beacon.png",
+  ].forEach(getImage);
+  if (!fxRaf) fxLoop();
   resizeDungeon();
 }
 
 function resizeDungeon() {
-  if (!app) return;
+  if (!canvas || !ctx) return;
   const container = document.getElementById("board-canvas");
-  const w = container.clientWidth;
-  const h = container.clientHeight;
-  app.renderer.resize(w, h);
-
-  TILE_SIZE = Math.floor(Math.min(w / MAP_W, h / MAP_H));
-  const offsetX = (w - TILE_SIZE * MAP_W) / 2;
-  const offsetY = (h - TILE_SIZE * MAP_H) / 2;
-  boardContainer.position.set(offsetX, offsetY);
-
-  drawMap();
-  drawTokens();
-  renderFog();
+  const w = Math.max(1, container.clientWidth);
+  const h = Math.max(1, container.clientHeight);
+  canvas.width = w;
+  canvas.height = h;
+  ctx.imageSmoothingEnabled = false;
+  TILE_SIZE = Math.max(16, Math.floor(Math.min(w / MAP_W, h / MAP_H)));
+  boardContainer.x = Math.floor((w - TILE_SIZE * MAP_W) / 2);
+  boardContainer.y = Math.floor((h - TILE_SIZE * MAP_H) / 2);
+  requestDraw();
 }
 
-function drawMap() {
-  if (!tileGraphics) return;
-  tileGraphics.removeChildren();
-  tileGraphics.clear();
+function fxLoop(ts) {
+  fxRaf = requestAnimationFrame(fxLoop);
+  if (!fxList.length) return;
+  const now = ts || performance.now();
+  fxList = fxList.filter((f) => now - f.t0 < f.dur);
+  requestDraw();
+}
 
-  const wallColor = 0x2b2520;
-  const wallEdge = 0x463a2d;
-  const floorA = 0x1e1a16;
-  const floorB = 0x242019;
-  const hasTileArt = textureExists("/art/tile_floor.png");
+function paintBoard() {
+  const w = canvas.width, h = canvas.height;
+  ctx.imageSmoothingEnabled = false;
+  ctx.fillStyle = "#cbb896";
+  ctx.fillRect(0, 0, w, h);
+  ctx.save();
+  ctx.translate(boardContainer.x, boardContainer.y);
+  paintTiles();
+  paintGrid();
+  paintHighlights();
+  paintPath();
+  paintTokens();
+  paintFog();
+  paintFx();
+  ctx.restore();
+}
 
+function paintGrid() {
+  ctx.strokeStyle = "rgba(90, 60, 30, 0.22)";
+  ctx.lineWidth = 1;
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
+      ctx.strokeRect(x * TILE_SIZE + 0.5, y * TILE_SIZE + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
+    }
+  }
+}
+
+function drawMap() { requestDraw(); }
+
+function fillTile(x, y, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+}
+function blit(path, x, y, scale = 1) {
+  const img = getImage(path);
+  const px = x * TILE_SIZE, py = y * TILE_SIZE;
+  const s = TILE_SIZE * scale;
+  if (img) {
+    ctx.drawImage(img, px + (TILE_SIZE - s) / 2, py + (TILE_SIZE - s) / 2, s, s);
+    return true;
+  }
+  return false;
+}
+
+function paintTiles() {
+  if (!mapData.length) return;
+  const visible = computeVisibility();
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const key = `${x},${y}`;
+      if (!visible.has(key) && !explored.has(key)) continue;
       const t = mapData[y][x];
-      const px = x * TILE_SIZE;
-      const py = y * TILE_SIZE;
-
       if (t === TILE.WALL || t === TILE.SECRET_DOOR) {
-        if (hasTileArt) {
-          drawTileSprite("/art/tile_wall.png", x, y);
-        } else {
-          tileGraphics.beginFill(wallColor);
-          tileGraphics.lineStyle(1, wallEdge, 1);
-          tileGraphics.drawRect(px, py, TILE_SIZE, TILE_SIZE);
-          tileGraphics.endFill();
-          tileGraphics.beginFill(0x3d352c, 0.5);
-          tileGraphics.drawRect(px + 2, py + 2, TILE_SIZE * 0.4, TILE_SIZE * 0.25);
-          tileGraphics.endFill();
-        }
+        if (!blit("/art/tile_wall.png", x, y)) fillTile(x, y, "#2b2520");
       } else {
-        if (hasTileArt) {
-          const path = (x + y) % 2 === 0 ? "/art/tile_floor.png" : "/art/tile_floor_alt.png";
-          drawTileSprite(path, x, y);
-        } else {
-          tileGraphics.beginFill((x + y) % 2 === 0 ? floorA : floorB);
-          tileGraphics.lineStyle(1, 0x322a22, 0.6);
-          tileGraphics.drawRect(px, py, TILE_SIZE, TILE_SIZE);
-          tileGraphics.endFill();
-        }
-
-        if (t === TILE.DOOR && !doorsOpened.has(`${x},${y}`)) {
-          drawTileSprite("/art/tile_door.png", x, y);
+        const floor = (x + y) % 2 === 0 ? "/art/tile_floor.png" : "/art/tile_floor_alt.png";
+        if (!blit(floor, x, y)) fillTile(x, y, (x + y) % 2 === 0 ? "#1e1a16" : "#242019");
+        if ((t === TILE.DOOR || t === TILE.LOCKED_DOOR) && !doorsOpened.has(`${x},${y}`)) {
+          blit("/art/tile_door.png", x, y);
+          if (t === TILE.LOCKED_DOOR) {
+            ctx.fillStyle = "#c94a4a";
+            ctx.fillRect(x * TILE_SIZE + TILE_SIZE * 0.35, y * TILE_SIZE + TILE_SIZE * 0.4, TILE_SIZE * 0.3, TILE_SIZE * 0.25);
+          }
         } else if (t === TILE.CHEST && !chestsOpened.has(`${x},${y}`)) {
-          drawFeatureSprite("/art/icon_chest.png", x, y);
+          blit("/art/icon_chest.png", x, y, 0.8);
         } else if (t === TILE.EXIT) {
-          drawExitBeacon(x, y);
-        } else if (t === TILE.TRAP && trapsTriggered.has(`${x},${y}`)) {
-          drawFeatureIcon("trap", x, y, 0xc94a4a);
-        } else if (t === TILE.TRAP && trapsDiscovered.has(`${x},${y}`)) {
-          drawFeatureIcon("trap", x, y, 0xd4a03d);
+          ctx.fillStyle = "rgba(212,160,61,0.18)";
+          ctx.beginPath();
+          ctx.arc(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE * 0.45, 0, Math.PI * 2);
+          ctx.fill();
+          blit("/art/icon_beacon.png", x, y, 0.85);
+        } else if (t === TILE.TRAP && (trapsTriggered.has(`${x},${y}`) || trapsDiscovered.has(`${x},${y}`))) {
+          ctx.fillStyle = trapsTriggered.has(`${x},${y}`) ? "rgba(201,74,74,0.45)" : "rgba(212,160,61,0.45)";
+          ctx.beginPath();
+          ctx.arc(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE * 0.28, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (t === TILE.WATER) {
+          ctx.fillStyle = "rgba(42,77,102,0.75)";
+          ctx.fillRect(x * TILE_SIZE + 2, y * TILE_SIZE + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        } else if (t === TILE.BARREL && barrelData.has(`${x},${y}`)) {
+          ctx.fillStyle = "#6b4423";
+          ctx.fillRect(x * TILE_SIZE + TILE_SIZE * 0.22, y * TILE_SIZE + TILE_SIZE * 0.18, TILE_SIZE * 0.56, TILE_SIZE * 0.64);
         }
       }
     }
   }
 }
 
-function textureExists(path) {
-  if (textureCache[path]) return true;
-  // PIXI.Texture.from creates the texture immediately; we assume assets exist if generated.
-  try {
-    const t = PIXI.Texture.from(path);
-    return t && t.baseTexture && !t.baseTexture._invalid;
-  } catch (e) {
-    return false;
-  }
-}
+function drawTokens() { requestDraw(); }
 
-function drawTileSprite(path, x, y) {
-  const sprite = new PIXI.Sprite(getTexture(path));
-  sprite.position.set(x * TILE_SIZE, y * TILE_SIZE);
-  sprite.width = TILE_SIZE;
-  sprite.height = TILE_SIZE;
-  tileGraphics.addChild(sprite);
-}
-
-function drawFeatureSprite(path, x, y) {
-  const cx = x * TILE_SIZE + TILE_SIZE / 2;
-  const cy = y * TILE_SIZE + TILE_SIZE / 2;
-  const sprite = new PIXI.Sprite(getTexture(path));
-  sprite.anchor.set(0.5);
-  const scale = (TILE_SIZE * 0.75) / 32;
-  sprite.scale.set(scale);
-  sprite.position.set(cx, cy);
-  tileGraphics.addChild(sprite);
-}
-
-function drawFeatureIcon(name, x, y, color) {
-  const cx = x * TILE_SIZE + TILE_SIZE / 2;
-  const cy = y * TILE_SIZE + TILE_SIZE / 2;
-  const g = new PIXI.Graphics();
-  g.beginFill(color, 0.2);
-  g.lineStyle(2, color, 0.8);
-  g.drawCircle(0, 0, TILE_SIZE * 0.35);
-  g.endFill();
-  g.position.set(cx, cy);
-  tileGraphics.addChild(g);
-
-  const text = new PIXI.Text(name === "chest" ? "C" : "?", {
-    fontSize: TILE_SIZE * 0.45,
-    fill: color,
-    fontWeight: "bold",
-  });
-  text.anchor.set(0.5);
-  text.position.set(cx, cy);
-  tileGraphics.addChild(text);
-}
-
-function drawExitBeacon(x, y) {
-  const cx = x * TILE_SIZE + TILE_SIZE / 2;
-  const cy = y * TILE_SIZE + TILE_SIZE / 2;
-
-  const sprite = new PIXI.Sprite(getTexture("/art/icon_beacon.png"));
-  sprite.anchor.set(0.5);
-  const scale = (TILE_SIZE * 0.8) / 32;
-  sprite.scale.set(scale);
-  sprite.position.set(cx, cy);
-  tileGraphics.addChild(sprite);
-
-  // Pulsing glow ring.
-  const glow = new PIXI.Graphics();
-  glow.beginFill(0xd4a03d, 0.15);
-  glow.drawCircle(0, 0, TILE_SIZE * 0.45);
-  glow.endFill();
-  glow.position.set(cx, cy);
-  tileGraphics.addChild(glow);
-}
-
-function drawEmoji(emoji, x, y) {
-  const text = new PIXI.Text(emoji, { fontSize: TILE_SIZE * 0.6 });
-  text.anchor.set(0.5);
-  text.position.set(x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2);
-  tileGraphics.addChild(text);
-}
-
-const textureCache = {};
-function getTexture(path) {
-  if (!textureCache[path]) {
-    textureCache[path] = PIXI.Texture.from(path);
-  }
-  return textureCache[path];
-}
-
-function drawTokens() {
-  if (!tokenGraphics) return;
-  tokenGraphics.removeChildren();
-
+function paintTokens() {
   const visible = computeVisibility();
-
-  // Player token.
-  drawSpriteToken(playerPos.x, playerPos.y, "/art/player_token.png", true);
-
-  // Monsters.
+  paintSpriteToken(playerPos.x, playerPos.y, "/art/player_token.png", true, "H", 0xd4a03d);
   for (const m of monsters) {
     if (!m.alive) continue;
     if (!visible.has(`${m.x},${m.y}`)) continue;
     const path = monsterTexturePath(m.name);
-    drawSpriteToken(m.x, m.y, path, false, m.name);
-    if (m.turned > 0) {
-      drawStatusBadge(m.x, m.y, "T", 0xd4a03d);
+    const fallback = m.aiRole === "healer" ? 0x5ac989 : (m.aiRole === "archer" ? 0x9b59b6 : 0xc94a4a);
+    paintSpriteToken(m.x, m.y, path, false, m.name, fallback);
+    if (typeof attackFocus !== "undefined" && attackFocus && monsterInAttackReach(m)) {
+      paintAttackRing(m.x, m.y);
     }
+    paintHealthBar(m.x, m.y, m.hp, m.maxHp);
+    if (m.asleep) paintBadge(m.x, m.y, "z", "#888");
+    else if (m.turned > 0) paintBadge(m.x, m.y, "T", "#d4a03d");
+    else if (m.aiRole === "healer") paintBadge(m.x, m.y, "+", "#5ac989");
   }
 }
 
@@ -470,66 +509,55 @@ function monsterTexturePath(name) {
   return map[name] || null;
 }
 
-function drawSpriteToken(x, y, path, isPlayer, name = "") {
-  const cx = x * TILE_SIZE + TILE_SIZE / 2;
-  const cy = y * TILE_SIZE + TILE_SIZE / 2;
-
-  if (path) {
-    const sprite = new PIXI.Sprite(getTexture(path));
-    sprite.anchor.set(0.5);
-    const scale = (TILE_SIZE * (isPlayer ? 0.9 : 0.82)) / 32;
-    sprite.scale.set(scale);
-    sprite.position.set(cx, cy);
-    tokenGraphics.addChild(sprite);
-    return;
-  }
-
-  // Fallback circle + letter.
+function paintSpriteToken(x, y, path, isPlayer, name, fallbackColor) {
+  const scale = isPlayer ? 0.95 : 0.88;
+  if (path && blit(path, x, y, scale)) return;
   const label = isPlayer ? (playerCharacter ? classTokenLabel(playerCharacter.class) : "H") : (name ? name[0] : "?");
-  const color = isPlayer ? 0xd4a03d : 0xc94a4a;
-  drawFallbackToken(x, y, color, label, isPlayer);
-}
-
-function drawFallbackToken(x, y, color, label, isPlayer) {
   const cx = x * TILE_SIZE + TILE_SIZE / 2;
   const cy = y * TILE_SIZE + TILE_SIZE / 2;
   const radius = TILE_SIZE * (isPlayer ? 0.38 : 0.34);
-  const g = new PIXI.Graphics();
-  g.lineStyle(3, 0x0f0d0b, 1);
-  g.drawCircle(0, 0, radius + 2);
-  g.beginFill(color);
-  g.drawCircle(0, 0, radius);
-  g.endFill();
-  g.beginFill(0xffffff, 0.15);
-  g.drawCircle(-radius * 0.25, -radius * 0.25, radius * 0.35);
-  g.endFill();
-  g.position.set(cx, cy);
-  tokenGraphics.addChild(g);
-
-  const text = new PIXI.Text(label, {
-    fontSize: TILE_SIZE * (isPlayer ? 0.5 : 0.45),
-    fill: 0x1a1308,
-    fontWeight: "bold",
-  });
-  text.anchor.set(0.5);
-  text.position.set(cx, cy);
-  tokenGraphics.addChild(text);
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fillStyle = cssColor(isPlayer ? 0xd4a03d : (fallbackColor || 0xc94a4a));
+  ctx.fill();
+  ctx.strokeStyle = "#0f0d0b";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = "#1a1308";
+  ctx.font = `bold ${Math.floor(TILE_SIZE * 0.45)}px Georgia, serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, cx, cy);
 }
 
-function drawStatusBadge(x, y, label, color) {
+function paintBadge(x, y, label, color) {
+  ctx.fillStyle = color;
+  ctx.font = `bold ${Math.floor(TILE_SIZE * 0.32)}px Georgia, serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE * 0.14);
+}
+
+function paintAttackRing(x, y) {
   const cx = x * TILE_SIZE + TILE_SIZE / 2;
-  const cy = y * TILE_SIZE + TILE_SIZE * 0.15;
-  const text = new PIXI.Text(label, {
-    fontSize: TILE_SIZE * 0.35,
-    fill: color,
-    fontWeight: "bold",
-    dropShadow: true,
-    dropShadowColor: 0x000000,
-    dropShadowDistance: 1,
-  });
-  text.anchor.set(0.5);
-  text.position.set(cx, cy);
-  tokenGraphics.addChild(text);
+  const cy = y * TILE_SIZE + TILE_SIZE / 2;
+  ctx.strokeStyle = "#c94a4a";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, TILE_SIZE * 0.46, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function paintHealthBar(x, y, hp, maxHp) {
+  if (maxHp <= 0) return;
+  const pct = Math.max(0, Math.min(1, hp / maxHp));
+  const barW = TILE_SIZE * 0.7, barH = Math.max(3, TILE_SIZE * 0.1);
+  const px = x * TILE_SIZE + (TILE_SIZE - barW) / 2;
+  const py = y * TILE_SIZE + TILE_SIZE * 0.86;
+  ctx.fillStyle = "#3a2a2a";
+  ctx.fillRect(px, py, barW, barH);
+  ctx.fillStyle = pct > 0.6 ? "#5ac989" : (pct > 0.3 ? "#d4a03d" : "#c94a4a");
+  ctx.fillRect(px, py, barW * pct, barH);
 }
 
 function classTokenLabel(classId) {
@@ -562,13 +590,30 @@ function pickEncounterMonster(level) {
   return table[table.length - 1].id;
 }
 
+function weakenDamageExpression(damageExpr, level) {
+  // On level 1, young or malnourished monsters deal slightly less damage.
+  if (level !== 1 || !damageExpr) return damageExpr;
+  const match = String(damageExpr).match(/^(\d+)d(\d+)(.*)$/);
+  if (!match) return damageExpr;
+  const count = parseInt(match[1], 10);
+  let sides = parseInt(match[2], 10);
+  const rest = match[3] || "";
+  sides = Math.max(2, sides - 1);
+  return `${count}d${sides}${rest}`;
+}
+
 function scaleMonsterStats(base, level) {
-  const levelMult = 1 + (level - 1) * 0.35;
+  // Level 1 is the tutorial band: give the player a slight edge by reducing
+  // monster HP, damage, and AC. Deeper levels scale up normally.
+  const levelMult = level === 1 ? 0.6 : 1 + (level - 1) * 0.35;
+  const acDesc = Math.min(10, (base.ac_descending || 10) + (level === 1 ? 1 : -(level - 1)));
   return {
     hp: Math.max(1, Math.floor((base.hp || 1) * levelMult)),
     maxHp: Math.max(1, Math.floor((base.max_hp || base.hp || 1) * levelMult)),
     thac0: Math.max(1, (base.thac0 || 20) - (level - 1)),
     xp: Math.floor((base.xp || 1) * levelMult),
+    damage: weakenDamageExpression(base.damage, level),
+    acDesc: acDesc,
   };
 }
 
@@ -588,7 +633,28 @@ function isWalkable(x, y) {
   if (t === TILE.WALL) return false;
   if (t === TILE.SECRET_DOOR) return false;
   if (t === TILE.DOOR && !doorsOpened.has(`${x},${y}`)) return false;
+  if (t === TILE.LOCKED_DOOR && !doorsOpened.has(`${x},${y}`)) return false;
+  if (t === TILE.BARREL && !barrelData.has(`${x},${y}`)) return false; // destroyed barrels removed separately
+  if (t === TILE.BARREL) return false;
   return true;
+}
+
+function isObstacle(x, y) {
+  // Obstacles block movement and ranged line of sight.
+  if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return true;
+  const t = mapData[y][x];
+  return t === TILE.WALL || t === TILE.SECRET_DOOR || t === TILE.BARREL ||
+         (t === TILE.DOOR && !doorsOpened.has(`${x},${y}`)) ||
+         (t === TILE.LOCKED_DOOR && !doorsOpened.has(`${x},${y}`));
+}
+
+function isDifficultTerrain(x, y) {
+  if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
+  return mapData[y][x] === TILE.WATER;
+}
+
+function movementCost(x, y) {
+  return isDifficultTerrain(x, y) ? 2 : 1;
 }
 
 function monsterAt(x, y) {
@@ -599,61 +665,175 @@ function distance(a, b) {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
+function hasRangedLineOfSight(from, to) {
+  // Simple grid line traversal (Bresenham-style). Barrels and walls block.
+  if (!from || !to) return false;
+  if (from.x === to.x && from.y === to.y) return true;
+  let x = from.x, y = from.y;
+  const dx = Math.abs(to.x - from.x), dy = Math.abs(to.y - from.y);
+  const sx = from.x < to.x ? 1 : -1;
+  const sy = from.y < to.y ? 1 : -1;
+  let err = dx - dy;
+  while (true) {
+    if (x === to.x && y === to.y) return true;
+    const e2 = 2 * err;
+    if (e2 > -dy) { err -= dy; x += sx; }
+    else if (e2 < dx) { err += dx; y += sy; }
+    else { err += dx - dy; x += sx; y += sy; }
+    // Skip the starting tile; check every tile up to and including target.
+    if (x === to.x && y === to.y) return true;
+    if (isObstacle(x, y)) return false;
+  }
+}
+
+function destroyBarrel(x, y) {
+  const key = `${x},${y}`;
+  if (!barrelData.has(key)) return false;
+  barrelData.delete(key);
+  mapData[y][x] = TILE.FLOOR;
+  log(`<span class="damage">The barrel smashes apart!</span>`, "damage");
+  drawMap();
+  renderFog();
+  return true;
+}
+
+function pushBarrel(x, y, dx, dy) {
+  // Push a barrel from (x,y) one tile in direction (dx,dy) if the destination is free.
+  // The pusher steps into the barrel's old tile.
+  const key = `${x},${y}`;
+  if (mapData[y][x] !== TILE.BARREL || !barrelData.has(key)) return false;
+  const nx = x + dx, ny = y + dy;
+  if (nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) return false;
+  if (!isWalkable(nx, ny)) return false;
+  if (monsterAt(nx, ny)) return false;
+  const data = barrelData.get(key);
+  barrelData.delete(key);
+  mapData[y][x] = TILE.FLOOR;
+  mapData[ny][nx] = TILE.BARREL;
+  barrelData.set(`${nx},${ny}`, data);
+  log(`${playerCharacter.name} pushes a barrel.`);
+  movePlayer(x, y);
+  drawMap();
+  renderFog();
+  return true;
+}
+
+function gridFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const px = e.clientX - rect.left - boardContainer.x;
+  const py = e.clientY - rect.top - boardContainer.y;
+  return { gx: Math.floor(px / TILE_SIZE), gy: Math.floor(py / TILE_SIZE) };
+}
+
 function onBoardClick(e) {
   if (!combatState || combatState.phase !== "player") return;
-  const rect = app.view.getBoundingClientRect();
-  const scaleX = app.view.width / rect.width;
-  const scaleY = app.view.height / rect.height;
-  const px = (e.clientX - rect.left) * scaleX - boardContainer.x;
-  const py = (e.clientY - rect.top) * scaleY - boardContainer.y;
-  const gx = Math.floor(px / TILE_SIZE);
-  const gy = Math.floor(py / TILE_SIZE);
+  stopAutoExplore();
+  const { gx, gy } = gridFromEvent(e);
   handleGridClick(gx, gy);
 }
 
-function highlightReachable(origin, range) {
-  if (!highlightGraphics) return;
-  highlightGraphics.clear();
-  const reachable = computeReachable(origin, range);
-  for (const p of reachable) {
-    if (p.x === origin.x && p.y === origin.y) continue;
-    highlightGraphics.beginFill(0xd4a03d, 0.18);
-    highlightGraphics.lineStyle(1, 0xd4a03d, 0.55);
-    highlightGraphics.drawRect(p.x * TILE_SIZE + 2, p.y * TILE_SIZE + 2, TILE_SIZE - 4, TILE_SIZE - 4);
-    highlightGraphics.endFill();
+function onBoardHover(e) {
+  if (!combatState || combatState.phase !== "player") return;
+  if (typeof isActing === "function" && isActing()) return;
+  if (document.getElementById("dice-tray")?.classList.contains("open")) return;
+  const { gx, gy } = gridFromEvent(e);
+  if (!highlightCells.some((p) => p.x === gx && p.y === gy)) {
+    if (pathCells.length) { pathCells = []; requestDraw(); }
+    return;
   }
+  const next = pathTo(gx, gy);
+  if (next.length === pathCells.length && next.every((p, i) => p.x === pathCells[i].x && p.y === pathCells[i].y)) return;
+  pathCells = next;
+  requestDraw();
+}
+
+function highlightReachable(origin, range) {
+  const reachable = computeReachable(origin, range);
+  highlightCells = reachable.filter((p) => p.x !== origin.x || p.y !== origin.y);
+  requestDraw();
   return reachable;
 }
 
+function paintHighlights() {
+  ctx.fillStyle = "rgba(212,160,61,0.38)";
+  ctx.strokeStyle = "rgba(255, 210, 90, 0.95)";
+  ctx.lineWidth = 2;
+  for (const p of highlightCells) {
+    ctx.fillRect(p.x * TILE_SIZE + 3, p.y * TILE_SIZE + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+    ctx.strokeRect(p.x * TILE_SIZE + 3, p.y * TILE_SIZE + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+  }
+}
+
+function paintPath() {
+  if (!pathCells.length) return;
+  ctx.fillStyle = "#5aa8d4";
+  ctx.strokeStyle = "rgba(90, 168, 212, 0.9)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  const sx = playerPos.x * TILE_SIZE + TILE_SIZE / 2;
+  const sy = playerPos.y * TILE_SIZE + TILE_SIZE / 2;
+  ctx.moveTo(sx, sy);
+  for (const p of pathCells) {
+    ctx.lineTo(p.x * TILE_SIZE + TILE_SIZE / 2, p.y * TILE_SIZE + TILE_SIZE / 2);
+  }
+  ctx.stroke();
+  const end = pathCells[pathCells.length - 1];
+  ctx.beginPath();
+  ctx.arc(end.x * TILE_SIZE + TILE_SIZE / 2, end.y * TILE_SIZE + TILE_SIZE / 2, Math.max(3, TILE_SIZE * 0.14), 0, Math.PI * 2);
+  ctx.fill();
+}
+
 function computeReachable(origin, range) {
-  const queue = [{ ...origin, d: 0 }];
-  const seen = new Set([`${origin.x},${origin.y}`]);
+  // Weighted Dijkstra over the grid. Difficult terrain (water) costs 2.
+  const startKey = `${origin.x},${origin.y}`;
+  const dist = new Map([[startKey, 0]]);
+  const prev = new Map();
+  const queue = [{ x: origin.x, y: origin.y, d: 0 }];
   const reachable = [];
   let head = 0;
   while (head < queue.length) {
     const cur = queue[head++];
-    if (cur.d > 0) reachable.push({ x: cur.x, y: cur.y });
-    if (cur.d >= range) continue;
+    if (cur.d > 0) reachable.push({ x: cur.x, y: cur.y, cost: cur.d });
     for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
       const nx = cur.x + dx, ny = cur.y + dy;
       const key = `${nx},${ny}`;
-      if (seen.has(key)) continue;
       if (!isWalkable(nx, ny)) continue;
       if (monsterAt(nx, ny)) continue; // can't move through enemies
-      seen.add(key);
-      queue.push({ x: nx, y: ny, d: cur.d + 1 });
+      const nd = cur.d + movementCost(nx, ny);
+      if (nd > range) continue;
+      if (dist.has(key) && dist.get(key) <= nd) continue;
+      dist.set(key, nd);
+      prev.set(key, `${cur.x},${cur.y}`);
+      queue.push({ x: nx, y: ny, d: nd });
     }
   }
+  reachPrev = prev;
   return reachable;
 }
 
+function pathTo(tx, ty) {
+  const cells = [];
+  let key = `${tx},${ty}`;
+  const seen = new Set();
+  while (reachPrev.has(key) && !seen.has(key)) {
+    seen.add(key);
+    const [x, y] = key.split(",").map(Number);
+    cells.push({ x, y });
+    key = reachPrev.get(key);
+  }
+  return cells.reverse();
+}
+
 function clearHighlights() {
-  if (highlightGraphics) highlightGraphics.clear();
+  highlightCells = [];
+  pathCells = [];
+  requestDraw();
 }
 
 function movePlayer(x, y) {
   playerPos.x = x;
   playerPos.y = y;
+  if (window.SanctuaryAudio) window.SanctuaryAudio.play("step");
   if (typeof checkRoomEntry === "function") checkRoomEntry(x, y);
   computeVisibility();
   drawTokens();
@@ -664,67 +844,39 @@ function movePlayer(x, y) {
 }
 
 function showFloatingText(x, y, text, color = 0xffffff) {
-  if (!app || !boardContainer) return;
-  const cx = x * TILE_SIZE + TILE_SIZE / 2;
-  const cy = y * TILE_SIZE + TILE_SIZE / 2;
-  const style = new PIXI.TextStyle({
-    fontSize: TILE_SIZE * 0.55,
-    fontWeight: "bold",
-    fill: color,
-    dropShadow: true,
-    dropShadowColor: 0x000000,
-    dropShadowDistance: 2,
-    dropShadowBlur: 2,
-  });
-  const t = new PIXI.Text(text, style);
-  t.anchor.set(0.5);
-  t.position.set(cx, cy);
-  boardContainer.addChild(t);
-
-  let elapsed = 0;
-  const duration = 900;
-  const startY = cy;
-  const tick = (delta) => {
-    elapsed += app.ticker.elapsedMS;
-    const p = Math.min(elapsed / duration, 1);
-    t.position.y = startY - p * TILE_SIZE * 0.8;
-    t.alpha = 1 - p;
-    if (p >= 1) {
-      app.ticker.remove(tick);
-      t.destroy();
-    }
-  };
-  app.ticker.add(tick);
+  fxList.push({ kind: "text", x, y, text, color, t0: performance.now(), dur: 500 });
 }
 
 function showAttackSlash(fromX, fromY, toX, toY, color = 0xffffff) {
-  if (!app || !boardContainer) return;
-  const fx = fromX * TILE_SIZE + TILE_SIZE / 2;
-  const fy = fromY * TILE_SIZE + TILE_SIZE / 2;
-  const tx = toX * TILE_SIZE + TILE_SIZE / 2;
-  const ty = toY * TILE_SIZE + TILE_SIZE / 2;
+  fxList.push({ kind: "slash", fromX, fromY, toX, toY, color, t0: performance.now(), dur: 220 });
+}
 
-  const g = new PIXI.Graphics();
-  g.lineStyle(3, color, 0.9);
-  g.moveTo(fx, fy);
-  // A slight arc for slash effect.
-  const mx = (fx + tx) / 2 + (ty - fy) * 0.15;
-  const my = (fy + ty) / 2 - (tx - fx) * 0.15;
-  g.quadraticCurveTo(mx, my, tx, ty);
-  boardContainer.addChild(g);
-
-  let elapsed = 0;
-  const duration = 350;
-  const tick = (delta) => {
-    elapsed += app.ticker.elapsedMS;
-    const p = Math.min(elapsed / duration, 1);
-    g.alpha = 1 - p;
-    if (p >= 1) {
-      app.ticker.remove(tick);
-      g.destroy();
+function paintFx() {
+  const now = performance.now();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  for (const f of fxList) {
+    const p = Math.min(1, (now - f.t0) / f.dur);
+    if (f.kind === "text") {
+      ctx.globalAlpha = 1 - p;
+      ctx.fillStyle = cssColor(f.color);
+      ctx.font = `bold ${Math.floor(TILE_SIZE * 0.5)}px Georgia, serif`;
+      ctx.fillText(f.text, f.x * TILE_SIZE + TILE_SIZE / 2, f.y * TILE_SIZE + TILE_SIZE / 2 - p * TILE_SIZE * 0.8);
+    } else if (f.kind === "slash") {
+      ctx.globalAlpha = 1 - p;
+      ctx.strokeStyle = cssColor(f.color);
+      ctx.lineWidth = 3;
+      const fx = f.fromX * TILE_SIZE + TILE_SIZE / 2;
+      const fy = f.fromY * TILE_SIZE + TILE_SIZE / 2;
+      const tx = f.toX * TILE_SIZE + TILE_SIZE / 2;
+      const ty = f.toY * TILE_SIZE + TILE_SIZE / 2;
+      ctx.beginPath();
+      ctx.moveTo(fx, fy);
+      ctx.quadraticCurveTo((fx + tx) / 2 + (ty - fy) * 0.15, (fy + ty) / 2 - (tx - fx) * 0.15, tx, ty);
+      ctx.stroke();
     }
-  };
-  app.ticker.add(tick);
+    ctx.globalAlpha = 1;
+  }
 }
 
 function computeVisibility() {
@@ -750,8 +902,9 @@ function computeVisibility() {
       seen.add(key);
       explored.add(key);
       visible.add(key);
-      // Light passes through floor/door/chest/exit but stops after walls.
-      if (mapData[ny][nx] !== TILE.WALL) {
+      // Light passes through floor/door/chest/exit but stops after walls/barrels.
+      const t = mapData[ny][nx];
+      if (t !== TILE.WALL && t !== TILE.BARREL && t !== TILE.SECRET_DOOR) {
         queue.push({ x: nx, y: ny, d: cur.d + 1 });
       }
     }
@@ -759,22 +912,21 @@ function computeVisibility() {
   return visible;
 }
 
-function renderFog() {
-  if (!fogGraphics) return;
-  fogGraphics.clear();
-  const visible = computeVisibility();
+function isVisibleToPlayer(x, y) {
+  return computeVisibility().has(`${x},${y}`);
+}
 
+function renderFog() { requestDraw(); }
+
+function paintFog() {
+  const visible = computeVisibility();
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       const key = `${x},${y}`;
-      const px = x * TILE_SIZE;
-      const py = y * TILE_SIZE;
-      if (!visible.has(key)) {
-        // Explored but not currently visible = dim memory.
-        const alpha = explored.has(key) ? 0.55 : 0.92;
-        fogGraphics.beginFill(0x050403, alpha);
-        fogGraphics.drawRect(px, py, TILE_SIZE, TILE_SIZE);
-        fogGraphics.endFill();
+      if (visible.has(key)) continue;
+      if (explored.has(key)) {
+        ctx.fillStyle = "rgba(80, 52, 28, 0.42)";
+        ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
       }
     }
   }
@@ -782,6 +934,11 @@ function renderFog() {
 
 async function killMonster(m) {
   m.alive = false;
+  if (typeof recordMonsterKilled === "function") recordMonsterKilled(m.name);
+  if (typeof tutorialManager !== "undefined" && tutorialManager && tutorialManager.onMonsterKilled) {
+    tutorialManager.onMonsterKilled();
+  }
+  if (window.SanctuaryAudio) window.SanctuaryAudio.play("monster_death");
   drawTokens();
   if (typeof checkGroupMorale === "function") checkGroupMorale();
   if (m.xp && playerCharacter && playerCharacter.sheet) {
@@ -789,16 +946,22 @@ async function killMonster(m) {
     playerCharacter.sheet.xp += gained;
     log(`${playerCharacter.name} gains <b>${gained} XP</b>.`, "hit");
 
-    // Gold drop: 1d20 cp per HD.
-    const goldRoll = Math.max(1, rollDie(20) * (m.hd || 1));
-    const goldGp = goldRoll / 100;
-    playerCharacter.remaining_gold += goldGp;
-    // OSRIC: 1 GP = 1 XP.
-    playerCharacter.sheet.xp += Math.floor(goldGp * 100);
-    showFloatingText(m.x, m.y, `+${goldGp.toFixed(1)}gp`, 0xd4a03d);
-    log(`${m.name} drops <b>${formatCoins(goldRoll)}</b> (${Math.floor(goldGp * 100)} XP).`, "hit");
+    if (m.gold_gp) {
+      playerCharacter.remaining_gold += m.gold_gp;
+      playerCharacter.sheet.xp += Math.floor(m.gold_gp);
+      showFloatingText(m.x, m.y, `+${m.gold_gp}gp`, 0xd4a03d);
+      log(`${m.name} drops <b>${m.gold_gp} gp</b> (${Math.floor(m.gold_gp)} XP).`, "hit");
+    } else {
+      const goldRoll = Math.max(1, rollDie(20) * (m.hd || 1));
+      const goldGp = goldRoll / 100;
+      playerCharacter.remaining_gold += goldGp;
+      playerCharacter.sheet.xp += Math.floor(goldGp * 100);
+      showFloatingText(m.x, m.y, `+${goldGp.toFixed(1)}gp`, 0xd4a03d);
+      log(`${m.name} drops <b>${formatCoins(goldRoll)}</b> (${Math.floor(goldGp * 100)} XP).`, "hit");
+    }
 
-    if (playerCharacter.sheet.xp >= playerCharacter.sheet.next_level_xp) {
+    if (typeof maybeLevelUp === "function") await maybeLevelUp();
+    else if (playerCharacter.sheet.xp >= playerCharacter.sheet.next_level_xp) {
       await levelUpCharacter();
     }
     renderCharacterPanel();
@@ -808,6 +971,7 @@ async function killMonster(m) {
 
 function openChest(x, y) {
   chestsOpened.add(`${x},${y}`);
+  if (window.SanctuaryAudio) window.SanctuaryAudio.play("chest_open");
   drawMap();
 }
 
@@ -826,13 +990,28 @@ function findSpawnTiles(minDistance) {
   return tiles;
 }
 
+function wanderingMonsterCheck(cfg) {
+  // Level 1 is the tutorial band: fewer wanderers, so first-time players can
+  // clear the map. Deeper levels use the configured chance.
+  const baseChance = cfg.chance_in_6 ?? 1;
+  const die = dungeonLevel === 1 ? 12 : 6;
+  return rollDie(die) <= baseChance;
+}
+
+function wanderingMonsterCount(cfg) {
+  // Tutorial level spawns single wanderers; deeper levels use the config.
+  return dungeonLevel === 1 ? "1" : (cfg.count_per_encounter ?? "1");
+}
+
 function maybeSpawnWanderingMonster() {
+  // Level 1 is the tutorial band: no wandering monsters so the run is
+  // deterministic and first-time players aren't punished by chase loops.
+  if (dungeonLevel === 1) return 0;
   const cfg = combatConfig().wandering_monsters || {};
   if (!cfg.enabled) return 0;
   if (!isCombatSafe()) return 0;
-  const chance = cfg.chance_in_6 ?? 1;
-  if (rollDie(6) > chance) return 0;
-  const spawned = spawnWanderingMonster(cfg.count_per_encounter);
+  if (!wanderingMonsterCheck(cfg)) return 0;
+  const spawned = spawnWanderingMonster(wanderingMonsterCount(cfg));
   if (spawned) {
     log(`<span class="damage">Wandering monsters appear!</span>`, "damage");
   }
@@ -943,6 +1122,17 @@ class TutorialManager {
     const steps = currentModule.tutorial_steps || [];
     const step = steps.find(s => s.id === "chest");
     if (step) this.showOnce("chest", step.text);
+  }
+
+  onMonsterKilled() {
+    if (!TutorialManager.isActive()) return;
+  }
+
+  onWounded() {
+    if (!TutorialManager.isActive()) return;
+    const steps = currentModule.tutorial_steps || [];
+    const step = steps.find((s) => s.id === "rest");
+    if (step) this.showOnce("rest", step.text);
   }
 
   checkConditions() {
@@ -1073,15 +1263,16 @@ function spawnWanderingMonster(countExpr = "1") {
       hd: template.hd || 1,
       x: pos.x,
       y: pos.y,
+      acDesc: stats.acDesc,
       ...stats,
-      acDesc: template.ac_descending,
-      damage: template.damage,
       morale: template.morale,
       alive: true,
       fled: false,
+      asleep: dungeonLevel > 1,
       moraleChecked: false,
       turned: 0,
     });
+    if (typeof recordMonsterSeen === "function") recordMonsterSeen(template.name);
     spawned++;
   }
   if (spawned) {

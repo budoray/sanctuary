@@ -390,7 +390,7 @@ weapons:
     damage: 1d4
     damage_large: 1d6
     weapon_speed: 5
-    range: 35
+    range: 40
     rate_of_fire: "1"
   - id: dart
     subcategory: missile
@@ -480,3 +480,41 @@ gear:
     cost_cp: 5000
     use_action: heal
     heal: 1d8
+  - id: potion_of_extra_healing
+    name: Potion of extra healing
+    weight: 1
+    cost_cp: 10000
+    use_action: heal
+    heal: 2d8
+  - id: potion_of_poison
+    name: Potion of poison
+    weight: 1
+    cost_cp: 5000
+    use_action: poison
+    poison: 1d6
+  - id: iron_key
+    name: Iron key
+    weight: 0
+    cost_cp: 100
+    category: key
+  - id: scroll_of_identify
+    name: Scroll of identify
+    weight: 0
+    cost_cp: 1000
+    category: scroll
+    use_action: scroll
+    scroll: identify
+  - id: scroll_of_mapping
+    name: Scroll of mapping
+    weight: 0
+    cost_cp: 1500
+    category: scroll
+    use_action: scroll
+    scroll: mapping
+  - id: scroll_of_teleport
+    name: Scroll of teleport
+    weight: 0
+    cost_cp: 1200
+    category: scroll
+    use_action: scroll
+    scroll: teleport

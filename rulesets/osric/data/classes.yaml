@@ -52,6 +52,7 @@ cleric:
     - mace_light
     - mace_heavy
     - morning_star
+    - sling
     - staff
     - warhammer_light
     - warhammer_heavy
@@ -133,6 +134,7 @@ illusionist:
   weapons_allowed:
     - dagger
     - dart
+    - sling
     - staff
 
 magic_user:
@@ -160,6 +162,7 @@ magic_user:
   weapons_allowed:
     - dagger
     - dart
+    - sling
     - staff
 
 monk:
@@ -267,3 +270,4 @@ thief:
     - sling
     - sword_long
     - sword_short
+    - bow_short

@@ -31,6 +31,47 @@ let partyComposition = []; // [{type, index}, ...] active party
 let inTown = false;
 let townShopMode = false;
 
+// Unidentified potion discovery system.
+const CONSUMABLE_APPEARANCES = ["red", "blue", "green", "purple", "yellow", "orange", "silver", "gold", "ivory", "ebony"];
+const CONSUMABLE_TYPES = [
+  "potion_of_healing", "potion_of_extra_healing", "potion_of_poison",
+  "scroll_of_identify", "scroll_of_mapping", "scroll_of_teleport",
+];
+let consumableIdentities = {}; // item_id -> appearance label
+let identifiedConsumables = new Set(); // item_ids the player has identified this run
+
+function resetConsumableIdentities() {
+  consumableIdentities = {};
+  identifiedConsumables = new Set();
+  const shuffled = [...CONSUMABLE_APPEARANCES].sort(() => Math.random() - 0.5);
+  CONSUMABLE_TYPES.forEach((type, i) => {
+    const item = osricOptions?.equipment?.find(e => e.id === type);
+    const prefix = item?.category === "scroll" ? "Scroll" : "Potion";
+    consumableIdentities[type] = `${prefix} (${shuffled[i % shuffled.length]})`;
+  });
+}
+
+function isConsumable(itemId) {
+  const item = osricOptions?.equipment?.find(e => e.id === itemId);
+  return item?.use_action === "heal" || item?.use_action === "poison" || item?.category === "scroll";
+}
+
+function consumableDisplayName(itemId) {
+  const item = osricOptions?.equipment?.find(e => e.id === itemId);
+  if (!item) return itemId;
+  if (!isConsumable(itemId) || identifiedConsumables.has(itemId)) return item.name;
+  return consumableIdentities[itemId] || "Unknown consumable";
+}
+
+function identifyConsumable(itemId) {
+  if (isConsumable(itemId)) identifiedConsumables.add(itemId);
+}
+
+// Legacy aliases for older save files and inline callers.
+function resetPotionIdentities() { resetConsumableIdentities(); }
+function potionDisplayName(itemId) { return consumableDisplayName(itemId); }
+function identifyPotion(itemId) { identifyConsumable(itemId); }
+
 const CAMPAIGNS = {
   ashen_hollow: {
     id: "ashen_hollow",
@@ -251,6 +292,10 @@ function firstConsciousPartyIndex() {
   return -1;
 }
 
+function isHardcoreRun() {
+  return playerCharacter?.hardcore === true;
+}
+
 function ensureConsciousActive() {
   const idx = firstConsciousPartyIndex();
   if (idx >= 0) {
@@ -293,18 +338,23 @@ function saveGame() {
       playerPos,
       chestsOpened: Array.from(chestsOpened),
       doorsOpened: Array.from(doorsOpened),
+      doorsLocked: Array.from(doorsLocked),
+      chestsWithKey: Array.from(chestsWithKey),
       trapsTriggered: Array.from(trapsTriggered),
       trapsDiscovered: Array.from(trapsDiscovered),
       trapData: Array.from(trapData),
       secretDoorsDiscovered: Array.from(secretDoorsDiscovered),
       explored: Array.from(explored),
       roomsVisited: Array.from(roomsVisited),
+      roomEventsTriggered: Array.from(roomEventsTriggered || []),
       tutorialHintsShown: Array.from(tutorialHintsShown || []),
       currentModule,
       combatState: combatState ? {
         ...combatState,
         partyActed: Array.from(combatState.partyActed || []),
       } : null,
+      consumableIdentities,
+      identifiedConsumables: Array.from(identifiedConsumables),
       savedAt: new Date().toISOString(),
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -318,6 +368,59 @@ function clearSave() {
     localStorage.removeItem(SAVE_KEY);
   } catch (e) {
     console.warn("Failed to clear save:", e);
+  }
+}
+
+const HOF_KEY = "sanctuary_hall_of_fame";
+const MAX_HOF_ENTRIES = 50;
+
+function computeRunScore(won, finalHp, maxHp, rounds, level, roomsVisitedCount, hardcore) {
+  if (!won) return 0;
+  const hpPct = maxHp > 0 ? finalHp / maxHp : 0;
+  let score = Math.round(hpPct * 500) + (level * 200) + Math.max(0, 500 - rounds * 10) + (roomsVisitedCount * 50);
+  if (hardcore) score *= 2;
+  return Math.max(1, score);
+}
+
+function recordRun(won, finalMessage) {
+  try {
+    const raw = localStorage.getItem(HOF_KEY);
+    const history = Array.isArray(JSON.parse(raw || "[]")) ? JSON.parse(raw || "[]") : [];
+    const finalHp = playerCharacter?.sheet?.hit_points ?? 0;
+    const maxHp = playerCharacter?.sheet?.max_hit_points ?? 1;
+    const roomsVisitedCount = typeof roomsVisited !== "undefined" ? roomsVisited.size : 0;
+    const hardcore = isHardcoreRun();
+    const score = computeRunScore(won, finalHp, maxHp, combatState?.round || 0, dungeonLevel || 1, roomsVisitedCount, hardcore);
+    const entry = {
+      outcome: won ? "victory" : "defeat",
+      module: dungeonModuleName || "crooked_tower",
+      moduleName: DUNGEON_MODULES[dungeonModuleName]?.name || dungeonModuleName || "Unknown",
+      level: dungeonLevel || 1,
+      character: playerCharacter?.name || "Hero",
+      class: playerCharacter?.class || "",
+      finalHp,
+      maxHp,
+      rounds: combatState?.round || 0,
+      roomsVisited: roomsVisitedCount,
+      score,
+      message: finalMessage || "",
+      hardcore,
+      date: new Date().toISOString(),
+    };
+    history.unshift(entry);
+    if (history.length > MAX_HOF_ENTRIES) history.length = MAX_HOF_ENTRIES;
+    localStorage.setItem(HOF_KEY, JSON.stringify(history));
+  } catch (e) {
+    console.warn("Failed to record run:", e);
+  }
+}
+
+function getRunHistory() {
+  try {
+    const raw = localStorage.getItem(HOF_KEY);
+    return Array.isArray(JSON.parse(raw || "[]")) ? JSON.parse(raw || "[]") : [];
+  } catch (e) {
+    return [];
   }
 }
 
@@ -363,18 +466,23 @@ async function loadGame() {
     playerPos = data.playerPos || { x: 1, y: 1 };
     chestsOpened = new Set(data.chestsOpened || []);
     doorsOpened = new Set(data.doorsOpened || []);
+    doorsLocked = new Set(data.doorsLocked || []);
+    chestsWithKey = new Set(data.chestsWithKey || []);
     trapsTriggered = new Set(data.trapsTriggered || []);
     trapsDiscovered = new Set(data.trapsDiscovered || []);
     trapData = new Map(data.trapData || []);
     secretDoorsDiscovered = new Set(data.secretDoorsDiscovered || []);
     explored = new Set(data.explored || []);
     roomsVisited = new Set(data.roomsVisited || []);
+    roomEventsTriggered = new Set(data.roomEventsTriggered || []);
     tutorialHintsShown = new Set(data.tutorialHintsShown || []);
     currentModule = data.currentModule || null;
     if (data.combatState) {
       combatState = data.combatState;
       combatState.partyActed = new Set(combatState.partyActed || []);
     }
+    consumableIdentities = data.consumableIdentities || data.potionIdentities || {};
+    identifiedConsumables = new Set(data.identifiedConsumables || data.identifiedPotions || []);
     inTown = !!data.inTown;
 
     // Rebuild transient state.
@@ -672,10 +780,12 @@ async function rollCharacter() {
   }
 
   try {
+    const hardcore = document.getElementById("hardcore-toggle")?.checked || false;
     const newCharacter = await api("/api/osric/character", {
       method: "POST",
       body: JSON.stringify({ name, ancestry, class_id, alignment, roll_method: rollMethod }),
     });
+    newCharacter.hardcore = hardcore;
     party.push(newCharacter);
     activePartyIndex = party.length - 1;
     playerCharacter = newCharacter;
@@ -1475,6 +1585,12 @@ async function buyStarterKit() {
     if (party.length && activePartyIndex >= 0 && activePartyIndex < party.length) {
       party[activePartyIndex] = playerCharacter;
     }
+    // Starting consumables are pre-identified from the shop/kit.
+    if (typeof identifyConsumable === "function") {
+      for (const entry of playerCharacter.sheet.inventory?.items || []) {
+        if (isConsumable(entry.item_id)) identifyConsumable(entry.item_id);
+      }
+    }
     refreshAfterTransaction();
   } catch (err) {
     showCreationError(err.message);
@@ -1589,11 +1705,12 @@ function renderCharacterPanel() {
   const mods = s.ability_modifiers;
   const hpPct = s.max_hit_points > 0 ? (s.hit_points / s.max_hit_points) * 100 : 0;
   const classData = osricOptions.classes.find(c => c.id === playerCharacter.class);
+  const hardcoreTag = isHardcoreRun() ? `<span class="hof-hardcore" style="margin-left:0.5rem;">Hardcore</span>` : "";
   content.innerHTML = `
     <div class="char-header">
-      <div class="portrait"><span>${playerCharacter.name[0]}</span></div>
+      <div class="portrait"><img src="/art/player_token.png" alt=""></div>
       <div>
-        <div class="char-title">${playerCharacter.name}</div>
+        <div class="char-title">${playerCharacter.name}${hardcoreTag}</div>
         <div class="char-sub">${titleCase(playerCharacter.ancestry)} ${titleCase(playerCharacter.class)} · ${playerCharacter.alignment}</div>
         <div class="char-sub">Prime: <b class="prime">${classData?.prime_requisites.map(titleCase).join(", ") || "—"}</b></div>
       </div>
@@ -1604,8 +1721,8 @@ function renderCharacterPanel() {
     <div class="stat-row">
       <div class="stat-card"><div class="stat-icon">${icon("heart", 18)}</div><div class="stat-value" id="char-hp">${s.hit_points}/${s.max_hit_points}</div><div class="stat-label">HP</div></div>
       <div class="stat-card"><div class="stat-icon">${icon("shield", 18)}</div><div class="stat-value">${s.armour_class}</div><div class="stat-label">AC</div></div>
-      <div class="stat-card"><div class="stat-icon">${icon("crosshair", 18)}</div><div class="stat-value">${s.thac0}</div><div class="stat-label">THAC0</div></div>
-      <div class="stat-card"><div class="stat-icon">${icon("boot", 18)}</div><div class="stat-value">${s.movement}</div><div class="stat-label">MV</div></div>
+      <div class="stat-card" id="thac0-card" title="Click to declare an attack"><div class="stat-icon">${icon("crosshair", 18)}</div><div class="stat-value">${s.thac0}</div><div class="stat-label">THAC0</div></div>
+      <div class="stat-card"><div class="stat-value">${Number(playerCharacter.remaining_gold).toFixed(0)}</div><div class="stat-label">GP</div></div>
     </div>
     <div class="section-title">Abilities</div>
     <div class="ability-grid">
@@ -1618,6 +1735,21 @@ function renderCharacterPanel() {
         </div>`;
       }).join("")}
     </div>
+    <div class="section-title">Inventory <span class="weight-tag">${s.inventory.weight.toFixed(1)} lb</span></div>
+    <ul class="inventory-list">
+      ${inv.items.length ? [...inv.items].sort((a, b) => (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0)).map(i => {
+        const item = osricOptions.equipment.find(e => e.id === i.item_id) || { name: i.item_id };
+        const displayName = typeof consumableDisplayName === "function" ? consumableDisplayName(i.item_id) : item.name;
+        const usable = (item.use_action === "heal" || item.use_action === "poison" || item.category === "scroll") && combatState && playerConscious();
+        return `<li class="inventory-row">
+          <span class="${i.equipped ? 'equipped' : ''}">${displayName}${i.equipped ? ' ◆' : ''}</span>
+          <span style="display:flex;align-items:center;gap:0.4rem;">
+            <span class="qty">×${i.quantity || 1}</span>
+            ${usable ? `<button class="btn btn-secondary use-item-btn" data-id="${i.item_id}" style="font-size:0.7rem;padding:0.2rem 0.4rem;">Use</button>` : ""}
+          </span>
+        </li>`;
+      }).join("") : '<li style="color:var(--ink-2);font-size:0.8rem;">Empty</li>'}
+    </ul>
     <div class="section-title">Combat Modifiers</div>
     <div class="mod-row">
       <div class="mod-pill">Melee to-hit <b>${modifierText(mods.strength.to_hit)}</b></div>
@@ -1627,33 +1759,19 @@ function renderCharacterPanel() {
     </div>
     ${renderAcBreakdownInline(s)}
     ${renderHpBreakdownInline(s)}
-    <div class="section-title">Inventory <span class="weight-tag">${s.inventory.weight.toFixed(1)} lb</span></div>
-    <ul class="inventory-list">
-      ${inv.items.length ? inv.items.map(i => {
-        const item = osricOptions.equipment.find(e => e.id === i.item_id) || { name: i.item_id };
-        const usable = item.use_action === "heal" && combatState && playerConscious();
-        return `<li class="inventory-row">
-          <span class="${i.equipped ? 'equipped' : ''}">${item.name}${i.equipped ? ' ◆' : ''}</span>
-          <span style="display:flex;align-items:center;gap:0.4rem;">
-            <span class="qty">×${i.quantity || 1}</span>
-            ${usable ? `<button class="btn btn-secondary use-item-btn" data-id="${i.item_id}" style="font-size:0.7rem;padding:0.2rem 0.4rem;">Use</button>` : ""}
-          </span>
-        </li>`;
-      }).join("") : '<li style="color:var(--ink-2);font-size:0.8rem;">Empty</li>'}
-    </ul>
     ${s.spell_slots && Object.keys(s.spell_slots).length ? `
     <div class="section-title">Spell Slots</div>
     <div class="mod-row">
       ${Object.entries(s.spell_slots).map(([lvl, n]) => `<div class="mod-pill">Level ${lvl}: <b>${n}</b></div>`).join(" ")}
     </div>` : ""}
     ${s.saving_throws ? `
-    <div class="section-title">Saving Throws</div>
+    <div class="section-title">Saving Throws <span class="weight-tag">click to roll</span></div>
     <div class="save-grid">
-      <div class="save-card"><b>${s.saving_throws.death_paralysis_poison}</b><span>Death</span></div>
-      <div class="save-card"><b>${s.saving_throws.petrification_polymorph}</b><span>Petrify</span></div>
-      <div class="save-card"><b>${s.saving_throws.aimed_magic_items}</b><span>Wand</span></div>
-      <div class="save-card"><b>${s.saving_throws.breath_weapons}</b><span>Breath</span></div>
-      <div class="save-card"><b>${s.saving_throws.spells}</b><span>Spell</span></div>
+      <button type="button" class="save-card" data-save="death_paralysis_poison"><b>${s.saving_throws.death_paralysis_poison}</b><span>Death</span></button>
+      <button type="button" class="save-card" data-save="petrification_polymorph"><b>${s.saving_throws.petrification_polymorph}</b><span>Petrify</span></button>
+      <button type="button" class="save-card" data-save="aimed_magic_items"><b>${s.saving_throws.aimed_magic_items}</b><span>Wand</span></button>
+      <button type="button" class="save-card" data-save="breath_weapons"><b>${s.saving_throws.breath_weapons}</b><span>Breath</span></button>
+      <button type="button" class="save-card" data-save="spells"><b>${s.saving_throws.spells}</b><span>Spell</span></button>
     </div>` : ""}
     ${renderLanguagesInline(mods)}
     ${renderClassAbilitiesInline(playerCharacter.class)}
@@ -1663,13 +1781,30 @@ function renderCharacterPanel() {
     ${renderEncumbranceInline(s)}
     ${renderArmourCapInline(s)}
     ${formatActiveSpellsInline(s.active_spells)}
-    <div class="gold-line">Gold: <b>${Number(playerCharacter.remaining_gold).toFixed(1)} gp</b></div>
   `;
 
+  const thac0Card = document.getElementById("thac0-card");
+  if (thac0Card) {
+    thac0Card.addEventListener("click", () => {
+      if (typeof declareAttack === "function") declareAttack();
+    });
+    if (typeof attackFocus !== "undefined" && attackFocus) thac0Card.classList.add("ready");
+  }
+  content.querySelectorAll(".save-card[data-save]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (typeof rollSaveFromSheet === "function") {
+        rollSaveFromSheet(btn.dataset.save, btn.querySelector("span").textContent);
+      }
+    });
+  });
   content.querySelectorAll(".use-item-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
-      if (btn.dataset.id === "potion_of_healing") {
-        await usePotion();
+      const itemId = btn.dataset.id;
+      const item = osricOptions?.equipment?.find(e => e.id === itemId);
+      if (item?.use_action === "heal" || item?.use_action === "poison") {
+        await drinkPotionById(itemId);
+      } else if (item?.category === "scroll") {
+        await useScroll(itemId);
       }
     });
   });
@@ -1858,9 +1993,9 @@ async function enterDungeon() {
   if (campaign.campaign_gold <= 0 && playerCharacter?.remaining_gold > 0) {
     campaign.campaign_gold = Number(playerCharacter.remaining_gold);
   }
-  inTown = true;
+  inTown = false;
   saveGame();
-  showTown();
+  startModule("crooked_tower");
 }
 
 function renderModuleList(fromTown = false) {
@@ -1985,6 +2120,13 @@ function renderQuestPanel() {
 function startModule(id) {
   dungeonModuleName = id;
   dungeonLevel = 1;
+  resetConsumableIdentities();
+  // Consumables the party already carries (starter kits, bought in town) are known.
+  for (const c of party) {
+    for (const entry of c.sheet.inventory?.items || []) {
+      if (isConsumable(entry.item_id)) identifyConsumable(entry.item_id);
+    }
+  }
   document.getElementById("module-modal").classList.add("hidden");
   document.getElementById("create-modal").classList.add("hidden");
   hideTown();
@@ -2040,31 +2182,41 @@ function randomAncestryForClass(classId) {
 
 async function generateMercenary(classId, level = 1) {
   const name = randomMercName();
-  const ancestry = randomAncestryForClass(classId);
-  const alignment = randomAlignment(classId);
-  try {
-    const merc = await api("/api/osric/character", {
-      method: "POST",
-      body: JSON.stringify({ name, ancestry, class_id: classId, alignment, roll_method: "3d6_in_order" }),
-    });
-    merc.status = "alive";
-    merc.isMercenary = true;
-    merc.dailyWage = level * 2;
-    merc.sheet.level = level;
-    // Equip starter package if affordable.
-    try {
-      const equipped = await api("/api/osric/buy-package", {
-        method: "POST",
-        body: JSON.stringify({ character: merc, equip: true }),
-      });
-      return equipped;
-    } catch (e) {
-      return merc;
+  let lastError = null;
+  // Some ancestry/class combos are hard to roll for; retry with a different
+  // ancestry, then fall back to the unrestricted human ancestry before giving up.
+  for (let attempt = 0; attempt < 7; attempt++) {
+    let ancestry = randomAncestryForClass(classId);
+    if (attempt >= 3) {
+      ancestry = "human";
     }
-  } catch (e) {
-    console.warn("Failed to generate mercenary:", e);
-    return null;
+    const alignment = randomAlignment(classId);
+    try {
+      const merc = await api("/api/osric/character", {
+        method: "POST",
+        body: JSON.stringify({ name, ancestry, class_id: classId, alignment, roll_method: "3d6_in_order" }),
+      });
+      merc.status = "alive";
+      merc.isMercenary = true;
+      merc.dailyWage = level * 2;
+      merc.sheet.level = level;
+      // Equip starter package if affordable.
+      try {
+        const equipped = await api("/api/osric/buy-package", {
+          method: "POST",
+          body: JSON.stringify({ character: merc, equip: true }),
+        });
+        return equipped;
+      } catch (e) {
+        return merc;
+      }
+    } catch (e) {
+      lastError = e;
+      console.warn(`Failed to generate mercenary (attempt ${attempt + 1}):`, e);
+    }
   }
+  console.warn("Failed to generate mercenary after all attempts:", lastError);
+  return null;
 }
 
 async function ensureMercenaries() {
@@ -2083,7 +2235,15 @@ async function refreshMercenaries() {
   campaign.campaign_gold -= REFRESH_MERC_COST;
   const count = 3;
   const newMercs = [];
-  for (let i = 0; i < count; i++) {
+  // Guarantee at least one reliable front-line or healer class so a new party
+  // is never stuck with only fragile hirelings.  Paladin and ranger are left
+  // out of the guarantee because their ability-score requirements often fail
+  // to roll, leaving the slot empty.
+  const FRONT_LINE = ["fighter", "cleric"];
+  const firstClass = FRONT_LINE[Math.floor(Math.random() * FRONT_LINE.length)];
+  const firstMerc = await generateMercenary(firstClass, 1);
+  if (firstMerc) newMercs.push(firstMerc);
+  for (let i = newMercs.length; i < count; i++) {
     const classId = MERC_CLASSES[Math.floor(Math.random() * MERC_CLASSES.length)];
     const merc = await generateMercenary(classId, 1);
     if (merc) newMercs.push(merc);
@@ -2214,6 +2374,11 @@ function removeFromParty(index) {
   saveGame();
 }
 
+function resetHardcoreToggle() {
+  const toggle = document.getElementById("hardcore-toggle");
+  if (toggle) toggle.checked = false;
+}
+
 function createNewRosterCharacter() {
   if (playerCharacters.length >= 5) {
     showMessageModal("Roster Full", "You can keep up to 5 custom characters. Dismiss one from the roster first.");
@@ -2221,6 +2386,7 @@ function createNewRosterCharacter() {
   }
   rosterCreationMode = true;
   document.getElementById("create-modal").classList.remove("hidden");
+  resetHardcoreToggle();
   party = [];
   activePartyIndex = 0;
   playerCharacter = null;
@@ -2549,16 +2715,6 @@ function renderTown() {
   renderQuestPanel();
 }
 
-function townRest() {
-  for (const c of party) {
-    c.sheet.hit_points = c.sheet.max_hit_points;
-  }
-  renderCharacterPanel();
-  renderTown();
-  log("The party rests at the inn and recovers to full health.", "hit");
-  saveGame();
-}
-
 function openTownMarket() {
   townShopMode = true;
   openShopModal("armour");
@@ -2579,7 +2735,8 @@ function departToModule(id) {
   startModule(id);
 }
 
-function returnToTown(won, source) {
+async function returnToTown(won, source) {
+  recordRun(won, source);
   const deathThreshold = osricRules?.combat?.death_threshold ?? -10;
 
   // Convert carried gold to campaign gold.
@@ -2625,8 +2782,8 @@ function returnToTown(won, source) {
     completeModule(completed);
     const mod = DUNGEON_MODULES[completed];
     // Award module completion gold and XP.
-    const rewardGold = 25 * (mod?.level || 1);
-    const rewardXp = 200 * (mod?.level || 1);
+    const rewardGold = mod?.clear_gold != null ? mod.clear_gold : 25 * (mod?.level || 1);
+    const rewardXp = mod?.clear_xp != null ? mod.clear_xp : 200 * (mod?.level || 1);
     campaign.campaign_gold += rewardGold;
     for (const c of party) {
       if (c.status !== "dead") {
@@ -2634,6 +2791,16 @@ function returnToTown(won, source) {
       }
     }
     log(`Module reward: <b>${rewardGold} gp</b> and <b>${rewardXp} XP</b> per survivor.`, "hit");
+    if (typeof maybeLevelUp === "function") {
+      const prevName = playerCharacter?.name;
+      for (let i = 0; i < party.length; i++) {
+        if (party[i].status === "dead") continue;
+        playerCharacter = party[i];
+        await maybeLevelUp();
+        party[i] = playerCharacter;
+      }
+      playerCharacter = party.find((c) => c.name === prevName) || party[0] || playerCharacter;
+    }
 
     // Add non-consumable looted gear to stash.
     for (const c of party) {
@@ -2665,6 +2832,7 @@ function returnToTown(won, source) {
   currentModule = null;
   explored = new Set();
   roomsVisited = new Set();
+  roomEventsTriggered = new Set();
 
   saveGame();
   showTown();
@@ -2677,16 +2845,41 @@ function updateLevelBadge() {
 }
 
 function showEnd(won, message) {
+  if (window.SanctuaryAudio) window.SanctuaryAudio.play(won ? "victory" : "defeat");
   const modal = document.getElementById("end-modal");
-  document.getElementById("end-title").textContent = won ? "Victory" : "Defeat";
-  document.getElementById("end-msg").textContent = message;
-  document.getElementById("restart-btn").textContent = won ? "Return to Town" : "Return to Town";
+  const hardcore = isHardcoreRun();
+  const finalHp = playerCharacter?.sheet?.hit_points ?? 0;
+  const maxHp = playerCharacter?.sheet?.max_hit_points ?? 1;
+  const roomsVisitedCount = typeof roomsVisited !== "undefined" ? roomsVisited.size : 0;
+  const score = computeRunScore(won, finalHp, maxHp, combatState?.round || 0, dungeonLevel || 1, roomsVisitedCount, hardcore);
+  document.getElementById("end-title").textContent = won ? "Victory" : (hardcore ? "Permadeath" : "Defeat");
+  document.getElementById("end-msg").textContent = hardcore && !won
+    ? `${message} This hardcore character is lost forever.`
+    : message;
+  const scoreEl = document.getElementById("end-score");
+  if (scoreEl) {
+    if (won && score > 0) {
+      scoreEl.textContent = `Score: ${score}`;
+      scoreEl.style.display = "block";
+    } else {
+      scoreEl.style.display = "none";
+    }
+  }
+  document.getElementById("restart-btn").textContent = won ? "Return to Town" : (hardcore ? "Return to Title" : "Return to Town");
   document.getElementById("restart-btn").onclick = () => {
     modal.classList.add("hidden");
+    if (hardcore && !won) {
+      recordRun(false, message);
+      clearSave();
+      location.reload();
+      return;
+    }
     returnToTown(won, won ? "You return to Ashen Hollow with your spoils." : "You limp back to Ashen Hollow, empty-handed.");
   };
   const descendBtn = document.getElementById("descend-btn");
   if (descendBtn) descendBtn.style.display = "none";
+  const nextBtn = document.getElementById("next-module-btn");
+  if (nextBtn) nextBtn.classList.add("hidden");
   modal.classList.remove("hidden");
 }
 
@@ -2698,26 +2891,44 @@ function unlockNextModule() {
 }
 
 function showDescendChoice() {
+  if (window.SanctuaryAudio) window.SanctuaryAudio.play("victory");
   const modal = document.getElementById("end-modal");
+  const mod = DUNGEON_MODULES[dungeonModuleName];
+  let msg = `You have cleared level ${dungeonLevel}. Return to town with your loot, or descend deeper into ${mod?.name || "the dungeon"}?`;
+  if (mod?.story_reward) {
+    msg += `\n\nRelic recovered: ${mod.story_reward}`;
+  }
+  if (mod?.unlocks) {
+    const next = DUNGEON_MODULES[mod.unlocks];
+    if (next) msg += `\nUnlocked: ${next.name}`;
+  }
   document.getElementById("end-title").textContent = "Exit Open";
-  document.getElementById("end-msg").textContent = `You have cleared level ${dungeonLevel}. Return to town with your loot, or descend deeper into ${DUNGEON_MODULES[dungeonModuleName]?.name || "the dungeon"}?`;
+  document.getElementById("end-msg").textContent = msg;
+  const scoreEl = document.getElementById("end-score");
+  if (scoreEl) scoreEl.style.display = "none";
   document.getElementById("restart-btn").textContent = "Return to Town";
   document.getElementById("restart-btn").onclick = () => {
     modal.classList.add("hidden");
+    const nb = document.getElementById("next-module-btn");
+    if (nb) nb.classList.add("hidden");
     returnToTown(true, "You return to Ashen Hollow with your spoils.");
   };
 
   const descendBtn = document.getElementById("descend-btn");
-  if (!descendBtn) {
-    const btn = document.createElement("button");
-    btn.id = "descend-btn";
-    btn.className = "btn btn-primary";
-    btn.style.marginTop = "0.75rem";
-    btn.textContent = "Descend Deeper";
-    btn.onclick = () => descendLevel();
-    modal.querySelector(".modal-card").appendChild(btn);
-  } else {
-    descendBtn.style.display = "inline-flex";
+  if (descendBtn) descendBtn.style.display = "none";
+  const nextId = mod?.unlocks;
+  const nextBtn = document.getElementById("next-module-btn");
+  if (nextBtn && nextId && DUNGEON_MODULES[nextId]) {
+    nextBtn.textContent = `On to ${DUNGEON_MODULES[nextId].name}`;
+    nextBtn.classList.remove("hidden");
+    nextBtn.onclick = () => {
+      modal.classList.add("hidden");
+      nextBtn.classList.add("hidden");
+      returnToTown(true, "You return to Ashen Hollow with your spoils.");
+      departToModule(nextId);
+    };
+  } else if (nextBtn) {
+    nextBtn.classList.add("hidden");
   }
   modal.classList.remove("hidden");
 }
@@ -2765,6 +2976,7 @@ async function initGame() {
   playBtn.addEventListener("click", () => {
     document.getElementById("landing-screen").classList.add("hidden");
     document.getElementById("create-modal").classList.remove("hidden");
+    resetHardcoreToggle();
     party = [];
     activePartyIndex = 0;
     playerCharacter = null;
@@ -2784,6 +2996,13 @@ async function initGame() {
   document.getElementById("roll-character-btn").addEventListener("click", rollCharacter);
   document.getElementById("auto-arrange-btn").addEventListener("click", autoArrange);
   document.getElementById("enter-dungeon-btn").addEventListener("click", enterDungeon);
+  document.getElementById("auto-explore-btn").addEventListener("click", () => autoExplore());
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "e" || e.key === "E") {
+      const btn = document.getElementById("auto-explore-btn");
+      if (btn && !btn.disabled) autoExplore();
+    }
+  });
   document.getElementById("restart-btn").addEventListener("click", () => {
     clearSave();
     location.reload();
@@ -2867,6 +3086,8 @@ async function initGame() {
   const townCampaign = document.getElementById("town-campaign-btn");
   const townRegionMap = document.getElementById("town-region-map-btn");
   const townSave = document.getElementById("town-save");
+  const townHOF = document.getElementById("town-hall-of-fame-btn");
+  const townBestiary = document.getElementById("town-bestiary-btn");
   if (townInn) townInn.addEventListener("click", townRest);
   if (townTemple) townTemple.addEventListener("click", () => openTemple());
   if (townMarket) townMarket.addEventListener("click", openTownMarket);
@@ -2875,6 +3096,8 @@ async function initGame() {
   if (townJournal) townJournal.addEventListener("click", openCampaignJournal);
   if (townCampaign) townCampaign.addEventListener("click", openCampaignSelect);
   if (townRegionMap) townRegionMap.addEventListener("click", openRegionMap);
+  if (townHOF) townHOF.addEventListener("click", openHallOfFame);
+  if (townBestiary) townBestiary.addEventListener("click", openBestiary);
   if (townSave) townSave.addEventListener("click", () => {
     saveGame();
     showMessageModal("Saved", "Your campaign progress has been saved.");
@@ -2903,6 +3126,86 @@ async function initGame() {
   const closeRegionMapBtn = document.getElementById("close-region-map-btn");
   if (closeRegionMapBtn) closeRegionMapBtn.addEventListener("click", closeRegionMap);
   if (regionMapModal) regionMapModal.addEventListener("click", (e) => { if (e.target === regionMapModal) closeRegionMap(); });
+
+  // Hall of Fame modal bindings.
+  const hofModal = document.getElementById("hof-modal");
+  const closeHOF = document.getElementById("close-hof-btn");
+  if (closeHOF) closeHOF.addEventListener("click", closeHallOfFame);
+  if (hofModal) hofModal.addEventListener("click", (e) => { if (e.target === hofModal) closeHallOfFame(); });
+
+  // Bestiary modal bindings.
+  const bestiaryModal = document.getElementById("bestiary-modal");
+  const closeBestiaryBtn = document.getElementById("close-bestiary-btn");
+  if (closeBestiaryBtn) closeBestiaryBtn.addEventListener("click", closeBestiary);
+  if (bestiaryModal) bestiaryModal.addEventListener("click", (e) => { if (e.target === bestiaryModal) closeBestiary(); });
+}
+
+function computeHallOfFameStats(history) {
+  let wins = 0;
+  let defeats = 0;
+  let currentStreak = 0;
+  let bestStreak = 0;
+  let bestScore = 0;
+  for (const entry of history) {
+    if (entry.outcome === "victory") {
+      wins++;
+      currentStreak++;
+      bestStreak = Math.max(bestStreak, currentStreak);
+      bestScore = Math.max(bestScore, entry.score || 0);
+    } else {
+      defeats++;
+      currentStreak = 0;
+    }
+  }
+  return { wins, defeats, currentStreak, bestStreak, bestScore, total: history.length };
+}
+
+function openHallOfFame() {
+  const list = document.getElementById("hof-list");
+  const history = getRunHistory();
+  if (!list) return;
+  if (!history.length) {
+    list.innerHTML = `<p style="color:var(--ink-2)">No runs recorded yet. Complete or fall in a delve to see it here.</p>`;
+  } else {
+    const stats = computeHallOfFameStats(history);
+    const summaryHtml = `
+      <div class="hof-summary">
+        <div class="hof-stat"><span class="hof-stat-value">${stats.wins}</span><span class="hof-stat-label">Wins</span></div>
+        <div class="hof-stat"><span class="hof-stat-value">${stats.defeats}</span><span class="hof-stat-label">Losses</span></div>
+        <div class="hof-stat"><span class="hof-stat-value">${stats.currentStreak}</span><span class="hof-stat-label">Streak</span></div>
+        <div class="hof-stat"><span class="hof-stat-value">${stats.bestStreak}</span><span class="hof-stat-label">Best Streak</span></div>
+        <div class="hof-stat"><span class="hof-stat-value">${stats.bestScore}</span><span class="hof-stat-label">Best Score</span></div>
+      </div>
+    `;
+    const entriesHtml = history.map((entry) => {
+      const date = new Date(entry.date);
+      const dateStr = date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const outcomeClass = entry.outcome === "victory" ? "victory" : "defeat";
+      const outcomeText = entry.outcome === "victory" ? "Victory" : "Defeat";
+      const hardcoreBadge = entry.hardcore ? `<span class="hof-hardcore">Hardcore</span>` : "";
+      const scoreBadge = entry.score ? `<span class="hof-score">${entry.score} pts</span>` : "";
+      return `
+        <div class="hof-entry ${outcomeClass}">
+          <div class="hof-entry-main">
+            <div class="hof-entry-title">${outcomeText} — ${escapeHtml(entry.moduleName || entry.module)}${hardcoreBadge}${scoreBadge}</div>
+            <div class="hof-entry-meta">${escapeHtml(entry.character)}${entry.class ? ` (${entry.class})` : ""} · Level ${entry.level} · HP ${entry.finalHp}/${entry.maxHp} · Round ${entry.rounds}</div>
+          </div>
+          <div class="hof-entry-date">${dateStr}</div>
+        </div>
+      `;
+    }).join("");
+    list.innerHTML = summaryHtml + entriesHtml;
+  }
+  document.getElementById("hof-modal")?.classList.remove("hidden");
+}
+
+function closeHallOfFame() {
+  document.getElementById("hof-modal")?.classList.add("hidden");
+}
+
+function escapeHtml(str) {
+  if (str == null) return "";
+  return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
 }
 
 window.addEventListener("DOMContentLoaded", initGame);

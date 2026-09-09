@@ -31,6 +31,17 @@ surprise:
 initiative:
   dex_modifier_per_point: 1
 
+# Encounter reaction: roll 2d6 and add the caller's charisma reaction modifier.
+# The modified roll is compared to the table below to determine attitude.
+reaction:
+  table:
+    - attitude: hostile
+      max: 5
+    - attitude: uncertain
+      max: 8
+    - attitude: friendly
+      max: 12
+
 # Encumbrance tiers (weight in lb). Movement penalty is applied to base movement.
 encumbrance:
   light:

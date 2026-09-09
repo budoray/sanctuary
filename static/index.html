@@ -5,26 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sanctuary — OSRIC Dungeon</title>
   <meta name="description" content="Sanctuary is a browser-based OSRIC dungeon crawl. Roll a hero, buy gear, and descend into procedural dungeons.">
-  <link rel="stylesheet" href="/css/game.css">
+  <link rel="stylesheet" href="/css/game.css?v=0.1.11-alpha">
   <link rel="icon" type="image/png" href="/art/beacon.png">
-  <script src="https://cdn.jsdelivr.net/npm/pixi.js@7/dist/pixi.min.js"></script>
-  <script src="/js/icons.js"></script>
-  <script src="/js/dungeon.js"></script>
-  <script src="/js/modules.js"></script>
-  <script src="/js/merc_ai.js"></script>
-  <script src="/js/combat.js"></script>
-  <script src="/js/region_map.js"></script>
-  <script src="/js/game.js"></script>
-  <script src="/js/watch-agent.js"></script>
+  <script src="/js/icons.js?v=0.1.11-alpha"></script>
+  <script src="/js/dungeon.js?v=0.1.11-alpha"></script>
+  <script src="/js/modules.js?v=0.1.11-alpha"></script>
+  <script src="/js/merc_ai.js?v=0.1.11-alpha"></script>
+  <script src="/js/dice.js?v=0.1.11-alpha"></script>
+  <script src="/js/combat.js?v=0.1.11-alpha"></script>
+  <script src="/js/region_map.js?v=0.1.11-alpha"></script>
+  <script src="/js/bestiary.js?v=0.1.11-alpha"></script>
+  <script src="/js/game.js?v=0.1.11-alpha"></script>
+  <script src="/js/watch-agent.js?v=0.1.11-alpha"></script>
 </head>
 <body>
   <div id="landing-screen" class="landing-screen">
     <div class="landing-card">
       <img src="/art/hero.png" alt="Sanctuary hero" class="landing-hero">
       <h1>Sanctuary</h1>
-      <p class="landing-tagline">A browser-based OSRIC dungeon crawl.</p>
-      <p class="landing-blurb">Roll a hero, buy gear, choose a dungeon, and descend.</p>
-      <button id="play-now-btn" class="btn btn-primary btn-large">▶ Play Now</button>
+      <p class="landing-tagline">An OSRIC table. One delve. Dice you throw.</p>
+      <p class="landing-blurb">Sit down, roll a hero, and clear the Crooked Tower. You throw the dice. The dungeon throws back.</p>
+      <button id="play-now-btn" class="btn btn-primary btn-large">Sit at the table</button>
       <button id="continue-btn" class="btn btn-secondary btn-large hidden">↩ Continue Run</button>
       <button id="abandon-btn" class="btn btn-danger btn-large hidden">Abandon Run</button>
       <div class="landing-meta">
@@ -44,6 +45,7 @@
         <button id="help-btn" class="btn btn-secondary" style="padding:0.4rem 0.7rem;font-size:0.75rem;">? Help</button>
         <div class="level-badge" id="level-badge">Level 1</div>
         <div class="turn-badge" id="turn-badge">Create your hero</div>
+        <div class="objective-badge" id="objective-badge"></div>
       </div>
     </header>
 
@@ -56,7 +58,17 @@
       <section class="board" id="board">
         <div class="board-bg"></div>
         <div class="board-vignette"></div>
-        <div id="board-canvas"></div>
+        <div class="map-frame">
+          <div id="initiative-strip" class="initiative-strip" aria-live="polite"></div>
+          <div id="board-canvas"></div>
+          <div id="action-cooldown" class="action-cooldown" aria-hidden="true"><div id="action-cooldown-fill"></div></div>
+          <div id="dice-tray" class="dice-tray hidden" aria-live="polite">
+            <div id="dice-tray-who" class="dice-who">Your throw</div>
+            <div id="dice-tray-dice" class="dice-row"></div>
+            <div id="dice-tray-meta" class="dice-meta">Attack roll</div>
+            <button type="button" id="dice-roll-btn" class="btn btn-primary">Roll</button>
+          </div>
+        </div>
       </section>
 
       <aside class="panel log-panel">
@@ -74,6 +86,7 @@
       <span id="spell-bar" class="spell-bar"></span>
       <span id="consumables-bar" class="consumables-bar"></span>
       <span id="rest-bar" class="rest-bar"></span>
+      <button id="auto-explore-btn" class="btn btn-secondary" disabled title="Explore toward the nearest unseen tile (E)">Auto-Explore</button>
       <button id="end-turn-btn" class="btn btn-primary" disabled>End Turn</button>
     </footer>
   </div>
@@ -117,6 +130,14 @@
               <label>
                 Alignment
                 <select id="char-alignment"></select>
+              </label>
+            </div>
+
+            <div class="form-grid" style="margin-top:0.75rem;">
+              <label class="hardcore-label" title="In Hardcore mode, death is permanent. Your save is deleted and your run is recorded in the Hall of Fame.">
+                <input type="checkbox" id="hardcore-toggle">
+                <span>Hardcore mode</span>
+                <span class="hardcore-tag">Permadeath</span>
               </label>
             </div>
 
@@ -175,7 +196,7 @@
 
       <footer class="create-footer">
         <div id="creation-errors" class="creation-errors"></div>
-        <button id="enter-dungeon-btn" class="btn btn-primary btn-large">Enter the Dungeon</button>
+        <button id="enter-dungeon-btn" class="btn btn-primary btn-large">Begin the Crooked Tower</button>
       </footer>
     </div>
   </div>
@@ -240,7 +261,9 @@
     <div class="modal-card" style="text-align:center;">
       <h2 id="end-title">Victory</h2>
       <p id="end-msg">The dungeon is quiet.</p>
-      <button id="restart-btn" class="btn btn-primary">Play Again</button>
+      <p id="end-score" class="end-score" style="display:none;"></p>
+      <button id="restart-btn" class="btn btn-primary">Return to Town</button>
+      <button id="next-module-btn" class="btn btn-secondary hidden" style="margin-top:0.6rem;">Next module</button>
     </div>
   </div>
 
@@ -321,6 +344,28 @@
     </div>
   </div>
 
+  <div id="hof-modal" class="modal hidden">
+    <div class="modal-card hof-modal-card">
+      <h2>Hall of Fame</h2>
+      <p class="hof-subtitle">Your last 50 delves, newest first.</p>
+      <div id="hof-list" class="hof-list"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+        <button id="close-hof-btn" class="btn btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bestiary-modal" class="modal hidden">
+    <div class="modal-card bestiary-modal-card">
+      <h2>Bestiary</h2>
+      <p class="bestiary-subtitle" id="bestiary-stats">No creatures catalogued yet.</p>
+      <div id="bestiary-list" class="bestiary-list"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+        <button id="close-bestiary-btn" class="btn btn-primary">Close</button>
+      </div>
+    </div>
+  </div>
+
   <div id="town-screen" class="town-screen hidden">
     <header class="town-header">
       <div class="town-title">
@@ -383,6 +428,8 @@
             <button id="town-journal-btn" class="btn btn-secondary">Journal</button>
             <button id="town-campaign-btn" class="btn btn-secondary">Campaign</button>
             <button id="town-region-map-btn" class="btn btn-secondary">Region Map</button>
+            <button id="town-hall-of-fame-btn" class="btn btn-secondary">Hall of Fame</button>
+            <button id="town-bestiary-btn" class="btn btn-secondary">Bestiary</button>
           </div>
         </div>
         <div class="town-panel">

@@ -6,5 +6,7 @@ __pycache__/
 screenshots/
 postgres_data/
 *.pyc
+*.log
+tools/*.png
 .env
 .env.local

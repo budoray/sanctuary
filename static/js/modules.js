@@ -13,18 +13,22 @@ const DUNGEON_MODULES = {
       { id: "welcome", text: "Welcome to Sanctuary. Click highlighted tiles to move.", once: true },
       { id: "room", text: "Each room has a description in the Adventure Log. Explore carefully.", once: true },
       { id: "door", text: "Doors block movement until opened. Click an adjacent door to open it.", once: true },
-      { id: "monster", text: "Monsters are red tokens. Click an adjacent monster to attack.", once: true },
-      { id: "attack", text: "Each character can attack once per round. End your turn when done.", once: true },
-      { id: "rest", text: "Use the Rest button to recover HP when the area is safe.", once: true },
-      { id: "chest", text: "Click chests to loot them.", once: true },
+      { id: "monster", text: "Click an adjacent foe to attack. The dice tray will open — you throw.", once: true },
+      { id: "attack", text: "Click Roll. One attack per round, then End Turn.", once: true },
+      { id: "rest", text: "You're wounded. Rest if no enemy is next to you.", once: true },
+      { id: "chest", text: "Click chests to loot them. Gold is XP.", once: true },
       { id: "trap", text: "Traps are hidden. Thieves can search adjacent tiles for traps.", once: true },
-      { id: "boss", text: "Bosses are tougher and may have better morale. Use potions and spells wisely.", once: true },
-      { id: "exit", text: "Reach the beacon to escape the dungeon.", once: true },
+      { id: "boss", text: "Grik and his guard — the major fight. Rest first if you're wounded.", once: true },
+      { id: "exit", text: "Reach the beacon to leave. The reeve's purse waits in town.", once: true },
     ],
     unlocks: "sunken_crypt",
     blurb: "Lord Huet's fallen keep. Something gnaws in the cellars beneath.",
-    story: "Lord Huet was a feared warrior who drove the valley's goblin tribes into the hills. After his death the keep was abandoned, and now travelers report torchlight in the tower windows and missing livestock. The local reeve offers a modest purse for anyone who clears out whatever has taken root below.",
-    objective: "Explore the cellars beneath the Crooked Tower, defeat the creatures lairing there, and reach the beacon that marks the old escape tunnel.",
+    story: "Lord Huet was a feared warrior who drove the valley's goblin tribes into the hills. After his death the keep was abandoned, and now travelers report torchlight in the tower windows and missing livestock. The local reeve offers a purse for anyone who clears the cellars.",
+    objective: "Three scuffles, then Grik. Loot the chests, take the chieftain's purse, and reach the beacon. A full clear sees a 1st-level hero to 2nd.",
+    // Solo L1: 1 major + 3 minor. Target 10–15 min for above-average play (HP = round budget).
+    encounters: { major: 1, minor: 3 },
+    clear_xp: 550,
+    clear_gold: 100,
     story_objective: "Recover the Black Sun amulet from Grik the Goblin Chieftain.",
     story_reward: "Black Sun Amulet — a jet disc carved with a sun that shines darkness. Grik did not find it; he was sent to retrieve it.",
     intro: "You descend a crumbling stair into damp torchlight. Somewhere ahead, something scrapes stone against stone.",
@@ -42,12 +46,12 @@ const DUNGEON_MODULES = {
     ],
     room_descriptions: {
       entrance: "The entrance hall stinks of mildew and old blood. Rusted sconces still hold guttering torches.",
-      antechamber: "A cramped antechamber where sentries once warmed themselves. Now kobold paw-prints streak the dust.",
-      storage: "Cracked casks and rotted sacks line the walls. Something has gnawed through the grain barrels.",
-      crossing: "A low crossing where three passages meet. The floor is unnaturally smooth, worn by recent traffic.",
+      antechamber: "A cramped antechamber. A kobold is here — your first fight. Click it, then Roll.",
+      storage: "A chest sits among gnawed casks. Kill the rat, then loot. The key you need is in that box.",
+      crossing: "Three ways. East: a barred shrine door. West: the throne. If the shrine is locked, the storeroom has the key.",
       westhall: "A narrow hall leading toward the old throne room. Trip-wires glint in the torchlight.",
       shrine: "A forgotten shrine to a nameless god. Its altar has been desecrated and used as a larder.",
-      throne: "Lord Huet's throne room. A hunched figure in rusted mail sits on the dais, gnawing a bone.",
+      throne: "Lord Huet's throne room. Grik squats on the dais in rusted mail. A goblin guard bars the approach.",
       exit: "The old escape tunnel ends at a brass beacon, cold and dim. Beyond it lies the surface."
     },
     corridors: [
@@ -62,15 +66,18 @@ const DUNGEON_MODULES = {
     playerStart: "entrance",
     exitRoom: "exit",
     monsters: [
-      { room: "antechamber", type: "Kobold" },
-      { room: "storage",     type: "Giant Rat" },
-      { room: "shrine",      type: "Skeleton" },
-      { room: "exit",        type: "Orc" },
-      { room: "throne",      type: "Goblin", boss: true, name: "Grik the Goblin Chieftain" },
+      { room: "antechamber", type: "Kobold", xp: 150, hp: 9 },
+      { room: "storage",     type: "Giant Rat", xp: 175, hp: 11, offset: { x: -2, y: 0 } },
+      { room: "shrine",      type: "Goblin", xp: 225, hp: 13, offset: { x: -2, y: 1 } },
+      { room: "throne",      type: "Goblin", name: "Grik's Guard", xp: 100, hp: 11, offset: { x: 2, y: 0 } },
+      { room: "throne",      type: "Goblin", boss: true, name: "Grik the Goblin Chieftain", xp: 500, gold_gp: 250, hp: 22 },
     ],
     chests: ["storage", "shrine"],
+    // Full-clear XP: 3 minors 550 + major (Grik 500 + guard 100) + purse 250 + chests 900 + clear 550 = 2850
+    chest_gold_gp: { storage: 400, shrine: 500 },
     traps: [{ room: "westhall", type: "pit" }],
-    secret_doors: ["westhall"],
+    secret_doors: [],
+    locked_doors: ["shrine"],
   },
   sunken_crypt: {
     name: "The Sunken Crypt",
@@ -180,6 +187,7 @@ const DUNGEON_MODULES = {
     monsters: [
       { room: "guardpost", type: "Kobold" },
       { room: "commonroom", type: "Goblin" },
+      { room: "commonroom", type: "Goblin Shaman" },
       { room: "pit", type: "Giant Spider" },
       { room: "breeding", type: "Giant Spider" },
       { room: "chieftain", type: "Hobgoblin", boss: true, name: "Krag the Hobgoblin" },
@@ -553,6 +561,25 @@ const DUNGEON_MODULES = {
 let currentModule = null;
 let roomIdGrid = [];
 let roomsVisited = new Set();
+let roomEventsTriggered = new Set();
+
+function placeInRoom(room, offset) {
+  const c = roomCenter(room);
+  let x = c.x + (offset?.x || 0);
+  let y = c.y + (offset?.y || 0);
+  const inside = (tx, ty) =>
+    tx >= room.x && tx < room.x + room.w && ty >= room.y && ty < room.y + room.h;
+  if (!inside(x, y)) { x = c.x; y = c.y; }
+  const blocked = (tx, ty) =>
+    monsters.some((m) => m.x === tx && m.y === ty) ||
+    (tx === playerPos.x && ty === playerPos.y);
+  if (!blocked(x, y)) return { x, y };
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [2, 0], [-2, 0], [0, 2], [1, 1]]) {
+    const nx = c.x + dx, ny = c.y + dy;
+    if (inside(nx, ny) && !blocked(nx, ny)) return { x: nx, y: ny };
+  }
+  return { x: c.x, y: c.y };
+}
 
 function loadDungeonModule(name) {
   const mod = DUNGEON_MODULES[name];
@@ -562,6 +589,7 @@ function loadDungeonModule(name) {
   }
   currentModule = mod;
   roomsVisited = new Set();
+  roomEventsTriggered = new Set();
 
   MAP_W = mod.width;
   MAP_H = mod.height;
@@ -608,6 +636,9 @@ function loadDungeonModule(name) {
   // Reset state.
   chestsOpened.clear();
   doorsOpened.clear();
+  doorsLocked.clear();
+  chestsWithKey.clear();
+  chestGoldGp.clear();
   trapsTriggered.clear();
   trapsDiscovered.clear();
   secretDoorsDiscovered.clear();
@@ -622,6 +653,8 @@ function loadDungeonModule(name) {
   for (const roomId of mod.chests) {
     const pos = roomCenter(roomById[roomId]);
     grid[pos.y][pos.x] = TILE.CHEST;
+    const gp = mod.chest_gold_gp && mod.chest_gold_gp[roomId];
+    if (gp) chestGoldGp.set(`${pos.x},${pos.y}`, gp);
   }
 
   // Traps.
@@ -641,10 +674,25 @@ function loadDungeonModule(name) {
     }
   }
 
+  // Locked doors: seal off optional rooms. A key is placed in the first chest.
+  const lockedRooms = mod.locked_doors || [];
+  for (const roomId of lockedRooms) {
+    const doorTile = findDoorTileAdjacentToRoom(grid, roomIdGrid, roomId);
+    if (doorTile) {
+      grid[doorTile.y][doorTile.x] = TILE.LOCKED_DOOR;
+      doorsLocked.add(`${doorTile.x},${doorTile.y}`);
+    }
+  }
+  if (lockedRooms.length && mod.chests?.length) {
+    const keyChest = roomCenter(roomById[mod.chests[0]]);
+    chestsWithKey.add(`${keyChest.x},${keyChest.y}`);
+  }
+
   // Monsters.
   monsters = [];
   for (const entry of mod.monsters) {
-    const pos = roomCenter(roomById[entry.room]);
+    const room = roomById[entry.room];
+    const pos = placeInRoom(room, entry.offset);
     const monsterId = findMonsterIdByName(entry.type);
     if (!monsterId) {
       console.warn("Unknown monster type in module:", entry.type);
@@ -654,12 +702,17 @@ function loadDungeonModule(name) {
     if (!template) continue;
     const isBoss = entry.boss;
     const stats = scaleMonsterStats(template, dungeonLevel);
-    const hp = Math.floor(stats.hp * (isBoss ? 1.5 : 1));
-    const thac0 = Math.max(1, stats.thac0 - (isBoss ? 1 : 0));
+    // Early bosses are tough but not swingy: their bonus scales with dungeon depth.
+    // On level 1 they use the same weakened damage as normal monsters so a tutorial
+    // boss cannot one-shot a healthy starter character.
+    const bossHpMult = isBoss ? (1.25 + (dungeonLevel - 1) * 0.5) : 1;
+    const bossThac0Bonus = isBoss ? Math.min(dungeonLevel - 1, 1) : 0;
+    const hp = entry.hp != null ? entry.hp : Math.floor(stats.hp * bossHpMult);
+    const thac0 = Math.max(1, stats.thac0 - bossThac0Bonus);
     const damage = isBoss
-      ? `1d${Math.min(12, parseInt(template.damage.slice(2)) + 2)}`
-      : template.damage;
-    const xp = Math.floor(stats.xp * (isBoss ? 2 : 1));
+      ? `1d${Math.min(12, parseInt(template.damage.slice(2)) + Math.max(0, dungeonLevel - 1))}`
+      : stats.damage;
+    const xp = entry.xp != null ? entry.xp : Math.floor(stats.xp * (isBoss ? 2 : 1));
     monsters.push({
       id: `${monsterId}-${pos.x}-${pos.y}-${dungeonLevel}`,
       name: entry.name || template.name,
@@ -669,20 +722,43 @@ function loadDungeonModule(name) {
       y: pos.y,
       hp: hp,
       maxHp: hp,
-      acDesc: template.ac_descending,
+      acDesc: stats.acDesc,
       thac0: thac0,
       damage: damage,
       xp: xp,
+      gold_gp: entry.gold_gp,
       morale: template.morale,
       ranged: template.ranged || null,
+      aiRole: isBoss ? "boss" : (template.ai_role || "brute"),
       alive: true,
       fled: false,
+      asleep: !(dungeonLevel > 1 && isBoss),
       moraleChecked: false,
       turned: 0,
     });
+    if (typeof recordMonsterSeen === "function") recordMonsterSeen(entry.name || template.name);
   }
 
+  // Environmental features (keep level 1 sparse and off critical paths).
+  const startRoom = roomById[mod.playerStart];
+  const exitRoomObj = roomById[mod.exitRoom];
+  const chestRooms = (mod.chests || []).map(id => roomById[id]).filter(Boolean);
+  const usedForFeatures = new Set([startRoom, exitRoomObj, ...chestRooms]);
+  const featureRooms = mod.rooms.filter(r => !usedForFeatures.has(r));
+  const maxBarrels = dungeonLevel === 1 ? 1 : 2 + rollDie(2);
+  const maxWaterPools = dungeonLevel === 1 ? 1 : 2;
+  placeBarrels(grid, featureRooms, startRoom, exitRoomObj, chestRooms[0] || null, maxBarrels);
+  placeWaterPools(grid, featureRooms, startRoom, exitRoomObj, chestRooms[0] || null, maxWaterPools);
+
   mapData = grid;
+  barrelData.clear();
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      if (mapData[y][x] === TILE.BARREL) {
+        barrelData.set(`${x},${y}`, { hp: 1, maxHp: 1 });
+      }
+    }
+  }
   computeVisibility();
   return true;
 }
@@ -696,7 +772,85 @@ function checkRoomEntry(x, y) {
   if (desc && typeof log === "function") {
     log(desc);
   }
+  if (roomId === "throne" && typeof log === "function") {
+    log("<b>Grik</b> wears a jet disc at his throat — the Black Sun amulet. He did not find it. He was sent to keep it.", "damage");
+  }
   if (typeof tutorialManager !== "undefined" && tutorialManager) {
     tutorialManager.onRoomEntered(roomId);
   }
+  triggerRoomEvent(roomId);
+}
+
+function triggerRoomEvent(roomId) {
+  if (roomEventsTriggered.has(roomId)) return;
+  const mod = currentModule;
+  if (!mod) return;
+  if (roomId === mod.playerStart || roomId === mod.exitRoom) return;
+  if (Math.random() > 0.15) return;
+  roomEventsTriggered.add(roomId);
+
+  const events = [
+    { weight: 3, fn: eventAbandonedCache },
+    { weight: 3, fn: eventOldShrine },
+    { weight: 2, fn: eventCorpseLoot },
+    { weight: 1, fn: eventHiddenNiche },
+    { weight: 1, fn: eventOminousSigil },
+  ];
+  const total = events.reduce((s, e) => s + e.weight, 0);
+  let roll = Math.random() * total;
+  for (const e of events) {
+    roll -= e.weight;
+    if (roll <= 0) {
+      e.fn();
+      return;
+    }
+  }
+}
+
+function eventAbandonedCache() {
+  const gold = Math.max(1, rollDie(20));
+  const gp = gold / 100;
+  if (playerCharacter) playerCharacter.remaining_gold += gp;
+  log(`An abandoned cache yields <b>${formatCoins(gold)}</b>.`, "hit");
+}
+
+function eventOldShrine() {
+  const healed = rollDie(6);
+  let total = 0;
+  for (const c of party) {
+    if (c.sheet && c.sheet.hit_points > 0 && c.sheet.hit_points < c.sheet.max_hit_points) {
+      const before = c.sheet.hit_points;
+      c.sheet.hit_points = Math.min(c.sheet.max_hit_points, c.sheet.hit_points + healed);
+      total += c.sheet.hit_points - before;
+    }
+  }
+  if (total > 0) {
+    log(`An old shrine glows. The party recovers <span class="hit">${total}</span> HP in total.`, "hit");
+  } else {
+    log("An old shrine glows, but the party is already whole.");
+  }
+}
+
+function eventCorpseLoot() {
+  const options = CONSUMABLE_TYPES.filter(id => !identifiedConsumables.has(id));
+  if (options.length) {
+    const target = options[Math.floor(Math.random() * options.length)];
+    identifyConsumable(target);
+    const item = osricOptions?.equipment?.find(e => e.id === target);
+    log(`A corpse clutches a scrap of parchment identifying <b>${item?.name || target}</b>.`, "hit");
+  } else {
+    log("A corpse lies here, already stripped of anything useful.");
+  }
+}
+
+function eventHiddenNiche() {
+  if (playerCharacter && playerCharacter.sheet) {
+    const amount = rollDie(4);
+    playerCharacter.sheet.xp += amount;
+    log(`A hidden niche holds a faded inscription worth <span class="hit">${amount}</span> XP.`, "hit");
+  }
+}
+
+function eventOminousSigil() {
+  log(`<span class="damage">An ominous sigil flares beneath your feet. Nothing happens... yet.</span>`, "damage");
 }

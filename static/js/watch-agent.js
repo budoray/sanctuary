@@ -34,9 +34,6 @@
     await sleep(400);
     if (typeof enterDungeon === "function") await enterDungeon();
     else click("enter-dungeon-btn");
-    await sleep(400);
-    var card = document.querySelector(".module-card[data-id='crooked_tower']");
-    if (card) card.click();
     await sleep(800);
     loop();
   }
@@ -54,6 +51,12 @@
   }
 
   function takeAction() {
+    var roll = document.getElementById("dice-roll-btn");
+    if (roll && !roll.disabled && !roll.classList.contains("hidden") && document.getElementById("dice-tray") && document.getElementById("dice-tray").classList.contains("open")) {
+      roll.click();
+      return true;
+    }
+    if (typeof isActing === "function" && isActing()) return false;
     if (typeof combatState === "undefined" || !combatState || combatState.phase !== "player") return false;
     if (typeof handleGridClick !== "function") return false;
     var px = playerPos.x, py = playerPos.y;
@@ -68,7 +71,9 @@
       var dx = dirs[i][0], dy = dirs[i][1];
       var x = px + dx, y = py + dy;
       if (y < 0 || y >= MAP_H || x < 0 || x >= MAP_W) continue;
-      if (mapData[y][x] === "D" && !doorsOpened.has(x + "," + y)) {
+      var closedDoor = mapData[y][x] === "D" && !doorsOpened.has(x + "," + y);
+      var lockedDoor = mapData[y][x] === "L" && !doorsOpened.has(x + "," + y);
+      if (closedDoor || lockedDoor) {
         handleGridClick(x, y);
         return true;
       }

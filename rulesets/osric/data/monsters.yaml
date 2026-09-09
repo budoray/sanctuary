@@ -11,6 +11,7 @@ monsters:
     damage: 1d4
     xp: 7
     morale: 6
+    ai_role: skirmisher
     ranged:
       damage: 1d4
       range: 40
@@ -24,6 +25,7 @@ monsters:
     damage: 1d3
     xp: 10
     morale: 5
+    ai_role: brute
   goblin:
     name: Goblin
     hd: 1
@@ -34,6 +36,7 @@ monsters:
     damage: 1d6
     xp: 15
     morale: 7
+    ai_role: skirmisher
     ranged:
       damage: 1d4
       range: 30
@@ -47,6 +50,7 @@ monsters:
     damage: 1d6
     xp: 25
     morale: 12
+    ai_role: brute
     ranged:
       damage: 1d6
       range: 50
@@ -60,6 +64,7 @@ monsters:
     damage: 1d8
     xp: 40
     morale: 8
+    ai_role: brute
     ranged:
       damage: 1d6
       range: 20
@@ -73,6 +78,7 @@ monsters:
     damage: 1d8
     xp: 50
     morale: 9
+    ai_role: brute
     ranged:
       damage: 1d6
       range: 30
@@ -86,6 +92,7 @@ monsters:
     damage: 1d8
     xp: 65
     morale: 12
+    ai_role: brute
   ghoul:
     name: Ghoul
     hd: 2
@@ -96,6 +103,7 @@ monsters:
     damage: 1d3
     xp: 75
     morale: 10
+    ai_role: skirmisher
   giant_spider:
     name: Giant Spider
     hd: 1
@@ -106,6 +114,7 @@ monsters:
     damage: 1d6
     xp: 25
     morale: 7
+    ai_role: skirmisher
   bandit:
     name: Bandit
     hd: 1
@@ -116,6 +125,35 @@ monsters:
     damage: 1d6
     xp: 15
     morale: 7
+    ai_role: archer
+    ranged:
+      damage: 1d4
+      range: 30
+  kobold_shaman:
+    name: Kobold Shaman
+    hd: 1
+    hp: 4
+    max_hp: 4
+    ac_descending: 8
+    thac0: 20
+    damage: 1d4
+    xp: 15
+    morale: 5
+    ai_role: healer
+    ranged:
+      damage: 1d4
+      range: 30
+  goblin_shaman:
+    name: Goblin Shaman
+    hd: 1
+    hp: 6
+    max_hp: 6
+    ac_descending: 7
+    thac0: 20
+    damage: 1d4
+    xp: 20
+    morale: 6
+    ai_role: healer
     ranged:
       damage: 1d4
       range: 30
@@ -123,28 +161,36 @@ monsters:
 encounter_tables:
   1:
     - id: kobold
-      weight: 25
+      weight: 35
     - id: goblin
-      weight: 30
-    - id: skeleton
+      weight: 40
+    - id: giant_rat
       weight: 25
-    - id: orc
-      weight: 20
+  # Skeletons and orcs are too durable and hard-hitting for the level 1
+  # tutorial band; they appear from dungeon level 2 onward.
   2:
     - id: orc
-      weight: 30
+      weight: 25
     - id: hobgoblin
-      weight: 25
+      weight: 20
     - id: zombie
-      weight: 25
+      weight: 20
     - id: ghoul
       weight: 20
+    - id: kobold_shaman
+      weight: 10
+    - id: goblin_shaman
+      weight: 5
   3:
     - id: hobgoblin
-      weight: 30
+      weight: 25
     - id: ghoul
       weight: 25
     - id: zombie
-      weight: 25
-    - id: giant_rat
       weight: 20
+    - id: kobold_shaman
+      weight: 15
+    - id: goblin_shaman
+      weight: 10
+    - id: giant_rat
+      weight: 5

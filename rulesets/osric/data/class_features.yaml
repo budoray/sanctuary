@@ -7,6 +7,8 @@ starting_packages:
       - chain_mail
       - shield_medium
       - sword_long
+      - potion_of_healing
+      - potion_of_healing
       - backpack
       - rope_hemp
       - torches
@@ -18,8 +20,11 @@ starting_packages:
     items:
       - leather
       - shield_medium
-      - mace_light
+      - morning_star
+      - sling
+      - sling_bullet
       - holy_symbol_wooden
+      - potion_of_healing
       - backpack
       - torches
       - rations_standard
@@ -41,6 +46,9 @@ starting_packages:
     items:
       - dagger
       - staff
+      - sling
+      - sling_bullet
+      - potion_of_healing
       - backpack
       - torches
       - rations_standard
@@ -52,6 +60,9 @@ starting_packages:
     items:
       - dagger
       - staff
+      - sling
+      - sling_bullet
+      - potion_of_healing
       - backpack
       - torches
       - rations_standard
@@ -63,7 +74,11 @@ starting_packages:
     items:
       - leather
       - sword_short
+      - bow_short
+      - arrows
       - thieves_tools
+      - potion_of_healing
+      - potion_of_healing
       - backpack
       - rope_hemp
       - torches

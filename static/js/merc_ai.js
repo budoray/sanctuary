@@ -1,8 +1,8 @@
 /** Mercenary AI: auto-pilot hirelings during combat and exploration. */
 
 const AUTO_MERC_KEY = "sanctuary_auto_mercs";
-const MERC_AI_DELAY = 600;
-const MERC_STEP_DELAY = 350;
+const MERC_AI_DELAY = 300;
+const MERC_STEP_DELAY = 150;
 
 let autoMercs = loadAutoMercSetting();
 
@@ -34,7 +34,10 @@ function mercLog(character, msg) {
 }
 
 function mercPotionEntry(character) {
-  return character.sheet.inventory.items.find(i => i.item_id === "potion_of_healing" && (i.quantity || 1) > 0);
+  return character.sheet.inventory.items.find(i => {
+    const item = osricOptions.equipment.find(e => e.id === i.item_id);
+    return item?.use_action === "heal" && (i.quantity || 1) > 0;
+  });
 }
 
 function mercHasPotion(character) {
@@ -126,6 +129,26 @@ function mercBestAttackSpell(character) {
   return null;
 }
 
+function mercBestBuffSpell(character) {
+  const spells = (osricOptions.spells && osricOptions.spells[character.class]) || [];
+  const slots = character.sheet.spell_slots || {};
+  const active = new Set((character.sheet.active_spells || []).map(s => s.spell_id));
+  for (const spell of spells) {
+    const remaining = slots[spell.level] || slots[String(spell.level)] || 0;
+    if (remaining <= 0) continue;
+    if (!spell.buff) continue;
+    if (active.has(spell.id)) continue;
+    return spell;
+  }
+  return null;
+}
+
+function mercBestSleepSpell(character) {
+  const spells = (osricOptions.spells && osricOptions.spells[character.class]) || [];
+  const slots = character.sheet.spell_slots || {};
+  return spells.find(s => s.id === "sleep" && (slots[s.level] || slots[String(s.level)] || 0) > 0) || null;
+}
+
 function mercHasHealingSpell(character) {
   const spells = (osricOptions.spells && osricOptions.spells[character.class]) || [];
   const slots = character.sheet.spell_slots || {};
@@ -175,10 +198,28 @@ async function mercCastHealingSpell(character, ally) {
   const prevCharacter = playerCharacter;
   playerCharacter = character;
   try {
-    const res = await api("/api/osric/spell", {
-      method: "POST",
-      body: JSON.stringify({ caster: character, spell_id: spell.id, target: null }),
+    const throwDice = window.SanctuaryDice
+      ? (opts) => SanctuaryDice.present(opts)
+      : (opts) => opts.resolve();
+    const packed = await throwDice({
+      roller: "ai",
+      name: character.name,
+      label: spell.name,
+      dice: [{ sides: (window.SanctuaryDice && SanctuaryDice.parseSides(spell.heal)) || 8 }],
+      resolve: async () => {
+        const out = await api("/api/osric/spell", {
+          method: "POST",
+          body: JSON.stringify({ caster: character, spell_id: spell.id, target: null }),
+        });
+        const healedAmt = out.result?.heal || 0;
+        out.dice = [{ sides: SanctuaryDice ? SanctuaryDice.parseSides(out.result?.heal_die || spell.heal || "1d8") : 8, value: healedAmt }];
+        out.anatomy = `${spell.name}: ${out.result?.heal_die || "1d8"} -> ${healedAmt}`;
+        out.hit = healedAmt > 0;
+        return out;
+      },
     });
+    if (window.SanctuaryDice) SanctuaryDice.hideSoon();
+    const res = packed;
     const healed = res.result.heal || 0;
     const s = ally.sheet;
     const before = s.hit_points;
@@ -383,6 +424,13 @@ async function runMercenaryTurn(character, index) {
       endTurn();
       return;
     }
+    const buff = mercBestBuffSpell(character);
+    if (buff && nearest) {
+      mercLog(character, `casts <b>${buff.name}</b>.`);
+      await mercCastSpell(character, buff, null);
+      endTurn();
+      return;
+    }
     const woundedAlly = mercWoundedAllyForHealing(character);
     if (woundedAlly && mercHasHealingSpell(character)) {
       const healed = await mercCastHealingSpell(character, woundedAlly);
@@ -427,6 +475,24 @@ async function runMercenaryTurn(character, index) {
         endTurn();
         return;
       }
+    }
+
+    const buff = mercBestBuffSpell(character);
+    if (buff && nearest) {
+      mercLog(character, `casts <b>${buff.name}</b>.`);
+      await mercCastSpell(character, buff, null);
+      endTurn();
+      return;
+    }
+
+    const visible = monsters.filter(m => m.alive && !m.fled && computeVisibility().has(`${m.x},${m.y}`));
+    const sleepSpell = mercBestSleepSpell(character);
+    if (sleepSpell && visible.length >= 2) {
+      const target = visible.slice().sort((a, b) => a.hp - b.hp)[0];
+      mercLog(character, `casts <b>Sleep</b> on <b>${target.name}</b>.`);
+      await mercCastSpell(character, sleepSpell, target);
+      endTurn();
+      return;
     }
 
     const spell = mercBestAttackSpell(character);

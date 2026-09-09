@@ -2,10 +2,14 @@ magic_user:
   - magic_missile
   - burning_hands
   - shield
+  - sleep
+  - charm_person
 
 illusionist:
   - magic_missile
   - shield
+  - sleep
+  - charm_person
 
 cleric:
   - cure_light_wounds

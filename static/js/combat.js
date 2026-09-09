@@ -2,6 +2,97 @@
 
 let combatState = null;
 let pendingSpell = null;
+let isAutoExploring = false;
+let attackFocus = false;
+let actionBusyFrom = 0;
+let actionBusyUntil = 0;
+let actionTickRaf = 0;
+
+function actionDuration() {
+  return 3000 + Math.floor(Math.random() * 2001);
+}
+
+function isActing() {
+  if (Date.now() < actionBusyUntil) return true;
+  const tray = document.getElementById("dice-tray");
+  return !!(tray && tray.classList.contains("open"));
+}
+
+function beginActing(ms) {
+  const dur = ms || actionDuration();
+  const now = Date.now();
+  actionBusyFrom = now;
+  actionBusyUntil = Math.max(actionBusyUntil, now + dur);
+  document.body.classList.add("acting");
+  tickActingBar();
+  if (typeof updateCombatUI === "function" && combatState) updateCombatUI();
+}
+
+function tickActingBar() {
+  const bar = document.getElementById("action-cooldown");
+  const fill = document.getElementById("action-cooldown-fill");
+  const left = actionBusyUntil - Date.now();
+  const busy = left > 0 || isActing();
+  if (bar) bar.classList.toggle("visible", busy);
+  if (fill) {
+    const total = Math.max(1, actionBusyUntil - actionBusyFrom);
+    const pct = left > 0 ? Math.max(0, Math.min(100, (left / total) * 100)) : 0;
+    fill.style.width = pct + "%";
+  }
+  document.body.classList.toggle("acting", busy);
+  if (busy) {
+    actionTickRaf = requestAnimationFrame(tickActingBar);
+  } else {
+    actionTickRaf = 0;
+    if (typeof updateCombatUI === "function" && combatState) updateCombatUI();
+  }
+}
+
+function waitWhileActing() {
+  return new Promise((resolve) => {
+    const tick = () => {
+      if (!isActing()) resolve();
+      else setTimeout(tick, 40);
+    };
+    tick();
+  });
+}
+
+function throwDice(opts) {
+  return window.SanctuaryDice ? SanctuaryDice.present(opts) : opts.resolve();
+}
+
+function monsterInAttackReach(m) {
+  if (!m || !m.alive || !playerCharacter) return false;
+  const d = distance(playerPos, m);
+  if (d === 1 && typeof findEquippedMeleeWeapon === "function" && findEquippedMeleeWeapon()) return true;
+  const bow = typeof findEquippedRangedWeapon === "function" ? findEquippedRangedWeapon() : null;
+  if (bow && d > 0 && d <= Math.floor(bow.range / 10) && hasRangedLineOfSight(playerPos, m)) return true;
+  return false;
+}
+
+function declareAttack() {
+  if (typeof isActing === "function" && isActing()) return;
+  if (!combatState || combatState.phase !== "player") {
+    log("Wait for your throw.");
+    return;
+  }
+  if (combatState.attacked) {
+    log("You have already attacked this round.");
+    return;
+  }
+  attackFocus = true;
+  const card = document.getElementById("thac0-card");
+  if (card) card.classList.add("ready");
+  log(`${playerCharacter.name} readies an attack. Click a foe in reach.`);
+  if (typeof requestDraw === "function") requestDraw();
+}
+
+function clearAttackFocus() {
+  attackFocus = false;
+  const card = document.getElementById("thac0-card");
+  if (card) card.classList.remove("ready");
+}
 
 function setPlayerActed(attacked = false) {
   if (!combatState) return;
@@ -71,42 +162,204 @@ function healPlayer(amount) {
   return healed;
 }
 
+function healingPotionEntry(requireIdentified = true) {
+  return playerCharacter.sheet.inventory.items.find(i => {
+    const item = osricOptions.equipment.find(e => e.id === i.item_id);
+    if (item?.use_action !== "heal" || (i.quantity || 1) <= 0) return false;
+    return !requireIdentified || identifiedConsumables.has(i.item_id);
+  });
+}
+
 function potionEntry() {
-  return playerCharacter.sheet.inventory.items.find(i => i.item_id === "potion_of_healing" && (i.quantity || 1) > 0);
+  return healingPotionEntry(true);
+}
+
+function anyPotionEntry() {
+  return playerCharacter.sheet.inventory.items.find(i => {
+    const item = osricOptions.equipment.find(e => e.id === i.item_id);
+    return (item?.use_action === "heal" || item?.use_action === "poison") && (i.quantity || 1) > 0;
+  });
 }
 
 function hasPotion() {
   return !!potionEntry();
 }
 
-async function usePotion() {
-  const entry = potionEntry();
-  if (!entry) {
-    log("No potion of healing available.");
-    return 0;
-  }
-  const item = osricOptions.equipment.find(e => e.id === "potion_of_healing");
-  const amount = rollDamageExpression(item?.heal || "1d8");
-  const healed = healPlayer(amount);
+function hasKey() {
+  return playerCharacter.sheet.inventory.items.some(i => i.item_id === "iron_key" && (i.quantity || 1) > 0);
+}
+
+function consumeKey() {
+  const entry = playerCharacter.sheet.inventory.items.find(i => i.item_id === "iron_key" && (i.quantity || 1) > 0);
+  if (!entry) return false;
   entry.quantity = (entry.quantity || 1) - 1;
   if (entry.quantity <= 0) {
     const idx = playerCharacter.sheet.inventory.items.indexOf(entry);
     if (idx >= 0) playerCharacter.sheet.inventory.items.splice(idx, 1);
   }
-  log(`${playerCharacter.name} quaffs a <b>potion of healing</b>.`);
+  renderCharacterPanel();
+  return true;
+}
+
+async function usePotion() {
+  const entry = potionEntry();
+  if (!entry) {
+    log("No identified healing potion available.");
+    return 0;
+  }
+  const item = osricOptions.equipment.find(e => e.id === entry.item_id);
+  const amount = rollDamageExpression(item?.heal || "1d8");
+  const healed = healPlayer(amount);
+  if (window.SanctuaryAudio) window.SanctuaryAudio.play("heal");
+  entry.quantity = (entry.quantity || 1) - 1;
+  if (entry.quantity <= 0) {
+    const idx = playerCharacter.sheet.inventory.items.indexOf(entry);
+    if (idx >= 0) playerCharacter.sheet.inventory.items.splice(idx, 1);
+  }
+  log(`${playerCharacter.name} quaffs a <b>${potionDisplayName(entry.item_id)}</b>.`);
   renderCharacterPanel();
   renderConsumablesButton();
   saveGame();
   return healed;
 }
 
+async function drinkPotionById(itemId) {
+  const entry = playerCharacter.sheet.inventory.items.find(i => i.item_id === itemId && (i.quantity || 1) > 0);
+  if (!entry) return 0;
+  const item = osricOptions.equipment.find(e => e.id === itemId);
+  const wasIdentified = identifiedConsumables.has(itemId);
+  identifyConsumable(itemId);
+  entry.quantity = (entry.quantity || 1) - 1;
+  if (entry.quantity <= 0) {
+    const idx = playerCharacter.sheet.inventory.items.indexOf(entry);
+    if (idx >= 0) playerCharacter.sheet.inventory.items.splice(idx, 1);
+  }
+  if (item?.use_action === "heal") {
+    const amount = rollDamageExpression(item.heal || "1d8");
+    const healed = healPlayer(amount);
+    if (window.SanctuaryAudio) window.SanctuaryAudio.play("heal");
+    log(`${playerCharacter.name} quaffs a <b>${potionDisplayName(itemId)}</b>. It is ${item.name}! Healed <span class="hit">${healed}</span> HP.`);
+  } else if (item?.use_action === "poison") {
+    const amount = rollDamageExpression(item.poison || "1d6");
+    playerCharacter.sheet.hit_points -= amount;
+    showFloatingText(playerPos.x, playerPos.y, `-${amount}`, 0xff6b6b);
+    log(`${playerCharacter.name} quaffs a <b>${potionDisplayName(itemId)}</b>. It is ${item.name}! Takes <span class="damage">${amount}</span> damage.`);
+    if (!playerAlive() && !anyPartyAlive()) {
+      showEnd(false, "Your party has fallen.");
+      return -amount;
+    }
+    if (!playerConscious()) {
+      handlePlayerDown("Your hero is unconscious and overcome.");
+      return -amount;
+    }
+  } else {
+    log(`${playerCharacter.name} quaffs a <b>${potionDisplayName(itemId)}</b>. Nothing happens.`);
+  }
+  if (!wasIdentified) {
+    log(`You now recognize ${consumableIdentities[itemId] || "this"} as <b>${item?.name || itemId}</b>.`, "hit");
+  }
+  renderCharacterPanel();
+  renderConsumablesButton();
+  saveGame();
+  return 0;
+}
+
+async function useScroll(itemId) {
+  const entry = playerCharacter.sheet.inventory.items.find(i => i.item_id === itemId && (i.quantity || 1) > 0);
+  if (!entry) return;
+  const item = osricOptions.equipment.find(e => e.id === itemId);
+  const wasIdentified = identifiedConsumables.has(itemId);
+  identifyConsumable(itemId);
+  entry.quantity = (entry.quantity || 1) - 1;
+  if (entry.quantity <= 0) {
+    const idx = playerCharacter.sheet.inventory.items.indexOf(entry);
+    if (idx >= 0) playerCharacter.sheet.inventory.items.splice(idx, 1);
+  }
+  const effect = item?.scroll;
+  if (effect === "identify") {
+    const unknown = CONSUMABLE_TYPES.filter(id => !identifiedConsumables.has(id));
+    if (unknown.length) {
+      const target = unknown[Math.floor(Math.random() * unknown.length)];
+      identifyConsumable(target);
+      const targetItem = osricOptions.equipment.find(e => e.id === target);
+      log(`${playerCharacter.name} reads a <b>${consumableDisplayName(itemId)}</b>. It is a Scroll of Identify! You now recognize <b>${targetItem?.name || target}</b>.`, "hit");
+    } else {
+      log(`${playerCharacter.name} reads a <b>${consumableDisplayName(itemId)}</b>. It is a Scroll of Identify, but nothing remains unknown.`, "hit");
+    }
+  } else if (effect === "mapping") {
+    for (let y = 0; y < MAP_H; y++) {
+      for (let x = 0; x < MAP_W; x++) {
+        explored.add(`${x},${y}`);
+      }
+    }
+    renderFog();
+    log(`${playerCharacter.name} reads a <b>${consumableDisplayName(itemId)}</b>. It is a Scroll of Mapping! The dungeon layout is revealed.`, "hit");
+  } else if (effect === "teleport") {
+    const tiles = [];
+    for (let y = 0; y < MAP_H; y++) {
+      for (let x = 0; x < MAP_W; x++) {
+        if (isWalkable(x, y) && !(x === playerPos.x && y === playerPos.y)) tiles.push({ x, y });
+      }
+    }
+    if (tiles.length) {
+      const dest = tiles[Math.floor(Math.random() * tiles.length)];
+      movePlayer(dest.x, dest.y);
+      log(`${playerCharacter.name} reads a <b>${consumableDisplayName(itemId)}</b>. It is a Scroll of Teleport! Reality lurches.`, "hit");
+    }
+  } else {
+    log(`${playerCharacter.name} reads a <b>${consumableDisplayName(itemId)}</b>. Nothing happens.`);
+  }
+  if (!wasIdentified) {
+    log(`You now recognize ${consumableIdentities[itemId] || "this"} as <b>${item?.name || itemId}</b>.`, "hit");
+  }
+  renderCharacterPanel();
+  renderConsumablesButton();
+  saveGame();
+}
+
+function restBlockedByEnemy() {
+  return monsters.some((m) => m.alive && !m.fled && distance(m, playerPos) === 1);
+}
+
+function notePlayerWounded() {
+  if (typeof tutorialManager !== "undefined" && tutorialManager && tutorialManager.onWounded) {
+    tutorialManager.onWounded();
+  }
+}
+
+function showDelveBanner(title, text) {
+  let el = document.getElementById("delve-banner");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "delve-banner";
+    el.className = "delve-banner";
+    const strong = document.createElement("strong");
+    const span = document.createElement("span");
+    el.appendChild(strong);
+    el.appendChild(span);
+    const frame = document.querySelector(".map-frame");
+    (frame || document.body).appendChild(el);
+  }
+  const strong = el.querySelector("strong");
+  const span = el.querySelector("span");
+  if (strong) strong.textContent = title;
+  if (span) span.textContent = text;
+  el.classList.add("visible");
+  clearTimeout(showDelveBanner._t);
+  showDelveBanner._t = setTimeout(() => el.classList.remove("visible"), 7000);
+}
+
 function canRest() {
   const cfg = combatConfig().rest;
   if (!combatState) return false;
-  if (cfg?.require_safe_area && !isCombatSafe()) return false;
+  if (cfg?.require_safe_area && !isCombatSafe()) {
+    // On level 1, rest is allowed as long as no enemy is adjacent, so a new
+    // player can recover between fights without the dungeon feeling unfair.
+    if (dungeonLevel !== 1) return false;
+    if (restBlockedByEnemy()) return false;
+  }
   if (!playerAlive()) return false;
   if (isStuck(playerCharacter)) return false;
-  // Unconscious characters can only rest if the area is safe (companions bind wounds).
   if (!playerConscious() && (!cfg?.require_safe_area || !isCombatSafe())) return false;
   return combatState.phase === "player";
 }
@@ -116,11 +369,14 @@ async function playerRest() {
     log("It is not safe to rest here.");
     return;
   }
+  if (isActing()) return;
+  beginActing();
   const wanderCfg = combatConfig().wandering_monsters;
-  if (wanderCfg?.enabled && wanderCfg?.check_on_rest) {
-    const chance = wanderCfg.chance_in_6 ?? 1;
-    if (rollDie(6) <= chance) {
-      const spawned = spawnWanderingMonster(wanderCfg.count_per_encounter);
+  // Wandering monsters do not interrupt rest on level 1 so the tutorial band
+  // remains forgiving while new players learn the rest/heal loop.
+  if (wanderCfg?.enabled && wanderCfg?.check_on_rest && dungeonLevel !== 1) {
+    if (wanderingMonsterCheck(wanderCfg)) {
+      const spawned = spawnWanderingMonster(wanderingMonsterCount(wanderCfg));
       if (spawned) {
         log(`<span class="damage">Wandering monsters find the party while resting!</span>`, "damage");
         updateCombatUI();
@@ -142,6 +398,7 @@ async function playerRest() {
 
   const amount = perLevel * level;
   const healed = healPlayer(amount);
+  if (window.SanctuaryAudio) window.SanctuaryAudio.play("rest");
 
   if (cfg?.consumes_action) {
     setPlayerActed(true);
@@ -230,16 +487,19 @@ function renderRestButton() {
   const bar = document.getElementById("rest-bar");
   if (!bar) return;
   bar.innerHTML = "";
-  if (!combatState) return;
-  if (!canRest()) return;
+  if (!combatState || !playerAlive()) return;
   const cfg = combatConfig().rest;
   const amount = (cfg?.short_rest_heal_per_level ?? 1) * (playerCharacter.sheet.level || 1);
+  const adjacent = restBlockedByEnemy();
+  const allowed = canRest() && !isActing();
   const btn = document.createElement("button");
   btn.id = "rest-btn";
   btn.className = "btn btn-secondary";
-  btn.textContent = playerConscious() ? `Rest (+${amount})` : "Bind Wounds";
-  btn.title = playerConscious() ? "Take a short rest to recover HP." : "Rest until you can stand.";
-  btn.disabled = combatState.phase !== "player";
+  btn.textContent = adjacent ? "Rest (not safe)" : (playerConscious() ? `Rest (+${amount})` : "Bind Wounds");
+  btn.title = adjacent
+    ? "Not safe — enemy adjacent"
+    : (playerConscious() ? "Take a short rest to recover HP." : "Rest until you can stand.");
+  btn.disabled = !allowed;
   btn.addEventListener("click", playerRest);
   bar.appendChild(btn);
 }
@@ -285,6 +545,7 @@ function renderSpellBar() {
   for (const spell of spells) {
     const remaining = slots[spell.level] || slots[String(spell.level)] || 0;
     const btn = document.createElement("button");
+    btn.id = `spell-btn-${spell.id}`;
     btn.className = "btn btn-secondary";
     btn.textContent = `${spell.name} (${remaining})`;
     btn.disabled = remaining <= 0;
@@ -697,22 +958,30 @@ async function startRound() {
   updateCombatUI();
   if (combatState.phase === "player" && !playerConscious()) {
     await doDeathSave();
-    return;
+    if (!anyPartyAlive()) return;
+    if (!playerConscious()) {
+      // Unconscious hero cannot act this round; pass to the enemy phase.
+      combatState.phase = "enemy";
+      updateCombatUI();
+      setTimeout(enemyTurn, 800);
+      return;
+    }
   }
   if (combatState.phase === "player") {
     highlightReachable(playerPos, combatState.movementRemaining);
     highlightRangedTargets();
     maybeAutoMercTurn();
   } else {
-    setTimeout(enemyTurn, 600);
+    setTimeout(enemyTurn, 800);
   }
 }
 
 function updateCombatUI() {
   const name = playerCharacter ? playerCharacter.name : "Party";
+  const feet = (combatState.movementRemaining || 0) * 10;
   let turnText = combatState.phase === "player"
-    ? `Round ${combatState.round} — ${name}'s turn · Move ${combatState.movementRemaining} tiles`
-    : `Round ${combatState.round} — Enemy turn`;
+    ? `Round ${combatState.round} — ${name} · ${feet} ft left`
+    : `Round ${combatState.round} — Enemy throw`;
   const turned = monsters.filter(m => m.alive && m.turned > 0);
   if (turned.length) {
     turnText += ` · ${turned.length} turned`;
@@ -721,7 +990,30 @@ function updateCombatUI() {
   turnBadge.textContent = turnText;
   turnBadge.classList.toggle("player-turn", combatState.phase === "player");
   turnBadge.classList.toggle("enemy-turn", combatState.phase !== "player");
-  document.getElementById("end-turn-btn").disabled = combatState.phase !== "player" || !playerConscious();
+  const strip = document.getElementById("initiative-strip");
+  if (strip) {
+    const you = playerCharacter ? playerCharacter.name : "You";
+    const names = [];
+    const seen = new Set();
+    const add = (n) => { if (n && !seen.has(n)) { seen.add(n); names.push(n); } };
+    add(you);
+    for (const m of monsters) {
+      if (!m.alive) continue;
+      if (typeof isVisibleToPlayer === "function" && !isVisibleToPlayer(m.x, m.y)) continue;
+      add(m.name);
+    }
+    const up = combatState.phase === "player" ? you : (names[1] || "Enemy");
+    strip.innerHTML = names.map((n) => `<span class="init-name${n === up ? " current" : ""}">${n}</span>`).join("");
+  }
+  document.getElementById("end-turn-btn").disabled = combatState.phase !== "player" || !playerConscious() || isActing();
+
+  const aliveEnemies = monsters.filter(m => m.alive && !m.fled).length;
+  const exitOpen = aliveEnemies === 0;
+  const objectiveBadge = document.getElementById("objective-badge");
+  if (objectiveBadge) {
+    objectiveBadge.textContent = exitOpen ? "Exit open" : `${aliveEnemies} enemy${aliveEnemies === 1 ? "" : "ies"} remain`;
+    objectiveBadge.classList.toggle("exit-open", exitOpen);
+  }
 
   const actionHint = document.getElementById("action-hint");
   if (actionHint) {
@@ -758,6 +1050,111 @@ function updateCombatUI() {
   renderSearchSecretDoorsButton();
   renderClimbOutButton();
   renderCombatAutoMercToggle();
+  renderAutoExploreButton();
+}
+
+function renderAutoExploreButton() {
+  const btn = document.getElementById("auto-explore-btn");
+  if (!btn) return;
+  const enabled = combatState && combatState.phase === "player" && playerConscious() && !isAutoExploring && combatState.movementRemaining > 0 && !isActing();
+  btn.disabled = !enabled;
+  btn.textContent = isAutoExploring ? "Exploring…" : "Auto-Explore";
+}
+
+function stopAutoExplore() {
+  isAutoExploring = false;
+}
+
+function computeAutoExploreStep() {
+  // Find the nearest unexplored tile that is walkable, then return the first
+  // step on a safe path toward it. Favor tiles adjacent to explored cells so
+  // the frontier expands naturally.
+  const frontier = [];
+  for (const key of explored) {
+    const [x, y] = key.split(",").map(Number);
+    for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const nx = x + dx, ny = y + dy;
+      if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
+      if (explored.has(`${nx},${ny}`)) continue;
+      if (!isWalkable(nx, ny)) continue;
+      if (monsterAt(nx, ny)) continue;
+      frontier.push({ x: nx, y: ny });
+    }
+  }
+  if (!frontier.length) return null;
+
+  // Pick the closest frontier tile; tie-break toward the exit if visible.
+  let target = null;
+  let bestDist = Infinity;
+  for (const t of frontier) {
+    const d = distance(playerPos, t);
+    if (d < bestDist) {
+      bestDist = d;
+      target = t;
+    }
+  }
+  if (!target) return null;
+
+  // BFS for a path; closed doors are considered passable because the player
+  // will open them when adjacent.
+  const queue = [{ x: playerPos.x, y: playerPos.y, path: [] }];
+  const seen = new Set([`${playerPos.x},${playerPos.y}`]);
+  let head = 0;
+  while (head < queue.length) {
+    const cur = queue[head++];
+    if (cur.x === target.x && cur.y === target.y) {
+      return cur.path[0] || null;
+    }
+    for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const nx = cur.x + dx, ny = cur.y + dy;
+      const key = `${nx},${ny}`;
+      if (seen.has(key)) continue;
+      if (nx < 0 || ny < 0 || nx >= MAP_W || ny >= MAP_H) continue;
+      const t = mapData[ny][nx];
+      if (t === TILE.WALL || t === TILE.SECRET_DOOR) continue;
+      // Barrels can be pushed/destroyed when reached.
+      if (t === TILE.BARREL && !barrelData.has(`${nx},${ny}`)) continue;
+      if (monsterAt(nx, ny)) continue;
+      seen.add(key);
+      queue.push({ x: nx, y: ny, path: [...cur.path, { x: nx, y: ny }] });
+    }
+  }
+  return null;
+}
+
+async function autoExplore() {
+  if (!combatState || combatState.phase !== "player" || !playerConscious()) return;
+  if (isAutoExploring || isActing()) return;
+  isAutoExploring = true;
+  updateCombatUI();
+
+  while (isAutoExploring && combatState && combatState.phase === "player" && playerConscious() && combatState.movementRemaining > 0 && !combatState.attacked) {
+    // Stop if any monster is currently visible to the player.
+    const visibleMonster = monsters.find(m => m.alive && isVisibleToPlayer(m.x, m.y));
+    if (visibleMonster) {
+      log(`Auto-explore stopped: ${visibleMonster.name} spotted.`);
+      break;
+    }
+
+    const step = computeAutoExploreStep();
+    if (!step) {
+      log("Auto-explore stopped: nowhere left to explore.");
+      break;
+    }
+
+    const oldPos = { ...playerPos };
+    await handleGridClick(step.x, step.y);
+    await waitWhileActing();
+
+    // If the click did not result in movement (blocked, trap stuck, etc.), stop.
+    if (playerPos.x === oldPos.x && playerPos.y === oldPos.y) {
+      log("Auto-explore stopped: path blocked.");
+      break;
+    }
+  }
+
+  isAutoExploring = false;
+  updateCombatUI();
 }
 
 function findEquippedMeleeWeapon() {
@@ -772,12 +1169,22 @@ function findEquippedMeleeWeapon() {
 
 function findEquippedRangedWeapon() {
   const inv = playerCharacter.sheet.inventory.items;
+  let best = null;
   for (const entry of inv) {
     if (!entry.equipped) continue;
     const item = osricOptions.equipment.find(i => i.id === entry.item_id);
-    if (item && item.category === "weapons" && item.missile) return item;
+    if (!item || item.category !== "weapons" || !item.missile) continue;
+    // Prefer dedicated missile weapons (bows, slings) over thrown melee weapons
+    // like daggers or spears, and prefer longer range among missile weapons.
+    if (!best) {
+      best = item;
+    } else if (item.subcategory === "missile" && best.subcategory !== "missile") {
+      best = item;
+    } else if (item.subcategory === best.subcategory && (item.range || 0) > (best.range || 0)) {
+      best = item;
+    }
   }
-  return null;
+  return best;
 }
 
 function ammoForWeapon(weapon) {
@@ -854,6 +1261,7 @@ function highlightRangedTargets() {
 
 async function handleGridClick(gx, gy) {
   if (!combatState || combatState.phase !== "player") return;
+  if (isActing()) return;
   if (!playerConscious()) {
     log("You are unconscious and cannot act.");
     return;
@@ -864,10 +1272,27 @@ async function handleGridClick(gx, gy) {
   }
 
   // Open adjacent closed doors.
-  if (mapData[gy] && mapData[gy][gx] === TILE.DOOR && !doorsOpened.has(`${gx},${gy}`)) {
+  const isClosedDoor = mapData[gy] && mapData[gy][gx] === TILE.DOOR && !doorsOpened.has(`${gx},${gy}`);
+  const isLockedDoor = mapData[gy] && mapData[gy][gx] === TILE.LOCKED_DOOR && !doorsOpened.has(`${gx},${gy}`);
+  if (isClosedDoor || isLockedDoor) {
     if (distance(playerPos, { x: gx, y: gy }) === 1) {
+      if (isLockedDoor) {
+        if (!hasKey()) {
+          const shrineLock = currentModule && (currentModule.locked_doors || []).includes("shrine");
+          log(shrineLock
+            ? "<b>The shrine is barred.</b> The iron key is in the storeroom chest."
+            : "<b>The door is locked.</b> You need an iron key.");
+          return;
+        }
+        consumeKey();
+        log(`${playerCharacter.name} unlocks the shrine with the iron key.`);
+      } else {
+        log(`${playerCharacter.name} opens a door.`);
+      }
       doorsOpened.add(`${gx},${gy}`);
-      log(`${playerCharacter.name} opens a door.`);
+      if (window.SanctuaryAudio) window.SanctuaryAudio.play("door_open");
+      wakeNearbyMonsters(playerPos.x, playerPos.y, 2, "wake from the noise");
+      beginActing();
       drawMap();
       renderFog();
       highlightReachable(playerPos, combatState.movementRemaining);
@@ -877,6 +1302,42 @@ async function handleGridClick(gx, gy) {
   }
 
   const targetMonster = monsterAt(gx, gy);
+
+  if (attackFocus && !targetMonster) {
+    log("Attack cancelled.");
+    clearAttackFocus();
+    if (typeof requestDraw === "function") requestDraw();
+    return;
+  }
+
+  // Adjacent barrel: push if there is room, otherwise smash it.
+  const isBarrel = mapData[gy] && mapData[gy][gx] === TILE.BARREL && barrelData.has(`${gx},${gy}`);
+  if (isBarrel && distance(playerPos, { x: gx, y: gy }) === 1) {
+    const dx = gx - playerPos.x;
+    const dy = gy - playerPos.y;
+    const pushed = pushBarrel(gx, gy, dx, dy);
+    if (pushed) {
+      beginActing();
+      const cost = movementCost(gx, gy);
+      combatState.movementRemaining -= cost;
+      setPlayerActed(false);
+      updateCombatUI();
+      highlightReachable(playerPos, combatState.movementRemaining);
+      saveGame();
+      return;
+    }
+    if (combatState.attacked) {
+      log("You have already attacked this round.");
+      return;
+    }
+    log(`${playerCharacter.name} smashes the barrel!`);
+    beginActing();
+    destroyBarrel(gx, gy);
+    setPlayerActed(true);
+    updateCombatUI();
+    saveGame();
+    return;
+  }
 
   // Trap search / remove target selection.
   if (pendingTrapSearch) {
@@ -898,6 +1359,7 @@ async function handleGridClick(gx, gy) {
 
   // Spell casting target selection.
   if (pendingSpell && targetMonster) {
+    beginActing();
     await playerCastSpell(pendingSpell, targetMonster);
     pendingSpell = null;
     setPlayerActed(true); // spells count as the round's attack action
@@ -918,7 +1380,9 @@ async function handleGridClick(gx, gy) {
       return;
     }
     const backstab = isThief() && playerStealthed;
+    beginActing();
     await playerAttackMonster(targetMonster, false, 0, backstab);
+    clearAttackFocus();
     setPlayerActed(true);
     clearStealth();
     updateCombatUI();
@@ -939,11 +1403,17 @@ async function handleGridClick(gx, gy) {
     const d = distance(playerPos, { x: gx, y: gy });
     const maxTiles = Math.floor(findEquippedRangedWeapon().range / 10);
     if (d <= maxTiles) {
+      if (!hasRangedLineOfSight(playerPos, { x: gx, y: gy })) {
+        log("<span class='damage'>No clear shot.</span> A wall or barrel blocks your line of fire.");
+        return;
+      }
       if (!consumeAmmo()) {
         log("<span class='damage'>No ammo left for this weapon.</span>");
         return;
       }
+      beginActing();
       await playerAttackMonster(targetMonster, true, d * 10);
+      clearAttackFocus();
       setPlayerActed(true);
       clearStealth();
       renderCharacterPanel();
@@ -955,15 +1425,23 @@ async function handleGridClick(gx, gy) {
 
   if (combatState.movementRemaining <= 0) return;
   const reachable = computeReachable(playerPos, combatState.movementRemaining);
-  if (reachable.some(p => p.x === gx && p.y === gy)) {
-    const dist = distance(playerPos, { x: gx, y: gy });
-    movePlayer(gx, gy);
-    combatState.movementRemaining -= dist;
-    log(`${playerCharacter.name} moves ${dist * 10} ft.`);
+  const reached = reachable.find(p => p.x === gx && p.y === gy);
+  if (reached) {
+    const cost = reached.cost || distance(playerPos, { x: gx, y: gy });
+    const path = typeof pathTo === "function" ? pathTo(gx, gy) : [];
+    const steps = path.length ? path : [{ x: gx, y: gy }];
+    const ms = Math.max(850, steps.length * 400);
+    beginActing(ms);
+    const stepMs = Math.max(180, Math.floor(ms / steps.length));
+    for (const p of steps) {
+      movePlayer(p.x, p.y);
+      await new Promise((r) => setTimeout(r, stepMs));
+    }
+    combatState.movementRemaining -= cost;
+    log(`${playerCharacter.name} moves ${cost * 10} ft.`);
     if (typeof tutorialManager !== "undefined" && tutorialManager) {
       tutorialManager.markActed();
     }
-    // Moving silently is hard; stealth breaks on movement unless thief.
     if (!isThief()) clearStealth();
     updateCombatUI();
     highlightReachable(playerPos, combatState.movementRemaining);
@@ -974,6 +1452,45 @@ async function handleGridClick(gx, gy) {
   }
 }
 
+function rollChestLoot(level, type = null) {
+  // Consumables spice up chest openings and give low-level parties more
+  // resources. Deeper chests are less likely to hold healing potions.
+  const roll = Math.random();
+  const chance = level === 1 ? 0.5 : Math.max(0.1, 0.5 - (level - 1) * 0.1);
+  if (roll >= chance) return null;
+  const potionTable = [
+    { id: "potion_of_healing", weight: 3 },
+    { id: "potion_of_extra_healing", weight: level >= 2 ? 2 : 0 },
+    { id: "potion_of_poison", weight: level === 1 ? 1 : 2 },
+  ];
+  const scrollTable = [
+    { id: "scroll_of_identify", weight: level >= 2 ? 2 : 1 },
+    { id: "scroll_of_mapping", weight: 1 },
+    { id: "scroll_of_teleport", weight: level >= 2 ? 2 : 1 },
+  ];
+  const table = type === "potion" ? potionTable : type === "scroll" ? scrollTable : [...potionTable, ...scrollTable];
+  const available = table.filter(e => e.weight > 0);
+  if (!available.length) return null;
+  const totalWeight = available.reduce((s, e) => s + e.weight, 0);
+  let pick = Math.random() * totalWeight;
+  for (const entry of available) {
+    pick -= entry.weight;
+    if (pick <= 0) return entry.id;
+  }
+  return available[available.length - 1].id;
+}
+
+function addItemToInventory(itemId, quantity = 1) {
+  const inv = playerCharacter.sheet.inventory;
+  inv.items = inv.items || [];
+  const existing = inv.items.find(i => i.item_id === itemId);
+  if (existing) {
+    existing.quantity = (existing.quantity || 1) + quantity;
+  } else {
+    inv.items.push({ item_id: itemId, quantity, equipped: false });
+  }
+}
+
 async function checkTileInteraction(x, y) {
   const t = mapData[y][x];
   if (t === TILE.CHEST && !chestsOpened.has(`${x},${y}`)) {
@@ -981,25 +1498,52 @@ async function checkTileInteraction(x, y) {
     if (typeof tutorialManager !== "undefined" && tutorialManager) {
       tutorialManager.onChestOpened();
     }
-    const chestCfg = combatConfig().chest || {};
-    const rolls = rollDamageExpression(chestCfg.gold_die || "1d6");
-    const cp = rolls * (chestCfg.gold_cp_per_roll || 100);
-    playerCharacter.remaining_gold += cp / 100;
-    playerCharacter.sheet.xp += cp;
-    log(`The chest holds <b>${formatCoins(cp)}</b> (${cp} XP).`, "hit");
-    if (playerCharacter.sheet.xp >= playerCharacter.sheet.next_level_xp) {
+    const fixedGp = chestGoldGp.get(`${x},${y}`);
+    if (fixedGp != null) {
+      playerCharacter.remaining_gold += fixedGp;
+      playerCharacter.sheet.xp += fixedGp;
+      log(`The chest holds <b>${fixedGp} gp</b> (${fixedGp} XP).`, "hit");
+      chestGoldGp.delete(`${x},${y}`);
+    } else {
+      const chestCfg = combatConfig().chest || {};
+      const rolls = rollDamageExpression(chestCfg.gold_die || "1d6");
+      const cp = rolls * (chestCfg.gold_cp_per_roll || 100);
+      playerCharacter.remaining_gold += cp / 100;
+      playerCharacter.sheet.xp += cp;
+      log(`The chest holds <b>${formatCoins(cp)}</b> (${cp} XP).`, "hit");
+    }
+    if (chestsWithKey.has(`${x},${y}`)) {
+      addItemToInventory("iron_key", 1);
+      log(`Inside you find an <b>iron key</b>!`, "hit");
+      chestsWithKey.delete(`${x},${y}`);
+    }
+    const lootIds = [];
+    const potionId = rollChestLoot(dungeonLevel, "potion");
+    if (potionId) lootIds.push(potionId);
+    const scrollId = rollChestLoot(dungeonLevel, "scroll");
+    if (scrollId) lootIds.push(scrollId);
+    for (const lootId of lootIds) {
+      const item = osricOptions.equipment.find(e => e.id === lootId);
+      addItemToInventory(lootId, 1);
+      const displayName = typeof consumableDisplayName === "function" ? consumableDisplayName(lootId) : (item?.name || lootId);
+      log(`Inside you find a <b>${displayName}</b>!`, "hit");
+    }
+    if (typeof maybeLevelUp === "function") await maybeLevelUp();
+    else if (playerCharacter.sheet.xp >= playerCharacter.sheet.next_level_xp) {
       await levelUpCharacter();
     }
     renderCharacterPanel();
     saveGame();
   } else if (t === TILE.EXIT) {
     if (monsters.every(m => !m.alive || m.fled)) {
+      log("<span class='hit'>The exit is open. You may descend or return to town.</span>", "hit");
       showDescendChoice();
     } else {
-      log("The exit is warded until the enemies fall.");
+      const aliveEnemies = monsters.filter(m => m.alive && !m.fled).length;
+      log(`<span class='damage'>The exit is warded.</span> ${aliveEnemies} enemy${aliveEnemies === 1 ? "" : "ies"} remain.`);
     }
   } else if (t === TILE.TRAP && !trapsTriggered.has(`${x},${y}`)) {
-    triggerTrap(x, y);
+    await triggerTrap(x, y);
   }
 }
 
@@ -1024,6 +1568,36 @@ function makeSavingThrow(key) {
   return { target: combatConfig().trap?.save_fallback || 15, roll: rollDie(20) };
 }
 
+async function rollSaveFromSheet(saveKey, label) {
+  if (!playerCharacter) return;
+  if (isActing()) return;
+  try {
+    beginActing();
+    const thrown = await throwDice({
+      roller: "player",
+      name: playerCharacter.name,
+      label: `${label} save`,
+      dice: [{ sides: 20 }],
+      resolve: async () => {
+        const out = await api("/api/osric/saving-throw", {
+          method: "POST",
+          body: JSON.stringify({ character: playerCharacter, save_key: saveKey }),
+        });
+        out.dice = [{ sides: 20, value: out.roll }];
+        out.hit = !!out.success;
+        out.anatomy = SanctuaryDice
+          ? SanctuaryDice.anatomySave(out, label)
+          : `d20 ${out.roll} vs ${out.target}`;
+        return out;
+      },
+    });
+    if (window.SanctuaryDice) SanctuaryDice.hideSoon();
+    log(`${playerCharacter.name} rolls ${label}: <span class="log-dice">${thrown.anatomy}</span>`, thrown.success ? "hit" : "miss");
+  } catch (err) {
+    log(`<span class="damage">${err.message}</span>`);
+  }
+}
+
 function isStuck(character) {
   return character?.sheet?.stuck === true;
 }
@@ -1035,6 +1609,8 @@ function setStuck(character, value) {
 async function climbOutOfPit() {
   if (!combatState || combatState.phase !== "player") return;
   if (!isStuck(playerCharacter)) return;
+  if (isActing()) return;
+  beginActing();
   log(`${playerCharacter.name} climbs out of the pit.`, "hit");
   setStuck(playerCharacter, false);
   renderClimbOutButton();
@@ -1059,7 +1635,7 @@ function renderClimbOutButton() {
   bar.appendChild(btn);
 }
 
-function triggerTrap(x, y) {
+async function triggerTrap(x, y) {
   trapsTriggered.add(`${x},${y}`);
   if (typeof tutorialManager !== "undefined" && tutorialManager) {
     tutorialManager.onTrapTriggered();
@@ -1069,8 +1645,28 @@ function triggerTrap(x, y) {
   const def = trapTypes()[typeKey] || trapTypes().spike;
   const damage = trapDamageForType(typeKey);
   const saveKey = def.save;
-  const { target: saveTarget, roll: saveRoll } = makeSavingThrow(saveKey);
-  const saved = saveRoll >= saveTarget;
+  const saveTarget = trapSaveForType(typeKey);
+  const thrown = await throwDice({
+    roller: "player",
+    name: playerCharacter.name,
+    label: `${def.name} — save`,
+    dice: [{ sides: 20 }],
+    resolve: async () => {
+      const out = await api("/api/osric/saving-throw", {
+        method: "POST",
+        body: JSON.stringify({ character: playerCharacter, save_key: saveKey, target: saveTarget }),
+      });
+      out.dice = [{ sides: 20, value: out.roll }];
+      out.hit = !!out.success;
+      out.anatomy = SanctuaryDice
+        ? SanctuaryDice.anatomySave(out, def.name)
+        : `d20 ${out.roll} vs ${out.target}`;
+      return out;
+    },
+  });
+  if (window.SanctuaryDice) SanctuaryDice.hideSoon();
+  const saveRoll = thrown.roll;
+  const saved = !!thrown.success;
   const finalDamage = saved ? Math.max(1, Math.floor(damage / 2)) : damage;
 
   let extra = "";
@@ -1085,7 +1681,8 @@ function triggerTrap(x, y) {
   playerCharacter.sheet.hit_points -= finalDamage;
   renderCharacterPanel();
   showFloatingText(x, y, `-${finalDamage}`, 0xff6b6b);
-  log(`A <b>${def.name}</b> springs! Save roll <span class="roll">${saveRoll}</span> vs ${saveTarget}: ${saved ? '<span class="hit">saved</span>' : '<span class="miss">failed</span>'}. Take <span class="damage">${finalDamage}</span> damage.${extra}`);
+  if (finalDamage > 0) notePlayerWounded();
+  log(`A <b>${def.name}</b> springs! <span class="log-dice">${thrown.anatomy}</span>. Take <span class="damage">${finalDamage}</span> damage.${extra}`, saved ? "hit" : "miss");
   saveGame();
   if (!playerAlive()) {
     if (!anyPartyAlive()) {
@@ -1098,28 +1695,52 @@ function triggerTrap(x, y) {
   }
 }
 
+function attackDiceFromResult(res) {
+  const dice = [{ sides: 20, value: res.raw_roll }];
+  if (res.hit) {
+    const sides = (window.SanctuaryDice && SanctuaryDice.parseSides(res.damage_die)) || 8;
+    dice.push({ sides, value: res.damage_roll != null ? res.damage_roll : res.damage });
+  }
+  return dice;
+}
+
 async function playerAttackMonster(monster, ranged = false, rangeFt = 0, backstab = false) {
   try {
+    monster.asleep = false;
+    wakeNearbyMonsters(monster.x, monster.y, 2, "stir from the racket");
     const slashColor = backstab ? 0xffd700 : (ranged ? 0xff6b6b : 0xd4a03d);
-    showAttackSlash(playerPos.x, playerPos.y, monster.x, monster.y, slashColor);
     if (typeof tutorialManager !== "undefined" && tutorialManager) {
       tutorialManager.onPlayerAttacked();
     }
-    const res = await api("/api/osric/attack", {
-      method: "POST",
-      body: JSON.stringify({
-        attacker: playerCharacter,
-        defender: monsterToCombatant(monster),
-        ranged,
-        range_ft: rangeFt,
-        backstab,
-      }),
+    const cover = ranged ? coverBonus(monster) : 0;
+    const res = await throwDice({
+      roller: "player",
+      name: playerCharacter.name,
+      label: backstab ? "Backstab" : ranged ? "Missile attack" : "Melee attack",
+      dice: [{ sides: 20 }],
+      resolve: async () => {
+        const out = await api("/api/osric/attack", {
+          method: "POST",
+          body: JSON.stringify({
+            attacker: playerCharacter,
+            defender: monsterToCombatant(monster, 0, cover),
+            ranged,
+            range_ft: rangeFt,
+            backstab,
+          }),
+        });
+        out.dice = attackDiceFromResult(out);
+        out.anatomy = SanctuaryDice ? SanctuaryDice.anatomyAttack(out) : "";
+        return out;
+      },
     });
+    if (window.SanctuaryDice) SanctuaryDice.hideSoon();
+    showAttackSlash(playerPos.x, playerPos.y, monster.x, monster.y, slashColor);
     let action = ranged ? "shoots" : "attacks";
     if (backstab) action = "backstabs";
     const rangeNote = ranged && res.range_penalty ? ` (${res.range_penalty} range)` : "";
-    const backstabNote = backstab ? ` <span class="hit">backstab x${res.backstab_multiplier}</span>` : "";
-    log(`${res.attacker} ${action} ${res.defender}${rangeNote}: rolled <span class="roll">${res.raw_roll}</span> vs AC ${res.needed}. ${res.hit ? `<span class="hit">Hit</span>${backstabNote} for <span class="damage">${res.damage}</span> damage` : '<span class="miss">Miss</span>'}.`);
+    const attackMsg = `${res.attacker} ${action} ${res.defender}${rangeNote}: <span class="log-dice">${res.anatomy || (`d20 ${res.raw_roll} vs ${res.needed}`)}</span>`;
+    log(attackMsg, res.hit ? "hit" : "miss");
     if (res.hit) {
       monster.hp -= res.damage;
       showFloatingText(monster.x, monster.y, `-${res.damage}`, 0xff6b6b);
@@ -1133,6 +1754,20 @@ async function playerAttackMonster(monster, ranged = false, rangeFt = 0, backsta
     saveGame();
   } catch (err) {
     log(`<span class="damage">${err.message}</span>`);
+  }
+}
+
+async function maybeLevelUp() {
+  if (!playerCharacter?.sheet) return;
+  let guard = 0;
+  while (
+    playerCharacter.sheet.next_level_xp > 0 &&
+    playerCharacter.sheet.xp >= playerCharacter.sheet.next_level_xp &&
+    guard++ < 8
+  ) {
+    const before = playerCharacter.sheet.level;
+    await levelUpCharacter();
+    if (!playerCharacter?.sheet || playerCharacter.sheet.level <= before) break;
   }
 }
 
@@ -1150,6 +1785,7 @@ async function levelUpCharacter() {
       party[activePartyIndex] = playerCharacter;
     }
     log(`<b>${playerCharacter.name} reaches level ${playerCharacter.sheet.level}!</b> HP ${playerCharacter.sheet.hit_points}, THAC0 ${playerCharacter.sheet.thac0}.`, "hit");
+    showDelveBanner(`Level ${playerCharacter.sheet.level}`, `${playerCharacter.name} grows stronger.`);
     renderCharacterPanel();
     saveGame();
   } catch (err) {
@@ -1164,9 +1800,44 @@ async function playerCastSpell(spell, targetMonster) {
       spell_id: spell.id,
       target: targetMonster ? monsterToCombatant(targetMonster) : null,
     };
-    const res = await api("/api/osric/spell", { method: "POST", body: JSON.stringify(body) });
+    const preview = [];
+    if (spell.heal) preview.push({ sides: SanctuaryDice ? SanctuaryDice.parseSides(spell.heal) : 8 });
+    else if (spell.damage) preview.push({ sides: SanctuaryDice ? SanctuaryDice.parseSides(spell.damage) : 6 });
+    else preview.push({ sides: 20 });
+    const packed = await throwDice({
+      roller: "player",
+      name: playerCharacter.name,
+      label: spell.name,
+      dice: preview,
+      resolve: async () => {
+        const out = await api("/api/osric/spell", { method: "POST", body: JSON.stringify(body) });
+        const r = out.result || {};
+        const dice = [];
+        if (r.saving_throw) dice.push({ sides: 20, value: r.saving_throw.roll });
+        if (r.heal) dice.push({ sides: SanctuaryDice.parseSides(r.heal_die || spell.heal || "1d8"), value: r.heal });
+        if (r.damage) dice.push({ sides: SanctuaryDice.parseSides(r.damage_die || spell.damage || "1d4"), value: r.damage });
+        if (!dice.length) dice.push({ sides: 20, value: 20 });
+        let anatomy = `${r.spell || spell.name}`;
+        if (r.heal) anatomy += `: ${r.heal_die || "heal"} -> ${r.heal}`;
+        else if (r.damage) anatomy += `: ${r.damage_die || "dmg"} -> ${r.damage}`;
+        else if (r.saving_throw) anatomy += `: d20 ${r.saving_throw.roll} vs ${r.saving_throw.target} · ${r.saving_throw.success ? "saved" : "failed"}`;
+        else anatomy += " takes effect";
+        out.dice = dice;
+        out.anatomy = anatomy;
+        out.hit = r.hit !== false && !r.saved;
+        return out;
+      },
+    });
+    if (window.SanctuaryDice) SanctuaryDice.hideSoon();
+    const res = packed;
     playerCharacter = res.character;
+    // Keep the party array in sync so subsequent code that reads party[activePartyIndex]
+    // does not restore stale spell slots / active spells.
+    if (typeof activePartyIndex === "number" && party[activePartyIndex]) {
+      party[activePartyIndex] = playerCharacter;
+    }
     const result = res.result;
+    log(`<span class="log-dice">${packed.anatomy}</span>`, packed.hit ? "hit" : "miss");
     if (spell.buff) {
       const rounds = spell.duration || 1;
       playerCharacter.sheet.active_spells = playerCharacter.sheet.active_spells || [];
@@ -1182,6 +1853,9 @@ async function playerCastSpell(spell, targetMonster) {
       const healed = playerCharacter.sheet.hit_points - oldHp;
       showFloatingText(playerPos.x, playerPos.y, `+${healed}`, 0x5ac989);
       log(`${result.caster} casts <b>${result.spell}</b> and heals <span class="hit">${result.heal}</span> HP.`);
+    } else if (result.condition && targetMonster) {
+      applySpellCondition(targetMonster, result.condition, spell.duration || 1);
+      log(`${result.caster} casts <b>${result.spell}</b> on <b>${targetMonster.name}</b>.`);
     } else {
       log(`${result.caster} casts <b>${result.spell}</b> for <span class="damage">${result.damage}</span> damage.`);
       if (targetMonster) {
@@ -1223,20 +1897,35 @@ function formatActiveSpellsInline(spells) {
   return `<div class="section-title">Active Spells</div><div class="mod-row"><div class="mod-pill">${list}</div></div>`;
 }
 
-async function monsterAttackPlayer(monster) {
+async function monsterAttackPlayer(monster, powerAttack = false) {
   try {
     if (!playerConscious()) ensureConsciousActive();
     if (!playerCharacter) return;
-    showAttackSlash(monster.x, monster.y, playerPos.x, playerPos.y, 0xc94a4a);
-    const res = await api("/api/osric/attack", {
-      method: "POST",
-      body: JSON.stringify({ attacker: monsterToCombatant(monster), defender: playerCharacter }),
+    const packBonus = packTacticsBonus(monster, playerPos);
+    const res = await throwDice({
+      roller: "ai",
+      name: monster.name,
+      label: powerAttack ? "Power attack" : "Melee attack",
+      dice: [{ sides: 20 }],
+      resolve: async () => {
+        const out = await api("/api/osric/attack", {
+          method: "POST",
+          body: JSON.stringify({ attacker: monsterToCombatant(monster, packBonus, 0, powerAttack), defender: playerCharacter }),
+        });
+        out.dice = attackDiceFromResult(out);
+        out.anatomy = SanctuaryDice ? SanctuaryDice.anatomyAttack(out) : "";
+        return out;
+      },
     });
-    log(`${res.attacker} attacks ${res.defender}: rolled <span class="roll">${res.raw_roll}</span> vs AC ${res.needed}. ${res.hit ? `<span class="hit">Hit</span> for <span class="damage">${res.damage}</span> damage` : '<span class="miss">Miss</span>'}.`);
+    if (window.SanctuaryDice) SanctuaryDice.hideSoon();
+    showAttackSlash(monster.x, monster.y, playerPos.x, playerPos.y, powerAttack ? 0xff4500 : 0xc94a4a);
+    const action = powerAttack ? "power attacks" : "attacks";
+    log(`${res.attacker} ${action} ${res.defender}: <span class="log-dice">${res.anatomy || (`d20 ${res.raw_roll} vs ${res.needed}`)}</span>`, res.hit ? "hit" : "miss");
     if (res.hit) {
       playerCharacter.sheet.hit_points -= res.damage;
       showFloatingText(playerPos.x, playerPos.y, `-${res.damage}`, 0xff6b6b);
       renderCharacterPanel();
+      if (res.damage > 0) notePlayerWounded();
       if (!playerAlive()) {
         if (!anyPartyAlive()) {
           showEnd(false, "Your party has fallen.");
@@ -1255,17 +1944,278 @@ async function monsterAttackPlayer(monster) {
   }
 }
 
-function monsterToCombatant(m) {
+function monsterToCombatant(m, toHitMod = 0, acMod = 0, powerAttack = false) {
   return {
     name: m.name,
     abilities: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 },
     inventory: [{ item_id: "club", quantity: 1, equipped: true }],
+    damage: m.damage,
+    damage_mod: (m.damageMod || 0) + (powerAttack ? 2 : 0),
+    to_hit_mod: toHitMod + (powerAttack ? 2 : 0),
     sheet: {
       thac0: m.thac0,
-      armour_class_descending: m.acDesc,
-      armour_class: 20 - m.acDesc,
+      armour_class_descending: m.acDesc + acMod,
+      armour_class: 20 - m.acDesc - acMod,
     },
   };
+}
+
+function coverBonus(target) {
+  // Ranged targets gain +1 AC if adjacent to a wall, barrel, or another creature.
+  if (!target || target.x === undefined || target.y === undefined) return 0;
+  for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+    const nx = target.x + dx, ny = target.y + dy;
+    if (nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) return 1;
+    if (!mapData[ny]) continue;
+    const t = mapData[ny][nx];
+    if (t === TILE.WALL || t === TILE.SECRET_DOOR || t === TILE.BARREL) return 1;
+    if (monsters.some(m => m.alive && m.x === nx && m.y === ny)) return 1;
+  }
+  return 0;
+}
+
+function packTacticsBonus(monster, target) {
+  // +1 to hit per adjacent ally on dungeon level 2+ (tutorial monsters fight alone).
+  if (dungeonLevel < 2) return 0;
+  if (!target || target.x === undefined || target.y === undefined) return 0;
+  let allies = 0;
+  for (const other of monsters) {
+    if (!other.alive || other === monster || other.fled) continue;
+    if (Math.abs(other.x - target.x) + Math.abs(other.y - target.y) === 1) allies++;
+  }
+  return Math.min(allies, 2);
+}
+
+const MONSTER_AI_DECKS = {
+  brute: [
+    { card: "melee", weight: 3 },
+    { card: "charge", weight: 2 },
+    { card: "power_attack", weight: 1 },
+    { card: "ranged", weight: 1 },
+  ],
+  skirmisher: [
+    { card: "melee", weight: 2 },
+    { card: "charge", weight: 2 },
+    { card: "kite", weight: 1 },
+  ],
+  archer: [
+    { card: "ranged", weight: 3 },
+    { card: "kite", weight: 2 },
+    { card: "flee", weight: 1 },
+  ],
+  healer: [
+    { card: "heal", weight: 3 },
+    { card: "melee", weight: 2 },
+    { card: "kite", weight: 1 },
+  ],
+  boss: [
+    { card: "melee", weight: 2 },
+    { card: "power_attack", weight: 2 },
+    { card: "guard", weight: 1 },
+    { card: "rally", weight: 1 },
+  ],
+};
+
+function buildMonsterAIDeck(monster) {
+  return MONSTER_AI_DECKS[monster.aiRole || "brute"] || MONSTER_AI_DECKS.brute;
+}
+
+function drawMonsterAICard(monster) {
+  const deck = buildMonsterAIDeck(monster);
+  const total = deck.reduce((s, c) => s + c.weight, 0);
+  let roll = Math.random() * total;
+  for (const entry of deck) {
+    roll -= entry.weight;
+    if (roll <= 0) return entry.card;
+  }
+  return deck[deck.length - 1].card;
+}
+
+function nearestAlly(monster) {
+  let best = null, bestDist = Infinity;
+  for (const other of monsters) {
+    if (!other.alive || other === monster || other.fled) continue;
+    const d = distance(other, monster);
+    if (d < bestDist && d > 0) { bestDist = d; best = other; }
+  }
+  return best;
+}
+
+function moveMonsterToward(monster, target, moves) {
+  let remaining = moves;
+  while (remaining > 0 && distance(monster, target) > 1) {
+    const step = nextStepToward(monster, target);
+    if (!step) break;
+    monster.x = step.x;
+    monster.y = step.y;
+    remaining--;
+  }
+  return moves - remaining;
+}
+
+function moveMonsterAway(monster, target, moves) {
+  let remaining = moves;
+  while (remaining > 0) {
+    const step = nextStepAway(monster, target);
+    if (!step) break;
+    monster.x = step.x;
+    monster.y = step.y;
+    remaining--;
+  }
+  return moves - remaining;
+}
+
+async function executeMonsterAICard(monster, card) {
+  let firstShout = false;
+  if (monster.boss && monster.name && monster.name.includes("Grik") && !monster.shouted) {
+    monster.shouted = true;
+    firstShout = true;
+    log(`<b>Grik</b> slams his mace on the dais. "The Black Sun is mine! Hold, you dogs!"`, "damage");
+    showFloatingText(monster.x, monster.y, "HOLD!", 0xd4a03d);
+    card = "rally";
+  }
+  const speed = combatConfig().monster_speed_tiles || 6;
+  const adjacent = distance(monster, playerPos) === 1;
+
+  // Archers and skirmishers prefer their signature behaviours; fall back to melee if unable.
+  if (card === "ranged" && monster.ranged) {
+    let moves = speed;
+    if (adjacent && moves > 0) {
+      const step = nextStepAway(monster, playerPos);
+      if (step) { monster.x = step.x; monster.y = step.y; moves--; }
+    }
+    while (moves > 0 && !monsterRangedInRange(monster)) {
+      const step = nextStepToward(monster, playerPos);
+      if (!step) break;
+      monster.x = step.x;
+      monster.y = step.y;
+      moves--;
+    }
+    if (monsterRangedInRange(monster) && distance(monster, playerPos) > 1) {
+      await monsterRangedAttack(monster);
+      return;
+    }
+    // Fallback to closing to melee if no shot exists.
+    if (distance(monster, playerPos) === 1) await monsterAttackPlayer(monster);
+    return;
+  }
+
+  if (card === "kite") {
+    let moves = speed;
+    if (adjacent && moves > 0) {
+      const step = nextStepAway(monster, playerPos);
+      if (step) { monster.x = step.x; monster.y = step.y; moves--; }
+    }
+    if (monster.ranged && monsterRangedInRange(monster) && distance(monster, playerPos) > 1) {
+      await monsterRangedAttack(monster);
+      return;
+    }
+    while (moves > 0) {
+      const step = nextStepAway(monster, playerPos);
+      if (!step) break;
+      monster.x = step.x;
+      monster.y = step.y;
+      moves--;
+    }
+    return;
+  }
+
+  if (card === "flee") {
+    monster.fled = true;
+    log(`<b>${monster.name}</b> turns and runs!`, "miss");
+    showFloatingText(monster.x, monster.y, "FLEE", 0x888888);
+    moveMonsterAway(monster, playerPos, speed);
+    return;
+  }
+
+  if (card === "heal") {
+    // Find the most wounded living ally within 6 tiles (excluding self).
+    let bestAlly = null;
+    let bestMissing = 0;
+    for (const other of monsters) {
+      if (!other.alive || other === monster || other.fled) continue;
+      const d = distance(monster, other);
+      if (d > 6) continue;
+      const missing = (other.maxHp || other.hp) - other.hp;
+      if (missing > bestMissing) {
+        bestMissing = missing;
+        bestAlly = other;
+      }
+    }
+    if (bestAlly && bestMissing >= 3) {
+      const healAmount = Math.min(bestMissing, Math.max(3, rollDie(6) + rollDie(6)));
+      bestAlly.hp = Math.min(bestAlly.maxHp || bestAlly.hp, bestAlly.hp + healAmount);
+      log(`<b>${monster.name}</b> chants and heals <b>${bestAlly.name}</b> for <span class="hit">${healAmount}</span> HP.`, "hit");
+      showFloatingText(bestAlly.x, bestAlly.y, `+${healAmount}`, 0x5ac989);
+      return;
+    }
+    // No worthy target: behave like an archer/skirmisher.
+    if (monster.ranged && monsterRangedInRange(monster) && distance(monster, playerPos) > 1) {
+      await monsterRangedAttack(monster);
+      return;
+    }
+    if (adjacent) {
+      await monsterAttackPlayer(monster);
+      return;
+    }
+    moveMonsterToward(monster, playerPos, speed);
+    if (distance(monster, playerPos) === 1) await monsterAttackPlayer(monster);
+    return;
+  }
+
+  if (card === "guard") {
+    const ally = nearestAlly(monster);
+    if (ally && distance(monster, ally) > 1) {
+      moveMonsterToward(monster, ally, Math.floor(speed / 2));
+    }
+    if (adjacent || distance(monster, playerPos) === 1) {
+      await monsterAttackPlayer(monster);
+    }
+    return;
+  }
+
+  if (card === "rally") {
+    let rallied = 0;
+    for (const other of monsters) {
+      if (!other.alive || other === monster) continue;
+      if (other.fled && distance(other, monster) <= 4) {
+        other.fled = false;
+        other.moraleChecked = false;
+        rallied++;
+      }
+    }
+    if (rallied) {
+      log(`<b>${monster.name}</b> rallies its companions!`, "miss");
+      showFloatingText(monster.x, monster.y, "RALLY", 0xd4a03d);
+    } else if (firstShout) {
+      const guard = monsters.find((o) => o.alive && o !== monster && o.name && o.name.includes("Guard"));
+      if (guard && !guard.fled) log("<b>Grik's Guard</b> braces at the shout.", "miss");
+    }
+    if (distance(monster, playerPos) === 1) await monsterAttackPlayer(monster);
+    return;
+  }
+
+  // Charge and power_attack both close distance; power_attack gets a boosted strike.
+  if (card === "charge") {
+    moveMonsterToward(monster, playerPos, Math.min(speed + 2, 9));
+    if (distance(monster, playerPos) === 1) await monsterAttackPlayer(monster);
+    return;
+  }
+
+  if (card === "power_attack") {
+    moveMonsterToward(monster, playerPos, speed);
+    if (distance(monster, playerPos) === 1) {
+      log(`<b>${monster.name}</b> winds up for a powerful strike!`, "damage");
+      await monsterAttackPlayer(monster, true);
+    }
+    return;
+  }
+
+  // Default melee behaviour.
+  moveMonsterToward(monster, playerPos, speed);
+  if (distance(monster, playerPos) === 1) {
+    await monsterAttackPlayer(monster);
+  }
 }
 
 function rollDamageExpression(expr) {
@@ -1284,30 +2234,50 @@ function rollDamageExpression(expr) {
 }
 
 function monsterRangedInRange(m) {
-  return m.ranged && distance(m, playerPos) > 0 && distance(m, playerPos) <= Math.floor(m.ranged.range / 10);
+  return m.ranged && distance(m, playerPos) > 0 && distance(m, playerPos) <= Math.floor(m.ranged.range / 10) &&
+         hasRangedLineOfSight(m, playerPos);
 }
 
 async function monsterRangedAttack(m) {
   try {
     if (!playerConscious()) ensureConsciousActive();
     if (!playerCharacter) return;
+    const res = await throwDice({
+      roller: "ai",
+      name: m.name,
+      label: "Missile attack",
+      dice: [{ sides: 20 }],
+      resolve: async () => {
+        const rawRoll = rollDie(20);
+        const packBonus = packTacticsBonus(m, playerPos);
+        const cover = coverBonus(playerPos);
+        const needed = m.thac0 - playerCharacter.sheet.armour_class_descending - packBonus + cover;
+        const autoHitVal = combatConfig().auto_hit ?? 20;
+        const autoMissVal = combatConfig().auto_miss ?? 1;
+        const hit = rawRoll === autoHitVal || (rawRoll !== autoMissVal && rawRoll >= needed);
+        let damage = 0;
+        const dice = [{ sides: 20, value: rawRoll }];
+        if (hit) {
+          damage = rollDamageExpression(m.ranged.damage);
+          const sides = (window.SanctuaryDice && SanctuaryDice.parseSides(m.ranged.damage)) || 4;
+          dice.push({ sides, value: damage });
+        }
+        return {
+          raw_roll: rawRoll, needed, hit, damage, weapon: "missile",
+          to_hit_mod: 0, roll: rawRoll, damage_die: m.ranged.damage,
+          dice,
+          anatomy: `d20 ${rawRoll} vs ${needed} · ${hit ? `hit → ${damage}` : "miss"}`,
+        };
+      },
+    });
+    if (window.SanctuaryDice) SanctuaryDice.hideSoon();
     showAttackSlash(m.x, m.y, playerPos.x, playerPos.y, 0xff6b6b);
-    const rawRoll = rollDie(20);
-    const needed = m.thac0 - playerCharacter.sheet.armour_class_descending;
-    const autoHitVal = combatConfig().auto_hit ?? 20;
-    const autoMissVal = combatConfig().auto_miss ?? 1;
-    const autoHit = rawRoll === autoHitVal;
-    const autoMiss = rawRoll === autoMissVal;
-    const hit = autoHit || (!autoMiss && rawRoll >= needed);
-    let damage = 0;
-    if (hit) {
-      damage = rollDamageExpression(m.ranged.damage);
-      playerCharacter.sheet.hit_points -= damage;
-      showFloatingText(playerPos.x, playerPos.y, `-${damage}`, 0xff6b6b);
+    log(`${m.name} shoots ${playerCharacter.name}: <span class="log-dice">${res.anatomy}</span>`, res.hit ? "hit" : "miss");
+    if (res.hit) {
+      playerCharacter.sheet.hit_points -= res.damage;
+      showFloatingText(playerPos.x, playerPos.y, `-${res.damage}`, 0xff6b6b);
       renderCharacterPanel();
-    }
-    log(`${m.name} shoots ${playerCharacter.name}: rolled <span class="roll">${rawRoll}</span> vs AC ${needed}. ${hit ? `<span class="hit">Hit</span> for <span class="damage">${damage}</span> damage` : '<span class="miss">Miss</span>'}.`);
-    if (hit) {
+      if (res.damage > 0) notePlayerWounded();
       if (!playerAlive()) {
         if (!anyPartyAlive()) {
           showEnd(false, "Your party has fallen.");
@@ -1339,6 +2309,7 @@ function nextActingPartyMember() {
 }
 
 function endTurn() {
+  stopAutoExplore();
   if (!combatState || combatState.phase !== "player") return;
   if (!playerConscious()) {
     log("You are unconscious and cannot act.");
@@ -1367,7 +2338,7 @@ function endTurn() {
   pendingSpell = null;
   clearHighlights();
   updateCombatUI();
-  setTimeout(enemyTurn, 400);
+  setTimeout(enemyTurn, 800);
 }
 
 function maybeAutoMercTurn() {
@@ -1419,13 +2390,28 @@ async function enemyTurn() {
 
     checkMonsterRally(m);
 
+    // Sleeping monsters do not act until they see or hear the party.
+    if (m.asleep) {
+      const alerted = distance(m, playerPos) <= 3 || isVisibleToPlayer(m.x, m.y);
+      if (!alerted) continue;
+      m.asleep = false;
+      log(`<b>${m.name}</b> wakes up!`, "miss");
+      showFloatingText(m.x, m.y, "ALERT", 0xff6b6b);
+      wakeNearbyMonsters(m.x, m.y, 2, "wake from the noise");
+    } else if (distance(m, playerPos) > 6 && !(typeof isVisibleToPlayer === "function" && isVisibleToPlayer(m.x, m.y))) {
+      // Stay in their room. Do not hunt across the dungeon.
+      continue;
+    }
+
     // Intelligent monsters bash open adjacent doors to reach the player.
     if (!m.fled && m.morale > 4) {
       for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
         const nx = m.x + dx, ny = m.y + dy;
-        if (mapData[ny] && mapData[ny][nx] === TILE.DOOR && !doorsOpened.has(`${nx},${ny}`)) {
+        const isDoor = mapData[ny] && mapData[ny][nx] === TILE.DOOR && !doorsOpened.has(`${nx},${ny}`);
+        const isLocked = mapData[ny] && mapData[ny][nx] === TILE.LOCKED_DOOR && !doorsOpened.has(`${nx},${ny}`);
+        if (isDoor || isLocked) {
           doorsOpened.add(`${nx},${ny}`);
-          log(`A ${m.name} bursts through a door!`);
+          log(`A ${m.name} bursts through ${isLocked ? 'a locked door' : 'a door'}!`);
           drawMap();
           renderFog();
           break;
@@ -1433,57 +2419,29 @@ async function enemyTurn() {
       }
     }
 
-    const speed = combatConfig().monster_speed_tiles || 6;
-    let moves = speed;
-
-    // Ranged monsters prefer to shoot when in range and not adjacent.
-    if (!m.fled && m.ranged) {
-      const inRange = monsterRangedInRange(m);
-      const adjacent = distance(m, playerPos) === 1;
-      if (inRange && !adjacent) {
-        await monsterRangedAttack(m);
-        if (!anyPartyAlive() || !anyPartyConscious()) break;
-        continue;
-      }
-      // Move to get in range if too far; back up if adjacent.
-      while (moves > 0 && !monsterRangedInRange(m)) {
-        const step = adjacent ? nextStepAway(m, playerPos) : nextStepToward(m, playerPos);
-        if (!step) break;
-        m.x = step.x;
-        m.y = step.y;
-        moves--;
-      }
-      if (monsterRangedInRange(m) && distance(m, playerPos) > 1) {
-        await monsterRangedAttack(m);
-        if (!anyPartyAlive() || !anyPartyConscious()) break;
-        continue;
-      }
-    }
-
-    const target = m.fled ? farthestFromPlayer(m) : playerPos;
-    while (moves > 0 && distance(m, target) > (m.fled ? 0 : 1)) {
-      const step = m.fled ? nextStepAway(m, playerPos) : nextStepToward(m, playerPos);
-      if (!step) break;
-      m.x = step.x;
-      m.y = step.y;
-      moves--;
-    }
+    // Draw a role-based AI ability card and execute it.
+    const card = drawMonsterAICard(m);
+    await executeMonsterAICard(m, card);
     drawTokens();
-
-    if (!m.fled && distance(m, playerPos) === 1) {
-      await monsterAttackPlayer(m);
-      if (!anyPartyAlive() || !anyPartyConscious()) break;
-    }
+    if (!anyPartyAlive() || !anyPartyConscious()) break;
+    await new Promise((r) => setTimeout(r, 450));
   }
 
   combatState.enemyActedThisRound = true;
 
-  // Count down turn-undead durations.
+  // Count down turn-undead and sleep durations.
   for (const m of monsters) {
     if (m.turned > 0) {
       m.turned -= 1;
       if (m.turned <= 0) {
         log(`<b>${m.name}</b> shakes off its terror and returns.`, "miss");
+      }
+    }
+    if (m.asleep && typeof m.sleepRounds === "number") {
+      m.sleepRounds -= 1;
+      if (m.sleepRounds <= 0) {
+        m.asleep = false;
+        log(`<b>${m.name}</b> wakes from magical sleep.`, "miss");
       }
     }
   }
@@ -1495,14 +2453,17 @@ async function enemyTurn() {
 
   if (!playerConscious()) {
     await doDeathSave();
+    if (!anyPartyAlive()) return;
+    // Start the next round; the start-of-round logic will continue death saves
+    // if the hero is still unconscious, otherwise hand control to the player.
+    startRound();
     return;
   }
 
   const wanderCfg = combatConfig().wandering_monsters;
   if (wanderCfg?.enabled && wanderCfg?.check_every_round && !isCombatSafe()) {
-    const chance = wanderCfg.chance_in_6 ?? 1;
-    if (rollDie(6) <= chance) {
-      const spawned = spawnWanderingMonster(wanderCfg.count_per_encounter);
+    if (wanderingMonsterCheck(wanderCfg)) {
+      const spawned = spawnWanderingMonster(wanderingMonsterCount(wanderCfg));
       if (spawned) {
         log(`<span class="damage">More monsters wander into the fight!</span>`, "damage");
       }
@@ -1602,13 +2563,57 @@ function farthestFromPlayer(from) {
 }
 
 function checkEnd() {
-  if (monsters.every(m => !m.alive || m.fled)) {
-    log("All enemies are dead or fled. The exit is open.", "hit");
+  if (!combatState || combatState.exitAnnounced) return;
+  if (!monsters.length || !monsters.every(m => !m.alive || m.fled)) return;
+  combatState.exitAnnounced = true;
+  log("<span class='hit'>All enemies are dead or fled. The exit is open.</span>", "hit");
+  const lvl = playerCharacter?.sheet?.level || 1;
+  const name = playerCharacter?.name || "You";
+  if (lvl >= 2) {
+    showDelveBanner(`Level ${lvl} — exit open`, `${name} is stronger. The beacon is lit — walk the shrine tunnel.`);
+  } else {
+    showDelveBanner("Exit open", "The beacon is lit. Walk the shrine tunnel to leave.");
   }
+  const objectiveBadge = document.getElementById("objective-badge");
+  if (objectiveBadge) {
+    objectiveBadge.textContent = "Exit open";
+    objectiveBadge.classList.add("exit-open");
+  }
+}
+
+function applySpellCondition(monster, condition, duration) {
+  if (!monster || !condition) return;
+  if (condition === "sleeping") {
+    monster.asleep = true;
+    monster.sleepRounds = duration;
+    showFloatingText(monster.x, monster.y, "SLEEP", 0x9b59b6);
+    log(`<b>${monster.name}</b> falls into a magical slumber.`, "hit");
+  } else if (condition === "charmed") {
+    monster.fled = true;
+    monster.charmed = true;
+    showFloatingText(monster.x, monster.y, "CHARMED", 0x9b59b6);
+    log(`<b>${monster.name}</b> is charmed and wanders off.`, "hit");
+  }
+}
+
+function wakeNearbyMonsters(x, y, radius = 2, source = "") {
+  let woken = 0;
+  for (const m of monsters) {
+    if (!m.alive || !m.asleep) continue;
+    if (distance(m, { x, y }) <= radius) {
+      m.asleep = false;
+      woken++;
+    }
+  }
+  if (woken && source) {
+    log(`${woken > 1 ? "Several monsters" : "A monster"} ${source}!`, "miss");
+  }
+  return woken;
 }
 
 function checkMorale(monster) {
   if (monster.moraleChecked || monster.fled || !monster.alive) return;
+  if (monster.boss) return; // Bosses stand and fight.
   const wounded = monster.hp <= monster.maxHp / 2;
   if (!wounded) return;
   monster.moraleChecked = true;
@@ -1648,73 +2653,15 @@ const KEY_DIRS = {
 async function handleKeyDown(e) {
   const dir = KEY_DIRS[e.key];
   if (!dir) return;
+  const tag = e.target && e.target.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
   if (!combatState || combatState.phase !== "player") return;
-  if (!playerConscious()) {
-    log("You are unconscious and cannot act.");
-    return;
-  }
-  if (isStuck(playerCharacter)) {
-    log("You are stuck in a pit. Climb out first.");
-    return;
-  }
   e.preventDefault();
-
   const [dx, dy] = dir;
   const tx = playerPos.x + dx;
   const ty = playerPos.y + dy;
-
   if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H) return;
-
-  // Open adjacent closed door.
-  if (mapData[ty] && mapData[ty][tx] === TILE.DOOR && !doorsOpened.has(`${tx},${ty}`)) {
-    doorsOpened.add(`${tx},${ty}`);
-    log(`${playerCharacter.name} opens a door.`);
-    drawMap();
-    renderFog();
-    highlightReachable(playerPos, combatState.movementRemaining);
-    saveGame();
-    return;
-  }
-
-  // Attack adjacent monster.
-  const target = monsterAt(tx, ty);
-  if (target && distance(playerPos, { x: tx, y: ty }) === 1) {
-    if (combatState.attacked) {
-      log("You have already attacked this round.");
-      return;
-    }
-    if (!findEquippedMeleeWeapon() && !findEquippedRangedWeapon()) {
-      log("You have no weapon equipped.");
-      return;
-    }
-    const backstab = isThief() && playerStealthed;
-    await playerAttackMonster(target, false, 0, backstab);
-    setPlayerActed(true);
-    clearStealth();
-    updateCombatUI();
-    checkEnd();
-    saveGame();
-    return;
-  }
-
-  // Move one tile if reachable.
-  if (combatState.movementRemaining <= 0) return;
-  const reachable = computeReachable(playerPos, combatState.movementRemaining);
-  if (reachable.some(p => p.x === tx && p.y === ty)) {
-    movePlayer(tx, ty);
-    combatState.movementRemaining -= 1;
-    log(`${playerCharacter.name} moves 10 ft.`);
-    if (typeof tutorialManager !== "undefined" && tutorialManager) {
-      tutorialManager.markActed();
-    }
-    if (!isThief()) clearStealth();
-    updateCombatUI();
-    highlightReachable(playerPos, combatState.movementRemaining);
-    highlightRangedTargets();
-    await checkTileInteraction(tx, ty);
-    maybeSpawnWanderingMonster();
-    saveGame();
-  }
+  await handleGridClick(tx, ty);
 }
 
 window.addEventListener("keydown", handleKeyDown);

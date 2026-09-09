@@ -58,6 +58,25 @@ class LevelUpAction(BaseModel):
     character: dict
 
 
+class SavingThrowAction(BaseModel):
+    character: dict
+    save_key: str
+    target: int | None = None
+    modifier: int = 0
+
+
+class InitiativeAction(BaseModel):
+    party: list[dict]
+    enemies: list[dict]
+    party_roll: int | None = None
+    enemy_roll: int | None = None
+
+
+class ReactionAction(BaseModel):
+    character: dict | None = None
+    modifier: int = 0
+
+
 class CreateCharacter(BaseModel):
     name: str
     ancestry: str
@@ -319,6 +338,38 @@ def resolve_attack(req: AttackAction):
     return osric_combat.resolve_attack(req.attacker, req.defender, req.ranged, req.range_ft, req.backstab)
 
 
+@app.post("/api/osric/saving-throw")
+def resolve_saving_throw(req: SavingThrowAction):
+    """Roll a saving throw for a character."""
+    try:
+        return osric_combat.saving_throw(
+            req.character, req.save_key, req.target, req.modifier
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@app.post("/api/osric/initiative")
+def resolve_initiative(req: InitiativeAction):
+    """Roll side-based initiative for the party and enemies."""
+    return osric_combat.roll_initiative(
+        req.party,
+        req.enemies,
+        roll_a=req.party_roll,
+        roll_b=req.enemy_roll,
+    )
+
+
+@app.post("/api/osric/reaction")
+def resolve_reaction(req: ReactionAction):
+    """Roll an NPC/monster reaction check."""
+    modifier = req.modifier
+    if req.character:
+        cha = req.character.get("abilities", {}).get("charisma", 10)
+        modifier += osric.charisma_modifier(cha).get("reaction", 0)
+    return osric_combat.check_reaction(modifier)
+
+
 @app.post("/api/osric/spell")
 def cast_spell(req: SpellAction):
     caster = req.caster
@@ -337,7 +388,7 @@ def cast_spell(req: SpellAction):
     new_slots[level_key] = int(new_slots.get(level_key, new_slots.get(spell["level"], 0))) - 1
     caster["sheet"]["spell_slots"] = new_slots
 
-    result = osric_spells.resolve_spell(caster, req.spell_id)
+    result = osric_spells.resolve_spell(caster, req.spell_id, target=req.target)
     result["target"] = (req.target or {}).get("name")
     return {"result": result, "character": caster}
 
@@ -360,6 +411,11 @@ def roll_dice_endpoint(expression: str = Form(...)):
 def version():
     version_text = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     return {"version": version_text}
+
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "version": (ROOT / "VERSION").read_text(encoding="utf-8").strip()}
 
 
 app.mount("/", StaticFiles(directory=ROOT / "static"), name="static")

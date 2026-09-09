@@ -7,7 +7,6 @@ offers re-roll / arrange-to-taste).
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
@@ -44,12 +43,6 @@ def run() -> int:
         page.click("#buy-starter-kit")
         page.wait_for_timeout(500)
         page.click("#enter-dungeon-btn")
-        page.wait_for_selector("#town-screen", state="visible", timeout=10000)
-        page.click("#town-guild")
-        page.wait_for_selector("#module-list .module-card", state="visible", timeout=10000)
-        page.click(".module-card[data-id='crooked_tower']")
-        page.wait_for_selector("#module-brief-modal", state="visible", timeout=10000)
-        page.click("#module-brief-depart")
         page.wait_for_selector("#board-canvas canvas", state="visible", timeout=10000)
         page.wait_for_timeout(1000)
 
@@ -67,12 +60,6 @@ def run() -> int:
         page.click("#buy-starter-kit")
         page.wait_for_timeout(500)
         page.click("#enter-dungeon-btn")
-        page.wait_for_selector("#town-screen", state="visible", timeout=10000)
-        page.click("#town-guild")
-        page.wait_for_selector("#module-list .module-card", state="visible", timeout=10000)
-        page.click(".module-card[data-id='crooked_tower']")
-        page.wait_for_selector("#module-brief-modal", state="visible", timeout=10000)
-        page.click("#module-brief-depart")
         page.wait_for_selector("#board-canvas canvas", state="visible", timeout=10000)
         page.wait_for_timeout(1000)
 
@@ -113,12 +100,6 @@ def run() -> int:
         page.click("#buy-starter-kit")
         page.wait_for_timeout(500)
         page.click("#enter-dungeon-btn")
-        page.wait_for_selector("#town-screen", state="visible", timeout=10000)
-        page.click("#town-guild")
-        page.wait_for_selector("#module-list .module-card", state="visible", timeout=10000)
-        page.click(".module-card[data-id='crooked_tower']")
-        page.wait_for_selector("#module-brief-modal", state="visible", timeout=10000)
-        page.click("#module-brief-depart")
         page.wait_for_selector("#board-canvas canvas", state="visible", timeout=10000)
         page.wait_for_selector("text=Round 1", timeout=10000)
         page.wait_for_timeout(1000)
@@ -181,12 +162,6 @@ def run() -> int:
             print("Creation inventory shows arrows")
 
         page.click("#enter-dungeon-btn")
-        page.wait_for_selector("#town-screen", state="visible", timeout=10000)
-        page.click("#town-guild")
-        page.wait_for_selector("#module-list .module-card", state="visible", timeout=10000)
-        page.click(".module-card[data-id='crooked_tower']")
-        page.wait_for_selector("#module-brief-modal", state="visible", timeout=10000)
-        page.click("#module-brief-depart")
         page.wait_for_selector("#board-canvas canvas", state="visible", timeout=10000)
         page.wait_for_selector("text=Round 1", timeout=10000)
         page.wait_for_timeout(1000)

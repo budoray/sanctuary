@@ -6,7 +6,6 @@ All formulas and constants are read from config/ so they can be modded.
 from __future__ import annotations
 
 import random
-from pathlib import Path
 from typing import Any
 
 from engine.dice import roll_expression
@@ -354,7 +353,6 @@ def compute_encumbrance(inventory: list[dict]) -> dict[str, Any]:
     """Return encumbrance tier, movement penalty, and effective movement."""
     weight = inventory_weight(inventory)
     tiers = COMBAT.get("encumbrance", {})
-    min_movement = COMBAT.get("min_movement", 30)
     for key, cfg in tiers.items():
         if weight <= cfg.get("max_weight", 999999):
             penalty = cfg.get("movement_penalty", 0)
@@ -377,17 +375,18 @@ def encumbered_movement(base_movement: int, inventory: list[dict]) -> int:
 
 
 def starting_hit_points(class_id: str, constitution: int) -> int:
-    """First-level hit points: roll class hit dice and apply CON modifier per die."""
+    """First-level hit points: maximum hit die plus CON modifier per die.
+
+    Level 1 is lethal enough without random HP rolls making the tutorial
+    unwinnable, so starting characters receive max hit points per die.
+    """
     klass = get_class(class_id)
-    cfg = PROGRESSION["hp"]["first_level"]
     hit_die = klass.get("hit_die", 8)
     dice_count = klass.get("starting_hit_dice", 1)
     con_mod = constitution_hp_modifier(constitution, klass.get("fighter_type", False))
-    min_hp = cfg.get("min_hp_per_die", 1)
     total = 0
     for _ in range(dice_count):
-        roll = random.randint(1, hit_die)
-        total += max(min_hp, roll + con_mod)
+        total += max(1, hit_die + con_mod)
     return total
 
 
@@ -570,6 +569,36 @@ def can_equip(class_id: str, item_id: str) -> tuple[bool, str]:
     return True, ""
 
 
+def _ensure_ability(
+    abilities: dict[str, int], ability: str, target: int, protected: set[str]
+) -> dict[str, int]:
+    """Bump one ability to target, deducting from the lowest non-protected score."""
+    current = abilities.get(ability, 0)
+    if current >= target:
+        return abilities
+    delta = target - current
+    adjusted = dict(abilities)
+    others = {k: v for k, v in adjusted.items() if k not in protected}
+    while delta > 0 and others:
+        lowest_ability = min(others, key=others.get)
+        if adjusted[lowest_ability] <= 3:
+            others.pop(lowest_ability)
+            continue
+        adjusted[lowest_ability] -= 1
+        adjusted[ability] = adjusted.get(ability, 0) + 1
+        delta -= 1
+    return adjusted
+
+
+def _ensure_abilities(abilities: dict[str, int], class_id: str) -> dict[str, int]:
+    """Guarantee a strong prime requisite and a viable Constitution for level 1."""
+    klass = get_class(class_id)
+    prime = (klass.get("prime_requisites") or ["strength"])[0]
+    adjusted = _ensure_ability(abilities, prime, 16, {prime})
+    adjusted = _ensure_ability(adjusted, "constitution", 14, {prime, "constitution"})
+    return adjusted
+
+
 def create_character_data(
     ancestry_id: str,
     class_id: str,
@@ -579,11 +608,24 @@ def create_character_data(
     abilities: dict[str, int] | None = None,
 ) -> dict[str, Any]:
     if abilities is None:
-        raw_abilities = roll_ability_scores(roll_method)
-        abilities = apply_ancestry_adjustments(ancestry_id, raw_abilities)
-    ok, errors = meets_requirements(ancestry_id, class_id, alignment, abilities)
-    if not ok:
-        raise ValueError("; ".join(errors))
+        # Auto-rolled NPCs (mercenaries) may randomly fail ancestry/class
+        # requirements. Retry generously before giving up; the roll is cheap
+        # and a missing mercenary wastes a party slot.
+        for _ in range(100):
+            raw_abilities = roll_ability_scores(roll_method)
+            abilities = apply_ancestry_adjustments(ancestry_id, raw_abilities)
+            abilities = _ensure_abilities(abilities, class_id)
+            ok, errors = meets_requirements(ancestry_id, class_id, alignment, abilities)
+            if ok:
+                break
+        else:
+            ok, errors = meets_requirements(ancestry_id, class_id, alignment, abilities)
+            if not ok:
+                raise ValueError("; ".join(errors))
+    else:
+        ok, errors = meets_requirements(ancestry_id, class_id, alignment, abilities)
+        if not ok:
+            raise ValueError("; ".join(errors))
 
     hit_points = starting_hit_points(class_id, abilities["constitution"])
     starting_gold = roll_starting_gold(class_id)

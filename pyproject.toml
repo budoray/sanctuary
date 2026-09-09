@@ -1,6 +1,6 @@
 [project]
 name = "sanctuary"
-version = "0.1.0-alpha"
+version = "0.1.11-alpha"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi",
