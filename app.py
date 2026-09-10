@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, Form, HTTPException
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -410,7 +410,7 @@ def roll_dice_endpoint(expression: str = Form(...)):
 @app.get("/version")
 def version():
     version_text = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    return {"version": version_text}
+    return PlainTextResponse(version_text, headers={"Access-Control-Allow-Origin": "*"})
 
 
 @app.get("/api/health")
