@@ -13,8 +13,9 @@ let dungeonLevel = 1;
 let abilityDraft = null; // { pool: [...], assigned: {str: index, ...}, mode: null|"arrange" }
 let rollMethod = "3d6_in_order";
 
-const SAVE_KEY = "sanctuary_run_v1";
-const UNLOCK_KEY = "sanctuary_unlocked_v1";
+const _WATCH = location.pathname.startsWith("/live");
+const SAVE_KEY = _WATCH ? "sanctuary_watch_run_v1" : "sanctuary_run_v1";
+const UNLOCK_KEY = _WATCH ? "sanctuary_watch_unlocked_v1" : "sanctuary_unlocked_v1";
 
 let campaign = {
   campaign_id: "ashen_hollow",
@@ -371,7 +372,7 @@ function clearSave() {
   }
 }
 
-const HOF_KEY = "sanctuary_hall_of_fame";
+const HOF_KEY = _WATCH ? "sanctuary_watch_hall_of_fame" : "sanctuary_hall_of_fame";
 const MAX_HOF_ENTRIES = 50;
 
 function computeRunScore(won, finalHp, maxHp, rounds, level, roomsVisitedCount, hardcore) {
