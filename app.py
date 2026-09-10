@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, Form, HTTPException
-from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
+from fastapi.responses import FileResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -99,8 +99,8 @@ def live():
 
 @app.get("/begin")
 def begin():
-    """Hub play-gate sends signed-in users here; redirect straight to the game."""
-    return RedirectResponse("/", status_code=303)
+    """Hub play-gate: human play. Never the /live watch bot."""
+    return FileResponse(ROOT / "static" / "index.html")
 
 
 @app.get("/api/osric/rules")

@@ -82,6 +82,13 @@ html, body {
   padding: 1.5rem;
 }
 .landing-screen.hidden { display: none; }
+.spectate-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  padding: 0.45rem 1rem; text-align: center;
+  background: #2a1f14; color: #efe4c8; border-bottom: 1px solid #d4a03d;
+  font-size: 0.85rem;
+}
+.spectate-banner a { color: #d4a03d; font-weight: 700; }
 .landing-card {
   max-width: 520px;
   width: 100%;

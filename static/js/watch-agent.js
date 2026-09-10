@@ -117,7 +117,16 @@
     }
   }
 
-  window.addEventListener("DOMContentLoaded", function () {
+  function start() {
+    var bar = document.createElement("div");
+    bar.className = "spectate-banner";
+    bar.innerHTML = '<strong>Watching a bot.</strong> <a href="/begin">Play yourself</a>';
+    document.body.prepend(bar);
     setTimeout(setup, 600);
-  });
+  }
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
 })();
